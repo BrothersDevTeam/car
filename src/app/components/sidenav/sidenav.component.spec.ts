@@ -7,6 +7,7 @@ import { RouterModule, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { provideHttpClient } from '@angular/common/http';
 
 describe('SideNavComponent', () => {
   let component: SideNavComponent;
@@ -18,6 +19,7 @@ describe('SideNavComponent', () => {
         SideNavComponent,
         RouterModule.forRoot([]) // Configuração de rota vazia para os testes
       ],
+      providers: [provideHttpClient()]
     })
     .compileComponents();
 

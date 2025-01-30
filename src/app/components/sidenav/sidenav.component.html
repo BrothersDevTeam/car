@@ -30,8 +30,8 @@
       }
     </mat-nav-list>
   </div>
-  <button
-    class="menu-item"
+  <mat-list-item
+    class="menu-item exit_btn"
     mat-button
     (click)="handleLogout()"
   >
@@ -39,5 +39,5 @@
     @if (!sideNavCollapsed()) {
       <span matListItemTitle>Sair</span>
     }
-  </button>
+  </mat-list-item>
 </section>

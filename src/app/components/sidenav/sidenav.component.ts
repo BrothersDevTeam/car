@@ -44,7 +44,7 @@ export class SideNavComponent {
     },
     {
       icon: 'directions_car',
-      label: 'Veiculos',
+      label: 'Veículos',
       route: 'vehicle'
     }
   ]);

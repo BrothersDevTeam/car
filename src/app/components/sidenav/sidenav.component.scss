@@ -40,11 +40,6 @@ section {
 
   }
 
-  .menu-item {
-    border-left: 5px solid;
-    border-left-color: rgba(0, 0, 0, 0);
-  }
-
   mat-nav-list {
     .selected-menu-item {
       border-left-color: blue;
@@ -52,4 +47,16 @@ section {
       transition: all 200ms ease-in-out;
     }
   }
+
+  .menu-item {
+    border-left: 5px solid;
+    border-left-color: rgba(0, 0, 0, 0);
+  }
+
+  .exit_btn {
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+  }
+
 }
