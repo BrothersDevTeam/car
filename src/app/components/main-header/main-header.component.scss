@@ -1,4 +1,12 @@
 mat-toolbar {
   position: relative;
   z-index: 5;
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  .company-name {
+    margin-right: 10px;
+  }
 }
