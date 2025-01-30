@@ -1,5 +1,32 @@
-<div class="login-box">
-  <h2>Login</h2>
-  <button (click)="login()">Entrar</button>
-</div>
+<main>
+  <section>
+    <h2>Faça seu login no C.A.R. </h2>
 
+    <form [formGroup]="loginForm">
+      <app-primary-input
+        formControlName="email"
+        label="Email"
+        inputName="email"
+        type="email"
+        placeholder="exemplo@email.com"
+      >
+        <img src="./svg/email-icon.svg">
+      </app-primary-input>
+      <app-primary-input
+        formControlName="password"
+        label="Senha"
+        inputName="password"
+        type="password"
+        >
+        <img src="./svg/password-icon.svg">
+      </app-primary-input>
+    </form>
+
+    <button
+      (click)="submit()"
+      [disabled]="!disablePrimaryBtn"
+    >
+      Enviar
+    </button>
+  </section>
+</main>
