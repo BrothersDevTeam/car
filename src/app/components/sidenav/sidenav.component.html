@@ -1,30 +1,43 @@
-<div class="sidenav-header">
-  <img
-    src="https://github.com/tkdcris.png"
-    [width]="profilePicSize()"
-    [height]="profilePicSize()"
-  >
-  <div class="header-text" [class.hide-header-text]="sideNavCollapsed()">
-    <h2>TkdCris</h2>
-    <p>Controle Auto Revenda</p>
-  </div>
-</div>
-<mat-nav-list>
-  @for(item of menuItems(); track item.label) {
-    <mat-list-item
-      class="menu-item"
-      [routerLink]="item.route"
-      routerLinkActive="selected-menu-item"
-      #rla="routerLinkActive"
-      [activated]="rla.isActive"
-      [routerLinkActiveOptions]="{ exact: true }"
-    >
-      <mat-icon [fontSet]="rla.isActive ? 'material-icons' : 'material-icons-outlined'" matListItemIcon>
-        {{item.icon}}
-      </mat-icon>
-      @if (!sideNavCollapsed()) {
-        <span matListItemTitle>{{item.label}}</span>
+<section>
+  <div>
+    <div class="sidenav-header">
+      <img
+        src="https://github.com/tkdcris.png"
+        [width]="profilePicSize()"
+        [height]="profilePicSize()"
+      >
+      <div class="header-text" [class.hide-header-text]="sideNavCollapsed()">
+        <h2>TkdCris</h2>
+        <p>Controle Auto Revenda</p>
+      </div>
+    </div>
+    <mat-nav-list>
+      @for(item of menuItems(); track item.label) {
+        <mat-list-item
+          class="menu-item"
+          [routerLink]="item.route"
+          routerLinkActive="selected-menu-item"
+          #rla="routerLinkActive"
+          [activated]="rla.isActive"
+        >
+          <mat-icon [fontSet]="rla.isActive ? 'material-icons' : 'material-icons-outlined'" matListItemIcon>
+            {{item.icon}}
+          </mat-icon>
+          @if (!sideNavCollapsed()) {
+            <span matListItemTitle>{{item.label}}</span>
+          }
+        </mat-list-item>
       }
-    </mat-list-item>
-  }
-</mat-nav-list>
+    </mat-nav-list>
+  </div>
+  <button
+    class="menu-item"
+    mat-button
+    (click)="handleLogout()"
+  >
+    <mat-icon matListItemIcon>exit_to_app</mat-icon>
+    @if (!sideNavCollapsed()) {
+      <span matListItemTitle>Sair</span>
+    }
+  </button>
+</section>
