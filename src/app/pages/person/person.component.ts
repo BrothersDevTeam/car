@@ -1,11 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { TableComponent } from "../../components/table/table.component";
 import { Person } from '@interfaces/entity';
 import { PersonService } from '@services/person.service';
-
-
 
 @Component({
   selector: 'app-person',
@@ -15,11 +13,14 @@ import { PersonService } from '@services/person.service';
 })
 
 export class PersonComponent implements OnInit {
-  @Input() dataSource: Person[] = [];
+  dataSource: Person[] = [];
   totalElements = 0;
-  displayedColumns: string[] = ['id', 'name', 'city'];
+  displayedColumns: string[] = ['id', 'fullName', 'cpf'];
 
-  constructor(private personService: PersonService) {}
+  constructor(
+    private personService: PersonService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.loadPage(0, 10);
@@ -29,6 +30,8 @@ export class PersonComponent implements OnInit {
     this.personService.getPaginatedData(page, size).subscribe((response) => {
       this.dataSource = response.content;
       this.totalElements = response.totalElements;
+
+      this.cdr.detectChanges();
     });
   }
 

@@ -1,11 +1,12 @@
 import { Component, computed, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { SideNavComponent } from '../../components/sidenav/sidenav.component';
-import { MainHeaderComponent } from "../../components/main-header/main-header.component";
+import { MatToolbarModule } from '@angular/material/toolbar';
+
+import { MainHeaderComponent } from '@components/main-header/main-header.component';
+import { SideNavComponent } from '@components/sidenav/sidenav.component';
 
 @Component({
   selector: 'app-main-layout',
