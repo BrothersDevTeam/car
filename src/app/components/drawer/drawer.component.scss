@@ -1,4 +1,4 @@
-@use "../../../styles/variables.scss" as *;
+@use "@styles/variables.scss" as *;
 
 .container {
   background: rgba($color: #241907, $alpha: 0.2);
@@ -30,16 +30,15 @@
       .closeX {
         position: absolute;
         right: 20px;
-        top: 10px;
         cursor: pointer;
+        z-index: 999;
 
         border: none;
         border-radius: 50%;
-
         transition: all 500ms;
 
         &:hover {
-          background-color: rgba($color: #241907, $alpha: 0.1);
+          background-color: rgba($color: #fd9886, $alpha: 0.1);
           transform: rotate(180deg);
         }
       }
@@ -49,6 +48,7 @@
       .content {
         flex-grow: 1;
         overflow-y: auto;
+        margin-top: 20px;
       }
 
       .btn-container {

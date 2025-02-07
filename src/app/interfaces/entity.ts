@@ -1,7 +1,16 @@
-export interface ReqPerson {
+export interface CreateNaturalPerson {
   fullName: String;
   tradeName: String;
   cpf: String;
+  address?: Address;
+  contact?: Contact;
+}
+
+export interface CreateLegalEntity {
+  fullName: String;
+  tradeName: String;
+  cnpj: String;
+  ie: String;
   address?: Address;
   contact?: Contact;
 }
@@ -23,5 +32,5 @@ export interface Contact {
 
 export interface Person {
   id: number;
-  person: ReqPerson;
+  person: CreateNaturalPerson | CreateLegalEntity;
 }

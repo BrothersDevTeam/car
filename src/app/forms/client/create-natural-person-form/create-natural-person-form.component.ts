@@ -1,19 +1,21 @@
 import { Component, inject } from '@angular/core';
-
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
-import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
-import { ReqPerson } from '@interfaces/entity';
+
+import { CreateNaturalPerson } from '@interfaces/entity';
 import { PersonService } from '@services/person.service';
 
+import { MatButtonModule } from '@angular/material/button';
+
+import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
+import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
 @Component({
-  selector: 'app-create-client-form',
-  imports: [PrimaryInputComponent, ReactiveFormsModule, WrapperCardComponent ],
-  templateUrl: './create-client-form.component.html',
-  styleUrl: './create-client-form.component.scss'
+  selector: 'app-create-natural-person-form',
+  imports: [PrimaryInputComponent, ReactiveFormsModule, WrapperCardComponent, MatButtonModule ],
+  templateUrl: './create-natural-person-form.component.html',
+  styleUrl: './create-natural-person-form.component.scss'
 })
-export class CreateClientFormComponent {
+export class CreateNaturalPersonFormComponent {
   submitted = false;
 
   private formBuilderService = inject(FormBuilder);
@@ -48,9 +50,8 @@ export class CreateClientFormComponent {
       return;
     }
 
-
     // Processar envio se válido
-    const formValue: ReqPerson = {
+    const formValue: CreateNaturalPerson = {
       fullName: this.form.value.fullName || '',
       tradeName: this.form.value.tradeName || '',
       cpf: this.form.value.cpf || '',

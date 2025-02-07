@@ -22,6 +22,7 @@
       "@services/*": ["./src/app/services/*"],
       "@interfaces/*": ["./src/app/interfaces/*"],
       "@styles/*": ["./src/styles/*"],
+      "@forms/*": ["./src/app/forms/*"],
     }
   },
   "angularCompilerOptions": {

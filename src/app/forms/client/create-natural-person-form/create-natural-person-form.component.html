@@ -1,0 +1,96 @@
+
+<form [formGroup]="form">
+
+  <app-wrapper-card title="Dados pessoais">
+    <app-primary-input
+      formControlName="fullName"
+      label="Nome completo"
+      inputName="fullName"
+      type="text"
+      [error]="form.get('fullName')?.invalid && (form.get('fullName')?.touched || submitted)"
+    />
+    <app-primary-input
+    formControlName="tradeName"
+    label="Apelido"
+    inputName="tradeName"
+    type="text"
+    />
+
+    <!-- Grupo de contato -->
+    <div formGroupName="contact">
+      <app-primary-input
+        formControlName="email"
+        label="Email"
+        inputName="email"
+        type="email"
+        placeholder="exemplo@email.com"
+        [error]="form.get('contact.email')?.invalid && (form.get('contact.email')?.touched || submitted)"
+      />
+      <app-primary-input
+        formControlName="phone"
+        label="Telefone"
+        inputName="phone"
+        type="text"
+      />
+    </div>
+  </app-wrapper-card>
+
+
+  <app-wrapper-card title="Documentação" >
+    <app-primary-input
+      formControlName="cpf"
+      label="CPF"
+      inputName="cpf"
+      type="text"
+    />
+  </app-wrapper-card>
+
+  <app-wrapper-card title="endereço" >
+    <div formGroupName="address">
+      <app-primary-input
+        formControlName="zipcode"
+        label="Código Postal"
+        inputName="zipcode"
+        type="text"
+      ></app-primary-input>
+      <app-primary-input
+        formControlName="street"
+        label="Rua"
+        inputName="street"
+        type="text"
+      ></app-primary-input>
+      <app-primary-input
+        formControlName="number"
+        label="Número"
+        inputName="number"
+        type="text"
+      ></app-primary-input>
+      <app-primary-input
+        formControlName="complement"
+        label="Complemento"
+        inputName="complement"
+        type="text"
+      ></app-primary-input>
+      <app-primary-input
+        formControlName="state"
+        label="Estado"
+        inputName="state"
+        type="text"
+      ></app-primary-input>
+      <app-primary-input
+        formControlName="city"
+        label="Cidade"
+        inputName="city"
+        type="text"
+      ></app-primary-input>
+      <app-primary-input
+        formControlName="neighborhood"
+        label="Bairro"
+        inputName="neighborhood"
+        type="text"
+      ></app-primary-input>
+    </div>
+  </app-wrapper-card>
+
+  <button mat-flat-button type="button" (click)="onSubmit()">Enviar</button>
+</form>

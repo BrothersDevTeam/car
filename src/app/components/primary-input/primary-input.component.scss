@@ -1,4 +1,4 @@
-@use "../../../styles/variables.scss" as *;
+@use "@styles/variables.scss" as *;
 
 .input-wrapper {
   color: $text-color;
@@ -21,7 +21,7 @@
     }
 
     .invalid-field-message {
-      color: red;
+      color: $error-color;
       font-size: small;
       align-self: flex-end;
     }

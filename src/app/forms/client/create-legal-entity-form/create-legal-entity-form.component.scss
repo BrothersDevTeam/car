@@ -1,0 +1,8 @@
+@use '@styles/variables.scss' as *;
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px;
+}

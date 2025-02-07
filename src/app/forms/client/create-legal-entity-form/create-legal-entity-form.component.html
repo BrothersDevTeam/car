@@ -1,8 +1,7 @@
 
 <form [formGroup]="form">
 
-  <app-wrapper-card title="Dados pessoais">
-    <!-- <h1>Dados pessoais: </h1> -->
+  <app-wrapper-card title="Dados da empresa">
     <app-primary-input
       formControlName="fullName"
       label="Nome completo"
@@ -12,7 +11,7 @@
     />
     <app-primary-input
     formControlName="tradeName"
-    label="Apelido"
+    label="Nome Fantasia"
     inputName="tradeName"
     type="text"
     />
@@ -27,9 +26,6 @@
         placeholder="exemplo@email.com"
         [error]="form.get('contact.email')?.invalid && (form.get('contact.email')?.touched || submitted)"
       />
-      <!-- @if (form.get('contact.email')?.invalid && (form.get('contact.email')?.touched || submitted)) {
-        <p class="invalid-field-message">Campo inválido</p>
-      } -->
       <app-primary-input
         formControlName="phone"
         label="Telefone"
@@ -39,14 +35,19 @@
     </div>
   </app-wrapper-card>
 
-
   <app-wrapper-card title="Documentação" >
     <app-primary-input
-      formControlName="cpf"
-      label="CPF"
-      inputName="cpf"
+      formControlName="cnpj"
+      label="CNPJ"
+      inputName="cnpj"
       type="text"
     />
+    <app-primary-input
+    formControlName="ie"
+    label="Inscrição Estadual"
+    inputName="ie"
+    type="text"
+  />
   </app-wrapper-card>
 
   <app-wrapper-card title="endereço" >
@@ -98,3 +99,4 @@
 
   <button type="button" (click)="onSubmit()">Enviar</button>
 </form>
+

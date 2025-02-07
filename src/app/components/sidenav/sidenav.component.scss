@@ -1,3 +1,5 @@
+@use '@styles/variables.scss' as *;
+
 :host * {
   transition: all 500ms ease-in-out;
 }
@@ -42,7 +44,7 @@ section {
 
   mat-nav-list {
     .selected-menu-item {
-      border-left-color: blue;
+      border-left-color: $primary-color;
       background-color: rgba(0, 0, 0, 0.05);
       transition: all 200ms ease-in-out;
     }

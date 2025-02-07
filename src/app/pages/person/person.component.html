@@ -1,21 +1,26 @@
 <main>
+  <app-content-header
+    title="Pessoa"
+    btn_label="Novo"
+    fontIcon="add"
+    (onClick)="handleOpenForm()"
+  />
 
-<app-content-header
-  title="Pessoa"
-  btn_label="Novo"
-  fontIcon="add"
-  (onClick)="handleOpenForm()"
-/>
+  <app-table
+    [dataSource]="dataSource"
+    [displayedColumns]="displayedColumns"
+  />
 
-<app-table
-  [dataSource]="dataSource"
-  [displayedColumns]="displayedColumns"
-/>
-
-@if (openForm()) {
-  <app-drawer (closeForm)="handleOpenForm()">
-     <app-create-client-form />
-  </app-drawer>
-}
-
+  @if (openForm()) {
+    <app-drawer (closeForm)="handleOpenForm()">
+      <mat-tab-group>
+        <mat-tab label="Pessoa Física">
+          <app-create-natural-person-form />
+        </mat-tab>
+        <mat-tab label="Pessoa Jurídica">
+          <app-create-legal-entity-form />
+        </mat-tab>
+      </mat-tab-group>
+    </app-drawer>
+  }
 </main>

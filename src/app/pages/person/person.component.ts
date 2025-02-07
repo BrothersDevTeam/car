@@ -1,12 +1,15 @@
-import { ChangeDetectorRef, Component, Input, OnInit, signal } from '@angular/core';
-import { ContentHeaderComponent } from '@components/content-header/content-header.component';
-import { DrawerComponent } from '@components/drawer/drawer.component';
-import { TableComponent } from '@components/table/table.component';
-import { CreateClientFormComponent } from '../../forms/client/create-client-form/create-client-form.component';
+import { ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
+
 import { Person } from '@interfaces/entity';
 import { PersonService } from '@services/person.service';
 
+import { MatTabsModule } from '@angular/material/tabs';
 
+import { ContentHeaderComponent } from '@components/content-header/content-header.component';
+import { DrawerComponent } from '@components/drawer/drawer.component';
+import { TableComponent } from '@components/table/table.component';
+import { CreateLegalEntityFormComponent } from '@forms/client/create-legal-entity-form/create-legal-entity-form.component';
+import { CreateNaturalPersonFormComponent } from '@forms/client/create-natural-person-form/create-natural-person-form.component';
 
 @Component({
   selector: 'app-person',
@@ -14,8 +17,10 @@ import { PersonService } from '@services/person.service';
     ContentHeaderComponent,
     TableComponent,
     DrawerComponent,
-    CreateClientFormComponent,
-  ],
+    MatTabsModule,
+    CreateLegalEntityFormComponent,
+    CreateNaturalPersonFormComponent
+],
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss'
 })
