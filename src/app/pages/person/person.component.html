@@ -1,6 +1,21 @@
-<app-content-header title="Pessoa" btn_label="Novo" fontIcon="add"/>
+<main>
+
+<app-content-header
+  title="Pessoa"
+  btn_label="Novo"
+  fontIcon="add"
+  (onClick)="handleOpenForm()"
+/>
 
 <app-table
   [dataSource]="dataSource"
   [displayedColumns]="displayedColumns"
 />
+
+@if (openForm()) {
+  <app-drawer (closeForm)="handleOpenForm()">
+     <app-create-client-form />
+  </app-drawer>
+}
+
+</main>

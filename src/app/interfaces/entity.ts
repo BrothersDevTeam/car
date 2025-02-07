@@ -1,12 +1,12 @@
-export interface Entity {
-  id: number;
-  address: Address;
-  contact: Contact;
-  active: boolean;
+export interface ReqPerson {
+  fullName: String;
+  tradeName: String;
+  cpf: String;
+  address?: Address;
+  contact?: Contact;
 }
 
 export interface Address {
-  id: number;
   street: string;
   city: string;
   number: string;
@@ -17,12 +17,11 @@ export interface Address {
 }
 
 export interface Contact {
-  id: number;
   email: string;
   phone: string;
 }
 
 export interface Person {
   id: number;
-  person: Entity;
+  person: ReqPerson;
 }

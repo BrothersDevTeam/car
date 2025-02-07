@@ -1,0 +1,16 @@
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px;
+
+  .invalid-field-message {
+    color: red;
+    align-self: flex-end;
+  }
+
+}
+
+
+
+

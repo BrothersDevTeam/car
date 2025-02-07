@@ -1,0 +1,78 @@
+import { Component, inject } from '@angular/core';
+
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
+import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
+import { ReqPerson } from '@interfaces/entity';
+import { PersonService } from '@services/person.service';
+
+
+@Component({
+  selector: 'app-create-client-form',
+  imports: [PrimaryInputComponent, ReactiveFormsModule, WrapperCardComponent ],
+  templateUrl: './create-client-form.component.html',
+  styleUrl: './create-client-form.component.scss'
+})
+export class CreateClientFormComponent {
+  submitted = false;
+
+  private formBuilderService = inject(FormBuilder);
+
+  protected form = this.formBuilderService.group({
+    fullName: ['', Validators.required],
+    tradeName: [''],
+    contact: this.formBuilderService.group({
+      email: ['', [Validators.email]],
+      phone: ['']
+    }),
+    cpf: [''],
+    address: this.formBuilderService.group({
+      zipcode: [''],
+      street: [''],
+      number: [''],
+      complement: [''],
+      state: [''],
+      city: [''],
+      neighborhood: ['']
+    })
+  });
+
+  constructor(private fb: FormBuilder, private personService: PersonService) {}
+
+  onSubmit() {
+    this.submitted = true;
+    if (this.form.invalid) {
+      // Marca todos os controles como "touched" para que os erros sejam exibidos
+      this.form.markAllAsTouched();
+      console.log('Formulário inválido: ', this.form.value);
+      return;
+    }
+
+
+    // Processar envio se válido
+    const formValue: ReqPerson = {
+      fullName: this.form.value.fullName || '',
+      tradeName: this.form.value.tradeName || '',
+      cpf: this.form.value.cpf || '',
+      contact: {
+        email: this.form.value.contact?.email || '',
+        phone: this.form.value.contact?.phone || ''
+      },
+      address: {
+        zipcode: this.form.value.address?.zipcode || '',
+        street: this.form.value.address?.street || '',
+        number: this.form.value.address?.number || '',
+        complement: this.form.value.address?.complement || '',
+        state: this.form.value.address?.state || '',
+        city: this.form.value.address?.city || '',
+        neighborhood: this.form.value.address?.neighborhood || ''
+      }
+    };
+
+    this.personService.create(formValue).subscribe(response => {
+      console.log('Formulário enviado com sucesso!', response);
+    }, error => {
+      console.error('Erro ao enviar formulário', error);
+    });
+  }
+}
