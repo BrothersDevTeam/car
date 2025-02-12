@@ -12,8 +12,8 @@ export class AuthService {
 
   login(email: string, password: string) {
     return this.httpClient.post<LoginResponse>(this.apiUrl + "/auth/login", { email, password }).pipe(tap((value) => {
-      sessionStorage.setItem("car-token", value.token)
-      sessionStorage.setItem("username", value.fullName)
+      sessionStorage.setItem("car-token", value.token);
+      sessionStorage.setItem("username", value.fullName);
       this.router.navigate(['/home']);
     }))
   }
