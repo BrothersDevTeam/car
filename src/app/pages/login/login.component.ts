@@ -5,9 +5,14 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { LoginForm } from '../../interfaces/login';
 import { MatIconModule } from '@angular/material/icon';
 
+import { ToastrService } from 'ngx-toastr';
+
 @Component({
   selector: 'app-login',
-  imports: [PrimaryInputComponent, ReactiveFormsModule, MatIconModule],
+  imports: [PrimaryInputComponent,
+    ReactiveFormsModule,
+    MatIconModule,
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
@@ -18,6 +23,7 @@ export class LoginComponent {
 
   constructor(
     private authService: AuthService,
+    private toastrService: ToastrService
   ) {
     this.loginForm = new FormGroup({
       email: new FormControl('', [Validators.required, Validators.email]),
@@ -37,8 +43,8 @@ export class LoginComponent {
       this.loginForm.value.email,
       this.loginForm.value.password
     ).subscribe({
-        // next: () => this.toastService.success("Login feito com sucesso"),
-        // error: () => this.toastService.error("Erro inesperado! Tente novamente mais tarde")
-      })
+      next: () => this.toastrService.success("Login feito com sucesso"),
+      error: () => this.toastrService.error("Erro inesperado! Tente novamente mais tarde")
+    })
   }
 }

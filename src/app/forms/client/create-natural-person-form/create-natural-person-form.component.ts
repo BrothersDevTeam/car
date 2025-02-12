@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 
-import { CreateNaturalPerson } from '@interfaces/entity';
+import { CreateNaturalPerson, Person } from '@interfaces/entity';
 import { PersonService } from '@services/person.service';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -15,8 +16,10 @@ import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.comp
   templateUrl: './create-natural-person-form.component.html',
   styleUrl: './create-natural-person-form.component.scss'
 })
-export class CreateNaturalPersonFormComponent {
+export class CreateNaturalPersonFormComponent implements OnChanges {
   submitted = false;
+
+  @Input() dataForm: Person | null = null;
 
   private formBuilderService = inject(FormBuilder);
 
@@ -39,7 +42,30 @@ export class CreateNaturalPersonFormComponent {
     })
   });
 
-  constructor(private fb: FormBuilder, private personService: PersonService) {}
+  constructor( private personService: PersonService, private toastrService: ToastrService ) {}
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['dataForm'] && this.dataForm) {
+      this.form.patchValue({
+        fullName: this.dataForm.person.fullName || '',
+        tradeName: this.dataForm.person.tradeName || '',
+        contact: {
+          email: this.dataForm.person.contact?.email || '',
+          phone: this.dataForm.person.contact?.phone || ''
+        },
+        cpf: this.dataForm.person.cpf || '',
+        address: {
+          zipcode: this.dataForm.person.address?.zipcode || '',
+          street: this.dataForm.person.address?.street || '',
+          number: this.dataForm.person.address?.number || '',
+          complement: this.dataForm.person.address?.complement || '',
+          state: this.dataForm.person.address?.state || '',
+          city: this.dataForm.person.address?.city || '',
+          neighborhood: this.dataForm.person.address?.neighborhood || ''
+        }
+      });
+    }
+  }
 
   onSubmit() {
     this.submitted = true;
@@ -52,6 +78,7 @@ export class CreateNaturalPersonFormComponent {
 
     // Processar envio se válido
     const formValue: CreateNaturalPerson = {
+
       fullName: this.form.value.fullName || '',
       tradeName: this.form.value.tradeName || '',
       cpf: this.form.value.cpf || '',
@@ -70,10 +97,18 @@ export class CreateNaturalPersonFormComponent {
       }
     };
 
-    this.personService.create(formValue).subscribe(response => {
-      console.log('Formulário enviado com sucesso!', response);
-    }, error => {
-      console.error('Erro ao enviar formulário', error);
-    });
+    if (this.dataForm?.id) {
+      this.personService.update(formValue, this.dataForm.id).subscribe({
+        next: () => {
+          this.toastrService.success("Atualização feita com sucesso")},
+        error: () => this.toastrService.error("Erro inesperado! Tente novamente mais tarde")
+      })
+    } else {
+      this.personService.create(formValue).subscribe({
+        next: () => {
+          this.toastrService.success("Cadastro realizado com sucesso")},
+        error: () => this.toastrService.error("Erro inesperado! Tente novamente mais tarde")
+      })
+    }
   }
 }

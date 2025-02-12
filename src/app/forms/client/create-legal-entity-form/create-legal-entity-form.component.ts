@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { CreateLegalEntity } from '@interfaces/entity';
+import { CreateLegalEntity, Person } from '@interfaces/entity';
 import { PersonService } from '@services/person.service';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -15,13 +15,15 @@ import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.comp
   templateUrl: './create-legal-entity-form.component.html',
   styleUrl: './create-legal-entity-form.component.scss'
 })
-export class CreateLegalEntityFormComponent {
+export class CreateLegalEntityFormComponent implements OnChanges {
  submitted = false;
+
+ @Input() dataForm: Person | null = null;
 
   private formBuilderService = inject(FormBuilder);
 
   protected form = this.formBuilderService.group({
-    fullName: ['', Validators.required],
+    legalName: [this.dataForm?.person.legalName || '', Validators.required],
     tradeName: [''],
     contact: this.formBuilderService.group({
       email: ['', [Validators.email]],
@@ -40,7 +42,31 @@ export class CreateLegalEntityFormComponent {
     })
   });
 
-  constructor(private fb: FormBuilder, private personService: PersonService) {}
+  constructor(private personService: PersonService) {}
+
+  ngOnChanges(changes: SimpleChanges) {
+      if (changes['dataForm'] && this.dataForm) {
+        this.form.patchValue({
+          legalName: this.dataForm.person.legalName || '',
+          tradeName: this.dataForm.person.tradeName || '',
+          contact: {
+            email: this.dataForm.person.contact?.email || '',
+            phone: this.dataForm.person.contact?.phone || ''
+          },
+          cnpj: this.dataForm.person.cpf || '',
+          ie: this.dataForm.person.ie || '',
+          address: {
+            zipcode: this.dataForm.person.address?.zipcode || '',
+            street: this.dataForm.person.address?.street || '',
+            number: this.dataForm.person.address?.number || '',
+            complement: this.dataForm.person.address?.complement || '',
+            state: this.dataForm.person.address?.state || '',
+            city: this.dataForm.person.address?.city || '',
+            neighborhood: this.dataForm.person.address?.neighborhood || ''
+          }
+        });
+      }
+    }
 
   onSubmit() {
     this.submitted = true;
@@ -54,7 +80,7 @@ export class CreateLegalEntityFormComponent {
 
     // Processar envio se válido
     const formValue: CreateLegalEntity = {
-      fullName: this.form.value.fullName || '',
+      legalName: this.form.value.legalName || '',
       tradeName: this.form.value.tradeName || '',
       cnpj: this.form.value.cnpj || '',
       ie: this.form.value.ie || '',
@@ -73,10 +99,6 @@ export class CreateLegalEntityFormComponent {
       }
     };
 
-    this.personService.create(formValue).subscribe(response => {
-      console.log('Formulário enviado com sucesso!', response);
-    }, error => {
-      console.error('Erro ao enviar formulário', error);
-    });
+    this.personService.create(formValue);
   }
 }

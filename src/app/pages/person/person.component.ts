@@ -27,8 +27,9 @@ import { CreateNaturalPersonFormComponent } from '@forms/client/create-natural-p
 
 export class PersonComponent implements OnInit {
   dataSource: Person[] = [];
+  selectedPerson: Person | null = null;
   totalElements = 0;
-  displayedColumns: string[] = ['id', 'fullName', 'cpf'];
+  
 
   openForm = signal(false);
 
@@ -52,6 +53,11 @@ export class PersonComponent implements OnInit {
 
       this.cdr.detectChanges();
     });
+  }
+
+  handleSelectedPerson(person: Person) {
+    this.selectedPerson = person;
+    this.openForm.set(true); // Abre o drawer automaticamente
   }
 
 }

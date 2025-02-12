@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -15,9 +15,11 @@ import { Person } from '@interfaces/entity';
   styleUrl: './table.component.scss'
 })
 export class TableComponent implements OnInit {
-  @Input() displayedColumns: string[] = [];
   @Input() dataSource!: Person[];
-
+  
+  @Output() selectedPerson = new EventEmitter<Person>();
+  
+  displayedColumns: string[] = ['id', 'fullName', 'cpf', 'cnpj'];
   matDataSource = new MatTableDataSource<Person>([]);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -32,6 +34,10 @@ export class TableComponent implements OnInit {
 
   ngAfterViewInit() {
     this.matDataSource.paginator = this.paginator; // Vincular o paginador
+  }
+
+  onRowClick(row: Person) {
+    this.selectedPerson.emit(row); // Emitir a pessoa selecionada
   }
 
 }

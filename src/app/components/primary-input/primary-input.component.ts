@@ -5,7 +5,7 @@ type InputTypes = "text" | "email" | "password"
 
 @Component({
   selector: 'app-primary-input',
-  imports: [ReactiveFormsModule],
+  imports: [],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -16,6 +16,7 @@ type InputTypes = "text" | "email" | "password"
   templateUrl: './primary-input.component.html',
   styleUrl: './primary-input.component.scss'
 })
+
 export class PrimaryInputComponent implements ControlValueAccessor {
   @Input() type: InputTypes = "text";
   @Input() placeholder: string = "";

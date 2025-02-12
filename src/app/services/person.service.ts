@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { CreateLegalEntity, CreateNaturalPerson, Person } from '@interfaces/entity';
 import { PaginationResponse } from '@interfaces/pagination';
 
@@ -17,6 +17,18 @@ export class PersonService {
   }
 
   create(data: CreateNaturalPerson | CreateLegalEntity) {
-    return this.http.post<Person>(`${this.apiUrl}`, data);
+    return this.http.post<string>(`${this.apiUrl}`, data).pipe(
+      tap((response: string) => {
+        console.log('Formulário enviado com sucesso!', response);
+      })
+    );
+  }
+
+  update(data:  CreateNaturalPerson | CreateLegalEntity, id: string) {
+    return this.http.post<string>(`${this.apiUrl}/${id}`, data).pipe(
+      tap((response: string) => {
+        console.log('Formulário enviado com sucesso!', response);
+      })
+    );
   }
 }

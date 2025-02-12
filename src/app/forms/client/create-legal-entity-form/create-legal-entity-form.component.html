@@ -3,11 +3,11 @@
 
   <app-wrapper-card title="Dados da empresa">
     <app-primary-input
-      formControlName="fullName"
+      formControlName="legalName"
       label="Nome completo"
-      inputName="fullName"
+      inputName="legalName"
       type="text"
-      [error]="form.get('fullName')?.invalid && (form.get('fullName')?.touched || submitted)"
+      [error]="form.get('legalName')?.invalid && (form.get('legalName')?.touched || submitted)"
     />
     <app-primary-input
     formControlName="tradeName"
