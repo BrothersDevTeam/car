@@ -57,7 +57,6 @@ export class PersonComponent implements OnInit {
 
   handleSelectedPerson(person: Person) {
     this.selectedPerson = person;
-    this.openForm.set(true); // Abre o drawer automaticamente
+    this.openForm.set(true);
   }
-
 }

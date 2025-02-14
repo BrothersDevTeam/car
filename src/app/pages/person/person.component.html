@@ -6,10 +6,18 @@
     (onClick)="handleOpenForm()"
   />
 
-  <app-table
-    (selectedPerson)="handleSelectedPerson($event)"
-    [dataSource]="dataSource"
-  />
+
+  @if (dataSource.length) {
+    <app-table
+      (selectedPerson)="handleSelectedPerson($event)"
+      [dataSource]="dataSource"
+    />
+  } @else {
+    <div class="loader-div">
+      <span class="loader"></span>
+    </div>
+  }
+
 
   @if (openForm()) {
     <app-drawer (closeForm)="handleOpenForm()">
