@@ -7,6 +7,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { MainHeaderComponent } from '@components/main-header/main-header.component';
 import { SideNavComponent } from '@components/sidenav/sidenav.component';
+import { NgxSpinnerModule } from "ngx-spinner";
 
 @Component({
   selector: 'app-main-layout',
@@ -17,7 +18,8 @@ import { SideNavComponent } from '@components/sidenav/sidenav.component';
     MatIconModule,
     MatSidenavModule,
     SideNavComponent,
-    MainHeaderComponent
+    MainHeaderComponent,
+    NgxSpinnerModule
 ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'

@@ -29,7 +29,7 @@ export class PersonComponent implements OnInit {
   dataSource: Person[] = [];
   selectedPerson: Person | null = null;
   totalElements = 0;
-  
+
 
   openForm = signal(false);
 

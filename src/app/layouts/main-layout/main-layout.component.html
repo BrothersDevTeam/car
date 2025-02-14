@@ -4,6 +4,9 @@
     <app-sidenav [collapsed]="collapsed()" />
   </mat-sidenav>
   <mat-sidenav-content class="content" [style.margin-left]="sidenavWidth()">
+    <ngx-spinner>
+      <p class="loading-text">loading...</p>
+    </ngx-spinner>
     <router-outlet />
   </mat-sidenav-content>
 </mat-sidenav-container>
