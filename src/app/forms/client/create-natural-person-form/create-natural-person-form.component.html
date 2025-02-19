@@ -1,20 +1,21 @@
-
 <form [formGroup]="form">
-
   <app-wrapper-card title="Dados pessoais">
     <app-primary-input
       formControlName="fullName"
       label="Nome completo"
       inputName="fullName"
       type="text"
-      [error]="form.get('fullName')?.invalid && (form.get('fullName')?.touched || submitted)"
+      [error]="
+        form.get('fullName')?.invalid &&
+        (form.get('fullName')?.touched || submitted)
+      "
     />
-    <app-primary-input
+    <!-- <app-primary-input
     formControlName="tradeName"
     label="Apelido"
     inputName="tradeName"
     type="text"
-    />
+    /> -->
 
     <!-- Grupo de contato -->
     <div formGroupName="contact">
@@ -24,7 +25,10 @@
         inputName="email"
         type="email"
         placeholder="exemplo@email.com"
-        [error]="form.get('contact.email')?.invalid && (form.get('contact.email')?.touched || submitted)"
+        [error]="
+          form.get('contact.email')?.invalid &&
+          (form.get('contact.email')?.touched || submitted)
+        "
       />
       <app-primary-input
         formControlName="phone"
@@ -33,10 +37,6 @@
         type="text"
       />
     </div>
-  </app-wrapper-card>
-
-
-  <app-wrapper-card title="Documentação" >
     <app-primary-input
       formControlName="cpf"
       label="CPF"
@@ -45,7 +45,7 @@
     />
   </app-wrapper-card>
 
-  <app-wrapper-card title="endereço" >
+  <app-wrapper-card title="Endereço">
     <div formGroupName="address">
       <app-primary-input
         formControlName="zipcode"

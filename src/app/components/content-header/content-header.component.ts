@@ -8,7 +8,7 @@ import { EventType } from '@angular/router';
   selector: 'app-content-header',
   imports: [MatToolbarModule, MatButtonModule, MatIconModule],
   templateUrl: './content-header.component.html',
-  styleUrl: './content-header.component.scss'
+  styleUrl: './content-header.component.scss',
 })
 export class ContentHeaderComponent {
   @Input() title = '';

@@ -7,7 +7,6 @@ import { AuthGuard } from './auth/auth.guard';
 import { VehicleComponent } from './pages/vehicle/vehicle.component';
 import { PersonComponent } from './pages/person/person.component';
 
-
 export const routes: Routes = [
   {
     path: '',
@@ -16,16 +15,16 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      {path: 'dashboard', component: DashboardComponent},
-      {path: 'home', component: DashboardComponent},
-      {path: 'vehicle', component: VehicleComponent},
-      {path: 'person', component: PersonComponent}
-    ]
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'home', component: DashboardComponent },
+      { path: 'vehicle', component: VehicleComponent },
+      { path: 'person', component: PersonComponent },
+    ],
   },
   {
     path: 'login',
     component: LoginLayoutComponent,
-    children: [{ path: '', component: LoginComponent }]
+    children: [{ path: '', component: LoginComponent }],
   },
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: '' },
 ];
