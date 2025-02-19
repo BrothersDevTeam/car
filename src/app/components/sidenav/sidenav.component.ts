@@ -12,18 +12,13 @@ export type MenuItem = {
   icon: string;
   label: string;
   route?: string;
-}
+};
 
 @Component({
   selector: 'app-sidenav',
-  imports: [
-    MatListModule,
-    MatIconModule,
-    RouterModule,
-    MatButtonModule
-  ],
+  imports: [MatListModule, MatIconModule, RouterModule, MatButtonModule],
   templateUrl: './sidenav.component.html',
-  styleUrl: './sidenav.component.scss'
+  styleUrl: './sidenav.component.scss',
 })
 export class SideNavComponent {
   constructor(private authService: AuthService) {}
@@ -37,23 +32,23 @@ export class SideNavComponent {
     {
       icon: 'dashboard',
       label: 'Dashboard',
-      route: 'dashboard'
+      route: 'dashboard',
     },
     {
       icon: 'person',
       label: 'Pessoas',
-      route: 'person'
+      route: 'person',
     },
     {
       icon: 'directions_car',
       label: 'Veículos',
-      route: 'vehicle'
-    }
+      route: 'vehicle',
+    },
   ]);
 
   handleLogout = () => {
     this.authService.logout();
-  }
+  };
 
-  profilePicSize = computed(() => this.sideNavCollapsed() ? '32' : '100');
+  profilePicSize = computed(() => (this.sideNavCollapsed() ? '32' : '100'));
 }

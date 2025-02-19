@@ -9,7 +9,6 @@
       "@components/*": ["./src/app/components/*"],
       "@services/*": ["./src/app/services/*"],
       "@interfaces/*": ["./src/app/interfaces/*"],
-      "@styles/*": ["./src/styles/*"],
     }
   },
   "include": [
