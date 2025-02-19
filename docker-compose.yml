@@ -1,0 +1,12 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.dev
+    container_name: car_angular
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./:/home/node/app
+    environment:
+      - TZ=America/Sao_Paulo

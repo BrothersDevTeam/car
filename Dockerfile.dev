@@ -1,0 +1,21 @@
+FROM node:22.14-slim
+
+USER node
+
+WORKDIR /home/node/app/
+
+COPY ./entrypoint.sh /home/node/app/entrypoint.sh
+
+EXPOSE 4200
+
+# ENTRYPOINT [ "tail", "-f", "/dev/null" ]
+
+# ENTRYPOINT ["npm", "run", "dev" ]
+ENTRYPOINT ["/bin/sh", "-c", "chmod +x /home/node/app/entrypoint.sh && /home/node/app/entrypoint.sh"]
+
+
+
+
+
+
+# Inicia a aplicação
