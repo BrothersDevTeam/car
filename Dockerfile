@@ -22,16 +22,23 @@
 
 # CMD [ "nginx", "-g", "daemon off;" ]
 
-# /////////////////////////////////
+# ============================================================
 
 FROM node:22.14-slim
 
-USER node
-
 WORKDIR /home/node/app/
 
-COPY ./entrypoint.sh /home/node/app/entrypoint.sh
+# Copia os arquivos antes de mudar o usuário
+COPY --chown=node:node . /home/node/app/
+
+# Troca para o usuário node
+USER node
+
+# Garante que o entrypoint tenha permissão de execução
+RUN chmod +x /home/node/app/entrypoint.sh
 
 EXPOSE 4200
 
-ENTRYPOINT ["/bin/sh", "-c", "chmod +x /home/node/app/entrypoint.sh && /home/node/app/entrypoint.sh"]
+# ENTRYPOINT ["/home/node/app/entrypoint.sh"]
+RUN npm install
+ENTRYPOINT ["npm", "run", "start", "--", "--host", "0.0.0.0"]
