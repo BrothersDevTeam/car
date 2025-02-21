@@ -52,4 +52,4 @@ jobs:
         run: docker rmi $(docker images -q tkdcris/car-frontend) || true
 
       - name: Run docker container
-        run: docker run -d -p 3002:4200 --name car-frontend tkdcris/car-frontend:latest
+        run: docker run -d -p 3002:80 --name car-frontend tkdcris/car-frontend:latest
