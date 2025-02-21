@@ -12,10 +12,3 @@ EXPOSE 4200
 
 # ENTRYPOINT ["npm", "run", "dev" ]
 ENTRYPOINT ["/bin/sh", "-c", "chmod +x /home/node/app/entrypoint.sh && /home/node/app/entrypoint.sh"]
-
-
-
-
-
-
-# Inicia a aplicação

@@ -2,10 +2,10 @@ services:
   web:
     build:
       context: .
-      dockerfile: ./Dockerfile
-    container_name: car_angular_container
+      dockerfile: ./Dockerfile.dev
+    container_name: car_angular_dev
     ports:
-      - "4201:4200"
+      - "4200:4200"
     volumes:
       - ./:/home/node/app
     environment:
