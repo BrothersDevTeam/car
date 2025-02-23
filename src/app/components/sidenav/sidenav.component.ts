@@ -30,11 +30,6 @@ export class SideNavComponent {
 
   menuItems = signal<MenuItem[]>([
     {
-      icon: 'dashboard',
-      label: 'Dashboard',
-      route: 'dashboard',
-    },
-    {
       icon: 'person',
       label: 'Pessoas',
       route: 'person',

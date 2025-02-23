@@ -1,7 +1,6 @@
 <mat-toolbar class="mat-elevation-z2">
   <span>{{ title }}</span>
-  <span class="spacer"></span>
-  <button mat-button (click)="handleAction()">
+  <button mat-flat-button (click)="handleAction()">
     <span matListItemTitle>{{ btn_label }}</span>
     <mat-icon matListItemIcon [fontIcon]="fontIcon" />
   </button>
