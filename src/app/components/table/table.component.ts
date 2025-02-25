@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -7,18 +14,15 @@ import { Person } from '@interfaces/entity';
 
 @Component({
   selector: 'app-table',
-  imports: [
-    MatTableModule,
-    MatPaginatorModule
-  ],
+  imports: [MatTableModule, MatPaginatorModule],
   templateUrl: './table.component.html',
-  styleUrl: './table.component.scss'
+  styleUrl: './table.component.scss',
 })
 export class TableComponent implements OnInit {
   @Input() dataSource!: Person[];
-  
+
   @Output() selectedPerson = new EventEmitter<Person>();
-  
+
   displayedColumns: string[] = ['id', 'fullName', 'cpf', 'cnpj'];
   matDataSource = new MatTableDataSource<Person>([]);
 
@@ -39,5 +43,4 @@ export class TableComponent implements OnInit {
   onRowClick(row: Person) {
     this.selectedPerson.emit(row); // Emitir a pessoa selecionada
   }
-
 }
