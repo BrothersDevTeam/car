@@ -1,24 +1,40 @@
-import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  inject,
+  Input,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { CreateLegalEntity, Person } from '@interfaces/entity';
 import { PersonService } from '@services/person.service';
 
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-create-legal-entity-form',
-   imports: [PrimaryInputComponent, ReactiveFormsModule, WrapperCardComponent, MatButtonModule ],
+  imports: [
+    PrimaryInputComponent,
+    ReactiveFormsModule,
+    WrapperCardComponent,
+    MatButtonModule,
+    MatIconModule,
+  ],
   templateUrl: './create-legal-entity-form.component.html',
-  styleUrl: './create-legal-entity-form.component.scss'
+  styleUrl: './create-legal-entity-form.component.scss',
 })
 export class CreateLegalEntityFormComponent implements OnChanges {
- submitted = false;
+  submitted = false;
 
- @Input() dataForm: Person | null = null;
+  @Input() dataForm: Person | null = null;
+  @Input() SubmitButtonTitle?: string;
+  @Input() clientName?: string;
 
   private formBuilderService = inject(FormBuilder);
 
@@ -27,7 +43,7 @@ export class CreateLegalEntityFormComponent implements OnChanges {
     tradeName: [''],
     contact: this.formBuilderService.group({
       email: ['', [Validators.email]],
-      phone: ['']
+      phone: [''],
     }),
     cnpj: [''],
     ie: [''],
@@ -38,35 +54,38 @@ export class CreateLegalEntityFormComponent implements OnChanges {
       complement: [''],
       state: [''],
       city: [''],
-      neighborhood: ['']
-    })
+      neighborhood: [''],
+    }),
   });
 
-  constructor(private personService: PersonService) {}
+  constructor(
+    private personService: PersonService,
+    private toastrService: ToastrService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges) {
-      if (changes['dataForm'] && this.dataForm) {
-        this.form.patchValue({
-          legalName: this.dataForm.person.legalName || '',
-          tradeName: this.dataForm.person.tradeName || '',
-          contact: {
-            email: this.dataForm.person.contact?.email || '',
-            phone: this.dataForm.person.contact?.phone || ''
-          },
-          cnpj: this.dataForm.person.cpf || '',
-          ie: this.dataForm.person.ie || '',
-          address: {
-            zipcode: this.dataForm.person.address?.zipcode || '',
-            street: this.dataForm.person.address?.street || '',
-            number: this.dataForm.person.address?.number || '',
-            complement: this.dataForm.person.address?.complement || '',
-            state: this.dataForm.person.address?.state || '',
-            city: this.dataForm.person.address?.city || '',
-            neighborhood: this.dataForm.person.address?.neighborhood || ''
-          }
-        });
-      }
+    if (changes['dataForm'] && this.dataForm) {
+      this.form.patchValue({
+        legalName: this.dataForm.person.legalName || '',
+        tradeName: this.dataForm.person.tradeName || '',
+        contact: {
+          email: this.dataForm.person.contact?.email || '',
+          phone: this.dataForm.person.contact?.phone || '',
+        },
+        cnpj: this.dataForm.person.cpf || '',
+        ie: this.dataForm.person.ie || '',
+        address: {
+          zipcode: this.dataForm.person.address?.zipcode || '',
+          street: this.dataForm.person.address?.street || '',
+          number: this.dataForm.person.address?.number || '',
+          complement: this.dataForm.person.address?.complement || '',
+          state: this.dataForm.person.address?.state || '',
+          city: this.dataForm.person.address?.city || '',
+          neighborhood: this.dataForm.person.address?.neighborhood || '',
+        },
+      });
     }
+  }
 
   onSubmit() {
     this.submitted = true;
@@ -77,7 +96,6 @@ export class CreateLegalEntityFormComponent implements OnChanges {
       return;
     }
 
-
     // Processar envio se válido
     const formValue: CreateLegalEntity = {
       legalName: this.form.value.legalName || '',
@@ -86,7 +104,7 @@ export class CreateLegalEntityFormComponent implements OnChanges {
       ie: this.form.value.ie || '',
       contact: {
         email: this.form.value.contact?.email || '',
-        phone: this.form.value.contact?.phone || ''
+        phone: this.form.value.contact?.phone || '',
       },
       address: {
         zipcode: this.form.value.address?.zipcode || '',
@@ -95,10 +113,38 @@ export class CreateLegalEntityFormComponent implements OnChanges {
         complement: this.form.value.address?.complement || '',
         state: this.form.value.address?.state || '',
         city: this.form.value.address?.city || '',
-        neighborhood: this.form.value.address?.neighborhood || ''
-      }
+        neighborhood: this.form.value.address?.neighborhood || '',
+      },
     };
 
-    this.personService.create(formValue);
+    if (this.dataForm?.id) {
+      this.personService.update(formValue, this.dataForm.id).subscribe({
+        next: () => {
+          this.toastrService.success('Atualização feita com sucesso');
+        },
+        error: () =>
+          this.toastrService.error(
+            'Erro inesperado! Tente novamente mais tarde'
+          ),
+      });
+    } else {
+      this.personService.create(formValue).subscribe({
+        next: () => {
+          this.toastrService.success('Cadastro realizado com sucesso');
+        },
+        error: () =>
+          this.toastrService.error(
+            'Erro inesperado! Tente novamente mais tarde'
+          ),
+      });
+    }
+  }
+
+  onDelete() {
+    console.log('Deletando pessoa jurídica: ');
+    this.personService.delete(this.dataForm!.id).subscribe({
+      next: (response) => console.log('Deleção bem-sucedida', response),
+      error: (error) => console.error('Erro ao deletar cliente', error),
+    });
   }
 }

@@ -1,4 +1,10 @@
 <form [formGroup]="form">
+  <div class="title-trash">
+    <h2>{{ name }}</h2>
+    <mat-icon class="delete-btn" matListItemIcon (click)="onDelete()"
+      >delete</mat-icon
+    >
+  </div>
   <app-wrapper-card title="Dados pessoais">
     <app-primary-input
       formControlName="fullName"
@@ -10,14 +16,6 @@
         (form.get('fullName')?.touched || submitted)
       "
     />
-    <!-- <app-primary-input
-    formControlName="tradeName"
-    label="Apelido"
-    inputName="tradeName"
-    type="text"
-    /> -->
-
-    <!-- Grupo de contato -->
     <div formGroupName="contact">
       <app-primary-input
         formControlName="email"
@@ -91,6 +89,12 @@
       ></app-primary-input>
     </div>
   </app-wrapper-card>
-
-  <button mat-flat-button type="button" (click)="onSubmit()">Enviar</button>
+  <button
+    mat-raised-button
+    type="button"
+    class="submit-btn"
+    (click)="onSubmit()"
+  >
+    {{ SubmitButtonTitle }}
+  </button>
 </form>

@@ -6,7 +6,30 @@ form {
   gap: 10px;
   padding: 24px;
 
-  button {
-    background-color: $primary-color;
+  .title-trash {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h2 {
+      margin: 0;
+    }
   }
+
+  .submit-btn {
+    background-color: $primary-color;
+    flex-grow: 4;
+  }
+
+  .delete-btn {
+    right: 30px;
+    cursor: pointer;
+    transition: transform 200ms ease-in-out;
+
+    &:hover {
+      color: rgba(250, 0, 0, 0.9);
+      transform: scale(1.2) rotate(30deg);
+    }
+  }
+
 }

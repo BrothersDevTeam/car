@@ -7,11 +7,11 @@ export interface GenericClient {
   ie?: string;
   address?: Address;
   contact?: Contact;
+  active?: boolean;
 }
 
 export interface CreateNaturalPerson {
   fullName: string;
-  tradeName: string;
   cpf: string;
   address?: Address;
   contact?: Contact;
