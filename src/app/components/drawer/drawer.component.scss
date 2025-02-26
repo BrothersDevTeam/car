@@ -2,6 +2,8 @@
 
 .container {
   background: rgba($color: #241907, $alpha: 0.2);
+  height: auto;
+  flex-grow: 1;
 
   /* Embaçamento (desfoque) */
   backdrop-filter: blur(1.5px);
@@ -21,6 +23,15 @@
     flex-direction: column;
     overflow: hidden;
     min-width: 50%;
+
+    @media (max-width: 960px) {
+      min-width: 70%;
+    }
+
+    @media (max-width: 599px) {
+      /* Smartphones */
+      min-width: 100%;
+    }
 
     mat-nav-list {
       display: flex;
@@ -46,9 +57,9 @@
       justify-content: space-between;
 
       .content {
-        flex-grow: 1;
         overflow-y: auto;
         margin-top: 20px;
+        flex-grow: 1;
       }
 
       .btn-container {
@@ -57,19 +68,11 @@
         margin-bottom: 24px;
         gap: 10px;
         padding: 16px;
+      }
 
-        .action {
-          background-color: $primary-color;
-          color: antiquewhite;
-          display: flex;
-          width: 200px;
-        }
-
-        .close {
-          color: chocolate;
-          width: 100%;
-        }
-
+      .close {
+        color: rgb(50, 49, 153);
+        width: 100%;
       }
     }
   }

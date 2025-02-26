@@ -1,4 +1,4 @@
-@use '../../../../styles/variables.scss' as *;
+@use "../../../../styles/variables.scss" as *;
 
 form {
   display: flex;
@@ -18,7 +18,7 @@ form {
 
   .submit-btn {
     background-color: $primary-color;
-    flex-grow: 4;
+    color: white;
   }
 
   .delete-btn {
@@ -31,5 +31,4 @@ form {
       transform: scale(1.2) rotate(30deg);
     }
   }
-
 }

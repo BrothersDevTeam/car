@@ -33,8 +33,6 @@ export class CreateLegalEntityFormComponent implements OnChanges {
   submitted = false;
 
   @Input() dataForm: Person | null = null;
-  @Input() SubmitButtonTitle?: string;
-  @Input() clientName?: string;
 
   private formBuilderService = inject(FormBuilder);
 
@@ -141,7 +139,6 @@ export class CreateLegalEntityFormComponent implements OnChanges {
   }
 
   onDelete() {
-    console.log('Deletando pessoa jurídica: ');
     this.personService.delete(this.dataForm!.id).subscribe({
       next: (response) => console.log('Deleção bem-sucedida', response),
       error: (error) => console.error('Erro ao deletar cliente', error),

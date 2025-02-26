@@ -1,10 +1,12 @@
 <form [formGroup]="form">
-  <div class="title-trash">
-    <h2>{{ clientName }}</h2>
-    <mat-icon class="delete-btn" matListItemIcon (click)="onDelete()"
-      >delete</mat-icon
-    >
-  </div>
+  @if(dataForm?.person?.legalName) {
+    <div class="title-trash">
+      <h2>{{ dataForm?.person?.legalName }}</h2>
+      <mat-icon class="delete-btn" matListItemIcon (click)="onDelete()"
+        >delete</mat-icon
+      >
+    </div>
+  }
   <app-wrapper-card title="Dados da empresa">
     <app-primary-input
       formControlName="legalName"
@@ -110,6 +112,6 @@
     class="submit-btn"
     (click)="onSubmit()"
   >
-    {{ SubmitButtonTitle }}
+    Enviar
   </button>
 </form>

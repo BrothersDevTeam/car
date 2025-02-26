@@ -19,22 +19,20 @@ import { CreateNaturalPersonFormComponent } from '@forms/client/create-natural-p
     DrawerComponent,
     MatTabsModule,
     CreateLegalEntityFormComponent,
-    CreateNaturalPersonFormComponent
-],
+    CreateNaturalPersonFormComponent,
+  ],
   templateUrl: './person.component.html',
-  styleUrl: './person.component.scss'
+  styleUrl: './person.component.scss',
 })
-
 export class PersonComponent implements OnInit {
   dataSource: Person[] = [];
   selectedPerson: Person | null = null;
   totalElements = 0;
 
-
   openForm = signal(false);
 
   handleOpenForm() {
-    this.openForm.set(!this.openForm())
+    this.openForm.set(!this.openForm());
   }
 
   constructor(
@@ -43,12 +41,15 @@ export class PersonComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loadPage(0, 10);
+    this.loadPage(0, 100);
   }
 
   loadPage(page: number, size: number) {
     this.personService.getPaginatedData(page, size).subscribe((response) => {
-      this.dataSource = response.content;
+      this.dataSource = response.content.filter(
+        (value) =>
+          value.person.active && (value.person.cnpj || value.person.cpf)
+      );
       this.totalElements = response.totalElements;
 
       this.cdr.detectChanges();

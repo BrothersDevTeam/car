@@ -1,19 +1,28 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
-import { CreateLegalEntity, CreateNaturalPerson, Person } from '@interfaces/entity';
+import {
+  CreateLegalEntity,
+  CreateNaturalPerson,
+  Person,
+} from '@interfaces/entity';
 import { PaginationResponse } from '@interfaces/pagination';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PersonService {
-  private apiUrl = 'http://controleautorevenda.duckdns.org/api/v1/clients'
+  private apiUrl = 'http://controleautorevenda.duckdns.org/api/v1/clients';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  getPaginatedData(page: number, size: number): Observable<PaginationResponse<Person>> {
-    return this.http.get<PaginationResponse<Person>>(`${this.apiUrl}?page=${page}&size=${size}`);
+  getPaginatedData(
+    page: number,
+    size: number
+  ): Observable<PaginationResponse<Person>> {
+    return this.http.get<PaginationResponse<Person>>(
+      `${this.apiUrl}?page=${page}&size=${size}`
+    );
   }
 
   create(data: CreateNaturalPerson | CreateLegalEntity) {
@@ -24,10 +33,18 @@ export class PersonService {
     );
   }
 
-  update(data:  CreateNaturalPerson | CreateLegalEntity, id: string) {
+  update(data: CreateNaturalPerson | CreateLegalEntity, id: string) {
     return this.http.post<string>(`${this.apiUrl}/${id}`, data).pipe(
       tap((response: string) => {
         console.log('Formulário enviado com sucesso!', response);
+      })
+    );
+  }
+
+  delete(id: string) {
+    return this.http.delete<string>(id).pipe(
+      tap((response: string) => {
+        console.log('Cliente deletado com sucesso!', response);
       })
     );
   }

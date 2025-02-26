@@ -1,22 +1,32 @@
 <main>
-  <app-content-header title="Pessoas" btn_label="Novo" fontIcon="add" (onClick)="handleOpenForm()" />
+  <app-content-header
+    title="Pessoas"
+    btn_label="Novo"
+    fontIcon="add"
+    (onClick)="handleOpenForm()"
+  />
 
   @if (dataSource.length) {
-  <app-table (selectedPerson)="handleSelectedPerson($event)" [dataSource]="dataSource" />
+  <app-table
+    (selectedPerson)="handleSelectedPerson($event)"
+    [dataSource]="dataSource"
+  />
   } @else {
   <div class="loader-div">
     <span class="loader"></span>
   </div>
-  }
-
-  @if (openForm()) {
+  } @if (openForm()) {
   <app-drawer (closeForm)="handleOpenForm()">
     <mat-tab-group [selectedIndex]="selectedPerson?.person?.cpf ? 0 : 1">
       <mat-tab label="Pessoa Física">
-        <app-create-natural-person-form [dataForm]="selectedPerson?.person?.cpf ? selectedPerson : null" />
+        <app-create-natural-person-form
+          [dataForm]="selectedPerson?.person?.cpf ? selectedPerson : null"
+        />
       </mat-tab>
       <mat-tab label="Pessoa Jurídica">
-        <app-create-legal-entity-form [dataForm]="selectedPerson?.person?.cnpj ? selectedPerson : null" />
+        <app-create-legal-entity-form
+          [dataForm]="selectedPerson?.person?.cnpj ? selectedPerson : null"
+        />
       </mat-tab>
     </mat-tab-group>
   </app-drawer>
