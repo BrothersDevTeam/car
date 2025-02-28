@@ -19,7 +19,7 @@ import { Person } from '@interfaces/entity';
   styleUrl: './table.component.scss',
 })
 export class TableComponent implements OnInit {
-  @Input() dataSource!: Person[];
+  @Input() personList!: Person[];
 
   @Output() selectedPerson = new EventEmitter<Person>();
 
@@ -29,11 +29,11 @@ export class TableComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   ngOnInit() {
-    this.matDataSource.data = this.dataSource;
+    this.matDataSource.data = this.personList;
   }
 
   ngOnChanges() {
-    this.matDataSource.data = this.dataSource; // Atualizar o DataSource da tabela
+    this.matDataSource.data = this.personList; // Atualizar o DataSource da tabela
   }
 
   ngAfterViewInit() {
