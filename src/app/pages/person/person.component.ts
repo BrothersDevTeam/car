@@ -1,15 +1,14 @@
-import { ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
-
-import { Person } from '@interfaces/entity';
-import { PersonService } from '@services/person.service';
-
+import { Component, OnInit, signal } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
-
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { TableComponent } from '@components/table/table.component';
 import { CreateLegalEntityFormComponent } from '@forms/client/create-legal-entity-form/create-legal-entity-form.component';
 import { CreateNaturalPersonFormComponent } from '@forms/client/create-natural-person-form/create-natural-person-form.component';
+import { Person } from '@interfaces/entity';
+import { PersonService } from '@services/person.service';
+import { ToastrService } from 'ngx-toastr';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-person',
@@ -25,9 +24,9 @@ import { CreateNaturalPersonFormComponent } from '@forms/client/create-natural-p
   styleUrl: './person.component.scss',
 })
 export class PersonComponent implements OnInit {
-  dataSource: Person[] = [];
+  personList: Person[] | null = null;
   selectedPerson: Person | null = null;
-  totalElements = 0;
+  clientListError: boolean = false;
 
   openForm = signal(false);
 
@@ -37,23 +36,27 @@ export class PersonComponent implements OnInit {
 
   constructor(
     private personService: PersonService,
-    private cdr: ChangeDetectorRef
+    private toastr: ToastrService
   ) {}
 
   ngOnInit() {
-    this.loadPage(0, 100);
+    this.loadPersonList(0, 3);
   }
 
-  loadPage(page: number, size: number) {
-    this.personService.getPaginatedData(page, size).subscribe((response) => {
-      this.dataSource = response.content.filter(
-        (value) =>
-          value.person.active && (value.person.cnpj || value.person.cpf)
-      );
-      this.totalElements = response.totalElements;
-
-      this.cdr.detectChanges();
-    });
+  loadPersonList(page: number, size: number) {
+    this.personService
+      .getPaginatedData(page, size)
+      .pipe(
+        catchError((err) => {
+          this.clientListError = true;
+          console.error('Erro ao carregar a lista de pessoas:', err);
+          this.toastr.error('Erro ao buscar dados da tabela de clientes');
+          return of();
+        })
+      )
+      .subscribe((response) => {
+        this.personList = response.content;
+      });
   }
 
   handleSelectedPerson(person: Person) {

@@ -6,16 +6,26 @@
     (onClick)="handleOpenForm()"
   />
 
-  @if (dataSource.length) {
+  @if (personList?.length) {
   <app-table
     (selectedPerson)="handleSelectedPerson($event)"
-    [dataSource]="dataSource"
+    [personList]="personList!"
   />
   } @else {
-  <div class="loader-div">
-    <span class="loader"></span>
-  </div>
-  } @if (openForm()) {
+    @if (!clientListError) {
+      <div class="loader-div">
+        <span class="loader"></span>
+      </div>
+    } @else {
+      <div class="message-error mat-elevation-z8">
+        <h3>Não foi possível acessar os dados da tabela</h3>
+        <h4>Tente novamente em alguns minutos.</h4>
+      </div>
+    }
+  }
+
+
+  @if (openForm()) {
   <app-drawer (closeForm)="handleOpenForm()">
     <mat-tab-group [selectedIndex]="selectedPerson?.person?.cpf ? 0 : 1">
       <mat-tab label="Pessoa Física">

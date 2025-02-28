@@ -1,28 +1,45 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { first, Observable, tap } from 'rxjs';
 import {
   CreateLegalEntity,
   CreateNaturalPerson,
   Person,
 } from '@interfaces/entity';
 import { PaginationResponse } from '@interfaces/pagination';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PersonService {
-  private apiUrl = 'http://controleautorevenda.duckdns.org/api/v1/clients';
+  private readonly apiUrl =
+    'http://controleautorevenda.duckdns.org/api/v1/clients';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private toastr: ToastrService) {}
 
   getPaginatedData(
     page: number,
     size: number
   ): Observable<PaginationResponse<Person>> {
-    return this.http.get<PaginationResponse<Person>>(
-      `${this.apiUrl}?page=${page}&size=${size}`
-    );
+    return this.http
+      .get<PaginationResponse<Person>>(
+        `${this.apiUrl}?page=${page}&size=${size}`
+      )
+      .pipe(
+        first(),
+        tap((response) => {
+          console.log('PersonService response: ', response);
+
+          //Filtrar retorno no back enquanto não estiver vindo filtrado da api.
+
+          // response.content = response.content.filter(
+          //   (element) =>
+          //     element.person.active &&
+          //     (!!element.person.cnpj || !!element.person.cpf)
+          // );
+        })
+      );
   }
 
   create(data: CreateNaturalPerson | CreateLegalEntity) {
