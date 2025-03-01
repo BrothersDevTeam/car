@@ -19,26 +19,23 @@ export class PersonService {
   constructor(private http: HttpClient, private toastr: ToastrService) {}
 
   getPaginatedData(
-    page: number,
-    size: number
+    pageIndex: number,
+    pageSize: number
   ): Observable<PaginationResponse<Person>> {
     return this.http
       .get<PaginationResponse<Person>>(
-        `${this.apiUrl}?page=${page}&size=${size}`
+        `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`
       )
       .pipe(
-        first(),
-        tap((response) => {
-          console.log('PersonService response: ', response);
-
-          //Filtrar retorno no back enquanto não estiver vindo filtrado da api.
-
-          // response.content = response.content.filter(
-          //   (element) =>
-          //     element.person.active &&
-          //     (!!element.person.cnpj || !!element.person.cpf)
-          // );
-        })
+        first()
+        // tap((response) => {
+        //   //Filtrar retorno no back enquanto não estiver vindo filtrado da api.
+        //   // response.content = response.content.filter(
+        //   //   (element) =>
+        //   //     element.person.active &&
+        //   //     (!!element.person.cnpj || !!element.person.cpf)
+        //   // );
+        // })
       );
   }
 

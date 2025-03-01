@@ -6,10 +6,11 @@
     (onClick)="handleOpenForm()"
   />
 
-  @if (personList?.length) {
+  @if (personPaginatedList?.totalElements) {
   <app-table
     (selectedPerson)="handleSelectedPerson($event)"
-    [personList]="personList!"
+    [personPaginatedList]="personPaginatedList!"
+    (pageEvent)="handlePageEvent($event)"
   />
   } @else {
     @if (!clientListError) {

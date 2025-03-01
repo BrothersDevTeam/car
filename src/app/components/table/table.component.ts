@@ -1,16 +1,10 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnInit,
-  Output,
-  ViewChild,
-} from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatTableModule } from '@angular/material/table';
 
 import { Person } from '@interfaces/entity';
+import { PaginationResponse } from '@interfaces/pagination';
 
 @Component({
   selector: 'app-table',
@@ -18,29 +12,20 @@ import { Person } from '@interfaces/entity';
   templateUrl: './table.component.html',
   styleUrl: './table.component.scss',
 })
-export class TableComponent implements OnInit {
-  @Input() personList!: Person[];
+export class TableComponent {
+  @Input() personPaginatedList!: PaginationResponse<Person>;
 
   @Output() selectedPerson = new EventEmitter<Person>();
+  @Output() pageEvent = new EventEmitter<PageEvent>();
 
-  displayedColumns: string[] = ['id', 'fullName', 'cpf', 'cnpj'];
-  matDataSource = new MatTableDataSource<Person>([]);
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-  ngOnInit() {
-    this.matDataSource.data = this.personList;
-  }
-
-  ngOnChanges() {
-    this.matDataSource.data = this.personList; // Atualizar o DataSource da tabela
-  }
-
-  ngAfterViewInit() {
-    this.matDataSource.paginator = this.paginator; // Vincular o paginador
-  }
+  displayedColumns: string[] = ['fullName', 'active', 'cpf', 'cnpj'];
+  pageSizeOptions = [1000, 100, 50];
 
   onRowClick(row: Person) {
-    this.selectedPerson.emit(row); // Emitir a pessoa selecionada
+    this.selectedPerson.emit(row);
+  }
+
+  handlePageEvent(event: PageEvent) {
+    this.pageEvent.emit(event);
   }
 }
