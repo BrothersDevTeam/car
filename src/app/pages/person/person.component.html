@@ -30,12 +30,12 @@
   <app-drawer (closeForm)="handleOpenForm()">
     <mat-tab-group [selectedIndex]="selectedPerson?.person?.cpf ? 0 : 1">
       <mat-tab label="Pessoa Física">
-        <app-create-natural-person-form
+        <app-natural-person-form
           [dataForm]="selectedPerson?.person?.cpf ? selectedPerson : null"
         />
       </mat-tab>
       <mat-tab label="Pessoa Jurídica">
-        <app-create-legal-entity-form
+        <app-legal-entity-form
           [dataForm]="selectedPerson?.person?.cnpj ? selectedPerson : null"
         />
       </mat-tab>

@@ -112,6 +112,6 @@
     class="submit-btn"
     (click)="onSubmit()"
   >
-    Enviar
+  {{ dataForm?.person?.legalName ? "Editar" : "Enviar"}}
   </button>
 </form>

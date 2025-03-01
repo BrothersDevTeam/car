@@ -1,16 +1,18 @@
 import { Component, signal, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTabsModule } from '@angular/material/tabs';
-import { ContentHeaderComponent } from '@components/content-header/content-header.component';
-import { DrawerComponent } from '@components/drawer/drawer.component';
-import { TableComponent } from '@components/table/table.component';
-import { CreateLegalEntityFormComponent } from '@forms/client/create-legal-entity-form/create-legal-entity-form.component';
-import { CreateNaturalPersonFormComponent } from '@forms/client/create-natural-person-form/create-natural-person-form.component';
+import { ToastrService } from 'ngx-toastr';
+import { catchError, of } from 'rxjs';
+
 import { Person } from '@interfaces/entity';
 import { PaginationResponse } from '@interfaces/pagination';
 import { PersonService } from '@services/person.service';
-import { ToastrService } from 'ngx-toastr';
-import { catchError, of } from 'rxjs';
+
+import { ContentHeaderComponent } from '@components/content-header/content-header.component';
+import { DrawerComponent } from '@components/drawer/drawer.component';
+import { TableComponent } from '@components/table/table.component';
+import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
+import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 
 @Component({
   selector: 'app-person',
@@ -19,8 +21,8 @@ import { catchError, of } from 'rxjs';
     TableComponent,
     DrawerComponent,
     MatTabsModule,
-    CreateLegalEntityFormComponent,
-    CreateNaturalPersonFormComponent,
+    LegalEntityFormComponent,
+    NaturalPersonFormComponent,
   ],
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss',

@@ -6,9 +6,8 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
 
-import { CreateNaturalPerson, Person } from '@interfaces/entity';
+import { CreateLegalEntity, Person } from '@interfaces/entity';
 import { PersonService } from '@services/person.service';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -16,9 +15,10 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
-  selector: 'app-create-natural-person-form',
+  selector: 'app-legal-entity-form',
   imports: [
     PrimaryInputComponent,
     ReactiveFormsModule,
@@ -26,10 +26,10 @@ import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.comp
     MatButtonModule,
     MatIconModule,
   ],
-  templateUrl: './create-natural-person-form.component.html',
-  styleUrl: './create-natural-person-form.component.scss',
+  templateUrl: './legal-entity-form.component.html',
+  styleUrl: './legal-entity-form.component.scss',
 })
-export class CreateNaturalPersonFormComponent implements OnChanges {
+export class LegalEntityFormComponent implements OnChanges {
   submitted = false;
 
   @Input() dataForm: Person | null = null;
@@ -37,13 +37,14 @@ export class CreateNaturalPersonFormComponent implements OnChanges {
   private formBuilderService = inject(FormBuilder);
 
   protected form = this.formBuilderService.group({
-    fullName: ['', Validators.required],
+    legalName: [this.dataForm?.person.legalName || '', Validators.required],
     tradeName: [''],
     contact: this.formBuilderService.group({
       email: ['', [Validators.email]],
       phone: [''],
     }),
-    cpf: [''],
+    cnpj: [''],
+    ie: [''],
     address: this.formBuilderService.group({
       zipcode: [''],
       street: [''],
@@ -63,12 +64,14 @@ export class CreateNaturalPersonFormComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
       this.form.patchValue({
-        fullName: this.dataForm.person.fullName || '',
+        legalName: this.dataForm.person.legalName || '',
+        tradeName: this.dataForm.person.tradeName || '',
         contact: {
           email: this.dataForm.person.contact?.email || '',
           phone: this.dataForm.person.contact?.phone || '',
         },
-        cpf: this.dataForm.person.cpf || '',
+        cnpj: this.dataForm.person.cnpj || '',
+        ie: this.dataForm.person.ie || '',
         address: {
           zipcode: this.dataForm.person.address?.zipcode || '',
           street: this.dataForm.person.address?.street || '',
@@ -92,9 +95,11 @@ export class CreateNaturalPersonFormComponent implements OnChanges {
     }
 
     // Processar envio se válido
-    const formValue: CreateNaturalPerson = {
-      fullName: this.form.value.fullName || '',
-      cpf: this.form.value.cpf || '',
+    const formValue: CreateLegalEntity = {
+      legalName: this.form.value.legalName || '',
+      tradeName: this.form.value.tradeName || '',
+      cnpj: this.form.value.cnpj || '',
+      ie: this.form.value.ie || '',
       contact: {
         email: this.form.value.contact?.email || '',
         phone: this.form.value.contact?.phone || '',
