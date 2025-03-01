@@ -7,7 +7,7 @@ export interface GenericClient {
   ie?: string;
   address?: Address;
   contact?: Contact;
-  active?: boolean;
+  active: boolean;
 }
 
 export interface CreateNaturalPerson {
