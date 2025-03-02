@@ -27,15 +27,15 @@ export class PersonService {
         `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`
       )
       .pipe(
-        first()
-        // tap((response) => {
-        //   // Filtrar retorno no back enquanto não estiver vindo filtrado da api.
-        //   response.content = response.content.filter(
-        //     (element) =>
-        //       element.person.active &&
-        //       (!!element.person.cnpj || !!element.person.cpf)
-        //   );
-        // })
+        first(),
+        tap((response) => {
+          // Filtrar retorno no back enquanto não estiver vindo filtrado da api.
+          response.content = response.content.filter(
+            (element) =>
+              element.person.active &&
+              (!!element.person.cnpj || !!element.person.cpf)
+          );
+        })
       );
   }
 
@@ -48,7 +48,7 @@ export class PersonService {
   }
 
   update(data: CreateNaturalPerson | CreateLegalEntity, id: string) {
-    return this.http.post<string>(`${this.apiUrl}/${id}`, data).pipe(
+    return this.http.put<string>(`${this.apiUrl}/${id}`, data).pipe(
       tap((response: string) => {
         console.log('Formulário enviado com sucesso!', response);
       })
