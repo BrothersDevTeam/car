@@ -1,4 +1,9 @@
 <main>
+  <mat-form-field>
+    <mat-label>Pesquisar por nome</mat-label>
+    <input matInput (input)="onSearch($event)">
+  </mat-form-field>
+
   <app-content-header
     title="Pessoas"
     btn_label="Novo"
@@ -11,6 +16,7 @@
     (selectedPerson)="handleSelectedPerson($event)"
     [personPaginatedList]="personPaginatedList!"
     (pageEvent)="handlePageEvent($event)"
+    [searchValue]="searchValue"
   />
   } @else {
     @if (!clientListError) {
@@ -27,7 +33,7 @@
 
 
   @if (openForm()) {
-  <app-drawer (closeForm)="handleOpenForm()">
+  <app-drawer (closeDrawer)="handleCloseDrawer()">
     <mat-tab-group [selectedIndex]="selectedPerson?.person?.cpf ? 0 : 1">
       <mat-tab label="Pessoa Física">
         <app-natural-person-form
@@ -42,4 +48,15 @@
     </mat-tab-group>
   </app-drawer>
   }
+
+  @if (openInfo()) {
+    <app-drawer (closeDrawer)="handleCloseDrawer()">
+      <button color="primary" mat-raised-button (click)="handleEdit()" >Edit</button>
+      @if (selectedPerson?.person?.cpf) {
+        {{ selectedPerson?.person?.fullName }}
+      } @else {
+        {{ selectedPerson?.person?.legalName }}
+      }
+    </app-drawer>
+    }
 </main>

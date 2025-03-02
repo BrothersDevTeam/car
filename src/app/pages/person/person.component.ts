@@ -1,6 +1,10 @@
 import { Component, signal, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+
 import { ToastrService } from 'ngx-toastr';
 import { catchError, of } from 'rxjs';
 
@@ -23,6 +27,9 @@ import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/na
     MatTabsModule,
     LegalEntityFormComponent,
     NaturalPersonFormComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
   ],
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss',
@@ -31,15 +38,18 @@ export class PersonComponent {
   personPaginatedList: PaginationResponse<Person> | null = null;
   selectedPerson: Person | null = null;
   clientListError: boolean = false;
+  searchValue: string = '';
   paginationRequestConfig = {
     pageSize: 1000,
     pageIndex: 0,
   };
 
   openForm = signal(false);
+  openInfo = signal(false);
 
-  handleOpenForm() {
-    this.openForm.set(!this.openForm());
+  handleCloseDrawer() {
+    this.openForm.set(false);
+    this.openInfo.set(false);
   }
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -74,10 +84,23 @@ export class PersonComponent {
 
   handleSelectedPerson(person: Person) {
     this.selectedPerson = person;
+    this.openInfo.set(true);
+  }
+
+  handleOpenForm() {
     this.openForm.set(true);
   }
 
   handlePageEvent(event: PageEvent) {
     this.loadPersonList(event.pageIndex, event.pageSize);
+  }
+
+  onSearch(event: Event) {
+    this.searchValue = (event.target as HTMLInputElement).value;
+  }
+
+  handleEdit() {
+    this.openInfo.set(false);
+    this.openForm.set(true);
   }
 }

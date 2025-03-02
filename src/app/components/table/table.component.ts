@@ -1,59 +1,73 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatTableModule } from '@angular/material/table';
-import { Sort, MatSortModule } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSortModule, MatSort } from '@angular/material/sort';
 
 import { Person } from '@interfaces/entity';
 import { PaginationResponse } from '@interfaces/pagination';
+import { PaginationComponent } from '../pagination/pagination.component';
 
 @Component({
   selector: 'app-table',
-  imports: [MatTableModule, MatPaginatorModule, MatSortModule],
+  imports: [
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    PaginationComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './table.component.html',
   styleUrl: './table.component.scss',
 })
-export class TableComponent implements OnInit {
+export class TableComponent implements OnInit, OnChanges {
   @Input() personPaginatedList!: PaginationResponse<Person>;
-
+  @Input() searchValue?: string;
   @Output() selectedPerson = new EventEmitter<Person>();
   @Output() pageEvent = new EventEmitter<PageEvent>();
 
+  dataSource = new MatTableDataSource<Person>();
+
   displayedColumns: string[] = ['fullName', 'active', 'cpf', 'cnpj'];
-  pageSizeOptions = [1000, 100, 50];
-  sortedData!: Person[];
+  pageSizeOptions = [1000, 100, 50, 20];
+  filteredData: Person[] = [];
+
+  @ViewChild(MatSort) sort!: MatSort;
+
+  ngAfterViewInit() {}
 
   ngOnInit(): void {
     if (this.personPaginatedList?.content) {
-      this.sortedData = this.personPaginatedList.content;
+      this.dataSource.data = this.personPaginatedList.content;
     }
   }
 
-  sortData(sort: Sort) {
-    const data = this.personPaginatedList.content.slice();
-    if (!sort.active || sort.direction === '') {
-      this.sortedData = data;
-      return;
-    }
+  ngOnChanges() {
+    this.filteringData();
+  }
 
-    this.sortedData = data.sort((a, b) => {
-      const isAsc = sort.direction === 'asc';
-      switch (sort.active) {
-        case 'fullName':
-          return compare(a.person.fullName, b.person.fullName, isAsc);
-        case 'active':
-          return compare(
-            a.person.active ? 1 : 0,
-            b.person.active ? 1 : 0,
-            isAsc
-          );
-        default:
-          return 0;
-      }
-    });
-
-    function compare(a: number | string, b: number | string, isAsc: boolean) {
-      return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+  filteringData() {
+    if (this.searchValue?.length) {
+      this.filteredData = this.personPaginatedList.content.filter((element) => {
+        if (element.person.fullName || element.person.legalName) {
+          return (element.person.fullName || element.person.legalName)
+            .trim()
+            .toLowerCase()
+            .includes(this.searchValue!.trim().toLowerCase());
+        } else return false;
+      });
+      this.dataSource.data = this.filteredData;
+    } else {
+      this.dataSource.data = this.personPaginatedList.content;
     }
   }
 

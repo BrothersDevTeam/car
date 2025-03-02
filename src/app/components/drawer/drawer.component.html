@@ -1,14 +1,12 @@
 <div class="container" @slideInOut fxLayout="" fxFlexFill>
   <mat-sidenav position="end" #sidenav mode="side" opened>
     <mat-nav-list>
-      <mat-icon class="closeX" matListItemIcon (click)="handleCloseForm()"
-        >close</mat-icon
-      >
+      <mat-icon class="closeX" matListItemIcon (click)="handleCloseDrawer()">close</mat-icon>
 
       <div class="content">
         <ng-content></ng-content>
       </div>
-      <button class="close" mat-raised-button (click)="handleCloseForm()">
+      <button class="close" mat-raised-button (click)="handleCloseDrawer()">
         Fechar
       </button>
     </mat-nav-list>

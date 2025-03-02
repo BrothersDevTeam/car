@@ -4,6 +4,7 @@
   background: rgba($color: #241907, $alpha: 0.2);
   height: auto;
   flex-grow: 1;
+  margin-top: 64px;
 
   /* Embaçamento (desfoque) */
   backdrop-filter: blur(1.5px);
@@ -11,7 +12,7 @@
   /* Compatibilidade com navegadores mais antigos */
   -webkit-backdrop-filter: blur(1.5px);
 
-  position: absolute;
+  position: fixed;
   left: 0;
   right: 0;
   top: 0;
@@ -39,18 +40,27 @@
       flex-grow: 1; // Ocupa toda a altura disponível
 
       .closeX {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $secondary-color;
+
+        width: 44px;
+        height: 28px;
+        background-color: white;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+
         position: absolute;
         right: 20px;
         cursor: pointer;
         z-index: 999;
 
         border: none;
-        border-radius: 50%;
+        border-radius: 50% 0 0 50%;
         transition: all 500ms;
 
         &:hover {
-          background-color: rgba($color: #fd9886, $alpha: 0.1);
-          transform: rotate(180deg);
+          box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
         }
       }
 
@@ -71,7 +81,7 @@
       }
 
       .close {
-        color: rgb(50, 49, 153);
+        color: $secondary-color;
         width: 100%;
       }
     }

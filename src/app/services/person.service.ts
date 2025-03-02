@@ -29,12 +29,12 @@ export class PersonService {
       .pipe(
         first()
         // tap((response) => {
-        //   //Filtrar retorno no back enquanto não estiver vindo filtrado da api.
-        //   // response.content = response.content.filter(
-        //   //   (element) =>
-        //   //     element.person.active &&
-        //   //     (!!element.person.cnpj || !!element.person.cpf)
-        //   // );
+        //   // Filtrar retorno no back enquanto não estiver vindo filtrado da api.
+        //   response.content = response.content.filter(
+        //     (element) =>
+        //       element.person.active &&
+        //       (!!element.person.cnpj || !!element.person.cpf)
+        //   );
         // })
       );
   }
