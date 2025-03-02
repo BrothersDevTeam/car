@@ -122,6 +122,7 @@ export class LegalEntityFormComponent implements OnChanges {
       this.personService.update(formValue, this.dataForm.id).subscribe({
         next: () => {
           this.toastrService.success('Atualização feita com sucesso');
+          this.formSubmitted.emit();
         },
         error: () =>
           this.toastrService.error(
@@ -132,6 +133,7 @@ export class LegalEntityFormComponent implements OnChanges {
       this.personService.create(formValue).subscribe({
         next: () => {
           this.toastrService.success('Cadastro realizado com sucesso');
+          this.formSubmitted.emit();
         },
         error: () =>
           this.toastrService.error(

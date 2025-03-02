@@ -143,7 +143,7 @@ export class NaturalPersonFormComponent implements OnChanges {
       this.personService.delete(this.dataForm.id).subscribe({
         next: (response) => {
           console.log('Deleção bem-sucedida', response);
-          this.toastrService.success('Deleção feita com sucesso');
+          this.toastrService.success('Deleção bem-sucedida');
           this.formSubmitted.emit();
         },
         error: (error) => {
