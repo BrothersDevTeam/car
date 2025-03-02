@@ -1,8 +1,10 @@
 import {
   Component,
+  EventEmitter,
   inject,
   Input,
   OnChanges,
+  Output,
   SimpleChanges,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -33,6 +35,7 @@ export class NaturalPersonFormComponent implements OnChanges {
   submitted = false;
 
   @Input() dataForm: Person | null = null;
+  @Output() formSubmitted = new EventEmitter<void>();
 
   private formBuilderService = inject(FormBuilder);
 
@@ -114,6 +117,7 @@ export class NaturalPersonFormComponent implements OnChanges {
       this.personService.update(formValue, this.dataForm.id).subscribe({
         next: () => {
           this.toastrService.success('Atualização feita com sucesso');
+          this.formSubmitted.emit();
         },
         error: () =>
           this.toastrService.error(
@@ -124,6 +128,7 @@ export class NaturalPersonFormComponent implements OnChanges {
       this.personService.create(formValue).subscribe({
         next: () => {
           this.toastrService.success('Cadastro realizado com sucesso');
+          this.formSubmitted.emit();
         },
         error: () =>
           this.toastrService.error(
@@ -134,9 +139,21 @@ export class NaturalPersonFormComponent implements OnChanges {
   }
 
   onDelete() {
-    this.personService.delete(this.dataForm!.id).subscribe({
-      next: (response) => console.log('Deleção bem-sucedida', response),
-      error: (error) => console.error('Erro ao deletar cliente', error),
-    });
+    if (this.dataForm?.id) {
+      this.personService.delete(this.dataForm.id).subscribe({
+        next: (response) => {
+          console.log('Deleção bem-sucedida', response);
+          this.toastrService.success('Deleção feita com sucesso');
+          this.formSubmitted.emit();
+        },
+        error: (error) => {
+          console.error('Erro ao deletar cliente', error);
+          this.toastrService.error('Erro ao deletar cliente');
+        },
+      });
+    } else {
+      console.error('ID não encontrado para deleção');
+      this.toastrService.error('ID não encontrado para deleção');
+    }
   }
 }

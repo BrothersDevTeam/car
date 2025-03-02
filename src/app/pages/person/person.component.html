@@ -38,11 +38,13 @@
       <mat-tab label="Pessoa Física">
         <app-natural-person-form
           [dataForm]="selectedPerson?.person?.cpf ? selectedPerson : null"
+          (formSubmitted)="onFormSubmitted()"
         />
       </mat-tab>
       <mat-tab label="Pessoa Jurídica">
         <app-legal-entity-form
           [dataForm]="selectedPerson?.person?.cnpj ? selectedPerson : null"
+          (formSubmitted)="onFormSubmitted()"
         />
       </mat-tab>
     </mat-tab-group>

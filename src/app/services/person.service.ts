@@ -7,7 +7,6 @@ import {
   Person,
 } from '@interfaces/entity';
 import { PaginationResponse } from '@interfaces/pagination';
-import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +15,7 @@ export class PersonService {
   private readonly apiUrl =
     'http://controleautorevenda.duckdns.org/api/v1/clients';
 
-  constructor(private http: HttpClient, private toastr: ToastrService) {}
+  constructor(private http: HttpClient) {}
 
   getPaginatedData(
     pageIndex: number,
@@ -56,7 +55,7 @@ export class PersonService {
   }
 
   delete(id: string) {
-    return this.http.delete<string>(id).pipe(
+    return this.http.delete<string>(`${this.apiUrl}/${id}`).pipe(
       tap((response: string) => {
         console.log('Cliente deletado com sucesso!', response);
       })

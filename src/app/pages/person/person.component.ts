@@ -103,4 +103,12 @@ export class PersonComponent {
     this.openInfo.set(false);
     this.openForm.set(true);
   }
+
+  onFormSubmitted() {
+    this.loadPersonList(
+      this.paginationRequestConfig.pageIndex,
+      this.paginationRequestConfig.pageSize
+    );
+    this.openForm.set(false);
+  }
 }
