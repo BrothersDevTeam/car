@@ -3,7 +3,7 @@
     <h1>Controle Auto Revenda</h1>
     <h2>Faça seu login</h2>
 
-    <form [formGroup]="loginForm">
+    <form [formGroup]="loginForm" (keydown.enter)="submit()">
       <app-primary-input
         formControlName="email"
         label="Email"
