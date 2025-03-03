@@ -1,5 +1,12 @@
 import '@angular/material/list';
-import { Component, computed, Input, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  EventEmitter,
+  Input,
+  Output,
+  signal,
+} from '@angular/core';
 
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -24,9 +31,11 @@ export class SideNavComponent {
   constructor(private authService: AuthService) {}
 
   sideNavCollapsed = signal(false);
+  isSmallScreen = signal(false);
   @Input() set collapsed(val: boolean) {
     this.sideNavCollapsed.set(val);
   }
+  @Output() toggleSidebar = new EventEmitter<void>();
 
   menuItems = signal<MenuItem[]>([
     {
@@ -40,6 +49,12 @@ export class SideNavComponent {
       route: 'vehicle',
     },
   ]);
+
+  onMenuItemClick() {
+    if (window.innerWidth <= 599) {
+      this.toggleSidebar.emit();
+    }
+  }
 
   handleLogout = () => {
     this.authService.logout();
