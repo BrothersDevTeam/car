@@ -1,18 +1,28 @@
-.content {
-  padding: 14px;
-}
-
 mat-sidenav-container {
   height: calc(100vh - 64px);
 
-  mat-sidenav, mat-sidenav-content {
+  mat-sidenav,
+  .sidenav-content {
     transition: all 500ms ease-in-out;
   }
+
+  mat-sidenav {
+    width: 250px;
+
+    &.collapsed {
+      width: 65px;
+    }
+
+    &.collapsed.smallscreen {
+      width: 0px;
+    }
+  }
+
+  .sidenav-content {
+    padding: 14px;
+
+    &.smallscreen {
+      margin-left: 0px !important;
+    }
+  }
 }
-
-.loading-text {
-  color: white;
-  font-size: medium;
-}
-
-

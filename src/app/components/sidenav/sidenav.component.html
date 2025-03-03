@@ -19,6 +19,7 @@
           routerLinkActive="selected-menu-item"
           #rla="routerLinkActive"
           [activated]="rla.isActive"
+          (click)="onMenuItemClick()"
         >
           <mat-icon [fontSet]="rla.isActive ? 'material-icons' : 'material-icons-outlined'" matListItemIcon>
             {{item.icon}}

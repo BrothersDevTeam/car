@@ -1,9 +1,23 @@
-<app-main-header (collapsedEvent)="toggleSidebar()" /> <!-- Escutando o evento -->
+<app-main-header (collapsedEvent)="toggleSidebar()" />
+<!-- Escutando o evento -->
 <mat-sidenav-container>
-  <mat-sidenav [opened]="true" mode="side" [style.width]="sidenavWidth()">
-    <app-sidenav [collapsed]="collapsed()" />
+  <mat-sidenav
+    [class.smallscreen]="isSmallScreen()"
+    [class.collapsed]="collapsed()"
+    [opened]="true"
+    mode="side"
+  >
+    <app-sidenav
+      [collapsed]="collapsed()"
+      (toggleSidebar)="toggleSidebar()"
+    />
   </mat-sidenav>
-  <mat-sidenav-content class="content" [style.margin-left]="sidenavWidth()">
+  <mat-sidenav-content
+    class="sidenav-content"
+    [class.collapsed]="collapsed()"
+    [class.smallscreen]="isSmallScreen()"
+    [style.margin-left]="sidenavWidth()"
+  >
     <router-outlet />
   </mat-sidenav-content>
 </mat-sidenav-container>
