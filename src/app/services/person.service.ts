@@ -34,7 +34,7 @@ export class PersonService {
         tap((response) => {
           this.cache = response;
 
-          // Filtrar retorno no back enquanto não estiver vindo filtrado da api.
+          //TODO Remover filtro abaixo depois que estiver sendo filtrado na api.
           this.cache.content = this.cache.content.filter(
             (element) =>
               element.person.active &&
