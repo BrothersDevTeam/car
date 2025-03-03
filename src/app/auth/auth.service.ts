@@ -6,8 +6,7 @@ import { tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  // apiUrl: string = "http://controleautorevenda.duckdns.org/api/v1";
-  apiUrl: string = '/api/v1';
+  private readonly apiUrl: string = '/api/v1';
 
   constructor(private httpClient: HttpClient, private router: Router) {}
 

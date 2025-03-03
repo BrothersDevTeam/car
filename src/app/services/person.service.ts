@@ -13,8 +13,7 @@ import { PaginationResponse } from '@interfaces/pagination';
 })
 export class PersonService {
   private cache: PaginationResponse<Person> | null = null;
-  private readonly apiUrl =
-    'http://controleautorevenda.duckdns.org/api/v1/clients';
+  private readonly apiUrl: string = '/api/v1/clients';
 
   constructor(private http: HttpClient) {}
 
