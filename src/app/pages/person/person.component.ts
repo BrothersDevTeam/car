@@ -50,6 +50,7 @@ export class PersonComponent {
   handleCloseDrawer() {
     this.openForm.set(false);
     this.openInfo.set(false);
+    this.selectedPerson = null;
   }
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
