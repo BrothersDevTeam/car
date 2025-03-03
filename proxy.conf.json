@@ -1,0 +1,8 @@
+{
+  "/api": {
+    "target": "http://controleautorevenda.duckdns.org",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
