@@ -59,11 +59,12 @@
 
   @if (openInfo()) {
     <app-drawer (closeDrawer)="handleCloseDrawer()">
-      <button color="primary" mat-raised-button (click)="handleEdit()" >Edit</button>
       @if (selectedPerson?.person?.cpf) {
-        {{ selectedPerson?.person?.fullName }}
+        <app-natural-person-info (editEvent)="handleEdit()" [person]="selectedPerson!.person" />
+      } @else if(selectedPerson?.person?.cnpj) {
+        <app-legal-entity-info (editEvent)="handleEdit()" [person]="selectedPerson!.person" />
       } @else {
-        {{ selectedPerson?.person?.legalName }}
+        <h1>Dados não encontrados</h1>
       }
     </app-drawer>
     }
