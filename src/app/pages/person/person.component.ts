@@ -17,6 +17,8 @@ import { DrawerComponent } from '@components/drawer/drawer.component';
 import { TableComponent } from '@components/table/table.component';
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
+import { LegalEntityInfoComponent } from '../../info/legal-entity-info/legal-entity-info.component';
+import { NaturalPersonInfoComponent } from '../../info/natural-person-info/natural-person-info.component';
 
 @Component({
   selector: 'app-person',
@@ -30,6 +32,8 @@ import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/na
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    LegalEntityInfoComponent,
+    NaturalPersonInfoComponent,
   ],
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss',

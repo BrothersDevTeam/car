@@ -1,0 +1,58 @@
+<mat-card class="card-container" appearance="outlined">
+  <mat-card-header>
+    <mat-card-title class="card-title">Pessoa Física</mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="card-content">
+    <app-wrapper-card class="person-info" title="Dados pessoais">
+      <div class="card-row">
+        <h3 class="label">Nome: </h3>
+        <h3 class="value">{{person.fullName}}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Email: </h3>
+        <h3 class="value">{{person.contact?.email}}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Telefone: </h3>
+        <h3 class="value">{{person.contact?.phone}}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">CPF: </h3>
+        <h3 class="value">{{person.cpf}}</h3>
+      </div>
+    </app-wrapper-card>
+    <app-wrapper-card class="person-address" title="Endereço">
+      <div class="card-row">
+        <h3 class="label">Código Postal: </h3>
+        <h3 class="value">{{person.address?.zipcode}}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Rua: </h3>
+        <h3 class="value">{{person.address?.street}}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Número: </h3>
+        <h3 class="value">{{person.address?.number}}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Complemento: </h3>
+        <h3 class="value">{{person.address?.complement}}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Estado: </h3>
+        <h3 class="value">{{person.address?.state}}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Cidade: </h3>
+        <h3 class="value">{{person.address?.city}}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Bairro: </h3>
+        <h3 class="value">{{person.address?.neighborhood}}</h3>
+      </div>
+    </app-wrapper-card>
+  </mat-card-content>
+  <mat-card-footer class="card-footer">
+    <button color="primary" mat-raised-button (click)="editEvent.emit()" >Edit</button>
+  </mat-card-footer>
+</mat-card>
