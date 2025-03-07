@@ -3,10 +3,35 @@
 .card-container {
   color: $text-color;
 
+  .card-title {
+    font-size: 24px;
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+
   .card-content {
     display: flex;
+    flex-direction: column;
+    gap: 24px;
 
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    .person-info .label {
+      width: 80px;
+    }
+
+    .person-address .label {
+      width: 120px;
+    }
+  }
+
+  .card-row {
+    display: flex;
+    gap: 24px;
+
+    .label {
+      font-size: medium;
+      font-weight: 500;
+    }
   }
 
   .card-footer {
