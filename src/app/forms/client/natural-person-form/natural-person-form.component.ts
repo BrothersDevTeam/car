@@ -8,16 +8,18 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { ToastrService } from 'ngx-toastr';
 
 import { CreateNaturalPerson, Person } from '@interfaces/entity';
 import { PersonService } from '@services/person.service';
 
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
+import { DialogComponent } from '@components/dialog/dialog.component';
 
 @Component({
   selector: 'app-natural-person-form',
@@ -33,6 +35,8 @@ import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.comp
 })
 export class NaturalPersonFormComponent implements OnChanges {
   submitted = false;
+
+  readonly dialog = inject(MatDialog);
 
   @Input() dataForm: Person | null = null;
   @Output() formSubmitted = new EventEmitter<void>();
@@ -139,6 +143,30 @@ export class NaturalPersonFormComponent implements OnChanges {
   }
 
   onDelete() {
+    this.openDialog();
+  }
+
+  openDialog() {
+    const dialogRef: MatDialogRef<DialogComponent> = this.dialog.open(
+      DialogComponent,
+      {
+        data: {
+          title: 'Confirmar Deleção',
+          message: 'Você tem certeza que deseja deletar este registro?',
+          confirmText: 'Sim',
+          cancelText: 'Não',
+        },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.deleteConfirmed();
+      }
+    });
+  }
+
+  deleteConfirmed() {
     if (this.dataForm?.id) {
       this.personService.delete(this.dataForm.id).subscribe({
         next: (response) => {
