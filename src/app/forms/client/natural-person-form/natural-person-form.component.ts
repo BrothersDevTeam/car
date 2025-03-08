@@ -37,11 +37,10 @@ export class NaturalPersonFormComponent implements OnChanges {
   submitted = false;
 
   readonly dialog = inject(MatDialog);
+  private formBuilderService = inject(FormBuilder);
 
   @Input() dataForm: Person | null = null;
   @Output() formSubmitted = new EventEmitter<void>();
-
-  private formBuilderService = inject(FormBuilder);
 
   protected form = this.formBuilderService.group({
     fullName: ['', Validators.required],
