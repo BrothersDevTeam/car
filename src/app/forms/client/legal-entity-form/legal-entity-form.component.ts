@@ -18,6 +18,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { ToastrService } from 'ngx-toastr';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { DialogComponent } from '@components/dialog/dialog.component';
 
 @Component({
   selector: 'app-legal-entity-form',
@@ -34,10 +36,11 @@ import { ToastrService } from 'ngx-toastr';
 export class LegalEntityFormComponent implements OnChanges {
   submitted = false;
 
+  readonly dialog = inject(MatDialog);
+  private formBuilderService = inject(FormBuilder);
+
   @Input() dataForm: Person | null = null;
   @Output() formSubmitted = new EventEmitter<void>();
-
-  private formBuilderService = inject(FormBuilder);
 
   protected form = this.formBuilderService.group({
     legalName: [this.dataForm?.person.legalName || '', Validators.required],
@@ -144,6 +147,30 @@ export class LegalEntityFormComponent implements OnChanges {
   }
 
   onDelete() {
+    this.openDialog();
+  }
+
+  openDialog() {
+    const dialogRef: MatDialogRef<DialogComponent> = this.dialog.open(
+      DialogComponent,
+      {
+        data: {
+          title: 'Confirmar Deleção',
+          message: 'Você tem certeza que deseja deletar este registro?',
+          confirmText: 'Sim',
+          cancelText: 'Não',
+        },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.deleteConfirmed();
+      }
+    });
+  }
+
+  deleteConfirmed() {
     if (this.dataForm?.id) {
       this.personService.delete(this.dataForm.id).subscribe({
         next: (response) => {
