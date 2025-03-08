@@ -115,5 +115,6 @@ export class PersonComponent {
       this.paginationRequestConfig.pageSize
     );
     this.openForm.set(false);
+    this.selectedPerson = null;
   }
 }
