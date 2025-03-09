@@ -31,4 +31,22 @@ form {
       transform: scale(1.2) rotate(30deg);
     }
   }
+
+  .search-icon-btn {
+    display: flex;
+    position: absolute;
+    right: 44px;
+    align-self: center;
+    border: none;
+    transition: transform 200ms ease-in-out;
+
+    &.is-active {
+      color: $primary-color;
+    }
+
+    &:hover.is-active {
+      cursor: pointer;
+      transform: scale(1.2);
+    }
+  }
 }

@@ -6,25 +6,28 @@
   width: 100%;
   margin-top: 10px;
 
-  .input-content {
+  .input-container {
     display: flex;
     flex-direction: column;
-    margin-top: 10px;
 
-    input {
-      border: none;
-      border-radius: 8px;
-      padding: 12px;
+    .input-content {
+      display: flex;
+      margin-top: 10px;
 
-      background-color: $gray-secondary-bg;
+      input {
+        border: none;
+        border-radius: 8px;
+        padding: 12px;
+        width: 100%;
+
+        background-color: $gray-secondary-bg;
+      }
+
+      .invalid-field-message {
+        color: $error-color;
+        font-size: small;
+        align-self: flex-end;
+      }
     }
-
-    .invalid-field-message {
-      color: $error-color;
-      font-size: small;
-      align-self: flex-end;
-    }
-
   }
-
 }

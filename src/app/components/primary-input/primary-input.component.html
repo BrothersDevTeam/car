@@ -1,12 +1,15 @@
 <div class="input-wrapper">
   <label [for]="inputName">{{label}}</label>
-  <div class="input-content">
-    <input
-      [type]="type"
-      [placeholder]="placeholder"
-      [value]="value"
-      (input)="onInput($event)"
-    />
+  <div class="input-container">
+    <div class="input-content">
+      <input
+        [type]="type"
+        [placeholder]="placeholder"
+        [value]="value"
+        (input)="onInput($event)"
+      />
+      <ng-content></ng-content>
+    </div>
     @if (error) {
       <p class="invalid-field-message">Campo inválido</p>
     }
