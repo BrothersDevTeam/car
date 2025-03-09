@@ -20,6 +20,7 @@ import { PersonService } from '@services/person.service';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { DialogComponent } from '@components/dialog/dialog.component';
+import { CepService } from '@services/cep.service';
 
 @Component({
   selector: 'app-natural-person-form',
@@ -63,7 +64,8 @@ export class NaturalPersonFormComponent implements OnChanges {
 
   constructor(
     private personService: PersonService,
-    private toastrService: ToastrService
+    private toastrService: ToastrService,
+    private cepService: CepService
   ) {}
 
   ngOnChanges(changes: SimpleChanges) {
@@ -182,5 +184,40 @@ export class NaturalPersonFormComponent implements OnChanges {
       console.error('ID não encontrado para deleção');
       this.toastrService.error('ID não encontrado para deleção');
     }
+  }
+
+  getAddressByCep() {
+    console.log('Buscando endereço pelo CEP');
+    const cep = this.form.value.address?.zipcode || '';
+    this.cepService
+      .getAddressByCep(cep)
+      .then((data) => {
+        console.log('DATA: ', data);
+        if (!data.erro) {
+          this.form.patchValue({
+            address: {
+              street: data.logradouro,
+              complement: data.complemento,
+              state: data.uf,
+              city: data.localidade,
+              neighborhood: data.bairro,
+            },
+          });
+        } else {
+          console.error('Erro ao buscar endereço pelo CEP: ');
+          this.form.get('address.zipcode')?.setErrors({ invalidCep: true });
+          this.toastrService.error(
+            'CEP inválido. Por favor, verifique e tente novamente.'
+          );
+        }
+      })
+      .catch((error) => {
+        console.error('Erro ao buscar endereço pelo CEP: ', error);
+      });
+  }
+
+  isCepValid(): boolean {
+    const cepControl = this.form.get('address.zipcode');
+    return cepControl?.valid && cepControl?.value?.length === 8 ? true : false;
   }
 }

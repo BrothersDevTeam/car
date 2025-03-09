@@ -51,8 +51,17 @@
         formControlName="zipcode"
         label="Código Postal"
         inputName="zipcode"
+        placeholder="00000-000"
         type="text"
-      ></app-primary-input>
+        [error]="
+          form.get('address.zipcode')?.invalid &&
+          (form.get('address.zipcode')?.touched || submitted)"
+      >
+        <button class="search-icon-btn" (click)="getAddressByCep()" [disabled]="!isCepValid()" [class.is-active]="isCepValid()">
+          <mat-icon class="search-icon">search</mat-icon>
+        </button>
+      </app-primary-input>
+
       <app-primary-input
         formControlName="street"
         label="Rua"
