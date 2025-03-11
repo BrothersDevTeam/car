@@ -71,24 +71,26 @@ export class LegalEntityFormComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
-      this.form.patchValue({
-        legalName: this.dataForm.person.legalName || '',
-        tradeName: this.dataForm.person.tradeName || '',
-        contact: {
-          email: this.dataForm.person.contact?.email || '',
-          phone: this.dataForm.person.contact?.phone || '',
-        },
-        cnpj: this.dataForm.person.cnpj || '',
-        ie: this.dataForm.person.ie || '',
-        address: {
-          zipcode: this.dataForm.person.address?.zipcode || '',
-          street: this.dataForm.person.address?.street || '',
-          number: this.dataForm.person.address?.number || '',
-          complement: this.dataForm.person.address?.complement || '',
-          state: this.dataForm.person.address?.state || '',
-          city: this.dataForm.person.address?.city || '',
-          neighborhood: this.dataForm.person.address?.neighborhood || '',
-        },
+      setTimeout(() => {
+        this.form.patchValue({
+          legalName: this.dataForm!.person.legalName || '',
+          tradeName: this.dataForm!.person.tradeName || '',
+          contact: {
+            email: this.dataForm!.person.contact?.email || '',
+            phone: this.dataForm!.person.contact?.phone || '',
+          },
+          cnpj: this.dataForm!.person.cnpj || '',
+          ie: this.dataForm!.person.ie || '',
+          address: {
+            zipcode: this.dataForm!.person.address?.zipcode || '',
+            street: this.dataForm!.person.address?.street || '',
+            number: this.dataForm!.person.address?.number || '',
+            complement: this.dataForm!.person.address?.complement || '',
+            state: this.dataForm!.person.address?.state || '',
+            city: this.dataForm!.person.address?.city || '',
+            neighborhood: this.dataForm!.person.address?.neighborhood || '',
+          },
+        });
       });
     }
   }
