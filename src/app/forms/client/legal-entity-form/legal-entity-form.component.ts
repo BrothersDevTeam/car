@@ -223,6 +223,6 @@ export class LegalEntityFormComponent implements OnChanges {
 
   isCepValid(): boolean {
     const cepControl = this.form.get('address.zipcode');
-    return cepControl?.valid && cepControl?.value?.length === 8 ? true : false;
+    return cepControl?.valid && cepControl?.value?.length === 9 ? true : false;
   }
 }

@@ -32,9 +32,11 @@
       />
       <app-primary-input
         formControlName="phone"
-        label="Telefone"
+        label="Celular"
         inputName="phone"
-        type="text"
+        type="tel"
+        placeholder="(00) 00000-0000"
+        mask="(00) 00000-0000"
       />
     </div>
     <app-primary-input
@@ -42,6 +44,8 @@
       label="CPF"
       inputName="cpf"
       type="text"
+      placeholder="000-000-000-00"
+      mask="000-000-000-00"
     />
   </app-wrapper-card>
 
@@ -52,6 +56,7 @@
         label="Código Postal"
         inputName="zipcode"
         placeholder="00000-000"
+        mask="00000-000"
         type="text"
         [error]="
           form.get('address.zipcode')?.invalid &&
