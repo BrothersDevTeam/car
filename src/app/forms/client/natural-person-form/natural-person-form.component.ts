@@ -70,22 +70,24 @@ export class NaturalPersonFormComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
-      this.form.patchValue({
-        fullName: this.dataForm.person.fullName || '',
-        contact: {
-          email: this.dataForm.person.contact?.email || '',
-          phone: this.dataForm.person.contact?.phone || '',
-        },
-        cpf: this.dataForm.person.cpf || '',
-        address: {
-          zipcode: this.dataForm.person.address?.zipcode || '',
-          street: this.dataForm.person.address?.street || '',
-          number: this.dataForm.person.address?.number || '',
-          complement: this.dataForm.person.address?.complement || '',
-          state: this.dataForm.person.address?.state || '',
-          city: this.dataForm.person.address?.city || '',
-          neighborhood: this.dataForm.person.address?.neighborhood || '',
-        },
+      setTimeout(() => {
+        this.form.patchValue({
+          fullName: this.dataForm!.person.fullName || '',
+          contact: {
+            email: this.dataForm!.person.contact?.email || '',
+            phone: this.dataForm!.person.contact?.phone || '',
+          },
+          cpf: this.dataForm!.person.cpf || '',
+          address: {
+            zipcode: this.dataForm!.person.address?.zipcode || '',
+            street: this.dataForm!.person.address?.street || '',
+            number: this.dataForm!.person.address?.number || '',
+            complement: this.dataForm!.person.address?.complement || '',
+            state: this.dataForm!.person.address?.state || '',
+            city: this.dataForm!.person.address?.city || '',
+            neighborhood: this.dataForm!.person.address?.neighborhood || '',
+          },
+        });
       });
     }
   }
@@ -218,6 +220,6 @@ export class NaturalPersonFormComponent implements OnChanges {
 
   isCepValid(): boolean {
     const cepControl = this.form.get('address.zipcode');
-    return cepControl?.valid && cepControl?.value?.length === 8 ? true : false;
+    return cepControl?.valid && cepControl?.value?.length === 9 ? true : false;
   }
 }

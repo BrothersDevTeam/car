@@ -1,8 +1,16 @@
-import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  importProvidersFrom,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { BrowserAnimationsModule, provideAnimations } from '@angular/platform-browser/animations';
+import {
+  BrowserAnimationsModule,
+  provideAnimations,
+} from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideEnvironmentNgxMask } from 'ngx-mask';
 
 import { provideToastr } from 'ngx-toastr';
 
@@ -18,6 +26,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([loadingInterceptor, authInterceptor])),
     provideAnimations(),
     provideToastr(),
-    importProvidersFrom([BrowserAnimationsModule])
-  ]
+    importProvidersFrom([BrowserAnimationsModule]),
+    provideEnvironmentNgxMask(),
+  ],
 };
