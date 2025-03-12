@@ -14,7 +14,7 @@ import { PersonService } from '@services/person.service';
 
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { DrawerComponent } from '@components/drawer/drawer.component';
-import { TableComponent } from '@components/table/table.component';
+import { TableComponent } from '@components/tables/person-table/table.component';
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 import { LegalEntityInfoComponent } from '../../info/legal-entity-info/legal-entity-info.component';

@@ -15,7 +15,7 @@ import { MatSortModule, MatSort } from '@angular/material/sort';
 
 import { Person } from '@interfaces/entity';
 import { PaginationResponse } from '@interfaces/pagination';
-import { PaginationComponent } from '../pagination/pagination.component';
+import { PaginationComponent } from '../../pagination/pagination.component';
 
 @Component({
   selector: 'app-table',
