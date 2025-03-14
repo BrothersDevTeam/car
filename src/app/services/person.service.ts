@@ -33,12 +33,13 @@ export class PersonService {
         tap((response) => {
           this.cache = response;
 
-          //TODO Remover filtro abaixo depois que estiver sendo filtrado na api.
           this.cache.content = this.cache.content.filter(
             (element) =>
               element.person.active &&
               (!!element.person.cnpj || !!element.person.cpf)
           );
+
+          this.cache.totalElements = this.cache.content.length;
         })
       );
   }
