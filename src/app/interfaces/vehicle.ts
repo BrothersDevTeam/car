@@ -1,14 +1,26 @@
-export interface GenericVehicle {
-  plate: string;
-  brand: string;
-  model: string;
-  year: string;
-  color: string;
-  active: boolean;
-  imported: boolean;
-}
-
 export interface Vehicle {
   id: string;
-  vehicle: GenericVehicle;
+  licensePlate: string;
+  brand: {
+    id: string;
+    name: string;
+  };
+  model: {
+    id: string;
+    name: string;
+  };
+  yearModel?: string;
+  chassis?: string;
+  numberOfDoors?: 0;
+  horsepower?: string;
+  engineNumber?: string;
+  initialMileage?: 0;
+  renavam?: string;
+  species?: string;
+  category?: string;
+  age?: 0;
+  features?: string;
+  color?: string;
+  fuelType?: string;
+  origin?: string;
 }
