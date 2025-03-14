@@ -6,16 +6,15 @@ import {
   OnChanges,
   OnInit,
   Output,
-  ViewChild,
 } from '@angular/core';
-
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatSortModule } from '@angular/material/sort';
 
 import { Person } from '@interfaces/entity';
 import { PaginationResponse } from '@interfaces/pagination';
-import { PaginationComponent } from '../../pagination/pagination.component';
+
+import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-person-table',
@@ -40,8 +39,6 @@ export class PersonTableComponent implements OnInit, OnChanges {
   displayedColumns: string[] = ['fullName', 'active', 'cpf', 'cnpj'];
   pageSizeOptions = [1000, 100, 50, 20];
   filteredData: Person[] = [];
-
-  @ViewChild(MatSort) sort!: MatSort;
 
   ngAfterViewInit() {}
 

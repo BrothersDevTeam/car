@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { first, Observable, of, tap } from 'rxjs';
+
 import { PaginationResponse } from '@interfaces/pagination';
 import { Vehicle } from '@interfaces/vehicle';
-import { first, Observable, of, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -20,63 +21,45 @@ export class VehicleService {
     if (this.cache) {
       return of(this.cache);
     }
-    // return this.http
-    //   .get<PaginationResponse<Vehicle>>(
-    //     `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`
-    //   )
-    //   .pipe(
-    //     first(),
-    //     tap((response) => {
-    //       this.cache = response;
-    //     })
-    //   );
+    return this.http
+      .get<PaginationResponse<Vehicle>>(
+        `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`
+      )
+      .pipe(
+        first(),
+        tap((response) => {
+          this.cache = response;
+        })
+      );
 
     // Mock
-    return of(
-      (this.cache = {
-        content: [
-          {
-            id: '1',
-            vehicle: {
-              plate: 'ABC-1234',
-              brand: 'Volkswagen',
-              model: 'Fusca',
-              year: '1970',
-              color: 'Azul',
-              active: true,
-              imported: false,
-            },
-          },
-          {
-            id: '2',
-            vehicle: {
-              plate: 'DEF-5678',
-              model: 'Gol',
-              brand: 'Volkswagen',
-              year: '2000',
-              color: 'Azul',
-              active: true,
-              imported: false,
-            },
-          },
-          {
-            id: '3',
-            vehicle: {
-              plate: 'GHI-9012',
-              model: 'Uno',
-              brand: 'Fiat',
-              year: '1990',
-              color: 'Azul',
-              active: true,
-              imported: false,
-            },
-          },
-        ],
-        page: 0,
-        size: 1000,
-        totalElements: 3,
-        totalPages: 1,
-      })
-    );
+    // return of(
+    //   (this.cache = {
+    //     content: [
+    //       {
+    //         id: '1',
+    //         licensePlate: 'ABC-1234',
+    //         brand: { id: '1', name: 'Volkswagen' },
+    //         model: { id: '1', name: 'Fusca' },
+    //         yearModel: '1970',
+    //         color: 'Azul',
+    //         origin: 'nacional',
+    //       },
+    //       {
+    //         id: '2',
+    //         licensePlate: 'DEF-5678',
+    //         model: { id: '2', name: 'Gol' },
+    //         brand: { id: '1', name: 'Volkswagen' },
+    //         yearModel: '2000',
+    //         color: 'Azul',
+    //         origin: 'nacional',
+    //       },
+    //     ],
+    //     page: 0,
+    //     size: 1000,
+    //     totalElements: 3,
+    //     totalPages: 1,
+    //   })
+    // );
   }
 }

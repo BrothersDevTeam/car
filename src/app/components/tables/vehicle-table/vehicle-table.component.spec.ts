@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { VehicleTableComponent } from './vehicle-table.component';
 import { PaginationResponse } from '@interfaces/pagination';
 import { Vehicle } from '@interfaces/vehicle';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { VehicleTableComponent } from './vehicle-table.component';
 
 describe('VehicleTableComponent', () => {
   let component: VehicleTableComponent;
@@ -22,39 +23,21 @@ describe('VehicleTableComponent', () => {
       content: [
         {
           id: '1',
-          vehicle: {
-            plate: 'ABC-1234',
-            brand: 'Volkswagen',
-            model: 'Fusca',
-            year: '1970',
-            color: 'Azul',
-            active: true,
-            imported: false,
-          },
+          licensePlate: 'ABC-1234',
+          brand: { id: '1', name: 'Volkswagen' },
+          model: { id: '1', name: 'Fusca' },
+          yearModel: '1970',
+          color: 'Azul',
+          origin: 'nacional',
         },
         {
           id: '2',
-          vehicle: {
-            plate: 'DEF-5678',
-            model: 'Gol',
-            brand: 'Volkswagen',
-            year: '2000',
-            color: 'Azul',
-            active: true,
-            imported: false,
-          },
-        },
-        {
-          id: '3',
-          vehicle: {
-            plate: 'GHI-9012',
-            model: 'Uno',
-            brand: 'Fiat',
-            year: '1990',
-            color: 'Azul',
-            active: true,
-            imported: false,
-          },
+          licensePlate: 'DEF-5678',
+          model: { id: '2', name: 'Gol' },
+          brand: { id: '1', name: 'Volkswagen' },
+          yearModel: '2000',
+          color: 'Azul',
+          origin: 'nacional',
         },
       ],
       page: 0,

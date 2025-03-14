@@ -4,7 +4,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-
 import { ToastrService } from 'ngx-toastr';
 import { catchError, of } from 'rxjs';
 
@@ -15,10 +14,10 @@ import { PersonService } from '@services/person.service';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { PersonTableComponent } from '@components/tables/person-table/person-table.component';
-import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
-import { LegalEntityInfoComponent } from '../../info/legal-entity-info/legal-entity-info.component';
-import { NaturalPersonInfoComponent } from '../../info/natural-person-info/natural-person-info.component';
+import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
+import { LegalEntityInfoComponent } from '@info/legal-entity-info/legal-entity-info.component';
+import { NaturalPersonInfoComponent } from '@info/natural-person-info/natural-person-info.component';
 
 @Component({
   selector: 'app-person',

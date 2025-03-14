@@ -9,9 +9,11 @@ import {
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+
 import { PaginationResponse } from '@interfaces/pagination';
 import { Vehicle } from '@interfaces/vehicle';
+
+import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-vehicle-table',
@@ -33,8 +35,7 @@ export class VehicleTableComponent implements OnInit, OnChanges {
   dataSource = new MatTableDataSource<Vehicle>();
 
   displayedColumns: string[] = [
-    'plate',
-    'active',
+    'licensePlate',
     'brand',
     'model',
     'year',
@@ -59,14 +60,14 @@ export class VehicleTableComponent implements OnInit, OnChanges {
       this.filteredData = this.vehiclePaginatedList.content.filter(
         (element) => {
           if (
-            element.vehicle.plate ||
-            element.vehicle.brand ||
-            element.vehicle.model
+            element.licensePlate ||
+            element.brand.name ||
+            element.model.name
           ) {
             return (
-              element.vehicle.plate ||
-              element.vehicle.brand ||
-              element.vehicle.model
+              element.licensePlate ||
+              element.brand.name ||
+              element.model.name
             )
               .trim()
               .toLowerCase()

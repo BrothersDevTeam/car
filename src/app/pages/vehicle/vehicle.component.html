@@ -6,30 +6,39 @@
 
   <app-content-header title="Veículo" btn_label="Novo" fontIcon="add" (onClick)="handleOpenForm()"/>
 
-  <!-- //TODO verificar se a lista de veículos está chegando -->
-  @if (vehiclePaginatedList?.totalElements) {
+  @if (!!vehiclePaginatedList?.totalElements) {
     <app-vehicle-table
       (selectedVehicle)="handleSelectedVehicle($event)"
       [vehiclePaginatedList]="vehiclePaginatedList!"
       (pageEvent)="handlePageEvent($event)"
       [searchValue]="searchValue"
     />
+  } @else {
+    @if (vehicleListLoading()) {
+      <div class="loader-div">
+        <span class="loader"></span>
+      </div>
     } @else {
-      @if (!vehicleListError) {
-        <div class="loader-div">
-          <span class="loader"></span>
+      @if (vehicleListError()) {
+        <div class="message-error mat-elevation-z8">
+          <h3>Não foi possível acessar os dados da tabela</h3>
+          <h4>Tente novamente em alguns minutos.</h4>
         </div>
       } @else {
-        @if (vehicleListError) {
-          <div class="message-error mat-elevation-z8">
-            <h3>Não foi possível acessar os dados da tabela</h3>
-            <h4>Tente novamente em alguns minutos.</h4>
-          </div>
-        } @else {
-          //TODO Adicionar uma imagem quando a tabela não tiver dados
-          <h1>Tabela vazia</h1>
-        }
-
+        //TODO Adicionar uma imagem quando a tabela estiver vazia
+        <h1>Nenhum veículo cadastrado</h1>
       }
+
     }
+  }
+
+  @if (openInfo()) {
+    <app-drawer (closeDrawer)="handleCloseDrawer()">
+      @if (selectedVehicle) {
+        <app-vehicle-info (editEvent)="handleEdit()" [vehicle]="selectedVehicle" />
+      } @else {
+        <h1>Dados não encontrados</h1>
+      }
+    </app-drawer>
+  }
 </main>

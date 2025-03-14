@@ -1,5 +1,7 @@
 import { Component, signal, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, of } from 'rxjs';
 
@@ -9,8 +11,8 @@ import { VehicleService } from '@services/vehicle.service';
 
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { VehicleTableComponent } from '@components/tables/vehicle-table/vehicle-table.component';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { DrawerComponent } from '@components/drawer/drawer.component';
+import { VehicleInfoComponent } from '@info/vehicle-info/vehicle-info.component';
 
 @Component({
   selector: 'app-vehicle',
@@ -19,6 +21,8 @@ import { MatInputModule } from '@angular/material/input';
     VehicleTableComponent,
     MatFormFieldModule,
     MatInputModule,
+    DrawerComponent,
+    VehicleInfoComponent,
   ],
   templateUrl: './vehicle.component.html',
   styleUrl: './vehicle.component.scss',
@@ -26,13 +30,15 @@ import { MatInputModule } from '@angular/material/input';
 export class VehicleComponent {
   vehiclePaginatedList: PaginationResponse<Vehicle> | null = null;
   selectedVehicle: Vehicle | null = null;
-  vehicleListError: boolean = false;
+
   searchValue: string = '';
   paginationRequestConfig = {
     pageSize: 1000,
     pageIndex: 0,
   };
 
+  vehicleListLoading = signal(false);
+  vehicleListError = signal(false);
   openForm = signal(false);
   openInfo = signal(false);
 
@@ -55,17 +61,19 @@ export class VehicleComponent {
   }
 
   loadVehicleList(pageIndex: number, pageSize: number) {
+    this.vehicleListLoading.set(true);
     this.vehicleService
       .getPaginatedData(pageIndex, pageSize)
       .pipe(
         catchError((err) => {
-          this.vehicleListError = true;
+          this.vehicleListError.set(true);
           console.error('Erro ao carregar a lista de veículos:', err);
           this.toastr.error('Erro ao buscar dados da tabela de veículos');
           return of();
         })
       )
       .subscribe((response) => {
+        this.vehicleListLoading.set(false);
         if (response) {
           this.vehiclePaginatedList = response;
         }
