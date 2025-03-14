@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { TableComponent } from './table.component';
+import { PersonTableComponent } from './person-table.component';
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
@@ -9,8 +9,8 @@ import { PaginationResponse } from '@interfaces/pagination';
 import { Person } from '@interfaces/entity';
 
 describe('TableComponent', () => {
-  let component: TableComponent;
-  let fixture: ComponentFixture<TableComponent>;
+  let component: PersonTableComponent;
+  let fixture: ComponentFixture<PersonTableComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -18,12 +18,12 @@ describe('TableComponent', () => {
         MatTableModule,
         MatPaginatorModule,
         MatSortModule,
-        TableComponent,
+        PersonTableComponent,
         BrowserAnimationsModule,
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TableComponent);
+    fixture = TestBed.createComponent(PersonTableComponent);
     component = fixture.componentInstance;
 
     const mockPersonPaginatedList: PaginationResponse<Person> = {

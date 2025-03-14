@@ -1,1 +1,35 @@
-<app-content-header title="Veículo" btn_label="Novo" fontIcon="add"/>
+<main>
+  <mat-form-field>
+    <mat-label>Pesquisar por nome</mat-label>
+    <input matInput (input)="onSearch($event)">
+  </mat-form-field>
+
+  <app-content-header title="Veículo" btn_label="Novo" fontIcon="add" (onClick)="handleOpenForm()"/>
+
+  <!-- //TODO verificar se a lista de veículos está chegando -->
+  @if (vehiclePaginatedList?.totalElements) {
+    <app-vehicle-table
+      (selectedVehicle)="handleSelectedVehicle($event)"
+      [vehiclePaginatedList]="vehiclePaginatedList!"
+      (pageEvent)="handlePageEvent($event)"
+      [searchValue]="searchValue"
+    />
+    } @else {
+      @if (!vehicleListError) {
+        <div class="loader-div">
+          <span class="loader"></span>
+        </div>
+      } @else {
+        @if (vehicleListError) {
+          <div class="message-error mat-elevation-z8">
+            <h3>Não foi possível acessar os dados da tabela</h3>
+            <h4>Tente novamente em alguns minutos.</h4>
+          </div>
+        } @else {
+          //TODO Adicionar uma imagem quando a tabela não tiver dados
+          <h1>Tabela vazia</h1>
+        }
+
+      }
+    }
+</main>

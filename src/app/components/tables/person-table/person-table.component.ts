@@ -15,10 +15,10 @@ import { MatSortModule, MatSort } from '@angular/material/sort';
 
 import { Person } from '@interfaces/entity';
 import { PaginationResponse } from '@interfaces/pagination';
-import { PaginationComponent } from '../pagination/pagination.component';
+import { PaginationComponent } from '../../pagination/pagination.component';
 
 @Component({
-  selector: 'app-table',
+  selector: 'app-person-table',
   imports: [
     MatTableModule,
     MatPaginatorModule,
@@ -26,10 +26,10 @@ import { PaginationComponent } from '../pagination/pagination.component';
     PaginationComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './table.component.html',
-  styleUrl: './table.component.scss',
+  templateUrl: './person-table.component.html',
+  styleUrl: './person-table.component.scss',
 })
-export class TableComponent implements OnInit, OnChanges {
+export class PersonTableComponent implements OnInit, OnChanges {
   @Input() personPaginatedList!: PaginationResponse<Person>;
   @Input() searchValue?: string;
   @Output() selectedPerson = new EventEmitter<Person>();

@@ -12,7 +12,7 @@
   />
 
   @if (personPaginatedList?.totalElements) {
-  <app-table
+  <app-person-table
     (selectedPerson)="handleSelectedPerson($event)"
     [personPaginatedList]="personPaginatedList!"
     (pageEvent)="handlePageEvent($event)"
