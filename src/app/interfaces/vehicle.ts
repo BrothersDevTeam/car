@@ -24,3 +24,5 @@ export interface Vehicle {
   fuelType?: string;
   origin?: string;
 }
+
+export type CreateVehicle = Omit<Vehicle, 'id'>;

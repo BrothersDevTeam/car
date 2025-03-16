@@ -2,6 +2,7 @@ import { Component, signal, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatTabsModule } from '@angular/material/tabs';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, of } from 'rxjs';
 
@@ -12,6 +13,7 @@ import { VehicleService } from '@services/vehicle.service';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { VehicleTableComponent } from '@components/tables/vehicle-table/vehicle-table.component';
 import { DrawerComponent } from '@components/drawer/drawer.component';
+import { VehicleFormComponent } from '@forms/vehicle/vehicle-form/vehicle-form.component';
 import { VehicleInfoComponent } from '@info/vehicle-info/vehicle-info.component';
 
 @Component({
@@ -21,8 +23,10 @@ import { VehicleInfoComponent } from '@info/vehicle-info/vehicle-info.component'
     VehicleTableComponent,
     MatFormFieldModule,
     MatInputModule,
+    MatTabsModule,
     DrawerComponent,
     VehicleInfoComponent,
+    VehicleFormComponent,
   ],
   templateUrl: './vehicle.component.html',
   styleUrl: './vehicle.component.scss',

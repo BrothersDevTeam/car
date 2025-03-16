@@ -1,0 +1,143 @@
+<form [formGroup]="form">
+  @if(dataForm?.licensePlate) {
+  <div class="title-trash">
+    <h2>Veículo placa: {{ dataForm!.licensePlate }}</h2>
+    <mat-icon class="delete-btn" matListItemIcon (click)="onDelete()"
+      >delete</mat-icon
+    >
+  </div>
+  }
+  <app-wrapper-card title="Dados do veículo">
+    <app-primary-input
+      formControlName="licensePlate"
+      label="Placa*"
+      inputName="licensePlate"
+      type="text"
+      mask="AAA-AAAA"
+      [error]="
+        form.get('licensePlate')?.invalid &&
+        (form.get('licensePlate')?.touched || submitted)
+      "
+    />
+    <div formGroupName="brand">
+      <app-primary-input
+        formControlName="name"
+        label="Marca"
+        inputName="name"
+        type="text"
+        [error]="
+          form.get('brand.name')?.invalid &&
+          (form.get('brand.name')?.touched || submitted)
+        "
+      />
+    </div>
+    <div formGroupName="model">
+      <app-primary-input
+        formControlName="name"
+        label="Modelo"
+        inputName="name"
+        type="text"
+        [error]="
+          form.get('model.name')?.invalid &&
+          (form.get('model.name')?.touched || submitted)
+        "
+      />
+    </div>
+
+    <app-primary-input
+      formControlName="yearModel"
+      label="Ano do modelo"
+      inputName="yearModel"
+      type="text"
+      placeholder="0000"
+      mask="0000"
+    />
+    <app-primary-input
+      formControlName="chassis"
+      label="Chassi"
+      inputName="chassis"
+      type="text"
+    />
+    <app-primary-input
+      formControlName="numberOfDoors"
+      label="Número de portas"
+      inputName="numberOfDoors"
+      type="text"
+    />
+    <app-primary-input
+      formControlName="horsepower"
+      label="Potência"
+      inputName="horsepower"
+      type="text"
+    />
+    <app-primary-input
+      formControlName="engineNumber"
+      label="Número do motor"
+      inputName="engineNumber"
+      type="text"
+    />
+    <app-primary-input
+      formControlName="initialMileage"
+      label="KM inicial"
+      inputName="initialMileage"
+      type="text"
+    />
+    <app-primary-input
+      formControlName="renavam"
+      label="Renavam"
+      inputName="renavam"
+      type="text"
+    />
+    <app-primary-input
+      formControlName="species"
+      label="Espécie"
+      inputName="species"
+      type="text"
+    />
+    <app-primary-input
+      formControlName="category"
+      label="Categoria"
+      inputName="category"
+      type="text"
+    />
+    <app-primary-input
+      formControlName="age"
+      label="Idade"
+      inputName="age"
+      type="text"
+    />
+    <app-primary-input
+      formControlName="features"
+      label="Características"
+      inputName="features"
+      type="text"
+    />
+    <app-primary-input
+      formControlName="color"
+      label="Cor"
+      inputName="color"
+      type="text"
+    />
+    <app-primary-input
+      formControlName="fuelType"
+      label="Combustível"
+      inputName="fuelType"
+      type="text"
+    />
+    <app-primary-input
+      formControlName="origin"
+      label="Origem"
+      inputName="origin"
+      type="text"
+    />
+  </app-wrapper-card>
+
+  <button
+    mat-raised-button
+    type="button"
+    class="submit-btn"
+    (click)="onSubmit()"
+  >
+    {{ dataForm?.licensePlate ? "Editar" : "Enviar" }}
+  </button>
+</form>
