@@ -3,14 +3,14 @@ import { Injectable } from '@angular/core';
 import { first, Observable, of, tap } from 'rxjs';
 
 import { PaginationResponse } from '@interfaces/pagination';
-import { Vehicle } from '@interfaces/vehicle';
+import { CreateVehicle, Vehicle } from '@interfaces/vehicle';
 
 @Injectable({
   providedIn: 'root',
 })
 export class VehicleService {
   private cache: PaginationResponse<Vehicle> | null = null;
-  private readonly apiUrl: string = '/api/v1/vehicles';
+  private readonly apiUrl: string = 'api/v1/vehicles';
 
   constructor(private http: HttpClient) {}
 
@@ -61,5 +61,36 @@ export class VehicleService {
     //     totalPages: 1,
     //   })
     // );
+  }
+
+  create(data: CreateVehicle) {
+    return this.http.post<string>(`${this.apiUrl}`, data).pipe(
+      tap((response: string) => {
+        console.log('Formulário enviado com sucesso!', response);
+        this.clearCache();
+      })
+    );
+  }
+
+  update(data: Vehicle, id: string) {
+    return this.http.put<string>(`${this.apiUrl}/${id}`, data).pipe(
+      tap((response: string) => {
+        console.log('Formulário enviado com sucesso!', response);
+        this.clearCache();
+      })
+    );
+  }
+
+  delete(id: string) {
+    return this.http.delete<string>(`${this.apiUrl}/${id}`).pipe(
+      tap((response: string) => {
+        console.log('Cliente deletado com sucesso!', response);
+        this.clearCache();
+      })
+    );
+  }
+
+  private clearCache() {
+    this.cache = null;
   }
 }

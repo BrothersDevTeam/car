@@ -1,0 +1,52 @@
+@use "../../../../styles/variables.scss" as *;
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+
+  .title-trash {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h2 {
+      margin: 0;
+    }
+  }
+
+  .submit-btn {
+    background-color: $primary-color;
+    color: white;
+  }
+
+  .delete-btn {
+    right: 30px;
+    cursor: pointer;
+    transition: transform 200ms ease-in-out;
+
+    &:hover {
+      color: rgba(250, 0, 0, 0.9);
+      transform: scale(1.2) rotate(30deg);
+    }
+  }
+
+  .search-icon-btn {
+    display: flex;
+    position: absolute;
+    right: 44px;
+    align-self: center;
+    border: none;
+    transition: transform 200ms ease-in-out;
+
+    &.is-active {
+      color: $primary-color;
+    }
+
+    &:hover.is-active {
+      cursor: pointer;
+      transform: scale(1.2);
+    }
+  }
+}

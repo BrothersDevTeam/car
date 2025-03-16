@@ -101,7 +101,6 @@ export class NaturalPersonFormComponent implements OnChanges {
       return;
     }
 
-    // Processar envio se válido
     const formValue: CreateNaturalPerson = {
       fullName: this.form.value.fullName || '',
       cpf: this.form.value.cpf || '',
