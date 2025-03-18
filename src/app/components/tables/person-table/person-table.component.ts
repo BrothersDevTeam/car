@@ -11,7 +11,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 
-import { Person } from '@interfaces/entity';
+import { Person } from '@interfaces/person';
 import { PaginationResponse } from '@interfaces/pagination';
 
 import { PaginationComponent } from '@components/pagination/pagination.component';

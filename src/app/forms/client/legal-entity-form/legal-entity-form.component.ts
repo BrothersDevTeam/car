@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { CreateLegalEntity, Person } from '@interfaces/entity';
+import { CreateLegalEntity, Person } from '@interfaces/person';
 import { PersonService } from '@services/person.service';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -110,6 +110,7 @@ export class LegalEntityFormComponent implements OnChanges {
       tradeName: this.form.value.tradeName || '',
       cnpj: this.form.value.cnpj || '',
       ie: this.form.value.ie || '',
+      active: true,
       contact: {
         email: this.form.value.contact?.email || '',
         phone: this.form.value.contact?.phone || '',

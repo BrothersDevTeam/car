@@ -6,7 +6,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { PaginationResponse } from '@interfaces/pagination';
-import { Person } from '@interfaces/entity';
+import { Person } from '@interfaces/person';
 
 describe('TableComponent', () => {
   let component: PersonTableComponent;
@@ -31,6 +31,7 @@ describe('TableComponent', () => {
         {
           id: '1',
           person: {
+            id: '1',
             fullName: 'John Doe',
             active: true,
             cpf: '12345678901',
@@ -42,6 +43,7 @@ describe('TableComponent', () => {
         {
           id: '2',
           person: {
+            id: '2',
             fullName: 'John Lee',
             active: true,
             cpf: '12345678902',

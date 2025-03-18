@@ -5,7 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 
 import { EventType } from '@angular/router';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
-import { GenericClient } from '@interfaces/entity';
+import { GenericClient } from '@interfaces/person';
 
 @Component({
   selector: 'app-legal-entity-info',

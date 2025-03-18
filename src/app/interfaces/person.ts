@@ -1,30 +1,23 @@
 export interface GenericClient {
+  id: string;
   fullName: string;
   legalName: string;
   tradeName: string;
   cpf?: string;
   cnpj?: string;
   ie?: string;
+  crt?: string;
   address?: Address;
   contact?: Contact;
   active: boolean;
 }
 
-export interface CreateNaturalPerson {
-  fullName: string;
-  cpf: string;
-  address?: Address;
-  contact?: Contact;
-}
+export type CreateNaturalPerson = Omit<
+  GenericClient,
+  'id' | 'legalName' | 'tradeName' | 'cnpj' | 'ie' | 'crt'
+>;
 
-export interface CreateLegalEntity {
-  legalName: string;
-  tradeName: string;
-  cnpj: string;
-  ie: string;
-  address?: Address;
-  contact?: Contact;
-}
+export type CreateLegalEntity = Omit<GenericClient, 'id' | 'fullName' | 'cpf'>;
 
 export interface Address {
   street: string;

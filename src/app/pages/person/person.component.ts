@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, of } from 'rxjs';
 
-import { Person } from '@interfaces/entity';
+import { Person } from '@interfaces/person';
 import { PaginationResponse } from '@interfaces/pagination';
 import { PersonService } from '@services/person.service';
 
