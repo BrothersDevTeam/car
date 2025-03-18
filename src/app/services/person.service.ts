@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { first, Observable, of, tap } from 'rxjs';
+
 import {
   CreateLegalEntity,
   CreateNaturalPerson,
   Person,
-} from '@interfaces/entity';
+} from '@interfaces/person';
 import { PaginationResponse } from '@interfaces/pagination';
 
 @Injectable({

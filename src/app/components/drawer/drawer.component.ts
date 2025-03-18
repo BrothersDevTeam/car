@@ -1,4 +1,10 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { EventType } from '@angular/router';
 
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -8,6 +14,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 import { animate, style, transition, trigger } from '@angular/animations';
+import { ActionsService } from '@services/actions.service';
+import { skip, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-drawer',
@@ -29,8 +37,29 @@ import { animate, style, transition, trigger } from '@angular/animations';
     ]),
   ],
 })
-export class DrawerComponent {
+export class DrawerComponent implements OnInit, OnDestroy {
   @Output() closeDrawer = new EventEmitter<EventType>();
+  private subscription!: Subscription;
+
+  constructor(private actionsService: ActionsService) {}
+
+  ngOnInit() {
+    this.subscription = this.actionsService.sidebarClick$
+      .pipe(skip(1))
+      .subscribe(() => {
+        this.closeDrawerTest();
+      });
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  closeDrawerTest() {
+    this.handleCloseDrawer();
+  }
 
   handleCloseDrawer() {
     this.closeDrawer.emit();

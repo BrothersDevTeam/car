@@ -14,7 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastrService } from 'ngx-toastr';
 
-import { CreateNaturalPerson, Person } from '@interfaces/entity';
+import { CreateNaturalPerson, Person } from '@interfaces/person';
 import { PersonService } from '@services/person.service';
 
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
@@ -104,6 +104,7 @@ export class NaturalPersonFormComponent implements OnChanges {
     const formValue: CreateNaturalPerson = {
       fullName: this.form.value.fullName || '',
       cpf: this.form.value.cpf || '',
+      active: true,
       contact: {
         email: this.form.value.contact?.email || '',
         phone: this.form.value.contact?.phone || '',
