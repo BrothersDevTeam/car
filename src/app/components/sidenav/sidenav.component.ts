@@ -7,12 +7,12 @@ import {
   Output,
   signal,
 } from '@angular/core';
-
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 
+import { ActionsService } from '@services/actions.service';
 import { AuthService } from '../../auth/auth.service';
 
 export type MenuItem = {
@@ -28,7 +28,10 @@ export type MenuItem = {
   styleUrl: './sidenav.component.scss',
 })
 export class SideNavComponent {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private actionsService: ActionsService
+  ) {}
 
   sideNavCollapsed = signal(false);
   isSmallScreen = signal(false);
@@ -64,6 +67,10 @@ export class SideNavComponent {
   handleLogout = () => {
     this.authService.logout();
   };
+
+  onSidenavClick() {
+    this.actionsService.emitSidebarClick();
+  }
 
   profilePicSize = computed(() => (this.sideNavCollapsed() ? '32' : '100'));
 }
