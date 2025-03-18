@@ -1,14 +1,8 @@
 export interface Vehicle {
   id: string;
   licensePlate: string;
-  brand: {
-    id: string;
-    name: string;
-  };
-  model: {
-    id: string;
-    name: string;
-  };
+  brand: string;
+  model: string;
   yearModel?: string;
   chassis?: string;
   numberOfDoors?: 0;
@@ -26,3 +20,8 @@ export interface Vehicle {
 }
 
 export type CreateVehicle = Omit<Vehicle, 'id'>;
+
+export type GetVehicle = Omit<Vehicle, 'model' | 'brand'> & {
+  model: { id: string; name: string };
+  brand: { id: string; name: string };
+};

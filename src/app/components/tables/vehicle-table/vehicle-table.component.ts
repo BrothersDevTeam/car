@@ -11,7 +11,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 import { PaginationResponse } from '@interfaces/pagination';
-import { Vehicle } from '@interfaces/vehicle';
+import { GetVehicle } from '@interfaces/vehicle';
 
 import { PaginationComponent } from '@components/pagination/pagination.component';
 
@@ -27,12 +27,12 @@ import { PaginationComponent } from '@components/pagination/pagination.component
   styleUrl: './vehicle-table.component.scss',
 })
 export class VehicleTableComponent implements OnInit, OnChanges {
-  @Input() vehiclePaginatedList!: PaginationResponse<Vehicle>;
+  @Input() vehiclePaginatedList!: PaginationResponse<GetVehicle>;
   @Input() searchValue?: string;
-  @Output() selectedVehicle = new EventEmitter<Vehicle>();
+  @Output() selectedVehicle = new EventEmitter<GetVehicle>();
   @Output() pageEvent = new EventEmitter<PageEvent>();
 
-  dataSource = new MatTableDataSource<Vehicle>();
+  dataSource = new MatTableDataSource<GetVehicle>();
 
   displayedColumns: string[] = [
     'licensePlate',
@@ -43,7 +43,7 @@ export class VehicleTableComponent implements OnInit, OnChanges {
     'imported',
   ];
   pageSizeOptions = [1000, 100, 50, 20];
-  filteredData: Vehicle[] = [];
+  filteredData: GetVehicle[] = [];
 
   ngOnInit(): void {
     if (this.vehiclePaginatedList?.content) {
@@ -81,7 +81,7 @@ export class VehicleTableComponent implements OnInit, OnChanges {
     }
   }
 
-  onRowClick(row: Vehicle) {
+  onRowClick(row: GetVehicle) {
     this.selectedVehicle.emit(row);
   }
 

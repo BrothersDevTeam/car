@@ -39,16 +39,9 @@ export class VehicleFormComponent {
   @Output() formSubmitted = new EventEmitter<void>();
 
   protected form = this.formBuilderService.group({
-    id: [''],
     licensePlate: ['', Validators.required],
-    brand: this.formBuilderService.group({
-      id: [''],
-      name: [''],
-    }),
-    model: this.formBuilderService.group({
-      id: [''],
-      name: [''],
-    }),
+    brand: [''],
+    model: [''],
     yearModel: [''],
     chassis: [''],
     numberOfDoors: [''],
@@ -74,16 +67,9 @@ export class VehicleFormComponent {
     if (changes['dataForm'] && this.dataForm) {
       setTimeout(() => {
         this.form.patchValue({
-          id: this.dataForm!.id || '',
           licensePlate: this.dataForm!.licensePlate || '',
-          brand: {
-            id: this.dataForm!.brand.id || '',
-            name: this.dataForm!.brand.name || '',
-          },
-          model: {
-            id: this.dataForm!.model.id || '',
-            name: this.dataForm!.model.name || '',
-          },
+          brand: this.dataForm!.brand || '',
+          model: this.dataForm!.model || '',
           yearModel: this.dataForm!.yearModel || '',
           chassis: this.dataForm!.chassis || '',
           numberOfDoors: this.dataForm!.numberOfDoors || '',
