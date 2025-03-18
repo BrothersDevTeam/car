@@ -7,7 +7,7 @@ import { ToastrService } from 'ngx-toastr';
 import { catchError, of } from 'rxjs';
 
 import { PaginationResponse } from '@interfaces/pagination';
-import { Vehicle } from '@interfaces/vehicle';
+import { GetVehicle, Vehicle } from '@interfaces/vehicle';
 import { VehicleService } from '@services/vehicle.service';
 
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
@@ -32,10 +32,10 @@ import { VehicleInfoComponent } from '@info/vehicle-info/vehicle-info.component'
   styleUrl: './vehicle.component.scss',
 })
 export class VehicleComponent {
-  vehiclePaginatedList: PaginationResponse<Vehicle> | null = null;
+  vehiclePaginatedList: PaginationResponse<GetVehicle> | null = null;
   selectedVehicle: Vehicle | null = null;
-
   searchValue: string = '';
+
   paginationRequestConfig = {
     pageSize: 1000,
     pageIndex: 0,
@@ -84,8 +84,12 @@ export class VehicleComponent {
       });
   }
 
-  handleSelectedVehicle(vehicle: Vehicle) {
-    this.selectedVehicle = vehicle;
+  handleSelectedVehicle(vehicle: GetVehicle) {
+    this.selectedVehicle = {
+      ...vehicle,
+      brand: vehicle.brand.name,
+      model: vehicle.model.name,
+    };
     this.openInfo.set(true);
   }
 

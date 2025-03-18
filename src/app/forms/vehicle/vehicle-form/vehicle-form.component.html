@@ -19,38 +19,34 @@
         (form.get('licensePlate')?.touched || submitted)
       "
     />
-    <div formGroupName="brand">
-      <app-primary-input
-        formControlName="name"
-        label="Marca"
-        inputName="name"
-        type="text"
-        [error]="
-          form.get('brand.name')?.invalid &&
-          (form.get('brand.name')?.touched || submitted)
-        "
-      />
-    </div>
-    <div formGroupName="model">
-      <app-primary-input
-        formControlName="name"
-        label="Modelo"
-        inputName="name"
-        type="text"
-        [error]="
-          form.get('model.name')?.invalid &&
-          (form.get('model.name')?.touched || submitted)
-        "
-      />
-    </div>
+    <app-primary-input
+      formControlName="brand"
+      label="Marca"
+      inputName="brand"
+      type="text"
+      [error]="
+        form.get('brand')?.invalid &&
+        (form.get('brand')?.touched || submitted)
+      "
+    />
+    <app-primary-input
+      formControlName="model"
+      label="Modelo"
+      inputName="model"
+      type="text"
+      [error]="
+        form.get('model')?.invalid &&
+        (form.get('model')?.touched || submitted)
+      "
+    />
 
     <app-primary-input
       formControlName="yearModel"
       label="Ano do modelo"
       inputName="yearModel"
       type="text"
-      placeholder="0000"
-      mask="0000"
+      placeholder="0000/0000"
+      mask="0000/0000"
     />
     <app-primary-input
       formControlName="chassis"

@@ -3,13 +3,13 @@ import { Injectable } from '@angular/core';
 import { first, Observable, of, tap } from 'rxjs';
 
 import { PaginationResponse } from '@interfaces/pagination';
-import { CreateVehicle, Vehicle } from '@interfaces/vehicle';
+import { CreateVehicle, GetVehicle, Vehicle } from '@interfaces/vehicle';
 
 @Injectable({
   providedIn: 'root',
 })
 export class VehicleService {
-  private cache: PaginationResponse<Vehicle> | null = null;
+  private cache: PaginationResponse<GetVehicle> | null = null;
   private readonly apiUrl: string = 'api/v1/vehicles';
 
   constructor(private http: HttpClient) {}
@@ -17,12 +17,12 @@ export class VehicleService {
   getPaginatedData(
     pageIndex: number,
     pageSize: number
-  ): Observable<PaginationResponse<Vehicle>> {
+  ): Observable<PaginationResponse<GetVehicle>> {
     if (this.cache) {
       return of(this.cache);
     }
     return this.http
-      .get<PaginationResponse<Vehicle>>(
+      .get<PaginationResponse<GetVehicle>>(
         `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`
       )
       .pipe(
