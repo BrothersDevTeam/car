@@ -6,6 +6,7 @@ import { AuthGuard } from './auth/auth.guard';
 import { VehicleComponent } from './pages/vehicle/vehicle.component';
 import { PersonComponent } from './pages/person/person.component';
 import { StoreComponent } from './pages/store/store.component';
+import { NfeComponent } from './pages/nfe/nfe.component';
 
 export const routes: Routes = [
   {
@@ -17,6 +18,7 @@ export const routes: Routes = [
       { path: 'person', component: PersonComponent },
       { path: 'vehicle', component: VehicleComponent },
       { path: 'store', component: StoreComponent },
+      { path: 'nfe', component: NfeComponent },
     ],
   },
   {

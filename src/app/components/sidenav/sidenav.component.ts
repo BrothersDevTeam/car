@@ -56,6 +56,11 @@ export class SideNavComponent {
       label: 'Veículos',
       route: 'vehicle',
     },
+    {
+      icon: 'description',
+      label: 'Notas Fiscais',
+      route: 'nfe',
+    },
   ]);
 
   onMenuItemClick() {
