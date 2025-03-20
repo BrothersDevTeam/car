@@ -1,26 +1,27 @@
 import {
-  Component,
-  EventEmitter,
-  inject,
   Input,
-  OnChanges,
+  inject,
   Output,
+  Component,
+  OnChanges,
+  EventEmitter,
   SimpleChanges,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { ToastrService } from 'ngx-toastr';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
-import { CreateNaturalPerson, Person } from '@interfaces/person';
 import { PersonService } from '@services/person.service';
+import { CreateNaturalPerson, Person } from '@interfaces/person';
 
-import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
-import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
-import { DialogComponent } from '@components/dialog/dialog.component';
 import { CepService } from '@services/cep.service';
+import { DialogComponent } from '@components/dialog/dialog.component';
+import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
+import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
+import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 
 @Component({
   selector: 'app-natural-person-form',
@@ -30,6 +31,7 @@ import { CepService } from '@services/cep.service';
     WrapperCardComponent,
     MatButtonModule,
     MatIconModule,
+    CpfValidatorDirective
   ],
   templateUrl: './natural-person-form.component.html',
   styleUrl: './natural-person-form.component.scss',
