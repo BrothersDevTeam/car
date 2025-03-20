@@ -99,6 +99,7 @@ export class VehicleFormComponent {
     }
 
     if (this.dataForm?.id) {
+      console.log('this.dataForm editing: ', this.form.value);
       const updateValue = {
         ...this.form.value,
         id: this.dataForm.id,

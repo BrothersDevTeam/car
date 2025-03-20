@@ -9,13 +9,13 @@
     <ng-container matColumnDef="brand">
       <th mat-header-cell *matHeaderCellDef>Marca</th>
       <td mat-cell *matCellDef="let element">
-        {{ element.brand.name }}
+        {{ element.brand.description }}
       </td>
     </ng-container>
     <ng-container matColumnDef="model">
       <th mat-header-cell *matHeaderCellDef>Modelo</th>
       <td mat-cell *matCellDef="let element">
-        {{ element.model.name }}
+        {{ element.model.description }}
       </td>
     </ng-container>
     <ng-container matColumnDef="year">

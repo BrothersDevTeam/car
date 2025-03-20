@@ -61,13 +61,13 @@ export class VehicleTableComponent implements OnInit, OnChanges {
         (element) => {
           if (
             element.licensePlate ||
-            element.brand.name ||
-            element.model.name
+            element.brand.description ||
+            element.model.description
           ) {
             return (
               element.licensePlate ||
-              element.brand.name ||
-              element.model.name
+              element.brand.description ||
+              element.model.description
             )
               .trim()
               .toLowerCase()
