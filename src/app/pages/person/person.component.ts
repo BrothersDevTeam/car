@@ -40,13 +40,14 @@ import { NaturalPersonInfoComponent } from '@info/natural-person-info/natural-pe
 export class PersonComponent {
   personPaginatedList: PaginationResponse<Person> | null = null;
   selectedPerson: Person | null = null;
-  clientListError: boolean = false;
   searchValue: string = '';
   paginationRequestConfig = {
     pageSize: 1000,
     pageIndex: 0,
   };
 
+  clientListLoading = signal(false);
+  clientListError = signal(false);
   openForm = signal(false);
   openInfo = signal(false);
 
@@ -69,17 +70,19 @@ export class PersonComponent {
   }
 
   loadPersonList(pageIndex: number, pageSize: number) {
+    this.clientListLoading.set(true);
     this.personService
       .getPaginatedData(pageIndex, pageSize)
       .pipe(
         catchError((err) => {
-          this.clientListError = true;
+          this.clientListError.set(true);
           console.error('Erro ao carregar a lista de pessoas:', err);
           this.toastr.error('Erro ao buscar dados da tabela de clientes');
           return of();
         })
       )
       .subscribe((response) => {
+        this.clientListLoading.set(false);
         if (response) {
           this.personPaginatedList = response;
         }

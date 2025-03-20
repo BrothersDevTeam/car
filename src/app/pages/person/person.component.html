@@ -19,12 +19,12 @@
     [searchValue]="searchValue"
   />
   } @else {
-    @if (!clientListError) {
+    @if (clientListLoading()) {
       <div class="loader-div">
         <span class="loader"></span>
       </div>
     } @else {
-      @if (clientListError) {
+      @if (clientListError()) {
         <div class="message-error mat-elevation-z8">
           <h3>Não foi possível acessar os dados da tabela</h3>
           <h4>Tente novamente em alguns minutos.</h4>
