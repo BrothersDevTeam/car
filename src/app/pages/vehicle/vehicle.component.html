@@ -4,9 +4,9 @@
     <input matInput (input)="onSearch($event)">
   </mat-form-field>
 
-  <app-content-header title="Veículo" btn_label="Novo" fontIcon="add" (onClick)="handleOpenForm()"/>
+  <app-content-header title="Veículos" btn_label="Novo" fontIcon="add" (onClick)="handleOpenForm()"/>
 
-  @if (!!vehiclePaginatedList?.totalElements) {
+  @if (vehiclePaginatedList?.totalElements) {
     <app-vehicle-table
       (selectedVehicle)="handleSelectedVehicle($event)"
       [vehiclePaginatedList]="vehiclePaginatedList!"
@@ -25,8 +25,8 @@
           <h4>Tente novamente em alguns minutos.</h4>
         </div>
       } @else {
-        //TODO Adicionar uma imagem quando a tabela estiver vazia
-        <h1>Nenhum veículo cadastrado</h1>
+        <br>
+        <h2>Não há veículos cadastrados</h2>
       }
 
     }
