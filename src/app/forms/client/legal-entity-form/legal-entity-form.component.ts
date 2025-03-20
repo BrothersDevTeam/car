@@ -204,11 +204,11 @@ export class LegalEntityFormComponent implements OnChanges {
         if (!data.erro) {
           this.form.patchValue({
             address: {
-              street: data.logradouro,
-              complement: data.complemento,
-              state: data.uf,
-              city: data.localidade,
-              neighborhood: data.bairro,
+              street: data.logradouro.toUpperCase(),
+              complement: data.complemento.toUpperCase(),
+              state: data.uf.toUpperCase(),
+              city: data.localidade.toUpperCase(),
+              neighborhood: data.bairro.toUpperCase(),
             },
           });
         } else {

@@ -24,13 +24,20 @@ export class PrimaryInputComponent implements ControlValueAccessor {
   @Input() inputName: string = '';
   @Input() error?: boolean = false;
   @Input() mask: string = '';
+  @Input() uppercase?: boolean = true;
 
   value: string = '';
   onChange: any = () => {};
   onTouched: any = () => {};
 
   onInput(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
+    const inputElement = event.target as HTMLInputElement;
+
+    const value = this.uppercase
+      ? inputElement.value.toUpperCase()
+      : inputElement.value;
+
+    if (this.uppercase) inputElement.value = value;
     this.onChange(value);
   }
 
