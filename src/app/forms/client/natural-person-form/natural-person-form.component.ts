@@ -4,6 +4,7 @@ import {
   inject,
   Input,
   OnChanges,
+  OnInit,
   Output,
   SimpleChanges,
 } from '@angular/core';
@@ -34,7 +35,7 @@ import { CepService } from '@services/cep.service';
   templateUrl: './natural-person-form.component.html',
   styleUrl: './natural-person-form.component.scss',
 })
-export class NaturalPersonFormComponent implements OnChanges {
+export class NaturalPersonFormComponent implements OnInit, OnChanges {
   submitted = false;
 
   readonly dialog = inject(MatDialog);
@@ -42,6 +43,7 @@ export class NaturalPersonFormComponent implements OnChanges {
 
   @Input() dataForm: Person | null = null;
   @Output() formSubmitted = new EventEmitter<void>();
+  @Output() formChanged = new EventEmitter<boolean>();
 
   protected form = this.formBuilderService.group({
     fullName: ['', Validators.required],
@@ -67,6 +69,14 @@ export class NaturalPersonFormComponent implements OnChanges {
     private toastrService: ToastrService,
     private cepService: CepService
   ) {}
+
+  ngOnInit() {
+    // Inscreve-se no valueChanges para detectar mudanças no formulário
+    this.form.valueChanges.subscribe(() => {
+      const isDirty = this.form.dirty; // Verifica se o formulário foi modificado
+      this.formChanged.emit(isDirty); // Emite o estado de mudanças para o componente pai
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
