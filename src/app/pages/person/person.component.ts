@@ -18,6 +18,7 @@ import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/na
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
 import { LegalEntityInfoComponent } from '@info/legal-entity-info/legal-entity-info.component';
 import { NaturalPersonInfoComponent } from '@info/natural-person-info/natural-person-info.component';
+import { BusinessDoneTableComponent } from '@components/tables/business-done-table/business-done-table.component';
 
 @Component({
   selector: 'app-person',
@@ -33,6 +34,7 @@ import { NaturalPersonInfoComponent } from '@info/natural-person-info/natural-pe
     MatButtonModule,
     LegalEntityInfoComponent,
     NaturalPersonInfoComponent,
+    BusinessDoneTableComponent,
   ],
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss',
