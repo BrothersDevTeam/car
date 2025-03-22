@@ -52,6 +52,7 @@
         <app-legal-entity-form
           [dataForm]="selectedPerson?.person?.cnpj ? selectedPerson : null"
           (formSubmitted)="onFormSubmitted()"
+          (formChanged)="handleFormChanged($event)"
         />
       </mat-tab>
     </mat-tab-group>
