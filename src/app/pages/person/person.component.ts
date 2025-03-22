@@ -110,6 +110,8 @@ export class PersonComponent implements OnInit, OnDestroy {
   handleCloseDrawer() {
     this.openForm.set(false);
     this.openInfo.set(false);
+    this.hasChanges = signal(false);
+
     this.selectedPerson = null;
   }
 
