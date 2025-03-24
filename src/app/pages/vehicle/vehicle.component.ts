@@ -51,7 +51,6 @@ export class VehicleComponent {
   vehicleListError = signal(false);
   openForm = signal(false);
   openInfo = signal(false);
-  hasChanges = signal(false);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -79,11 +78,11 @@ export class VehicleComponent {
   }
 
   handleFormChanged(isDirty: boolean) {
-    this.hasChanges.set(isDirty);
+    this.actionsService.hasFormChanges.set(isDirty);
   }
 
   handleConfirmationCloseDrawer() {
-    if (this.hasChanges()) {
+    if (this.actionsService.hasFormChanges()) {
       this.openDialog();
     } else {
       this.handleCloseDrawer();
@@ -94,6 +93,7 @@ export class VehicleComponent {
     this.openForm.set(false);
     this.openInfo.set(false);
     this.selectedVehicle = null;
+    this.actionsService.hasFormChanges.set(false);
   }
 
   loadVehicleList(pageIndex: number, pageSize: number) {
@@ -127,7 +127,6 @@ export class VehicleComponent {
 
   handleOpenForm() {
     this.openForm.set(true);
-    console.log('openForm: Implement me!');
   }
 
   handlePageEvent(event: PageEvent) {

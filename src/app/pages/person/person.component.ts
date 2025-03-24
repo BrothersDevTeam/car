@@ -68,7 +68,6 @@ export class PersonComponent implements OnInit, OnDestroy {
   clientListError = signal(false);
   openForm = signal(false);
   openInfo = signal(false);
-  hasChanges = signal(false);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -96,11 +95,11 @@ export class PersonComponent implements OnInit, OnDestroy {
   }
 
   handleFormChanged(isDirty: boolean) {
-    this.hasChanges.set(isDirty);
+    this.actionsService.hasFormChanges.set(isDirty);
   }
 
   handleConfirmationCloseDrawer() {
-    if (this.hasChanges()) {
+    if (this.actionsService.hasFormChanges()) {
       this.openDialog();
     } else {
       this.handleCloseDrawer();
@@ -110,9 +109,8 @@ export class PersonComponent implements OnInit, OnDestroy {
   handleCloseDrawer() {
     this.openForm.set(false);
     this.openInfo.set(false);
-    this.hasChanges = signal(false);
-
     this.selectedPerson = null;
+    this.actionsService.hasFormChanges.set(false);
   }
 
   loadPersonList(pageIndex: number, pageSize: number) {
