@@ -1,20 +1,24 @@
-import { Component, signal, ViewChild } from '@angular/core';
+import { Component, inject, signal, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-import { catchError, of } from 'rxjs';
-
-import { PaginationResponse } from '@interfaces/pagination';
-import { GetVehicle, Vehicle } from '@interfaces/vehicle';
-import { VehicleService } from '@services/vehicle.service';
+import { catchError, of, Subscription } from 'rxjs';
 
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { VehicleTableComponent } from '@components/tables/vehicle-table/vehicle-table.component';
 import { DrawerComponent } from '@components/drawer/drawer.component';
+import { DialogComponent } from '@components/dialog/dialog.component';
 import { VehicleFormComponent } from '@forms/vehicle/vehicle-form/vehicle-form.component';
 import { VehicleInfoComponent } from '@info/vehicle-info/vehicle-info.component';
+
+import type { PaginationResponse } from '@interfaces/pagination';
+import type { GetVehicle, Vehicle } from '@interfaces/vehicle';
+
+import { VehicleService } from '@services/vehicle.service';
+import { ActionsService } from '@services/actions.service';
 
 @Component({
   selector: 'app-vehicle',
@@ -32,10 +36,12 @@ import { VehicleInfoComponent } from '@info/vehicle-info/vehicle-info.component'
   styleUrl: './vehicle.component.scss',
 })
 export class VehicleComponent {
+  readonly dialog = inject(MatDialog);
+  private subscription!: Subscription;
+
   vehiclePaginatedList: PaginationResponse<GetVehicle> | null = null;
   selectedVehicle: Vehicle | null = null;
   searchValue: string = '';
-
   paginationRequestConfig = {
     pageSize: 1000,
     pageIndex: 0,
@@ -45,23 +51,49 @@ export class VehicleComponent {
   vehicleListError = signal(false);
   openForm = signal(false);
   openInfo = signal(false);
-
-  handleCloseDrawer() {
-    this.openForm.set(false);
-    this.openInfo.set(false);
-    this.selectedVehicle = null;
-  }
+  hasChanges = signal(false);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
     private vehicleService: VehicleService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private actionsService: ActionsService
   ) {
     this.loadVehicleList(
       this.paginationRequestConfig.pageIndex,
       this.paginationRequestConfig.pageSize
     );
+  }
+
+  ngOnInit() {
+    this.subscription = this.actionsService.sidebarClick$.subscribe(() => {
+      this.handleConfirmationCloseDrawer();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  handleFormChanged(isDirty: boolean) {
+    this.hasChanges.set(isDirty);
+  }
+
+  handleConfirmationCloseDrawer() {
+    if (this.hasChanges()) {
+      this.openDialog();
+    } else {
+      this.handleCloseDrawer();
+    }
+  }
+
+  handleCloseDrawer() {
+    this.openForm.set(false);
+    this.openInfo.set(false);
+    this.selectedVehicle = null;
   }
 
   loadVehicleList(pageIndex: number, pageSize: number) {
@@ -118,5 +150,25 @@ export class VehicleComponent {
     );
     this.openForm.set(false);
     this.selectedVehicle = null;
+  }
+
+  openDialog() {
+    const dialogRef: MatDialogRef<DialogComponent> = this.dialog.open(
+      DialogComponent,
+      {
+        data: {
+          title: 'Há mudanças não salvas',
+          message: 'Deseja fechar sem salvar?',
+          confirmText: 'Sim',
+          cancelText: 'Não',
+        },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.handleCloseDrawer();
+      }
+    });
   }
 }

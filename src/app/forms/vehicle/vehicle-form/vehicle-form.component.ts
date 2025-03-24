@@ -37,6 +37,7 @@ export class VehicleFormComponent {
 
   @Input() dataForm: Vehicle | null = null;
   @Output() formSubmitted = new EventEmitter<void>();
+  @Output() formChanged = new EventEmitter<boolean>();
 
   protected form = this.formBuilderService.group({
     licensePlate: ['', Validators.required],
@@ -62,6 +63,13 @@ export class VehicleFormComponent {
     private vehicleService: VehicleService,
     private toastrService: ToastrService
   ) {}
+
+  ngOnInit() {
+    this.form.valueChanges.subscribe(() => {
+      const isDirty = this.form.dirty;
+      this.formChanged.emit(isDirty);
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
