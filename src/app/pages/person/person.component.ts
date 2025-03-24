@@ -162,6 +162,7 @@ export class PersonComponent implements OnInit, OnDestroy {
     );
     this.openForm.set(false);
     this.selectedPerson = null;
+    this.actionsService.hasFormChanges.set(false);
   }
 
   openDialog() {

@@ -149,6 +149,7 @@ export class VehicleComponent {
     );
     this.openForm.set(false);
     this.selectedVehicle = null;
+    this.actionsService.hasFormChanges.set(false);
   }
 
   openDialog() {
