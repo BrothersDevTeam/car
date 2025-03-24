@@ -9,19 +9,20 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastrService } from 'ngx-toastr';
 
-import { CreateNaturalPerson, Person } from '@interfaces/person';
-import { PersonService } from '@services/person.service';
-
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { DialogComponent } from '@components/dialog/dialog.component';
+
+import type { CreateNaturalPerson, Person } from '@interfaces/person';
+
+import { PersonService } from '@services/person.service';
 import { CepService } from '@services/cep.service';
+import { ActionsService } from '@services/actions.service';
 
 @Component({
   selector: 'app-natural-person-form',
@@ -67,14 +68,15 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   constructor(
     private personService: PersonService,
     private toastrService: ToastrService,
-    private cepService: CepService
+    private cepService: CepService,
+    private actionsService: ActionsService
   ) {}
 
   ngOnInit() {
     // Inscreve-se no valueChanges para detectar mudanças no formulário
     this.form.valueChanges.subscribe(() => {
       const isDirty = this.form.dirty; // Verifica se o formulário foi modificado
-      this.formChanged.emit(isDirty); // Emite o estado de mudanças para o componente pai
+      this.actionsService.hasFormChanges.set(isDirty);
     });
   }
 
