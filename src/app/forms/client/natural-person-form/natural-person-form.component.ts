@@ -1,27 +1,30 @@
 import {
-  Component,
-  EventEmitter,
-  inject,
   Input,
-  OnChanges,
+  inject,
   OnInit,
   Output,
+  OnChanges,
+  Component,
+  EventEmitter,
   SimpleChanges,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+
 import { ToastrService } from 'ngx-toastr';
-
-import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
-import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
-import { DialogComponent } from '@components/dialog/dialog.component';
-
-import type { CreateNaturalPerson, Person } from '@interfaces/person';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 import { PersonService } from '@services/person.service';
+import { CreateNaturalPerson, Person } from '@interfaces/person';
+
 import { CepService } from '@services/cep.service';
+import { DialogComponent } from '@components/dialog/dialog.component';
+import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
+import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
+import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
+
+
 import { ActionsService } from '@services/actions.service';
 
 @Component({
@@ -32,6 +35,7 @@ import { ActionsService } from '@services/actions.service';
     WrapperCardComponent,
     MatButtonModule,
     MatIconModule,
+    CpfValidatorDirective
   ],
   templateUrl: './natural-person-form.component.html',
   styleUrl: './natural-person-form.component.scss',
@@ -70,7 +74,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     private toastrService: ToastrService,
     private cepService: CepService,
     private actionsService: ActionsService
-  ) {}
+  ) { }
 
   ngOnInit() {
     // Inscreve-se no valueChanges para detectar mudanças no formulário
