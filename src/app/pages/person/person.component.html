@@ -64,7 +64,8 @@
       @if (selectedPerson?.person?.cpf) {
         <mat-tab-group [selectedIndex]="0">
           <mat-tab label="Pessoa Física">
-            <app-natural-person-info (editEvent)="handleEdit()" [person]="selectedPerson!.person" />
+            <app-natural-person-info (editEvent)="handleEdit()" [person]="selectedPerson!" (formSubmitted)="onFormSubmitted()" />
+
           </mat-tab>
           <mat-tab label="Negócios efetuados">
             <app-business-done-table />
