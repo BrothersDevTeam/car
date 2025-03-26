@@ -6,11 +6,7 @@ import { Injectable } from '@angular/core';
 export class CpfValidatorService {
   constructor() { }
 
-  /**
-   * Verifica se o CPF é válido.
-   * @param cpf O CPF como string (pode vir com máscara)
-   * @returns true se for válido, false caso contrário
-   */
+
   public isValid(cpf: string): boolean {
     if (!cpf) return false;
 
@@ -18,7 +14,6 @@ export class CpfValidatorService {
 
     if (cpf.length !== 11) return false;
 
-    // Elimina CPFs inválidos conhecidos (ex: 111.111.111-11)
     if (/^(\d)\1{10}$/.test(cpf)) return false;
 
     // Validação do primeiro dígito verificador
