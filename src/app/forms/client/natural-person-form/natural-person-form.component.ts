@@ -1,9 +1,10 @@
 import {
   Input,
   inject,
+  OnInit,
   Output,
-  Component,
   OnChanges,
+  Component,
   EventEmitter,
   SimpleChanges,
 } from '@angular/core';
@@ -23,6 +24,9 @@ import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 
+
+import { ActionsService } from '@services/actions.service';
+
 @Component({
   selector: 'app-natural-person-form',
   imports: [
@@ -36,7 +40,7 @@ import { PrimaryInputComponent } from '@components/primary-input/primary-input.c
   templateUrl: './natural-person-form.component.html',
   styleUrl: './natural-person-form.component.scss',
 })
-export class NaturalPersonFormComponent implements OnChanges {
+export class NaturalPersonFormComponent implements OnInit, OnChanges {
   submitted = false;
 
   readonly dialog = inject(MatDialog);
@@ -44,6 +48,7 @@ export class NaturalPersonFormComponent implements OnChanges {
 
   @Input() dataForm: Person | null = null;
   @Output() formSubmitted = new EventEmitter<void>();
+  @Output() formChanged = new EventEmitter<boolean>();
 
   protected form = this.formBuilderService.group({
     fullName: ['', Validators.required],
@@ -67,8 +72,17 @@ export class NaturalPersonFormComponent implements OnChanges {
   constructor(
     private personService: PersonService,
     private toastrService: ToastrService,
-    private cepService: CepService
-  ) {}
+    private cepService: CepService,
+    private actionsService: ActionsService
+  ) { }
+
+  ngOnInit() {
+    // Inscreve-se no valueChanges para detectar mudanças no formulário
+    this.form.valueChanges.subscribe(() => {
+      const isDirty = this.form.dirty; // Verifica se o formulário foi modificado
+      this.actionsService.hasFormChanges.set(isDirty);
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
@@ -200,11 +214,11 @@ export class NaturalPersonFormComponent implements OnChanges {
         if (!data.erro) {
           this.form.patchValue({
             address: {
-              street: data.logradouro,
-              complement: data.complemento,
-              state: data.uf,
-              city: data.localidade,
-              neighborhood: data.bairro,
+              street: data.logradouro.toUpperCase(),
+              complement: data.complemento.toUpperCase(),
+              state: data.uf.toUpperCase(),
+              city: data.localidade.toUpperCase(),
+              neighborhood: data.bairro.toUpperCase(),
             },
           });
         } else {

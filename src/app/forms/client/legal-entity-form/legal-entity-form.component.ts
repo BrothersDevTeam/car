@@ -4,23 +4,25 @@ import {
   inject,
   Input,
   OnChanges,
+  OnInit,
   Output,
   SimpleChanges,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-
-import { CreateLegalEntity, Person } from '@interfaces/person';
-import { PersonService } from '@services/person.service';
-
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ToastrService } from 'ngx-toastr';
 
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
-import { ToastrService } from 'ngx-toastr';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DialogComponent } from '@components/dialog/dialog.component';
+
+import type { CreateLegalEntity, Person } from '@interfaces/person';
+
+import { PersonService } from '@services/person.service';
 import { CepService } from '@services/cep.service';
+import { ActionsService } from '@services/actions.service';
 
 @Component({
   selector: 'app-legal-entity-form',
@@ -34,7 +36,7 @@ import { CepService } from '@services/cep.service';
   templateUrl: './legal-entity-form.component.html',
   styleUrl: './legal-entity-form.component.scss',
 })
-export class LegalEntityFormComponent implements OnChanges {
+export class LegalEntityFormComponent implements OnInit, OnChanges {
   submitted = false;
 
   readonly dialog = inject(MatDialog);
@@ -42,6 +44,7 @@ export class LegalEntityFormComponent implements OnChanges {
 
   @Input() dataForm: Person | null = null;
   @Output() formSubmitted = new EventEmitter<void>();
+  @Output() formChanged = new EventEmitter<boolean>();
 
   protected form = this.formBuilderService.group({
     legalName: [this.dataForm?.person.legalName || '', Validators.required],
@@ -66,8 +69,17 @@ export class LegalEntityFormComponent implements OnChanges {
   constructor(
     private personService: PersonService,
     private toastrService: ToastrService,
-    private cepService: CepService
+    private cepService: CepService,
+    private actionsService: ActionsService
   ) {}
+
+  ngOnInit() {
+    // Inscreve-se no valueChanges para detectar mudanças no formulário
+    this.form.valueChanges.subscribe(() => {
+      const isDirty = this.form.dirty; // Verifica se o formulário foi modificado
+      this.actionsService.hasFormChanges.set(isDirty);
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {

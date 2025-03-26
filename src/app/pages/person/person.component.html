@@ -37,35 +37,51 @@
     }
   }
 
+  @if (openInfo()) {
+    <app-drawer (closeDrawer)="handleCloseDrawer()">
+      @if (selectedPerson?.person?.cpf) {
+        <mat-tab-group [selectedIndex]="0">
+          <mat-tab label="Pessoa Física">
+            <app-natural-person-info (editEvent)="handleEdit()" [person]="selectedPerson!.person" />
+          </mat-tab>
+          <mat-tab label="Negócios efetuados">
+            <app-business-done-table />
+          </mat-tab>
+        </mat-tab-group>
+      } @else if(selectedPerson?.person?.cnpj) {
+        <mat-tab-group [selectedIndex]="0">
+          <mat-tab label="Pessoa Jurídica">
+            <app-legal-entity-info (editEvent)="handleEdit()" [person]="selectedPerson!.person" />
+          </mat-tab>
+          <mat-tab label="Negócios efetuados">
+            <app-business-done-table />
+          </mat-tab>
+        </mat-tab-group>
+      } @else {
+        <h1>Dados não encontrados</h1>
+      }
+    </app-drawer>
+  }
 
   @if (openForm()) {
-  <app-drawer (closeDrawer)="handleCloseDrawer()">
+  <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
     <mat-tab-group [selectedIndex]="selectedPerson?.person?.cpf ? 0 : 1">
       <mat-tab label="Pessoa Física" [disabled]="selectedPerson && selectedPerson.person.cnpj">
         <app-natural-person-form
           [dataForm]="selectedPerson?.person?.cpf ? selectedPerson : null"
           (formSubmitted)="onFormSubmitted()"
+          (formChanged)="handleFormChanged($event)"
         />
       </mat-tab>
       <mat-tab label="Pessoa Jurídica" [disabled]="selectedPerson && selectedPerson.person.cpf">
         <app-legal-entity-form
           [dataForm]="selectedPerson?.person?.cnpj ? selectedPerson : null"
           (formSubmitted)="onFormSubmitted()"
+          (formChanged)="handleFormChanged($event)"
         />
       </mat-tab>
     </mat-tab-group>
   </app-drawer>
   }
 
-  @if (openInfo()) {
-    <app-drawer (closeDrawer)="handleCloseDrawer()">
-      @if (selectedPerson?.person?.cpf) {
-        <app-natural-person-info (editEvent)="handleEdit()" [person]="selectedPerson!.person" />
-      } @else if(selectedPerson?.person?.cnpj) {
-        <app-legal-entity-info (editEvent)="handleEdit()" [person]="selectedPerson!.person" />
-      } @else {
-        <h1>Dados não encontrados</h1>
-      }
-    </app-drawer>
-  }
 </main>

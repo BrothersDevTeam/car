@@ -1,23 +1,37 @@
-import { Component, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-import { catchError, of } from 'rxjs';
-
-import { Person } from '@interfaces/person';
-import { PaginationResponse } from '@interfaces/pagination';
-import { PersonService } from '@services/person.service';
+import { catchError, of, Subscription } from 'rxjs';
 
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { PersonTableComponent } from '@components/tables/person-table/person-table.component';
+import { BusinessDoneTableComponent } from '@components/tables/business-done-table/business-done-table.component';
+import { DialogComponent } from '@components/dialog/dialog.component';
+
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
+
 import { LegalEntityInfoComponent } from '@info/legal-entity-info/legal-entity-info.component';
 import { NaturalPersonInfoComponent } from '@info/natural-person-info/natural-person-info.component';
+
+import type { Person } from '@interfaces/person';
+import type { PaginationResponse } from '@interfaces/pagination';
+
+import { PersonService } from '@services/person.service';
+import { ActionsService } from '@services/actions.service';
 
 @Component({
   selector: 'app-person',
@@ -33,11 +47,15 @@ import { NaturalPersonInfoComponent } from '@info/natural-person-info/natural-pe
     MatButtonModule,
     LegalEntityInfoComponent,
     NaturalPersonInfoComponent,
+    BusinessDoneTableComponent,
   ],
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss',
 })
-export class PersonComponent {
+export class PersonComponent implements OnInit, OnDestroy {
+  readonly dialog = inject(MatDialog);
+  private subscription!: Subscription;
+
   personPaginatedList: PaginationResponse<Person> | null = null;
   selectedPerson: Person | null = null;
   searchValue: string = '';
@@ -51,22 +69,48 @@ export class PersonComponent {
   openForm = signal(false);
   openInfo = signal(false);
 
-  handleCloseDrawer() {
-    this.openForm.set(false);
-    this.openInfo.set(false);
-    this.selectedPerson = null;
-  }
-
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
     private personService: PersonService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private actionsService: ActionsService
   ) {
     this.loadPersonList(
       this.paginationRequestConfig.pageIndex,
       this.paginationRequestConfig.pageSize
     );
+  }
+
+  ngOnInit() {
+    this.subscription = this.actionsService.sidebarClick$.subscribe(() => {
+      this.handleConfirmationCloseDrawer();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  handleFormChanged(isDirty: boolean) {
+    this.actionsService.hasFormChanges.set(isDirty);
+  }
+
+  handleConfirmationCloseDrawer() {
+    if (this.actionsService.hasFormChanges()) {
+      this.openDialog();
+    } else {
+      this.handleCloseDrawer();
+    }
+  }
+
+  handleCloseDrawer() {
+    this.openForm.set(false);
+    this.openInfo.set(false);
+    this.selectedPerson = null;
+    this.actionsService.hasFormChanges.set(false);
   }
 
   loadPersonList(pageIndex: number, pageSize: number) {
@@ -118,5 +162,26 @@ export class PersonComponent {
     );
     this.openForm.set(false);
     this.selectedPerson = null;
+    this.actionsService.hasFormChanges.set(false);
+  }
+
+  openDialog() {
+    const dialogRef: MatDialogRef<DialogComponent> = this.dialog.open(
+      DialogComponent,
+      {
+        data: {
+          title: 'Há mudanças não salvas',
+          message: 'Deseja fechar sem salvar?',
+          confirmText: 'Sim',
+          cancelText: 'Não',
+        },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.handleCloseDrawer();
+      }
+    });
   }
 }

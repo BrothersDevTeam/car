@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -10,6 +10,8 @@ export class ActionsService {
 
   // Observable para que outros componentes possam se inscrever
   sidebarClick$ = this.sidebarClickSubject.asObservable();
+
+  hasFormChanges = signal(false);
 
   constructor() {}
 
