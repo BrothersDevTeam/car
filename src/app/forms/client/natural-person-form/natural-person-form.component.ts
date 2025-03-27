@@ -19,7 +19,6 @@ import { PersonService } from '@services/person.service';
 import { CreateNaturalPerson, Person } from '@interfaces/person';
 
 import { CepService } from '@services/cep.service';
-import { DialogComponent } from '@components/dialog/dialog.component';
 import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
