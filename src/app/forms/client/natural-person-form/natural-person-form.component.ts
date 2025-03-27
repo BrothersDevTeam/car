@@ -3,8 +3,8 @@ import {
   inject,
   OnInit,
   Output,
-  Component,
   OnChanges,
+  Component,
   EventEmitter,
   SimpleChanges,
 } from '@angular/core';
@@ -23,6 +23,9 @@ import { DialogComponent } from '@components/dialog/dialog.component';
 import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
+
+
+import { ActionsService } from '@services/actions.service';
 
 @Component({
   selector: 'app-natural-person-form',
@@ -69,14 +72,15 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   constructor(
     private personService: PersonService,
     private toastrService: ToastrService,
-    private cepService: CepService
-  ) {}
+    private cepService: CepService,
+    private actionsService: ActionsService
+  ) { }
 
   ngOnInit() {
     // Inscreve-se no valueChanges para detectar mudanças no formulário
     this.form.valueChanges.subscribe(() => {
       const isDirty = this.form.dirty; // Verifica se o formulário foi modificado
-      this.formChanged.emit(isDirty); // Emite o estado de mudanças para o componente pai
+      this.actionsService.hasFormChanges.set(isDirty);
     });
   }
 

@@ -7,7 +7,7 @@ import {
   Output,
   signal,
 } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -30,7 +30,8 @@ export type MenuItem = {
 export class SideNavComponent {
   constructor(
     private authService: AuthService,
-    private actionsService: ActionsService
+    private actionsService: ActionsService,
+    private router: Router
   ) {}
 
   sideNavCollapsed = signal(false);
@@ -44,29 +45,37 @@ export class SideNavComponent {
     {
       icon: 'store',
       label: 'Loja',
-      route: 'store',
+      route: '/store',
     },
     {
       icon: 'person',
       label: 'Pessoas',
-      route: 'person',
+      route: '/person',
     },
     {
       icon: 'directions_car',
       label: 'Veículos',
-      route: 'vehicle',
+      route: '/vehicle',
     },
     {
       icon: 'description',
       label: 'Notas Fiscais',
-      route: 'nfe',
+      route: '/nfe',
     },
   ]);
 
-  onMenuItemClick() {
+  onMenuItemClick(route: string) {
     if (window.innerWidth <= 599) {
       this.toggleSidebar.emit();
     }
+
+    if (this.actionsService.hasFormChanges()) return;
+
+    this.router.navigate([route]);
+  }
+
+  isRouteActive(route: string): boolean {
+    return this.router.url === route; // Verifica se a rota está ativa
   }
 
   handleLogout = () => {
