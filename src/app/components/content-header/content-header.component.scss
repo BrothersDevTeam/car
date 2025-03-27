@@ -1,4 +1,4 @@
-@use '../../../styles/variables' as *;
+@use "../../../styles/variables" as *;
 
 mat-toolbar {
   position: relative;
@@ -6,8 +6,11 @@ mat-toolbar {
   height: 3rem;
   display: flex;
   justify-content: space-between;
+  color: whitesmoke;
+
+  background-color: $content-header-color;
 
   button {
-    background-color: $primary-color;
+    background-color: whitesmoke;
   }
 }

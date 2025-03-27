@@ -2,7 +2,7 @@
   <table mat-table [dataSource]="dataSource">
     <ng-container matColumnDef="fullName">
       <th mat-header-cell *matHeaderCellDef>Name</th>
-      <td mat-cell *matCellDef="let element" class="name-column">
+      <td mat-cell *matCellDef="let element" class="nowrap">
         {{
           element.person.fullName
             ? element.person.fullName
@@ -35,9 +35,11 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr
       mat-row
-      *matRowDef="let row; columns: displayedColumns"
+      *matRowDef="let row; columns: displayedColumns ; let i = index"
       (click)="onRowClick(row)"
       class="row-clickable"
+      [class.even-row]="i % 2 === 0"
+      [class.odd-row]="i % 2 !== 0"
     ></tr>
   </table>
   <app-pagination

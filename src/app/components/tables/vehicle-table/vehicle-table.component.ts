@@ -10,10 +10,10 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
-import { PaginationResponse } from '@interfaces/pagination';
-import { GetVehicle } from '@interfaces/vehicle';
-
 import { PaginationComponent } from '@components/pagination/pagination.component';
+
+import { PaginationResponse } from '@interfaces/pagination';
+import type { GetVehicle } from '@interfaces/vehicle';
 
 @Component({
   selector: 'app-vehicle-table',
