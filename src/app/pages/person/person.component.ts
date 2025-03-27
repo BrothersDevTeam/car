@@ -1,28 +1,28 @@
 import {
-  Component,
   inject,
-  OnDestroy,
   OnInit,
   signal,
+  Component,
+  OnDestroy,
   ViewChild,
 } from '@angular/core';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, of, Subscription } from 'rxjs';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 
-import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { DrawerComponent } from '@components/drawer/drawer.component';
+import { DialogComponent } from '@components/dialog/dialog.component';
+import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { PersonTableComponent } from '@components/tables/person-table/person-table.component';
 import { BusinessDoneTableComponent } from '@components/tables/business-done-table/business-done-table.component';
-import { DialogComponent } from '@components/dialog/dialog.component';
 
-import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
+import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 
 import { LegalEntityInfoComponent } from '@info/legal-entity-info/legal-entity-info.component';
 import { NaturalPersonInfoComponent } from '@info/natural-person-info/natural-person-info.component';
@@ -161,6 +161,7 @@ export class PersonComponent implements OnInit, OnDestroy {
       this.paginationRequestConfig.pageSize
     );
     this.openForm.set(false);
+    this.openInfo.set(false);
     this.selectedPerson = null;
     this.actionsService.hasFormChanges.set(false);
   }

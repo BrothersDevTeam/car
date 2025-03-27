@@ -1,12 +1,5 @@
 <form [formGroup]="form">
-  @if(dataForm?.person?.fullName) {
-    <div class="title-trash">
-      <h2>{{ dataForm?.person?.fullName }}</h2>
-      <mat-icon class="delete-btn" matListItemIcon (click)="onDelete()"
-        >delete</mat-icon
-      >
-    </div>
-  }
+
   <app-wrapper-card title="Dados pessoais">
     <app-primary-input
       formControlName="fullName"
@@ -116,6 +109,6 @@
     class="submit-btn"
     (click)="onSubmit()"
   >
-    {{ dataForm?.person?.fullName ? "Editar" : "Enviar"}}
+    {{ dataForm?.person?.fullName ? "Salvar" : "Enviar"}}
   </button>
 </form>
