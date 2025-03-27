@@ -77,9 +77,8 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   ) { }
 
   ngOnInit() {
-    // Inscreve-se no valueChanges para detectar mudanças no formulário
     this.form.valueChanges.subscribe(() => {
-      const isDirty = this.form.dirty; // Verifica se o formulário foi modificado
+      const isDirty = this.form.dirty;
       this.actionsService.hasFormChanges.set(isDirty);
     });
   }
@@ -111,7 +110,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   onSubmit() {
     this.submitted = true;
     if (this.form.invalid) {
-      // Marca todos os controles como "touched" para que os erros sejam exibidos
       this.form.markAllAsTouched();
       console.log('Formulário inválido: ', this.form.value);
       return;
@@ -160,49 +158,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       });
     }
   }
-
-  // onDelete() {
-  //   this.openDialog();
-  // }
-
-  // openDialog() {
-  //   const dialogRef: MatDialogRef<DialogComponent> = this.dialog.open(
-  //     DialogComponent,
-  //     {
-  //       data: {
-  //         title: 'Confirmar Deleção',
-  //         message: 'Você tem certeza que deseja deletar este registro?',
-  //         confirmText: 'Sim',
-  //         cancelText: 'Não',
-  //       },
-  //     }
-  //   );
-
-  //   dialogRef.afterClosed().subscribe((result) => {
-  //     if (result) {
-  //       this.deleteConfirmed();
-  //     }
-  //   });
-  // }
-
-  // deleteConfirmed() {
-  //   if (this.dataForm?.id) {
-  //     this.personService.delete(this.dataForm.id).subscribe({
-  //       next: (response) => {
-  //         console.log('Deleção bem-sucedida', response);
-  //         this.toastrService.success('Deleção bem-sucedida');
-  //         this.formSubmitted.emit();
-  //       },
-  //       error: (error) => {
-  //         console.error('Erro ao deletar cliente', error);
-  //         this.toastrService.error('Erro ao deletar cliente');
-  //       },
-  //     });
-  //   } else {
-  //     console.error('ID não encontrado para deleção');
-  //     this.toastrService.error('ID não encontrado para deleção');
-  //   }
-  // }
 
   getAddressByCep() {
     console.log('Buscando endereço pelo CEP');
