@@ -55,6 +55,11 @@
       type="text"
       placeholder="00.000.000/0000-00"
       mask="00.000.000/0000-00"
+      appCnpjValidator
+      [error]="
+        form.get('cnpj')?.invalid &&
+        (form.get('cnpj')?.touched || submitted)
+      "
     />
     <app-primary-input
       formControlName="ie"

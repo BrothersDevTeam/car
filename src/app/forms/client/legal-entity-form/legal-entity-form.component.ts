@@ -1,37 +1,39 @@
 import {
-  Component,
-  EventEmitter,
-  inject,
   Input,
-  OnChanges,
+  inject,
   OnInit,
   Output,
+  Component,
+  OnChanges,
+  EventEmitter,
   SimpleChanges,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
-import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { DialogComponent } from '@components/dialog/dialog.component';
+import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
+import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 
 import type { CreateLegalEntity, Person } from '@interfaces/person';
 
-import { PersonService } from '@services/person.service';
 import { CepService } from '@services/cep.service';
+import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
+import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
 
 @Component({
   selector: 'app-legal-entity-form',
   imports: [
-    PrimaryInputComponent,
+  PrimaryInputComponent,
     ReactiveFormsModule,
     WrapperCardComponent,
     MatButtonModule,
     MatIconModule,
+    CnpjValidatorDirective
   ],
   templateUrl: './legal-entity-form.component.html',
   styleUrl: './legal-entity-form.component.scss',
