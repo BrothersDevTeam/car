@@ -1,6 +1,6 @@
 import { ToastrService } from 'ngx-toastr';
 import { EventType } from '@angular/router';
-import { Person } from '@interfaces/person';
+import type { Person } from '@interfaces/person';
 import { MatCardModule } from '@angular/material/card';
 import { PersonService } from '@services/person.service';
 import { MatButtonModule } from '@angular/material/button';
