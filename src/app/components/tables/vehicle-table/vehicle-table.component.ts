@@ -35,6 +35,7 @@ export class VehicleTableComponent implements OnInit, OnChanges {
   dataSource = new MatTableDataSource<GetVehicle>();
 
   displayedColumns: string[] = [
+    'status',
     'licensePlate',
     'brand',
     'model',
