@@ -52,7 +52,7 @@
       } @else if(selectedPerson?.person?.cnpj) {
         <mat-tab-group [selectedIndex]="0">
           <mat-tab label="Pessoa Jurídica">
-            <app-legal-entity-info (editEvent)="handleEdit()" [person]="selectedPerson!.person" />
+            <app-legal-entity-info (editEvent)="handleEdit()" [person]="selectedPerson!" (formSubmitted)="onFormSubmitted()" />
           </mat-tab>
           <mat-tab label="Negócios efetuados">
             <app-business-done-table />
