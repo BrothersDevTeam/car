@@ -1,13 +1,18 @@
 import { ToastrService } from 'ngx-toastr';
+
 import { EventType } from '@angular/router';
-import type { Person } from '@interfaces/person';
 import { MatCardModule } from '@angular/material/card';
-import { PersonService } from '@services/person.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { DialogComponent } from '@components/dialog/dialog.component';
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+
+import { DialogComponent } from '@components/dialog/dialog.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
+
+import type { Person } from '@interfaces/person';
+
+import { PersonService } from '@services/person.service';
+
 
 @Component({
   selector: 'app-natural-person-info',

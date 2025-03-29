@@ -1,3 +1,5 @@
+import { ToastrService } from 'ngx-toastr';
+
 import {
   inject,
   OnInit,
@@ -6,8 +8,8 @@ import {
   OnDestroy,
   ViewChild,
 } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
 import { catchError, of, Subscription } from 'rxjs';
+
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';

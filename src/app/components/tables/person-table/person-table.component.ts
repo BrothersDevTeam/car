@@ -1,20 +1,21 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
   Input,
-  OnChanges,
   OnInit,
   Output,
+  Component,
+  OnChanges,
+  EventEmitter,
+  ChangeDetectionStrategy,
 } from '@angular/core';
+import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatSortModule } from '@angular/material/sort';
 
-import { Person } from '@interfaces/person';
+import  { PaginationComponent } from '@components/pagination/pagination.component';
+
+import type { Person } from '@interfaces/person';
 import { PaginationResponse } from '@interfaces/pagination';
 
-import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-person-table',
@@ -40,7 +41,7 @@ export class PersonTableComponent implements OnInit, OnChanges {
   pageSizeOptions = [1000, 100, 50, 20];
   filteredData: Person[] = [];
 
-  ngAfterViewInit() {}
+  ngAfterViewInit() { }
 
   ngOnInit(): void {
     if (this.personPaginatedList?.content) {

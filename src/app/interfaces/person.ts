@@ -17,7 +17,9 @@ export type CreateNaturalPerson = Omit<
   'id' | 'legalName' | 'tradeName' | 'cnpj' | 'ie' | 'crt'
 >;
 
-export type CreateLegalEntity = Omit<GenericClient, 'id' | 'fullName' | 'cpf'>;
+export type CreateLegalEntity = Omit<
+  GenericClient, 'id' | 'fullName' | 'cpf'
+>;
 
 export interface Address {
   street: string;
