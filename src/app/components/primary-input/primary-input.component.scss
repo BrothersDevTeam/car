@@ -19,15 +19,13 @@
         border-radius: 8px;
         padding: 12px;
         width: 100%;
-
         background-color: $gray-secondary-bg;
       }
-
-      .invalid-field-message {
-        color: $error-color;
-        font-size: small;
-        align-self: flex-end;
-      }
+    }
+    .invalid-field-message {
+      color: $error-color;
+      font-size: small;
+      align-self: flex-end;
     }
   }
 }
