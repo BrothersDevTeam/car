@@ -16,7 +16,8 @@ export class AuthService {
       .pipe(
         tap((value) => {
           sessionStorage.setItem('car-token', value.token);
-          sessionStorage.setItem('username', value.fullName);
+          sessionStorage.setItem('car-username', value.fullName);
+          sessionStorage.setItem('car-user-role', value.role);
           this.router.navigate(['/home']);
         })
       );
@@ -24,6 +25,8 @@ export class AuthService {
 
   logout() {
     sessionStorage.removeItem('car-token');
+    sessionStorage.removeItem('car-username');
+    sessionStorage.removeItem('car-user-role');
     this.router.navigate(['/login']);
   }
 }

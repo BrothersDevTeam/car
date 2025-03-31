@@ -8,7 +8,8 @@ section {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: calc(100vh - 70px);
+  height: calc(100vh - 80px);
+  overflow: hidden;
 
   .sidenav-header {
     padding-top: 24px;
@@ -22,16 +23,18 @@ section {
 
     .header-text {
       height: 3rem;
+      color: $text-color;
 
-      > h2 {
+      > h3 {
         margin: 0;
-        font-size: 1rem;
-        line-height: 1.5rem;
+        font-size: medium;
+        font-weight: 500;
       }
 
       > p {
         margin: 0;
-        font-size: 0.8rem;
+        font-size: medium;
+        font-weight: 500;
       }
     }
 

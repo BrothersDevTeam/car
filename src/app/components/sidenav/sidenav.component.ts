@@ -32,10 +32,14 @@ export class SideNavComponent {
     private authService: AuthService,
     private actionsService: ActionsService,
     private router: Router
-  ) {}
+  ) {
+    this.loggedUsername.set(sessionStorage.getItem('car-username') || '');
+  }
 
   sideNavCollapsed = signal(false);
   isSmallScreen = signal(false);
+  loggedUsername = signal('');
+
   @Input() set collapsed(val: boolean) {
     this.sideNavCollapsed.set(val);
   }
