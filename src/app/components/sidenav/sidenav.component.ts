@@ -7,13 +7,13 @@ import {
   Output,
   signal,
 } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 
 import { ActionsService } from '@services/actions.service';
-import { AuthService } from '../../auth/auth.service';
+import { AuthService } from '@services/auth/auth.service';
 
 export type MenuItem = {
   icon: string;

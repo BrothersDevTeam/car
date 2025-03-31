@@ -1,12 +1,15 @@
 import { Routes } from '@angular/router';
+
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { LoginLayoutComponent } from './layouts/login-layout/login-layout.component';
-import { LoginComponent } from './pages/login/login.component';
-import { AuthGuard } from './auth/auth.guard';
+
 import { VehicleComponent } from './pages/vehicle/vehicle.component';
 import { PersonComponent } from './pages/person/person.component';
 import { StoreComponent } from './pages/store/store.component';
+import { LoginComponent } from './pages/login/login.component';
 import { NfeComponent } from './pages/nfe/nfe.component';
+
+import { AuthGuard } from './services/auth/auth.guard';
 
 export const routes: Routes = [
   {
