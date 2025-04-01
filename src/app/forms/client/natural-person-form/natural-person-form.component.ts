@@ -23,7 +23,6 @@ import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 
-
 import { ActionsService } from '@services/actions.service';
 
 @Component({
@@ -34,7 +33,7 @@ import { ActionsService } from '@services/actions.service';
     WrapperCardComponent,
     MatButtonModule,
     MatIconModule,
-    CpfValidatorDirective
+    CpfValidatorDirective,
   ],
   templateUrl: './natural-person-form.component.html',
   styleUrl: './natural-person-form.component.scss',
@@ -73,7 +72,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     private toastrService: ToastrService,
     private cepService: CepService,
     private actionsService: ActionsService
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.form.valueChanges.subscribe(() => {
@@ -116,11 +115,11 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
 
     const formValue: CreateNaturalPerson = {
       fullName: this.form.value.fullName || '',
-      cpf: this.form.value.cpf || '',
+      cpf: this.form.value.cpf?.replace(/\D/g, '') || '',
       active: true,
       contact: {
         email: this.form.value.contact?.email || '',
-        phone: this.form.value.contact?.phone || '',
+        phone: this.form.value.contact?.phone?.replace(/\D/g, '') || '',
       },
       address: {
         zipcode: this.form.value.address?.zipcode || '',

@@ -28,12 +28,12 @@ import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
 @Component({
   selector: 'app-legal-entity-form',
   imports: [
-  PrimaryInputComponent,
+    PrimaryInputComponent,
     ReactiveFormsModule,
     WrapperCardComponent,
     MatButtonModule,
     MatIconModule,
-    CnpjValidatorDirective
+    CnpjValidatorDirective,
   ],
   templateUrl: './legal-entity-form.component.html',
   styleUrl: './legal-entity-form.component.scss',
@@ -122,12 +122,12 @@ export class LegalEntityFormComponent implements OnInit, OnChanges {
     const formValue: CreateLegalEntity = {
       legalName: this.form.value.legalName || '',
       tradeName: this.form.value.tradeName || '',
-      cnpj: this.form.value.cnpj || '',
+      cnpj: this.form.value.cnpj?.replace(/\D/g, '') || '',
       ie: this.form.value.ie || '',
       active: true,
       contact: {
         email: this.form.value.contact?.email || '',
-        phone: this.form.value.contact?.phone || '',
+        phone: this.form.value.contact?.phone?.replace(/\D/g, '') || '',
       },
       address: {
         zipcode: this.form.value.address?.zipcode || '',
@@ -164,7 +164,6 @@ export class LegalEntityFormComponent implements OnInit, OnChanges {
       });
     }
   }
-
 
   getAddressByCep() {
     console.log('Buscando endereço pelo CEP');
