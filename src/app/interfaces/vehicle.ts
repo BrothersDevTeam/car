@@ -22,6 +22,9 @@ export interface Vehicle {
 export type CreateVehicle = Omit<Vehicle, 'id'>;
 
 export type GetVehicle = Omit<Vehicle, 'model' | 'brand'> & {
-  model: { id: string; description: string };
-  brand: { id: string; description: string };
+  model: {
+    id: string;
+    description: string;
+    brand: { id: string; description: string };
+  };
 };

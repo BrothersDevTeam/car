@@ -119,7 +119,7 @@ export class VehicleComponent {
   handleSelectedVehicle(vehicle: GetVehicle) {
     this.selectedVehicle = {
       ...vehicle,
-      brand: vehicle.brand.description,
+      brand: vehicle.model.brand.description,
       model: vehicle.model.description,
     };
     this.openInfo.set(true);

@@ -60,20 +60,19 @@ export class VehicleTableComponent implements OnInit, OnChanges {
     if (this.searchValue?.length) {
       this.filteredData = this.vehiclePaginatedList.content.filter(
         (element) => {
-          if (
-            element.licensePlate ||
-            element.brand.description ||
-            element.model.description
-          ) {
-            return (
-              element.licensePlate ||
-              element.brand.description ||
-              element.model.description
-            )
-              .trim()
-              .toLowerCase()
-              .includes(this.searchValue!.trim().toLowerCase());
-          } else return false;
+          const searchableString = [
+            element.licensePlate,
+            element.model.brand.description,
+            element.model.description,
+          ]
+            .filter((value) => value)
+            .join(' ')
+            .trim()
+            .toLowerCase();
+
+          return searchableString.includes(
+            this.searchValue!.trim().toLowerCase()
+          );
         }
       );
       this.dataSource.data = this.filteredData;
