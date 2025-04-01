@@ -24,6 +24,7 @@ export class LoginComponent {
   loginForm!: FormGroup<LoginForm>;
 
   disableBtn = signal(false);
+  passwordVisible = signal(false);
 
   constructor(
     private authService: AuthService,
@@ -55,5 +56,9 @@ export class LoginComponent {
             'Erro inesperado! Tente novamente mais tarde'
           ),
       });
+  }
+
+  togglePasswordVisibility() {
+    this.passwordVisible.set(!this.passwordVisible());
   }
 }

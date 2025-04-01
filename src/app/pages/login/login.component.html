@@ -18,10 +18,12 @@
         formControlName="password"
         label="Senha"
         inputName="password"
-        type="password"
+        [type]="passwordVisible() ? 'text' : 'password'"
         [uppercase]="false"
       >
-        <mat-icon>password</mat-icon>
+        <mat-icon (click)="togglePasswordVisibility()" style="cursor: pointer;" >
+          {{ passwordVisible() ? 'visibility' : 'visibility_off' }}
+        </mat-icon>
       </app-primary-input>
     </form>
 

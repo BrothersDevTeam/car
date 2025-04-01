@@ -1,4 +1,4 @@
-@use '../../../styles/variables.scss' as *;
+@use "../../../styles/variables.scss" as *;
 
 .input-wrapper {
   color: $text-color;
@@ -12,10 +12,8 @@
 
     .input-content {
       display: flex;
-      background-color: $gray-secondary-bg;
       border-radius: 8px;
       margin-top: 10px;
-      padding-right: 12px;
       align-items: center;
 
       input {

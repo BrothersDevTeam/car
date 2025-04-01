@@ -52,3 +52,13 @@ main {
     }
   }
 }
+
+app-primary-input {
+  position: relative;
+
+  mat-icon {
+    position: absolute;
+
+    right: 10px;
+  }
+}
