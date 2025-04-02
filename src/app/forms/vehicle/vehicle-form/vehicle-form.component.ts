@@ -149,7 +149,8 @@ export class VehicleFormComponent {
       {
         data: {
           title: 'Confirmar Deleção',
-          message: 'Você tem certeza que deseja deletar este registro?',
+          message:
+            'Você tem certeza que deseja <strong>deletar</strong> este registro?',
           confirmText: 'Sim',
           cancelText: 'Não',
         },

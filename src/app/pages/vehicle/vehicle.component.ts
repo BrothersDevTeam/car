@@ -158,7 +158,7 @@ export class VehicleComponent {
       {
         data: {
           title: 'Há mudanças não salvas',
-          message: 'Deseja fechar sem salvar?',
+          message: 'Deseja fechar <strong>sem salvar</strong>?',
           confirmText: 'Sim',
           cancelText: 'Não',
         },

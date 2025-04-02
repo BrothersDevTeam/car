@@ -13,7 +13,6 @@ import type { Person } from '@interfaces/person';
 
 import { PersonService } from '@services/person.service';
 
-
 @Component({
   selector: 'app-natural-person-info',
   imports: [MatButtonModule, MatCardModule, WrapperCardComponent],
@@ -21,14 +20,16 @@ import { PersonService } from '@services/person.service';
   styleUrl: './natural-person-info.component.scss',
 })
 export class NaturalPersonInfoComponent {
-
   readonly dialog = inject(MatDialog);
 
   @Input() person!: Person;
   @Output() editEvent = new EventEmitter<EventType>();
   @Output() formSubmitted = new EventEmitter<void>();
 
-  constructor(private toastrService: ToastrService, private personService: PersonService) { }
+  constructor(
+    private toastrService: ToastrService,
+    private personService: PersonService
+  ) {}
 
   onDelete() {
     this.openDialog();
@@ -40,7 +41,8 @@ export class NaturalPersonInfoComponent {
       {
         data: {
           title: 'Confirmar Exclusão',
-          message: 'Você tem certeza que deseja excluir este registro?',
+          message:
+            'Você tem certeza que deseja <strong>excluir</strong> este registro?',
           confirmText: 'Sim',
           cancelText: 'Não',
         },
@@ -56,7 +58,6 @@ export class NaturalPersonInfoComponent {
 
   deleteConfirmed() {
     if (this.person.id) {
-
       this.personService.delete(this.person.id).subscribe({
         next: (response) => {
           console.log('Exclusão bem-sucedida', response);

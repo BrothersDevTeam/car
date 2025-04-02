@@ -20,15 +20,16 @@ import { PersonService } from '@services/person.service';
   styleUrl: './legal-entity-info.component.scss',
 })
 export class LegalEntityInfoComponent {
-
   readonly dialog = inject(MatDialog);
 
   @Input() person!: Person;
   @Output() editEvent = new EventEmitter<EventType>();
   @Output() formSubmitted = new EventEmitter<void>();
 
-  constructor(private toastrService: ToastrService, private personService: PersonService) { }
-
+  constructor(
+    private toastrService: ToastrService,
+    private personService: PersonService
+  ) {}
 
   onDelete() {
     this.openDialog();
@@ -40,7 +41,8 @@ export class LegalEntityInfoComponent {
       {
         data: {
           title: 'Confirmar Exclusão',
-          message: 'Tem certeza que deseja excluir este registro?',
+          message:
+            'Tem certeza que deseja <strong>excluir</strong> este registro?',
           confirmText: 'Sim',
           cancelText: 'Nao',
         },
@@ -72,7 +74,4 @@ export class LegalEntityInfoComponent {
       this.toastrService.error('ID nao encontrado para exclusao');
     }
   }
-
-
-
 }
