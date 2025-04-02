@@ -42,7 +42,7 @@
 
     <app-primary-input
       formControlName="yearModel"
-      label="Ano do modelo"
+      label="Ano/Modelo"
       inputName="yearModel"
       type="text"
       placeholder="0000/0000"
@@ -53,6 +53,8 @@
       label="Chassi"
       inputName="chassis"
       type="text"
+      placeholder="Insira os 17 caracteres do chassi"
+      mask="AAAAAAAAAAAAAAAAA"
     />
     <app-primary-input
       formControlName="numberOfDoors"
@@ -71,6 +73,8 @@
       label="Número do motor"
       inputName="engineNumber"
       type="text"
+      placeholder="Digite o Número do Motor"
+      mask="AAAAAAAAAAAAAAAAAAAA"
     />
     <app-primary-input
       formControlName="initialMileage"

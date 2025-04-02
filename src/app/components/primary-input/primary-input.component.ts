@@ -1,8 +1,8 @@
-import { NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
+import { NgxMaskDirective } from 'ngx-mask';
 import { Component, forwardRef, Input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-type InputTypes = 'text' | 'email' | 'password' | 'number' | 'tel' ;
+type InputTypes = 'text' | 'email' | 'password' | 'number' | 'tel';
 
 @Component({
   selector: 'app-primary-input',
