@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Inject,
-  Input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
@@ -13,6 +8,7 @@ import {
   MatDialogRef,
   MatDialogTitle,
 } from '@angular/material/dialog';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-dialog',
@@ -28,6 +24,8 @@ import {
   styleUrl: './dialog.component.scss',
 })
 export class DialogComponent {
+  safeMessage: SafeHtml;
+
   constructor(
     public dialogRef: MatDialogRef<DialogComponent>,
     @Inject(MAT_DIALOG_DATA)
@@ -36,6 +34,9 @@ export class DialogComponent {
       message: string;
       confirmText: string;
       cancelText: string;
-    }
-  ) {}
+    },
+    private sanitizer: DomSanitizer
+  ) {
+    this.safeMessage = this.sanitizer.bypassSecurityTrustHtml(data.message);
+  }
 }
