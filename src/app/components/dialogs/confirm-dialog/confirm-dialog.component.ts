@@ -11,7 +11,7 @@ import {
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-dialog',
+  selector: 'app-comfirm-dialog',
   imports: [
     MatDialogTitle,
     MatDialogContent,
@@ -20,14 +20,14 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
     MatButtonModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './dialog.component.html',
-  styleUrl: './dialog.component.scss',
+  templateUrl: './confirm-dialog.component.html',
+  styleUrl: './confirm-dialog.component.scss',
 })
-export class DialogComponent {
+export class ConfirmDialogComponent {
   safeMessage: SafeHtml;
 
   constructor(
-    public dialogRef: MatDialogRef<DialogComponent>,
+    public dialogRef: MatDialogRef<ConfirmDialogComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data: {
       title: string;
