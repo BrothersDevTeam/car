@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 
-import { DialogComponent } from '@components/dialog/dialog.component';
+import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
 import type { Person } from '@interfaces/person';
@@ -36,8 +36,8 @@ export class LegalEntityInfoComponent {
   }
 
   openDialog() {
-    const dialogRef: MatDialogRef<DialogComponent> = this.dialog.open(
-      DialogComponent,
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
+      ConfirmDialogComponent,
       {
         data: {
           title: 'Confirmar Exclusão',

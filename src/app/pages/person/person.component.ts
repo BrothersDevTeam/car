@@ -18,7 +18,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 
 import { DrawerComponent } from '@components/drawer/drawer.component';
-import { DialogComponent } from '@components/dialog/dialog.component';
+import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { PersonTableComponent } from '@components/tables/person-table/person-table.component';
 import { BusinessDoneTableComponent } from '@components/tables/business-done-table/business-done-table.component';
@@ -169,8 +169,8 @@ export class PersonComponent implements OnInit, OnDestroy {
   }
 
   openDialog() {
-    const dialogRef: MatDialogRef<DialogComponent> = this.dialog.open(
-      DialogComponent,
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
+      ConfirmDialogComponent,
       {
         data: {
           title: 'Há mudanças não salvas',

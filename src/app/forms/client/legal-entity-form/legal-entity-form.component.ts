@@ -8,13 +8,13 @@ import {
   EventEmitter,
   SimpleChanges,
 } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { DialogComponent } from '@components/dialog/dialog.component';
+import { ToastrService } from 'ngx-toastr';
+
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 
