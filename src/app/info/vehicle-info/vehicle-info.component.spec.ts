@@ -18,11 +18,14 @@ describe('VehicleInfoComponent', () => {
     const mockVehicle: Vehicle = {
       id: '1',
       licensePlate: 'ABC-1234',
-      brand: { id: '1', name: 'Volkswagen' },
-      model: { id: '1', name: 'Fusca' },
+      modelDto: {
+        id: '1',
+        description: 'Fusca',
+        brandDto: { id: '1', description: 'Volkswagen' },
+      },
       yearModel: '1970',
-      color: 'Azul',
-      origin: 'nacional',
+      colorDto: { id: '1', description: 'AZUL' },
+      origin: 'NACIONAL',
     };
 
     component.vehicle = mockVehicle;

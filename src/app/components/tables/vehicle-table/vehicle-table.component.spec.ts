@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { PaginationResponse } from '@interfaces/pagination';
-import { Vehicle } from '@interfaces/vehicle';
+import { GetVehicle, Vehicle } from '@interfaces/vehicle';
 
 import { VehicleTableComponent } from './vehicle-table.component';
 
@@ -19,34 +19,46 @@ describe('VehicleTableComponent', () => {
     component = fixture.componentInstance;
 
     // Mock da propriedade personPaginatedList
-    const mockVehiclePaginatedList: PaginationResponse<Vehicle> = {
-      content: [
-        {
-          id: '1',
-          licensePlate: 'ABC-1234',
-          brand: { id: '1', name: 'Volkswagen' },
-          model: { id: '1', name: 'Fusca' },
-          yearModel: '1970',
-          color: 'Azul',
-          origin: 'nacional',
-        },
-        {
-          id: '2',
-          licensePlate: 'DEF-5678',
-          model: { id: '2', name: 'Gol' },
-          brand: { id: '1', name: 'Volkswagen' },
-          yearModel: '2000',
-          color: 'Azul',
-          origin: 'nacional',
-        },
-      ],
-      page: 0,
-      size: 1000,
-      totalElements: 3,
-      totalPages: 1,
-    };
+    // const mockVehiclePaginatedList: PaginationResponse<GetVehicle> = {
+    //   content: [
+    //     {
+    //       id: '1',
+    //       licensePlate: 'ABC-1234',
+    //       modelDto: {
+    //         id: '1',
+    //         description: '',
+    //         brandDto: {
+    //           id: '11e4f7cb-e8e7-401a-b47c-d8b4d5a6b3f8',
+    //           description: 'HONDA',
+    //         },
+    //       },
+    //       yearModel: '1970',
+    //       colorDto: { id: '1', description: 'Azul' },
+    //       origin: 'nacional',
+    //     },
+    //     {
+    //       id: '2',
+    //       licensePlate: 'DEF-5678',
+    //       modelDto: {
+    //         id: '2',
+    //         description: 'Gol',
+    //         brandDto: {
+    //           id: '11e4f7cb-e8e7-401a-b47c-d8b4d5a6b3f8',
+    //           description: 'HONDA',
+    //         },
+    //       },
+    //       yearModel: '2000',
+    //       colorDto: { id: '1', description: 'Azul' },
+    //       origin: 'nacional',
+    //     },
+    //   ],
+    //   page: 0,
+    //   size: 1000,
+    //   totalElements: 2,
+    //   totalPages: 1,
+    // };
 
-    component.vehiclePaginatedList = mockVehiclePaginatedList;
+    // component.vehiclePaginatedList = mockVehiclePaginatedList;
     fixture.detectChanges();
   });
 

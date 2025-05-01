@@ -3,9 +3,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { EventType } from '@angular/router';
 
-import { Vehicle } from '@interfaces/vehicle';
-
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
+
+import { VehicleForm } from '@interfaces/vehicle';
 
 @Component({
   selector: 'app-vehicle-info',
@@ -14,6 +14,6 @@ import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.comp
   styleUrl: './vehicle-info.component.scss',
 })
 export class VehicleInfoComponent {
-  @Input() vehicle!: Vehicle;
+  @Input() vehicle!: VehicleForm;
   @Output() editEvent = new EventEmitter<EventType>();
 }

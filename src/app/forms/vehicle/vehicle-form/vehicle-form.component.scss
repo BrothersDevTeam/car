@@ -50,3 +50,13 @@ form {
     }
   }
 }
+
+.custom-selects-container {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+
+  > * {
+    flex: 1;
+  }
+}

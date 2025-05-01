@@ -7,15 +7,17 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, of, Subscription } from 'rxjs';
 
+import { DrawerComponent } from '@components/drawer/drawer.component';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { VehicleTableComponent } from '@components/tables/vehicle-table/vehicle-table.component';
-import { DrawerComponent } from '@components/drawer/drawer.component';
-import { DialogComponent } from '@components/dialog/dialog.component';
+import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
+
 import { VehicleFormComponent } from '@forms/vehicle/vehicle-form/vehicle-form.component';
+
 import { VehicleInfoComponent } from '@info/vehicle-info/vehicle-info.component';
 
 import type { PaginationResponse } from '@interfaces/pagination';
-import type { GetVehicle, Vehicle } from '@interfaces/vehicle';
+import type { GetVehicle, Vehicle, VehicleForm } from '@interfaces/vehicle';
 
 import { VehicleService } from '@services/vehicle.service';
 import { ActionsService } from '@services/actions.service';
@@ -40,7 +42,7 @@ export class VehicleComponent {
   private subscription!: Subscription;
 
   vehiclePaginatedList: PaginationResponse<GetVehicle> | null = null;
-  selectedVehicle: Vehicle | null = null;
+  selectedVehicle: VehicleForm | null = null;
   searchValue: string = '';
   paginationRequestConfig = {
     pageSize: 1000,
@@ -117,12 +119,12 @@ export class VehicleComponent {
   }
 
   handleSelectedVehicle(vehicle: GetVehicle) {
-    this.selectedVehicle = {
+    (this.selectedVehicle = {
       ...vehicle,
-      brand: vehicle.model.brand.description,
-      model: vehicle.model.description,
-    };
-    this.openInfo.set(true);
+      brandDto: vehicle.modelDto?.brandDto || null,
+      modelDto: vehicle.modelDto || null,
+    }),
+      this.openInfo.set(true);
   }
 
   handleOpenForm() {
@@ -153,8 +155,8 @@ export class VehicleComponent {
   }
 
   openDialog() {
-    const dialogRef: MatDialogRef<DialogComponent> = this.dialog.open(
-      DialogComponent,
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
+      ConfirmDialogComponent,
       {
         data: {
           title: 'Há mudanças não salvas',

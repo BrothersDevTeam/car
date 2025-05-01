@@ -7,7 +7,7 @@
     >
   </div>
   }
-  <app-wrapper-card title="Dados do veículo">
+  <app-wrapper-card>
     <app-primary-input
       formControlName="licensePlate"
       label="Placa*"
@@ -19,26 +19,46 @@
         (form.get('licensePlate')?.touched || submitted)
       "
     />
-    <app-primary-input
-      formControlName="brand"
-      label="Marca"
-      inputName="brand"
-      type="text"
-      [error]="
-        form.get('brand')?.invalid &&
-        (form.get('brand')?.touched || submitted)
-      "
-    />
-    <app-primary-input
-      formControlName="model"
-      label="Modelo"
-      inputName="model"
-      type="text"
-      [error]="
-        form.get('model')?.invalid &&
-        (form.get('model')?.touched || submitted)
-      "
-    />
+    <div class="custom-selects-container">
+      <app-custom-select
+        listType="brandDto"
+        [label]="'Marca'"
+        [options]="brands"
+        [control]="brandControl"
+        matTooltip="Adicionar nova marca"
+        placeholder="Selecione uma marca"
+      ></app-custom-select>
+
+      <app-custom-select
+        listType="modelDto"
+        label="Modelo"
+        [selectedBrand]="brandControl.value"
+        [options]="models"
+        [control]="modelControl"
+        [placeholder]="selectModelDisabled() ? 'Selecione uma marca' : 'Selecione um modelo'"
+        matTooltip="Adicionar novo modelo"
+        [disabled]="selectModelDisabled()"
+      ></app-custom-select>
+    </div>
+    <div class="custom-selects-container">
+      <app-custom-select
+        listType="colorDto"
+        [label]="'Cor'"
+        [options]="colors"
+        [control]="colorControl"
+        placeholder="Selecione uma cor"
+        matTooltip="Adicionar nova cor"
+      ></app-custom-select>
+
+      <app-custom-select
+        listType="fuelTypeDto"
+        [label]="'Combustível'"
+        [options]="fuelTypes"
+        [control]="fuelTypeControl"
+        placeholder="Selecione um combustível"
+        matTooltip="Adicionar novo tipo de combustível"
+      ></app-custom-select>
+    </div>
 
     <app-primary-input
       formControlName="yearModel"
@@ -112,18 +132,7 @@
       inputName="features"
       type="text"
     />
-    <app-primary-input
-      formControlName="color"
-      label="Cor"
-      inputName="color"
-      type="text"
-    />
-    <app-primary-input
-      formControlName="fuelType"
-      label="Combustível"
-      inputName="fuelType"
-      type="text"
-    />
+
     <app-primary-input
       formControlName="origin"
       label="Origem"

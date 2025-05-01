@@ -62,8 +62,8 @@ export class VehicleTableComponent implements OnInit, OnChanges {
         (element) => {
           const searchableString = [
             element.licensePlate,
-            element.model.brand.description,
-            element.model.description,
+            element.modelDto.brandDto.description,
+            element.modelDto.description,
           ]
             .filter((value) => value)
             .join(' ')

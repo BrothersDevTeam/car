@@ -1,5 +1,5 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { first, Observable, of, tap } from 'rxjs';
 
 import { PaginationResponse } from '@interfaces/pagination';
@@ -31,36 +31,6 @@ export class VehicleService {
           this.cache = response;
         })
       );
-
-    // Mock
-    // return of(
-    //   (this.cache = {
-    //     content: [
-    //       {
-    //         id: '1',
-    //         licensePlate: 'ABC-1234',
-    //         brand: { id: '1', name: 'Volkswagen' },
-    //         model: { id: '1', name: 'Fusca' },
-    //         yearModel: '1970',
-    //         color: 'Azul',
-    //         origin: 'nacional',
-    //       },
-    //       {
-    //         id: '2',
-    //         licensePlate: 'DEF-5678',
-    //         model: { id: '2', name: 'Gol' },
-    //         brand: { id: '1', name: 'Volkswagen' },
-    //         yearModel: '2000',
-    //         color: 'Azul',
-    //         origin: 'nacional',
-    //       },
-    //     ],
-    //     page: 0,
-    //     size: 1000,
-    //     totalElements: 3,
-    //     totalPages: 1,
-    //   })
-    // );
   }
 
   create(data: CreateVehicle) {
@@ -72,8 +42,8 @@ export class VehicleService {
     );
   }
 
-  update(data: Vehicle, id: string) {
-    return this.http.put<string>(`${this.apiUrl}/${id}`, data).pipe(
+  update(data: Vehicle) {
+    return this.http.put<string>(`${this.apiUrl}`, data).pipe(
       tap((response: string) => {
         console.log('Formulário enviado com sucesso!', response);
         this.clearCache();
