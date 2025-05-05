@@ -10,6 +10,7 @@ import { CreateModel, Model } from '@interfaces/vehicle';
 })
 export class ModelService {
   private cache: Model[] | null = null;
+  private cacheBrandId: string = '';
 
   // private cache: Model[] | null = [
   //   { id: '1', description: 'ES', brand: { id: '1', description: 'HONDA' } },
@@ -35,10 +36,10 @@ export class ModelService {
   constructor(private http: HttpClient) {}
 
   getModels(id: string): Observable<Model[]> {
-    console.log('Fetching models from API...id: ', id);
-    if (this.cache) {
+    if (this.cache && this.cacheBrandId === id) {
       return of(this.cache);
     }
+    this.cacheBrandId = id;
     return this.http.get<Model[]>(`${this.apiUrl}?brandId=${id}`).pipe(
       first(),
       tap((response) => {

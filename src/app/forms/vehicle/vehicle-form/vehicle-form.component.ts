@@ -132,7 +132,9 @@ export class VehicleFormComponent implements OnInit, OnChanges {
     this.colorService.getColors().subscribe((colors) => {
       this.colors = colors;
     });
+  }
 
+  ngOnChanges(changes: SimpleChanges) {
     this.brandControl.valueChanges
       .pipe(distinctUntilChanged())
       .subscribe((brand) => {
@@ -149,9 +151,7 @@ export class VehicleFormComponent implements OnInit, OnChanges {
           this.selectModelDisabled.set(true);
         }
       });
-  }
 
-  ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
       setTimeout(() => {
         this.form.patchValue({
