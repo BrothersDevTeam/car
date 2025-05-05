@@ -198,18 +198,18 @@ export class VehicleFormComponent implements OnInit, OnChanges {
     }
 
     let formValues: { [key: string]: any } = this.form.value;
-    let payload: any = { licensePlate: this.form.value.licensePlate };
+    let payload: any = {};
 
-    const removeEmptyValues = (obj: any) => {
+    const removeEmptyValues = () => {
       Object.keys(formValues).forEach((key) => {
         if (
           typeof formValues[key] === 'object' &&
-          formValues[key].description !== null
+          formValues[key]?.description !== null
         ) {
           if (
-            formValues[key].description === null ||
-            formValues[key].description === undefined ||
-            formValues[key].description === ''
+            formValues[key]?.description === null ||
+            formValues[key]?.description === undefined ||
+            formValues[key]?.description === ''
           ) {
             delete formValues[key];
           }
@@ -224,31 +224,28 @@ export class VehicleFormComponent implements OnInit, OnChanges {
         }
       });
     };
-    removeEmptyValues(formValues);
+    removeEmptyValues();
 
-    const changeNameOfKeysAndRemoveId = (obj: any) => {
-      const { id, fuelType, color, model, brand, ...restOfForm } = obj;
-      payload = {
-        ...restOfForm,
-        fuelTypeDto: fuelType,
-        colorDto: color,
-      };
-    };
-    changeNameOfKeysAndRemoveId(formValues);
+    const addformValuesOnPayload = () => {
+      const { brandDto, modelDto, ...restOfFormValues } = formValues;
+      payload = restOfFormValues;
 
-    const addBrandIntoModel = () => {
-      if (formValues['model'] && formValues['model'].description !== '') {
-        const { brand, model } = formValues;
+      if (
+        formValues['modelDto'] &&
+        formValues['modelDto'].description !== '' &&
+        formValues['brandDto'] &&
+        formValues['brandDto'].description !== ''
+      ) {
         payload = {
           ...payload,
           modelDto: {
-            ...model,
-            brandDto: brand,
+            ...modelDto,
+            brandDto,
           },
         } as VehicleForm;
       }
     };
-    addBrandIntoModel();
+    addformValuesOnPayload();
 
     if (this.dataForm?.id) {
       this.vehicleService
