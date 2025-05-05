@@ -46,8 +46,8 @@ export class FuelTypeService {
     );
   }
 
-  update(data: FuelType, id: string) {
-    return this.http.put<string>(`${this.apiUrl}/${id}`, data).pipe(
+  update(data: FuelType) {
+    return this.http.put<string>(`${this.apiUrl}`, data).pipe(
       tap((response: string) => {
         console.log('Formulário enviado com sucesso!', response);
         this.clearCache();

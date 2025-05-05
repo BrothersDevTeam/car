@@ -103,7 +103,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
 
     const service = this.serviceMap[this.listType];
     if (service) {
-      service.update(option.id).subscribe({
+      service.update(option).subscribe({
         next: () => {
           this.toastrService.success('Edição realizada com sucesso!');
         },
@@ -133,39 +133,47 @@ export class CustomSelectComponent implements OnInit, OnChanges {
 
   typeListTexts = {
     brandDto: {
-      title: 'Adicionar nova marca',
+      create: 'Adicionar nova marca',
+      update: 'Editar marca',
       message: 'Digite o nome da marca',
-      successMessage: 'Marca adicionada com sucesso!',
+      successCreateMessage: 'Marca adicionada com sucesso!',
+      successUpdateMessage: 'Marca editada com sucesso!',
       errorMessage: 'Erro ao adicionar marca. Tente novamente.',
     },
     modelDto: {
-      title: 'Adicionar novo modelo',
+      create: 'Adicionar novo modelo',
+      update: 'Editar modelo',
       message: 'Digite o nome do modelo',
-      successMessage: 'Modelo adicionado com sucesso!',
+      successCreateMessage: 'Modelo adicionado com sucesso!',
+      successUpdateMessage: 'Modelo editado com sucesso!',
       errorMessage: 'Erro ao adicionar modelo. Tente novamente.',
     },
     colorDto: {
-      title: 'Adicionar nova cor',
+      create: 'Adicionar nova cor',
+      update: 'Editar cor',
       message: 'Digite o nome da cor',
-      successMessage: 'Cor adicionada com sucesso!',
+      successCreateMessage: 'Cor adicionada com sucesso!',
+      successUpdateMessage: 'Cor editada com sucesso!',
       errorMessage: 'Erro ao adicionar cor. Tente novamente.',
     },
     fuelTypeDto: {
-      title: 'Adicionar novo tipo de combustível',
+      create: 'Adicionar novo tipo de combustível',
+      update: 'Editar tipo de combustível',
       message: 'Digite o nome do tipo de combustível',
-      successMessage: 'Tipo de combustível adicionado com sucesso!',
+      successCreateMessage: 'Tipo de combustível adicionado com sucesso!',
+      successUpdateMessage: 'Tipo de combustível editado com sucesso!',
       errorMessage: 'Erro ao adicionar tipo de combustível. Tente novamente.',
     },
   };
 
-  createNewItem() {
+  createNewItem(id?: string) {
     const service = this.serviceMap[this.listType];
 
     if (service) {
       const dialogRef = this.dialog.open(CriateElementConfirmDialogComponent, {
         width: '400px',
         data: {
-          title: this.typeListTexts[this.listType].title,
+          title: this.typeListTexts[this.listType].create,
           message: this.typeListTexts[this.listType].message,
           confirmText: 'Salvar',
           cancelText: 'Cancelar',
@@ -188,12 +196,59 @@ export class CustomSelectComponent implements OnInit, OnChanges {
             next: (response: { id: string; description: string }) => {
               this.options.push(response);
               this.toastrService.success(
-                this.typeListTexts[this.listType].successMessage
+                this.typeListTexts[this.listType].successCreateMessage
               );
             },
             error: () => {
               this.toastrService.error(
                 `Erro ao criar ${this.listType}. Tente novamente.`
+              );
+            },
+          });
+        }
+      });
+    } else {
+      console.error(`Serviço não encontrado para o tipo: ${this.listType}`);
+    }
+  }
+
+  editItem(option: { id: string; description: string }, event: Event) {
+    const service = this.serviceMap[this.listType];
+
+    if (service) {
+      const dialogRef = this.dialog.open(CriateElementConfirmDialogComponent, {
+        width: '400px',
+        data: {
+          title:
+            this.typeListTexts[this.listType].update + ` ${option.description}`,
+          message: this.typeListTexts[this.listType].message,
+          confirmText: 'Salvar',
+          cancelText: 'Cancelar',
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((description) => {
+        if (description) {
+          let payload: any = { description, id: option.id };
+          if (this.listType === 'modelDto') {
+            if (this.selectedBrand) {
+              payload = {
+                ...payload,
+                brandDto: this.selectedBrand,
+              };
+            }
+          }
+
+          service.update(payload).subscribe({
+            next: (response: { id: string; description: string }) => {
+              this.options.push(response);
+              this.toastrService.success(
+                this.typeListTexts[this.listType].successUpdateMessage
+              );
+            },
+            error: () => {
+              this.toastrService.error(
+                `Erro ao editar ${this.listType}. Tente novamente.`
               );
             },
           });

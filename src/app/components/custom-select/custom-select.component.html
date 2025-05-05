@@ -17,7 +17,7 @@
     >
       <li *ngFor="let option of options" (click)="selectOption(option)">
         <span>{{ option.description }}</span>
-        <button class="edit-button" (click)="editOption(option, $event)">
+        <button class="edit-button" (click)="editItem(option, $event)">
           ✏️
         </button>
       </li>

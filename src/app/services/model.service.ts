@@ -57,8 +57,8 @@ export class ModelService {
     );
   }
 
-  update(data: Model, id: string) {
-    return this.http.put<string>(`${this.apiUrl}/${id}`, data).pipe(
+  update(data: Model) {
+    return this.http.put<string>(`${this.apiUrl}`, data).pipe(
       tap((response: string) => {
         console.log('Formulário enviado com sucesso!', response);
         this.clearCache();
