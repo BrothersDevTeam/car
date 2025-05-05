@@ -202,10 +202,7 @@ export class VehicleFormComponent implements OnInit, OnChanges {
 
     const removeEmptyValues = () => {
       Object.keys(formValues).forEach((key) => {
-        if (
-          typeof formValues[key] === 'object' &&
-          formValues[key]?.description !== null
-        ) {
+        if (typeof formValues[key] === 'object') {
           if (
             formValues[key]?.description === null ||
             formValues[key]?.description === undefined ||
@@ -233,8 +230,10 @@ export class VehicleFormComponent implements OnInit, OnChanges {
       if (
         formValues['modelDto'] &&
         formValues['modelDto'].description !== '' &&
+        formValues['modelDto'].description !== null &&
         formValues['brandDto'] &&
-        formValues['brandDto'].description !== ''
+        formValues['brandDto'].description !== '' &&
+        formValues['brandDto'].description !== null
       ) {
         payload = {
           ...payload,
