@@ -35,10 +35,18 @@
         [selectedBrand]="brandControl.value"
         [options]="models"
         [control]="modelControl"
-        [placeholder]="selectModelDisabled() ? 'Selecione uma marca' : 'Selecione um modelo'"
+        [placeholder]="
+          selectModelDisabled() ? 'Selecione uma marca' : 'Selecione um modelo'
+        "
         matTooltip="Adicionar novo modelo"
         [disabled]="selectModelDisabled()"
       ></app-custom-select>
+      <div
+        *ngIf="form.errors?.['modelRequired'] && submitted"
+        class="error-message"
+      >
+        Campo obrigadório.
+      </div>
     </div>
     <div class="custom-selects-container">
       <app-custom-select

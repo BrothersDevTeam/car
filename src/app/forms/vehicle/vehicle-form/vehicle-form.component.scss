@@ -49,10 +49,19 @@ form {
       transform: scale(1.2);
     }
   }
+
+  .error-message {
+    position: absolute;
+    right: 0px;
+    bottom: -20px;
+    color: $error-color;
+    font-size: small;
+  }
 }
 
 .custom-selects-container {
   display: flex;
+  position: relative;
   gap: 10px;
   width: 100%;
 

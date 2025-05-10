@@ -10,6 +10,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import {
+  AbstractControl,
   FormBuilder,
   FormControl,
   FormGroup,
@@ -72,7 +73,7 @@ export class VehicleFormComponent implements OnInit, OnChanges {
 
   selectModelDisabled = signal(true);
 
-  protected form = this.formBuilderService.group({
+  protected form: FormGroup = this.formBuilderService.group({
     licensePlate: ['', Validators.required],
     yearModel: [''],
     chassis: [''],
@@ -113,8 +114,23 @@ export class VehicleFormComponent implements OnInit, OnChanges {
     private toastrService: ToastrService
   ) {}
 
+  private validateBrandAndModel(
+    control: AbstractControl
+  ): { [key: string]: any } | null {
+    const group = control as FormGroup;
+    const brand = group.get('brandDto')?.value;
+    const model = group.get('modelDto')?.value;
+
+    if (brand && brand.id && (!model || !model.id)) {
+      return { modelRequired: true };
+    }
+    return null;
+  }
+
   ngOnInit() {
     console.log('Form structure:', this.form.value);
+
+    this.form.setValidators(this.validateBrandAndModel.bind(this));
 
     this.form.valueChanges.subscribe(() => {
       const isDirty = this.form.dirty;
@@ -131,6 +147,15 @@ export class VehicleFormComponent implements OnInit, OnChanges {
 
     this.colorService.getColors().subscribe((colors) => {
       this.colors = colors;
+    });
+
+    this.brandControl.valueChanges.subscribe((brand) => {
+      if (brand && brand.id) {
+        this.modelControl.setValidators(Validators.required);
+      } else {
+        this.modelControl.clearValidators();
+      }
+      this.modelControl.updateValueAndValidity(); // Atualiza a validação
     });
   }
 
