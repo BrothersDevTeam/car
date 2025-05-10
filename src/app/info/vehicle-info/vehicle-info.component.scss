@@ -15,11 +15,15 @@
     gap: 24px;
 
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    .person-info .label {
-      width: 80px;
+    .first-info-card .label {
+      width: 120px;
     }
 
-    .person-address .label {
+    .second-info-card .label {
+      width: 140px;
+    }
+
+    .third-info-card .label {
       width: 120px;
     }
   }

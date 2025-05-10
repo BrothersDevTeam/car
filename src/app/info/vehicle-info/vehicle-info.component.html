@@ -1,81 +1,89 @@
 <mat-card class="card-container" appearance="outlined">
   <mat-card-header>
-    <mat-card-title class="card-title">Veículo</mat-card-title>
+    <mat-card-title class="card-title">Dados do veículo</mat-card-title>
   </mat-card-header>
   <mat-card-content class="card-content">
-    <app-wrapper-card class="vehicle-info" title="Dados do veículo">
+    <app-wrapper-card class="first-info-card">
       <div class="card-row">
-        <h3 class="label">Placa: </h3>
-        <h3 class="value">{{vehicle.licensePlate}}</h3>
+        <h3 class="label">Placa:</h3>
+        <h3 class="value">{{ vehicle.licensePlate }}</h3>
       </div>
       <div class="card-row">
-        <h3 class="label">Marca: </h3>
-        <h3 class="value">{{vehicle.brandDto?.description || ''}}</h3>
+        <h3 class="label">Marca:</h3>
+        <h3 class="value">{{ vehicle.brandDto?.description || "" }}</h3>
       </div>
       <div class="card-row">
-        <h3 class="label">Modelo: </h3>
-        <h3 class="value">{{vehicle.modelDto?.description || ''}}</h3>
+        <h3 class="label">Modelo:</h3>
+        <h3 class="value">{{ vehicle.modelDto?.description || "" }}</h3>
       </div>
       <div class="card-row">
-        <h3 class="label">Ano do modelo: </h3>
-        <h3 class="value">{{vehicle.yearModel || ''}}</h3>
+        <h3 class="label">Ano do modelo:</h3>
+        <h3 class="value">{{ vehicle.yearModel || "" }}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Cor:</h3>
+        <h3 class="value">{{ vehicle.colorDto?.description }}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Combustivel:</h3>
+        <h3 class="value">{{ vehicle.fuelTypeDto?.description }}</h3>
+      </div>
+    </app-wrapper-card>
+    <app-wrapper-card class="second-info-card">
+      <div class="card-row">
+        <h3 class="label">Número de portas:</h3>
+        <h3 class="value">{{ vehicle.numberOfDoors || "" }}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Km inicial:</h3>
+        <h3 class="value">{{ vehicle.initialMileage || "" }}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Ano:</h3>
+        <h3 class="value">{{ vehicle.age || "" }}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Chassi:</h3>
+        <h3 class="value">{{ vehicle.chassis || "" }}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Potência:</h3>
+        <h3 class="value">{{ vehicle.horsepower || "" }}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Número do motor:</h3>
+        <h3 class="value">{{ vehicle.engineNumber || "" }}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Renavam:</h3>
+        <h3 class="value">{{ vehicle.renavam || "" }}</h3>
+      </div>
+    </app-wrapper-card>
+
+    <app-wrapper-card class="third-info-card" title="">
+      <div class="card-row">
+        <h3 class="label">Espécies:</h3>
+        <h3 class="value">{{ vehicle.species || "" }}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Categoria:</h3>
+        <h3 class="value">{{ vehicle.category || "" }}</h3>
       </div>
 
       <div class="card-row">
-        <h3 class="label">Chassi: </h3>
-        <h3 class="value">{{vehicle.chassis || ''}}</h3>
+        <h3 class="label">Características:</h3>
+        <h3 class="value">{{ vehicle.features || "" }}</h3>
       </div>
+
       <div class="card-row">
-        <h3 class="label">Número de portas: </h3>
-        <h3 class="value">{{vehicle.numberOfDoors || ''}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Potência: </h3>
-        <h3 class="value">{{vehicle.horsepower || ''}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Número do motor: </h3>
-        <h3 class="value">{{vehicle.engineNumber || ''}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Km inicial: </h3>
-        <h3 class="value">{{vehicle.initialMileage || ''}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Renavam: </h3>
-        <h3 class="value">{{vehicle.renavam || ''}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Espécies: </h3>
-        <h3 class="value">{{vehicle.species || ''}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Categoria: </h3>
-        <h3 class="value">{{vehicle.category || ''}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Ano: </h3>
-        <h3 class="value">{{vehicle.age || ''}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Características: </h3>
-        <h3 class="value">{{vehicle.features || ''}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Cor: </h3>
-        <h3 class="value">{{vehicle.colorDto?.description}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Combustivel: </h3>
-        <h3 class="value">{{vehicle.fuelTypeDto?.description}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Origem: </h3>
-        <h3 class="value">{{vehicle.origin || ''}}</h3>
+        <h3 class="label">Origem:</h3>
+        <h3 class="value">{{ vehicle.origin || "" }}</h3>
       </div>
     </app-wrapper-card>
   </mat-card-content>
   <mat-card-footer class="card-footer">
-    <button color="primary" mat-raised-button (click)="editEvent.emit()" >Edit</button>
+    <button color="primary" mat-raised-button (click)="editEvent.emit()">
+      Edit
+    </button>
   </mat-card-footer>
 </mat-card>
