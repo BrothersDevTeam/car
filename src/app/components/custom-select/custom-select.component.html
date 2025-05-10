@@ -17,10 +17,16 @@
     >
       <li *ngFor="let option of options" (click)="selectOption(option)">
         <span>{{ option.description }}</span>
-        <button class="edit-button" (click)="editItem(option, $event)">
-          ✏️
-        </button>
+        <div class="select_list_buttons">
+          <button class="edit-button" (click)="editItem(option, $event)">
+            ✏️
+          </button>
+          <button class="delete-button" (click)="deleteItem(option, $event)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
       </li>
+
     </ul>
     <mat-icon [matTooltip]="matTooltip" (click)="createNewItem()">add_box</mat-icon>
   </div>

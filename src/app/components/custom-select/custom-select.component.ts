@@ -12,6 +12,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 
+import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { CriateElementConfirmDialogComponent } from '@components/dialogs/criate-element-dialog/criate-element-dialog.component';
 
 import { FuelTypeService } from '@services/fuel-type.service';
@@ -135,33 +136,46 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     brandDto: {
       create: 'Adicionar nova marca',
       update: 'Editar marca',
+      delete: 'Deletar marca',
       message: 'Digite o nome da marca',
+      deleteMessage: 'Você tem certeza que deseja deletar esta marca?',
       successCreateMessage: 'Marca adicionada com sucesso!',
       successUpdateMessage: 'Marca editada com sucesso!',
+      successDeleteMessage: 'Marca deletada com sucesso!',
       errorMessage: 'Erro ao adicionar marca. Tente novamente.',
     },
     modelDto: {
       create: 'Adicionar novo modelo',
       update: 'Editar modelo',
+      delete: 'Deletar modelo',
       message: 'Digite o nome do modelo',
+      deleteMessage: 'Você tem certeza que deseja deletar este modelo?',
       successCreateMessage: 'Modelo adicionado com sucesso!',
       successUpdateMessage: 'Modelo editado com sucesso!',
+      successDeleteMessage: 'Modelo deletado com sucesso!',
       errorMessage: 'Erro ao adicionar modelo. Tente novamente.',
     },
     colorDto: {
       create: 'Adicionar nova cor',
       update: 'Editar cor',
+      delete: 'Deletar cor',
       message: 'Digite o nome da cor',
+      deleteMessage: 'Você tem certeza que deseja deletar esta cor?',
       successCreateMessage: 'Cor adicionada com sucesso!',
       successUpdateMessage: 'Cor editada com sucesso!',
+      successDeleteMessage: 'Cor deletada com sucesso!',
       errorMessage: 'Erro ao adicionar cor. Tente novamente.',
     },
     fuelTypeDto: {
       create: 'Adicionar novo tipo de combustível',
       update: 'Editar tipo de combustível',
+      delete: 'Deletar tipo de combustível',
       message: 'Digite o nome do tipo de combustível',
+      deleteMessage:
+        'Você tem certeza que deseja deletar este tipo de combustível?',
       successCreateMessage: 'Tipo de combustível adicionado com sucesso!',
       successUpdateMessage: 'Tipo de combustível editado com sucesso!',
+      successDeleteMessage: 'Tipo de combustível deletado com sucesso!',
       errorMessage: 'Erro ao adicionar tipo de combustível. Tente novamente.',
     },
   };
@@ -249,6 +263,45 @@ export class CustomSelectComponent implements OnInit, OnChanges {
             error: () => {
               this.toastrService.error(
                 `Erro ao editar ${this.listType}. Tente novamente.`
+              );
+            },
+          });
+        }
+      });
+    } else {
+      console.error(`Serviço não encontrado para o tipo: ${this.listType}`);
+    }
+  }
+
+  deleteItem(option: { id: string; description: string }, event: Event) {
+    const service = this.serviceMap[this.listType];
+
+    if (service) {
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: '400px',
+        data: {
+          title:
+            this.typeListTexts[this.listType].delete + ` ${option.description}`,
+          message: this.typeListTexts[this.listType].deleteMessage,
+          confirmText: 'Deletar',
+          cancelText: 'Cancelar',
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((confirm) => {
+        if (confirm) {
+          service.delete(option.id).subscribe({
+            next: () => {
+              this.options = this.options.filter(
+                (item) => item.id !== option.id
+              );
+              this.toastrService.success(
+                this.typeListTexts[this.listType].successDeleteMessage
+              );
+            },
+            error: () => {
+              this.toastrService.error(
+                `Erro ao deletar ${this.listType}. Tente novamente.`
               );
             },
           });

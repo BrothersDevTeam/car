@@ -1,0 +1,13 @@
+@use "./../../../../styles/variables.scss" as *;
+
+mat-dialog-actions {
+  display: flex;
+  justify-content: end;
+  margin-right: 16px;
+  margin-bottom: 16px;
+
+  .delete-btn {
+    color: white;
+    background-color: $danger-color;
+  }
+}

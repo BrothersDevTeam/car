@@ -3,6 +3,6 @@
   <p [innerHTML]="safeMessage"></p>
 </mat-dialog-content>
 <mat-dialog-actions>
-  <button mat-button mat-dialog-close cdkFocusInitial>{{data.cancelText}}</button>
-  <button mat-button [mat-dialog-close]="true">{{data.confirmText}}</button>
+  <button mat-flat-button mat-dialog-close cdkFocusInitial>{{data.cancelText}}</button>
+  <button mat-flat-button class="delete-btn" [mat-dialog-close]="true">{{data.confirmText}}</button>
 </mat-dialog-actions>
