@@ -1,4 +1,5 @@
 @use "../../../styles/variables.scss" as *;
+@use "sass:color";
 
 .disabled {
   pointer-events: none;
@@ -109,7 +110,7 @@
       cursor: pointer;
 
       &:hover {
-        background-color: lighten($primary-color, 40%);
+        background-color: color.adjust($primary-color, $lightness: 40%);
       }
 
       .select_list_buttons {
@@ -139,7 +140,6 @@
         transition: transform 0.3s ease;
 
         &:hover {
-          color: darken($primary-color, 10%);
           transform: scale(1.2);
         }
       }
@@ -149,10 +149,9 @@
   .vertical-bar {
     position: absolute;
     right: 38px;
-
-    width: 2px; // Largura da barra
-    height: 100%; // Altura da barra
-    background-color: white; // Cor da barra
+    width: 2px;
+    height: 100%;
+    background-color: white;
 
     display: inline-block;
   }
