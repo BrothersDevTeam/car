@@ -82,8 +82,7 @@
     </app-wrapper-card>
   </mat-card-content>
   <mat-card-footer class="card-footer">
-    <button color="primary" mat-raised-button (click)="editEvent.emit()">
-      Edit
-    </button>
+    <button type="button" class="btn" color="primary" mat-raised-button (click)="editEvent.emit()">Editar</button>
+    <button type="button" class="btn" color="warn" mat-raised-button matListItemIcon (click)="onDelete()">Excluir</button>
   </mat-card-footer>
 </mat-card>

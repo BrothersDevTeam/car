@@ -21,17 +21,6 @@ form {
     color: white;
   }
 
-  .delete-btn {
-    right: 30px;
-    cursor: pointer;
-    transition: transform 200ms ease-in-out;
-
-    &:hover {
-      color: rgba(250, 0, 0, 0.9);
-      transform: scale(1.2) rotate(30deg);
-    }
-  }
-
   .search-icon-btn {
     display: flex;
     position: absolute;

@@ -40,8 +40,13 @@
 
   .card-footer {
     padding: 16px;
-
+    width: auto;
     display: flex;
-    justify-content: end;
+    justify-content: center;
+    gap: 16px;
+
+    .btn {
+      width: 100%;
+    }
   }
 }

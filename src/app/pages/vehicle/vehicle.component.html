@@ -35,7 +35,7 @@
   @if (openInfo()) {
     <app-drawer (closeDrawer)="handleCloseDrawer()">
       @if (selectedVehicle) {
-        <app-vehicle-info (editEvent)="handleEdit()" [vehicle]="selectedVehicle" />
+        <app-vehicle-info (editEvent)="handleEdit()" [vehicle]="selectedVehicle" (formSubmitted)="onFormSubmitted()" />
       } @else {
         <h1>Dados não encontrados</h1>
       }

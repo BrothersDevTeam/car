@@ -150,6 +150,7 @@ export class VehicleComponent {
       this.paginationRequestConfig.pageSize
     );
     this.openForm.set(false);
+    this.openInfo.set(false);
     this.selectedVehicle = null;
     this.actionsService.hasFormChanges.set(false);
   }
