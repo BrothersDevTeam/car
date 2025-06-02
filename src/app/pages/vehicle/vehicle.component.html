@@ -1,58 +1,61 @@
 <main>
   <mat-form-field>
     <mat-label>Pesquisar pela placa</mat-label>
-    <input matInput (input)="onSearch($event)">
+    <input matInput (input)="onSearch($event)" />
   </mat-form-field>
 
-  <app-content-header title="Veículos" btn_label="Novo" fontIcon="add" (onClick)="handleOpenForm()"/>
+  <app-content-header
+    title="Veículos"
+    btn_label="Novo"
+    fontIcon="add"
+    (onClick)="handleOpenForm()"
+  />
 
   @if (vehiclePaginatedList?.totalElements) {
-    <app-vehicle-table
-      (selectedVehicle)="handleSelectedVehicle($event)"
-      [vehiclePaginatedList]="vehiclePaginatedList!"
-      (pageEvent)="handlePageEvent($event)"
-      [searchValue]="searchValue"
-    />
+  <app-generic-table
+    [columns]="columns"
+    [genericPaginatedList]="vehiclePaginatedList"
+    [totalElements]="vehiclePaginatedList!.totalElements"
+    [pageSizeOptions]="[5, 10, 25, 100]"
+    (rowClick)="onRowClick($event)"
+    (pageEvent)="handlePageEvent($event)"
+  ></app-generic-table>
+
+  } @else { @if (vehicleListLoading()) {
+  <div class="loader-div">
+    <span class="loader"></span>
+  </div>
+  } @else { @if (vehicleListError()) {
+  <div class="message-error mat-elevation-z8">
+    <h3>Não foi possível acessar os dados da tabela</h3>
+    <h4>Tente novamente em alguns minutos.</h4>
+  </div>
   } @else {
-    @if (vehicleListLoading()) {
-      <div class="loader-div">
-        <span class="loader"></span>
-      </div>
+  <br />
+  <h2>Não há veículos cadastrados</h2>
+  } } } @if (openInfo()) {
+  <app-drawer (closeDrawer)="handleCloseDrawer()">
+    @if (selectedVehicle) {
+    <app-vehicle-info
+      (editEvent)="handleEdit()"
+      [vehicle]="selectedVehicle"
+      (formSubmitted)="onFormSubmitted()"
+    />
     } @else {
-      @if (vehicleListError()) {
-        <div class="message-error mat-elevation-z8">
-          <h3>Não foi possível acessar os dados da tabela</h3>
-          <h4>Tente novamente em alguns minutos.</h4>
-        </div>
-      } @else {
-        <br>
-        <h2>Não há veículos cadastrados</h2>
-      }
-
+    <h1>Dados não encontrados</h1>
     }
+  </app-drawer>
+  } @if (openForm()) {
+  <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
+    <mat-tab-group [selectedIndex]="0">
+      <mat-tab label="Veículo">
+        <app-vehicle-form
+          [dataForm]="selectedVehicle?.licensePlate ? selectedVehicle : null"
+          (formSubmitted)="onFormSubmitted()"
+          (formChanged)="handleFormChanged($event)"
+        />
+      </mat-tab>
+    </mat-tab-group>
+  </app-drawer>
   }
-
-  @if (openInfo()) {
-    <app-drawer (closeDrawer)="handleCloseDrawer()">
-      @if (selectedVehicle) {
-        <app-vehicle-info (editEvent)="handleEdit()" [vehicle]="selectedVehicle" (formSubmitted)="onFormSubmitted()" />
-      } @else {
-        <h1>Dados não encontrados</h1>
-      }
-    </app-drawer>
-  }
-
-  @if (openForm()) {
-    <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
-      <mat-tab-group [selectedIndex]="0">
-        <mat-tab label="Veículo">
-          <app-vehicle-form
-            [dataForm]="selectedVehicle?.licensePlate ? selectedVehicle : null"
-            (formSubmitted)="onFormSubmitted()"
-            (formChanged)="handleFormChanged($event)"
-          />
-        </mat-tab>
-      </mat-tab-group>
-    </app-drawer>
-    }
 </main>

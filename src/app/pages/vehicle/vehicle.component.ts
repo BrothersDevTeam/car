@@ -8,16 +8,17 @@ import { ToastrService } from 'ngx-toastr';
 import { catchError, of, Subscription } from 'rxjs';
 
 import { DrawerComponent } from '@components/drawer/drawer.component';
+import { GenericTableComponent } from '@components/generic-table/generic-table.component';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
-import { VehicleTableComponent } from '@components/tables/vehicle-table/vehicle-table.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 
 import { VehicleFormComponent } from '@forms/vehicle/vehicle-form/vehicle-form.component';
 
 import { VehicleInfoComponent } from '@info/vehicle-info/vehicle-info.component';
 
+import type { ColumnConfig } from '@interfaces/genericTable';
 import type { PaginationResponse } from '@interfaces/pagination';
-import type { GetVehicle, Vehicle, VehicleForm } from '@interfaces/vehicle';
+import type { GetVehicle, VehicleForm } from '@interfaces/vehicle';
 
 import { VehicleService } from '@services/vehicle.service';
 import { ActionsService } from '@services/actions.service';
@@ -26,13 +27,13 @@ import { ActionsService } from '@services/actions.service';
   selector: 'app-vehicle',
   imports: [
     ContentHeaderComponent,
-    VehicleTableComponent,
     MatFormFieldModule,
     MatInputModule,
     MatTabsModule,
     DrawerComponent,
     VehicleInfoComponent,
     VehicleFormComponent,
+    GenericTableComponent,
   ],
   templateUrl: './vehicle.component.html',
   styleUrl: './vehicle.component.scss',
@@ -48,6 +49,32 @@ export class VehicleComponent {
     pageSize: 1000,
     pageIndex: 0,
   };
+  columns: ColumnConfig<GetVehicle>[] = [
+    {
+      key: 'licensePlate',
+      header: 'Placa',
+    },
+    {
+      key: 'modelDto.brandDto.description',
+      header: 'Marca',
+    },
+    {
+      key: 'modelDto.description',
+      header: 'Modelo',
+    },
+    {
+      key: 'yearModel',
+      header: 'Ano/Modelo',
+    },
+    {
+      key: 'colorDto.description',
+      header: 'Cor',
+    },
+    {
+      key: 'origin',
+      header: 'Origem',
+    },
+  ];
 
   vehicleListLoading = signal(false);
   vehicleListError = signal(false);
@@ -114,6 +141,7 @@ export class VehicleComponent {
         this.vehicleListLoading.set(false);
         if (response) {
           this.vehiclePaginatedList = response;
+          console.log('\n\n vehiclePaginatedList: ', response.content);
         }
       });
   }
@@ -125,6 +153,10 @@ export class VehicleComponent {
       modelDto: vehicle.modelDto || null,
     }),
       this.openInfo.set(true);
+  }
+
+  onRowClick(vehicle: GetVehicle) {
+    this.handleSelectedVehicle(vehicle);
   }
 
   handleOpenForm() {
