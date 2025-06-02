@@ -5,6 +5,23 @@
   </div>
   }
   <app-wrapper-card>
+    <div class="radio-button-wrapper-container">
+      <label class="radio-button-label">Origem: </label>
+      <mat-radio-group
+        color="primary"
+        formControlName="origin"
+        aria-label="Select an option"
+        class="radio-button-group"
+      >
+        <mat-radio-button class="radio-button" value="NACIONAL">
+          Nacional
+        </mat-radio-button>
+        <mat-radio-button class="radio-button" value="IMPORTADO"
+          >Importado</mat-radio-button
+        >
+      </mat-radio-group>
+    </div>
+
     <app-primary-input
       formControlName="licensePlate"
       label="Placa*"
@@ -45,6 +62,7 @@
         Campo obrigadório.
       </div>
     </div>
+
     <div class="custom-selects-container">
       <app-custom-select
         listType="colorDto"
@@ -135,13 +153,6 @@
       formControlName="features"
       label="Características"
       inputName="features"
-      type="text"
-    />
-
-    <app-primary-input
-      formControlName="origin"
-      label="Origem"
-      inputName="origin"
       type="text"
     />
   </app-wrapper-card>

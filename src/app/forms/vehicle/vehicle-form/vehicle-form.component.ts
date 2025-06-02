@@ -39,6 +39,7 @@ import { VehicleService } from '@services/vehicle.service';
 import { BrandService } from '@services/brand.service';
 import { ModelService } from '@services/model.service';
 import { ColorService } from '@services/color.service';
+import { MatRadioModule } from '@angular/material/radio';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -52,6 +53,7 @@ import { ColorService } from '@services/color.service';
     MatOptionModule,
     MatSelectModule,
     CustomSelectComponent,
+    MatRadioModule,
   ],
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',
@@ -102,7 +104,7 @@ export class VehicleFormComponent implements OnInit, OnChanges {
       id: [''],
       description: [''],
     }),
-    origin: [''],
+    origin: ['NACIONAL'],
   });
 
   constructor(
@@ -208,7 +210,7 @@ export class VehicleFormComponent implements OnInit, OnChanges {
             id: this.dataForm!.fuelTypeDto?.id || null,
             description: this.dataForm!.fuelTypeDto?.description || null,
           },
-          origin: this.dataForm!.origin || null,
+          origin: this.dataForm!.origin || this.form.get('origin')?.value,
         });
       });
     }

@@ -19,6 +19,13 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
+:root {
+  // Estilizar o texto do mat-radio-button em toda aplicação
+  mat-radio-button .mdc-label {
+    color: $text-color !important;
+  }
+}
+
 table {
   .mat-mdc-header-row {
     background-color: #b0b0ca35; /* Cor de fundo */

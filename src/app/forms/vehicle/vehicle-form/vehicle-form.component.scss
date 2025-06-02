@@ -16,6 +16,22 @@ form {
     }
   }
 
+  .radio-button-wrapper-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .radio-button-label {
+      color: $text-color;
+      font-size: 16px;
+    }
+
+    .radio-button-group {
+      display: flex;
+      gap: 1rem;
+    }
+  }
+
   .submit-btn {
     background-color: $primary-color;
     color: white;
@@ -46,15 +62,15 @@ form {
     color: $error-color;
     font-size: small;
   }
-}
 
-.custom-selects-container {
-  display: flex;
-  position: relative;
-  gap: 10px;
-  width: 100%;
+  .custom-selects-container {
+    display: flex;
+    position: relative;
+    gap: 10px;
+    width: 100%;
 
-  > * {
-    flex: 1;
+    > * {
+      flex: 1;
+    }
   }
 }
