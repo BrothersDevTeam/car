@@ -100,9 +100,7 @@ export class PersonService {
           this.cache = response;
 
           this.cache.content = this.cache.content.filter(
-            (element) =>
-              element.person.active &&
-              (!!element.person.cnpj || !!element.person.cpf)
+            (element) => element.person.active
           );
 
           this.cache.totalElements = this.cache.content.length;

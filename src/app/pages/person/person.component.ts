@@ -18,9 +18,9 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 
 import { DrawerComponent } from '@components/drawer/drawer.component';
-import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
+import { GenericTableComponent } from '@components/generic-table/generic-table.component';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
-import { PersonTableComponent } from '@components/tables/person-table/person-table.component';
+import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { BusinessDoneTableComponent } from '@components/tables/business-done-table/business-done-table.component';
 
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
@@ -31,6 +31,7 @@ import { NaturalPersonInfoComponent } from '@info/natural-person-info/natural-pe
 
 import type { Person } from '@interfaces/person';
 import type { PaginationResponse } from '@interfaces/pagination';
+import type { ColumnConfig } from '@interfaces/genericTable';
 
 import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
@@ -39,7 +40,6 @@ import { ActionsService } from '@services/actions.service';
   selector: 'app-person',
   imports: [
     ContentHeaderComponent,
-    PersonTableComponent,
     DrawerComponent,
     MatTabsModule,
     LegalEntityFormComponent,
@@ -50,6 +50,7 @@ import { ActionsService } from '@services/actions.service';
     LegalEntityInfoComponent,
     NaturalPersonInfoComponent,
     BusinessDoneTableComponent,
+    GenericTableComponent,
   ],
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss',
@@ -65,6 +66,28 @@ export class PersonComponent implements OnInit, OnDestroy {
     pageSize: 1000,
     pageIndex: 0,
   };
+  columns: ColumnConfig<Person>[] = [
+    {
+      key: 'fullName-legalName',
+      header: 'Nome',
+      format: (value: any, row: Person) => {
+        return row.person.fullName ? row.person.fullName : row.person.legalName;
+      },
+    },
+    {
+      key: 'person.cnpj',
+      header: 'PF/PJ',
+      format: (value: any, row: Person) =>
+        row.person.cnpj ? 'PESSOA JURÍDICA' : 'PESSOA FÍSICA',
+    },
+    {
+      key: 'cpf-cnpj',
+      header: 'CPF/CNPJ',
+      format: (value: any, row: Person) => {
+        return row.person.cpf ? row.person.cpf : row.person.cnpj || '-';
+      },
+    },
+  ];
 
   clientListLoading = signal(false);
   clientListError = signal(false);
@@ -138,6 +161,10 @@ export class PersonComponent implements OnInit, OnDestroy {
   handleSelectedPerson(person: Person) {
     this.selectedPerson = person;
     this.openInfo.set(true);
+  }
+
+  onRowClick(person: Person) {
+    this.handleSelectedPerson(person);
   }
 
   handleOpenForm() {

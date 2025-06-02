@@ -1,7 +1,7 @@
 <main>
   <mat-form-field>
     <mat-label>Pesquisar por nome</mat-label>
-    <input matInput (input)="onSearch($event)">
+    <input matInput (input)="onSearch($event)" />
   </mat-form-field>
 
   <app-content-header
@@ -12,69 +12,75 @@
   />
 
   @if (personPaginatedList?.totalElements) {
-  <app-person-table
-    (selectedPerson)="handleSelectedPerson($event)"
-    [personPaginatedList]="personPaginatedList!"
+  <app-generic-table
+    [columns]="columns"
+    [genericPaginatedList]="personPaginatedList"
+    [totalElements]="personPaginatedList!.totalElements"
+    [pageSizeOptions]="[5, 10, 25, 100]"
+    (rowClick)="onRowClick($event)"
     (pageEvent)="handlePageEvent($event)"
-    [searchValue]="searchValue"
-  />
+  ></app-generic-table>
+  } @else { @if (clientListLoading()) {
+  <div class="loader-div">
+    <span class="loader"></span>
+  </div>
+  } @else { @if (clientListError()) {
+  <div class="message-error mat-elevation-z8">
+    <h3>Não foi possível acessar os dados da tabela</h3>
+    <h4>Tente novamente em alguns minutos.</h4>
+  </div>
   } @else {
-    @if (clientListLoading()) {
-      <div class="loader-div">
-        <span class="loader"></span>
-      </div>
+  <br />
+  <h2>Não há pessoas cadastradas</h2>
+  } } } @if (openInfo()) {
+  <app-drawer (closeDrawer)="handleCloseDrawer()">
+    @if (selectedPerson?.person?.fullName) {
+    <mat-tab-group [selectedIndex]="0">
+      <mat-tab label="Pessoa Física">
+        <app-natural-person-info
+          (editEvent)="handleEdit()"
+          [person]="selectedPerson!"
+          (formSubmitted)="onFormSubmitted()"
+        />
+      </mat-tab>
+      <mat-tab label="Negócios efetuados">
+        <app-business-done-table />
+      </mat-tab>
+    </mat-tab-group>
+    } @else if(selectedPerson?.person?.legalName) {
+    <mat-tab-group [selectedIndex]="0">
+      <mat-tab label="Pessoa Jurídica">
+        <app-legal-entity-info
+          (editEvent)="handleEdit()"
+          [person]="selectedPerson!"
+          (formSubmitted)="onFormSubmitted()"
+        />
+      </mat-tab>
+      <mat-tab label="Negócios efetuados">
+        <app-business-done-table />
+      </mat-tab>
+    </mat-tab-group>
     } @else {
-      @if (clientListError()) {
-        <div class="message-error mat-elevation-z8">
-          <h3>Não foi possível acessar os dados da tabela</h3>
-          <h4>Tente novamente em alguns minutos.</h4>
-        </div>
-      } @else {
-        <br>
-        <h2>Não há pessoas cadastradas</h2>
-      }
-
+    <h1>Dados não encontrados</h1>
     }
-  }
-
-  @if (openInfo()) {
-    <app-drawer (closeDrawer)="handleCloseDrawer()">
-      @if (selectedPerson?.person?.cpf) {
-        <mat-tab-group [selectedIndex]="0">
-          <mat-tab label="Pessoa Física">
-            <app-natural-person-info (editEvent)="handleEdit()" [person]="selectedPerson!" (formSubmitted)="onFormSubmitted()" />
-
-          </mat-tab>
-          <mat-tab label="Negócios efetuados">
-            <app-business-done-table />
-          </mat-tab>
-        </mat-tab-group>
-      } @else if(selectedPerson?.person?.cnpj) {
-        <mat-tab-group [selectedIndex]="0">
-          <mat-tab label="Pessoa Jurídica">
-            <app-legal-entity-info (editEvent)="handleEdit()" [person]="selectedPerson!" (formSubmitted)="onFormSubmitted()" />
-          </mat-tab>
-          <mat-tab label="Negócios efetuados">
-            <app-business-done-table />
-          </mat-tab>
-        </mat-tab-group>
-      } @else {
-        <h1>Dados não encontrados</h1>
-      }
-    </app-drawer>
-  }
-
-  @if (openForm()) {
+  </app-drawer>
+  } @if (openForm()) {
   <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
     <mat-tab-group [selectedIndex]="selectedPerson?.person?.cpf ? 0 : 1">
-      <mat-tab label="Pessoa Física" [disabled]="selectedPerson && selectedPerson.person.cnpj">
+      <mat-tab
+        label="Pessoa Física"
+        [disabled]="selectedPerson && selectedPerson.person.cnpj"
+      >
         <app-natural-person-form
           [dataForm]="selectedPerson?.person?.cpf ? selectedPerson : null"
           (formSubmitted)="onFormSubmitted()"
           (formChanged)="handleFormChanged($event)"
         />
       </mat-tab>
-      <mat-tab label="Pessoa Jurídica" [disabled]="selectedPerson && selectedPerson.person.cpf">
+      <mat-tab
+        label="Pessoa Jurídica"
+        [disabled]="selectedPerson && selectedPerson.person.cpf"
+      >
         <app-legal-entity-form
           [dataForm]="selectedPerson?.person?.cnpj ? selectedPerson : null"
           (formSubmitted)="onFormSubmitted()"
@@ -84,5 +90,4 @@
     </mat-tab-group>
   </app-drawer>
   }
-
 </main>
