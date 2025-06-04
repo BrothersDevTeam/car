@@ -1,4 +1,4 @@
-@use "../../../styles/variables.scss" as *;
+@use '../../../styles/variables.scss' as *;
 
 :host * {
   transition: all 500ms ease-in-out;
@@ -8,7 +8,7 @@ section {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: calc(100vh - 80px);
+  min-height: calc(100vh - 80px);
   overflow: hidden;
 
   .sidenav-header {
@@ -39,6 +39,10 @@ section {
   }
 
   mat-nav-list {
+    min-width: 72px;
+  }
+
+  mat-nav-list {
     .selected-menu-item {
       border-left-color: $primary-color;
       background-color: rgba(0, 0, 0, 0.05);
@@ -49,6 +53,25 @@ section {
   .menu-item {
     border-left: 5px solid;
     border-left-color: rgba(0, 0, 0, 0);
+  }
+
+  .expansion-button {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    // box-shadow: none;
+
+    mat-expansion-panel-header {
+      width: 100%;
+      padding: 0 21px;
+      min-height: 48px;
+
+      mat-panel-title {
+        display: flex;
+        gap: 1.5rem;
+        width: 100%;
+      }
+    }
   }
 
   .exit_btn {

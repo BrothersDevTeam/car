@@ -11,19 +11,29 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 import { ActionsService } from '@services/actions.service';
 import { AuthService } from '@services/auth/auth.service';
+import { CommonModule } from '@angular/common';
 
 export type MenuItem = {
   icon: string;
   label: string;
   route?: string;
+  subItems?: MenuItem[];
 };
 
 @Component({
   selector: 'app-sidenav',
-  imports: [MatListModule, MatIconModule, RouterModule, MatButtonModule],
+  imports: [
+    MatListModule,
+    MatIconModule,
+    RouterModule,
+    MatButtonModule,
+    CommonModule,
+    MatExpansionModule,
+  ],
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
 })
@@ -47,20 +57,27 @@ export class SideNavComponent {
 
   menuItems = signal<MenuItem[]>([
     {
+      icon: 'settings',
+      label: 'Cadastros',
+      subItems: [
+        {
+          icon: 'person',
+          label: 'Pessoas',
+          route: '/person',
+        },
+        {
+          icon: 'directions_car',
+          label: 'Veículos',
+          route: '/vehicle',
+        },
+      ],
+    },
+    {
       icon: 'store',
       label: 'Loja',
       route: '/store',
     },
-    {
-      icon: 'person',
-      label: 'Pessoas',
-      route: '/person',
-    },
-    {
-      icon: 'directions_car',
-      label: 'Veículos',
-      route: '/vehicle',
-    },
+
     {
       icon: 'description',
       label: 'Notas Fiscais',
@@ -68,18 +85,26 @@ export class SideNavComponent {
     },
   ]);
 
-  onMenuItemClick(route: string) {
+  onMenuItemClick(route?: string) {
     if (window.innerWidth <= 599) {
       this.toggleSidebar.emit();
     }
 
     if (this.actionsService.hasFormChanges()) return;
 
-    this.router.navigate([route]);
+    if (route) {
+      this.router.navigate([route]);
+    }
   }
 
-  isRouteActive(route: string): boolean {
-    return this.router.url === route; // Verifica se a rota está ativa
+  isRouteActive(route?: string | null, subItems?: MenuItem[]): boolean {
+    if (route && this.router.url === route) return true;
+    if (subItems) {
+      return subItems.some(
+        (subItem) => subItem.route && this.router.url === subItem.route
+      );
+    }
+    return false;
   }
 
   handleLogout = () => {

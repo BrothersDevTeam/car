@@ -6,19 +6,25 @@
   }
   <app-wrapper-card>
     <div class="radio-button-wrapper-container">
-      <label class="radio-button-label">Origem: </label>
+      <label class="radio-button-label">Origem:</label>
       <mat-radio-group
         color="primary"
         formControlName="origin"
         aria-label="Select an option"
         class="radio-button-group"
       >
-        <mat-radio-button class="radio-button" value="NACIONAL">
+        <mat-radio-button
+          class="radio-button"
+          value="NACIONAL"
+        >
           Nacional
         </mat-radio-button>
-        <mat-radio-button class="radio-button" value="IMPORTADO"
-          >Importado</mat-radio-button
+        <mat-radio-button
+          class="radio-button"
+          value="IMPORTADO"
         >
+          Importado
+        </mat-radio-button>
       </mat-radio-group>
     </div>
 
@@ -163,6 +169,6 @@
     class="submit-btn"
     (click)="onSubmit()"
   >
-    {{ dataForm?.licensePlate ? "Editar" : "Enviar" }}
+    {{ dataForm?.licensePlate ? 'Editar' : 'Enviar' }}
   </button>
 </form>

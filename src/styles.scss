@@ -1,7 +1,8 @@
-@use "./styles/variables.scss" as *;
-@use "ngx-toastr/toastr";
-@use "@angular/material" as mat;
-@import "@angular/material/prebuilt-themes/indigo-pink.css";
+@use './styles/variables.scss' as *;
+@use 'ngx-toastr/toastr';
+@use '@angular/material' as mat;
+@use 'variables' as *;
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 @include mat.core();
 
 * {
@@ -16,14 +17,21 @@ body {
 }
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 :root {
+  --text-color: #{$text-color};
+  --primary-color: #{$primary-color};
+
   // Estilizar o texto do mat-radio-button em toda aplicação
   mat-radio-button .mdc-label {
     color: $text-color !important;
   }
+}
+
+mat-expansion-panel .mat-expansion-panel-content .mat-expansion-panel-body {
+  padding: 0 !important;
 }
 
 table {
