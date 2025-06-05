@@ -1,0 +1,5 @@
+@use 'abstracts/variables' as *;
+
+mat-radio-button .mdc-label {
+  color: $text-color !important;
+}

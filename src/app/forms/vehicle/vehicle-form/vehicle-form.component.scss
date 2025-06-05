@@ -1,10 +1,9 @@
-@use "../../../../styles/variables.scss" as *;
-
 form {
   display: flex;
   flex-direction: column;
   gap: 24px;
   padding: 24px;
+  color: var(--text-color);
 
   .title-trash {
     display: flex;
@@ -22,7 +21,6 @@ form {
     gap: 1rem;
 
     .radio-button-label {
-      color: $text-color;
       font-size: 16px;
     }
 
@@ -33,7 +31,7 @@ form {
   }
 
   .submit-btn {
-    background-color: $primary-color;
+    background-color: var(--primary-color);
     color: white;
   }
 
@@ -46,7 +44,7 @@ form {
     transition: transform 200ms ease-in-out;
 
     &.is-active {
-      color: $primary-color;
+      color: var(--primary-color);
     }
 
     &:hover.is-active {
@@ -59,7 +57,7 @@ form {
     position: absolute;
     right: 0px;
     bottom: -20px;
-    color: $error-color;
+    color: var(--error-color);
     font-size: small;
   }
 

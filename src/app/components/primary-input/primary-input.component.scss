@@ -1,7 +1,5 @@
-@use "../../../styles/variables.scss" as *;
-
 .input-wrapper {
-  color: $text-color;
+  color: var(--text-color);
   font-size: 16px;
   width: 100%;
   margin-top: 12px;
@@ -21,12 +19,12 @@
         border-radius: 8px;
         padding: 12px;
         width: 100%;
-        background-color: $gray-secondary-bg;
+        background-color: var(--gray-secondary-bg);
       }
     }
 
     .invalid-field-message {
-      color: $error-color;
+      color: var(--error-color);
       font-size: small;
       align-self: flex-end;
     }

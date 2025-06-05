@@ -1,0 +1,17 @@
+@use 'sass:color';
+
+@function lighten-color($color, $amount: 20%) {
+  @return color.adjust($color, $lightness: $amount);
+}
+
+@function darken-color($color, $amount: 20%) {
+  @return color.adjust($color, $lightness: -$amount);
+}
+
+// Testar: função para calcular contraste de cor
+@function contrast-color($color, $dark: #000, $light: #fff) {
+  @if (color.lightness($color) > 50%) {
+    @return $dark;
+  }
+  @return $light;
+}

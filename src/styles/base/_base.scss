@@ -1,0 +1,25 @@
+@use 'abstracts/variables' as *;
+@use 'abstracts/functions' as *;
+
+:root {
+  --primary-color: #{$primary-color};
+  --primary-color-light: #{lighten-color($primary-color, 20%)};
+  --primary-color-dark: #{darken-color($primary-color, 20%)};
+
+  --secondary-color: #{$secondary-color};
+  --secondary-color-light: #{lighten-color($secondary-color, 20%)};
+  --secondary-color-dark: #{darken-color($secondary-color, 20%)};
+
+  --text-color: #{$text-color};
+  --text-color-light: #{lighten-color($text-color, 20%)};
+  --text-color-dark: #{darken-color($text-color, 20%)};
+
+  --success-color: #{$success-color};
+  --warning-color: #{$warning-color};
+  --danger-color: #{$danger-color};
+  --error-color: #{$error-color};
+
+  --content-header-color: #{$content-header-color};
+  --gray-bg: #{$gray-bg};
+  --gray-secondary-bg: #{$gray-secondary-bg};
+}

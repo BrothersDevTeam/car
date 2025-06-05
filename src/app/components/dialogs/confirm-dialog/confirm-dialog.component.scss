@@ -1,5 +1,3 @@
-@use "./../../../../styles/variables.scss" as *;
-
 mat-dialog-actions {
   display: flex;
   justify-content: end;
@@ -8,6 +6,6 @@ mat-dialog-actions {
 
   .delete-btn {
     color: white;
-    background-color: $danger-color;
+    background-color: var(--danger-color);
   }
 }

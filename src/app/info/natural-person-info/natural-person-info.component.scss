@@ -1,7 +1,5 @@
-@use '../../../styles/variables.scss' as *;
-
 .card-container {
-  color: $text-color;
+  color: var(--text-color);
 
   .card-title {
     font-size: 24px;
@@ -43,7 +41,6 @@
 
     .btn {
       width: 100%;
-
     }
   }
 }

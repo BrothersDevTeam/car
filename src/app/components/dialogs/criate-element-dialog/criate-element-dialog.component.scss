@@ -1,12 +1,10 @@
-@use "./../../../../styles/variables.scss" as *;
-
 mat-dialog-content {
   input {
     border: none;
     border-radius: 8px;
     padding: 12px;
     width: 100%;
-    background-color: $gray-secondary-bg;
+    background-color: var(--gray-secondary-bg);
   }
 }
 

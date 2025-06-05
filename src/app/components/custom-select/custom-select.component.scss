@@ -1,5 +1,5 @@
-@use "../../../styles/variables.scss" as *;
-@use "sass:color";
+@use 'abstracts/functions' as *;
+@use 'abstracts/variables' as *;
 
 .disabled {
   pointer-events: none;
@@ -14,11 +14,8 @@
   margin-top: 12px;
 
   .label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     margin-bottom: 4px;
-    color: $text-color;
+    color: var(--text-color);
   }
 
   .dropdown-container {
@@ -44,10 +41,10 @@
   .dropdown-button {
     width: 100%;
     padding: 12px 12px;
-    background-color: $gray-secondary-bg;
+    background-color: var(--gray-secondary-bg);
     border: none;
     border-radius: 8px;
-    color: $text-color;
+    color: var(--text-color-light);
     text-align: left;
     cursor: pointer;
     display: flex;
@@ -61,7 +58,7 @@
   }
 
   .dropdown-arrow {
-    border: solid $text-color;
+    border: solid var(--text-color-light);
     border-width: 0 2px 2px 0;
     display: inline-block;
     padding: 3px;
@@ -76,7 +73,7 @@
     top: 100%;
     left: 0;
     width: 100%;
-    background-color: $gray-secondary-bg;
+    background-color: var(--gray-secondary-bg);
     background-color: rgb(250, 255, 255);
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -106,11 +103,11 @@
       justify-content: space-between;
       align-items: center;
       padding: 8px 12px;
-      color: $text-color;
+      color: var(--text-color-light);
       cursor: pointer;
 
       &:hover {
-        background-color: color.adjust($primary-color, $lightness: 40%);
+        background-color: lighten-color($primary-color, 40%);
       }
 
       .select_list_buttons {
@@ -126,7 +123,7 @@
 
           mat-icon {
             right: 0;
-            color: $danger-color;
+            color: var(--danger-color);
           }
         }
       }
@@ -134,7 +131,6 @@
       .edit-button {
         background: none;
         border: none;
-        color: $primary-color;
         cursor: pointer;
         font-size: 14px;
         transition: transform 0.3s ease;
