@@ -1,11 +1,19 @@
 <section (click)="onSidenavClick()">
   <div>
     <div class="sidenav-header">
-      <img
-        src="https://github.com/tkdcris.png"
+      <!-- <img
+        src="./icon"
         [width]="profilePicSize()"
         [height]="profilePicSize()"
-      />
+      /> -->
+      @if (!sideNavCollapsed()) {
+      <mat-icon
+        class="mat-18"
+        fontSet="material-icons-outlined"
+      >
+        person
+      </mat-icon>
+      }
       <div
         class="header-text"
         [class.hide-header-text]="sideNavCollapsed()"
@@ -50,13 +58,18 @@
           <mat-panel-title>
             <mat-icon
               [fontSet]="!true ? 'material-icons' : 'material-icons-outlined'"
-              [style.color]=" 'var(--text-color)' "
+              [style.color]="'var(--text-color)'"
             >
               {{ item.icon }}
             </mat-icon>
 
             @if (!sideNavCollapsed()) {
-            <span [style.color]=" 'var(--text-color)' ">{{ item.label }}</span>
+            <span
+              [style.font-size]="'medium'"
+              [style.color]="'var(--text-color)'"
+            >
+              {{ item.label }}
+            </span>
             }
           </mat-panel-title>
         </mat-expansion-panel-header>
