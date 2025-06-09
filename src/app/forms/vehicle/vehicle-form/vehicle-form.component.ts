@@ -1,5 +1,6 @@
 import {
   Component,
+  ElementRef,
   EventEmitter,
   inject,
   Input,
@@ -9,6 +10,7 @@ import {
   Output,
   signal,
   SimpleChanges,
+  ViewChild,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -70,6 +72,9 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
+
+  @ViewChild('submitButton', { static: false, read: ElementRef })
+  submitButton!: ElementRef<HTMLButtonElement>;
 
   @Input() dataForm: VehicleForm | null = null;
   @Output() formSubmitted = new EventEmitter<void>();
@@ -244,6 +249,23 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           origin: this.dataForm!.origin || this.form.get('origin')?.value,
         });
       });
+    }
+  }
+
+  onEnter(event: Event): void {
+    if (event instanceof KeyboardEvent) {
+      event.preventDefault(); // Impede o comportamento padrão do Enter
+
+      if (
+        this.form.valid &&
+        document.activeElement === this.submitButton.nativeElement
+      ) {
+        this.onSubmit();
+      }
+
+      if (this.form.valid && this.submitButton) {
+        this.submitButton.nativeElement.focus(); // Define o foco no botão de submit
+      }
     }
   }
 

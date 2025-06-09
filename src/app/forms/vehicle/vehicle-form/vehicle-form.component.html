@@ -1,4 +1,4 @@
-<form [formGroup]="form">
+<form [formGroup]="form" (keydown.enter)="onEnter($event)">
   @if(dataForm?.licensePlate) {
   <div class="title-trash">
     <h2>Veículo placa: {{ dataForm!.licensePlate }}</h2>
@@ -169,6 +169,7 @@
     class="submit-btn"
     color="primary"
     (click)="onSubmit()"
+    #submitButton
   >
     {{ dataForm?.licensePlate ? 'Editar' : 'Enviar' }}
   </button>
