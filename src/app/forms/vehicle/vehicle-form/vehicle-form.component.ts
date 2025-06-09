@@ -107,6 +107,11 @@ export class VehicleFormComponent implements OnInit, OnChanges {
     origin: ['NACIONAL'],
   });
 
+  // Adicione este getter público
+  public get vehicleForm(): FormGroup {
+    return this.form;
+  }
+
   constructor(
     private vehicleService: VehicleService,
     private brandService: BrandService,
@@ -159,6 +164,22 @@ export class VehicleFormComponent implements OnInit, OnChanges {
       }
       this.modelControl.updateValueAndValidity(); // Atualiza a validação
     });
+
+    this.brandControl.valueChanges
+      .pipe(distinctUntilChanged())
+      .subscribe((brand) => {
+        if (brand) {
+          this.modelService.getModels(brand.id).subscribe((models) => {
+            this.models = models;
+            this.modelControl.enable({ emitEvent: false });
+          });
+          this.selectModelDisabled.set(false);
+        } else {
+          this.models = [];
+          this.modelControl.disable({ emitEvent: false });
+          this.selectModelDisabled.set(true);
+        }
+      });
   }
 
   ngOnChanges(changes: SimpleChanges) {

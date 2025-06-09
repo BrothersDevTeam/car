@@ -56,26 +56,25 @@ export class SideNavComponent {
   @Output() toggleSidebar = new EventEmitter<void>();
 
   menuItems = signal<MenuItem[]>([
-    {
-      icon: 'settings',
-      label: 'Cadastros',
-      subItems: [
-        {
-          icon: 'person',
-          label: 'Pessoas',
-          route: '/person',
-        },
-        {
-          icon: 'directions_car',
-          label: 'Veículos',
-          route: '/vehicle',
-        },
-      ],
-    },
+    // {
+    //   icon: 'settings',
+    //   label: 'Cadastros',
+    //   subItems: [],
+    // },
     {
       icon: 'store',
       label: 'Loja',
       route: '/store',
+    },
+    {
+      icon: 'person',
+      label: 'Pessoas',
+      route: '/person',
+    },
+    {
+      icon: 'directions_car',
+      label: 'Veículos',
+      route: '/vehicle',
     },
 
     {
