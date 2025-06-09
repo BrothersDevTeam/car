@@ -1,5 +1,4 @@
-<form [formGroup]="form">
-
+<form [formGroup]="form" (keydown.enter)="onEnter($event)">
   <app-wrapper-card title="Dados pessoais">
     <app-primary-input
       formControlName="fullName"
@@ -108,6 +107,7 @@
     type="button"
     class="submit-btn"
     (click)="onSubmit()"
+    #submitButton
   >
     Salvar
   </button>

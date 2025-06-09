@@ -7,6 +7,8 @@ import {
   Component,
   EventEmitter,
   SimpleChanges,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -45,6 +47,9 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
 
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
+
+  @ViewChild('submitButton', { static: false, read: ElementRef })
+  submitButton!: ElementRef<HTMLButtonElement>;
 
   @Input() dataForm: Person | null = null;
   @Output() formSubmitted = new EventEmitter<void>();
@@ -110,6 +115,23 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
           },
         });
       });
+    }
+  }
+
+  onEnter(event: Event): void {
+    if (event instanceof KeyboardEvent) {
+      event.preventDefault(); // Impede o comportamento padrão do Enter
+
+      if (
+        this.form.valid &&
+        document.activeElement === this.submitButton.nativeElement
+      ) {
+        this.onSubmit();
+      }
+
+      if (this.form.valid && this.submitButton) {
+        this.submitButton.nativeElement.focus(); // Define o foco no botão de submit
+      }
     }
   }
 

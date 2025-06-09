@@ -8,6 +8,8 @@ import {
   EventEmitter,
   SimpleChanges,
   OnDestroy,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -46,6 +48,9 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
 
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
+
+  @ViewChild('submitButton', { static: false, read: ElementRef })
+  submitButton!: ElementRef<HTMLButtonElement>;
 
   @Input() dataForm: Person | null = null;
   @Output() formSubmitted = new EventEmitter<void>();
@@ -115,6 +120,23 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
           },
         });
       });
+    }
+  }
+
+  onEnter(event: Event): void {
+    if (event instanceof KeyboardEvent) {
+      event.preventDefault(); // Impede o comportamento padrão do Enter
+
+      if (
+        this.form.valid &&
+        document.activeElement === this.submitButton.nativeElement
+      ) {
+        this.onSubmit();
+      }
+
+      if (this.form.valid && this.submitButton) {
+        this.submitButton.nativeElement.focus(); // Define o foco no botão de submit
+      }
     }
   }
 
