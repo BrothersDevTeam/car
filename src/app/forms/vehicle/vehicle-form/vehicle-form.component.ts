@@ -4,6 +4,7 @@ import {
   inject,
   Input,
   OnChanges,
+  OnDestroy,
   OnInit,
   Output,
   signal,
@@ -25,7 +26,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 import { ToastrService } from 'ngx-toastr';
-import { distinctUntilChanged } from 'rxjs';
+import { distinctUntilChanged, Subscription } from 'rxjs';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
@@ -58,7 +59,8 @@ import { MatRadioModule } from '@angular/material/radio';
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',
 })
-export class VehicleFormComponent implements OnInit, OnChanges {
+export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
+  private subscriptions = new Subscription();
   submitted = false;
 
   brands: { id: string; description: string }[] = [];
@@ -135,8 +137,6 @@ export class VehicleFormComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    console.log('Form structure:', this.form.value);
-
     this.form.setValidators(this.validateBrandAndModel.bind(this));
 
     this.form.valueChanges.subscribe(() => {
@@ -156,30 +156,40 @@ export class VehicleFormComponent implements OnInit, OnChanges {
       this.colors = colors;
     });
 
-    this.brandControl.valueChanges.subscribe((brand) => {
-      if (brand && brand.id) {
-        this.modelControl.setValidators(Validators.required);
-      } else {
-        this.modelControl.clearValidators();
-      }
-      this.modelControl.updateValueAndValidity(); // Atualiza a validação
-    });
+    // Primeira subscrição: Carregamento de modelos
+    this.subscriptions.add(
+      this.brandControl.valueChanges
+        .pipe(distinctUntilChanged())
+        .subscribe((brand) => {
+          if (brand) {
+            this.modelService.getModels(brand.id).subscribe((models) => {
+              this.models = models;
+              this.modelControl.enable({ emitEvent: false });
+            });
+            this.selectModelDisabled.set(false);
+          } else {
+            this.models = [];
+            this.modelControl.disable({ emitEvent: false });
+            this.selectModelDisabled.set(true);
+          }
+        })
+    );
 
-    this.brandControl.valueChanges
-      .pipe(distinctUntilChanged())
-      .subscribe((brand) => {
-        if (brand) {
-          this.modelService.getModels(brand.id).subscribe((models) => {
-            this.models = models;
-            this.modelControl.enable({ emitEvent: false });
-          });
-          this.selectModelDisabled.set(false);
+    // Segunda subscrição: Validação dinâmica
+    this.subscriptions.add(
+      this.brandControl.valueChanges.subscribe((brand) => {
+        if (brand && brand.id) {
+          this.modelControl.setValidators(Validators.required);
         } else {
-          this.models = [];
-          this.modelControl.disable({ emitEvent: false });
-          this.selectModelDisabled.set(true);
+          this.modelControl.clearValidators();
         }
-      });
+        this.modelControl.updateValueAndValidity();
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe(); // Cancela todas as subscrições
   }
 
   ngOnChanges(changes: SimpleChanges) {

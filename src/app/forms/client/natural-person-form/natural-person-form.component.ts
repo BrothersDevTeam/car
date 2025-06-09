@@ -24,6 +24,7 @@ import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.comp
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 
 import { ActionsService } from '@services/actions.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-natural-person-form',
@@ -39,6 +40,7 @@ import { ActionsService } from '@services/actions.service';
   styleUrl: './natural-person-form.component.scss',
 })
 export class NaturalPersonFormComponent implements OnInit, OnChanges {
+  private subscriptions = new Subscription();
   submitted = false;
 
   readonly dialog = inject(MatDialog);
@@ -75,10 +77,16 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnInit() {
-    this.form.valueChanges.subscribe(() => {
-      const isDirty = this.form.dirty;
-      this.actionsService.hasFormChanges.set(isDirty);
-    });
+    this.subscriptions.add(
+      this.form.valueChanges.subscribe(() => {
+        const isDirty = this.form.dirty;
+        this.actionsService.hasFormChanges.set(isDirty);
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe(); // Limpa as inscrições para evitar vazamentos de memória
   }
 
   ngOnChanges(changes: SimpleChanges) {

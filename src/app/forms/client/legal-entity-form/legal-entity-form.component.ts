@@ -7,6 +7,7 @@ import {
   OnChanges,
   EventEmitter,
   SimpleChanges,
+  OnDestroy,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,6 +25,7 @@ import { CepService } from '@services/cep.service';
 import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
 import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-legal-entity-form',
@@ -38,7 +40,8 @@ import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
   templateUrl: './legal-entity-form.component.html',
   styleUrl: './legal-entity-form.component.scss',
 })
-export class LegalEntityFormComponent implements OnInit, OnChanges {
+export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
+  private subscriptions = new Subscription();
   submitted = false;
 
   readonly dialog = inject(MatDialog);
@@ -77,10 +80,16 @@ export class LegalEntityFormComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     // Inscreve-se no valueChanges para detectar mudanças no formulário
-    this.form.valueChanges.subscribe(() => {
-      const isDirty = this.form.dirty; // Verifica se o formulário foi modificado
-      this.actionsService.hasFormChanges.set(isDirty);
-    });
+    this.subscriptions.add(
+      this.form.valueChanges.subscribe(() => {
+        const isDirty = this.form.dirty; // Verifica se o formulário foi modificado
+        this.actionsService.hasFormChanges.set(isDirty);
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe(); // Limpa as inscrições para evitar vazamentos de memória
   }
 
   ngOnChanges(changes: SimpleChanges) {
