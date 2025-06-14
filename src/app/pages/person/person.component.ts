@@ -87,6 +87,16 @@ export class PersonComponent implements OnInit, OnDestroy {
         return row.person.cpf ? row.person.cpf : row.person.cnpj || '-';
       },
     },
+    {
+      key: 'edit',
+      header: '',
+      showEditIcon: (row) => true,
+    },
+    {
+      key: 'delete',
+      header: '',
+      showDeleteIcon: (row) => true,
+    },
   ];
 
   clientListLoading = signal(false);
@@ -144,6 +154,7 @@ export class PersonComponent implements OnInit, OnDestroy {
       .getPaginatedData(pageIndex, pageSize)
       .pipe(
         catchError((err) => {
+          this.clientListLoading.set(false);
           this.clientListError.set(true);
           console.error('Erro ao carregar a lista de pessoas:', err);
           this.toastr.error('Erro ao buscar dados da tabela de clientes');
@@ -179,7 +190,8 @@ export class PersonComponent implements OnInit, OnDestroy {
     this.searchValue = (event.target as HTMLInputElement).value;
   }
 
-  handleEdit() {
+  handleEdit(person?: Person) {
+    if (person) this.selectedPerson = person;
     this.openInfo.set(false);
     this.openForm.set(true);
   }

@@ -83,6 +83,10 @@ export class PersonService {
 
   constructor(private http: HttpClient) {}
 
+  filterByActive(array: Person[]) {
+    return array.filter((element) => element.person.active);
+  }
+
   getPaginatedData(
     pageIndex: number,
     pageSize: number
@@ -99,9 +103,7 @@ export class PersonService {
         tap((response) => {
           this.cache = response;
 
-          this.cache.content = this.cache.content.filter(
-            (element) => element.person.active
-          );
+          this.cache.content = this.filterByActive(this.cache.content);
 
           this.cache.totalElements = this.cache.content.length;
         })
