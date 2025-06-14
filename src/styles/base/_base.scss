@@ -16,7 +16,11 @@
 
   --success-color: #{$success-color};
   --warning-color: #{$warning-color};
+
   --danger-color: #{$danger-color};
+  --danger-color-light: #{lighten-color($danger-color, 5%)};
+  --danger-color-dark: #{darken-color($danger-color, 5%)};
+
   --error-color: #{$error-color};
 
   --content-header-color: #{$content-header-color};

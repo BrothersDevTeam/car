@@ -1,16 +1,26 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { PageEvent } from '@angular/material/paginator';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { PageEvent } from '@angular/material/paginator';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 import { PaginationComponent } from '@components/pagination/pagination.component';
 
-import { PaginationResponse } from '@interfaces/pagination';
-import { ColumnConfig } from '@interfaces/genericTable';
+import type { ColumnConfig } from '@interfaces/genericTable';
+import type { PaginationResponse } from '@interfaces/pagination';
 
 @Component({
   selector: 'app-generic-table',
-  imports: [MatTableModule, PaginationComponent, CommonModule],
+  imports: [
+    MatTableModule,
+    PaginationComponent,
+    CommonModule,
+    MatCheckboxModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
   templateUrl: './generic-table.component.html',
   styleUrl: './generic-table.component.scss',
 })
@@ -22,15 +32,21 @@ export class GenericTableComponent<T> implements OnInit {
 
   @Output() rowClick = new EventEmitter<T>();
   @Output() pageEvent = new EventEmitter<PageEvent>();
+  @Output() editClick = new EventEmitter<T>();
+  @Output() deleteClick = new EventEmitter<T>();
+  @Output() selectionChange = new EventEmitter<T[]>();
 
   tableDataSource = new MatTableDataSource<T>();
-
-  ngAfterViewInit() {}
+  selectedRows: Set<T> = new Set<T>();
 
   ngOnInit(): void {
     if (this.genericPaginatedList?.content) {
       this.tableDataSource.data = this.genericPaginatedList.content;
     }
+  }
+
+  get hasSelectColumn(): boolean {
+    return this.columns.some((col) => col.key === 'select');
   }
 
   get displayedColumns(): string[] {
@@ -57,5 +73,64 @@ export class GenericTableComponent<T> implements OnInit {
       ? column.format(value, row)
       : value?.toString() || '';
     return columnValue;
+  }
+
+  // Lógica para checkboxes
+  isSelected(row: T): boolean {
+    return this.selectedRows.has(row);
+  }
+
+  toggleRow(row: T): void {
+    if (this.isSelected(row)) {
+      this.selectedRows.delete(row);
+    } else {
+      this.selectedRows.add(row);
+    }
+    this.selectionChange.emit(Array.from(this.selectedRows));
+  }
+
+  isAllSelected(): boolean {
+    return this.tableDataSource.data.every((row) => this.isSelected(row));
+  }
+
+  isSomeSelected(): boolean {
+    return (
+      this.tableDataSource.data.some((row) => this.isSelected(row)) &&
+      !this.isAllSelected()
+    );
+  }
+
+  toggleAllRows(): void {
+    if (this.isAllSelected()) {
+      this.selectedRows.clear();
+    } else {
+      this.tableDataSource.data.forEach((row) => this.selectedRows.add(row));
+    }
+    this.selectionChange.emit(Array.from(this.selectedRows));
+  }
+
+  onEditClick(row: T): void {
+    this.editClick.emit(row);
+  }
+
+  onDeleteClick(row: T): void {
+    this.deleteClick.emit(row);
+  }
+
+  shouldShowEditIcon(row: T): boolean {
+    const editColumn = this.columns.find((col) => col.key === 'edit');
+    return editColumn?.showEditIcon ? editColumn.showEditIcon(row) : true;
+  }
+
+  shouldShowDeleteIcon(row: T): boolean {
+    const deleteColumn = this.columns.find((col) => col.key === 'delete');
+    return deleteColumn?.showDeleteIcon
+      ? deleteColumn.showDeleteIcon(row)
+      : true;
+  }
+
+  shouldShowCheckbox(row: T): boolean {
+    const selectColumn = this.columns.find((col) => col.key === 'select');
+    return selectColumn?.showCheckbox ? selectColumn.showCheckbox(row) : true;
   }
 }
