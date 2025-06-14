@@ -1,7 +1,10 @@
 <mat-toolbar class="mat-elevation-z2">
   <span>{{ title }}</span>
-  <button mat-flat-button (click)="handleAction()">
-    <span matListItemTitle>{{ btn_label }}</span>
-    <mat-icon matListItemIcon [fontIcon]="fontIcon" />
-  </button>
+  <div class="button-container">
+    <ng-content></ng-content>
+    <button mat-flat-button (click)="handleAction()">
+      <span matListItemTitle>{{ btn_label }}</span>
+      <mat-icon matListItemIcon [fontIcon]="fontIcon" />
+    </button>
+  </div>
 </mat-toolbar>

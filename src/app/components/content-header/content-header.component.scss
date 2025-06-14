@@ -12,3 +12,9 @@ mat-toolbar {
     background-color: whitesmoke;
   }
 }
+
+.button-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
