@@ -71,13 +71,13 @@
     </app-drawer>
   } @if (openForm()) {
   <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
-    <mat-tab-group [selectedIndex]="selectedPerson?.person?.cpf ? 0 : 1">
+    <mat-tab-group [selectedIndex]="selectedPerson?.person?.fullName ? 0 : 1">
       <mat-tab
         label="Pessoa Física"
         [disabled]="selectedPerson && selectedPerson.person.cnpj"
       >
         <app-natural-person-form
-          [dataForm]="selectedPerson?.person?.cpf ? selectedPerson : null"
+          [dataForm]="selectedPerson?.person?.fullName ? selectedPerson : null"
           (formSubmitted)="onFormSubmitted()"
           (formChanged)="handleFormChanged($event)"
         />
@@ -87,7 +87,7 @@
         [disabled]="selectedPerson && selectedPerson.person.cpf"
       >
         <app-legal-entity-form
-          [dataForm]="selectedPerson?.person?.cnpj ? selectedPerson : null"
+          [dataForm]="selectedPerson?.person?.legalName ? selectedPerson : null"
           (formSubmitted)="onFormSubmitted()"
           (formChanged)="handleFormChanged($event)"
         />

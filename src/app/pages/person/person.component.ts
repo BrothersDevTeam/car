@@ -58,6 +58,7 @@ import { ActionsService } from '@services/actions.service';
 export class PersonComponent implements OnInit, OnDestroy {
   readonly dialog = inject(MatDialog);
   private subscription!: Subscription;
+  private cacheSubscription!: Subscription;
 
   personPaginatedList: PaginationResponse<Person> | null = null;
   selectedPerson: Person | null = null;
@@ -78,7 +79,7 @@ export class PersonComponent implements OnInit, OnDestroy {
       key: 'person.cnpj',
       header: 'PF/PJ',
       format: (value: any, row: Person) =>
-        row.person.cnpj ? 'PESSOA JURÍDICA' : 'PESSOA FÍSICA',
+        row.person.legalName ? 'PESSOA JURÍDICA' : 'PESSOA FÍSICA',
     },
     {
       key: 'cpf-cnpj',
@@ -115,6 +116,9 @@ export class PersonComponent implements OnInit, OnDestroy {
       this.paginationRequestConfig.pageIndex,
       this.paginationRequestConfig.pageSize
     );
+
+    // Inscrever-se nas mudanças do cache
+    this.setupCacheSubscription();
   }
 
   ngOnInit() {
@@ -127,6 +131,20 @@ export class PersonComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    if (this.cacheSubscription) {
+      this.cacheSubscription.unsubscribe();
+    }
+  }
+
+  // Método para configurar a inscrição do cache
+  private setupCacheSubscription() {
+    this.cacheSubscription = this.personService.cacheUpdated.subscribe(
+      (updatedCache) => {
+        if (updatedCache) {
+          this.personPaginatedList = updatedCache;
+        }
+      }
+    );
   }
 
   handleFormChanged(isDirty: boolean) {

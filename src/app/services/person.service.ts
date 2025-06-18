@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
-import { first, Observable, of, tap } from 'rxjs';
+import { BehaviorSubject, first, Observable, of, tap } from 'rxjs';
 
 import {
   CreateLegalEntity,
@@ -16,75 +15,40 @@ import { PaginationResponse } from '@interfaces/pagination';
 export class PersonService {
   private cache: PaginationResponse<Person> | null = null;
 
-  // private cache: PaginationResponse<Person> | null = {
-  //   content: [
-  //     {
-  //       id: '1',
-  //       person: {
-  //         id: '1',
-  //         fullName: 'Usumaki Naruto',
-  //         legalName: '',
-  //         tradeName: '',
-  //         cpf: '123.456.789-00',
-  //         cnpj: '',
-  //         ie: '',
-  //         crt: '',
-  //         address: {
-  //           street: 'Rua A',
-  //           city: 'São Paulo',
-  //           number: '123',
-  //           complement: 'Apto 1',
-  //           state: 'SP',
-  //           zipcode: '12345-678',
-  //           neighborhood: 'Centro',
-  //         },
-  //         contact: {
-  //           email: 'email@email.com',
-  //           phone: '123456789',
-  //         },
-  //         active: true,
-  //       },
-  //     },
-  //     {
-  //       id: '1',
-  //       person: {
-  //         id: '2',
-  //         fullName: 'Obito Uchiha',
-  //         legalName: '',
-  //         tradeName: '',
-  //         cpf: '',
-  //         cnpj: '123.456.789/0001-00',
-  //         ie: '',
-  //         crt: '',
-  //         address: {
-  //           street: 'Rua A',
-  //           city: 'São Paulo',
-  //           number: '123',
-  //           complement: 'Apto 1',
-  //           state: 'SP',
-  //           zipcode: '12345-678',
-  //           neighborhood: 'Centro',
-  //         },
-  //         contact: {
-  //           email: 'email@email.com',
-  //           phone: '123456789',
-  //         },
-  //         active: true,
-  //       },
-  //     },
-  //   ],
-  //   page: 0,
-  //   size: 1000,
-  //   totalElements: 3,
-  //   totalPages: 1,
-  // };
+  // Subject para notificar mudanças no cache
+  private cacheUpdated$ =
+    new BehaviorSubject<PaginationResponse<Person> | null>(null);
 
   private readonly apiUrl: string = '/api/v1/clients';
 
   constructor(private http: HttpClient) {}
 
+  // Observable público para componentes se inscreverem
+  get cacheUpdated(): Observable<PaginationResponse<Person> | null> {
+    return this.cacheUpdated$.asObservable();
+  }
+
   filterByActive(array: Person[]) {
     return array.filter((element) => element.person.active);
+  }
+
+  // Método para atualizar o cache
+  private updatePersonOnCache(person: Person) {
+    if (this.cache?.content) {
+      // Remove a pessoa antiga do cache
+      const filteredCache = this.cache.content.filter(
+        (personCache) => personCache.id !== person.id
+      );
+
+      // Adiciona a pessoa atualizada no início
+      const updatedContent = [person, ...filteredCache];
+
+      // Cria uma nova referência para o cache para garantir que o @Input() seja detectado
+      this.cache = { ...this.cache, content: updatedContent };
+
+      // Notifica os componentes sobre a mudança com a nova referência
+      this.cacheUpdated$.next(this.cache);
+    }
   }
 
   getPaginatedData(
@@ -102,10 +66,11 @@ export class PersonService {
         first(),
         tap((response) => {
           this.cache = response;
-
           this.cache.content = this.filterByActive(this.cache.content);
-
           this.cache.totalElements = this.cache.content.length;
+
+          // Notifica sobre o carregamento inicial com uma nova referência
+          this.cacheUpdated$.next({ ...this.cache });
         })
       );
   }
@@ -113,7 +78,8 @@ export class PersonService {
   create(data: CreateNaturalPerson | CreateLegalEntity) {
     return this.http.post<string>(`${this.apiUrl}`, data).pipe(
       tap((response: string) => {
-        console.log('Formulário enviado com sucesso!', response);
+        // Ao invés de limpar o cache, atualiza o cache com a nova pessoa
+        //TODO: Back precisa retornar a pessoa criada
         this.clearCache();
       })
     );
@@ -122,8 +88,7 @@ export class PersonService {
   update(data: CreateNaturalPerson | CreateLegalEntity, id: string) {
     return this.http.put<string>(`${this.apiUrl}/${id}`, data).pipe(
       tap((response: string) => {
-        console.log('Formulário enviado com sucesso!', response);
-        this.clearCache();
+        this.updatePersonOnCache({ person: data, id } as Person);
       })
     );
   }
@@ -139,5 +104,6 @@ export class PersonService {
 
   private clearCache() {
     this.cache = null;
+    this.cacheUpdated$.next(null);
   }
 }

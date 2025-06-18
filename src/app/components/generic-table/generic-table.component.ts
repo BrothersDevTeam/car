@@ -4,7 +4,15 @@ import { PageEvent } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 
 import { PaginationComponent } from '@components/pagination/pagination.component';
 
@@ -24,7 +32,7 @@ import type { PaginationResponse } from '@interfaces/pagination';
   templateUrl: './generic-table.component.html',
   styleUrl: './generic-table.component.scss',
 })
-export class GenericTableComponent<T> implements OnInit {
+export class GenericTableComponent<T> implements OnInit, OnChanges {
   @Input() columns: ColumnConfig<T>[] = [];
   @Input() genericPaginatedList: PaginationResponse<T> | null = null;
   @Input() totalElements: number = 0;
@@ -41,6 +49,12 @@ export class GenericTableComponent<T> implements OnInit {
 
   ngOnInit(): void {
     if (this.genericPaginatedList?.content) {
+      this.tableDataSource.data = this.genericPaginatedList.content;
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['genericPaginatedList'] && this.genericPaginatedList?.content) {
       this.tableDataSource.data = this.genericPaginatedList.content;
     }
   }
