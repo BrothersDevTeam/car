@@ -34,7 +34,7 @@
             (click)="$event.stopPropagation(); onEditClick(element)"
             aria-label="Editar NFe"
           >
-            <mat-icon style="color: var(--secondary-color-light)">edit</mat-icon>
+            <mat-icon>edit</mat-icon>
           </button>
         </ng-container>
         <!-- Ícone de deleção para a coluna 'delete' -->
@@ -43,8 +43,9 @@
             mat-icon-button
             (click)="$event.stopPropagation(); onDeleteClick(element)"
             aria-label="Deletar NFe"
+            class="delete-btn"
           >
-            <mat-icon style="color: var(--danger-color-light)">delete</mat-icon>
+            <mat-icon>delete</mat-icon>
           </button>
         </ng-container>
         <!-- Dados normais para outras colunas -->

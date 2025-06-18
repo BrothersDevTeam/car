@@ -8,17 +8,22 @@ table {
 
 th[mat-header-cell],
 td[mat-cell] {
-  &.mat-column-select,
   &.mat-column-edit,
+  &.mat-column-select,
   &.mat-column-delete {
-    width: 48px; /* Ajuste conforme necessário */
+    width: 48px;
+    padding: 0px;
     text-align: center;
   }
+}
 
-  &.mat-column-edit,
-  &.mat-column-select,
-  &.mat-column-delete {
-    padding: 0px;
+mat-icon {
+  font-size: 20px;
+}
+
+.delete-btn {
+  &:hover {
+    color: var(--danger-color-light);
   }
 }
 
