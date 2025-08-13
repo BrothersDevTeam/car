@@ -20,7 +20,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { MatIconModule } from '@angular/material/icon';
 import { MatOptionModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
@@ -47,7 +47,6 @@ import { MatRadioModule } from '@angular/material/radio';
 @Component({
   selector: 'app-vehicle-form',
   imports: [
-    CommonModule,
     PrimaryInputComponent,
     ReactiveFormsModule,
     WrapperCardComponent,
@@ -56,8 +55,8 @@ import { MatRadioModule } from '@angular/material/radio';
     MatOptionModule,
     MatSelectModule,
     CustomSelectComponent,
-    MatRadioModule,
-  ],
+    MatRadioModule
+],
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',
 })

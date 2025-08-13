@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { MatIconModule } from '@angular/material/icon';
 import { PageEvent } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
@@ -24,11 +24,10 @@ import type { PaginationResponse } from '@interfaces/pagination';
   imports: [
     MatTableModule,
     PaginationComponent,
-    CommonModule,
     MatCheckboxModule,
     MatIconModule,
-    MatButtonModule,
-  ],
+    MatButtonModule
+],
   templateUrl: './generic-table.component.html',
   styleUrl: './generic-table.component.scss',
 })

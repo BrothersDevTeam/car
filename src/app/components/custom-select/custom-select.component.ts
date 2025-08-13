@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import {
   Component,
   HostListener,
@@ -22,7 +22,7 @@ import { ColorService } from '@services/color.service';
 
 @Component({
   selector: 'app-custom-select',
-  imports: [CommonModule, ReactiveFormsModule, MatIcon, MatTooltipModule],
+  imports: [ReactiveFormsModule, MatIcon, MatTooltipModule],
   templateUrl: './custom-select.component.html',
   styleUrls: ['./custom-select.component.scss'],
 })
