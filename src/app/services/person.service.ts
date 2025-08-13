@@ -19,7 +19,7 @@ export class PersonService {
   private cacheUpdated$ =
     new BehaviorSubject<PaginationResponse<Person> | null>(null);
 
-  private readonly apiUrl: string = '/api/v1/clients';
+  private readonly apiUrl: string = '/api/clients';
 
   constructor(private http: HttpClient) {}
 
@@ -60,7 +60,7 @@ export class PersonService {
     }
     return this.http
       .get<PaginationResponse<Person>>(
-        `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`
+        `${this.apiUrl + '/clients'}?page=${pageIndex}&size=${pageSize}`
       )
       .pipe(
         first(),
@@ -105,5 +105,9 @@ export class PersonService {
   private clearCache() {
     this.cache = null;
     this.cacheUpdated$.next(null);
+  }
+
+  getUserRole(): string | null {
+    return sessionStorage.getItem('car-user-role');
   }
 }

@@ -91,7 +91,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.unsubscribe(); // Limpa as inscrições para evitar vazamentos de memória
+    this.subscriptions.unsubscribe();
   }
 
   ngOnChanges(changes: SimpleChanges) {

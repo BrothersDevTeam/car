@@ -7,13 +7,13 @@ import { LoginResponse } from '@interfaces/login';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly apiUrl: string = '/api';
+  private readonly apiUrl: string = '/api/auth/login';
 
   constructor(private httpClient: HttpClient, private router: Router) {}
 
   login(email: string, password: string) {
     return this.httpClient
-      .post<LoginResponse>(this.apiUrl + '/auth/login', {
+      .post<LoginResponse>(this.apiUrl, {
         username: email,
         password,
       })

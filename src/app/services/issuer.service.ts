@@ -9,7 +9,7 @@ import { GenericClient } from '@interfaces/person';
 })
 export class IssuerService {
   private cache: GenericClient[] | null = null;
-  private readonly apiUrl: string = '/api/v1/issuer';
+  private readonly apiUrl: string = '/api/issuer';
 
   constructor(private http: HttpClient) {}
 

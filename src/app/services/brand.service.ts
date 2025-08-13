@@ -22,7 +22,7 @@ export class BrandService {
   //   { id: '8', description: 'RENAULT' },
   // ];
 
-  private readonly apiUrl: string = 'api/v1/vehicles/brands';
+  private readonly apiUrl: string = '/api/vehicles/brands';
 
   constructor(private http: HttpClient) {}
 

@@ -21,7 +21,7 @@ export class FuelTypeService {
   //   { id: '7', description: 'GNV' },
   // ];
 
-  private readonly apiUrl: string = 'api/v1/vehicles/fuel-types';
+  private readonly apiUrl: string = '/api/vehicles/fuel-types';
 
   constructor(private http: HttpClient) {}
 

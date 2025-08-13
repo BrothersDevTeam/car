@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { first, Observable, of, tap } from 'rxjs';
+import { BehaviorSubject, first, Observable, of, tap } from 'rxjs';
 
 import { PaginationResponse } from '@interfaces/pagination';
 import { CreateVehicle, GetVehicle, Vehicle } from '@interfaces/vehicle';
@@ -10,9 +10,19 @@ import { CreateVehicle, GetVehicle, Vehicle } from '@interfaces/vehicle';
 })
 export class VehicleService {
   private cache: PaginationResponse<GetVehicle> | null = null;
-  private readonly apiUrl: string = 'api/v1/vehicles';
+
+  // Subject para notificar mudanças no cache
+  private cacheUpdated$ =
+    new BehaviorSubject<PaginationResponse<GetVehicle> | null>(null);
+
+  private readonly apiUrl: string = '/api/vehicles';
 
   constructor(private http: HttpClient) {}
+
+  // Observable público para componentes se inscreverem
+  get cacheUpdated(): Observable<PaginationResponse<GetVehicle> | null> {
+    return this.cacheUpdated$.asObservable();
+  }
 
   getPaginatedData(
     pageIndex: number,
@@ -29,6 +39,9 @@ export class VehicleService {
         first(),
         tap((response) => {
           this.cache = response;
+
+          // Notifica sobre o carregamento inicial com uma nova referência
+          this.cacheUpdated$.next({ ...this.cache });
         })
       );
   }
@@ -62,5 +75,6 @@ export class VehicleService {
 
   private clearCache() {
     this.cache = null;
+    this.cacheUpdated$.next(null);
   }
 }

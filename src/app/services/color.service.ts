@@ -21,7 +21,7 @@ export class ColorService {
   //   { id: '7', description: 'CINZA' },
   // ];
 
-  private readonly apiUrl: string = 'api/v1/vehicles/colors';
+  private readonly apiUrl: string = '/api/vehicles/colors';
 
   constructor(private http: HttpClient) {}
 

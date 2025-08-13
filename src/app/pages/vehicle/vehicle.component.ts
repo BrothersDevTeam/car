@@ -18,7 +18,7 @@ import { VehicleInfoComponent } from '@info/vehicle-info/vehicle-info.component'
 
 import type { ColumnConfig } from '@interfaces/genericTable';
 import type { PaginationResponse } from '@interfaces/pagination';
-import type { GetVehicle, VehicleForm } from '@interfaces/vehicle';
+import type { GetVehicle, Vehicle, VehicleForm } from '@interfaces/vehicle';
 
 import { VehicleService } from '@services/vehicle.service';
 import { ActionsService } from '@services/actions.service';
@@ -41,6 +41,7 @@ import { ActionsService } from '@services/actions.service';
 export class VehicleComponent {
   readonly dialog = inject(MatDialog);
   private subscription!: Subscription;
+  private cacheSubscription!: Subscription;
 
   vehiclePaginatedList: PaginationResponse<GetVehicle> | null = null;
   selectedVehicle: VehicleForm | null = null;
@@ -74,6 +75,16 @@ export class VehicleComponent {
       key: 'origin',
       header: 'Origem',
     },
+    {
+      key: 'edit',
+      header: '',
+      showEditIcon: (row) => true,
+    },
+    {
+      key: 'delete',
+      header: '',
+      showDeleteIcon: (row) => true,
+    },
   ];
 
   vehicleListLoading = signal(false);
@@ -92,6 +103,9 @@ export class VehicleComponent {
       this.paginationRequestConfig.pageIndex,
       this.paginationRequestConfig.pageSize
     );
+
+    // Inscrever-se nas mudanças do cache
+    this.setupCacheSubscription();
   }
 
   ngOnInit() {
@@ -104,6 +118,20 @@ export class VehicleComponent {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    if (this.cacheSubscription) {
+      this.cacheSubscription.unsubscribe();
+    }
+  }
+
+  // Método para configurar a inscrição do cache
+  private setupCacheSubscription() {
+    this.cacheSubscription = this.vehicleService.cacheUpdated.subscribe(
+      (updatedCache) => {
+        if (updatedCache) {
+          this.vehiclePaginatedList = updatedCache;
+        }
+      }
+    );
   }
 
   handleFormChanged(isDirty: boolean) {
@@ -141,7 +169,6 @@ export class VehicleComponent {
         this.vehicleListLoading.set(false);
         if (response) {
           this.vehiclePaginatedList = response;
-          console.log('\n\n vehiclePaginatedList: ', response.content);
         }
       });
   }
@@ -171,7 +198,8 @@ export class VehicleComponent {
     this.searchValue = (event.target as HTMLInputElement).value;
   }
 
-  handleEdit() {
+  handleEdit(vehicle?: GetVehicle) {
+    if (vehicle) this.selectedVehicle = vehicle;
     this.openInfo.set(false);
     this.openForm.set(true);
   }

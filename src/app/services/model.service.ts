@@ -31,7 +31,7 @@ export class ModelService {
   //   },
   // ];
 
-  private readonly apiUrl: string = 'api/v1/vehicles/models';
+  private readonly apiUrl: string = '/api/vehicles/models';
 
   constructor(private http: HttpClient) {}
 

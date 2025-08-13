@@ -56,7 +56,7 @@ export class NfeService {
     totalPages: 0,
   };
 
-  private readonly apiUrl: string = 'api/v1/nfe';
+  private readonly apiUrl: string = '/api/nfe';
 
   constructor(private http: HttpClient) {}
 

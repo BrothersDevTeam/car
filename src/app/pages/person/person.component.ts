@@ -57,8 +57,7 @@ import { ActionsService } from '@services/actions.service';
 })
 export class PersonComponent implements OnInit, OnDestroy {
   readonly dialog = inject(MatDialog);
-  private subscription!: Subscription;
-  private cacheSubscription!: Subscription;
+  private subscriptions: Subscription[] = [];
 
   personPaginatedList: PaginationResponse<Person> | null = null;
   selectedPerson: Person | null = null;
@@ -122,28 +121,25 @@ export class PersonComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscription = this.actionsService.sidebarClick$.subscribe(() => {
-      this.handleConfirmationCloseDrawer();
-    });
+    this.subscriptions.push(
+      this.actionsService.sidebarClick$.subscribe(() => {
+        this.handleConfirmationCloseDrawer();
+      })
+    );
   }
 
   ngOnDestroy() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-    if (this.cacheSubscription) {
-      this.cacheSubscription.unsubscribe();
-    }
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   // Método para configurar a inscrição do cache
   private setupCacheSubscription() {
-    this.cacheSubscription = this.personService.cacheUpdated.subscribe(
-      (updatedCache) => {
+    this.subscriptions.push(
+      this.personService.cacheUpdated.subscribe((updatedCache) => {
         if (updatedCache) {
           this.personPaginatedList = updatedCache;
         }
-      }
+      })
     );
   }
 
