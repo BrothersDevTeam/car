@@ -1,8 +1,11 @@
 {
   "/api": {
-    "target": "http://controleautorevenda.duckdns.org",
+    "target": "http://localhost:8090",
     "secure": false,
     "changeOrigin": true,
-    "logLevel": "debug"
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/api": "/api/v1/car"
+    }
   }
 }

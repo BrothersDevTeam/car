@@ -7,13 +7,16 @@ import { LoginResponse } from '@interfaces/login';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly apiUrl: string = '/api/v1';
+  private readonly apiUrl: string = '/api';
 
   constructor(private httpClient: HttpClient, private router: Router) {}
 
   login(email: string, password: string) {
     return this.httpClient
-      .post<LoginResponse>(this.apiUrl + '/auth/login', { email, password })
+      .post<LoginResponse>(this.apiUrl + '/auth/login', {
+        username: email,
+        password,
+      })
       .pipe(
         tap((value) => {
           sessionStorage.setItem('car-token', value.token);
