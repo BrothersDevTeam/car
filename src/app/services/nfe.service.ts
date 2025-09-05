@@ -50,10 +50,12 @@ export class NfeService {
         idVeiculo: '2',
       },
     ],
-    page: 0,
-    size: 0,
-    totalElements: 2,
-    totalPages: 0,
+    page: {
+      size: 1000,
+      number: 0,
+      totalElements: 1,
+      totalPages: 1,
+    },
   };
 
   private readonly apiUrl: string = '/api/nfe';
@@ -76,7 +78,7 @@ export class NfeService {
         tap((response) => {
           this.cache = response;
 
-          this.cache.totalElements = this.cache.content.length;
+          this.cache.page.totalElements = this.cache.content.length;
         })
       );
   }

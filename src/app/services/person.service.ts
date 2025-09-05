@@ -19,7 +19,7 @@ export class PersonService {
   private cacheUpdated$ =
     new BehaviorSubject<PaginationResponse<Person> | null>(null);
 
-  private readonly apiUrl: string = '/api/clients';
+  private readonly apiUrl: string = '/api/persons';
 
   constructor(private http: HttpClient) {}
 
@@ -60,14 +60,14 @@ export class PersonService {
     }
     return this.http
       .get<PaginationResponse<Person>>(
-        `${this.apiUrl + '/clients'}?page=${pageIndex}&size=${pageSize}`
+        `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`
       )
       .pipe(
         first(),
         tap((response) => {
           this.cache = response;
           this.cache.content = this.filterByActive(this.cache.content);
-          this.cache.totalElements = this.cache.content.length;
+          this.cache.page.totalElements = this.cache.content.length;
 
           // Notifica sobre o carregamento inicial com uma nova referência
           this.cacheUpdated$.next({ ...this.cache });
