@@ -57,8 +57,8 @@ export class NaturalPersonInfoComponent {
   }
 
   deleteConfirmed() {
-    if (this.person.id) {
-      this.personService.delete(this.person.id).subscribe({
+    if (this.person.personId) {
+      this.personService.delete(this.person.personId).subscribe({
         next: (response) => {
           console.log('Exclusão bem-sucedida', response);
           this.toastrService.success('Exclusão bem-sucedida');

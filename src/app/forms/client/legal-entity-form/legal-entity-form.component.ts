@@ -57,23 +57,27 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
   @Output() formChanged = new EventEmitter<boolean>();
 
   protected form = this.formBuilderService.group({
-    legalName: [this.dataForm?.person.legalName || '', Validators.required],
-    tradeName: [''],
-    contact: this.formBuilderService.group({
-      email: ['', [Validators.email]],
-      phone: [''],
-    }),
+    name: [this.dataForm?.name || '', Validators.required],
+    nickName: [''],
+    email: ['', [Validators.email]],
+    phone: [''],
     cnpj: [''],
     ie: [''],
-    address: this.formBuilderService.group({
-      zipcode: [''],
-      street: [''],
-      number: [''],
-      complement: [''],
-      state: [''],
-      city: [''],
-      neighborhood: [''],
-    }),
+    crc: [''],
+    active: [true],
+    storeId: [''],
+    legalEntity: [true],
+    relationshipTypes: [[]],
+
+    // address: this.formBuilderService.group({
+    //   zipcode: [''],
+    //   street: [''],
+    //   number: [''],
+    //   complement: [''],
+    //   state: [''],
+    //   city: [''],
+    //   neighborhood: [''],
+    // }),
   });
 
   constructor(
@@ -81,7 +85,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
     private toastrService: ToastrService,
     private cepService: CepService,
     private actionsService: ActionsService
-  ) {}
+  ) { }
 
   ngOnInit() {
     // Inscreve-se no valueChanges para detectar mudanças no formulário
@@ -101,23 +105,21 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
     if (changes['dataForm'] && this.dataForm) {
       setTimeout(() => {
         this.form.patchValue({
-          legalName: this.dataForm!.person.legalName || '',
-          tradeName: this.dataForm!.person.tradeName || '',
-          contact: {
-            email: this.dataForm!.person.contact?.email || '',
-            phone: this.dataForm!.person.contact?.phone || '',
-          },
-          cnpj: this.dataForm!.person.cnpj || '',
-          ie: this.dataForm!.person.ie || '',
-          address: {
-            zipcode: this.dataForm!.person.address?.zipcode || '',
-            street: this.dataForm!.person.address?.street || '',
-            number: this.dataForm!.person.address?.number || '',
-            complement: this.dataForm!.person.address?.complement || '',
-            state: this.dataForm!.person.address?.state || '',
-            city: this.dataForm!.person.address?.city || '',
-            neighborhood: this.dataForm!.person.address?.neighborhood || '',
-          },
+          name: this.dataForm!.name || '',
+          nickName: this.dataForm!.nickName || '',
+          email: this.dataForm!.email || '',
+          phone: this.dataForm!.phone || '',
+          cnpj: this.dataForm!.cnpj || '',
+          ie: this.dataForm!.ie || '',
+          // address: {
+          //   zipcode: this.dataForm!.person.address?.zipcode || '',
+          //   street: this.dataForm!.person.address?.street || '',
+          //   number: this.dataForm!.person.address?.number || '',
+          //   complement: this.dataForm!.person.address?.complement || '',
+          //   state: this.dataForm!.person.address?.state || '',
+          //   city: this.dataForm!.person.address?.city || '',
+          //   neighborhood: this.dataForm!.person.address?.neighborhood || '',
+          // },
         });
       });
     }
@@ -151,28 +153,21 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
 
     // Processar envio se válido
     const formValue: CreateLegalEntity = {
-      legalName: this.form.value.legalName || '',
-      tradeName: this.form.value.tradeName || '',
+      name: this.form.value.name || '',
+      nickName: this.form.value.nickName || '',
       cnpj: this.form.value.cnpj?.replace(/\D/g, '') || '',
       ie: this.form.value.ie || '',
       active: true,
-      contact: {
-        email: this.form.value.contact?.email || '',
-        phone: this.form.value.contact?.phone?.replace(/\D/g, '') || '',
-      },
-      address: {
-        zipcode: this.form.value.address?.zipcode || '',
-        street: this.form.value.address?.street || '',
-        number: this.form.value.address?.number || '',
-        complement: this.form.value.address?.complement || '',
-        state: this.form.value.address?.state || '',
-        city: this.form.value.address?.city || '',
-        neighborhood: this.form.value.address?.neighborhood || '',
-      },
+      email: this.form.value.email || '',
+      phone: this.form.value.phone?.replace(/\D/g, '') || '',
+      storeId: this.form.value.storeId || '',
+      legalEntity: true,
+      crc: this.form.value.crc || '',
+      relationshipTypes: this.form.value.relationshipTypes || [],
     };
 
-    if (this.dataForm?.id) {
-      this.personService.update(formValue, this.dataForm.id).subscribe({
+    if (this.dataForm?.personId) {
+      this.personService.update(formValue, this.dataForm.personId).subscribe({
         next: () => {
           this.toastrService.success('Atualização feita com sucesso');
           this.formSubmitted.emit();
@@ -196,38 +191,38 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  getAddressByCep() {
-    console.log('Buscando endereço pelo CEP');
-    const cep = this.form.value.address?.zipcode || '';
-    this.cepService
-      .getAddressByCep(cep)
-      .then((data) => {
-        console.log('DATA: ', data);
-        if (!data.erro) {
-          this.form.patchValue({
-            address: {
-              street: data.logradouro.toUpperCase(),
-              complement: data.complemento.toUpperCase(),
-              state: data.uf.toUpperCase(),
-              city: data.localidade.toUpperCase(),
-              neighborhood: data.bairro.toUpperCase(),
-            },
-          });
-        } else {
-          console.error('Erro ao buscar endereço pelo CEP: ');
-          this.form.get('address.zipcode')?.setErrors({ invalidCep: true });
-          this.toastrService.error(
-            'CEP inválido. Por favor, verifique e tente novamente.'
-          );
-        }
-      })
-      .catch((error) => {
-        console.error('Erro ao buscar endereço pelo CEP: ', error);
-      });
-  }
+  // getAddressByCep() {
+  //   console.log('Buscando endereço pelo CEP');
+  //   const cep = this.form.value.address?.zipcode || '';
+  //   this.cepService
+  //     .getAddressByCep(cep)
+  //     .then((data) => {
+  //       console.log('DATA: ', data);
+  //       if (!data.erro) {
+  //         this.form.patchValue({
+  //           address: {
+  //             street: data.logradouro.toUpperCase(),
+  //             complement: data.complemento.toUpperCase(),
+  //             state: data.uf.toUpperCase(),
+  //             city: data.localidade.toUpperCase(),
+  //             neighborhood: data.bairro.toUpperCase(),
+  //           },
+  //         });
+  //       } else {
+  //         console.error('Erro ao buscar endereço pelo CEP: ');
+  //         this.form.get('address.zipcode')?.setErrors({ invalidCep: true });
+  //         this.toastrService.error(
+  //           'CEP inválido. Por favor, verifique e tente novamente.'
+  //         );
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error('Erro ao buscar endereço pelo CEP: ', error);
+  //     });
+  // }
 
-  isCepValid(): boolean {
-    const cepControl = this.form.get('address.zipcode');
-    return cepControl?.valid && cepControl?.value?.length === 9 ? true : false;
-  }
+  // isCepValid(): boolean {
+  //   const cepControl = this.form.get('address.zipcode');
+  //   return cepControl?.valid && cepControl?.value?.length === 9 ? true : false;
+  // }
 }

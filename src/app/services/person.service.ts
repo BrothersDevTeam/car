@@ -29,7 +29,7 @@ export class PersonService {
   }
 
   filterByActive(array: Person[]) {
-    return array.filter((element) => element.person.active);
+    return array.filter((person) => person.active);
   }
 
   // Método para atualizar o cache
@@ -37,7 +37,7 @@ export class PersonService {
     if (this.cache?.content) {
       // Remove a pessoa antiga do cache
       const filteredCache = this.cache.content.filter(
-        (personCache) => personCache.id !== person.id
+        (personCache) => personCache.personId !== person.personId
       );
 
       // Adiciona a pessoa atualizada no início
@@ -88,7 +88,9 @@ export class PersonService {
   update(data: CreateNaturalPerson | CreateLegalEntity, id: string) {
     return this.http.put<string>(`${this.apiUrl}/${id}`, data).pipe(
       tap((response: string) => {
-        this.updatePersonOnCache({ person: data, id } as Person);
+        //TODO: Back precisa retornar a pessoa criada
+        console.log('Formulário enviado com sucesso!', response);
+        // this.updatePersonOnCache(response as Person);
       })
     );
   }

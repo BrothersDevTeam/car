@@ -68,23 +68,23 @@ export class PersonComponent implements OnInit, OnDestroy {
   };
   columns: ColumnConfig<Person>[] = [
     {
-      key: 'fullName-legalName',
+      key: 'name',
       header: 'Nome',
       format: (value: any, row: Person) => {
-        return row.person.fullName ? row.person.fullName : row.person.legalName;
+        return row.name;
       },
     },
     {
-      key: 'person.cnpj',
+      key: 'cnpj',
       header: 'PF/PJ',
       format: (value: any, row: Person) =>
-        row.person.legalName ? 'PESSOA JURÍDICA' : 'PESSOA FÍSICA',
+        row.legalEntity ? 'PESSOA JURÍDICA' : 'PESSOA FÍSICA',
     },
     {
       key: 'cpf-cnpj',
       header: 'CPF/CNPJ',
       format: (value: any, row: Person) => {
-        return row.person.cpf ? row.person.cpf : row.person.cnpj || '-';
+        return row.legalEntity ? row.cnpj : row.cpf || '-';
       },
     },
     {

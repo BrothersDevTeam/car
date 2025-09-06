@@ -11,11 +11,11 @@
     (onClick)="handleOpenForm()"
   />
 
-  @if (vehiclePaginatedList?.totalElements) {
+  @if (vehiclePaginatedList?.page?.totalElements) {
   <app-generic-table
     [columns]="columns"
     [genericPaginatedList]="vehiclePaginatedList"
-    [totalElements]="vehiclePaginatedList!.totalElements"
+    [totalElements]="vehiclePaginatedList!.page.totalElements"
     [pageSizeOptions]="[5, 10, 25, 100]"
     (rowClick)="onRowClick($event)"
     (pageEvent)="handlePageEvent($event)"

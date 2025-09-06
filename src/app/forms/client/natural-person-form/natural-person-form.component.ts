@@ -56,22 +56,26 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   @Output() formChanged = new EventEmitter<boolean>();
 
   protected form = this.formBuilderService.group({
-    fullName: ['', Validators.required],
-    tradeName: [''],
-    contact: this.formBuilderService.group({
-      email: ['', [Validators.email]],
-      phone: [''],
-    }),
+    name: ['', Validators.required],
+    nickName: [''],
+    email: ['', [Validators.email]],
+    phone: [''],
     cpf: [''],
-    address: this.formBuilderService.group({
-      zipcode: [''],
-      street: [''],
-      number: [''],
-      complement: [''],
-      state: [''],
-      city: [''],
-      neighborhood: [''],
-    }),
+    rg: [''],
+    rgIssuer: [''],
+    active: [true],
+    storeId: [''],
+    legalEntity: [false],
+
+    // address: this.formBuilderService.group({
+    //   zipcode: [''],
+    //   street: [''],
+    //   number: [''],
+    //   complement: [''],
+    //   state: [''],
+    //   city: [''],
+    //   neighborhood: [''],
+    // }),
   });
 
   constructor(
@@ -79,7 +83,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     private toastrService: ToastrService,
     private cepService: CepService,
     private actionsService: ActionsService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.subscriptions.add(
@@ -98,21 +102,19 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     if (changes['dataForm'] && this.dataForm) {
       setTimeout(() => {
         this.form.patchValue({
-          fullName: this.dataForm!.person.fullName || '',
-          contact: {
-            email: this.dataForm!.person.contact?.email || '',
-            phone: this.dataForm!.person.contact?.phone || '',
-          },
-          cpf: this.dataForm!.person.cpf || '',
-          address: {
-            zipcode: this.dataForm!.person.address?.zipcode || '',
-            street: this.dataForm!.person.address?.street || '',
-            number: this.dataForm!.person.address?.number || '',
-            complement: this.dataForm!.person.address?.complement || '',
-            state: this.dataForm!.person.address?.state || '',
-            city: this.dataForm!.person.address?.city || '',
-            neighborhood: this.dataForm!.person.address?.neighborhood || '',
-          },
+          name: this.dataForm!.name || '',
+          email: this.dataForm!.email || '',
+          phone: this.dataForm!.phone || '',
+          cpf: this.dataForm!.cpf || '',
+          // address: {
+          //   zipcode: this.dataForm!.address?.zipcode || '',
+          //   street: this.dataForm!.address?.street || '',
+          //   number: this.dataForm!.address?.number || '',
+          //   complement: this.dataForm!.address?.complement || '',
+          //   state: this.dataForm!.address?.state || '',
+          //   city: this.dataForm!.address?.city || '',
+          //   neighborhood: this.dataForm!.address?.neighborhood || '',
+          // },
         });
       });
     }
@@ -144,26 +146,22 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     }
 
     const formValue: CreateNaturalPerson = {
-      fullName: this.form.value.fullName || '',
+      name: this.form.value.name || '',
       cpf: this.form.value.cpf?.replace(/\D/g, '') || '',
       active: true,
-      contact: {
-        email: this.form.value.contact?.email || '',
-        phone: this.form.value.contact?.phone?.replace(/\D/g, '') || '',
-      },
-      address: {
-        zipcode: this.form.value.address?.zipcode || '',
-        street: this.form.value.address?.street || '',
-        number: this.form.value.address?.number || '',
-        complement: this.form.value.address?.complement || '',
-        state: this.form.value.address?.state || '',
-        city: this.form.value.address?.city || '',
-        neighborhood: this.form.value.address?.neighborhood || '',
-      },
+      email: this.form.value.email || '',
+      phone: this.form.value.phone?.replace(/\D/g, '') || '',
+      nickName: this.form.value.nickName || '',
+      storeId: this.form.value.storeId || '',
+      legalEntity: false,
+      rg: this.form.value.rg?.replace(/\D/g, '') || '',
+      rgIssuer: '',
+      crc: '',
+      relationshipTypes: []
     };
 
-    if (this.dataForm?.id) {
-      this.personService.update(formValue, this.dataForm.id).subscribe({
+    if (this.dataForm?.personId) {
+      this.personService.update(formValue, this.dataForm.personId).subscribe({
         next: () => {
           this.toastrService.success('Atualização feita com sucesso');
           this.formSubmitted.emit();
@@ -187,38 +185,38 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     }
   }
 
-  getAddressByCep() {
-    console.log('Buscando endereço pelo CEP');
-    const cep = this.form.value.address?.zipcode || '';
-    this.cepService
-      .getAddressByCep(cep)
-      .then((data) => {
-        console.log('DATA: ', data);
-        if (!data.erro) {
-          this.form.patchValue({
-            address: {
-              street: data.logradouro.toUpperCase(),
-              complement: data.complemento.toUpperCase(),
-              state: data.uf.toUpperCase(),
-              city: data.localidade.toUpperCase(),
-              neighborhood: data.bairro.toUpperCase(),
-            },
-          });
-        } else {
-          console.error('Erro ao buscar endereço pelo CEP: ');
-          this.form.get('address.zipcode')?.setErrors({ invalidCep: true });
-          this.toastrService.error(
-            'CEP inválido. Por favor, verifique e tente novamente.'
-          );
-        }
-      })
-      .catch((error) => {
-        console.error('Erro ao buscar endereço pelo CEP: ', error);
-      });
-  }
+  // getAddressByCep() {
+  //   console.log('Buscando endereço pelo CEP');
+  //   const cep = this.form.value.address?.zipcode || '';
+  //   this.cepService
+  //     .getAddressByCep(cep)
+  //     .then((data) => {
+  //       console.log('DATA: ', data);
+  //       if (!data.erro) {
+  //         this.form.patchValue({
+  //           address: {
+  //             street: data.logradouro.toUpperCase(),
+  //             complement: data.complemento.toUpperCase(),
+  //             state: data.uf.toUpperCase(),
+  //             city: data.localidade.toUpperCase(),
+  //             neighborhood: data.bairro.toUpperCase(),
+  //           },
+  //         });
+  //       } else {
+  //         console.error('Erro ao buscar endereço pelo CEP: ');
+  //         this.form.get('address.zipcode')?.setErrors({ invalidCep: true });
+  //         this.toastrService.error(
+  //           'CEP inválido. Por favor, verifique e tente novamente.'
+  //         );
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error('Erro ao buscar endereço pelo CEP: ', error);
+  //     });
+  // }
 
-  isCepValid(): boolean {
-    const cepControl = this.form.get('address.zipcode');
-    return cepControl?.valid && cepControl?.value?.length === 9 ? true : false;
-  }
+  // isCepValid(): boolean {
+  //   const cepControl = this.form.get('address.zipcode');
+  //   return cepControl?.valid && cepControl?.value?.length === 9 ? true : false;
+  // }
 }
