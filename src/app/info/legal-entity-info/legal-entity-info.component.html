@@ -3,26 +3,26 @@
     <app-wrapper-card class="person-info" title="Dados da empresa">
       <div class="card-row">
         <h3 class="label">Razão Social: </h3>
-        <h3 class="value">{{person.person.legalName}}</h3>
+        <h3 class="value">{{person.name}}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Nome Fantasia: </h3>
-        <h3 class="value">{{person.person.tradeName}}</h3>
+        <h3 class="value">{{person.nickName}}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Email: </h3>
-        <h3 class="value">{{person.person.contact?.email}}</h3>
+        <h3 class="value">{{person.email}}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Telefone: </h3>
-        <h3 class="value">{{person.person.contact?.phone}}</h3>
+        <h3 class="value">{{person.phone}}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">CNPJ: </h3>
-        <h3 class="value">{{person.person.cnpj}}</h3>
+        <h3 class="value">{{person.cnpj}}</h3>
       </div>
     </app-wrapper-card>
-    <app-wrapper-card class="person-address" title="Endereço">
+    <!-- <app-wrapper-card class="person-address" title="Endereço">
       <div class="card-row">
         <h3 class="label">Código Postal: </h3>
         <h3 class="value">{{person.person.address?.zipcode}}</h3>
@@ -51,7 +51,7 @@
         <h3 class="label">Bairro: </h3>
         <h3 class="value">{{person.person.address?.neighborhood}}</h3>
       </div>
-    </app-wrapper-card>
+    </app-wrapper-card> -->
   </mat-card-content>
   <mat-card-footer class="card-footer">
     <button type="button" class="btn" color="primary" mat-raised-button (click)="editEvent.emit()">Editar</button>

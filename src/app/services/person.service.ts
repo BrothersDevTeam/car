@@ -19,7 +19,7 @@ export class PersonService {
   private cacheUpdated$ =
     new BehaviorSubject<PaginationResponse<Person> | null>(null);
 
-  private readonly apiUrl: string = '/api/clients';
+  private readonly apiUrl: string = '/api/persons';
 
   constructor(private http: HttpClient) {}
 
@@ -29,7 +29,7 @@ export class PersonService {
   }
 
   filterByActive(array: Person[]) {
-    return array.filter((element) => element.person.active);
+    return array.filter((person) => person.active);
   }
 
   // Método para atualizar o cache
@@ -37,7 +37,7 @@ export class PersonService {
     if (this.cache?.content) {
       // Remove a pessoa antiga do cache
       const filteredCache = this.cache.content.filter(
-        (personCache) => personCache.id !== person.id
+        (personCache) => personCache.personId !== person.personId
       );
 
       // Adiciona a pessoa atualizada no início
@@ -60,14 +60,14 @@ export class PersonService {
     }
     return this.http
       .get<PaginationResponse<Person>>(
-        `${this.apiUrl + '/clients'}?page=${pageIndex}&size=${pageSize}`
+        `${this.apiUrl }?page=${pageIndex}&size=${pageSize}`
       )
       .pipe(
         first(),
         tap((response) => {
           this.cache = response;
           this.cache.content = this.filterByActive(this.cache.content);
-          this.cache.totalElements = this.cache.content.length;
+          this.cache.page.totalElements = this.cache.content.length;
 
           // Notifica sobre o carregamento inicial com uma nova referência
           this.cacheUpdated$.next({ ...this.cache });
@@ -88,7 +88,9 @@ export class PersonService {
   update(data: CreateNaturalPerson | CreateLegalEntity, id: string) {
     return this.http.put<string>(`${this.apiUrl}/${id}`, data).pipe(
       tap((response: string) => {
-        this.updatePersonOnCache({ person: data, id } as Person);
+        //TODO: Back precisa retornar a pessoa criada
+        console.log('Formulário enviado com sucesso!', response);
+        // this.updatePersonOnCache(response as Person);
       })
     );
   }

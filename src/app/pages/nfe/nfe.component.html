@@ -14,11 +14,11 @@
     </button>
 </app-content-header>
 
-  @if (nfePaginatedList?.totalElements) {
+  @if (nfePaginatedList?.page?.totalElements) {
     <app-generic-table
       [columns]="columns"
       [genericPaginatedList]="nfePaginatedList"
-      [totalElements]="nfePaginatedList!.totalElements"
+      [totalElements]="nfePaginatedList!.page.totalElements"
       [pageSizeOptions]="[5, 10, 25, 100]"
       (rowClick)="onRowClick($event)"
       (pageEvent)="handlePageEvent($event)"

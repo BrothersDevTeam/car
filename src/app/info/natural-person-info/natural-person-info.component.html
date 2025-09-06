@@ -3,51 +3,55 @@
     <app-wrapper-card class="person-info" title="Dados pessoais">
       <div class="card-row">
         <h3 class="label">Nome: </h3>
-        <h3 class="value">{{person.person.fullName}}</h3>
+        <h3 class="value">{{person.name}}</h3>
+      </div>
+      <div class="card-row">
+        <h3 class="label">Apelido: </h3>
+        <h3 class="value">{{person.nickName}}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Email: </h3>
-        <h3 class="value">{{person.person.contact?.email}}</h3>
+        <h3 class="value">{{person.email}}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Telefone: </h3>
-        <h3 class="value">{{person.person.contact?.phone}}</h3>
+        <h3 class="value">{{person.phone}}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">CPF: </h3>
-        <h3 class="value">{{person.person.cpf}}</h3>
+        <h3 class="value">{{person.cpf}}</h3>
       </div>
     </app-wrapper-card>
-    <app-wrapper-card class="person-address" title="Endereço">
+    <!-- <app-wrapper-card class="person-address" title="Endereço">
       <div class="card-row">
         <h3 class="label">Código Postal: </h3>
-        <h3 class="value">{{person.person.address?.zipcode}}</h3>
+        <h3 class="value">{{person.zipcode}}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Rua: </h3>
-        <h3 class="value">{{person.person.address?.street}}</h3>
+        <h3 class="value">{{person.street}}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Número: </h3>
-        <h3 class="value">{{person.person.address?.number}}</h3>
+        <h3 class="value">{{person.number}}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Complemento: </h3>
-        <h3 class="value">{{person.person.address?.complement}}</h3>
+        <h3 class="value">{{person.complement}}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Estado: </h3>
-        <h3 class="value">{{person.person.address?.state}}</h3>
+        <h3 class="value">{{person.state}}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Cidade: </h3>
-        <h3 class="value">{{person.person.address?.city}}</h3>
+        <h3 class="value">{{person.city}}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Bairro: </h3>
-        <h3 class="value">{{person.person.address?.neighborhood}}</h3>
+        <h3 class="value">{{person.neighborhood}}</h3>
       </div>
-    </app-wrapper-card>
+    </app-wrapper-card> -->
   </mat-card-content>
   <mat-card-footer class="card-footer">
     <button type="button" class="btn" color="primary" mat-raised-button (click)="editEvent.emit()">Editar</button>

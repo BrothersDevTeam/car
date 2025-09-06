@@ -50,15 +50,18 @@ export class NfeService {
         idVeiculo: '2',
       },
     ],
-    page: 0,
-    size: 0,
-    totalElements: 2,
-    totalPages: 0,
+    page: {
+      size: 0,
+      totalElements: 2,
+      totalPages: 0,
+      number: 0
+    }
+
   };
 
   private readonly apiUrl: string = '/api/nfe';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getPaginatedData(
     pageIndex: number,
@@ -76,7 +79,7 @@ export class NfeService {
         tap((response) => {
           this.cache = response;
 
-          this.cache.totalElements = this.cache.content.length;
+          this.cache.page.totalElements = this.cache.content.length;
         })
       );
   }

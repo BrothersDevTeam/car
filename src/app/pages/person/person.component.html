@@ -11,11 +11,11 @@
     (onClick)="handleOpenForm()"
   />
 
-  @if (personPaginatedList?.totalElements) {
+  @if (personPaginatedList?.page?.totalElements) {
     <app-generic-table
       [columns]="columns"
       [genericPaginatedList]="personPaginatedList"
-      [totalElements]="personPaginatedList!.totalElements"
+      [totalElements]="personPaginatedList!.page.totalElements"
       [pageSizeOptions]="[5, 10, 25, 100]"
       (rowClick)="onRowClick($event)"
       (pageEvent)="handlePageEvent($event)"
@@ -39,7 +39,7 @@
     }
   } @if (openInfo()) {
     <app-drawer (closeDrawer)="handleCloseDrawer()">
-      @if (selectedPerson?.person?.fullName) {
+      @if (!selectedPerson?.legalEntity) {
         <mat-tab-group [selectedIndex]="0">
           <mat-tab label="Pessoa Física">
             <app-natural-person-info
@@ -52,7 +52,7 @@
             <app-business-done-table />
           </mat-tab>
         </mat-tab-group>
-      } @else if(selectedPerson?.person?.legalName) {
+      } @else if(selectedPerson?.legalEntity) {
         <mat-tab-group [selectedIndex]="0">
           <mat-tab label="Pessoa Jurídica">
             <app-legal-entity-info
@@ -71,23 +71,23 @@
     </app-drawer>
   } @if (openForm()) {
   <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
-    <mat-tab-group [selectedIndex]="selectedPerson?.person?.fullName ? 0 : 1">
+    <mat-tab-group [selectedIndex]="selectedPerson?.legalEntity ? 1 : 0">
       <mat-tab
         label="Pessoa Física"
-        [disabled]="selectedPerson && selectedPerson.person.cnpj"
+        [disabled]="selectedPerson && selectedPerson.legalEntity"
       >
         <app-natural-person-form
-          [dataForm]="selectedPerson?.person?.fullName ? selectedPerson : null"
+          [dataForm]="!selectedPerson?.legalEntity ? selectedPerson : null"
           (formSubmitted)="onFormSubmitted()"
           (formChanged)="handleFormChanged($event)"
         />
       </mat-tab>
       <mat-tab
         label="Pessoa Jurídica"
-        [disabled]="selectedPerson && selectedPerson.person.cpf"
+        [disabled]="selectedPerson && !selectedPerson.legalEntity"
       >
         <app-legal-entity-form
-          [dataForm]="selectedPerson?.person?.legalName ? selectedPerson : null"
+          [dataForm]="selectedPerson?.legalEntity ? selectedPerson : null"
           (formSubmitted)="onFormSubmitted()"
           (formChanged)="handleFormChanged($event)"
         />
