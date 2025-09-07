@@ -35,7 +35,7 @@
   <h2>Não há pessoas cadastradas</h2>
   } } } @if (openInfo()) {
   <app-drawer (closeDrawer)="handleCloseDrawer()">
-    @if (selectedPerson?.person?.fullName) {
+    @if (!selectedPerson?.legalEntity) {
     <mat-tab-group [selectedIndex]="0">
       <mat-tab label="Pessoa Física">
         <app-natural-person-info
@@ -48,7 +48,7 @@
         <app-business-done-table />
       </mat-tab>
     </mat-tab-group>
-    } @else if(selectedPerson?.person?.legalName) {
+    } @else if(selectedPerson?.legalEntity) {
     <mat-tab-group [selectedIndex]="0">
       <mat-tab label="Pessoa Jurídica">
         <app-legal-entity-info
@@ -64,39 +64,9 @@
     } @else {
     <h1>Dados não encontrados</h1>
     }
-  } @if (openInfo()) {
-    <app-drawer (closeDrawer)="handleCloseDrawer()">
-      @if (!selectedPerson?.legalEntity) {
-        <mat-tab-group [selectedIndex]="0">
-          <mat-tab label="Pessoa Física">
-            <app-natural-person-info
-              (editEvent)="handleEdit()"
-              [person]="selectedPerson!"
-              (formSubmitted)="onFormSubmitted()"
-            />
-          </mat-tab>
-          <mat-tab label="Negócios efetuados">
-            <app-business-done-table />
-          </mat-tab>
-        </mat-tab-group>
-      } @else if(selectedPerson?.legalEntity) {
-        <mat-tab-group [selectedIndex]="0">
-          <mat-tab label="Pessoa Jurídica">
-            <app-legal-entity-info
-              (editEvent)="handleEdit()"
-              [person]="selectedPerson!"
-              (formSubmitted)="onFormSubmitted()"
-            />
-          </mat-tab>
-          <mat-tab label="Negócios efetuados">
-            <app-business-done-table />
-          </mat-tab>
-        </mat-tab-group>
-      } @else {
-      <h1>Dados não encontrados</h1>
-      }
-    </app-drawer>
-  } @if (openForm()) {
+  </app-drawer>
+  }
+  @if (openForm()) {
   <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
     <mat-tab-group [selectedIndex]="selectedPerson?.legalEntity ? 1 : 0">
       <mat-tab
