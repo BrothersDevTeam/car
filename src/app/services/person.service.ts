@@ -21,7 +21,7 @@ export class PersonService {
 
   private readonly apiUrl: string = '/api/persons';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Observable público para componentes se inscreverem
   get cacheUpdated(): Observable<PaginationResponse<Person> | null> {
@@ -65,6 +65,7 @@ export class PersonService {
       .pipe(
         first(),
         tap((response) => {
+          console.log('✅ Resposta original do backend:', response);
           this.cache = response;
           this.cache.content = this.filterByActive(this.cache.content);
           this.cache.page.totalElements = this.cache.content.length;
@@ -88,9 +89,8 @@ export class PersonService {
   update(data: CreateNaturalPerson | CreateLegalEntity, id: string) {
     return this.http.put<string>(`${this.apiUrl}/${id}`, data).pipe(
       tap((response: string) => {
-        //TODO: Back precisa retornar a pessoa criada
         console.log('Formulário enviado com sucesso!', response);
-        // this.updatePersonOnCache(response as Person);
+        this.clearCache();
       })
     );
   }

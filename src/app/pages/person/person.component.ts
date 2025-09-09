@@ -177,10 +177,23 @@ export class PersonComponent implements OnInit, OnDestroy {
       )
       .subscribe((response) => {
         this.clientListLoading.set(false);
-        if (response) {
-          this.personPaginatedList = response;
-        }
-      });
+    if (response && response.content) {
+        // A lista de pessoas está em response.content
+        this.personPaginatedList = {
+            ...response,
+            content: response.content.map(person => ({
+                ...person,
+                // Mapeie os dados conforme necessário para a tabela
+            }))
+        };
+    }
+});
+      // .subscribe((response) => {
+      //   this.clientListLoading.set(false);
+      //   if (response) {
+      //     this.personPaginatedList = response;
+      //   }
+      // });
   }
 
   handleSelectedPerson(person: Person) {
