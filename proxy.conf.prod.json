@@ -1,0 +1,11 @@
+{
+  "/api": {
+    "target": "http://api.carctrl.duckdns.org",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/api": "/api/v1/car"
+    }
+  }
+}
