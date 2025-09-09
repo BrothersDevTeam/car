@@ -75,6 +75,13 @@ export class PersonComponent implements OnInit, OnDestroy {
       },
     },
     {
+      key: 'nickName',
+      header: 'Apelido',
+      format: (value: any, row: Person) => {
+        return row.nickName;
+      },
+    },
+    {
       key: 'cnpj',
       header: 'PF/PJ',
       format: (value: any, row: Person) =>

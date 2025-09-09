@@ -37,7 +37,7 @@ export class PersonTableComponent implements OnInit, OnChanges {
 
   dataSource = new MatTableDataSource<Person>();
 
-  displayedColumns: string[] = ['fullName', 'active', 'cpf', 'cnpj'];
+  displayedColumns: string[] = ['name', 'active', 'cpf', 'cnpj'];
   pageSizeOptions = [1000, 100, 50, 20];
   filteredData: Person[] = [];
 
@@ -53,11 +53,13 @@ export class PersonTableComponent implements OnInit, OnChanges {
     this.filteringData();
   }
 
-  filteringData() {
+
+  //TODO : REVISAR O CODIGO ABAIXO
+    filteringData() {
     if (this.searchValue?.length) {
       this.filteredData = this.personPaginatedList.content.filter((element) => {
-        if (element.person.fullName || element.person.legalName) {
-          return (element.person.fullName || element.person.legalName)
+        if (element.name || element.legalEntity === true) {
+          return (element.name)
             .trim()
             .toLowerCase()
             .includes(this.searchValue!.trim().toLowerCase());
@@ -68,6 +70,22 @@ export class PersonTableComponent implements OnInit, OnChanges {
       this.dataSource.data = this.personPaginatedList.content;
     }
   }
+
+  // filteringData() {
+  //   if (this.searchValue?.length) {
+  //     this.filteredData = this.personPaginatedList.content.filter((element) => {
+  //       if (element.person.fullName || element.person.legalName) {
+  //         return (element.person.fullName || element.person.legalName)
+  //           .trim()
+  //           .toLowerCase()
+  //           .includes(this.searchValue!.trim().toLowerCase());
+  //       } else return false;
+  //     });
+  //     this.dataSource.data = this.filteredData;
+  //   } else {
+  //     this.dataSource.data = this.personPaginatedList.content;
+  //   }
+  // }
 
   onRowClick(row: Person) {
     this.selectedPerson.emit(row);

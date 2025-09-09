@@ -29,34 +29,32 @@ describe('TableComponent', () => {
     const mockPersonPaginatedList: PaginationResponse<Person> = {
       content: [
         {
-          id: '1',
-          person: {
-            id: '1',
-            fullName: 'John Doe',
-            active: true,
-            cpf: '12345678901',
-            cnpj: '12345678000199',
-            legalName: 'John Doe Legal',
-            tradeName: 'John Doe Trade',
-          },
+          storeId: '1',
+          personId: '1',
+          name: 'John Doe',
+          nickName: 'John Doe',
+          email: 'd3d0o@example.com',
+          legalEntity: false,
+          cpf: '12345678901',
+          cnpj: '12345678000199',
+          rg: '123456789',
+          rgIssuer: 'SSP',
+          phone: '12345678901',
+          active: true,
+          ie: '123456789',
+          crc: '123456789',
+          relationshipTypes: []
         },
-        {
-          id: '2',
-          person: {
-            id: '2',
-            fullName: 'John Lee',
-            active: true,
-            cpf: '12345678902',
-            cnpj: '12345678000192',
-            legalName: 'John Lee Legal',
-            tradeName: 'John Lee Trade',
-          },
-        },
+
       ],
-      totalElements: 2,
-      totalPages: 1,
-      size: 2,
-      page: 0,
+
+      page: {
+        number: 0,
+        size: 2,
+        totalElements: 2,
+        totalPages: 1,
+      }
+
     };
 
     component.personPaginatedList = mockPersonPaginatedList;
