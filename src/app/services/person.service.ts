@@ -75,11 +75,9 @@ export class PersonService {
       );
   }
 
-  create(data: CreateNaturalPerson | CreateLegalEntity) {
+  create(data: Partial<Person>) {
     return this.http.post<string>(`${this.apiUrl}`, data).pipe(
       tap((response: string) => {
-        // Ao invés de limpar o cache, atualiza o cache com a nova pessoa
-        //TODO: Back precisa retornar a pessoa criada
         this.clearCache();
       })
     );
@@ -88,9 +86,7 @@ export class PersonService {
   update(data: CreateNaturalPerson | CreateLegalEntity, id: string) {
     return this.http.put<string>(`${this.apiUrl}/${id}`, data).pipe(
       tap((response: string) => {
-        //TODO: Back precisa retornar a pessoa criada
-        console.log('Formulário enviado com sucesso!', response);
-        // this.updatePersonOnCache(response as Person);
+        this.clearCache();
       })
     );
   }
