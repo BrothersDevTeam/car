@@ -10,23 +10,30 @@ import {
   ViewChild,
   ElementRef,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-
 import { ToastrService } from 'ngx-toastr';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { PersonService } from '@services/person.service';
-import { CreateNaturalPerson, Person } from '@interfaces/person';
-
-import { CepService } from '@services/cep.service';
-import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 
+import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
+
+import {
+  CreateNaturalPerson,
+  Person,
+  RelationshipTypes,
+} from '@interfaces/person';
+
+import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
+
 import { Subscription } from 'rxjs';
+import { removeEmptyPropertiesFromObject } from '../../../utils/removeEmptyPropertiesFromObject';
+import { minLengthArray } from '../../../utils/minLengthArray';
+import { AuthService } from '@services/auth/auth.service';
 
 @Component({
   selector: 'app-natural-person-form',
@@ -66,24 +73,20 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     active: [true],
     storeId: [''],
     legalEntity: [false],
-
-    // address: this.formBuilderService.group({
-    //   zipcode: [''],
-    //   street: [''],
-    //   number: [''],
-    //   complement: [''],
-    //   state: [''],
-    //   city: [''],
-    //   neighborhood: [''],
-    // }),
+    relationshipTypes: this.formBuilderService.control<RelationshipTypes[]>(
+      [], //TODO: Criar campo no formulário para selecionar o tipo de relacionamento
+      {
+        validators: [minLengthArray(1)], // pelo menos 1 selecionado
+      }
+    ),
   });
 
   constructor(
     private personService: PersonService,
     private toastrService: ToastrService,
-    private cepService: CepService,
-    private actionsService: ActionsService
-  ) { }
+    private actionsService: ActionsService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
     this.subscriptions.add(
@@ -106,6 +109,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
           email: this.dataForm!.email || '',
           phone: this.dataForm!.phone || '',
           cpf: this.dataForm!.cpf || '',
+          relationshipTypes: this.dataForm!.relationshipTypes || [],
           // address: {
           //   zipcode: this.dataForm!.address?.zipcode || '',
           //   street: this.dataForm!.address?.street || '',
@@ -145,19 +149,26 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       return;
     }
 
+    const storeId = this.authService.getStoreId();
+    if (!storeId) {
+      this.toastrService.error('Loja não identificada. Faça login novamente.');
+      return;
+    }
+
     const formValue: CreateNaturalPerson = {
       name: this.form.value.name || '',
+      storeId,
       cpf: this.form.value.cpf?.replace(/\D/g, '') || '',
       active: true,
       email: this.form.value.email || '',
       phone: this.form.value.phone?.replace(/\D/g, '') || '',
       nickName: this.form.value.nickName || '',
-      storeId: this.form.value.storeId || '',
       legalEntity: false,
       rg: this.form.value.rg?.replace(/\D/g, '') || '',
       rgIssuer: '',
       crc: '',
-      relationshipTypes: []
+      relationshipTypes: this.form.value
+        .relationshipTypes as RelationshipTypes[],
     };
 
     if (this.dataForm?.personId) {
@@ -172,7 +183,11 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
           ),
       });
     } else {
-      this.personService.create(formValue).subscribe({
+      const clean = removeEmptyPropertiesFromObject<CreateNaturalPerson>(
+        formValue as Person
+      );
+      console.log('\n\n99999999999999999999\nCLEAN: ', clean);
+      this.personService.create(clean).subscribe({
         next: () => {
           this.toastrService.success('Cadastro realizado com sucesso');
           this.formSubmitted.emit();

@@ -1,16 +1,16 @@
 <form [formGroup]="form" (keydown.enter)="onEnter($event)">
   <app-wrapper-card title="Dados pessoais">
     <app-primary-input
-      formControlName="fullName"
+      formControlName="name"
       label="Nome completo"
-      inputName="fullName"
+      inputName="name"
       type="text"
       [error]="
-        form.get('fullName')?.invalid &&
-        (form.get('fullName')?.touched || submitted)
+        form.get('name')?.invalid &&
+        (form.get('name')?.touched || submitted)
       "
     />
-    <div formGroupName="contact">
+    <!-- <div formGroupName="contact">
       <app-primary-input
         formControlName="email"
         label="Email"
@@ -30,7 +30,7 @@
         placeholder="(00) 00000-0000"
         mask="(00) 00000-0000"
       />
-    </div>
+    </div> -->
     <app-primary-input
       formControlName="cpf"
       label="CPF"

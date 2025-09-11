@@ -13,19 +13,19 @@
 // }
 
 export interface Person {
-  personId: string;
+  personId?: string;
   storeId: string;
   name: string;
-  nickName: string;
-  email: string;
-  phone: string;
+  nickName?: string;
+  email?: string;
+  phone?: string;
   legalEntity: Boolean;
   cpf: string;
   cnpj: string;
-  rg: string;
-  rgIssuer: string;
-  ie: string;
-  crc: string;
+  rg?: string;
+  rgIssuer?: string;
+  ie?: string;
+  crc?: string;
   active: boolean;
   relationshipTypes: RelationshipTypes[];
 }
@@ -36,7 +36,8 @@ export type CreateNaturalPerson = Omit<
 >;
 
 export type CreateLegalEntity = Omit<
-  Person, 'personId' | 'cpf' | 'rg' | 'rgIssuer'
+  Person,
+  'personId' | 'cpf' | 'rg' | 'rgIssuer'
 >;
 
 export interface Address {
@@ -54,11 +55,9 @@ export interface Contact {
   phone: string;
 }
 
-enum RelationshipTypes {
+export enum RelationshipTypes {
   FUNCIONARIO,
   CLIENTE,
   CONTADOR,
-  FORNECEDOR
+  FORNECEDOR,
 }
-
-

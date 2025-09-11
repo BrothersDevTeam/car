@@ -76,11 +76,9 @@ export class PersonService {
       );
   }
 
-  create(data: CreateNaturalPerson | CreateLegalEntity) {
+  create(data: Partial<Person>) {
     return this.http.post<string>(`${this.apiUrl}`, data).pipe(
       tap((response: string) => {
-        // Ao invés de limpar o cache, atualiza o cache com a nova pessoa
-        //TODO: Back precisa retornar a pessoa criada
         this.clearCache();
       })
     );
