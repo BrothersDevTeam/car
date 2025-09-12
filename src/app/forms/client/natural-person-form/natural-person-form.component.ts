@@ -34,7 +34,7 @@ import { Subscription } from 'rxjs';
 import { removeEmptyPropertiesFromObject } from '../../../utils/removeEmptyPropertiesFromObject';
 import { minLengthArray } from '../../../utils/minLengthArray';
 import { AuthService } from '@services/auth/auth.service';
-import { PrimarySelectComponent } from "@components/primary-select/primary-select.component";
+import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
 
 @Component({
   selector: 'app-natural-person-form',
@@ -45,8 +45,8 @@ import { PrimarySelectComponent } from "@components/primary-select/primary-selec
     MatButtonModule,
     MatIconModule,
     CpfValidatorDirective,
-    PrimarySelectComponent
-],
+    PrimarySelectComponent,
+  ],
   templateUrl: './natural-person-form.component.html',
   styleUrl: './natural-person-form.component.scss',
 })
@@ -152,9 +152,11 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       console.log('Formulário inválido: ', this.form.value);
-       // Log específico para relationshipTypes se inválido
+      // Log específico para relationshipTypes se inválido
       if (this.form.get('relationshipTypes')?.invalid) {
-        console.log('RelationshipTypes é obrigatório e deve ter pelo menos 1 item');
+        console.log(
+          'RelationshipTypes é obrigatório e deve ter pelo menos 1 item'
+        );
       }
       return;
     }
@@ -220,11 +222,8 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     this.form.patchValue({
       active: true,
       legalEntity: false,
-    })
-
+    });
   }
-
-
 
   // getAddressByCep() {
   //   console.log('Buscando endereço pelo CEP');

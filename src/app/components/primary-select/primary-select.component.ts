@@ -1,4 +1,10 @@
-import { Component, forwardRef, Input, HostListener, OnInit } from '@angular/core';
+import {
+  Component,
+  forwardRef,
+  Input,
+  HostListener,
+  OnInit,
+} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RelationshipTypes } from '@interfaces/person';
@@ -29,7 +35,6 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit {
   @Input() allowMultiple: boolean = false;
   @Input() options: SelectOption[] = [];
 
-
   value: any = null;
   isOpen: boolean = false;
   onChange: any = () => {};
@@ -41,12 +46,12 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit {
     }
   }
 
-private getRelationshipTypeOptions(): SelectOption[] {
-  return Object.values(RelationshipTypes).map(value => ({
-    value: value,
-    label: (value)
-  }));
-}
+  private getRelationshipTypeOptions(): SelectOption[] {
+    return Object.values(RelationshipTypes).map((value) => ({
+      value: value,
+      label: value,
+    }));
+  }
 
   toggleDropdown() {
     this.isOpen = !this.isOpen;
@@ -98,8 +103,8 @@ private getRelationshipTypeOptions(): SelectOption[] {
         return '';
       }
 
-      const selectedLabels = this.value.map(val => {
-        const option = this.options.find(opt => opt.value === val);
+      const selectedLabels = this.value.map((val) => {
+        const option = this.options.find((opt) => opt.value === val);
         return option ? option.label : val;
       });
 
@@ -108,7 +113,7 @@ private getRelationshipTypeOptions(): SelectOption[] {
         : selectedLabels[0];
     }
 
-    const option = this.options.find(opt => opt.value === this.value);
+    const option = this.options.find((opt) => opt.value === this.value);
     return option ? option.label : this.value;
   }
 

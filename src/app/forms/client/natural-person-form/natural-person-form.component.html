@@ -1,4 +1,7 @@
-<form [formGroup]="form" (keydown.enter)="onEnter($event)">
+<form
+  [formGroup]="form"
+  (keydown.enter)="onEnter($event)"
+>
   <app-wrapper-card title="Dados pessoais">
     <app-primary-input
       formControlName="name"
@@ -6,57 +9,53 @@
       inputName="name"
       type="text"
       [error]="
-        form.get('name')?.invalid &&
-        (form.get('name')?.touched || submitted)
+        form.get('name')?.invalid && (form.get('name')?.touched || submitted)
       "
     />
 
- <!-- Tipos de Relacionamento -->
-      <app-primary-select
-        label="Tipos de Relacionamento *"
-        placeholder="Selecione os tipos"
-        inputName="relationshipTypes"
-        [allowMultiple]="false"
-        formControlName="relationshipTypes"
-        [error]="submitted && form.get('relationshipTypes')?.invalid"
-      ></app-primary-select>
+    <!-- Tipos de Relacionamento -->
+    <app-primary-select
+      label="Tipos de Relacionamento *"
+      placeholder="Selecione os tipos"
+      inputName="relationshipTypes"
+      [allowMultiple]="true"
+      formControlName="relationshipTypes"
+      [error]="submitted && form.get('relationshipTypes')?.invalid"
+    ></app-primary-select>
 
-      <!-- Mensagem de erro para relationshipTypes -->
-      @if (submitted && form.get('relationshipTypes')?.invalid) {
-        <div class="error-message">
-          Selecione pelo menos um tipo de relacionamento
-        </div>
-      }
+    <!-- Mensagem de erro para relationshipTypes -->
+    @if (submitted && form.get('relationshipTypes')?.invalid) {
+    <div class="error-message">
+      Selecione pelo menos um tipo de relacionamento
+    </div>
+    }
 
     <app-primary-input
-    formControlName="nickName"
-    label="Apelido"
-    inputName="nickName"
-    type="text"
-    placeholder="Como deseja ser chamado?"
+      formControlName="nickName"
+      label="Apelido"
+      inputName="nickName"
+      type="text"
+      placeholder="Como deseja ser chamado?"
     />
-
-    <div formGroupName="contact">
-      <app-primary-input
-        formControlName="email"
-        label="Email"
-        inputName="email"
-        type="email"
-        placeholder="exemplo@email.com"
-        [error]="
-          form.get('contact.email')?.invalid &&
-          (form.get('contact.email')?.touched || submitted)
-        "
-      />
-      <app-primary-input
-        formControlName="phone"
-        label="Celular"
-        inputName="phone"
-        type="tel"
-        placeholder="(00) 00000-0000"
-        mask="(00) 00000-0000"
-      />
-    </div>
+    <app-primary-input
+      formControlName="email"
+      label="Email"
+      inputName="email"
+      type="email"
+      placeholder="exemplo@email.com"
+      [error]="
+        form.get('contact.email')?.invalid &&
+        (form.get('contact.email')?.touched || submitted)
+      "
+    />
+    <app-primary-input
+      formControlName="phone"
+      label="Celular"
+      inputName="phone"
+      type="tel"
+      placeholder="(00) 00000-0000"
+      mask="(00) 00000-0000"
+    />
     <app-primary-input
       formControlName="cpf"
       label="CPF"
@@ -66,12 +65,11 @@
       mask="000.000.000-00"
       appCpfValidator
       [error]="
-        form.get('cpf')?.invalid &&
-        (form.get('cpf')?.touched || submitted)
+        form.get('cpf')?.invalid && (form.get('cpf')?.touched || submitted)
       "
     />
   </app-wrapper-card>
-<!--
+  <!--
   <app-wrapper-card title="Endereço">
     <div formGroupName="address">
       <app-primary-input
