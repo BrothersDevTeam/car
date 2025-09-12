@@ -34,6 +34,7 @@ import { Subscription } from 'rxjs';
 import { removeEmptyPropertiesFromObject } from '../../../utils/removeEmptyPropertiesFromObject';
 import { minLengthArray } from '../../../utils/minLengthArray';
 import { AuthService } from '@services/auth/auth.service';
+import { PrimarySelectComponent } from "@components/primary-select/primary-select.component";
 
 @Component({
   selector: 'app-natural-person-form',
@@ -44,7 +45,8 @@ import { AuthService } from '@services/auth/auth.service';
     MatButtonModule,
     MatIconModule,
     CpfValidatorDirective,
-  ],
+    PrimarySelectComponent
+],
   templateUrl: './natural-person-form.component.html',
   styleUrl: './natural-person-form.component.scss',
 })
@@ -93,6 +95,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       this.form.valueChanges.subscribe(() => {
         const isDirty = this.form.dirty;
         this.actionsService.hasFormChanges.set(isDirty);
+        this.formChanged.emit(isDirty); //TODO : Considerar se o formulário foi modificado
       })
     );
   }
@@ -106,10 +109,13 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       setTimeout(() => {
         this.form.patchValue({
           name: this.dataForm!.name || '',
+          relationshipTypes: this.dataForm!.relationshipTypes || [],
+          nickName: this.dataForm!.nickName || '',
           email: this.dataForm!.email || '',
           phone: this.dataForm!.phone || '',
           cpf: this.dataForm!.cpf || '',
-          relationshipTypes: this.dataForm!.relationshipTypes || [],
+          rg: this.dataForm!.rg || '',
+          rgIssuer: this.dataForm!.rgIssuer || '',
           // address: {
           //   zipcode: this.dataForm!.address?.zipcode || '',
           //   street: this.dataForm!.address?.street || '',
@@ -146,6 +152,10 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       console.log('Formulário inválido: ', this.form.value);
+       // Log específico para relationshipTypes se inválido
+      if (this.form.get('relationshipTypes')?.invalid) {
+        console.log('RelationshipTypes é obrigatório e deve ter pelo menos 1 item');
+      }
       return;
     }
 
@@ -191,6 +201,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
         next: () => {
           this.toastrService.success('Cadastro realizado com sucesso');
           this.formSubmitted.emit();
+          this.resetForm();
         },
         error: () =>
           this.toastrService.error(
@@ -199,6 +210,21 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       });
     }
   }
+
+  private resetForm() {
+    this.form.reset();
+    this.submitted = false;
+
+    this.form.get('relationshipTypes')?.setValue([]);
+
+    this.form.patchValue({
+      active: true,
+      legalEntity: false,
+    })
+
+  }
+
+
 
   // getAddressByCep() {
   //   console.log('Buscando endereço pelo CEP');

@@ -1,0 +1,53 @@
+<div class="input-wrapper">
+  <label [for]="inputName">{{label}}</label>
+  <div class="input-container">
+    <div class="input-content">
+      <div class="select-container" (click)="toggleDropdown()">
+        <input
+          [id]="inputName"
+          [placeholder]="placeholder"
+          [value]="getDisplayValue()"
+          readonly
+          class="select-input"
+        />
+        <span class="dropdown-arrow" [class.rotated]="isOpen">▼</span>
+      </div>
+
+      @if (isOpen) {
+        <div class="dropdown-options">
+          @if (allowMultiple) {
+            @for (option of options; track option.value) {
+              <div
+                class="option-item"
+                (click)="toggleOption(option.value)"
+                [class.selected]="isSelected(option.value)"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(option.value)"
+                  (click)="$event.stopPropagation()"
+                />
+                <span>{{ option.label }}</span>
+              </div>
+            }
+          } @else {
+            @for (option of options; track option.value) {
+              <div
+                class="option-item"
+                (click)="selectSingleOption(option.value)"
+                [class.selected]="value === option.value"
+              >
+                <span>{{ option.label }}</span>
+              </div>
+            }
+          }
+        </div>
+      }
+
+      <ng-content></ng-content>
+    </div>
+    @if (error) {
+      <p class="invalid-field-message">Campo inválido</p>
+    }
+  </div>
+</div>

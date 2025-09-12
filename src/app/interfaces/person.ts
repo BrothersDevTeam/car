@@ -56,8 +56,8 @@ export interface Contact {
 }
 
 export enum RelationshipTypes {
-  FUNCIONARIO,
-  CLIENTE,
-  CONTADOR,
-  FORNECEDOR,
+  FUNCIONARIO = 'FUNCIONARIO',
+  CLIENTE = 'CLIENTE',
+  CONTADOR = 'CONTADOR',
+  FORNECEDOR  = 'FORNECEDOR',
 }
