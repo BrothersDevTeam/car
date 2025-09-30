@@ -1,7 +1,7 @@
 <form [formGroup]="form" (keydown.enter)="onEnter($event)">
-  @if(dataForm?.licensePlate) {
+  @if(dataForm?.plate) {
     <div class="title-trash">
-      <h2>Veículo placa: {{ dataForm!.licensePlate }}</h2>
+      <h2>Veículo placa: {{ dataForm!.plate }}</h2>
     </div>
   }
   <app-wrapper-card>
@@ -172,6 +172,6 @@
     (click)="onSubmit()"
     #submitButton
     >
-    {{ dataForm?.licensePlate ? 'Editar' : 'Enviar' }}
+    {{ dataForm?.plate ? 'Editar' : 'Enviar' }}
   </button>
 </form>

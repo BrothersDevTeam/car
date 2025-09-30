@@ -51,7 +51,7 @@
     <mat-tab-group [selectedIndex]="0">
       <mat-tab label="Veículo">
         <app-vehicle-form
-          [dataForm]="selectedVehicle?.licensePlate ? selectedVehicle : null"
+          [dataForm]="selectedVehicle?.plate ? selectedVehicle : null"
           (formSubmitted)="onFormSubmitted()"
           (formChanged)="handleFormChanged($event)"
         />

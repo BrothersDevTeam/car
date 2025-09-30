@@ -55,8 +55,8 @@ import { MatRadioModule } from '@angular/material/radio';
     MatOptionModule,
     MatSelectModule,
     CustomSelectComponent,
-    MatRadioModule
-],
+    MatRadioModule,
+  ],
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',
 })
@@ -217,34 +217,21 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     if (changes['dataForm'] && this.dataForm) {
       setTimeout(() => {
         this.form.patchValue({
-          licensePlate: this.dataForm!.licensePlate || '',
-          yearModel: this.dataForm!.yearModel || null,
+          licensePlate: this.dataForm!.plate || '',
+          yearModel: this.dataForm!.modelYear || null,
           chassis: this.dataForm!.chassis || null,
-          numberOfDoors: this.dataForm!.numberOfDoors || null,
+          numberOfDoors: this.dataForm!.doors || null,
           horsepower: this.dataForm!.horsepower || null,
           engineNumber: this.dataForm!.engineNumber || null,
-          initialMileage: this.dataForm!.initialMileage || null,
+          initialMileage: this.dataForm!.km || null,
           renavam: this.dataForm!.renavam || null,
-          species: this.dataForm!.species || null,
-          category: this.dataForm!.category || null,
+          category: this.dataForm!.vehicleType || null,
           age: this.dataForm!.age || null,
           features: this.dataForm!.features || null,
-          modelDto: {
-            id: this.dataForm!.modelDto?.id || null,
-            description: this.dataForm!.modelDto?.description || null,
-          },
-          brandDto: {
-            id: this.dataForm!.brandDto?.id || null,
-            description: this.dataForm!.brandDto?.description || null,
-          },
-          colorDto: {
-            id: this.dataForm!.colorDto?.id || null,
-            description: this.dataForm!.colorDto?.description || null,
-          },
-          fuelTypeDto: {
-            id: this.dataForm!.fuelTypeDto?.id || null,
-            description: this.dataForm!.fuelTypeDto?.description || null,
-          },
+          model: this.dataForm!.model || null,
+          brand: this.dataForm!.brand || null,
+          color: this.dataForm!.color || null,
+          fuelTypes: this.dataForm!.fuelTypes || null,
           origin: this.dataForm!.origin || this.form.get('origin')?.value,
         });
       });
@@ -302,32 +289,32 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     };
     removeEmptyValues();
 
-    const addformValuesOnPayload = () => {
-      const { brandDto, modelDto, ...restOfFormValues } = formValues;
-      payload = restOfFormValues;
+    // const addformValuesOnPayload = () => {
+    //   const { brandDto, modelDto, ...restOfFormValues } = formValues;
+    //   payload = restOfFormValues;
 
-      if (
-        formValues['modelDto'] &&
-        formValues['modelDto'].description !== '' &&
-        formValues['modelDto'].description !== null &&
-        formValues['brandDto'] &&
-        formValues['brandDto'].description !== '' &&
-        formValues['brandDto'].description !== null
-      ) {
-        payload = {
-          ...payload,
-          modelDto: {
-            ...modelDto,
-            brandDto,
-          },
-        } as VehicleForm;
-      }
-    };
-    addformValuesOnPayload();
+    //   if (
+    //     formValues['modelDto'] &&
+    //     formValues['modelDto'].description !== '' &&
+    //     formValues['modelDto'].description !== null &&
+    //     formValues['brandDto'] &&
+    //     formValues['brandDto'].description !== '' &&
+    //     formValues['brandDto'].description !== null
+    //   ) {
+    //     payload = {
+    //       ...payload,
+    //       modelDto: {
+    //         ...modelDto,
+    //         brandDto,
+    //       },
+    //     } as VehicleForm;
+    //   }
+    // };
+    // addformValuesOnPayload();
 
-    if (this.dataForm?.id) {
+    if (this.dataForm?.vehicleId) {
       this.vehicleService
-        .update({ ...payload, id: this.dataForm.id })
+        .update({ ...payload, id: this.dataForm.vehicleId })
         .subscribe({
           next: () => {
             this.toastrService.success('Atualização feita com sucesso');
@@ -378,8 +365,8 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   deleteConfirmed() {
-    if (this.dataForm?.id) {
-      this.vehicleService.delete(this.dataForm.id).subscribe({
+    if (this.dataForm?.vehicleId) {
+      this.vehicleService.delete(this.dataForm.vehicleId).subscribe({
         next: (response) => {
           console.log('Deleção bem-sucedida', response);
           this.toastrService.success('Deleção bem-sucedida');

@@ -6,37 +6,37 @@
     <app-wrapper-card class="first-info-card">
       <div class="card-row">
         <h3 class="label">Placa:</h3>
-        <h3 class="value">{{ vehicle.licensePlate }}</h3>
+        <h3 class="value">{{ vehicle.plate }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Marca:</h3>
-        <h3 class="value">{{ vehicle.brandDto?.description || "" }}</h3>
+        <h3 class="value">{{ vehicle.brand || "" }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Modelo:</h3>
-        <h3 class="value">{{ vehicle.modelDto?.description || "" }}</h3>
+        <h3 class="value">{{ vehicle.model || "" }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Ano do modelo:</h3>
-        <h3 class="value">{{ vehicle.yearModel || "" }}</h3>
+        <h3 class="value">{{ vehicle.modelYear || "" }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Cor:</h3>
-        <h3 class="value">{{ vehicle.colorDto?.description }}</h3>
+        <h3 class="value">{{ vehicle.color }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Combustivel:</h3>
-        <h3 class="value">{{ vehicle.fuelTypeDto?.description }}</h3>
+        <h3 class="value">{{ vehicle.fuelTypes }}</h3>
       </div>
     </app-wrapper-card>
     <app-wrapper-card class="second-info-card">
       <div class="card-row">
         <h3 class="label">Número de portas:</h3>
-        <h3 class="value">{{ vehicle.numberOfDoors || "" }}</h3>
+        <h3 class="value">{{ vehicle.doors || "" }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Km inicial:</h3>
-        <h3 class="value">{{ vehicle.initialMileage || "" }}</h3>
+        <h3 class="value">{{ vehicle.km || "" }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Ano:</h3>
@@ -62,12 +62,8 @@
 
     <app-wrapper-card class="third-info-card" title="">
       <div class="card-row">
-        <h3 class="label">Espécies:</h3>
-        <h3 class="value">{{ vehicle.species || "" }}</h3>
-      </div>
-      <div class="card-row">
         <h3 class="label">Categoria:</h3>
-        <h3 class="value">{{ vehicle.category || "" }}</h3>
+        <h3 class="value">{{ vehicle.vehicleType || "" }}</h3>
       </div>
 
       <div class="card-row">
