@@ -52,23 +52,23 @@ export class VehicleComponent {
   };
   columns: ColumnConfig<GetVehicle>[] = [
     {
-      key: 'licensePlate',
+      key: 'plate',
       header: 'Placa',
     },
     {
-      key: 'modelDto.brandDto.description',
+      key: 'brand',
       header: 'Marca',
     },
     {
-      key: 'modelDto.description',
+      key: 'model',
       header: 'Modelo',
     },
     {
-      key: 'yearModel',
+      key: 'modelYear',
       header: 'Ano/Modelo',
     },
     {
-      key: 'colorDto.description',
+      key: 'color',
       header: 'Cor',
     },
     {

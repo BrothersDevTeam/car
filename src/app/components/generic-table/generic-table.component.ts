@@ -1,4 +1,3 @@
-
 import { MatIconModule } from '@angular/material/icon';
 import { PageEvent } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,8 +25,8 @@ import type { PaginationResponse } from '@interfaces/pagination';
     PaginationComponent,
     MatCheckboxModule,
     MatIconModule,
-    MatButtonModule
-],
+    MatButtonModule,
+  ],
   templateUrl: './generic-table.component.html',
   styleUrl: './generic-table.component.scss',
 })
