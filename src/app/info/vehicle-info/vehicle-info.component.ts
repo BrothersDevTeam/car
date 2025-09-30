@@ -57,8 +57,8 @@ export class VehicleInfoComponent {
   }
 
   deleteConfirmed() {
-    if (this.vehicle.id) {
-      this.vehicleService.delete(this.vehicle.id).subscribe({
+    if (this.vehicle.vehicleId) {
+      this.vehicleService.delete(this.vehicle.vehicleId).subscribe({
         next: (response) => {
           console.log('Exclusão bem-sucedida', response);
           this.toastrService.success('Exclusão bem-sucedida');

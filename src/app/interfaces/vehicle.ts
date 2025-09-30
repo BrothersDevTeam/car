@@ -1,21 +1,26 @@
+import { Person } from './person';
+
 export interface Vehicle {
-  id?: string;
-  licensePlate: string;
-  yearModel?: string;
-  chassis?: string;
-  numberOfDoors?: 0;
-  horsepower?: string;
-  engineNumber?: string;
-  initialMileage?: 0;
-  renavam?: string;
-  species?: string;
-  category?: string;
-  age?: 0;
+  storeId?: string;
+  vehicleId?: string;
+  owner?: Person;
+  plate: string;
+  brand: string;
+  model: string;
+  year: string;
+  modelYear?: string;
+  color: string;
+  chassis: string;
+  renavam: string;
+  doors: string;
+  horsepower: string;
+  engineNumber: string;
+  km: string;
+  vehicleType: string;
+  age: string;
   features?: string;
+  fuelTypes: string[];
   origin?: string;
-  modelDto?: Model;
-  colorDto?: Color;
-  fuelTypeDto?: FuelType;
 }
 export type CreateVehicle = Omit<Vehicle, 'id'>;
 
