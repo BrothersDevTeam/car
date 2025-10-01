@@ -4,6 +4,7 @@ import { BehaviorSubject, first, Observable, of, tap } from 'rxjs';
 
 import { PaginationResponse } from '@interfaces/pagination';
 import { CreateVehicle, GetVehicle, Vehicle } from '@interfaces/vehicle';
+import { MessageResponse } from '@interfaces/message-response';
 
 @Injectable({
   providedIn: 'root',
@@ -47,27 +48,27 @@ export class VehicleService {
   }
 
   create(data: CreateVehicle) {
-    return this.http.post<string>(`${this.apiUrl}`, data).pipe(
-      tap((response: string) => {
-        console.log('Formulário enviado com sucesso!', response);
+    return this.http.post<GetVehicle>(`${this.apiUrl}`, data).pipe(
+      tap((response) => {
+        console.log('Veículo criado com sucesso!', response);
         this.clearCache();
       })
     );
   }
 
   update(data: Vehicle) {
-    return this.http.put<string>(`${this.apiUrl}`, data).pipe(
-      tap((response: string) => {
-        console.log('Formulário enviado com sucesso!', response);
+    return this.http.put<GetVehicle>(`${this.apiUrl}/${data.vehicleId}`, data).pipe(
+      tap((response) => {
+        console.log('Veículo atualizado com sucesso!', response);
         this.clearCache();
       })
     );
   }
 
-  delete(id: string) {
-    return this.http.delete<string>(`${this.apiUrl}/${id}`).pipe(
-      tap((response: string) => {
-        console.log('Cliente deletado com sucesso!', response);
+  delete(id: string): Observable<MessageResponse> {
+    return this.http.delete<MessageResponse>(`${this.apiUrl}/${id}`).pipe(
+      tap((response) => {
+        console.log('Resposta do servidor:', response.message);
         this.clearCache();
       })
     );

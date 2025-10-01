@@ -40,11 +40,10 @@ export class VehicleInfoComponent {
       ConfirmDialogComponent,
       {
         data: {
-          title: 'Confirmar Exclusão',
-          message:
-            'Tem certeza que deseja <strong>excluir</strong> este registro?',
-          confirmText: 'Sim',
-          cancelText: 'Nao',
+          title: 'Confirmar exclusão',
+          message: `Deseja realmente excluir o veículo <strong>${this.vehicle.plate}</strong>?`,
+          confirmText: 'Sim, excluir',
+          cancelText: 'Cancelar',
         },
       }
     );
@@ -65,8 +64,8 @@ export class VehicleInfoComponent {
           this.formSubmitted.emit();
         },
         error: (error) => {
-          console.error('Erro ao excluir cliente', error);
-          this.toastrService.error('Erro ao excluir cliente');
+          console.error('Erro ao excluir veículo', error);
+          this.toastrService.error('Erro ao excluir veículo');
         },
       });
     } else {

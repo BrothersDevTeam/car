@@ -215,6 +215,42 @@ export class VehicleComponent {
     this.actionsService.hasFormChanges.set(false);
   }
 
+  handleDelete(vehicle: GetVehicle) {
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
+      ConfirmDialogComponent,
+      {
+        data: {
+          title: 'Confirmar exclusão',
+          message: `Deseja realmente excluir o veículo <strong>${vehicle.plate}</strong>?`,
+          confirmText: 'Sim, excluir',
+          cancelText: 'Cancelar',
+        },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.deleteVehicle(vehicle.vehicleId!);
+      }
+    });
+  }
+
+  deleteVehicle(vehicleId: string) {
+    this.vehicleService.delete(vehicleId).subscribe({
+      next: (response) => {
+        this.toastr.success('Veículo deletado com sucesso!');
+        this.loadVehicleList(
+          this.paginationRequestConfig.pageIndex,
+          this.paginationRequestConfig.pageSize
+        );
+      },
+      error: (err) => {
+        console.error('Erro ao deletar veículo:', err);
+        this.toastr.error('Erro ao deletar veículo');
+      }
+    });
+  }
+
   openDialog() {
     const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
       ConfirmDialogComponent,
