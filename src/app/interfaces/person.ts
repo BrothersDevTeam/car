@@ -1,16 +1,4 @@
-// export interface GenericClient {
-//   id: string;
-//   fullName: string;
-//   legalName: string;
-//   tradeName: string;
-//   cpf?: string;
-//   cnpj?: string;
-//   ie?: string;
-//   crt?: string;
-//   address?: Address;
-//   contact?: Contact;
-//   active: boolean;
-// }
+import { RelationshipTypes } from "../enums/relationshipTypes";
 
 export interface Person {
   personId?: string;
@@ -28,6 +16,9 @@ export interface Person {
   crc?: string;
   active: boolean;
   relationshipTypes: RelationshipTypes[];
+  username?: string;
+  password?: string;
+  roleName?: string;
 }
 
 export type CreateNaturalPerson = Omit<
@@ -48,16 +39,4 @@ export interface Address {
   state: string;
   zipcode: string;
   neighborhood: string;
-}
-
-export interface Contact {
-  email: string;
-  phone: string;
-}
-
-export enum RelationshipTypes {
-  FUNCIONARIO = 'FUNCIONARIO',
-  CLIENTE = 'CLIENTE',
-  CONTADOR = 'CONTADOR',
-  FORNECEDOR = 'FORNECEDOR',
 }

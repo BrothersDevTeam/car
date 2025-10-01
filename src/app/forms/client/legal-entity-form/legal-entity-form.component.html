@@ -1,44 +1,57 @@
 <form [formGroup]="form" (keydown.enter)="onEnter($event)">
   <app-wrapper-card title="Dados da empresa">
     <app-primary-input
-      formControlName="legalName"
-      label="Razão Social"
-      inputName="legalName"
+      formControlName="name"
+      label="Nome da Empresa *"
+      inputName="name"
       type="text"
       [error]="
-        form.get('legalName')?.invalid &&
-        (form.get('legalName')?.touched || submitted)
+        form.get('name')?.invalid &&
+        (form.get('name')?.touched || submitted)
+      "
+    />
+
+    <app-primary-select
+      label="Tipos de Relacionamento *"
+      placeholder="Selecione os tipos"
+      inputName="relationshipTypes"
+      [allowMultiple]="true"
+      formControlName="relationshipTypes"
+      [error]="submitted && form.get('relationshipTypes')?.invalid"
+    ></app-primary-select>
+
+    @if (submitted && form.get('relationshipTypes')?.invalid) {
+    <div class="error-message">
+      Selecione pelo menos um tipo de relacionamento
+    </div>
+    }
+
+    <app-primary-input
+      formControlName="nickName"
+      label="Nome Fantasia"
+      inputName="nickName"
+      type="text"
+      placeholder="Como a empresa é conhecida?"
+    />
+    <app-primary-input
+      formControlName="email"
+      label="Email"
+      inputName="email"
+      type="email"
+      placeholder="exemplo@email.com"
+      [error]="
+        form.get('email')?.invalid &&
+        (form.get('email')?.touched || submitted)
       "
     />
     <app-primary-input
-      formControlName="tradeName"
-      label="Nome Fantasia"
-      inputName="tradeName"
-      type="text"
+      formControlName="phone"
+      label="Celular"
+      inputName="phone"
+      type="tel"
+      placeholder="(00) 00000-0000"
+      mask="(00) 00000-0000"
     />
-
-    <!-- Grupo de contato -->
-    <div formGroupName="contact">
-      <app-primary-input
-        formControlName="email"
-        label="Email"
-        inputName="email"
-        type="email"
-        placeholder="exemplo@email.com"
-        [error]="
-          form.get('contact.email')?.invalid &&
-          (form.get('contact.email')?.touched || submitted)
-        "
-      />
-      <app-primary-input
-        formControlName="phone"
-        label="Celular"
-        inputName="phone"
-        type="tel"
-        placeholder="(00) 00000-0000"
-        mask="(00) 00000-0000"
-      />
-    </div>
 
     <app-primary-input
       formControlName="cnpj"
@@ -59,7 +72,73 @@
       inputName="ie"
       type="text"
     />
+    <app-primary-input
+      formControlName="crc"
+      label="CRC (se aplicável)"
+      inputName="crc"
+      type="text"
+      placeholder="Número do CRC para contadores"
+    />
   </app-wrapper-card>
+
+@if (shouldShowUserFields) {
+  <app-wrapper-card title="Dados de Acesso ao Sistema">
+    <app-primary-input
+      formControlName="username"
+      label="Nome de usuário *"
+      inputName="username"
+      type="text"
+      placeholder="Digite o nome de usuário"
+      [error]="
+        form.get('username')?.invalid &&
+        (form.get('username')?.touched || submitted)
+      "
+    />
+
+    <app-primary-input
+      formControlName="password"
+      label="Senha *"
+      inputName="password"
+      type="password"
+      placeholder="Mínimo 6 caracteres"
+      [error]="
+        form.get('password')?.invalid &&
+        (form.get('password')?.touched || submitted)
+      "
+    />
+
+    <app-primary-select
+      label="Função no Sistema *"
+      placeholder="Selecione a função"
+      inputName="roleName"
+      formControlName="roleName"
+      [error]="submitted && form.get('roleName')?.invalid"
+      [options]="[
+        { value: 'ROLE_MANAGER', label: 'Gerente' },
+        { value: 'ROLE_SELLER', label: 'Vendedor' },
+        { value: 'ROLE_FINANCIAL', label: 'Financeiro' }
+      ]"
+    />
+
+    @if (submitted && form.get('username')?.invalid) {
+    <div class="error-message">
+      Nome de usuário é obrigatório (mínimo 3 caracteres)
+    </div>
+    }
+
+    @if (submitted && form.get('password')?.invalid) {
+    <div class="error-message">
+      Senha é obrigatória (mínimo 6 caracteres)
+    </div>
+    }
+
+    @if (submitted && form.get('roleName')?.invalid) {
+    <div class="error-message">
+      Selecione uma função no sistema
+    </div>
+    }
+  </app-wrapper-card>
+}
 
   <!-- <app-wrapper-card title="Endereço">
     <div formGroupName="address">
