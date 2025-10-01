@@ -93,7 +93,7 @@ export class PersonService {
     );
   }
 
-  delete(id: string) {
+   delete(id: string) {
     return this.http.delete<string>(`${this.apiUrl}/${id}`).pipe(
       tap((response: string) => {
         console.log('Cliente deletado com sucesso!', response);

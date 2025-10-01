@@ -230,6 +230,52 @@ export class PersonComponent implements OnInit, OnDestroy {
     this.openForm.set(true);
   }
 
+  handleDelete(person: Person) {
+    this.openDeleteDialog(person);
+  }
+
+  openDeleteDialog(person: Person) {
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
+      ConfirmDialogComponent,
+      {
+        data: {
+          title: 'Confirmar Exclusão',
+          message: `Tem certeza que deseja <strong>excluir</strong> ${person.name}?`,
+          confirmText: 'Sim',
+          cancelText: 'Não',
+        },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.deleteConfirmed(person);
+      }
+    });
+  }
+
+  deleteConfirmed(person: Person) {
+    if (person.personId) {
+      this.personService.delete(person.personId).subscribe({
+        next: (response) => {
+          console.log('Exclusão bem-sucedida:', response);
+          this.toastr.success('Pessoa excluída com sucesso');
+          // Recarrega a lista após exclusão bem-sucedida
+          this.onFormSubmitted();
+        },
+        error: (error) => {
+          console.error('Erro ao excluir pessoa:', error);
+          // Verifica se há mensagem de erro específica do backend
+          const errorMessage = error?.error?.message || error?.message || 'Erro ao excluir pessoa';
+          this.toastr.error(errorMessage);
+        },
+      });
+    } else {
+      console.error('ID não encontrado para exclusão');
+      this.toastr.error('ID não encontrado para exclusão');
+    }
+  }
+
   onFormSubmitted() {
     this.loadPersonList(
       this.paginationRequestConfig.pageIndex,

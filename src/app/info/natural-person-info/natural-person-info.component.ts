@@ -60,13 +60,15 @@ export class NaturalPersonInfoComponent {
     if (this.person.personId) {
       this.personService.delete(this.person.personId).subscribe({
         next: (response) => {
-          console.log('Exclusão bem-sucedida', response);
-          this.toastrService.success('Exclusão bem-sucedida');
+          console.log('Exclusão bem-sucedida:', response);
+          this.toastrService.success('Pessoa excluída com sucesso');
           this.formSubmitted.emit();
         },
         error: (error) => {
-          console.error('Erro ao excluir cliente', error);
-          this.toastrService.error('Erro ao excluir cliente');
+          console.error('Erro ao excluir pessoa:', error);
+          // Verifica se há mensagem de erro específica do backend
+          const errorMessage = error?.error?.message || error?.message || 'Erro ao excluir pessoa';
+          this.toastrService.error(errorMessage);
         },
       });
     } else {
