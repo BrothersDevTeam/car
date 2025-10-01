@@ -13,6 +13,14 @@ section {
     padding-top: 20px;
     text-align: center;
 
+    .user-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 8px;
+      color: var(--primary-color);
+    }
+
     > img {
       border-radius: 50%;
       object-fit: cover;
@@ -20,19 +28,33 @@ section {
     }
 
     .header-text {
-      height: 3rem;
+      min-height: 3.5rem;
       color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
 
-      > p {
+      .username {
         margin: 0;
-        font-size: medium;
-        font-weight: 500;
+        font-size: 0.95rem;
+        font-weight: 600;
+        line-height: 1.2;
+      }
+
+      .user-role {
+        margin: 0;
+        font-size: 0.75rem;
+        font-weight: 400;
+        opacity: 0.75;
+        line-height: 1.2;
       }
     }
 
     .hide-header-text {
       opacity: 0;
       height: 0px !important;
+      min-height: 0 !important;
     }
   }
 

@@ -36,4 +36,24 @@ form {
       transform: scale(1.2);
     }
   }
+
+  // Novo: Container para campos de senha lado a lado
+  .password-fields-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+
+    // Em telas pequenas, empilha os campos
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+
+  .error-message {
+    color: #d32f2f;
+    font-size: 0.875rem;
+    margin-top: -16px;
+    margin-bottom: 8px;
+  }
 }

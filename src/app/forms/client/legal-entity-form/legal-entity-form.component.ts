@@ -14,7 +14,7 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 
 import { ToastrService } from 'ngx-toastr';
 
@@ -74,15 +74,39 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
     storeId: [''],
     legalEntity: [true],
     relationshipTypes: this.formBuilderService.control<RelationshipTypes[]>(
-      [],
+      [RelationshipTypes.CLIENTE],
       {
         validators: [minLengthArray(1)],
       }
     ),
     username: [''],
     password: [''],
+    confirmPassword: [''], // NOVO campo
     roleName: [''],
   });
+
+  // Validator personalizado para verificar se as senhas coincidem
+  private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+    const password = control.get('password');
+    const confirmPassword = control.get('confirmPassword');
+
+    if (!password || !confirmPassword) {
+      return null;
+    }
+
+    if (password.value !== confirmPassword.value) {
+      confirmPassword.setErrors({ passwordMismatch: true });
+      return { passwordMismatch: true };
+    } else {
+      const errors = confirmPassword.errors;
+      if (errors) {
+        delete errors['passwordMismatch'];
+        confirmPassword.setErrors(Object.keys(errors).length > 0 ? errors : null);
+      }
+    }
+
+    return null;
+  }
 
   get shouldShowUserFields(): boolean {
     const selectedTypes = this.form.get('relationshipTypes')?.value || [];
@@ -101,9 +125,13 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
   ) { }
 
   ngOnInit() {
+    // Adiciona o validator de senha no formulário
+    this.form.setValidators(this.passwordMatchValidator.bind(this));
+
     this.subscriptions.add(
-      this.form.get('relationshipTypes')!.valueChanges.subscribe(() => {
+      this.form.get('relationshipTypes')!.valueChanges.subscribe((types) => {
         this.updateConditionalValidators();
+        this.updateRoleNameForContador(types);
       })
     );
 
@@ -116,41 +144,52 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
     );
   }
 
+  private updateRoleNameForContador(types: RelationshipTypes[] | null) {
+    const roleNameControl = this.form.get('roleName');
+
+    if (types && types.includes(RelationshipTypes.CONTADOR)) {
+      roleNameControl?.setValue('ROLE_SELLER', { emitEvent: false });
+    }
+  }
+
   private updateConditionalValidators() {
     if (!this.form) return;
 
     const usernameControl = this.form.get('username');
     const passwordControl = this.form.get('password');
+    const confirmPasswordControl = this.form.get('confirmPassword');
     const roleNameControl = this.form.get('roleName');
 
     if (this.shouldShowUserFields) {
       usernameControl?.setValidators([Validators.required, Validators.minLength(3)]);
       passwordControl?.setValidators([Validators.required, Validators.minLength(6)]);
+      confirmPasswordControl?.setValidators([Validators.required, Validators.minLength(6)]);
       roleNameControl?.setValidators([Validators.required]);
 
       usernameControl?.updateValueAndValidity({ emitEvent: false });
       passwordControl?.updateValueAndValidity({ emitEvent: false });
+      confirmPasswordControl?.updateValueAndValidity({ emitEvent: false });
       roleNameControl?.updateValueAndValidity({ emitEvent: false });
     } else {
-      // Remover validações quando ocultar campos
       usernameControl?.clearValidators();
       passwordControl?.clearValidators();
+      confirmPasswordControl?.clearValidators();
       roleNameControl?.clearValidators();
 
-      // Limpar valores sem emitir eventos
       usernameControl?.setValue('', { emitEvent: false });
       passwordControl?.setValue('', { emitEvent: false });
+      confirmPasswordControl?.setValue('', { emitEvent: false });
       roleNameControl?.setValue('', { emitEvent: false });
 
-      // Atualizar sem emitir eventos para evitar loops
       usernameControl?.updateValueAndValidity({ emitEvent: false });
       passwordControl?.updateValueAndValidity({ emitEvent: false });
+      confirmPasswordControl?.updateValueAndValidity({ emitEvent: false });
       roleNameControl?.updateValueAndValidity({ emitEvent: false });
     }
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.unsubscribe(); // Limpa as inscrições para evitar vazamentos de memória
+    this.subscriptions.unsubscribe();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -158,7 +197,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
       setTimeout(() => {
         this.form.patchValue({
           name: this.dataForm!.name || '',
-          relationshipTypes: this.dataForm!.relationshipTypes || [],
+          relationshipTypes: this.dataForm!.relationshipTypes || [RelationshipTypes.CLIENTE],
           nickName: this.dataForm!.nickName || '',
           email: this.dataForm!.email || '',
           phone: this.dataForm!.phone || '',
@@ -189,10 +228,9 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
   onSubmit() {
     this.submitted = true;
     if (this.form.invalid) {
-      // Marca todos os controles como "touched" para que os erros sejam exibidos
       this.form.markAllAsTouched();
       console.log('Formulário inválido: ', this.form.value);
-      // NOVO: Logs específicos para campos obrigatórios (igual ao natural-person)
+      
       if (this.form.get('relationshipTypes')?.invalid) {
         console.log('RelationshipTypes é obrigatório e deve ter pelo menos 1 item');
       }
@@ -202,6 +240,12 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
         }
         if (this.form.get('password')?.invalid) {
           console.log('Password é obrigatório para funcionários/contadores/proprietários');
+        }
+        if (this.form.get('confirmPassword')?.invalid) {
+          console.log('Confirmação de senha é obrigatória');
+        }
+        if (this.form.errors?.['passwordMismatch']) {
+          console.log('As senhas não coincidem');
         }
         if (this.form.get('roleName')?.invalid) {
           console.log('RoleName é obrigatório para funcionários/contadores/proprietários');
@@ -215,13 +259,6 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
       this.toastrService.error('Loja não identificada. Faça login novamente.');
       return;
     }
-
-    const toStringOrUndefined = (value: any): string | undefined => {
-      if (value === null || value === undefined || value === '') {
-        return undefined;
-      }
-      return String(value);
-    };
 
     const baseData = {
       name: this.form.value.name || '',
@@ -240,15 +277,19 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
     let formValue: CreateLegalEntity;
 
     if (this.shouldShowUserFields) {
+      // Só adiciona username, password e roleName se for funcionário/contador/proprietário
       formValue = {
         ...baseData,
-        username: toStringOrUndefined(this.form.value.username),
-        password: toStringOrUndefined(this.form.value.password),
-        roleName: toStringOrUndefined(this.form.value.roleName),
+        username: this.form.value.username || '',
+        password: this.form.value.password || '',
+        roleName: this.form.value.roleName || '',
       };
     } else {
+      // Cliente: NÃO envia username, password e roleName
       formValue = baseData;
     }
+
+    console.log('Dados a serem enviados:', formValue);
 
     if (this.dataForm?.personId) {
       this.personService.update(formValue, this.dataForm.personId).subscribe({
@@ -256,25 +297,30 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
           this.toastrService.success('Atualização feita com sucesso');
           this.formSubmitted.emit();
         },
-        error: () =>
+        error: (error) => {
+          console.error('Erro ao atualizar:', error);
           this.toastrService.error(
             'Erro inesperado! Tente novamente mais tarde'
-          ),
+          );
+        },
       });
     } else {
       const formCleaned = removeEmptyPropertiesFromObject<CreateLegalEntity>(
         formValue as Person
       );
+      console.log('Dados limpos:', formCleaned);
       this.personService.create(formCleaned).subscribe({
         next: () => {
           this.toastrService.success('Cadastro realizado com sucesso');
           this.formSubmitted.emit();
           this.resetForm();
         },
-        error: () =>
+        error: (error) => {
+          console.error('Erro ao criar:', error);
           this.toastrService.error(
             'Erro inesperado! Tente novamente mais tarde'
-          ),
+          );
+        },
       });
     }
   }
@@ -283,46 +329,11 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
     this.form.reset();
     this.submitted = false;
 
-    this.form.get('relationshipTypes')?.setValue([]);
+    this.form.get('relationshipTypes')?.setValue([RelationshipTypes.CLIENTE]);
 
     this.form.patchValue({
       active: true,
       legalEntity: true,
     });
   }
-
-  // getAddressByCep() {
-  //   console.log('Buscando endereço pelo CEP');
-  //   const cep = this.form.value.address?.zipcode || '';
-  //   this.cepService
-  //     .getAddressByCep(cep)
-  //     .then((data) => {
-  //       console.log('DATA: ', data);
-  //       if (!data.erro) {
-  //         this.form.patchValue({
-  //           address: {
-  //             street: data.logradouro.toUpperCase(),
-  //             complement: data.complemento.toUpperCase(),
-  //             state: data.uf.toUpperCase(),
-  //             city: data.localidade.toUpperCase(),
-  //             neighborhood: data.bairro.toUpperCase(),
-  //           },
-  //         });
-  //       } else {
-  //         console.error('Erro ao buscar endereço pelo CEP: ');
-  //         this.form.get('address.zipcode')?.setErrors({ invalidCep: true });
-  //         this.toastrService.error(
-  //           'CEP inválido. Por favor, verifique e tente novamente.'
-  //         );
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error('Erro ao buscar endereço pelo CEP: ', error);
-  //     });
-  // }
-
-  // isCepValid(): boolean {
-  //   const cepControl = this.form.get('address.zipcode');
-  //   return cepControl?.valid && cepControl?.value?.length === 9 ? true : false;
-  // }
 }
