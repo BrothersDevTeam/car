@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Component, inject, signal, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { DecimalPipe } from '@angular/common';
 
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
@@ -34,6 +35,7 @@ import { ActionsService } from '@services/actions.service';
     GenericTableComponent,
     NfeEntradaFormComponent,
     NfeSaidaFormComponent,
+    DecimalPipe,
   ],
   templateUrl: './nfe.component.html',
   styleUrl: './nfe.component.scss',
@@ -91,6 +93,7 @@ export class NfeComponent {
   nfeListError = signal(false);
   openForm = signal(false);
   openInfo = signal(false);
+  selectedTabIndex = signal(0); // 0 = Entrada, 1 = Saída
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -143,7 +146,7 @@ export class NfeComponent {
         catchError((err) => {
           this.nfeListError.set(true);
           this.nfeListLoading.set(false);
-          console.error('Erro ao carregar a lista de pessoas:', err);
+          console.error('Erro ao carregar a lista de NFes:', err);
           return of();
         })
       )
@@ -165,7 +168,9 @@ export class NfeComponent {
   }
 
   handleOpenForm() {
+    this.selectedNfe = null;
     this.openForm.set(true);
+    this.selectedTabIndex.set(0); // Inicia na aba de entrada
   }
 
   handlePageEvent(event: PageEvent) {
@@ -177,14 +182,26 @@ export class NfeComponent {
   }
 
   handleEdit(nfe: Nfe) {
-    if (nfe) this.selectedNfe = nfe;
+    if (nfe) {
+      this.selectedNfe = nfe;
+      
+      // Determina qual aba abrir baseado no tipo de NFe
+      const tiposEntrada = [
+        'COMPRA DE VEICULO USADO',
+        'ENTRADA EM CONSIGNAÇÃO',
+        'ENTRADA COMPRA DEFINITIVA',
+        'DEVOLUÇÃO DE VENDA'
+      ];
+      
+      const isEntrada = tiposEntrada.includes(nfe.tipo);
+      this.selectedTabIndex.set(isEntrada ? 0 : 1);
+    }
     this.openInfo.set(false);
     this.openForm.set(true);
   }
 
   handleSelectionChange(selectedRows: any[]) {
     console.log('Linhas selecionadas:', selectedRows);
-    // Exemplo: atualizar estado com linhas selecionadas
   }
 
   onFormSubmitted() {

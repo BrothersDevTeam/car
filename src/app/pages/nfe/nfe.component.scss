@@ -1,63 +1,67 @@
-.loader-div,
-.message-error {
-  width: 100%;
-  height: 40vh;
+main {
+  padding: 1rem;
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
+  .loader-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+  }
 
-.loader {
-  width: 48px;
-  height: 48px;
-  display: block;
-  margin: 20px auto;
-  position: relative;
-  border: 3px solid rgb(200, 200, 200);
-  border-radius: 50%;
-  box-sizing: border-box;
-  animation: animloader 3s linear infinite;
-}
-.loader::after {
-  content: '';
-  box-sizing: border-box;
-  width: 6px;
-  height: 24px;
-  background: rgb(200, 200, 200);
-  transform: rotate(-45deg);
-  position: absolute;
-  bottom: -20px;
-  left: 46px;
-}
+  .message-error {
+    padding: 2rem;
+    text-align: center;
+    background-color: #f8d7da;
+    border-radius: 8px;
+    margin: 2rem 0;
 
-@keyframes animloader {
-  0% {
-    transform: translate(-10px, -10px);
+    h3 {
+      color: #721c24;
+      margin-bottom: 0.5rem;
+    }
+
+    h4 {
+      color: #721c24;
+      font-weight: normal;
+    }
   }
-  12.5% {
-    transform: translate(-10px, 0px);
-  }
-  25% {
-    transform: translate(0px, 10px);
-  }
-  37.5% {
-    transform: translate(10px, 10px);
-  }
-  50% {
-    transform: translate(20px, 0px);
-  }
-  62.5% {
-    transform: translate(20px, -10px);
-  }
-  75% {
-    transform: translate(10px, -20px);
-  }
-  87.5% {
-    transform: translate(0px, -20px);
-  }
-  100% {
-    transform: translate(-10px, -10px);
+
+  .nfe-info-container {
+    padding: 1.5rem;
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+
+      .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        &.full-width {
+          grid-column: 1 / -1;
+        }
+
+        label {
+          font-weight: 600;
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+        }
+
+        span {
+          font-size: 1rem;
+          color: var(--text-primary);
+        }
+      }
+    }
   }
 }

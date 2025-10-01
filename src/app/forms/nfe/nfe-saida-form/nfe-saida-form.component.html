@@ -1,1 +1,82 @@
-<p>nfe-saida-form works!</p>
+<form [formGroup]="form" (keydown.enter)="onEnter($event)">
+  @if(dataForm?.numero) {
+    <div class="title-trash">
+      <h2>NFe Nº: {{ dataForm!.numero }}</h2>
+    </div>
+  }
+
+  <app-wrapper-card>
+    <h3 class="section-title">Tipo de Operação*</h3>
+    <mat-radio-group
+      color="primary"
+      formControlName="tipo"
+      aria-label="Selecione o tipo de saída"
+      class="radio-button-group"
+    >
+      @for (tipo of tiposNfeSaida; track tipo.value) {
+        <mat-radio-button
+          class="radio-button"
+          [value]="tipo.value"
+        >
+          {{ tipo.label }}
+        </mat-radio-button>
+      }
+    </mat-radio-group>
+    @if (form.get('tipo')?.invalid && (form.get('tipo')?.touched || submitted)) {
+      <div class="error-message">
+        Selecione o tipo de operação.
+      </div>
+    }
+
+    <h3 class="section-title">Informações do Veículo*</h3>
+    <app-primary-select
+      formControlName="idVeiculo"
+      label="Veículo*"
+      [options]="vehicles"
+      optionValue="vehicleId"
+      [optionLabel]="getVehicleDisplay.bind(this)"
+      placeholder="Selecione o veículo"
+      [error]="
+        form.get('idVeiculo')?.invalid &&
+        (form.get('idVeiculo')?.touched || submitted)
+      "
+    />
+
+    <h3 class="section-title">Cliente/Destinatário*</h3>
+    <app-primary-select
+      formControlName="idDestinatario"
+      label="Cliente/Destinatário*"
+      [options]="persons"
+      optionValue="personId"
+      [optionLabel]="getPersonDisplay.bind(this)"
+      placeholder="Selecione o cliente"
+      [error]="
+        form.get('idDestinatario')?.invalid &&
+        (form.get('idDestinatario')?.touched || submitted)
+      "
+    />
+  </app-wrapper-card>
+
+  <button
+    mat-raised-button
+    type="button"
+    class="submit-btn"
+    color="primary"
+    (click)="onSubmit()"
+    #submitButton
+  >
+    {{ dataForm?.numero ? 'Atualizar' : 'Criar NFe' }}
+  </button>
+
+  @if (dataForm?.numero && dataForm?.status === 'Em digitacao') {
+    <button
+      mat-raised-button
+      type="button"
+      class="delete-btn"
+      color="warn"
+      (click)="onDelete()"
+    >
+      Cancelar NFe
+    </button>
+  }
+</form>
