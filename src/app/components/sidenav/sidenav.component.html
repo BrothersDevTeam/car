@@ -8,7 +8,7 @@
       /> -->
       @if (!sideNavCollapsed()) {
       <mat-icon
-        class="mat-18"
+        class="mat-18 user-icon"
         fontSet="material-icons-outlined"
       >
         person
@@ -19,7 +19,8 @@
         [class.hide-header-text]="sideNavCollapsed()"
       >
         @if (loggedUsername()) {
-        <p>{{ loggedUsername() }}</p>
+        <p class="username">{{ loggedUsername() }}</p>
+        <p class="user-role">{{ userRole() }}</p>
         }
       </div>
     </div>

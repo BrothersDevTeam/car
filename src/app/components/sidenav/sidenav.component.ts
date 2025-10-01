@@ -42,12 +42,14 @@ export class SideNavComponent {
     private actionsService: ActionsService,
     private router: Router
   ) {
-    this.loggedUsername.set(sessionStorage.getItem('car-username') || '');
+    this.loggedUsername.set(this.authService.getUsername() || 'Usuário');
+    this.userRole.set(this.formatRole(this.authService.getRoles()));
   }
 
   sideNavCollapsed = signal(false);
   isSmallScreen = signal(false);
   loggedUsername = signal('');
+  userRole = signal('');
 
   @Input() set collapsed(val: boolean) {
     this.sideNavCollapsed.set(val);
@@ -82,6 +84,33 @@ export class SideNavComponent {
       route: '/nfe',
     },
   ]);
+
+  // Formata as roles para exibição amigável
+  private formatRole(roles: string[]): string {
+    if (roles.length === 0) return 'Sem permissão';
+
+    const roleMap: { [key: string]: string } = {
+      'ROLE_CAR_ADMIN': 'Administrador',
+      'ROLE_MANAGER': 'Gerente',
+      'ROLE_SELLER': 'Vendedor',
+      'ROLE_FINANCIAL': 'Financeiro',
+    };
+
+    // Se tiver CAR_ADMIN, prioriza mostrar isso
+    if (roles.includes('ROLE_CAR_ADMIN')) {
+      return roleMap['ROLE_CAR_ADMIN'];
+    }
+
+    // Se tiver múltiplas roles, mostra a primeira mapeada
+    for (const role of roles) {
+      if (roleMap[role]) {
+        return roleMap[role];
+      }
+    }
+
+    // Se não encontrar mapeamento, retorna a primeira role
+    return roles[0];
+  }
 
   onMenuItemClick(route?: string) {
     if (window.innerWidth <= 599) {
