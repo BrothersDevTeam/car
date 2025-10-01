@@ -16,28 +16,28 @@
       @if (isOpen) {
         <div class="dropdown-options">
           @if (allowMultiple) {
-            @for (option of options; track option.value) {
+            @for (option of options; track $index) {
               <div
                 class="option-item"
-                (click)="toggleOption(option.value)"
-                [class.selected]="isSelected(option.value)"
+                (click)="toggleOption(option)"
+                [class.selected]="isSelected(option)"
               >
                 <input
                   type="checkbox"
-                  [checked]="isSelected(option.value)"
+                  [checked]="isSelected(option)"
                   (click)="$event.stopPropagation()"
                 />
-                <span>{{ option.label }}</span>
+                <span>{{ getOptionLabel(option) }}</span>
               </div>
             }
           } @else {
-            @for (option of options; track option.value) {
+            @for (option of options; track $index) {
               <div
                 class="option-item"
-                (click)="selectSingleOption(option.value)"
-                [class.selected]="value === option.value"
+                (click)="selectSingleOption(option)"
+                [class.selected]="isSelected(option)"
               >
-                <span>{{ option.label }}</span>
+                <span>{{ getOptionLabel(option) }}</span>
               </div>
             }
           }

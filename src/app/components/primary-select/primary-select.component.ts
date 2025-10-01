@@ -4,10 +4,13 @@ import {
   Input,
   HostListener,
   OnInit,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RelationshipTypes } from '../../enums/relationshipTypes';
+import { AuthService } from '@services/auth/auth.service';
 
 export interface SelectOption {
   value: any;
@@ -27,30 +30,56 @@ export interface SelectOption {
   templateUrl: './primary-select.component.html',
   styleUrl: './primary-select.component.scss',
 })
-export class PrimarySelectComponent implements ControlValueAccessor, OnInit {
+export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnChanges {
   @Input() placeholder: string = 'Selecione uma opção';
   @Input() label: string = '';
   @Input() inputName: string = '';
   @Input() error?: boolean = false;
   @Input() allowMultiple: boolean = false;
-  @Input() options: SelectOption[] = [];
+  @Input() options: any[] = [];
+  @Input() optionValue: string = 'value'; // propriedade que contém o valor
+  @Input() optionLabel: string | ((item: any) => string) = 'label'; // propriedade ou função que retorna o label
 
   value: any = null;
   isOpen: boolean = false;
   onChange: any = () => {};
   onTouched: any = () => {};
 
+  constructor(private authService: AuthService) {}
+
   ngOnInit() {
-    if (this.options.length === 0) {
+    this.loadOptions();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    // Recarrega as opções quando houver mudanças nos inputs
+    if (changes['options'] || changes['inputName']) {
+      this.loadOptions();
+    }
+  }
+
+  private loadOptions() {
+    // Se não houver opções E o campo for relationshipTypes, carrega as opções do enum
+    if (this.options.length === 0 && this.inputName === 'relationshipTypes') {
       this.options = this.getRelationshipTypeOptions();
     }
   }
 
   private getRelationshipTypeOptions(): SelectOption[] {
-    return Object.values(RelationshipTypes).map((value) => ({
-      value: value,
-      label: value,
-    }));
+    const userRoles = this.authService.getRoles();
+    const isCarAdmin = userRoles.includes('CAR_ADMIN');
+
+    return Object.values(RelationshipTypes)
+      .filter((value) => {
+        if (value === RelationshipTypes.PROPRIETARIO && !isCarAdmin) {
+          return false;
+        }
+        return true;
+      })
+      .map((value) => ({
+        value: value,
+        label: value,
+      }));
   }
 
   toggleDropdown() {
@@ -60,15 +89,17 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit {
     }
   }
 
-  selectSingleOption(optionValue: any) {
-    this.value = optionValue;
+  selectSingleOption(option: any) {
+    // Extrai o valor correto baseado no optionValue
+    const optionVal = this.getOptionValue(option);
+    this.value = optionVal;
     this.onChange(this.value);
     this.isOpen = false;
   }
 
-  toggleOption(optionValue: any) {
+  toggleOption(option: any) {
     if (!this.allowMultiple) {
-      this.selectSingleOption(optionValue);
+      this.selectSingleOption(option);
       return;
     }
 
@@ -76,21 +107,25 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit {
       this.value = [];
     }
 
-    const index = this.value.indexOf(optionValue);
+    const optionVal = this.getOptionValue(option);
+    const index = this.value.indexOf(optionVal);
+    
     if (index > -1) {
-      this.value = this.value.filter((v: any) => v !== optionValue);
+      this.value = this.value.filter((v: any) => v !== optionVal);
     } else {
-      this.value = [...this.value, optionValue];
+      this.value = [...this.value, optionVal];
     }
 
     this.onChange(this.value);
   }
 
-  isSelected(optionValue: any): boolean {
+  isSelected(option: any): boolean {
+    const optionVal = this.getOptionValue(option);
+    
     if (this.allowMultiple && Array.isArray(this.value)) {
-      return this.value.includes(optionValue);
+      return this.value.includes(optionVal);
     }
-    return this.value === optionValue;
+    return this.value === optionVal;
   }
 
   getDisplayValue(): string {
@@ -103,9 +138,11 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit {
         return '';
       }
 
-      const selectedLabels = this.value.map((val) => {
-        const option = this.options.find((opt) => opt.value === val);
-        return option ? option.label : val;
+      const selectedLabels = this.value.map((val: any) => {
+        const option = this.options.find(
+          (opt) => this.getOptionValue(opt) === val
+        );
+        return option ? this.getOptionLabel(option) : val;
       });
 
       return selectedLabels.length > 1
@@ -113,8 +150,31 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit {
         : selectedLabels[0];
     }
 
-    const option = this.options.find((opt) => opt.value === this.value);
-    return option ? option.label : this.value;
+    const option = this.options.find(
+      (opt) => this.getOptionValue(opt) === this.value
+    );
+    return option ? this.getOptionLabel(option) : this.value;
+  }
+
+  // Helper para extrair o valor de uma opção
+  private getOptionValue(option: any): any {
+    if (typeof option === 'object' && this.optionValue) {
+      return option[this.optionValue];
+    }
+    return option.value !== undefined ? option.value : option;
+  }
+
+  // Helper para extrair o label de uma opção
+  getOptionLabel(option: any): string {
+    if (typeof this.optionLabel === 'function') {
+      return this.optionLabel(option);
+    }
+    
+    if (typeof option === 'object' && typeof this.optionLabel === 'string') {
+      return option[this.optionLabel] || option.label || String(option);
+    }
+    
+    return option.label !== undefined ? option.label : String(option);
   }
 
   @HostListener('document:click', ['$event'])
