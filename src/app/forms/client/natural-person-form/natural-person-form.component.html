@@ -84,17 +84,40 @@
       "
     />
 
-    <app-primary-input
-      formControlName="password"
-      label="Senha *"
-      inputName="password"
-      type="password"
-      placeholder="Mínimo 6 caracteres"
-      [error]="
-        form.get('password')?.invalid &&
-        (form.get('password')?.touched || submitted)
-      "
-    />
+    <!-- Container para os campos de senha lado a lado -->
+    <div class="password-fields-container">
+      <app-primary-input
+        formControlName="password"
+        label="Senha *"
+        inputName="password"
+        type="password"
+        placeholder="Mínimo 6 caracteres"
+        [error]="
+          form.get('password')?.invalid &&
+          (form.get('password')?.touched || submitted)
+        "
+      />
+
+      <app-primary-input
+        formControlName="confirmPassword"
+        label="Confirmar Senha *"
+        inputName="confirmPassword"
+        type="password"
+        placeholder="Digite a senha novamente"
+        [error]="
+          (form.get('confirmPassword')?.invalid ||
+          form.errors?.['passwordMismatch']) &&
+          (form.get('confirmPassword')?.touched || submitted)
+        "
+      />
+    </div>
+
+    <!-- Mensagem de erro para senhas não coincidentes -->
+    @if (submitted && form.errors?.['passwordMismatch']) {
+    <div class="error-message">
+      As senhas não coincidem
+    </div>
+    }
 
     <app-primary-select
       label="Função no Sistema *"
@@ -119,6 +142,12 @@
     @if (submitted && form.get('password')?.invalid) {
     <div class="error-message">
       Senha é obrigatória (mínimo 6 caracteres)
+    </div>
+    }
+
+    @if (submitted && form.get('confirmPassword')?.invalid && !form.errors?.['passwordMismatch']) {
+    <div class="error-message">
+      Confirmação de senha é obrigatória (mínimo 6 caracteres)
     </div>
     }
 

@@ -14,7 +14,7 @@ import { ToastrService } from 'ngx-toastr';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
@@ -76,17 +76,41 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     storeId: [''],
     legalEntity: [false],
     relationshipTypes: this.formBuilderService.control<RelationshipTypes[]>(
-      [], //TODO: Criar campo no formulário para selecionar o tipo de relacionamento
+      [RelationshipTypes.CLIENTE],
       {
-        validators: [minLengthArray(1)], // pelo menos 1 selecionado
+        validators: [minLengthArray(1)],
       }
     ),
     username: [''],
     password: [''],
+    confirmPassword: [''], // NOVO campo
     roleName: [''],
   });
 
-  // Adicione o getter para verificar se deve mostrar campos de usuário
+  // Validator personalizado para verificar se as senhas coincidem
+  private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+    const password = control.get('password');
+    const confirmPassword = control.get('confirmPassword');
+
+    if (!password || !confirmPassword) {
+      return null;
+    }
+
+    if (password.value !== confirmPassword.value) {
+      confirmPassword.setErrors({ passwordMismatch: true });
+      return { passwordMismatch: true };
+    } else {
+      // Remove o erro se as senhas coincidem
+      const errors = confirmPassword.errors;
+      if (errors) {
+        delete errors['passwordMismatch'];
+        confirmPassword.setErrors(Object.keys(errors).length > 0 ? errors : null);
+      }
+    }
+
+    return null;
+  }
+
   get shouldShowUserFields(): boolean {
     const selectedTypes = this.form.get('relationshipTypes')?.value || [];
     return selectedTypes.some((type: RelationshipTypes) =>
@@ -103,14 +127,16 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   ) { }
 
   ngOnInit() {
-    // CORRIGIDO: Observar apenas mudanças no relationshipTypes para evitar loops infinitos
+    // Adiciona o validator de senha no formulário
+    this.form.setValidators(this.passwordMatchValidator.bind(this));
+
     this.subscriptions.add(
-      this.form.get('relationshipTypes')!.valueChanges.subscribe(() => {
+      this.form.get('relationshipTypes')!.valueChanges.subscribe((types) => {
         this.updateConditionalValidators();
+        this.updateRoleNameForContador(types);
       })
     );
 
-    // CORRIGIDO: Observar outras mudanças sem acionar validações condicionais
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
         const isDirty = this.form.dirty;
@@ -120,38 +146,46 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     );
   }
 
-  // CORRIGIDO: Método otimizado para evitar loops infinitos
+  private updateRoleNameForContador(types: RelationshipTypes[] | null) {
+    const roleNameControl = this.form.get('roleName');
+
+    if (types && types.includes(RelationshipTypes.CONTADOR)) {
+      roleNameControl?.setValue('ROLE_SELLER', { emitEvent: false });
+    }
+  }
+
   private updateConditionalValidators() {
     if (!this.form) return;
 
     const usernameControl = this.form.get('username');
     const passwordControl = this.form.get('password');
+    const confirmPasswordControl = this.form.get('confirmPassword');
     const roleNameControl = this.form.get('roleName');
 
     if (this.shouldShowUserFields) {
-      // Adicionar validações quando mostrar campos de usuário
       usernameControl?.setValidators([Validators.required, Validators.minLength(3)]);
       passwordControl?.setValidators([Validators.required, Validators.minLength(6)]);
+      confirmPasswordControl?.setValidators([Validators.required, Validators.minLength(6)]);
       roleNameControl?.setValidators([Validators.required]);
 
-      // Atualizar sem emitir eventos para evitar loops
       usernameControl?.updateValueAndValidity({ emitEvent: false });
       passwordControl?.updateValueAndValidity({ emitEvent: false });
+      confirmPasswordControl?.updateValueAndValidity({ emitEvent: false });
       roleNameControl?.updateValueAndValidity({ emitEvent: false });
     } else {
-      // Remover validações quando ocultar campos
       usernameControl?.clearValidators();
       passwordControl?.clearValidators();
+      confirmPasswordControl?.clearValidators();
       roleNameControl?.clearValidators();
 
-      // Limpar valores sem emitir eventos
       usernameControl?.setValue('', { emitEvent: false });
       passwordControl?.setValue('', { emitEvent: false });
+      confirmPasswordControl?.setValue('', { emitEvent: false });
       roleNameControl?.setValue('', { emitEvent: false });
 
-      // Atualizar sem emitir eventos para evitar loops
       usernameControl?.updateValueAndValidity({ emitEvent: false });
       passwordControl?.updateValueAndValidity({ emitEvent: false });
+      confirmPasswordControl?.updateValueAndValidity({ emitEvent: false });
       roleNameControl?.updateValueAndValidity({ emitEvent: false });
     }
   }
@@ -165,7 +199,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       setTimeout(() => {
         this.form.patchValue({
           name: this.dataForm!.name || '',
-          relationshipTypes: this.dataForm!.relationshipTypes || [],
+          relationshipTypes: this.dataForm!.relationshipTypes || [RelationshipTypes.CLIENTE],
           nickName: this.dataForm!.nickName || '',
           email: this.dataForm!.email || '',
           phone: this.dataForm!.phone || '',
@@ -179,7 +213,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
 
   onEnter(event: Event): void {
     if (event instanceof KeyboardEvent) {
-      event.preventDefault(); // Impede o comportamento padrão do Enter
+      event.preventDefault();
 
       if (
         this.form.valid &&
@@ -189,7 +223,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       }
 
       if (this.form.valid && this.submitButton) {
-        this.submitButton.nativeElement.focus(); // Define o foco no botão de submit
+        this.submitButton.nativeElement.focus();
       }
     }
   }
@@ -199,19 +233,23 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       console.log('Formulário inválido: ', this.form.value);
-      // Log específico para relationshipTypes se inválido
+      
       if (this.form.get('relationshipTypes')?.invalid) {
-        console.log(
-          'RelationshipTypes é obrigatório e deve ter pelo menos 1 item'
-        );
+        console.log('RelationshipTypes é obrigatório e deve ter pelo menos 1 item');
       }
-      // NOVO: Logs específicos para campos de usuário condicionais
+      
       if (this.shouldShowUserFields) {
         if (this.form.get('username')?.invalid) {
           console.log('Username é obrigatório para funcionários/contadores/proprietários');
         }
         if (this.form.get('password')?.invalid) {
           console.log('Password é obrigatório para funcionários/contadores/proprietários');
+        }
+        if (this.form.get('confirmPassword')?.invalid) {
+          console.log('Confirmação de senha é obrigatória');
+        }
+        if (this.form.errors?.['passwordMismatch']) {
+          console.log('As senhas não coincidem');
         }
         if (this.form.get('roleName')?.invalid) {
           console.log('RoleName é obrigatório para funcionários/contadores/proprietários');
@@ -226,15 +264,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       return;
     }
 
-    // CORRIGIDO: Função helper para garantir tipos corretos
-    const toStringOrUndefined = (value: any): string | undefined => {
-      if (value === null || value === undefined || value === '') {
-        return undefined;
-      }
-      return String(value);
-    };
-
-    // CORRIGIDO: Construir dados base
     const baseData = {
       name: this.form.value.name || '',
       storeId,
@@ -250,19 +279,22 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       relationshipTypes: this.form.value.relationshipTypes as RelationshipTypes[],
     };
 
-    // CORRIGIDO: Construir formValue com tipos garantidos
     let formValue: CreateNaturalPerson;
 
     if (this.shouldShowUserFields) {
+      // Só adiciona username, password e roleName se for funcionário/contador/proprietário
       formValue = {
         ...baseData,
-        username: toStringOrUndefined(this.form.value.username),
-        password: toStringOrUndefined(this.form.value.password),
-        roleName: toStringOrUndefined(this.form.value.roleName),
+        username: this.form.value.username || '',
+        password: this.form.value.password || '',
+        roleName: this.form.value.roleName || '',
       };
     } else {
+      // Cliente: NÃO envia username, password e roleName
       formValue = baseData;
     }
+
+    console.log('Dados a serem enviados:', formValue);
 
     if (this.dataForm?.personId) {
       this.personService.update(formValue, this.dataForm.personId).subscribe({
@@ -270,25 +302,30 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
           this.toastrService.success('Atualização feita com sucesso');
           this.formSubmitted.emit();
         },
-        error: () =>
+        error: (error) => {
+          console.error('Erro ao atualizar:', error);
           this.toastrService.error(
             'Erro inesperado! Tente novamente mais tarde'
-          ),
+          );
+        },
       });
     } else {
       const clean = removeEmptyPropertiesFromObject<CreateNaturalPerson>(
         formValue as Person
       );
+      console.log('Dados limpos:', clean);
       this.personService.create(clean).subscribe({
         next: () => {
           this.toastrService.success('Cadastro realizado com sucesso');
           this.formSubmitted.emit();
           this.resetForm();
         },
-        error: () =>
+        error: (error) => {
+          console.error('Erro ao criar:', error);
           this.toastrService.error(
             'Erro inesperado! Tente novamente mais tarde'
-          ),
+          );
+        },
       });
     }
   }
@@ -297,46 +334,11 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     this.form.reset();
     this.submitted = false;
 
-    this.form.get('relationshipTypes')?.setValue([]);
+    this.form.get('relationshipTypes')?.setValue([RelationshipTypes.CLIENTE]);
 
     this.form.patchValue({
       active: true,
       legalEntity: false,
     });
   }
-
-  // getAddressByCep() {
-  //   console.log('Buscando endereço pelo CEP');
-  //   const cep = this.form.value.address?.zipcode || '';
-  //   this.cepService
-  //     .getAddressByCep(cep)
-  //     .then((data) => {
-  //       console.log('DATA: ', data);
-  //       if (!data.erro) {
-  //         this.form.patchValue({
-  //           address: {
-  //             street: data.logradouro.toUpperCase(),
-  //             complement: data.complemento.toUpperCase(),
-  //             state: data.uf.toUpperCase(),
-  //             city: data.localidade.toUpperCase(),
-  //             neighborhood: data.bairro.toUpperCase(),
-  //           },
-  //         });
-  //       } else {
-  //         console.error('Erro ao buscar endereço pelo CEP: ');
-  //         this.form.get('address.zipcode')?.setErrors({ invalidCep: true });
-  //         this.toastrService.error(
-  //           'CEP inválido. Por favor, verifique e tente novamente.'
-  //         );
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error('Erro ao buscar endereço pelo CEP: ', error);
-  //     });
-  // }
-
-  // isCepValid(): boolean {
-  //   const cepControl = this.form.get('address.zipcode');
-  //   return cepControl?.valid && cepControl?.value?.length === 9 ? true : false;
-  // }
 }
