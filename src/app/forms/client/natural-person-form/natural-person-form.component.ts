@@ -21,10 +21,9 @@ import { PrimaryInputComponent } from '@components/primary-input/primary-input.c
 
 import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 
-import {
+import type {
   CreateNaturalPerson,
   Person,
-  RelationshipTypes,
 } from '@interfaces/person';
 
 import { PersonService } from '@services/person.service';
@@ -34,6 +33,8 @@ import { Subscription } from 'rxjs';
 import { removeEmptyPropertiesFromObject } from '../../../utils/removeEmptyPropertiesFromObject';
 import { minLengthArray } from '../../../utils/minLengthArray';
 import { AuthService } from '@services/auth/auth.service';
+import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
+import { RelationshipTypes } from '../../../enums/relationshipTypes';
 
 @Component({
   selector: 'app-natural-person-form',
@@ -44,6 +45,7 @@ import { AuthService } from '@services/auth/auth.service';
     MatButtonModule,
     MatIconModule,
     CpfValidatorDirective,
+    PrimarySelectComponent,
   ],
   templateUrl: './natural-person-form.component.html',
   styleUrl: './natural-person-form.component.scss',
@@ -79,22 +81,79 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
         validators: [minLengthArray(1)], // pelo menos 1 selecionado
       }
     ),
+    username: [''],
+    password: [''],
+    roleName: [''],
   });
+
+  // Adicione o getter para verificar se deve mostrar campos de usuário
+  get shouldShowUserFields(): boolean {
+    const selectedTypes = this.form.get('relationshipTypes')?.value || [];
+    return selectedTypes.some((type: RelationshipTypes) =>
+      [RelationshipTypes.PROPRIETARIO, RelationshipTypes.FUNCIONARIO, RelationshipTypes.CONTADOR]
+        .includes(type)
+    );
+  }
 
   constructor(
     private personService: PersonService,
     private toastrService: ToastrService,
     private actionsService: ActionsService,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit() {
+    // CORRIGIDO: Observar apenas mudanças no relationshipTypes para evitar loops infinitos
+    this.subscriptions.add(
+      this.form.get('relationshipTypes')!.valueChanges.subscribe(() => {
+        this.updateConditionalValidators();
+      })
+    );
+
+    // CORRIGIDO: Observar outras mudanças sem acionar validações condicionais
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
         const isDirty = this.form.dirty;
         this.actionsService.hasFormChanges.set(isDirty);
+        this.formChanged.emit(isDirty);
       })
     );
+  }
+
+  // CORRIGIDO: Método otimizado para evitar loops infinitos
+  private updateConditionalValidators() {
+    if (!this.form) return;
+
+    const usernameControl = this.form.get('username');
+    const passwordControl = this.form.get('password');
+    const roleNameControl = this.form.get('roleName');
+
+    if (this.shouldShowUserFields) {
+      // Adicionar validações quando mostrar campos de usuário
+      usernameControl?.setValidators([Validators.required, Validators.minLength(3)]);
+      passwordControl?.setValidators([Validators.required, Validators.minLength(6)]);
+      roleNameControl?.setValidators([Validators.required]);
+
+      // Atualizar sem emitir eventos para evitar loops
+      usernameControl?.updateValueAndValidity({ emitEvent: false });
+      passwordControl?.updateValueAndValidity({ emitEvent: false });
+      roleNameControl?.updateValueAndValidity({ emitEvent: false });
+    } else {
+      // Remover validações quando ocultar campos
+      usernameControl?.clearValidators();
+      passwordControl?.clearValidators();
+      roleNameControl?.clearValidators();
+
+      // Limpar valores sem emitir eventos
+      usernameControl?.setValue('', { emitEvent: false });
+      passwordControl?.setValue('', { emitEvent: false });
+      roleNameControl?.setValue('', { emitEvent: false });
+
+      // Atualizar sem emitir eventos para evitar loops
+      usernameControl?.updateValueAndValidity({ emitEvent: false });
+      passwordControl?.updateValueAndValidity({ emitEvent: false });
+      roleNameControl?.updateValueAndValidity({ emitEvent: false });
+    }
   }
 
   ngOnDestroy(): void {
@@ -106,19 +165,13 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       setTimeout(() => {
         this.form.patchValue({
           name: this.dataForm!.name || '',
+          relationshipTypes: this.dataForm!.relationshipTypes || [],
+          nickName: this.dataForm!.nickName || '',
           email: this.dataForm!.email || '',
           phone: this.dataForm!.phone || '',
           cpf: this.dataForm!.cpf || '',
-          relationshipTypes: this.dataForm!.relationshipTypes || [],
-          // address: {
-          //   zipcode: this.dataForm!.address?.zipcode || '',
-          //   street: this.dataForm!.address?.street || '',
-          //   number: this.dataForm!.address?.number || '',
-          //   complement: this.dataForm!.address?.complement || '',
-          //   state: this.dataForm!.address?.state || '',
-          //   city: this.dataForm!.address?.city || '',
-          //   neighborhood: this.dataForm!.address?.neighborhood || '',
-          // },
+          rg: this.dataForm!.rg || '',
+          rgIssuer: this.dataForm!.rgIssuer || '',
         });
       });
     }
@@ -146,6 +199,24 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       console.log('Formulário inválido: ', this.form.value);
+      // Log específico para relationshipTypes se inválido
+      if (this.form.get('relationshipTypes')?.invalid) {
+        console.log(
+          'RelationshipTypes é obrigatório e deve ter pelo menos 1 item'
+        );
+      }
+      // NOVO: Logs específicos para campos de usuário condicionais
+      if (this.shouldShowUserFields) {
+        if (this.form.get('username')?.invalid) {
+          console.log('Username é obrigatório para funcionários/contadores/proprietários');
+        }
+        if (this.form.get('password')?.invalid) {
+          console.log('Password é obrigatório para funcionários/contadores/proprietários');
+        }
+        if (this.form.get('roleName')?.invalid) {
+          console.log('RoleName é obrigatório para funcionários/contadores/proprietários');
+        }
+      }
       return;
     }
 
@@ -155,21 +226,43 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       return;
     }
 
-    const formValue: CreateNaturalPerson = {
+    // CORRIGIDO: Função helper para garantir tipos corretos
+    const toStringOrUndefined = (value: any): string | undefined => {
+      if (value === null || value === undefined || value === '') {
+        return undefined;
+      }
+      return String(value);
+    };
+
+    // CORRIGIDO: Construir dados base
+    const baseData = {
       name: this.form.value.name || '',
       storeId,
       cpf: this.form.value.cpf?.replace(/\D/g, '') || '',
-      active: true,
+      active: true as const,
       email: this.form.value.email || '',
       phone: this.form.value.phone?.replace(/\D/g, '') || '',
       nickName: this.form.value.nickName || '',
-      legalEntity: false,
+      legalEntity: false as const,
       rg: this.form.value.rg?.replace(/\D/g, '') || '',
       rgIssuer: '',
       crc: '',
-      relationshipTypes: this.form.value
-        .relationshipTypes as RelationshipTypes[],
+      relationshipTypes: this.form.value.relationshipTypes as RelationshipTypes[],
     };
+
+    // CORRIGIDO: Construir formValue com tipos garantidos
+    let formValue: CreateNaturalPerson;
+
+    if (this.shouldShowUserFields) {
+      formValue = {
+        ...baseData,
+        username: toStringOrUndefined(this.form.value.username),
+        password: toStringOrUndefined(this.form.value.password),
+        roleName: toStringOrUndefined(this.form.value.roleName),
+      };
+    } else {
+      formValue = baseData;
+    }
 
     if (this.dataForm?.personId) {
       this.personService.update(formValue, this.dataForm.personId).subscribe({
@@ -186,11 +279,11 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       const clean = removeEmptyPropertiesFromObject<CreateNaturalPerson>(
         formValue as Person
       );
-      console.log('\n\n99999999999999999999\nCLEAN: ', clean);
       this.personService.create(clean).subscribe({
         next: () => {
           this.toastrService.success('Cadastro realizado com sucesso');
           this.formSubmitted.emit();
+          this.resetForm();
         },
         error: () =>
           this.toastrService.error(
@@ -198,6 +291,18 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
           ),
       });
     }
+  }
+
+  private resetForm() {
+    this.form.reset();
+    this.submitted = false;
+
+    this.form.get('relationshipTypes')?.setValue([]);
+
+    this.form.patchValue({
+      active: true,
+      legalEntity: false,
+    });
   }
 
   // getAddressByCep() {
