@@ -1,4 +1,3 @@
-import '@angular/material/list';
 import {
   Component,
   computed,
