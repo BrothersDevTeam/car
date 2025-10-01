@@ -1,3 +1,19 @@
+.search-container {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  align-items: flex-start;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 300px;
+}
+
+.search-type-field {
+  width: 180px;
+}
+
 .loader-div,
 .message-error {
   width: 100%;
