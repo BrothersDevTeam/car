@@ -1,8 +1,32 @@
 <main>
-  <!-- <mat-form-field>
-    <mat-label>Pesquisar por nome</mat-label>
-    <input matInput (input)="onSearch($event)" />
-  </mat-form-field> -->
+  <div class="search-container">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar pessoa</mat-label>
+      <input 
+        matInput 
+        [(ngModel)]="searchValue"
+        (input)="onSearch($event)"
+        [placeholder]="'Digite o ' + (searchType === 'name' ? 'nome' : searchType === 'cpf' ? 'CPF' : searchType === 'cnpj' ? 'CNPJ' : searchType === 'email' ? 'email' : 'ID da loja')"
+      />
+      @if (searchValue) {
+        <button matSuffix mat-icon-button aria-label="Limpar" (click)="clearSearch()">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="search-type-field">
+      <mat-label>Buscar por</mat-label>
+      <mat-select [(value)]="searchType" (selectionChange)="onSearchTypeChange($event.value)">
+        <mat-option value="name">Nome</mat-option>
+        <mat-option value="cpf">CPF</mat-option>
+        <mat-option value="cnpj">CNPJ</mat-option>
+        <mat-option value="email">Email</mat-option>
+        <mat-option *ngIf="isCarAdmin" value="storeId">Loja (ID)</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
 
   <app-content-header
     title="Pessoas"

@@ -8,6 +8,7 @@ import {
   Person,
 } from '@interfaces/person';
 import { PaginationResponse } from '@interfaces/pagination';
+import { AuthService } from './auth/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -21,7 +22,10 @@ export class PersonService {
 
   private readonly apiUrl: string = '/api/persons';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) { }
 
   // Observable público para componentes se inscreverem
   get cacheUpdated(): Observable<PaginationResponse<Person> | null> {
@@ -53,25 +57,63 @@ export class PersonService {
 
   getPaginatedData(
     pageIndex: number,
-    pageSize: number
+    pageSize: number,
+    searchParams?: {
+      name?: string;
+      cpf?: string;
+      cnpj?: string;
+      email?: string;
+      storeId?: string;
+    }
   ): Observable<PaginationResponse<Person>> {
-    if (this.cache) {
+    // Se houver parâmetros de busca, não usa cache
+    const hasSearchParams = searchParams && Object.values(searchParams).some(value => value && value.trim());
+    
+    if (this.cache && !hasSearchParams) {
       return of(this.cache);
     }
+
+    // Monta a URL com os parâmetros
+    let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
+    
+    if (hasSearchParams && searchParams) {
+      if (searchParams.name?.trim()) {
+        url += `&name=${encodeURIComponent(searchParams.name.trim())}`;
+      }
+      if (searchParams.cpf?.trim()) {
+        url += `&cpf=${encodeURIComponent(searchParams.cpf.trim())}`;
+      }
+      if (searchParams.cnpj?.trim()) {
+        url += `&cnpj=${encodeURIComponent(searchParams.cnpj.trim())}`;
+      }
+      if (searchParams.email?.trim()) {
+        url += `&email=${encodeURIComponent(searchParams.email.trim())}`;
+      }
+      if (searchParams.storeId?.trim()) {
+        url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
+      }
+    }
+
     return this.http
-      .get<PaginationResponse<Person>>(
-        `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`
-      )
+      .get<PaginationResponse<Person>>(url)
       .pipe(
         first(),
         tap((response) => {
           console.log('✅ Resposta original do backend:', response);
-          this.cache = response;
-          this.cache.content = this.filterByActive(this.cache.content);
-          this.cache.page.totalElements = this.cache.content.length;
+          
+          // Só atualiza o cache se não houver busca
+          if (!hasSearchParams) {
+            this.cache = response;
+            this.cache.content = this.filterByActive(this.cache.content);
+            this.cache.page.totalElements = this.cache.content.length;
 
-          // Notifica sobre o carregamento inicial com uma nova referência
-          this.cacheUpdated$.next({ ...this.cache });
+            // Notifica sobre o carregamento inicial com uma nova referência
+            this.cacheUpdated$.next({ ...this.cache });
+          } else {
+            // Se houver busca, filtra mas não armazena em cache
+            response.content = this.filterByActive(response.content);
+            response.page.totalElements = response.content.length;
+          }
         })
       );
   }
@@ -108,6 +150,12 @@ export class PersonService {
   }
 
   getUserRole(): string | null {
-    return sessionStorage.getItem('car-user-role');
+    const roles = this.authService.getRoles();
+    return roles && roles.length > 0 ? roles[0] : null;
+  }
+
+  hasRole(roleName: string): boolean {
+    const roles = this.authService.getRoles();
+    return roles.includes(roleName);
   }
 }
