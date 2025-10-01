@@ -77,6 +77,7 @@
       label="Nome de usuário *"
       inputName="username"
       type="text"
+      [uppercase]="false"
       placeholder="Digite o nome de usuário"
       [error]="
         form.get('username')?.invalid &&
@@ -91,6 +92,7 @@
         label="Senha *"
         inputName="password"
         type="password"
+        [uppercase]="false"
         placeholder="Mínimo 6 caracteres"
         [error]="
           form.get('password')?.invalid &&
@@ -103,6 +105,7 @@
         label="Confirmar Senha *"
         inputName="confirmPassword"
         type="password"
+        [uppercase]="false"
         placeholder="Digite a senha novamente"
         [error]="
           (form.get('confirmPassword')?.invalid ||
