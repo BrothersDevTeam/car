@@ -23,7 +23,9 @@
         <mat-option value="cpf">CPF</mat-option>
         <mat-option value="cnpj">CNPJ</mat-option>
         <mat-option value="email">Email</mat-option>
-        <mat-option *ngIf="isCarAdmin" value="storeId">Loja (ID)</mat-option>
+        @if (isCarAdmin) {
+          <mat-option value="storeId">Loja (ID)</mat-option>
+        }
       </mat-select>
     </mat-form-field>
   </div>

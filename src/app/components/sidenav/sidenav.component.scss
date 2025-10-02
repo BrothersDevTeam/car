@@ -1,3 +1,5 @@
+@use 'abstracts/variables' as *;
+
 :host * {
   transition: all 500ms ease-in-out;
 }
@@ -65,7 +67,8 @@ section {
   mat-nav-list {
     .selected-menu-item {
       border-left-color: var(--primary-color);
-      background-color: rgba(0, 0, 0, 0.05);
+      border-left-width: 6px;
+      background-color: $selected-item-bg;
       transition: all 200ms ease-in-out;
     }
   }
@@ -96,7 +99,7 @@ section {
 
   .exit_btn {
     &:hover {
-      background-color: rgba(0, 0, 0, 0.05);
+      background-color: $hover-bg;
     }
   }
 }

@@ -1,5 +1,5 @@
-@use 'abstracts/functions' as *;
 @use 'abstracts/variables' as *;
+@use 'abstracts/functions' as *;
 
 .disabled {
   pointer-events: none;
@@ -74,7 +74,6 @@
     left: 0;
     width: 100%;
     background-color: var(--gray-secondary-bg);
-    background-color: rgb(250, 255, 255);
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     list-style: none;
@@ -107,7 +106,13 @@
       cursor: pointer;
 
       &:hover {
-        background-color: lighten-color($primary-color, 40%);
+        background-color: lighten-color($primary-color, 35%);
+      }
+
+      &.selected {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 500;
       }
 
       .select_list_buttons {

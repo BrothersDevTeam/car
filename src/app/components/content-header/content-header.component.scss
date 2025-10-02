@@ -4,12 +4,17 @@ mat-toolbar {
   height: 3rem;
   display: flex;
   justify-content: space-between;
-  color: whitesmoke;
+  color: #ffffff;
 
   background-color: var(--content-header-color);
 
   button {
-    background-color: whitesmoke;
+    background-color: #ffffff;
+    color: var(--text-color);
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
   }
 }
 

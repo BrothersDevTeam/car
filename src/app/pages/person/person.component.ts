@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import { catchError, debounceTime, of, Subject, Subscription } from 'rxjs';
 
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
@@ -43,7 +42,6 @@ import { ActionsService } from '@services/actions.service';
 @Component({
   selector: 'app-person',
   imports: [
-    CommonModule,
     FormsModule,
     ContentHeaderComponent,
     DrawerComponent,
