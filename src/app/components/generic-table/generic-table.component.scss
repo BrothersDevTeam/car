@@ -1,3 +1,5 @@
+@use 'abstracts/variables' as *;
+
 .table-container {
   overflow-x: auto;
 }
@@ -34,8 +36,13 @@ button[mat-icon-button] {
 
 /* Evitar que o clique no checkbox ou ícone acione o rowClick */
 .row-clickable {
+  &:hover {
+    background-color: $hover-bg !important;
+  }
+
   td.mat-column-select,
-  td.mat-column-edit {
+  td.mat-column-edit,
+  td.mat-column-delete {
     pointer-events: auto;
   }
 }

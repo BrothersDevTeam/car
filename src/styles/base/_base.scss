@@ -26,4 +26,15 @@
   --content-header-color: #{$content-header-color};
   --gray-bg: #{$gray-bg};
   --gray-secondary-bg: #{$gray-secondary-bg};
+
+  // Novas variáveis CSS para tabelas e estados
+  --table-header-bg: #{$table-header-bg};
+  --table-odd-row: #{$table-odd-row};
+  --table-even-row: #{$table-even-row};
+  --selected-item-bg: #{$selected-item-bg};
+  --hover-bg: #{$hover-bg};
+
+  // Variações adicionais
+  --gray-bg-light: #{lighten-color($gray-bg, 10%)};
+  --gray-bg-dark: #{darken-color($gray-bg, 10%)};
 }

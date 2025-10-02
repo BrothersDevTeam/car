@@ -1,3 +1,5 @@
+@use 'abstracts/variables' as *;
+
 .container {
   background: rgba($color: #241907, $alpha: 0.2);
   height: auto;
@@ -59,6 +61,7 @@
 
         &:hover {
           box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+          background-color: $hover-bg;
         }
       }
 
