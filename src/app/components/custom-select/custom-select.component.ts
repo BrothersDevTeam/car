@@ -554,4 +554,21 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     this.searchTerm = '';
     this.filteredOptions = [...this.options];
   }
+
+  /**
+   * Controla o fechamento do dropdown ao sair com o mouse
+   * Fecha apenas se o mouse sair completamente do dropdown (incluindo campo de busca)
+   */
+  onMouseLeaveDropdown(event: MouseEvent): void {
+    const target = event.relatedTarget as HTMLElement;
+    const dropdown = (event.currentTarget as HTMLElement);
+    
+    // Verifica se o mouse está indo para dentro do próprio dropdown
+    if (target && dropdown.contains(target)) {
+      return; // Não fecha se o mouse está dentro do dropdown
+    }
+    
+    // Fecha apenas se o mouse realmente saiu do dropdown
+    this.closeDropdown();
+  }
 }

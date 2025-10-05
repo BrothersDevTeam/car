@@ -11,7 +11,7 @@
     </button>
 
     <!-- Dropdown Menu com busca -->
-    <div class="dropdown-menu" [class.open]="isOpen" [class.closed]="!isOpen">
+    <div class="dropdown-menu" [class.open]="isOpen" [class.closed]="!isOpen" (mouseleave)="onMouseLeaveDropdown($event)">
       
       <!-- Campo de busca -->
       <div class="search-container" (click)="$event.stopPropagation()">
@@ -41,7 +41,7 @@
       </div>
 
       <!-- Lista com scroll -->
-      <ul class="options-list" (mouseleave)="closeDropdown()">
+      <ul class="options-list">
         @if (filteredOptions.length > 0) {
           @for (option of filteredOptions; track option.id) {
             <li (click)="selectOption(option)">
