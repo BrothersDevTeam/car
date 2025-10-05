@@ -36,8 +36,9 @@ export class ModelService {
       return of(this.cache.get(cacheKey)!);
     }
 
+    // Busca todos os modelos da marca (size=1000)
     return this.http
-      .get<PaginationResponse<Model>>(`${this.apiUrl}?brandId=${brandId}&status=ACTIVE`)
+      .get<PaginationResponse<Model>>(`${this.apiUrl}?brandId=${brandId}&status=ACTIVE&size=1000`)
       .pipe(
         first(),
         tap((response) => {

@@ -35,7 +35,8 @@ export class BrandService {
     if (this.cache) {
       return of(this.cache);
     }
-    return this.http.get<PaginationResponse<Brand>>(`${this.apiUrl}`).pipe(
+    // Busca todos os registros (size=1000)
+    return this.http.get<PaginationResponse<Brand>>(`${this.apiUrl}?size=1000&status=ACTIVE`).pipe(
       first(),
       tap((response) => {
         console.log('Brands fetched:', response);

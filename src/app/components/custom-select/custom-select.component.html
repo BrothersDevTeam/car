@@ -9,28 +9,60 @@
       <span class="dropdown-arrow"></span>
       <span class="vertical-bar"></span>
     </button>
-    <ul
-      class="dropdown-menu"
-      [class.open]="isOpen"
-      [class.closed]="!isOpen"
-      (mouseleave)="closeDropdown()"
-      >
-      @for (option of options; track option) {
-        <li (click)="selectOption(option)">
-          <span>{{ option.name }}</span>
-          <div class="select_list_buttons">
-            <button class="edit-button" (click)="editItem(option, $event)">
-              ✏️
-            </button>
-            <button class="delete-button" (click)="deleteItem(option, $event)">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
-        </li>
+
+    <!-- Dropdown Menu com busca -->
+    <div class="dropdown-menu" [class.open]="isOpen" [class.closed]="!isOpen">
+      
+      <!-- Campo de busca -->
+      <div class="search-container" (click)="$event.stopPropagation()">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+          placeholder="Buscar..."
+          (keydown.enter)="$event.preventDefault()"
+        />
+        @if (searchTerm) {
+          <mat-icon class="clear-icon" (click)="clearSearch()">close</mat-icon>
+        }
+      </div>
+
+      <!-- Lista com scroll -->
+      <ul class="options-list" (mouseleave)="closeDropdown()">
+        @if (filteredOptions.length > 0) {
+          @for (option of filteredOptions; track option.id) {
+            <li (click)="selectOption(option)">
+              <span>{{ option.name }}</span>
+              <div class="select_list_buttons">
+                <button class="edit-button" (click)="editItem(option, $event)">
+                  ✏️
+                </button>
+                <button class="delete-button" (click)="deleteItem(option, $event)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </li>
+          }
+        } @else {
+          <li class="no-results">
+            <span>Nenhum resultado encontrado</span>
+          </li>
+        }
+      </ul>
+
+      <!-- Loading indicator -->
+      @if (isLoading) {
+        <div class="loading-container">
+          <mat-icon class="loading-spinner">refresh</mat-icon>
+          <span>Carregando...</span>
+        </div>
       }
-    </ul>
-    <mat-icon [matTooltip]="matTooltip" (click)="createNewItem()"
-      >add_box</mat-icon
-      >
     </div>
+
+    <mat-icon [matTooltip]="matTooltip" (click)="createNewItem()">
+      add_box
+    </mat-icon>
   </div>
+</div>

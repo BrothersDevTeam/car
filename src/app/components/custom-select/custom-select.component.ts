@@ -5,7 +5,7 @@ import {
   OnChanges,
   OnInit,
 } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,7 +23,7 @@ import { ColorService } from '@services/color.service';
 
 @Component({
   selector: 'app-custom-select',
-  imports: [ReactiveFormsModule, MatIcon, MatTooltipModule],
+  imports: [ReactiveFormsModule, FormsModule, MatIcon, MatTooltipModule],
   templateUrl: './custom-select.component.html',
   styleUrls: ['./custom-select.component.scss'],
 })
@@ -39,6 +39,9 @@ export class CustomSelectComponent implements OnInit, OnChanges {
 
   selectedOption: { id: string; name: string } | null = null;
   isOpen: boolean = false;
+  searchTerm: string = '';
+  filteredOptions: { id: string; name: string }[] = [];
+  isLoading: boolean = false;
 
   private serviceMap: { [key: string]: any } = {};
 
@@ -62,9 +65,11 @@ export class CustomSelectComponent implements OnInit, OnChanges {
 
   ngOnChanges(): void {
     if (this.options.length > 0) {
+      this.filteredOptions = [...this.options];
       this.setSelectedOption();
     } else {
       setTimeout(() => {
+        this.filteredOptions = [...this.options];
         this.setSelectedOption();
       }, 0);
     }
@@ -86,6 +91,10 @@ export class CustomSelectComponent implements OnInit, OnChanges {
 
   toggleDropdown() {
     this.isOpen = !this.isOpen;
+    if (this.isOpen) {
+      this.searchTerm = '';
+      this.filteredOptions = [...this.options];
+    }
   }
 
   selectOption(option: { id: string; name: string }) {
@@ -101,6 +110,8 @@ export class CustomSelectComponent implements OnInit, OnChanges {
 
   closeDropdown() {
     this.isOpen = false;
+    this.searchTerm = '';
+    this.filteredOptions = [...this.options];
   }
 
   @HostListener('document:click', ['$event'])
@@ -518,5 +529,29 @@ export class CustomSelectComponent implements OnInit, OnChanges {
         reject('Nenhuma marca selecionada');
       }
     });
+  }
+
+  /**
+   * Filtra opções baseado no termo de busca
+   */
+  onSearch(): void {
+    const term = this.searchTerm.toLowerCase().trim();
+    
+    if (!term) {
+      this.filteredOptions = [...this.options];
+      return;
+    }
+
+    this.filteredOptions = this.options.filter(option =>
+      option.name.toLowerCase().includes(term)
+    );
+  }
+
+  /**
+   * Limpa o campo de busca
+   */
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.filteredOptions = [...this.options];
   }
 }
