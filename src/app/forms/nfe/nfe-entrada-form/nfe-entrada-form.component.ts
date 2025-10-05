@@ -33,7 +33,7 @@ import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.comp
 
 import type { createNfe, Nfe, TipoNfe } from '@interfaces/nfe';
 import type { Person } from '@interfaces/person';
-import type { GetVehicle } from '@interfaces/vehicle';
+import { Vehicle } from '@interfaces/vehicle';
 
 import { NfeService } from '@services/nfe.service';
 import { PersonService } from '@services/person.service';
@@ -56,12 +56,21 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   private subscriptions = new Subscription();
   submitted = false;
 
-  vehicles: GetVehicle[] = [];
+  vehicles: Vehicle[] = [];
   persons: Person[] = [];
   tiposNfeEntrada: { value: TipoNfe; label: string }[] = [
-    { value: 'COMPRA DE VEICULO USADO' as TipoNfe, label: 'Compra de Veículo Usado' },
-    { value: 'ENTRADA EM CONSIGNAÇÃO' as TipoNfe, label: 'Entrada em Consignação' },
-    { value: 'ENTRADA COMPRA DEFINITIVA' as TipoNfe, label: 'Entrada Compra Definitiva' },
+    {
+      value: 'COMPRA DE VEICULO USADO' as TipoNfe,
+      label: 'Compra de Veículo Usado',
+    },
+    {
+      value: 'ENTRADA EM CONSIGNAÇÃO' as TipoNfe,
+      label: 'Entrada em Consignação',
+    },
+    {
+      value: 'ENTRADA COMPRA DEFINITIVA' as TipoNfe,
+      label: 'Entrada Compra Definitiva',
+    },
     { value: 'DEVOLUÇÃO DE VENDA' as TipoNfe, label: 'Devolução de Venda' },
   ];
 
@@ -156,18 +165,16 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
     if (this.dataForm?.id) {
       // Edição
-      this.nfeService
-        .update({ ...this.dataForm, ...formValues })
-        .subscribe({
-          next: () => {
-            this.toastrService.success('NFe atualizada com sucesso');
-            this.formSubmitted.emit();
-          },
-          error: () =>
-            this.toastrService.error(
-              'Erro inesperado! Tente novamente mais tarde'
-            ),
-        });
+      this.nfeService.update({ ...this.dataForm, ...formValues }).subscribe({
+        next: () => {
+          this.toastrService.success('NFe atualizada com sucesso');
+          this.formSubmitted.emit();
+        },
+        error: () =>
+          this.toastrService.error(
+            'Erro inesperado! Tente novamente mais tarde'
+          ),
+      });
     } else {
       // Criação
       this.nfeService.create(formValues).subscribe({
@@ -223,9 +230,9 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   // Helpers para exibição nos selects
-  getVehicleDisplay(vehicle: GetVehicle): string {
-    const brand = vehicle.modelDto?.brandDto?.description || '';
-    const model = vehicle.modelDto?.description || '';
+  getVehicleDisplay(vehicle: Vehicle): string {
+    const brand = vehicle.brand || '';
+    const model = vehicle.model || '';
     return `${vehicle.plate} - ${brand} ${model}`.trim();
   }
 
