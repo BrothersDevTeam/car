@@ -1,81 +1,115 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { first, Observable, of, tap } from 'rxjs';
+import { BehaviorSubject, first, Observable, of, tap } from 'rxjs';
 
-import { CreateModel, Model } from '@interfaces/vehicle';
+import { Model } from '@interfaces/vehicle';
+import { PaginationResponse } from '@interfaces/pagination';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ModelService {
-  private cache: Model[] | null = null;
-  private cacheBrandId: string = '';
+  private cache: Map<string, PaginationResponse<Model>> = new Map();
 
-  // private cache: Model[] | null = [
-  //   { id: '1', description: 'ES', brand: { id: '1', description: 'HONDA' } },
-  //   { id: '2', description: 'CIVIC', brand: { id: '1', description: 'HONDA' } },
-  //   { id: '3', description: 'CR-V', brand: { id: '1', description: 'HONDA' } },
-  //   { id: '4', description: 'FIESTA', brand: { id: '2', description: 'FIAT' } },
-  //   { id: '5', description: 'PALIO', brand: { id: '2', description: 'FIAT' } },
-  //   { id: '6', description: 'FUSION', brand: { id: '3', description: 'FORD' } },
-  //   {
-  //     id: '7',
-  //     description: 'COROLLA',
-  //     brand: { id: '5', description: 'TOYOTA' },
-  //   },
-  //   {
-  //     id: '8',
-  //     description: 'HB20',
-  //     brand: { id: '6', description: 'HYUNDAI' },
-  //   },
-  // ];
+  // Subject para notificar mudanças no cache
+  private cacheUpdated$ = new BehaviorSubject<PaginationResponse<Model> | null>(null);
 
-  private readonly apiUrl: string = '/api/vehicles/models';
+  private readonly apiUrl: string = '/api/vehicle-models';
 
   constructor(private http: HttpClient) {}
 
-  getModels(id: string): Observable<Model[]> {
-    if (this.cache && this.cacheBrandId === id) {
-      return of(this.cache);
+  // Observable público para componentes se inscreverem
+  get cacheUpdated(): Observable<PaginationResponse<Model> | null> {
+    return this.cacheUpdated$.asObservable();
+  }
+
+  /**
+   * Busca modelos de uma marca específica
+   * @param brandId ID da marca
+   * @returns Observable com a lista de modelos
+   */
+  getModelsByBrand(brandId: string): Observable<PaginationResponse<Model>> {
+    const cacheKey = `brand_${brandId}`;
+    
+    if (this.cache.has(cacheKey)) {
+      return of(this.cache.get(cacheKey)!);
     }
-    this.cacheBrandId = id;
-    return this.http.get<Model[]>(`${this.apiUrl}?brandId=${id}`).pipe(
-      first(),
+
+    return this.http
+      .get<PaginationResponse<Model>>(`${this.apiUrl}?brandId=${brandId}&status=ACTIVE`)
+      .pipe(
+        first(),
+        tap((response) => {
+          console.log('Modelos carregados para marca:', brandId, response);
+          this.cache.set(cacheKey, response);
+        })
+      );
+  }
+
+  /**
+   * Busca todos os modelos
+   * @returns Observable com a lista paginada de modelos
+   */
+  getModels(): Observable<PaginationResponse<Model>> {
+    return this.http
+      .get<PaginationResponse<Model>>(`${this.apiUrl}?status=ACTIVE`)
+      .pipe(
+        first(),
+        tap((response) => {
+          console.log('Todos os modelos carregados:', response);
+        })
+      );
+  }
+
+  /**
+   * Cria um novo modelo
+   * @param data Dados do modelo a ser criado
+   * @returns Observable com o modelo criado
+   */
+  create(data: any) {
+    return this.http.post<Model>(`${this.apiUrl}`, data).pipe(
       tap((response) => {
-        this.cache = response;
-      })
-    );
-  }
-
-  create(data: CreateModel) {
-    return this.http.post<string>(`${this.apiUrl}`, data).pipe(
-      tap((response: string) => {
-        console.log('Formulário enviado com sucesso!', response);
+        console.log('Modelo criado com sucesso!', response);
         this.clearCache();
       })
     );
   }
 
-  update(data: Model) {
-    return this.http.put<string>(`${this.apiUrl}`, data).pipe(
-      tap((response: string) => {
-        console.log('Formulário enviado com sucesso!', response);
+  /**
+   * Atualiza um modelo existente
+   * @param modelId ID do modelo
+   * @param data Dados atualizados
+   * @returns Observable com o modelo atualizado
+   */
+  update(modelId: string, data: any) {
+    return this.http.put<Model>(`${this.apiUrl}/${modelId}`, data).pipe(
+      tap((response) => {
+        console.log('Modelo atualizado com sucesso!', response);
         this.clearCache();
       })
     );
   }
 
-  delete(id: string) {
-    return this.http.delete<string>(`${this.apiUrl}/${id}`).pipe(
-      tap((response: string) => {
+  /**
+   * Deleta um modelo
+   * @param modelId ID do modelo a ser deletado
+   * @returns Observable com a resposta
+   */
+  delete(modelId: string) {
+    return this.http.delete<any>(`${this.apiUrl}/${modelId}`).pipe(
+      tap((response) => {
         console.log('Modelo deletado com sucesso!', response);
         this.clearCache();
       })
     );
   }
 
+  /**
+   * Limpa o cache de modelos
+   */
   private clearCache() {
-    this.cache = null;
+    this.cache.clear();
+    this.cacheUpdated$.next(null);
   }
 }

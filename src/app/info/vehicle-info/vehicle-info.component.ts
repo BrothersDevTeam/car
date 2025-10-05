@@ -1,16 +1,13 @@
 import { ToastrService } from 'ngx-toastr';
-import { EventType } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
-
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
 import { VehicleForm } from '@interfaces/vehicle';
-
 import { VehicleService } from '@services/vehicle.service';
 
 @Component({
@@ -23,13 +20,17 @@ export class VehicleInfoComponent {
   readonly dialog = inject(MatDialog);
 
   @Input() vehicle!: VehicleForm;
-  @Output() editEvent = new EventEmitter<EventType>();
+  @Output() editEvent = new EventEmitter<VehicleForm>();
   @Output() formSubmitted = new EventEmitter<void>();
 
   constructor(
     private toastrService: ToastrService,
     private vehicleService: VehicleService
   ) {}
+
+  onEdit() {
+    this.editEvent.emit(this.vehicle);
+  }
 
   onDelete() {
     this.openDialog();

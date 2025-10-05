@@ -18,7 +18,7 @@ import { VehicleInfoComponent } from '@info/vehicle-info/vehicle-info.component'
 
 import type { ColumnConfig } from '@interfaces/genericTable';
 import type { PaginationResponse } from '@interfaces/pagination';
-import type { GetVehicle, Vehicle, VehicleForm } from '@interfaces/vehicle';
+import type { Vehicle, VehicleForm } from '@interfaces/vehicle';
 
 import { VehicleService } from '@services/vehicle.service';
 import { ActionsService } from '@services/actions.service';
@@ -43,14 +43,14 @@ export class VehicleComponent {
   private subscription!: Subscription;
   private cacheSubscription!: Subscription;
 
-  vehiclePaginatedList: PaginationResponse<GetVehicle> | null = null;
+  vehiclePaginatedList: PaginationResponse<Vehicle> | null = null;
   selectedVehicle: VehicleForm | null = null;
   searchValue: string = '';
   paginationRequestConfig = {
     pageSize: 1000,
     pageIndex: 0,
   };
-  columns: ColumnConfig<GetVehicle>[] = [
+  columns: ColumnConfig<Vehicle>[] = [
     {
       key: 'plate',
       header: 'Placa',
@@ -173,16 +173,24 @@ export class VehicleComponent {
       });
   }
 
-  handleSelectedVehicle(vehicle: GetVehicle) {
-    (this.selectedVehicle = {
+  /**
+   * Converte Vehicle para VehicleForm
+   * Vehicle.owner é Person | undefined
+   * VehicleForm.owner é string | undefined (ID da pessoa)
+   */
+  private vehicleToForm(vehicle: Vehicle): VehicleForm {
+    return {
       ...vehicle,
-      brandDto: vehicle.modelDto?.brandDto || null,
-      modelDto: vehicle.modelDto || null,
-    }),
-      this.openInfo.set(true);
+      owner: vehicle.owner?.personId || undefined,
+    };
   }
 
-  onRowClick(vehicle: GetVehicle) {
+  handleSelectedVehicle(vehicle: Vehicle) {
+    this.selectedVehicle = this.vehicleToForm(vehicle);
+    this.openInfo.set(true);
+  }
+
+  onRowClick(vehicle: Vehicle) {
     this.handleSelectedVehicle(vehicle);
   }
 
@@ -198,8 +206,20 @@ export class VehicleComponent {
     this.searchValue = (event.target as HTMLInputElement).value;
   }
 
-  handleEdit(vehicle?: GetVehicle) {
-    if (vehicle) this.selectedVehicle = vehicle;
+  /**
+   * Método handleEdit aceita tanto Vehicle quanto VehicleForm
+   * Quando vem da tabela (editClick), recebe Vehicle
+   * Quando vem do vehicle-info (editEvent), recebe VehicleForm
+   */
+  handleEdit(vehicle: Vehicle | VehicleForm) {
+    // Se for Vehicle (tem propriedade owner do tipo Person), converte
+    if ('owner' in vehicle && vehicle.owner && typeof vehicle.owner === 'object') {
+      this.selectedVehicle = this.vehicleToForm(vehicle as Vehicle);
+    } else {
+      // Já é VehicleForm
+      this.selectedVehicle = vehicle as VehicleForm;
+    }
+    
     this.openInfo.set(false);
     this.openForm.set(true);
   }
@@ -215,7 +235,7 @@ export class VehicleComponent {
     this.actionsService.hasFormChanges.set(false);
   }
 
-  handleDelete(vehicle: GetVehicle) {
+  handleDelete(vehicle: Vehicle) {
     const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
       ConfirmDialogComponent,
       {
@@ -247,7 +267,7 @@ export class VehicleComponent {
       error: (err) => {
         console.error('Erro ao deletar veículo:', err);
         this.toastr.error('Erro ao deletar veículo');
-      }
+      },
     });
   }
 

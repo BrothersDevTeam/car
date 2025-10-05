@@ -1,36 +1,41 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { first, Observable, of, tap } from 'rxjs';
+import { BehaviorSubject, first, Observable, of, tap } from 'rxjs';
 
 import { Brand, CreateBrand } from '@interfaces/vehicle';
+import { PaginationResponse } from '@interfaces/pagination';
+import { BrandStatus } from '../enums/brandStatus';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BrandService {
-  private cache: Brand[] | null = null;
+  private cache: PaginationResponse<Brand> | null = null;
 
-  // private cache: Brand[] | null = [
-  //   { id: '1', description: 'HONDA' },
-  //   { id: '2', description: 'FIAT' },
-  //   { id: '3', description: 'FORD' },
-  //   { id: '4', description: 'CHEVROLET' },
-  //   { id: '5', description: 'TOYOTA' },
-  //   { id: '6', description: 'HYUNDAI' },
-  //   { id: '7', description: 'NISSAN' },
-  //   { id: '8', description: 'RENAULT' },
-  // ];
+  // Subject para notificar mudanças no cache
+  private cacheUpdated$ = new BehaviorSubject<PaginationResponse<Brand> | null>(
+    null
+  );
 
-  private readonly apiUrl: string = '/api/vehicles/brands';
+  private readonly apiUrl: string = '/api/vehicle-brands';
 
   constructor(private http: HttpClient) {}
 
-  getBrands(): Observable<Brand[]> {
+  // Observable público para componentes se inscreverem
+  get cacheUpdated(): Observable<PaginationResponse<Brand> | null> {
+    return this.cacheUpdated$.asObservable();
+  }
+
+  filterByActive(array: Brand[]) {
+    return array.filter((brand) => brand.status === BrandStatus.ACTIVE);
+  }
+
+  getBrands(): Observable<PaginationResponse<Brand>> {
     if (this.cache) {
       return of(this.cache);
     }
-    return this.http.get<Brand[]>(`${this.apiUrl}`).pipe(
+    return this.http.get<PaginationResponse<Brand>>(`${this.apiUrl}`).pipe(
       first(),
       tap((response) => {
         console.log('Brands fetched:', response);
@@ -49,7 +54,7 @@ export class BrandService {
   }
 
   update(data: Brand) {
-    return this.http.put<string>(`${this.apiUrl}`, data).pipe(
+    return this.http.put<string>(`${this.apiUrl}/${data.brandId}`, data).pipe(
       tap((response: string) => {
         console.log('Formulário enviado com sucesso!', response);
         this.clearCache();

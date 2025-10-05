@@ -4,7 +4,9 @@
       <h2>Veículo placa: {{ dataForm!.plate }}</h2>
     </div>
   }
+  
   <app-wrapper-card>
+    <!-- Origem do veículo -->
     <div class="radio-button-wrapper-container">
       <label class="radio-button-label">Origem:</label>
       <mat-radio-group
@@ -12,92 +14,84 @@
         formControlName="origin"
         aria-label="Select an option"
         class="radio-button-group"
-        >
-        <mat-radio-button
-          class="radio-button"
-          value="NACIONAL"
-          >
+      >
+        <mat-radio-button class="radio-button" value="NACIONAL">
           Nacional
         </mat-radio-button>
-        <mat-radio-button
-          class="radio-button"
-          value="IMPORTADO"
-          >
+        <mat-radio-button class="radio-button" value="IMPORTADO">
           Importado
         </mat-radio-button>
       </mat-radio-group>
     </div>
 
+    <!-- Placa (obrigatório) -->
     <app-primary-input
-      formControlName="licensePlate"
+      formControlName="plate"
       label="Placa*"
-      inputName="licensePlate"
+      inputName="plate"
       type="text"
       mask="AAA-AAAA"
       [error]="
-        form.get('licensePlate')?.invalid &&
-        (form.get('licensePlate')?.touched || submitted)
+        form.get('plate')?.invalid &&
+        (form.get('plate')?.touched || submitted)
       "
-      />
+    />
+
+    <!-- Seleção de Marca -->
     <div class="custom-selects-container">
       <app-custom-select
-        listType="brandDto"
+        listType="brand"
         [label]="'Marca'"
         [options]="brands"
         [control]="brandControl"
-        matTooltip="Adicionar nova marca"
         placeholder="Selecione uma marca"
+        matTooltip="Selecione a marca do veículo"
       ></app-custom-select>
-
-      <app-custom-select
-        listType="modelDto"
-        label="Modelo"
-        [selectedBrand]="brandControl.value"
-        [options]="models"
-        [control]="modelControl"
-        [placeholder]="
-          selectModelDisabled() ? 'Selecione uma marca' : 'Selecione um modelo'
-        "
-        matTooltip="Adicionar novo modelo"
-        [disabled]="selectModelDisabled()"
-      ></app-custom-select>
-      @if (form.errors?.['modelRequired'] && submitted) {
-        <div
-          class="error-message"
-          >
-          Campo obrigadório.
-        </div>
-      }
     </div>
 
+    <!-- Seleção de Modelo (habilitado apenas após selecionar marca) -->
     <div class="custom-selects-container">
       <app-custom-select
-        listType="colorDto"
-        [label]="'Cor'"
-        [options]="colors"
-        [control]="colorControl"
-        placeholder="Selecione uma cor"
-        matTooltip="Adicionar nova cor"
-      ></app-custom-select>
-
-      <app-custom-select
-        listType="fuelTypeDto"
-        [label]="'Combustível'"
-        [options]="fuelTypes"
-        [control]="fuelTypeControl"
-        placeholder="Selecione um combustível"
-        matTooltip="Adicionar novo tipo de combustível"
+        listType="model"
+        [label]="'Modelo'"
+        [options]="models"
+        [control]="modelControl"
+        [placeholder]="selectModelDisabled() ? 'Selecione uma marca primeiro' : 'Selecione um modelo'"
+        [disabled]="selectModelDisabled()"
+        [selectedBrand]="brandControl.value"
+        matTooltip="Selecione o modelo do veículo"
       ></app-custom-select>
     </div>
 
+    <!-- Ano -->
     <app-primary-input
-      formControlName="yearModel"
+      formControlName="year"
+      label="Ano"
+      inputName="year"
+      type="text"
+      placeholder="0000"
+      mask="0000"
+    />
+
+    <!-- Ano/Modelo -->
+    <app-primary-input
+      formControlName="modelYear"
       label="Ano/Modelo"
-      inputName="yearModel"
+      inputName="modelYear"
       type="text"
       placeholder="0000/0000"
       mask="0000/0000"
-      />
+    />
+
+    <!-- Cor -->
+    <app-primary-input
+      formControlName="color"
+      label="Cor"
+      inputName="color"
+      type="text"
+    />
+
+    <!-- Chassi -->
     <app-primary-input
       formControlName="chassis"
       label="Chassi"
@@ -105,19 +99,25 @@
       type="text"
       placeholder="Insira os 17 caracteres do chassi"
       mask="AAAAAAAAAAAAAAAAA"
-      />
+    />
+
+    <!-- Número de portas -->
     <app-primary-input
-      formControlName="numberOfDoors"
+      formControlName="doors"
       label="Número de portas"
-      inputName="numberOfDoors"
+      inputName="doors"
       type="text"
-      />
+    />
+
+    <!-- Potência -->
     <app-primary-input
       formControlName="horsepower"
       label="Potência"
       inputName="horsepower"
       type="text"
-      />
+    />
+
+    <!-- Número do motor -->
     <app-primary-input
       formControlName="engineNumber"
       label="Número do motor"
@@ -125,45 +125,66 @@
       type="text"
       placeholder="Digite o Número do Motor"
       mask="AAAAAAAAAAAAAAAAAAAA"
-      />
+    />
+
+    <!-- KM inicial -->
     <app-primary-input
-      formControlName="initialMileage"
+      formControlName="km"
       label="KM inicial"
-      inputName="initialMileage"
+      inputName="km"
       type="text"
-      />
+    />
+
+    <!-- Renavam -->
     <app-primary-input
       formControlName="renavam"
       label="Renavam"
       inputName="renavam"
       type="text"
-      />
+    />
+
+    <!-- Espécie -->
     <app-primary-input
       formControlName="species"
       label="Espécie"
       inputName="species"
       type="text"
-      />
+    />
+
+    <!-- Categoria -->
     <app-primary-input
       formControlName="category"
       label="Categoria"
       inputName="category"
       type="text"
-      />
+    />
+
+    <!-- Tipo de Veículo -->
+    <app-primary-input
+      formControlName="vehicleType"
+      label="Tipo de Veículo"
+      inputName="vehicleType"
+      type="text"
+    />
+
+    <!-- Idade -->
     <app-primary-input
       formControlName="age"
       label="Idade"
       inputName="age"
       type="text"
-      />
+    />
+
+    <!-- Características -->
     <app-primary-input
       formControlName="features"
       label="Características"
       inputName="features"
       type="text"
-      />
+    />
   </app-wrapper-card>
 
+  <!-- Botão de submit -->
   <button
     mat-raised-button
     type="button"
@@ -171,7 +192,7 @@
     color="primary"
     (click)="onSubmit()"
     #submitButton
-    >
+  >
     {{ dataForm?.plate ? 'Editar' : 'Enviar' }}
   </button>
 </form>

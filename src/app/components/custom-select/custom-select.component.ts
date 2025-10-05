@@ -1,4 +1,3 @@
-
 import {
   Component,
   HostListener,
@@ -28,15 +27,15 @@ import { ColorService } from '@services/color.service';
 })
 export class CustomSelectComponent implements OnInit, OnChanges {
   @Input() label: string = 'Selecione uma opção';
-  @Input() options: { id: string; description: string }[] = [];
+  @Input() options: { id: string; name: string }[] = [];
   @Input() control!: FormControl | FormGroup;
-  @Input() listType!: 'brandDto' | 'modelDto' | 'colorDto' | 'fuelTypeDto';
+  @Input() listType!: 'brand' | 'model' | 'colorDto' | 'fuelTypeDto';
   @Input() selectedBrand: string = '';
   @Input() matTooltip: string = '';
   @Input() placeholder: string = '';
   @Input() disabled: boolean = false;
 
-  selectedOption: { id: string; description: string } | null = null;
+  selectedOption: { id: string; name: string } | null = null;
   isOpen: boolean = false;
 
   private serviceMap: { [key: string]: any } = {};
@@ -52,8 +51,8 @@ export class CustomSelectComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.serviceMap = {
-      brandDto: this.brandService,
-      modelDto: this.modelService,
+      brand: this.brandService,
+      model: this.modelService,
       colorDto: this.colorService,
       fuelTypeDto: this.fuelTypeService,
     };
@@ -87,19 +86,18 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     this.isOpen = !this.isOpen;
   }
 
-  selectOption(option: { id: string; description: string }) {
-    // this.selectedOption = { id: option.id, description: option.description };
+  selectOption(option: { id: string; name: string }) {
     this.selectedOption = option;
 
     this.control.setValue({
       id: option.id,
-      description: option.description,
+      name: option.name,
     });
 
     this.isOpen = false;
   }
 
-  editOption(option: { id: string; description: string }, event: Event) {
+  editOption(option: { id: string; name: string }, event: Event) {
     event.stopPropagation(); // Evita que o clique feche o dropdown
 
     const service = this.serviceMap[this.listType];
@@ -133,7 +131,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   }
 
   typeListTexts = {
-    brandDto: {
+    brand: {
       create: 'Adicionar nova marca',
       update: 'Editar marca',
       delete: 'Deletar marca',
@@ -144,7 +142,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       successDeleteMessage: 'Marca deletada com sucesso!',
       errorMessage: 'Erro ao adicionar marca. Tente novamente.',
     },
-    modelDto: {
+    model: {
       create: 'Adicionar novo modelo',
       update: 'Editar modelo',
       delete: 'Deletar modelo',
@@ -197,7 +195,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       dialogRef.afterClosed().subscribe((newItem) => {
         if (newItem) {
           let payload: any = { description: newItem };
-          if (this.listType === 'modelDto') {
+          if (this.listType === 'model') {
             if (this.selectedBrand) {
               payload = {
                 ...payload,
@@ -207,7 +205,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
           }
 
           service.create(payload).subscribe({
-            next: (response: { id: string; description: string }) => {
+            next: (response: { id: string; name: string }) => {
               this.options.push(response);
               this.toastrService.success(
                 this.typeListTexts[this.listType].successCreateMessage
@@ -226,25 +224,24 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     }
   }
 
-  editItem(option: { id: string; description: string }, event: Event) {
+  editItem(option: { id: string; name: string }, event: Event) {
     const service = this.serviceMap[this.listType];
 
     if (service) {
       const dialogRef = this.dialog.open(CriateElementConfirmDialogComponent, {
         width: '400px',
         data: {
-          title:
-            this.typeListTexts[this.listType].update + ` ${option.description}`,
+          title: this.typeListTexts[this.listType].update + ` ${option.name}`,
           message: this.typeListTexts[this.listType].message,
           confirmText: 'Salvar',
           cancelText: 'Cancelar',
         },
       });
 
-      dialogRef.afterClosed().subscribe((description) => {
-        if (description) {
-          let payload: any = { description, id: option.id };
-          if (this.listType === 'modelDto') {
+      dialogRef.afterClosed().subscribe((name) => {
+        if (name) {
+          let payload: any = { name, id: option.id };
+          if (this.listType === 'model') {
             if (this.selectedBrand) {
               payload = {
                 ...payload,
@@ -254,7 +251,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
           }
 
           service.update(payload).subscribe({
-            next: (response: { id: string; description: string }) => {
+            next: (response: { id: string; name: string }) => {
               this.options.push(response);
               this.toastrService.success(
                 this.typeListTexts[this.listType].successUpdateMessage
@@ -273,15 +270,14 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     }
   }
 
-  deleteItem(option: { id: string; description: string }, event: Event) {
+  deleteItem(option: { id: string; name: string }, event: Event) {
     const service = this.serviceMap[this.listType];
 
     if (service) {
       const dialogRef = this.dialog.open(ConfirmDialogComponent, {
         width: '400px',
         data: {
-          title:
-            this.typeListTexts[this.listType].delete + ` ${option.description}`,
+          title: this.typeListTexts[this.listType].delete + ` ${option.name}`,
           message: this.typeListTexts[this.listType].deleteMessage,
           confirmText: 'Deletar',
           cancelText: 'Cancelar',

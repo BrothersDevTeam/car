@@ -13,7 +13,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import {
-  AbstractControl,
   FormBuilder,
   FormControl,
   FormGroup,
@@ -26,6 +25,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatRadioModule } from '@angular/material/radio';
 
 import { ToastrService } from 'ngx-toastr';
 import { distinctUntilChanged, Subscription } from 'rxjs';
@@ -37,12 +37,10 @@ import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.comp
 
 import { VehicleForm } from '@interfaces/vehicle';
 
-import { FuelTypeService } from '@services/fuel-type.service';
 import { VehicleService } from '@services/vehicle.service';
 import { BrandService } from '@services/brand.service';
 import { ModelService } from '@services/model.service';
-import { ColorService } from '@services/color.service';
-import { MatRadioModule } from '@angular/material/radio';
+import { AuthService } from '@services/auth/auth.service';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -64,13 +62,12 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   private subscriptions = new Subscription();
   submitted = false;
 
-  brands: { id: string; description: string }[] = [];
-  models: { id: string; description: string }[] = [];
-  fuelTypes: { id: string; description: string }[] = [];
-  colors: { id: string; description: string }[] = [];
+  brands: { id: string; name: string }[] = [];
+  models: { id: string; name: string }[] = [];
 
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
+  private authService = inject(AuthService);
 
   @ViewChild('submitButton', { static: false, read: ElementRef })
   submitButton!: ElementRef<HTMLButtonElement>;
@@ -81,39 +78,39 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   selectModelDisabled = signal(true);
 
+  /**
+   * Formulário com FormGroups aninhados para brand e model
+   * para trabalhar com o custom-select component
+   */
   protected form: FormGroup = this.formBuilderService.group({
-    licensePlate: ['', Validators.required],
-    yearModel: [''],
+    owner: [''],
+    plate: ['', Validators.required],
+    brand: this.formBuilderService.group({
+      id: [''],
+      name: [''],
+    }),
+    model: this.formBuilderService.group({
+      id: [''],
+      name: [''],
+    }),
+    year: [''],
+    modelYear: [''],
+    color: [''],
     chassis: [''],
-    numberOfDoors: [''],
+    renavam: [''],
+    doors: [''],
     horsepower: [''],
     engineNumber: [''],
-    initialMileage: [''],
-    renavam: [''],
+    km: [''],
+    vehicleType: [''],
+    age: [''],
     species: [''],
     category: [''],
-    age: [''],
     features: [''],
-    modelDto: this.formBuilderService.group({
-      id: [''],
-      description: [''],
-    }),
-    brandDto: this.formBuilderService.group({
-      id: [''],
-      description: [''],
-    }),
-    colorDto: this.formBuilderService.group({
-      id: [''],
-      description: [''],
-    }),
-    fuelTypeDto: this.formBuilderService.group({
-      id: [''],
-      description: [''],
-    }),
+    fuelTypes: [''],
     origin: ['NACIONAL'],
   });
 
-  // Adicione este getter público
   public get vehicleForm(): FormGroup {
     return this.form;
   }
@@ -122,117 +119,104 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     private vehicleService: VehicleService,
     private brandService: BrandService,
     private modelService: ModelService,
-    private fuelTypeService: FuelTypeService,
-    private colorService: ColorService,
     private toastrService: ToastrService
   ) {}
 
-  private validateBrandAndModel(
-    control: AbstractControl
-  ): { [key: string]: any } | null {
-    const group = control as FormGroup;
-    const brand = group.get('brandDto')?.value;
-    const model = group.get('modelDto')?.value;
-
-    if (brand && brand.id && (!model || !model.id)) {
-      return { modelRequired: true };
-    }
-    return null;
-  }
-
   ngOnInit() {
-    this.form.setValidators(this.validateBrandAndModel.bind(this));
-
+    // Monitora mudanças no formulário
     this.form.valueChanges.subscribe(() => {
       const isDirty = this.form.dirty;
       this.formChanged.emit(isDirty);
     });
 
-    this.brandService.getBrands().subscribe((brands) => {
-      this.brands = brands;
+    // Carrega marcas do backend
+    this.brandService.getBrands().subscribe({
+      next: (response) => {
+        console.log('Marcas carregadas:', response);
+        if (response.page.totalElements > 0) {
+          this.brands = response.content.map((brand) => ({
+            id: brand.brandId,
+            name: brand.name,
+          }));
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao carregar marcas:', error);
+        this.toastrService.error('Erro ao carregar marcas');
+      },
     });
 
-    this.fuelTypeService.getFuelTypes().subscribe((fuelTypes) => {
-      this.fuelTypes = fuelTypes;
-    });
-
-    this.colorService.getColors().subscribe((colors) => {
-      this.colors = colors;
-    });
-
-    // Primeira subscrição: Carregamento de modelos
+    // Quando a marca mudar, carrega os modelos
     this.subscriptions.add(
       this.brandControl.valueChanges
-        .pipe(distinctUntilChanged())
+        .pipe(distinctUntilChanged((prev, curr) => prev?.id === curr?.id))
         .subscribe((brand) => {
-          if (brand) {
-            this.modelService.getModels(brand.id).subscribe((models) => {
-              this.models = models;
-              this.modelControl.enable({ emitEvent: false });
+          if (brand && brand.id) {
+            // Limpa o modelo selecionado
+            this.modelControl.reset();
+
+            // Carrega modelos da marca
+            this.modelService.getModelsByBrand(brand.id).subscribe({
+              next: (response) => {
+                console.log('Modelos carregados:', response);
+                this.models = response.content.map((model) => ({
+                  id: model.modelId,
+                  name: model.name,
+                }));
+                this.selectModelDisabled.set(false);
+              },
+              error: (error) => {
+                console.error('Erro ao carregar modelos:', error);
+                this.toastrService.error('Erro ao carregar modelos');
+                this.models = [];
+                this.selectModelDisabled.set(true);
+              },
             });
-            this.selectModelDisabled.set(false);
           } else {
             this.models = [];
-            this.modelControl.disable({ emitEvent: false });
+            this.modelControl.reset();
             this.selectModelDisabled.set(true);
           }
         })
     );
-
-    // Segunda subscrição: Validação dinâmica
-    this.subscriptions.add(
-      this.brandControl.valueChanges.subscribe((brand) => {
-        if (brand && brand.id) {
-          this.modelControl.setValidators(Validators.required);
-        } else {
-          this.modelControl.clearValidators();
-        }
-        this.modelControl.updateValueAndValidity();
-      })
-    );
   }
 
   ngOnDestroy() {
-    this.subscriptions.unsubscribe(); // Cancela todas as subscrições
+    this.subscriptions.unsubscribe();
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    this.brandControl.valueChanges
-      .pipe(distinctUntilChanged())
-      .subscribe((brand) => {
-        if (brand) {
-          // Faz a requisição para buscar os modelos da marca selecionada
-          this.modelService.getModels(brand.id).subscribe((models) => {
-            this.models = models; // Atualiza a lista de modelos
-            this.modelControl.enable({ emitEvent: false }); // Habilita o controle de "Modelo"
-          });
-          this.selectModelDisabled.set(false);
-        } else {
-          this.models = []; // Limpa a lista de modelos
-          this.modelControl.disable({ emitEvent: false }); // Desabilita o controle de "Modelo"
-          this.selectModelDisabled.set(true);
-        }
-      });
-
     if (changes['dataForm'] && this.dataForm) {
       setTimeout(() => {
+        // Para edição, busca a marca pelo nome
+        const selectedBrand = this.brands.find(
+          (b) => b.name === this.dataForm!.brand
+        );
+
+        console.log('Editando veículo:', this.dataForm);
+        console.log('Marca encontrada:', selectedBrand);
+
         this.form.patchValue({
-          licensePlate: this.dataForm!.plate || '',
-          yearModel: this.dataForm!.modelYear || null,
-          chassis: this.dataForm!.chassis || null,
-          numberOfDoors: this.dataForm!.doors || null,
-          horsepower: this.dataForm!.horsepower || null,
-          engineNumber: this.dataForm!.engineNumber || null,
-          initialMileage: this.dataForm!.km || null,
-          renavam: this.dataForm!.renavam || null,
-          category: this.dataForm!.vehicleType || null,
-          age: this.dataForm!.age || null,
-          features: this.dataForm!.features || null,
-          model: this.dataForm!.model || null,
-          brand: this.dataForm!.brand || null,
-          color: this.dataForm!.color || null,
-          fuelTypes: this.dataForm!.fuelTypes || null,
-          origin: this.dataForm!.origin || this.form.get('origin')?.value,
+          plate: this.dataForm!.plate || '',
+          owner: this.dataForm!.owner || '',
+          brand: selectedBrand
+            ? { id: selectedBrand.id, name: selectedBrand.name }
+            : { id: '', name: '' },
+          model: { id: '', name: this.dataForm!.model || '' },
+          year: this.dataForm!.year || '',
+          modelYear: this.dataForm!.modelYear || '',
+          color: this.dataForm!.color || '',
+          chassis: this.dataForm!.chassis || '',
+          renavam: this.dataForm!.renavam || '',
+          doors: this.dataForm!.doors || '',
+          horsepower: this.dataForm!.horsepower || '',
+          engineNumber: this.dataForm!.engineNumber || '',
+          km: this.dataForm!.km || '',
+          vehicleType: this.dataForm!.vehicleType || '',
+          age: this.dataForm!.age || '',
+          category: this.dataForm!.category || '',
+          features: this.dataForm!.features || '',
+          origin: this.dataForm!.origin || 'NACIONAL',
         });
       });
     }
@@ -240,7 +224,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   onEnter(event: Event): void {
     if (event instanceof KeyboardEvent) {
-      event.preventDefault(); // Impede o comportamento padrão do Enter
+      event.preventDefault();
 
       if (
         this.form.valid &&
@@ -250,91 +234,83 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       }
 
       if (this.form.valid && this.submitButton) {
-        this.submitButton.nativeElement.focus(); // Define o foco no botão de submit
+        this.submitButton.nativeElement.focus();
       }
     }
   }
 
   onSubmit() {
     this.submitted = true;
+
     if (this.form.invalid) {
-      // Marca todos os controles como "touched" para que os erros sejam exibidos
       this.form.markAllAsTouched();
+      this.toastrService.warning('Preencha todos os campos obrigatórios');
       return;
     }
 
-    let formValues: { [key: string]: any } = this.form.value;
-    let payload: any = {};
+    const formValues = this.form.value;
+    console.log('Valores do formulário:', formValues);
 
-    const removeEmptyValues = () => {
-      Object.keys(formValues).forEach((key) => {
-        if (typeof formValues[key] === 'object') {
-          if (
-            formValues[key]?.description === null ||
-            formValues[key]?.description === undefined ||
-            formValues[key]?.description === ''
-          ) {
-            delete formValues[key];
-          }
-        }
-
-        if (
-          formValues[key] === null ||
-          formValues[key] === undefined ||
-          formValues[key] === ''
-        ) {
-          delete formValues[key];
-        }
-      });
+    // Monta o payload para o backend (brand e model são Strings)
+    const payload: any = {
+      storeId: this.authService.getStoreId(),
+      plate: formValues.plate,
+      brand: formValues.brand?.name || '', // Nome da marca (String)
+      model: formValues.model?.name || '', // Nome do modelo (String)
+      year: formValues.year || '',
+      modelYear: formValues.modelYear || '',
+      color: formValues.color || '',
+      chassis: formValues.chassis || '',
+      renavam: formValues.renavam || '',
+      doors: formValues.doors || '',
+      horsepower: formValues.horsepower || '',
+      engineNumber: formValues.engineNumber || '',
+      km: formValues.km || '',
+      vehicleType: formValues.vehicleType || '',
+      age: formValues.age || '',
+      category: formValues.category || '',
+      features: formValues.features || '',
+      origin: formValues.origin || 'NACIONAL',
+      fuelTypes: formValues.fuelTypes || [],
     };
-    removeEmptyValues();
 
-    // const addformValuesOnPayload = () => {
-    //   const { brandDto, modelDto, ...restOfFormValues } = formValues;
-    //   payload = restOfFormValues;
+    // Remove campos vazios
+    Object.keys(payload).forEach((key) => {
+      if (
+        payload[key] === '' ||
+        payload[key] === null ||
+        payload[key] === undefined
+      ) {
+        delete payload[key];
+      }
+    });
 
-    //   if (
-    //     formValues['modelDto'] &&
-    //     formValues['modelDto'].description !== '' &&
-    //     formValues['modelDto'].description !== null &&
-    //     formValues['brandDto'] &&
-    //     formValues['brandDto'].description !== '' &&
-    //     formValues['brandDto'].description !== null
-    //   ) {
-    //     payload = {
-    //       ...payload,
-    //       modelDto: {
-    //         ...modelDto,
-    //         brandDto,
-    //       },
-    //     } as VehicleForm;
-    //   }
-    // };
-    // addformValuesOnPayload();
+    console.log('Payload enviado ao backend:', payload);
 
+    // Cria ou atualiza o veículo
     if (this.dataForm?.vehicleId) {
       this.vehicleService
-        .update({ ...payload, id: this.dataForm.vehicleId })
+        .update({ ...payload, vehicleId: this.dataForm.vehicleId })
         .subscribe({
           next: () => {
-            this.toastrService.success('Atualização feita com sucesso');
+            this.toastrService.success('Veículo atualizado com sucesso');
             this.formSubmitted.emit();
           },
-          error: () =>
-            this.toastrService.error(
-              'Erro inesperado! Tente novamente mais tarde'
-            ),
+          error: (error) => {
+            console.error('Erro ao atualizar:', error);
+            this.toastrService.error('Erro ao atualizar veículo');
+          },
         });
     } else {
       this.vehicleService.create(payload).subscribe({
         next: () => {
-          this.toastrService.success('Cadastro realizado com sucesso');
+          this.toastrService.success('Veículo cadastrado com sucesso');
           this.formSubmitted.emit();
         },
-        error: () =>
-          this.toastrService.error(
-            'Erro inesperado! Tente novamente mais tarde'
-          ),
+        error: (error) => {
+          console.error('Erro ao cadastrar:', error);
+          this.toastrService.error('Erro ao cadastrar veículo');
+        },
       });
     }
   }
@@ -368,48 +344,25 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     if (this.dataForm?.vehicleId) {
       this.vehicleService.delete(this.dataForm.vehicleId).subscribe({
         next: (response) => {
-          console.log('Deleção bem-sucedida', response);
-          this.toastrService.success('Deleção bem-sucedida');
+          console.log('Veículo deletado:', response);
+          this.toastrService.success('Veículo deletado com sucesso');
           this.formSubmitted.emit();
         },
         error: (error) => {
-          console.error('Erro ao deletar veículo', error);
+          console.error('Erro ao deletar:', error);
           this.toastrService.error('Erro ao deletar veículo');
         },
       });
     } else {
-      console.error('ID não encontrado para deleção');
-      this.toastrService.error('ID não encontrado para deleção');
+      this.toastrService.error('ID do veículo não encontrado');
     }
   }
 
   get brandControl(): FormGroup {
-    const control = this.form.get('brandDto') as FormGroup;
-    return control;
+    return this.form.get('brand') as FormGroup;
   }
 
   get modelControl(): FormGroup {
-    const control = this.form.get('modelDto') as FormGroup;
-    return control;
-  }
-
-  get modelIdControl(): FormControl {
-    const control = this.modelControl.get('id');
-    if (!control) {
-      throw new Error(
-        "O controle 'model.id' não foi encontrado no formulário."
-      );
-    }
-    return control as FormControl;
-  }
-
-  get fuelTypeControl(): FormControl {
-    const control = this.form.get('fuelTypeDto') as FormControl;
-    return control;
-  }
-
-  get colorControl(): FormControl {
-    const control = this.form.get('colorDto') as FormControl;
-    return control;
+    return this.form.get('model') as FormGroup;
   }
 }

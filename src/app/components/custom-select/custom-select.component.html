@@ -5,7 +5,7 @@
 
   <div class="dropdown-container">
     <button class="dropdown-button" (click)="toggleDropdown()">
-      {{ selectedOption?.description || placeholder }}
+      {{ selectedOption?.name || placeholder }}
       <span class="dropdown-arrow"></span>
       <span class="vertical-bar"></span>
     </button>
@@ -17,7 +17,7 @@
       >
       @for (option of options; track option) {
         <li (click)="selectOption(option)">
-          <span>{{ option.description }}</span>
+          <span>{{ option.name }}</span>
           <div class="select_list_buttons">
             <button class="edit-button" (click)="editItem(option, $event)">
               ✏️

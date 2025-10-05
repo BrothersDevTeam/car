@@ -1,12 +1,16 @@
+import { BrandStatus } from '../enums/brandStatus';
 import { Person } from './person';
 
+/**
+ * Interface para Vehicle retornado do backend
+ */
 export interface Vehicle {
   storeId?: string;
   vehicleId?: string;
   owner?: Person;
   plate: string;
-  brand: string;
-  model: string;
+  brand: string;        // String - nome da marca
+  model: string;        // String - nome do modelo
   year: string;
   modelYear?: string;
   color: string;
@@ -18,35 +22,53 @@ export interface Vehicle {
   km: string;
   vehicleType: string;
   age: string;
+  category?: string;
   features?: string;
   fuelTypes: string[];
   origin?: string;
 }
-export type CreateVehicle = Omit<Vehicle, 'id'>;
 
-export type VehicleForm = Omit<Vehicle, 'modelDto'> & {
-  modelDto?: {
-    id: string;
-    description: string;
-  };
-  brandDto?: {
-    id: string;
-    description: string;
-  };
+export type CreateVehicle = Omit<Vehicle, 'vehicleId'>;
+
+/**
+ * Interface para o formulário de Vehicle
+ * Converte owner de Person para string (ID)
+ */
+export type VehicleForm = Omit<Vehicle, 'owner'> & {
+  owner?: string; // ID da pessoa (opcional)
 };
 
+/**
+ * Interface para Brand (marca de veículo)
+ */
 export interface Brand {
-  id: string;
+  brandId: string;
+  storeId: string | null;
+  name: string;
   description: string;
+  originCountry: string;
+  logoUrl: string;
+  status: BrandStatus;
+  isGlobal: boolean;
 }
-export type CreateBrand = Omit<Brand, 'id'>;
+export type CreateBrand = Omit<Brand, 'brandId'>;
 
+/**
+ * Interface para Model (modelo de veículo)
+ */
 export interface Model {
-  id: string;
+  modelId: string;
+  storeId: string | null;
+  brandId: string;
+  name: string;
   description: string;
-  brandDto: Brand;
+  yearStart?: string;
+  yearEnd?: string;
+  category?: string;
+  status: string;
+  isGlobal: boolean;
 }
-export type CreateModel = Omit<Model, 'id'> & {
+export type CreateModel = Omit<Model, 'modelId'> & {
   brandId: string;
 };
 
@@ -61,13 +83,3 @@ export interface Color {
   description: string;
 }
 export type CreateColor = Omit<Color, 'id'>;
-
-export type GetVehicle = Omit<Vehicle, 'modelDto' | 'brandDto'> & {
-  modelDto: {
-    id: string;
-    description: string;
-    brandDto: { id: string; description: string };
-  };
-  fuelTypeDto: { id: string; description: string };
-  colorDto: { id: string; description: string };
-};

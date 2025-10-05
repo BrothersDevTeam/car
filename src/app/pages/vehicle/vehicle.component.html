@@ -39,7 +39,7 @@
   <app-drawer (closeDrawer)="handleCloseDrawer()">
     @if (selectedVehicle) {
     <app-vehicle-info
-      (editEvent)="handleEdit()"
+      (editEvent)="handleEdit($event)"
       [vehicle]="selectedVehicle"
       (formSubmitted)="onFormSubmitted()"
     />
