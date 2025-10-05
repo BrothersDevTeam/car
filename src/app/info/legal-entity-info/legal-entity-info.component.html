@@ -1,5 +1,6 @@
 <mat-card class="card-container" appearance="outlined">
   <mat-card-content class="card-content">
+    <!-- Dados da Empresa -->
     <app-wrapper-card class="person-info" title="Dados da empresa">
       <div class="card-row">
         <h3 class="label">Razão Social: </h3>
@@ -22,36 +23,19 @@
         <h3 class="value">{{person.cnpj}}</h3>
       </div>
     </app-wrapper-card>
-    <!-- <app-wrapper-card class="person-address" title="Endereço">
-      <div class="card-row">
-        <h3 class="label">Código Postal: </h3>
-        <h3 class="value">{{person.person.address?.zipcode}}</h3>
+
+    <!-- Seção de Endereços -->
+    @if (person.personId) {
+      <div class="address-section">
+        <app-address-list
+          [personId]="person.personId"
+          [canEdit]="true"
+          [canDelete]="true"
+          [canAdd]="true">
+        </app-address-list>
       </div>
-      <div class="card-row">
-        <h3 class="label">Rua: </h3>
-        <h3 class="value">{{person.person.address?.street}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Número: </h3>
-        <h3 class="value">{{person.person.address?.number}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Complemento: </h3>
-        <h3 class="value">{{person.person.address?.complement}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Estado: </h3>
-        <h3 class="value">{{person.person.address?.state}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Cidade: </h3>
-        <h3 class="value">{{person.person.address?.city}}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Bairro: </h3>
-        <h3 class="value">{{person.person.address?.neighborhood}}</h3>
-      </div>
-    </app-wrapper-card> -->
+    }
+
   </mat-card-content>
   <mat-card-footer class="card-footer">
     <button type="button" class="btn" color="primary" mat-raised-button (click)="editEvent.emit()">Editar</button>

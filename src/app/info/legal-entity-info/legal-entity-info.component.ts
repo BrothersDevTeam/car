@@ -1,4 +1,5 @@
 import { ToastrService } from 'ngx-toastr';
+import { CommonModule } from '@angular/common';
 
 import { EventType } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -8,6 +9,7 @@ import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
+import { AddressListComponent } from '@components/address/address-list/address-list.component';
 
 import type { Person } from '@interfaces/person';
 
@@ -15,7 +17,13 @@ import { PersonService } from '@services/person.service';
 
 @Component({
   selector: 'app-legal-entity-info',
-  imports: [MatButtonModule, MatCardModule, WrapperCardComponent],
+  imports: [
+    CommonModule,
+    MatButtonModule, 
+    MatCardModule, 
+    WrapperCardComponent,
+    AddressListComponent
+  ],
   templateUrl: './legal-entity-info.component.html',
   styleUrl: './legal-entity-info.component.scss',
 })
@@ -66,7 +74,6 @@ export class LegalEntityInfoComponent {
         },
         error: (error) => {
           console.error('Erro ao excluir pessoa:', error);
-          // Verifica se há mensagem de erro específica do backend
           const errorMessage = error?.error?.message || error?.message || 'Erro ao excluir pessoa';
           this.toastrService.error(errorMessage);
         },

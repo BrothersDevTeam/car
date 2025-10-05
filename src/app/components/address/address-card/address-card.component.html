@@ -1,0 +1,69 @@
+<div class="address-card" [class.inactive]="!address.active">
+  <!-- Header -->
+  <div class="card-header">
+    <div class="type-badge">
+      <mat-icon class="type-icon">{{ typeIcon }}</mat-icon>
+      <span class="type-label">{{ typeLabel }}</span>
+    </div>
+
+    <div class="badges">
+      <span class="badge main" *ngIf="address.mainAddress">
+        <mat-icon>star</mat-icon>
+        Principal
+      </span>
+      <span class="badge inactive" *ngIf="!address.active">
+        Inativo
+      </span>
+    </div>
+  </div>
+
+  <!-- Address Info -->
+  <div class="card-body">
+    <div class="address-line">
+      <mat-icon class="info-icon">location_on</mat-icon>
+      <span>{{ fullAddress }}</span>
+    </div>
+
+    <div class="address-line">
+      <mat-icon class="info-icon">apartment</mat-icon>
+      <span>{{ address.neighborhood }}</span>
+    </div>
+
+    <div class="address-line">
+      <mat-icon class="info-icon">place</mat-icon>
+      <span>{{ cityState }}</span>
+    </div>
+
+    <div class="address-line">
+      <mat-icon class="info-icon">mail</mat-icon>
+      <span>CEP: {{ formattedCep }}</span>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="card-actions">
+    <button mat-icon-button
+      *ngIf="canEdit"
+      (click)="onEdit()"
+      matTooltip="Editar endereço"
+      class="action-btn edit">
+      <mat-icon>edit</mat-icon>
+    </button>
+
+    <button mat-icon-button
+      *ngIf="canDelete"
+      (click)="onDelete()"
+      matTooltip="Excluir endereço"
+      class="action-btn delete">
+      <mat-icon>delete</mat-icon>
+    </button>
+
+    <button mat-icon-button
+      *ngIf="canSetMain && !address.mainAddress"
+      (click)="onSetMain()"
+      matTooltip="Definir como principal"
+      class="action-btn star">
+      <mat-icon>star_outline</mat-icon>
+    </button>
+  </div>
+</div>
