@@ -13,7 +13,6 @@ import { MatSelectModule } from '@angular/material/select';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
-  MatDialogClose,
   MatDialogContent,
   MatDialogModule,
   MatDialogRef,
@@ -42,7 +41,6 @@ export interface ModelFormDialogData {
     MatButtonModule,
     MatSelectModule,
     MatDialogActions,
-    MatDialogClose,
     MatDialogTitle,
     MatDialogContent,
   ],
@@ -111,7 +109,6 @@ export class ModelFormDialogComponent implements OnInit {
           ],
         ],
         category: [''],
-        // status: ['ACTIVE', [Validators.required]],
       },
       { validators: this.yearRangeValidator }
     );

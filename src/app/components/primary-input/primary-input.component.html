@@ -7,10 +7,11 @@
         [type]="type"
         [mask]="mask"
         [placeholder]="placeholder"
-        [value]="value"
+        [(ngModel)]="value"
         [attr.maxlength]="maxlength"
         [attr.required]="required ? '' : null"
-        (input)="onInput($event)"
+        [disabled]="disabled"
+        (ngModelChange)="onChange($event)"
         (blur)="onBlur($event)"
       />
       <ng-content></ng-content>

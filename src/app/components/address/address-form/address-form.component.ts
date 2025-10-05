@@ -66,27 +66,53 @@ export class AddressFormComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    if (this.address) {
-      this.form.patchValue({
-        addressType: this.address.addressType,
-        cep: this.addressService.formatCep(this.address.cep),
-        street: this.address.street,
-        number: this.address.number || '',
-        complement: this.address.complement || '',
-        neighborhood: this.address.neighborhood,
-        city: this.address.city,
-        state: this.address.state,
-        country: this.address.country || 'Brasil',
-        mainAddress: this.address.mainAddress || false,
-        active: this.address.active,
-      });
-    }
+    console.log('📋 ngOnInit - address recebido:', this.address);
+    this.loadFormData();
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['address'] && this.address && !changes['address'].firstChange) {
-      this.ngOnInit();
+    console.log('🔄 ngOnChanges chamado:', changes);
+    
+    if (changes['address']) {
+      console.log('📝 Mudança no address detectada:');
+      console.log('  - Valor anterior:', changes['address'].previousValue);
+      console.log('  - Valor atual:', changes['address'].currentValue);
+      console.log('  - Primeira mudança?', changes['address'].firstChange);
+      
+      // Carrega dados sempre que o address mudar (incluindo primeira vez)
+      if (this.address) {
+        this.loadFormData();
+      }
     }
+  }
+
+  private loadFormData() {
+    if (!this.address) {
+      console.log('⚠️ Nenhum endereço para carregar');
+      return;
+    }
+
+    console.log('✅ Carregando dados no formulário:', this.address);
+
+    const formData = {
+      addressType: this.address.addressType,
+      cep: this.addressService.formatCep(this.address.cep),
+      street: this.address.street,
+      number: this.address.number || '',
+      complement: this.address.complement || '',
+      neighborhood: this.address.neighborhood,
+      city: this.address.city,
+      state: this.address.state,
+      country: this.address.country || 'Brasil',
+      mainAddress: this.address.mainAddress || false,
+      active: this.address.active,
+    };
+
+    console.log('📦 Dados para patchValue:', formData);
+    
+    this.form.patchValue(formData);
+    
+    console.log('✅ Formulário após patchValue:', this.form.value);
   }
 
   get isEditMode(): boolean {

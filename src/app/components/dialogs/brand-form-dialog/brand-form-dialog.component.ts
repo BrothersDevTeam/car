@@ -13,7 +13,6 @@ import { MatSelectModule } from '@angular/material/select';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
-  MatDialogClose,
   MatDialogContent,
   MatDialogModule,
   MatDialogRef,
@@ -41,7 +40,6 @@ export interface BrandFormDialogData {
     MatButtonModule,
     MatSelectModule,
     MatDialogActions,
-    MatDialogClose,
     MatDialogTitle,
     MatDialogContent,
   ],

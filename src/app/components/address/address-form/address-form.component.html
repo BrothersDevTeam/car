@@ -23,6 +23,7 @@
         type="text"
         placeholder="00000-000"
         [required]="true"
+        [uppercase]="false"
         mask="00000-000"
         (blur)="onCepBlur()">
         <mat-icon iconSuffix>{{ loadingCep ? 'hourglass_empty' : 'search' }}</mat-icon>
@@ -59,6 +60,7 @@
         label="Número"
         formControlName="number"
         type="text"
+        [uppercase]="false"
         placeholder="Ex: 1578"
         maxlength="10">
       </app-primary-input>

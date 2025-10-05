@@ -1,12 +1,13 @@
 import { NgxMaskDirective } from 'ngx-mask';
-import { Component, forwardRef, Input, Output, EventEmitter } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Component, forwardRef, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 type InputTypes = 'text' | 'email' | 'password' | 'number' | 'tel';
 
 @Component({
   selector: 'app-primary-input',
-  imports: [NgxMaskDirective],
+  imports: [NgxMaskDirective, FormsModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -28,32 +29,37 @@ export class PrimaryInputComponent implements ControlValueAccessor {
   @Input() maxlength?: string;
   @Input() required?: boolean = false;
 
-  // Novo: Output para evento blur
   @Output() blur = new EventEmitter<FocusEvent>();
 
   value: string = '';
   onChange: any = () => {};
   onTouched: any = () => {};
+  disabled: boolean = false;
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   onInput(event: Event) {
     const inputElement = event.target as HTMLInputElement;
 
-    const value = this.uppercase
-      ? inputElement.value.toUpperCase()
-      : inputElement.value;
-
-    if (this.uppercase) inputElement.value = value;
+    let value = inputElement.value;
+    
+    if (this.uppercase) {
+      value = value.toUpperCase();
+      inputElement.value = value;
+    }
+    
+    this.value = value;
     this.onChange(value);
   }
 
-  // Novo: método para tratar blur
   onBlur(event: FocusEvent) {
     this.onTouched();
     this.blur.emit(event);
   }
 
   writeValue(value: any): void {
-    this.value = value;
+    this.value = value || '';
+    this.cdr.detectChanges();
   }
 
   registerOnChange(fn: any): void {
@@ -62,5 +68,10 @@ export class PrimaryInputComponent implements ControlValueAccessor {
 
   registerOnTouched(fn: any): void {
     this.onTouched = fn;
+  }
+
+  setDisabledState?(isDisabled: boolean): void {
+    this.disabled = isDisabled;
+    this.cdr.markForCheck();
   }
 }
