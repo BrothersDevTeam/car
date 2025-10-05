@@ -66,8 +66,6 @@ export class ColorFormDialogComponent implements OnInit {
     if (this.data.mode === 'edit' && this.data.color) {
       this.colorForm.patchValue({
         name: this.data.color.name,
-        hexCode: this.data.color.hexCode || '',
-        description: this.data.color.description || '',
         status: this.data.color.status || 'ACTIVE',
       });
     }
@@ -83,13 +81,6 @@ export class ColorFormDialogComponent implements OnInit {
           Validators.maxLength(100),
         ],
       ],
-      hexCode: [
-        '',
-        [
-          Validators.pattern(/^#[0-9A-Fa-f]{6}$/),
-        ],
-      ],
-      description: ['', [Validators.maxLength(500)]],
       status: ['ACTIVE', [Validators.required]],
     });
   }
@@ -104,8 +95,6 @@ export class ColorFormDialogComponent implements OnInit {
 
       let payload: any = {
         name: formValue.name,
-        hexCode: formValue.hexCode || null,
-        description: formValue.description || null,
         status: formValue.status,
         isGlobal: false, // Sempre false para cores criadas pela loja
         storeId: this.authService.getStoreId(),
@@ -146,21 +135,6 @@ export class ColorFormDialogComponent implements OnInit {
       return `Máximo de ${maxLength} caracteres`;
     }
 
-    if (control?.hasError('pattern')) {
-      return 'Formato inválido. Use: #RRGGBB (ex: #FF0000)';
-    }
-
     return '';
-  }
-
-  /**
-   * Atualiza o preview da cor quando o hexCode muda
-   */
-  get previewColor(): string {
-    const hexCode = this.colorForm.get('hexCode')?.value;
-    if (hexCode && /^#[0-9A-Fa-f]{6}$/.test(hexCode)) {
-      return hexCode;
-    }
-    return '#CCCCCC'; // Cor padrão se inválido
   }
 }

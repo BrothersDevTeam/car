@@ -18,51 +18,6 @@
         }
       </mat-form-field>
 
-      <!-- Código Hexadecimal com Preview -->
-      <div class="hex-color-container">
-        <mat-form-field appearance="outline" class="hex-input">
-          <mat-label>Código Hexadecimal</mat-label>
-          <input 
-            matInput 
-            formControlName="hexCode" 
-            placeholder="#FFFFFF"
-            maxlength="7"
-          />
-          <mat-hint>Formato: #RRGGBB (ex: #FF0000 para vermelho)</mat-hint>
-          @if (colorForm.get('hexCode')?.invalid && colorForm.get('hexCode')?.touched) {
-            <mat-error>{{ getErrorMessage('hexCode') }}</mat-error>
-          }
-        </mat-form-field>
-
-        <!-- Preview da Cor -->
-        <div class="color-preview-wrapper">
-          <div 
-            class="color-preview" 
-            [style.background-color]="previewColor"
-            [title]="'Preview da cor: ' + previewColor"
-          ></div>
-          <span class="preview-label">Preview</span>
-        </div>
-      </div>
-
-      <!-- Descrição -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Descrição</mat-label>
-        <textarea 
-          matInput 
-          formControlName="description" 
-          placeholder="Descrição detalhada da cor (opcional)"
-          rows="3"
-          maxlength="500"
-        ></textarea>
-        <mat-hint align="end">
-          {{ colorForm.get('description')?.value?.length || 0 }}/500
-        </mat-hint>
-        @if (colorForm.get('description')?.invalid && colorForm.get('description')?.touched) {
-          <mat-error>{{ getErrorMessage('description') }}</mat-error>
-        }
-      </mat-form-field>
-
       <!-- Status -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Status *</mat-label>

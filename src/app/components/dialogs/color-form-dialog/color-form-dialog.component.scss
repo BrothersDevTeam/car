@@ -29,51 +29,6 @@
     mat-form-field {
       font-size: 14px;
     }
-
-    textarea {
-      resize: vertical;
-      min-height: 60px;
-    }
-
-    // Container do campo hexadecimal com preview
-    .hex-color-container {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-
-      .hex-input {
-        flex: 1;
-      }
-
-      .color-preview-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        margin-top: 4px;
-
-        .color-preview {
-          width: 60px;
-          height: 60px;
-          border-radius: 8px;
-          border: 2px solid #e0e0e0;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          transition: all 0.3s ease;
-          cursor: pointer;
-
-          &:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-          }
-        }
-
-        .preview-label {
-          font-size: 11px;
-          color: #666;
-          font-weight: 500;
-        }
-      }
-    }
   }
 
   mat-dialog-actions {
@@ -91,19 +46,5 @@
 @media (max-width: 600px) {
   .color-form-dialog {
     min-width: 90vw;
-
-    .color-form {
-      .hex-color-container {
-        flex-direction: column;
-
-        .hex-input {
-          width: 100%;
-        }
-
-        .color-preview-wrapper {
-          align-self: center;
-        }
-      }
-    }
   }
 }

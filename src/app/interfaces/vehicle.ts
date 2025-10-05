@@ -87,8 +87,6 @@ export interface Color {
   storeId?: string;
   isGlobal?: boolean;
   name: string;              // Nome da cor (campo principal)
-  hexCode?: string;          // Código hexadecimal opcional
-  description?: string;      // Descrição opcional
   status?: string;           // Status (ACTIVE/INACTIVE)
   createdAt?: string;
   updatedAt?: string;
@@ -103,8 +101,6 @@ export interface Color {
 export interface CreateColor {
   storeId?: string;
   name: string;              // Nome obrigatório
-  hexCode?: string;          // Código hex opcional
-  description?: string;      // Descrição opcional
   status?: string;           // Status (default: ACTIVE)
   isGlobal?: boolean;        // Se é cor global
 }
@@ -115,8 +111,6 @@ export interface CreateColor {
 export interface UpdateColor {
   colorId: string;
   name?: string;
-  hexCode?: string;
-  description?: string;
   status?: string;
   isGlobal?: boolean;
 }
