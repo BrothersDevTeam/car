@@ -1,0 +1,100 @@
+.model-form-dialog {
+  min-width: 550px;
+  max-width: 650px;
+
+  h2 {
+    margin: 0;
+    padding: 20px 24px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  mat-dialog-content {
+    padding: 24px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .model-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .brand-info {
+      padding: 12px 16px;
+      background-color: #f5f5f5;
+      border-radius: 8px;
+      border-left: 4px solid #1976d2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .label {
+        font-weight: 600;
+        color: #666;
+      }
+
+      .value {
+        font-weight: 500;
+        color: #1976d2;
+        font-size: 16px;
+      }
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    .year-range {
+      display: flex;
+      gap: 16px;
+
+      .half-width {
+        flex: 1;
+      }
+    }
+
+    mat-form-field {
+      font-size: 14px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    input[type="number"] {
+      &::-webkit-inner-spin-button,
+      &::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      -moz-appearance: textfield;
+    }
+  }
+
+  mat-dialog-actions {
+    padding: 16px 24px;
+    border-top: 1px solid #e0e0e0;
+    gap: 12px;
+
+    button {
+      min-width: 100px;
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 600px) {
+  .model-form-dialog {
+    min-width: 90vw;
+
+    .model-form {
+      .year-range {
+        flex-direction: column;
+      }
+    }
+  }
+}

@@ -45,19 +45,24 @@ export class BrandService {
   }
 
   create(data: CreateBrand) {
-    return this.http.post<string>(`${this.apiUrl}`, data).pipe(
-      tap((response: string) => {
-        console.log('Formulário enviado com sucesso!', response);
+    return this.http.post<Brand>(`${this.apiUrl}`, data).pipe(
+      tap((response: Brand) => {
+        console.log('Marca criada com sucesso!', response);
         this.clearCache();
+        // Notifica mudança no cache
+        this.getBrands().subscribe();
       })
     );
   }
 
-  update(data: Brand) {
-    return this.http.put<string>(`${this.apiUrl}/${data.brandId}`, data).pipe(
-      tap((response: string) => {
-        console.log('Formulário enviado com sucesso!', response);
+  update(data: any) {
+    const brandId = data.brandId;
+    return this.http.put<Brand>(`${this.apiUrl}/${brandId}`, data).pipe(
+      tap((response: Brand) => {
+        console.log('Marca atualizada com sucesso!', response);
         this.clearCache();
+        // Notifica mudança no cache
+        this.getBrands().subscribe();
       })
     );
   }

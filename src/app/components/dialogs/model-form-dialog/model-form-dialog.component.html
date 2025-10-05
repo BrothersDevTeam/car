@@ -1,0 +1,125 @@
+<div class="model-form-dialog">
+  <h2 mat-dialog-title>{{ data.title }}</h2>
+  
+  <mat-dialog-content>
+    <form [formGroup]="modelForm" class="model-form">
+      
+      <!-- Marca (somente visualização) -->
+      @if (data.brandName) {
+        <div class="brand-info">
+          <span class="label">Marca:</span>
+          <span class="value">{{ data.brandName }}</span>
+        </div>
+      }
+
+      <!-- Nome do Modelo -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nome do Modelo *</mat-label>
+        <input 
+          matInput 
+          formControlName="name" 
+          placeholder="Ex: Corolla, Civic, Gol"
+          maxlength="100"
+        />
+        @if (modelForm.get('name')?.invalid && modelForm.get('name')?.touched) {
+          <mat-error>{{ getErrorMessage('name') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Descrição -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descrição</mat-label>
+        <textarea 
+          matInput 
+          formControlName="description" 
+          placeholder="Breve descrição do modelo"
+          rows="3"
+          maxlength="500"
+        ></textarea>
+        <mat-hint align="end">
+          {{ modelForm.get('description')?.value?.length || 0 }}/500
+        </mat-hint>
+        @if (modelForm.get('description')?.invalid && modelForm.get('description')?.touched) {
+          <mat-error>{{ getErrorMessage('description') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Anos de Fabricação -->
+      <div class="year-range">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Ano Inicial</mat-label>
+          <input 
+            matInput 
+            formControlName="yearStart" 
+            placeholder="2020"
+            type="number"
+            min="1900"
+            [max]="currentYear + 1"
+          />
+          <mat-hint>Ano de início da fabricação</mat-hint>
+          @if (modelForm.get('yearStart')?.invalid && modelForm.get('yearStart')?.touched) {
+            <mat-error>{{ getErrorMessage('yearStart') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Ano Final</mat-label>
+          <input 
+            matInput 
+            formControlName="yearEnd" 
+            placeholder="2024"
+            type="number"
+            min="1900"
+            [max]="currentYear + 1"
+          />
+          <mat-hint>Deixe vazio se ainda em produção</mat-hint>
+          @if (modelForm.get('yearEnd')?.invalid && modelForm.get('yearEnd')?.touched) {
+            <mat-error>{{ getErrorMessage('yearEnd') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Categoria -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Categoria</mat-label>
+        <mat-select formControlName="category" placeholder="Selecione a categoria">
+          @for (category of categories; track category) {
+            <mat-option [value]="category">{{ category }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>Tipo de veículo (opcional)</mat-hint>
+      </mat-form-field>
+
+      <!-- Status -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Status *</mat-label>
+        <mat-select formControlName="status">
+          @for (status of statuses; track status) {
+            <mat-option [value]="status">
+              {{ status === 'ACTIVE' ? 'Ativo' : 'Inativo' }}
+            </mat-option>
+          }
+        </mat-select>
+        @if (modelForm.get('status')?.invalid && modelForm.get('status')?.touched) {
+          <mat-error>{{ getErrorMessage('status') }}</mat-error>
+        }
+      </mat-form-field>
+
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" type="button">
+      Cancelar
+    </button>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="onSubmit()" 
+      type="button"
+      [disabled]="modelForm.invalid"
+    >
+      {{ data.mode === 'create' ? 'Criar' : 'Salvar' }}
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,99 @@
+<div class="brand-form-dialog">
+  <h2 mat-dialog-title>{{ data.title }}</h2>
+  
+  <mat-dialog-content>
+    <form [formGroup]="brandForm" class="brand-form">
+      
+      <!-- Nome da Marca -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nome da Marca *</mat-label>
+        <input 
+          matInput 
+          formControlName="name" 
+          placeholder="Ex: Toyota, Honda, Ford"
+          maxlength="100"
+        />
+        @if (brandForm.get('name')?.invalid && brandForm.get('name')?.touched) {
+          <mat-error>{{ getErrorMessage('name') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Descrição -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descrição</mat-label>
+        <textarea 
+          matInput 
+          formControlName="description" 
+          placeholder="Breve descrição da marca"
+          rows="3"
+          maxlength="500"
+        ></textarea>
+        <mat-hint align="end">
+          {{ brandForm.get('description')?.value?.length || 0 }}/500
+        </mat-hint>
+        @if (brandForm.get('description')?.invalid && brandForm.get('description')?.touched) {
+          <mat-error>{{ getErrorMessage('description') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- País de Origem -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>País de Origem *</mat-label>
+        <mat-select formControlName="originCountry" placeholder="Selecione o país">
+          @for (country of countries; track country) {
+            <mat-option [value]="country">{{ country }}</mat-option>
+          }
+        </mat-select>
+        @if (brandForm.get('originCountry')?.invalid && brandForm.get('originCountry')?.touched) {
+          <mat-error>{{ getErrorMessage('originCountry') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- URL do Logo -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>URL do Logo</mat-label>
+        <input 
+          matInput 
+          formControlName="logoUrl" 
+          placeholder="https://exemplo.com/logo.png"
+          type="url"
+        />
+        <mat-hint>URL da imagem do logo da marca (opcional)</mat-hint>
+        @if (brandForm.get('logoUrl')?.invalid && brandForm.get('logoUrl')?.touched) {
+          <mat-error>{{ getErrorMessage('logoUrl') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Status -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Status *</mat-label>
+        <mat-select formControlName="status">
+          @for (status of brandStatuses; track status) {
+            <mat-option [value]="status">
+              {{ status === 'ACTIVE' ? 'Ativo' : 'Inativo' }}
+            </mat-option>
+          }
+        </mat-select>
+        @if (brandForm.get('status')?.invalid && brandForm.get('status')?.touched) {
+          <mat-error>{{ getErrorMessage('status') }}</mat-error>
+        }
+      </mat-form-field>
+
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" type="button">
+      Cancelar
+    </button>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="onSubmit()" 
+      type="button"
+      [disabled]="brandForm.invalid"
+    >
+      {{ data.mode === 'create' ? 'Criar' : 'Salvar' }}
+    </button>
+  </mat-dialog-actions>
+</div>

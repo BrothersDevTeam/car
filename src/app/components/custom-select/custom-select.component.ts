@@ -12,6 +12,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
+import { BrandFormDialogComponent } from '@components/dialogs/brand-form-dialog/brand-form-dialog.component';
+import { ModelFormDialogComponent } from '@components/dialogs/model-form-dialog/model-form-dialog.component';
 import { CriateElementConfirmDialogComponent } from '@components/dialogs/criate-element-dialog/criate-element-dialog.component';
 
 import { FuelTypeService } from '@services/fuel-type.service';
@@ -30,7 +32,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   @Input() options: { id: string; name: string }[] = [];
   @Input() control!: FormControl | FormGroup;
   @Input() listType!: 'brand' | 'model' | 'colorDto' | 'fuelTypeDto';
-  @Input() selectedBrand: string = '';
+  @Input() selectedBrand: { id: string; name: string } = { id: '', name: '' }; // Necessário para carregar modelos com base na marca selecionada
   @Input() matTooltip: string = '';
   @Input() placeholder: string = '';
   @Input() disabled: boolean = false;
@@ -97,26 +99,6 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     this.isOpen = false;
   }
 
-  editOption(option: { id: string; name: string }, event: Event) {
-    event.stopPropagation(); // Evita que o clique feche o dropdown
-
-    const service = this.serviceMap[this.listType];
-    if (service) {
-      service.update(option).subscribe({
-        next: () => {
-          this.toastrService.success('Edição realizada com sucesso!');
-        },
-        error: () => {
-          this.toastrService.error('Erro ao editar. Tente novamente.');
-        },
-      });
-    } else {
-      console.error(
-        `Nenhum serviço configurado para o tipo de lista: ${this.listType}`
-      );
-    }
-  }
-
   closeDropdown() {
     this.isOpen = false;
   }
@@ -126,7 +108,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     const target = event.target as HTMLElement;
     const isInsideDropdown = target.closest('.custom-dropdown');
     if (!isInsideDropdown) {
-      this.closeDropdown(); // Fecha o menu se o clique for fora do dropdown
+      this.closeDropdown();
     }
   }
 
@@ -178,32 +160,239 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     },
   };
 
-  createNewItem(id?: string) {
+  /**
+   * Cria um novo item baseado no tipo (brand, model, color, fuelType)
+   */
+  createNewItem() {
     const service = this.serviceMap[this.listType];
 
-    if (service) {
-      const dialogRef = this.dialog.open(CriateElementConfirmDialogComponent, {
-        width: '400px',
-        data: {
-          title: this.typeListTexts[this.listType].create,
-          message: this.typeListTexts[this.listType].message,
-          confirmText: 'Salvar',
-          cancelText: 'Cancelar',
-        },
-      });
+    if (!service) {
+      console.error(`Serviço não encontrado para o tipo: ${this.listType}`);
+      return;
+    }
 
-      dialogRef.afterClosed().subscribe((newItem) => {
-        if (newItem) {
-          let payload: any = { description: newItem };
-          if (this.listType === 'model') {
-            if (this.selectedBrand) {
-              payload = {
-                ...payload,
-                brandDto: this.selectedBrand,
-              };
-            }
-          }
+    // Para Brand e Model, usar dialogs específicos
+    if (this.listType === 'brand') {
+      this.openBrandDialog('create');
+    } else if (this.listType === 'model') {
+      this.openModelDialog('create');
+    } else {
+      // Para Color e FuelType, usar dialog simples
+      this.openSimpleDialog('create', service);
+    }
+  }
 
+  /**
+   * Edita um item existente
+   */
+  editItem(option: { id: string; name: string }, event: Event) {
+    event.stopPropagation();
+
+    const service = this.serviceMap[this.listType];
+
+    if (!service) {
+      console.error(`Serviço não encontrado para o tipo: ${this.listType}`);
+      return;
+    }
+
+    // Para Brand e Model, usar dialogs específicos
+    if (this.listType === 'brand') {
+      this.openBrandDialog('edit', option);
+    } else if (this.listType === 'model') {
+      this.openModelDialog('edit', option);
+    } else {
+      // Para Color e FuelType, usar dialog simples
+      this.openSimpleDialog('edit', service, option);
+    }
+  }
+
+  /**
+   * Deleta um item
+   */
+  deleteItem(option: { id: string; name: string }, event: Event) {
+    event.stopPropagation();
+
+    const service = this.serviceMap[this.listType];
+
+    if (!service) {
+      console.error(`Serviço não encontrado para o tipo: ${this.listType}`);
+      return;
+    }
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.typeListTexts[this.listType].delete + ` ${option.name}`,
+        message: this.typeListTexts[this.listType].deleteMessage,
+        confirmText: 'Deletar',
+        cancelText: 'Cancelar',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirm) => {
+      if (confirm) {
+        service.delete(option.id).subscribe({
+          next: () => {
+            this.options = this.options.filter((item) => item.id !== option.id);
+            this.toastrService.success(
+              this.typeListTexts[this.listType].successDeleteMessage
+            );
+          },
+          error: (error: any) => {
+            console.error('Erro ao deletar:', error);
+            this.toastrService.error(
+              `Erro ao deletar ${this.listType}. Tente novamente.`
+            );
+          },
+        });
+      }
+    });
+  }
+
+  /**
+   * Abre o dialog específico para Brand
+   */
+  private openBrandDialog(mode: 'create' | 'edit', option?: any) {
+    const dialogRef = this.dialog.open(BrandFormDialogComponent, {
+      width: '600px',
+      data: {
+        title:
+          mode === 'create'
+            ? this.typeListTexts.brand.create
+            : `${this.typeListTexts.brand.update}: ${option?.name}`,
+        mode: mode,
+        brand: mode === 'edit' ? option : undefined,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((payload) => {
+      if (payload) {
+        if (mode === 'create') {
+          this.brandService.create(payload).subscribe({
+            next: (response: any) => {
+              // Recarrega as marcas
+              this.reloadBrands();
+              this.toastrService.success(
+                this.typeListTexts.brand.successCreateMessage
+              );
+            },
+            error: (error: any) => {
+              console.error('Erro ao criar marca:', error);
+              this.toastrService.error(this.typeListTexts.brand.errorMessage);
+            },
+          });
+        } else {
+          this.brandService.update(payload).subscribe({
+            next: (response: any) => {
+              // Recarrega as marcas
+              this.reloadBrands();
+              this.toastrService.success(
+                this.typeListTexts.brand.successUpdateMessage
+              );
+            },
+            error: (error: any) => {
+              console.error('Erro ao editar marca:', error);
+              this.toastrService.error(
+                'Erro ao editar marca. Tente novamente.'
+              );
+            },
+          });
+        }
+      }
+    });
+  }
+
+  /**
+   * Abre o dialog específico para Model
+   */
+  private openModelDialog(mode: 'create' | 'edit', option?: any) {
+    if (mode === 'create' && !this.selectedBrand) {
+      this.toastrService.warning('Selecione uma marca primeiro!');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(ModelFormDialogComponent, {
+      width: '650px',
+      data: {
+        title:
+          mode === 'create'
+            ? this.typeListTexts.model.create
+            : `${this.typeListTexts.model.update}: ${option?.name}`,
+        mode: mode,
+        model: mode === 'edit' ? option : undefined,
+        brandId: this.selectedBrand.id,
+        brandName: this.options.find((o) => o.id === this.selectedBrand.id)
+          ?.name,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((payload) => {
+      if (payload) {
+        console.log('Payload do modelo:', payload);
+        if (mode === 'create') {
+          this.modelService.create(payload).subscribe({
+            next: (response: any) => {
+              // Recarrega os modelos
+              this.reloadModels();
+              this.toastrService.success(
+                this.typeListTexts.model.successCreateMessage
+              );
+            },
+            error: (error: any) => {
+              console.error('Erro ao criar modelo:', error);
+              this.toastrService.error(this.typeListTexts.model.errorMessage);
+            },
+          });
+        } else {
+          this.modelService.update(payload.id, payload).subscribe({
+            next: (response: any) => {
+              // Recarrega os modelos
+              this.reloadModels();
+              this.toastrService.success(
+                this.typeListTexts.model.successUpdateMessage
+              );
+            },
+            error: (error: any) => {
+              console.error('Erro ao editar modelo:', error);
+              this.toastrService.error(
+                'Erro ao editar modelo. Tente novamente.'
+              );
+            },
+          });
+        }
+      }
+    });
+  }
+
+  /**
+   * Abre o dialog simples para Color e FuelType
+   */
+  private openSimpleDialog(
+    mode: 'create' | 'edit',
+    service: any,
+    option?: any
+  ) {
+    const dialogRef = this.dialog.open(CriateElementConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title:
+          mode === 'create'
+            ? this.typeListTexts[this.listType].create
+            : `${this.typeListTexts[this.listType].update}: ${option?.name}`,
+        message: this.typeListTexts[this.listType].message,
+        confirmText: 'Salvar',
+        cancelText: 'Cancelar',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((name) => {
+      if (name) {
+        const payload =
+          mode === 'create'
+            ? { description: name }
+            : { id: option.id, description: name };
+
+        if (mode === 'create') {
           service.create(payload).subscribe({
             next: (response: { id: string; name: string }) => {
               this.options.push(response);
@@ -211,100 +400,69 @@ export class CustomSelectComponent implements OnInit, OnChanges {
                 this.typeListTexts[this.listType].successCreateMessage
               );
             },
-            error: () => {
+            error: (error: any) => {
+              console.error('Erro ao criar:', error);
               this.toastrService.error(
                 `Erro ao criar ${this.listType}. Tente novamente.`
               );
             },
           });
-        }
-      });
-    } else {
-      console.error(`Serviço não encontrado para o tipo: ${this.listType}`);
-    }
-  }
-
-  editItem(option: { id: string; name: string }, event: Event) {
-    const service = this.serviceMap[this.listType];
-
-    if (service) {
-      const dialogRef = this.dialog.open(CriateElementConfirmDialogComponent, {
-        width: '400px',
-        data: {
-          title: this.typeListTexts[this.listType].update + ` ${option.name}`,
-          message: this.typeListTexts[this.listType].message,
-          confirmText: 'Salvar',
-          cancelText: 'Cancelar',
-        },
-      });
-
-      dialogRef.afterClosed().subscribe((name) => {
-        if (name) {
-          let payload: any = { name, id: option.id };
-          if (this.listType === 'model') {
-            if (this.selectedBrand) {
-              payload = {
-                ...payload,
-                brandDto: this.selectedBrand,
-              };
-            }
-          }
-
+        } else {
           service.update(payload).subscribe({
             next: (response: { id: string; name: string }) => {
-              this.options.push(response);
+              const index = this.options.findIndex((o) => o.id === option.id);
+              if (index !== -1) {
+                this.options[index] = response;
+              }
               this.toastrService.success(
                 this.typeListTexts[this.listType].successUpdateMessage
               );
             },
-            error: () => {
+            error: (error: any) => {
+              console.error('Erro ao editar:', error);
               this.toastrService.error(
                 `Erro ao editar ${this.listType}. Tente novamente.`
               );
             },
           });
         }
-      });
-    } else {
-      console.error(`Serviço não encontrado para o tipo: ${this.listType}`);
-    }
+      }
+    });
   }
 
-  deleteItem(option: { id: string; name: string }, event: Event) {
-    const service = this.serviceMap[this.listType];
+  /**
+   * Recarrega a lista de marcas
+   */
+  private reloadBrands() {
+    this.brandService.getBrands().subscribe({
+      next: (response) => {
+        this.options = response.content.map((brand: any) => ({
+          id: brand.brandId,
+          name: brand.name,
+        }));
+      },
+      error: (error) => {
+        console.error('Erro ao recarregar marcas:', error);
+      },
+    });
+  }
 
-    if (service) {
-      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-        width: '400px',
-        data: {
-          title: this.typeListTexts[this.listType].delete + ` ${option.name}`,
-          message: this.typeListTexts[this.listType].deleteMessage,
-          confirmText: 'Deletar',
-          cancelText: 'Cancelar',
+  /**
+   * Recarrega a lista de modelos
+   */
+  private reloadModels() {
+    if (this.selectedBrand) {
+      this.modelService.getModelsByBrand(this.selectedBrand.id).subscribe({
+        next: (response) => {
+          this.options = response.content.map((model: any) => ({
+            id: model.modelId,
+            name: model.name,
+          }));
+        },
+        error: (error) => {
+          console.error('Erro ao recarregar modelos:', error);
         },
       });
-
-      dialogRef.afterClosed().subscribe((confirm) => {
-        if (confirm) {
-          service.delete(option.id).subscribe({
-            next: () => {
-              this.options = this.options.filter(
-                (item) => item.id !== option.id
-              );
-              this.toastrService.success(
-                this.typeListTexts[this.listType].successDeleteMessage
-              );
-            },
-            error: () => {
-              this.toastrService.error(
-                `Erro ao deletar ${this.listType}. Tente novamente.`
-              );
-            },
-          });
-        }
-      });
-    } else {
-      console.error(`Serviço não encontrado para o tipo: ${this.listType}`);
     }
   }
 }
