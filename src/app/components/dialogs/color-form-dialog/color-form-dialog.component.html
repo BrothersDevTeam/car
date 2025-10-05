@@ -1,0 +1,98 @@
+<div class="color-form-dialog">
+  <h2 mat-dialog-title>{{ data.title }}</h2>
+  
+  <mat-dialog-content>
+    <form [formGroup]="colorForm" class="color-form">
+      
+      <!-- Nome da Cor -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nome da Cor *</mat-label>
+        <input 
+          matInput 
+          formControlName="name" 
+          placeholder="Ex: Preto, Branco, Azul Metalizado"
+          maxlength="100"
+        />
+        @if (colorForm.get('name')?.invalid && colorForm.get('name')?.touched) {
+          <mat-error>{{ getErrorMessage('name') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Código Hexadecimal com Preview -->
+      <div class="hex-color-container">
+        <mat-form-field appearance="outline" class="hex-input">
+          <mat-label>Código Hexadecimal</mat-label>
+          <input 
+            matInput 
+            formControlName="hexCode" 
+            placeholder="#FFFFFF"
+            maxlength="7"
+          />
+          <mat-hint>Formato: #RRGGBB (ex: #FF0000 para vermelho)</mat-hint>
+          @if (colorForm.get('hexCode')?.invalid && colorForm.get('hexCode')?.touched) {
+            <mat-error>{{ getErrorMessage('hexCode') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Preview da Cor -->
+        <div class="color-preview-wrapper">
+          <div 
+            class="color-preview" 
+            [style.background-color]="previewColor"
+            [title]="'Preview da cor: ' + previewColor"
+          ></div>
+          <span class="preview-label">Preview</span>
+        </div>
+      </div>
+
+      <!-- Descrição -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descrição</mat-label>
+        <textarea 
+          matInput 
+          formControlName="description" 
+          placeholder="Descrição detalhada da cor (opcional)"
+          rows="3"
+          maxlength="500"
+        ></textarea>
+        <mat-hint align="end">
+          {{ colorForm.get('description')?.value?.length || 0 }}/500
+        </mat-hint>
+        @if (colorForm.get('description')?.invalid && colorForm.get('description')?.touched) {
+          <mat-error>{{ getErrorMessage('description') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Status -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Status *</mat-label>
+        <mat-select formControlName="status">
+          @for (status of colorStatuses; track status.value) {
+            <mat-option [value]="status.value">
+              {{ status.label }}
+            </mat-option>
+          }
+        </mat-select>
+        @if (colorForm.get('status')?.invalid && colorForm.get('status')?.touched) {
+          <mat-error>{{ getErrorMessage('status') }}</mat-error>
+        }
+      </mat-form-field>
+
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" type="button">
+      Cancelar
+    </button>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="onSubmit()" 
+      type="button"
+      [disabled]="colorForm.invalid"
+    >
+      {{ data.mode === 'create' ? 'Criar' : 'Salvar' }}
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -14,6 +14,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { BrandFormDialogComponent } from '@components/dialogs/brand-form-dialog/brand-form-dialog.component';
 import { ModelFormDialogComponent } from '@components/dialogs/model-form-dialog/model-form-dialog.component';
+import { ColorFormDialogComponent } from '@components/dialogs/color-form-dialog/color-form-dialog.component';
 import { CriateElementConfirmDialogComponent } from '@components/dialogs/criate-element-dialog/criate-element-dialog.component';
 
 import { FuelTypeService } from '@services/fuel-type.service';
@@ -32,7 +33,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   @Input() options: { id: string; name: string }[] = [];
   @Input() control!: FormControl | FormGroup;
   @Input() listType!: 'brand' | 'model' | 'colorDto' | 'fuelTypeDto';
-  @Input() selectedBrand: { id: string; name: string } = { id: '', name: '' }; // Necessário para carregar modelos com base na marca selecionada
+  @Input() selectedBrand: { id: string; name: string } = { id: '', name: '' };
   @Input() matTooltip: string = '';
   @Input() placeholder: string = '';
   @Input() disabled: boolean = false;
@@ -182,13 +183,15 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       return;
     }
 
-    // Para Brand e Model, usar dialogs específicos
+    // Para Brand, Model e Color, usar dialogs específicos
     if (this.listType === 'brand') {
       this.openBrandDialog('create');
     } else if (this.listType === 'model') {
       this.openModelDialog('create');
+    } else if (this.listType === 'colorDto') {
+      this.openColorDialog('create');
     } else {
-      // Para Color e FuelType, usar dialog simples
+      // Para FuelType, usar dialog simples
       this.openSimpleDialog('create', service);
     }
   }
@@ -206,19 +209,21 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       return;
     }
 
-    // Para Brand e Model, precisamos buscar os dados completos
+    // Para Brand, Model e Color, precisamos buscar os dados completos
     if (this.listType === 'brand') {
-      // Para brand, buscar dados completos
       this.loadFullBrandData(option.id).then((fullBrand) => {
         this.openBrandDialog('edit', fullBrand);
       });
     } else if (this.listType === 'model') {
-      // Para model, buscar dados completos
       this.loadFullModelData(option.id).then((fullModel) => {
         this.openModelDialog('edit', fullModel);
       });
+    } else if (this.listType === 'colorDto') {
+      this.loadFullColorData(option.id).then((fullColor) => {
+        this.openColorDialog('edit', fullColor);
+      });
     } else {
-      // Para Color e FuelType, usar dialog simples
+      // Para FuelType, usar dialog simples
       this.openSimpleDialog('edit', service, option);
     }
   }
@@ -251,6 +256,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
         service.delete(option.id).subscribe({
           next: () => {
             this.options = this.options.filter((item) => item.id !== option.id);
+            this.filteredOptions = [...this.options];
             this.toastrService.success(
               this.typeListTexts[this.listType].successDeleteMessage
             );
@@ -287,7 +293,6 @@ export class CustomSelectComponent implements OnInit, OnChanges {
         if (mode === 'create') {
           this.brandService.create(payload).subscribe({
             next: (response: any) => {
-              // Recarrega as marcas
               this.reloadBrands();
               this.toastrService.success(
                 this.typeListTexts.brand.successCreateMessage
@@ -301,7 +306,6 @@ export class CustomSelectComponent implements OnInit, OnChanges {
         } else {
           this.brandService.update(payload).subscribe({
             next: (response: any) => {
-              // Recarrega as marcas
               this.reloadBrands();
               this.toastrService.success(
                 this.typeListTexts.brand.successUpdateMessage
@@ -349,7 +353,6 @@ export class CustomSelectComponent implements OnInit, OnChanges {
         if (mode === 'create') {
           this.modelService.create(payload).subscribe({
             next: (response: any) => {
-              // Recarrega os modelos
               this.reloadModels();
               this.toastrService.success(
                 this.typeListTexts.model.successCreateMessage
@@ -363,7 +366,6 @@ export class CustomSelectComponent implements OnInit, OnChanges {
         } else {
           this.modelService.update(payload.modelId, payload).subscribe({
             next: (response: any) => {
-              // Recarrega os modelos
               this.reloadModels();
               this.toastrService.success(
                 this.typeListTexts.model.successUpdateMessage
@@ -382,7 +384,59 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Abre o dialog simples para Color e FuelType
+   * Abre o dialog específico para Color
+   */
+  private openColorDialog(mode: 'create' | 'edit', option?: any) {
+    const dialogRef = this.dialog.open(ColorFormDialogComponent, {
+      width: '600px',
+      data: {
+        title:
+          mode === 'create'
+            ? this.typeListTexts.colorDto.create
+            : `${this.typeListTexts.colorDto.update}: ${option?.name}`,
+        mode: mode,
+        color: mode === 'edit' ? option : undefined,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((payload) => {
+      if (payload) {
+        console.log('Color payload:', payload);
+        if (mode === 'create') {
+          this.colorService.create(payload).subscribe({
+            next: (response: any) => {
+              this.reloadColors();
+              this.toastrService.success(
+                this.typeListTexts.colorDto.successCreateMessage
+              );
+            },
+            error: (error: any) => {
+              console.error('Erro ao criar cor:', error);
+              this.toastrService.error(this.typeListTexts.colorDto.errorMessage);
+            },
+          });
+        } else {
+          this.colorService.update(payload.colorId, payload).subscribe({
+            next: (response: any) => {
+              this.reloadColors();
+              this.toastrService.success(
+                this.typeListTexts.colorDto.successUpdateMessage
+              );
+            },
+            error: (error: any) => {
+              console.error('Erro ao editar cor:', error);
+              this.toastrService.error(
+                'Erro ao editar cor. Tente novamente.'
+              );
+            },
+          });
+        }
+      }
+    });
+  }
+
+  /**
+   * Abre o dialog simples para FuelType
    */
   private openSimpleDialog(
     mode: 'create' | 'edit',
@@ -405,17 +459,13 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     dialogRef.afterClosed().subscribe((inputValue) => {
       if (inputValue) {
         if (mode === 'create') {
-          // Para criar cor
-          const createPayload = this.listType === 'colorDto' 
-            ? { name: inputValue } 
-            : { description: inputValue };
+          const createPayload = { description: inputValue };
           
           service.create(createPayload).subscribe({
             next: (response: any) => {
-              // Adicionar cor à lista
               const newOption = {
-                id: response.colorId || response.id,
-                name: response.name || response.description
+                id: response.id,
+                name: response.description
               };
               this.options.push(newOption);
               this.filteredOptions = [...this.options];
@@ -431,56 +481,29 @@ export class CustomSelectComponent implements OnInit, OnChanges {
             },
           });
         } else {
-          // Para editar cor
-          const updatePayload = this.listType === 'colorDto'
-            ? { colorId: option.id, name: inputValue }
-            : { id: option.id, description: inputValue };
+          const updatePayload = { id: option.id, description: inputValue };
           
-          if (this.listType === 'colorDto') {
-            service.update(option.id, updatePayload).subscribe({
-              next: (response: any) => {
-                const index = this.options.findIndex((o) => o.id === option.id);
-                if (index !== -1) {
-                  this.options[index] = {
-                    id: response.colorId,
-                    name: response.name
-                  };
-                  this.filteredOptions = [...this.options];
-                }
-                this.toastrService.success(
-                  this.typeListTexts[this.listType].successUpdateMessage
-                );
-              },
-              error: (error: any) => {
-                console.error('Erro ao editar:', error);
-                this.toastrService.error(
-                  `Erro ao editar ${this.listType}. Tente novamente.`
-                );
-              },
-            });
-          } else {
-            service.update(updatePayload).subscribe({
-              next: (response: any) => {
-                const index = this.options.findIndex((o) => o.id === option.id);
-                if (index !== -1) {
-                  this.options[index] = {
-                    id: response.id,
-                    name: response.description
-                  };
-                  this.filteredOptions = [...this.options];
-                }
-                this.toastrService.success(
-                  this.typeListTexts[this.listType].successUpdateMessage
-                );
-              },
-              error: (error: any) => {
-                console.error('Erro ao editar:', error);
-                this.toastrService.error(
-                  `Erro ao editar ${this.listType}. Tente novamente.`
-                );
-              },
-            });
-          }
+          service.update(updatePayload).subscribe({
+            next: (response: any) => {
+              const index = this.options.findIndex((o) => o.id === option.id);
+              if (index !== -1) {
+                this.options[index] = {
+                  id: response.id,
+                  name: response.description
+                };
+                this.filteredOptions = [...this.options];
+              }
+              this.toastrService.success(
+                this.typeListTexts[this.listType].successUpdateMessage
+              );
+            },
+            error: (error: any) => {
+              console.error('Erro ao editar:', error);
+              this.toastrService.error(
+                `Erro ao editar ${this.listType}. Tente novamente.`
+              );
+            },
+          });
         }
       }
     });
@@ -496,6 +519,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
           id: brand.brandId,
           name: brand.name,
         }));
+        this.filteredOptions = [...this.options];
       },
       error: (error) => {
         console.error('Erro ao recarregar marcas:', error);
@@ -514,12 +538,31 @@ export class CustomSelectComponent implements OnInit, OnChanges {
             id: model.modelId,
             name: model.name,
           }));
+          this.filteredOptions = [...this.options];
         },
         error: (error) => {
           console.error('Erro ao recarregar modelos:', error);
         },
       });
     }
+  }
+
+  /**
+   * Recarrega a lista de cores
+   */
+  private reloadColors() {
+    this.colorService.getColors().subscribe({
+      next: (response) => {
+        this.options = response.content.map((color: any) => ({
+          id: color.colorId,
+          name: color.name,
+        }));
+        this.filteredOptions = [...this.options];
+      },
+      error: (error) => {
+        console.error('Erro ao recarregar cores:', error);
+      },
+    });
   }
 
   /**
@@ -571,6 +614,28 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   }
 
   /**
+   * Carrega dados completos de uma cor
+   */
+  private loadFullColorData(colorId: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.colorService.getColors().subscribe({
+        next: (response) => {
+          const fullColor = response.content.find((c: any) => c.colorId === colorId);
+          if (fullColor) {
+            resolve(fullColor);
+          } else {
+            reject('Cor não encontrada');
+          }
+        },
+        error: (error) => {
+          console.error('Erro ao carregar dados da cor:', error);
+          reject(error);
+        },
+      });
+    });
+  }
+
+  /**
    * Filtra opções baseado no termo de busca
    */
   onSearch(): void {
@@ -596,18 +661,15 @@ export class CustomSelectComponent implements OnInit, OnChanges {
 
   /**
    * Controla o fechamento do dropdown ao sair com o mouse
-   * Fecha apenas se o mouse sair completamente do dropdown (incluindo campo de busca)
    */
   onMouseLeaveDropdown(event: MouseEvent): void {
     const target = event.relatedTarget as HTMLElement;
     const dropdown = (event.currentTarget as HTMLElement);
     
-    // Verifica se o mouse está indo para dentro do próprio dropdown
     if (target && dropdown.contains(target)) {
-      return; // Não fecha se o mouse está dentro do dropdown
+      return;
     }
     
-    // Fecha apenas se o mouse realmente saiu do dropdown
     this.closeDropdown();
   }
 }
