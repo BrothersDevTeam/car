@@ -7,7 +7,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Address } from '@interfaces/address';
 import { AddressTypeLabels, AddressTypeIcons } from '../../../enums/addressTypes';
 import { AddressService } from '@services/address.service';
-import { SafePipe } from '../../../pipes/safe.pipe';
 
 @Component({
   selector: 'app-address-card',
@@ -17,7 +16,6 @@ import { SafePipe } from '../../../pipes/safe.pipe';
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
-    SafePipe,
   ],
   templateUrl: './address-card.component.html',
   styleUrl: './address-card.component.scss'
@@ -32,8 +30,8 @@ export class AddressCardComponent {
   @Output() delete = new EventEmitter<Address>();
   @Output() setMain = new EventEmitter<Address>();
 
+  // NOVO: Controla se o mapa está visível
   showMap = false;
-  mapLoadError = false;
 
   constructor(private addressService: AddressService) {}
 
@@ -74,6 +72,13 @@ export class AddressCardComponent {
     return parts.join(', ');
   }
 
+  // NOVO: URL para imagem estática do Google Maps
+  get staticMapUrl(): string {
+    const encodedAddress = encodeURIComponent(this.fullAddressForMap);
+    // API de imagem estática - não precisa API key para uso básico
+    return `https://maps.googleapis.com/maps/api/staticmap?center=${encodedAddress}&zoom=15&size=600x300&markers=color:red%7C${encodedAddress}&maptype=roadmap`;
+  }
+
   onEdit() {
     this.edit.emit(this.address);
   }
@@ -92,22 +97,8 @@ export class AddressCardComponent {
     window.open(googleMapsUrl, '_blank');
   }
 
+  // NOVO: Toggle mapa embutido
   toggleMap() {
     this.showMap = !this.showMap;
-    this.mapLoadError = false;
-    
-    if (this.showMap) {
-      console.log('🗺️ Abrindo mapa para:', this.fullAddressForMap);
-    }
-  }
-
-  onMapError() {
-    console.error('❌ Erro ao carregar mapa');
-    this.mapLoadError = true;
-  }
-
-  onMapLoad() {
-    console.log('✅ Mapa carregado com sucesso');
-    this.mapLoadError = false;
   }
 }
