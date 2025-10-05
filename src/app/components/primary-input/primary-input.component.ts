@@ -1,5 +1,5 @@
 import { NgxMaskDirective } from 'ngx-mask';
-import { Component, forwardRef, Input } from '@angular/core';
+import { Component, forwardRef, Input, Output, EventEmitter } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 type InputTypes = 'text' | 'email' | 'password' | 'number' | 'tel';
@@ -25,6 +25,11 @@ export class PrimaryInputComponent implements ControlValueAccessor {
   @Input() error?: boolean = false;
   @Input() mask: string = '';
   @Input() uppercase?: boolean = true;
+  @Input() maxlength?: string;
+  @Input() required?: boolean = false;
+
+  // Novo: Output para evento blur
+  @Output() blur = new EventEmitter<FocusEvent>();
 
   value: string = '';
   onChange: any = () => {};
@@ -39,6 +44,12 @@ export class PrimaryInputComponent implements ControlValueAccessor {
 
     if (this.uppercase) inputElement.value = value;
     this.onChange(value);
+  }
+
+  // Novo: método para tratar blur
+  onBlur(event: FocusEvent) {
+    this.onTouched();
+    this.blur.emit(event);
   }
 
   writeValue(value: any): void {

@@ -1,20 +1,15 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { ViaCepResponse } from '@interfaces/address';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CepService {
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
-  getAddressByCep(cep: string) {
-    return fetch(`https://viacep.com.br/ws/${cep}/json/`)
-      .then((response) => response.json())
-      .then((data) => {
-        return data;
-      })
-      .catch((error) => {
-        console.error('Erro ao buscar endereço pelo CEP', error);
-        return null;
-      });
+  getAddressByCep(cep: string): Observable<ViaCepResponse> {
+    return this.http.get<ViaCepResponse>(`https://viacep.com.br/ws/${cep}/json/`);
   }
 }

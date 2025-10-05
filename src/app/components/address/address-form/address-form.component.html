@@ -1,0 +1,144 @@
+<app-wrapper-card>
+  <h2 class="form-title">
+    {{ isEditMode ? 'Editar Endereço' : 'Novo Endereço' }}
+  </h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="address-form">
+    <!-- Tipo de Endereço -->
+    <div class="form-row">
+      <app-primary-select
+        label="Tipo de Endereço"
+        formControlName="addressType"
+        [options]="addressTypeOptions"
+        [required]="true"
+        placeholder="Selecione o tipo">
+      </app-primary-select>
+    </div>
+
+    <!-- CEP -->
+    <div class="form-row">
+      <app-primary-input
+        label="CEP"
+        formControlName="cep"
+        type="text"
+        placeholder="00000-000"
+        [required]="true"
+        mask="00000-000"
+        (blur)="onCepBlur()">
+        <mat-icon iconSuffix>{{ loadingCep ? 'hourglass_empty' : 'search' }}</mat-icon>
+      </app-primary-input>
+      
+      @if (!loadingCep) {
+        <small class="help-text">
+          Digite o CEP e pressione Tab para buscar automaticamente
+        </small>
+      }
+      
+      @if (loadingCep) {
+        <small class="help-text loading">
+          Buscando endereço...
+        </small>
+      }
+    </div>
+
+    <!-- Rua -->
+    <div class="form-row">
+      <app-primary-input
+        label="Rua/Logradouro"
+        formControlName="street"
+        type="text"
+        placeholder="Ex: Av. Paulista"
+        [required]="true"
+        maxlength="100">
+      </app-primary-input>
+    </div>
+
+    <!-- Número e Complemento -->
+    <div class="form-row two-columns">
+      <app-primary-input
+        label="Número"
+        formControlName="number"
+        type="text"
+        placeholder="Ex: 1578"
+        maxlength="10">
+      </app-primary-input>
+
+      <app-primary-input
+        label="Complemento"
+        formControlName="complement"
+        type="text"
+        placeholder="Ex: Apto 45"
+        maxlength="100">
+      </app-primary-input>
+    </div>
+
+    <!-- Bairro -->
+    <div class="form-row">
+      <app-primary-input
+        label="Bairro"
+        formControlName="neighborhood"
+        type="text"
+        placeholder="Ex: Bela Vista"
+        [required]="true"
+        maxlength="100">
+      </app-primary-input>
+    </div>
+
+    <!-- Cidade e Estado -->
+    <div class="form-row two-columns">
+      <app-primary-input
+        label="Cidade"
+        formControlName="city"
+        type="text"
+        placeholder="Ex: São Paulo"
+        [required]="true"
+        maxlength="100">
+      </app-primary-input>
+
+      <app-primary-select
+        label="UF"
+        formControlName="state"
+        [options]="stateOptions"
+        [required]="true"
+        placeholder="UF">
+      </app-primary-select>
+    </div>
+
+    <!-- Checkboxes -->
+    <div class="form-row checkboxes">
+      <label class="checkbox-label">
+        <input type="checkbox" formControlName="mainAddress">
+        <span>Endereço Principal</span>
+        <mat-icon class="info-icon" 
+          matTooltip="Apenas um endereço pode ser principal">
+          info
+        </mat-icon>
+      </label>
+
+      <label class="checkbox-label">
+        <input type="checkbox" formControlName="active">
+        <span>Ativo</span>
+      </label>
+    </div>
+
+    <!-- Botões -->
+    <div class="form-actions">
+      <button type="button" 
+        mat-stroked-button 
+        (click)="onCancel()"
+        class="btn-cancel">
+        <mat-icon>close</mat-icon>
+        Cancelar
+      </button>
+
+      <button type="submit" 
+        mat-raised-button 
+        color="primary"
+        [disabled]="submitted && form.invalid"
+        class="btn-submit">
+        <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+        {{ isEditMode ? 'Atualizar' : 'Cadastrar' }}
+      </button>
+    </div>
+  </form>
+</app-wrapper-card>
