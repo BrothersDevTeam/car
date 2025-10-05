@@ -195,11 +195,17 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       return;
     }
 
-    // Para Brand e Model, usar dialogs específicos
+    // Para Brand e Model, precisamos buscar os dados completos
     if (this.listType === 'brand') {
-      this.openBrandDialog('edit', option);
+      // Para brand, buscar dados completos
+      this.loadFullBrandData(option.id).then((fullBrand) => {
+        this.openBrandDialog('edit', fullBrand);
+      });
     } else if (this.listType === 'model') {
-      this.openModelDialog('edit', option);
+      // Para model, buscar dados completos
+      this.loadFullModelData(option.id).then((fullModel) => {
+        this.openModelDialog('edit', fullModel);
+      });
     } else {
       // Para Color e FuelType, usar dialog simples
       this.openSimpleDialog('edit', service, option);
@@ -344,7 +350,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
             },
           });
         } else {
-          this.modelService.update(payload.id, payload).subscribe({
+          this.modelService.update(payload.modelId, payload).subscribe({
             next: (response: any) => {
               // Recarrega os modelos
               this.reloadModels();
@@ -464,5 +470,53 @@ export class CustomSelectComponent implements OnInit, OnChanges {
         },
       });
     }
+  }
+
+  /**
+   * Carrega dados completos de uma marca
+   */
+  private loadFullBrandData(brandId: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.brandService.getBrands().subscribe({
+        next: (response) => {
+          const fullBrand = response.content.find((b: any) => b.brandId === brandId);
+          if (fullBrand) {
+            resolve(fullBrand);
+          } else {
+            reject('Marca não encontrada');
+          }
+        },
+        error: (error) => {
+          console.error('Erro ao carregar dados da marca:', error);
+          reject(error);
+        },
+      });
+    });
+  }
+
+  /**
+   * Carrega dados completos de um modelo
+   */
+  private loadFullModelData(modelId: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (this.selectedBrand?.id) {
+        this.modelService.getModelsByBrand(this.selectedBrand.id).subscribe({
+          next: (response) => {
+            const fullModel = response.content.find((m: any) => m.modelId === modelId);
+            if (fullModel) {
+              resolve(fullModel);
+            } else {
+              reject('Modelo não encontrado');
+            }
+          },
+          error: (error) => {
+            console.error('Erro ao carregar dados do modelo:', error);
+            reject(error);
+          },
+        });
+      } else {
+        reject('Nenhuma marca selecionada');
+      }
+    });
   }
 }
