@@ -402,17 +402,23 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       },
     });
 
-    dialogRef.afterClosed().subscribe((name) => {
-      if (name) {
-        const payload =
-          mode === 'create'
-            ? { description: name }
-            : { id: option.id, description: name };
-
+    dialogRef.afterClosed().subscribe((inputValue) => {
+      if (inputValue) {
         if (mode === 'create') {
-          service.create(payload).subscribe({
-            next: (response: { id: string; name: string }) => {
-              this.options.push(response);
+          // Para criar cor
+          const createPayload = this.listType === 'colorDto' 
+            ? { name: inputValue } 
+            : { description: inputValue };
+          
+          service.create(createPayload).subscribe({
+            next: (response: any) => {
+              // Adicionar cor à lista
+              const newOption = {
+                id: response.colorId || response.id,
+                name: response.name || response.description
+              };
+              this.options.push(newOption);
+              this.filteredOptions = [...this.options];
               this.toastrService.success(
                 this.typeListTexts[this.listType].successCreateMessage
               );
@@ -425,23 +431,56 @@ export class CustomSelectComponent implements OnInit, OnChanges {
             },
           });
         } else {
-          service.update(payload).subscribe({
-            next: (response: { id: string; name: string }) => {
-              const index = this.options.findIndex((o) => o.id === option.id);
-              if (index !== -1) {
-                this.options[index] = response;
-              }
-              this.toastrService.success(
-                this.typeListTexts[this.listType].successUpdateMessage
-              );
-            },
-            error: (error: any) => {
-              console.error('Erro ao editar:', error);
-              this.toastrService.error(
-                `Erro ao editar ${this.listType}. Tente novamente.`
-              );
-            },
-          });
+          // Para editar cor
+          const updatePayload = this.listType === 'colorDto'
+            ? { colorId: option.id, name: inputValue }
+            : { id: option.id, description: inputValue };
+          
+          if (this.listType === 'colorDto') {
+            service.update(option.id, updatePayload).subscribe({
+              next: (response: any) => {
+                const index = this.options.findIndex((o) => o.id === option.id);
+                if (index !== -1) {
+                  this.options[index] = {
+                    id: response.colorId,
+                    name: response.name
+                  };
+                  this.filteredOptions = [...this.options];
+                }
+                this.toastrService.success(
+                  this.typeListTexts[this.listType].successUpdateMessage
+                );
+              },
+              error: (error: any) => {
+                console.error('Erro ao editar:', error);
+                this.toastrService.error(
+                  `Erro ao editar ${this.listType}. Tente novamente.`
+                );
+              },
+            });
+          } else {
+            service.update(updatePayload).subscribe({
+              next: (response: any) => {
+                const index = this.options.findIndex((o) => o.id === option.id);
+                if (index !== -1) {
+                  this.options[index] = {
+                    id: response.id,
+                    name: response.description
+                  };
+                  this.filteredOptions = [...this.options];
+                }
+                this.toastrService.success(
+                  this.typeListTexts[this.listType].successUpdateMessage
+                );
+              },
+              error: (error: any) => {
+                console.error('Erro ao editar:', error);
+                this.toastrService.error(
+                  `Erro ao editar ${this.listType}. Tente novamente.`
+                );
+              },
+            });
+          }
         }
       }
     });

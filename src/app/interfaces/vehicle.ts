@@ -9,8 +9,8 @@ export interface Vehicle {
   vehicleId?: string;
   owner?: Person;
   plate: string;
-  brand: string;        // String - nome da marca
-  model: string;        // String - nome do modelo
+  brand: string; // String - nome da marca
+  model: string; // String - nome do modelo
   year: string;
   modelYear?: string;
   color: string;
@@ -78,8 +78,45 @@ export interface FuelType {
 }
 export type CreateFuelType = Omit<FuelType, 'id'>;
 
+/**
+ * Interface para Color (cor de veículo)
+ * Corresponde ao VehicleColorResponseDto do backend
+ */
 export interface Color {
-  id: string;
-  description: string;
+  colorId: string;
+  storeId?: string;
+  isGlobal?: boolean;
+  name: string;              // Nome da cor (campo principal)
+  hexCode?: string;          // Código hexadecimal opcional
+  description?: string;      // Descrição opcional
+  status?: string;           // Status (ACTIVE/INACTIVE)
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
 }
-export type CreateColor = Omit<Color, 'id'>;
+
+/**
+ * DTO para criar cor
+ * Corresponde ao VehicleColorRecordDto do backend
+ */
+export interface CreateColor {
+  storeId?: string;
+  name: string;              // Nome obrigatório
+  hexCode?: string;          // Código hex opcional
+  description?: string;      // Descrição opcional
+  status?: string;           // Status (default: ACTIVE)
+  isGlobal?: boolean;        // Se é cor global
+}
+
+/**
+ * DTO para atualizar cor
+ */
+export interface UpdateColor {
+  colorId: string;
+  name?: string;
+  hexCode?: string;
+  description?: string;
+  status?: string;
+  isGlobal?: boolean;
+}

@@ -83,13 +83,17 @@
       mask="0000/0000"
     />
 
-    <!-- Cor -->
-    <app-primary-input
-      formControlName="color"
-      label="Cor"
-      inputName="color"
-      type="text"
-    />
+    <!-- Seleção de Cor -->
+    <div class="custom-selects-container">
+      <app-custom-select
+        listType="colorDto"
+        [label]="'Cor'"
+        [options]="colors"
+        [control]="colorControl"
+        placeholder="Selecione uma cor"
+        matTooltip="Selecione a cor do veículo"
+      ></app-custom-select>
+    </div>
 
     <!-- Chassi -->
     <app-primary-input

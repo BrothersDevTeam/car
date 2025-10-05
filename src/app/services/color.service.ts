@@ -3,62 +3,61 @@ import { Injectable } from '@angular/core';
 
 import { first, Observable, of, tap } from 'rxjs';
 
-import { Color, CreateColor } from '@interfaces/vehicle';
+import { Color, CreateColor, UpdateColor } from '@interfaces/vehicle';
+import { PaginationResponse } from '@interfaces/pagination';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ColorService {
-  private cache: Color[] | null = null;
+  private cache: PaginationResponse<Color> | null = null;
 
-  // private cache: Color[] | null = [
-  //   { id: '1', description: 'BRANCO' },
-  //   { id: '2', description: 'PRETO' },
-  //   { id: '3', description: 'AZUL' },
-  //   { id: '4', description: 'VERDE' },
-  //   { id: '5', description: 'VERMELHO' },
-  //   { id: '6', description: 'AMARELO' },
-  //   { id: '7', description: 'CINZA' },
-  // ];
-
-  private readonly apiUrl: string = '/api/vehicles/colors';
+  private readonly apiUrl: string = '/api/vehicle-colors';
 
   constructor(private http: HttpClient) {}
 
-  getColors(): Observable<Color[]> {
+  getColors(): Observable<PaginationResponse<Color>> {
     if (this.cache) {
       return of(this.cache);
     }
-    return this.http.get<Color[]>(`${this.apiUrl}`).pipe(
-      first(),
-      tap((response) => {
-        this.cache = response;
-      })
-    );
+    // Busca todos os registros (size=1000)
+    return this.http
+      .get<PaginationResponse<Color>>(`${this.apiUrl}?size=1000`)
+      .pipe(
+        first(),
+        tap((response) => {
+          console.log('Colors fetched:', response);
+          this.cache = response;
+        })
+      );
   }
 
   create(data: CreateColor) {
-    return this.http.post<string>(`${this.apiUrl}`, data).pipe(
-      tap((response: string) => {
-        console.log('Formulário enviado com sucesso!', response);
+    return this.http.post<Color>(`${this.apiUrl}`, data).pipe(
+      tap((response: Color) => {
+        console.log('Cor criada com sucesso!', response);
         this.clearCache();
+        // Recarrega o cache
+        this.getColors().subscribe();
       })
     );
   }
 
-  update(data: Color) {
-    return this.http.put<string>(`${this.apiUrl}`, data).pipe(
-      tap((response: string) => {
-        console.log('Formulário enviado com sucesso!', response);
+  update(colorId: string, data: UpdateColor) {
+    return this.http.put<Color>(`${this.apiUrl}/${colorId}`, data).pipe(
+      tap((response: Color) => {
+        console.log('Cor atualizada com sucesso!', response);
         this.clearCache();
+        // Recarrega o cache
+        this.getColors().subscribe();
       })
     );
   }
 
   delete(id: string) {
-    return this.http.delete<string>(`${this.apiUrl}/${id}`).pipe(
-      tap((response: string) => {
-        console.log('Cor deletada com sucesso!', response);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => {
+        console.log('Cor deletada com sucesso!');
         this.clearCache();
       })
     );

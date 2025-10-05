@@ -40,6 +40,7 @@ import { VehicleForm } from '@interfaces/vehicle';
 import { VehicleService } from '@services/vehicle.service';
 import { BrandService } from '@services/brand.service';
 import { ModelService } from '@services/model.service';
+import { ColorService } from '@services/color.service';
 import { AuthService } from '@services/auth/auth.service';
 
 @Component({
@@ -64,6 +65,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   brands: { id: string; name: string }[] = [];
   models: { id: string; name: string }[] = [];
+  colors: { id: string; name: string }[] = [];
 
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
@@ -79,7 +81,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   selectModelDisabled = signal(true);
 
   /**
-   * Formulário com FormGroups aninhados para brand e model
+   * Formulário com FormGroups aninhados para brand, model e color
    * para trabalhar com o custom-select component
    */
   protected form: FormGroup = this.formBuilderService.group({
@@ -95,7 +97,10 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     }),
     year: [''],
     modelYear: [''],
-    color: [''],
+    color: this.formBuilderService.group({
+      id: [''],
+      name: [''],
+    }),
     chassis: [''],
     renavam: [''],
     doors: [''],
@@ -119,6 +124,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     private vehicleService: VehicleService,
     private brandService: BrandService,
     private modelService: ModelService,
+    private colorService: ColorService,
     private toastrService: ToastrService
   ) {}
 
@@ -143,6 +149,23 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       error: (error) => {
         console.error('Erro ao carregar marcas:', error);
         this.toastrService.error('Erro ao carregar marcas');
+      },
+    });
+
+    // Carrega cores do backend
+    this.colorService.getColors().subscribe({
+      next: (response) => {
+        console.log('Cores carregadas:', response);
+        if (response.page.totalElements > 0) {
+          this.colors = response.content.map((color) => ({
+            id: color.colorId,
+            name: color.name, // Usar o campo 'name' do backend
+          }));
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao carregar cores:', error);
+        this.toastrService.error('Erro ao carregar cores');
       },
     });
 
@@ -193,8 +216,14 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           (b) => b.name === this.dataForm!.brand
         );
 
+        // Para edição, busca a cor pelo nome
+        const selectedColor = this.colors.find(
+          (c) => c.name === this.dataForm!.color
+        );
+
         console.log('Editando veículo:', this.dataForm);
         console.log('Marca encontrada:', selectedBrand);
+        console.log('Cor encontrada:', selectedColor);
 
         this.form.patchValue({
           plate: this.dataForm!.plate || '',
@@ -205,7 +234,9 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           model: { id: '', name: this.dataForm!.model || '' },
           year: this.dataForm!.year || '',
           modelYear: this.dataForm!.modelYear || '',
-          color: this.dataForm!.color || '',
+          color: selectedColor
+            ? { id: selectedColor.id, name: selectedColor.name }
+            : { id: '', name: '' },
           chassis: this.dataForm!.chassis || '',
           renavam: this.dataForm!.renavam || '',
           doors: this.dataForm!.doors || '',
@@ -251,7 +282,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     const formValues = this.form.value;
     console.log('Valores do formulário:', formValues);
 
-    // Monta o payload para o backend (brand e model são Strings)
+    // Monta o payload para o backend (brand, model e color são Strings)
     const payload: any = {
       storeId: this.authService.getStoreId(),
       plate: formValues.plate,
@@ -259,7 +290,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       model: formValues.model?.name || '', // Nome do modelo (String)
       year: formValues.year || '',
       modelYear: formValues.modelYear || '',
-      color: formValues.color || '',
+      color: formValues.color?.name || '', // Nome da cor (String)
       chassis: formValues.chassis || '',
       renavam: formValues.renavam || '',
       doors: formValues.doors || '',
@@ -274,7 +305,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       fuelTypes: formValues.fuelTypes || [],
     };
 
-    // Remove campos vazios
+    // Remove campos vazios, EXCETO color que pode ser string vazia
     Object.keys(payload).forEach((key) => {
       if (
         payload[key] === '' ||
@@ -286,6 +317,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     console.log('Payload enviado ao backend:', payload);
+    console.log('Cor no payload:', payload.color);
 
     // Cria ou atualiza o veículo
     if (this.dataForm?.vehicleId) {
@@ -364,5 +396,9 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   get modelControl(): FormGroup {
     return this.form.get('model') as FormGroup;
+  }
+
+  get colorControl(): FormGroup {
+    return this.form.get('color') as FormGroup;
   }
 }
