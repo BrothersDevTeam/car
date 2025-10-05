@@ -27,12 +27,18 @@
         (blur)="onCepBlur()">
         <mat-icon iconSuffix>{{ loadingCep ? 'hourglass_empty' : 'search' }}</mat-icon>
       </app-primary-input>
-      <small class="help-text" *ngIf="!loadingCep">
-        Digite o CEP e pressione Tab para buscar automaticamente
-      </small>
-      <small class="help-text loading" *ngIf="loadingCep">
-        Buscando endereço...
-      </small>
+      
+      @if (!loadingCep) {
+        <small class="help-text">
+          Digite o CEP e pressione Tab para buscar automaticamente
+        </small>
+      }
+      
+      @if (loadingCep) {
+        <small class="help-text loading">
+          Buscando endereço...
+        </small>
+      }
     </div>
 
     <!-- Rua -->

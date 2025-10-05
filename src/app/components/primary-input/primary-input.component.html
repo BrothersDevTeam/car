@@ -8,7 +8,10 @@
         [mask]="mask"
         [placeholder]="placeholder"
         [value]="value"
+        [attr.maxlength]="maxlength"
+        [attr.required]="required ? '' : null"
         (input)="onInput($event)"
+        (blur)="onBlur($event)"
       />
       <ng-content></ng-content>
     </div>

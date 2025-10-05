@@ -95,24 +95,37 @@ export class AddressFormComponent implements OnInit, OnChanges {
 
   onCepBlur() {
     const cep = this.form.get('cep')?.value;
-    if (!cep || cep.length < 8) return;
+    console.log('🔍 onCepBlur chamado - CEP digitado:', cep);
+    
+    if (!cep || cep.length < 8) {
+      console.log('❌ CEP muito curto:', cep);
+      return;
+    }
 
     const cleanCep = this.addressService.cleanCep(cep);
+    console.log('🧹 CEP limpo:', cleanCep);
     
     if (!this.addressService.isValidCep(cleanCep)) {
+      console.log('❌ CEP inválido');
       this.toastr.error('CEP inválido');
       return;
     }
 
+    console.log('✅ CEP válido - Iniciando busca...');
     this.loadingCep = true;
+    
     this.cepService.getAddressByCep(cleanCep).subscribe({
       next: (data: ViaCepResponse) => {
+        console.log('📦 Resposta do ViaCEP:', data);
+        
         if (data.erro) {
+          console.log('❌ CEP não encontrado no ViaCEP');
           this.toastr.error('CEP não encontrado');
           this.loadingCep = false;
           return;
         }
 
+        console.log('✅ Preenchendo formulário com dados do ViaCEP');
         this.form.patchValue({
           street: data.logradouro || '',
           complement: data.complemento || '',
@@ -124,7 +137,8 @@ export class AddressFormComponent implements OnInit, OnChanges {
         this.toastr.success('Endereço preenchido automaticamente');
         this.loadingCep = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error('❌ Erro ao buscar CEP:', err);
         this.toastr.error('Erro ao buscar CEP');
         this.loadingCep = false;
       }
