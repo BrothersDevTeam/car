@@ -16,16 +16,27 @@
       <!-- Campo de busca -->
       <div class="search-container" (click)="$event.stopPropagation()">
         <mat-icon class="search-icon">search</mat-icon>
-        <input
-          type="text"
-          class="search-input"
-          [(ngModel)]="searchTerm"
-          (input)="onSearch()"
-          placeholder="Buscar..."
-          (keydown.enter)="$event.preventDefault()"
-        />
+        <div class="input-wrapper">
+          <input
+            type="text"
+            class="search-input"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+            placeholder="Digite para buscar..."
+            (keydown.enter)="$event.preventDefault()"
+            aria-label="Campo de busca"
+          />
+        </div>
         @if (searchTerm) {
-          <mat-icon class="clear-icon" (click)="clearSearch()">close</mat-icon>
+          <mat-icon 
+            class="clear-icon" 
+            (click)="clearSearch()"
+            aria-label="Limpar busca"
+            role="button"
+            tabindex="0"
+          >
+            close
+          </mat-icon>
         }
       </div>
 
