@@ -44,29 +44,14 @@
     </div>
   </div>
 
-  <!-- Mapa Embutido -->
+  <!-- OPÇÃO 1: Mapa Estático (imagem) -->
   @if (showMap) {
     <div class="map-container">
-      @if (!mapLoadError) {
-        <!-- Usando iframe do Google Maps -->
-        <iframe 
-          [src]="'https://www.google.com/maps?q=' + fullAddressForMap + '&output=embed' | safe"
-          class="map-iframe"
-          frameborder="0"
-          (error)="onMapError()"
-          (load)="onMapLoad()"
-          allowfullscreen>
-        </iframe>
-      } @else {
-        <div class="map-error">
-          <mat-icon>error_outline</mat-icon>
-          <p>Não foi possível carregar o mapa</p>
-          <button mat-stroked-button (click)="openInGoogleMaps()">
-            Abrir no Google Maps
-          </button>
-        </div>
-      }
-      
+      <img [src]="staticMapUrl" 
+           alt="Mapa do endereço" 
+           class="static-map"
+           (click)="openInGoogleMaps()"
+           matTooltip="Clique para abrir no Google Maps">
       <button mat-icon-button 
               class="close-map-btn"
               (click)="toggleMap()"
