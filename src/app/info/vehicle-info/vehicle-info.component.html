@@ -17,6 +17,10 @@
         <h3 class="value">{{ vehicle.model || "" }}</h3>
       </div>
       <div class="card-row">
+        <h3 class="label">Ano do veículo:</h3>
+        <h3 class="value">{{ vehicle.vehicleYear || "" }}</h3>
+      </div>
+      <div class="card-row">
         <h3 class="label">Ano do modelo:</h3>
         <h3 class="value">{{ vehicle.modelYear || "" }}</h3>
       </div>
@@ -74,6 +78,51 @@
         <h3 class="value">{{ vehicle.origin || "" }}</h3>
       </div>
     </app-wrapper-card>
+
+    <app-wrapper-card class="fourth-info-card" title="Proprietário">
+      @if(proprietario) {
+        @if(proprietario.legalEntity) {
+          <div class="card-row">
+            <h3 class="label">Razão Social:</h3>
+            <h3 class="value">{{ proprietario.name }}</h3>
+          </div>
+          <div class="card-row">
+            <h3 class="label">Nome Fantasia:</h3>
+            <h3 class="value">{{ proprietario.nickName }}</h3>
+          </div>
+          <div class="card-row">
+            <h3 class="label">Email:</h3>
+            <h3 class="value">{{ proprietario.email }}</h3>
+          </div>
+          <div class="card-row">
+            <h3 class="label">CNPJ:</h3>
+            <h3 class="value">{{ proprietario.cnpj }}</h3>
+          </div>
+        } @else {
+          <div class="card-row">
+            <h3 class="label">Nome:</h3>
+            <h3 class="value">{{ proprietario.name }}</h3>
+          </div>
+          <div class="card-row">
+            <h3 class="label">Apelido:</h3>
+            <h3 class="value">{{ proprietario.nickName }}</h3>
+          </div>
+          <div class="card-row">
+            <h3 class="label">Email:</h3>
+            <h3 class="value">{{ proprietario.email }}</h3>
+          </div>
+          <div class="card-row">
+            <h3 class="label">CPF:</h3>
+            <h3 class="value">{{ proprietario.cpf }}</h3>
+          </div>
+        }
+      } @else {
+        <div class="card-row">
+          <h3 class="label">Sem proprietário</h3>
+        </div>
+      }
+    </app-wrapper-card>
+
   </mat-card-content>
   <mat-card-footer class="card-footer">
     <button type="button" class="btn" color="primary" mat-raised-button (click)="onEdit()">Editar</button>

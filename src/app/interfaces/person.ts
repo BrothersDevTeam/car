@@ -1,7 +1,7 @@
-import { RelationshipTypes } from "../enums/relationshipTypes";
+import { RelationshipTypes } from '../enums/relationshipTypes';
 
 export interface Person {
-  personId?: string;
+  personId: string;
   storeId: string;
   name: string;
   nickName?: string;

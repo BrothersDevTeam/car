@@ -2,13 +2,15 @@ import { ToastrService } from 'ngx-toastr';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
 import { VehicleForm } from '@interfaces/vehicle';
 import { VehicleService } from '@services/vehicle.service';
+import { PersonService } from '@services/person.service';
+import { Person } from '@interfaces/person';
 
 @Component({
   selector: 'app-vehicle-info',
@@ -16,8 +18,10 @@ import { VehicleService } from '@services/vehicle.service';
   templateUrl: './vehicle-info.component.html',
   styleUrl: './vehicle-info.component.scss',
 })
-export class VehicleInfoComponent {
+export class VehicleInfoComponent implements OnChanges {
   readonly dialog = inject(MatDialog);
+
+  proprietario: Person | null = null;
 
   @Input() vehicle!: VehicleForm;
   @Output() editEvent = new EventEmitter<VehicleForm>();
@@ -25,8 +29,26 @@ export class VehicleInfoComponent {
 
   constructor(
     private toastrService: ToastrService,
-    private vehicleService: VehicleService
+    private vehicleService: VehicleService,
+    private personService: PersonService
   ) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['vehicle'] && this.vehicle?.owner) {
+      // Busca o proprietário quando o veículo mudar
+      this.personService.getById(this.vehicle.owner).subscribe({
+        next: (person) => {
+          this.proprietario = person;
+        },
+        error: (error) => {
+          console.error('Erro ao carregar proprietário:', error);
+          this.proprietario = null;
+        },
+      });
+    } else {
+      this.proprietario = null;
+    }
+  }
 
   onEdit() {
     this.editEvent.emit(this.vehicle);

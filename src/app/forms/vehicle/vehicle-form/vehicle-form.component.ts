@@ -1,4 +1,5 @@
-import {
+import type { Person } from '@interfaces/person';import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
+import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';import { DrawerComponent } from '@components/drawer/drawer.component';import { MatTabsModule } from '@angular/material/tabs';import {
   Component,
   ElementRef,
   EventEmitter,
@@ -42,6 +43,7 @@ import { BrandService } from '@services/brand.service';
 import { ModelService } from '@services/model.service';
 import { ColorService } from '@services/color.service';
 import { AuthService } from '@services/auth/auth.service';
+import { PersonService } from '@services/person.service';
 
 import { FuelTypes, FuelTypesLabels } from '../../../enums/fuelTypes';
 
@@ -58,6 +60,10 @@ import { FuelTypes, FuelTypesLabels } from '../../../enums/fuelTypes';
     MatSelectModule,
     CustomSelectComponent,
     MatRadioModule,
+    DrawerComponent,
+    MatTabsModule,
+    LegalEntityFormComponent,
+    NaturalPersonFormComponent,
   ],
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',
@@ -69,10 +75,16 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   brands: { id: string; name: string }[] = [];
   models: { id: string; name: string }[] = [];
   colors: { id: string; name: string }[] = [];
+  persons: { id: string; name: string }[] = [];
+
+  // Flags para controlar o drawer de person
+  openPersonForm = signal(false);
+  selectedPersonToEdit: Person | null = null;
 
   // Flags para controlar o carregamento
   private brandsLoaded = false;
   private colorsLoaded = false;
+  private personsLoaded = false;
   private formFilled = false; // Flag para garantir preenchimento único
 
   // Opções de tipos de combustível
@@ -96,7 +108,10 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
    * para trabalhar com o custom-select component
    */
   protected form: FormGroup = this.formBuilderService.group({
-    owner: [''],
+    owner: this.formBuilderService.group({
+      id: [''],
+      name: [''],
+    }),
     plate: ['', Validators.required],
     brand: this.formBuilderService.group({
       id: [''],
@@ -135,6 +150,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     private brandService: BrandService,
     private modelService: ModelService,
     private colorService: ColorService,
+    private personService: PersonService,
     private toastrService: ToastrService
   ) {}
 
@@ -169,6 +185,27 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
         console.error('Erro ao carregar marcas:', error);
         this.toastrService.error('Erro ao carregar marcas');
         this.brandsLoaded = true;
+      },
+    });
+
+    // Carrega pessoas do backend
+    this.personService.getPaginatedData(0, 1000).subscribe({
+      next: (response) => {
+        console.log('Pessoas carregadas:', response);
+        if (response.page.totalElements > 0) {
+          this.persons = response.content.map((person) => ({
+            id: person.personId,
+            name: person.name,
+          }));
+        }
+        this.personsLoaded = true;
+        // Tenta preencher o formulário se já tiver dataForm
+        this.tryFillFormOnEdit();
+      },
+      error: (error) => {
+        console.error('Erro ao carregar pessoas:', error);
+        this.toastrService.error('Erro ao carregar pessoas');
+        this.personsLoaded = true;
       },
     });
 
@@ -246,12 +283,18 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
    * Só executa quando brands e colors já estiverem carregados
    */
   private tryFillFormOnEdit(): void {
-    // Verifica se tem dataForm e se brands e colors já foram carregados
-    if (!this.dataForm || !this.brandsLoaded || !this.colorsLoaded) {
+    // Verifica se tem dataForm e se brands, colors e persons já foram carregados
+    if (
+      !this.dataForm ||
+      !this.brandsLoaded ||
+      !this.colorsLoaded ||
+      !this.personsLoaded
+    ) {
       console.log('tryFillFormOnEdit - aguardando carregamento:', {
         hasDataForm: !!this.dataForm,
         brandsLoaded: this.brandsLoaded,
         colorsLoaded: this.colorsLoaded,
+        personsLoaded: this.personsLoaded,
       });
       return;
     }
@@ -274,10 +317,17 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       (c) => c.name === this.dataForm!.color
     );
 
+    // Para edição, busca o proprietário pelo ID
+    const selectedOwner = this.dataForm!.owner
+      ? this.persons.find((p) => p.id === this.dataForm!.owner)
+      : null;
+
     // Preenche o formulário com os dados do veículo
     this.form.patchValue({
       plate: this.dataForm!.plate || '',
-      owner: this.dataForm!.owner || '',
+      owner: selectedOwner
+        ? { id: selectedOwner.id, name: selectedOwner.name }
+        : { id: '', name: '' },
       brand: selectedBrand
         ? { id: selectedBrand.id, name: selectedBrand.name }
         : { id: '', name: '' },
@@ -366,6 +416,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Monta o payload para o backend (brand, model e color são Strings)
     const payload: any = {
       storeId: this.authService.getStoreId(),
+      ownerId: formValues.owner?.id || null, // ID do proprietário (UUID)
       plate: formValues.plate,
       brand: formValues.brand?.name || '', // Nome da marca (String)
       model: formValues.model?.name || '', // Nome do modelo (String)
@@ -478,5 +529,68 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   get colorControl(): FormGroup {
     return this.form.get('color') as FormGroup;
+  }
+
+  get ownerControl(): FormGroup {
+    return this.form.get('owner') as FormGroup;
+  }
+
+  /**
+   * Abre o drawer para criar nova pessoa
+   */
+  onCreateNewPerson() {
+    this.selectedPersonToEdit = null;
+    this.openPersonForm.set(true);
+  }
+
+  /**
+   * Abre o drawer para editar pessoa existente
+   */
+  onEditPerson(personId: string) {
+    // Busca a pessoa específica por ID (requisição otimizada)
+    this.personService.getById(personId).subscribe({
+      next: (person) => {
+        this.selectedPersonToEdit = person;
+        this.openPersonForm.set(true);
+      },
+      error: (error) => {
+        console.error('Erro ao carregar pessoa:', error);
+        this.toastrService.error('Erro ao carregar pessoa');
+      },
+    });
+  }
+
+  /**
+   * Fecha o drawer de pessoa
+   */
+  handleClosePersonDrawer() {
+    this.openPersonForm.set(false);
+    this.selectedPersonToEdit = null;
+  }
+
+  /**
+   * Callback quando o formulário de pessoa é submetido
+   */
+  onPersonFormSubmitted() {
+    // Recarrega a lista de pessoas
+    this.reloadPersons();
+    this.handleClosePersonDrawer();
+  }
+
+  /**
+   * Recarrega a lista de pessoas
+   */
+  private reloadPersons() {
+    this.personService.getPaginatedData(0, 1000).subscribe({
+      next: (response) => {
+        this.persons = response.content.map((person) => ({
+          id: person.personId,
+          name: person.name,
+        }));
+      },
+      error: (error) => {
+        console.error('Erro ao recarregar pessoas:', error);
+      },
+    });
   }
 }

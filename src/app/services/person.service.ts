@@ -22,10 +22,7 @@ export class PersonService {
 
   private readonly apiUrl: string = '/api/persons';
 
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) { }
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   // Observable público para componentes se inscreverem
   get cacheUpdated(): Observable<PaginationResponse<Person> | null> {
@@ -67,15 +64,17 @@ export class PersonService {
     }
   ): Observable<PaginationResponse<Person>> {
     // Se houver parâmetros de busca, não usa cache
-    const hasSearchParams = searchParams && Object.values(searchParams).some(value => value && value.trim());
-    
+    const hasSearchParams =
+      searchParams &&
+      Object.values(searchParams).some((value) => value && value.trim());
+
     if (this.cache && !hasSearchParams) {
       return of(this.cache);
     }
 
     // Monta a URL com os parâmetros
     let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
-    
+
     if (hasSearchParams && searchParams) {
       if (searchParams.name?.trim()) {
         url += `&name=${encodeURIComponent(searchParams.name.trim())}`;
@@ -94,28 +93,26 @@ export class PersonService {
       }
     }
 
-    return this.http
-      .get<PaginationResponse<Person>>(url)
-      .pipe(
-        first(),
-        tap((response) => {
-          console.log('✅ Resposta original do backend:', response);
-          
-          // Só atualiza o cache se não houver busca
-          if (!hasSearchParams) {
-            this.cache = response;
-            this.cache.content = this.filterByActive(this.cache.content);
-            this.cache.page.totalElements = this.cache.content.length;
+    return this.http.get<PaginationResponse<Person>>(url).pipe(
+      first(),
+      tap((response) => {
+        console.log('✅ Resposta original do backend:', response);
 
-            // Notifica sobre o carregamento inicial com uma nova referência
-            this.cacheUpdated$.next({ ...this.cache });
-          } else {
-            // Se houver busca, filtra mas não armazena em cache
-            response.content = this.filterByActive(response.content);
-            response.page.totalElements = response.content.length;
-          }
-        })
-      );
+        // Só atualiza o cache se não houver busca
+        if (!hasSearchParams) {
+          this.cache = response;
+          this.cache.content = this.filterByActive(this.cache.content);
+          this.cache.page.totalElements = this.cache.content.length;
+
+          // Notifica sobre o carregamento inicial com uma nova referência
+          this.cacheUpdated$.next({ ...this.cache });
+        } else {
+          // Se houver busca, filtra mas não armazena em cache
+          response.content = this.filterByActive(response.content);
+          response.page.totalElements = response.content.length;
+        }
+      })
+    );
   }
 
   create(data: Partial<Person>) {
@@ -135,7 +132,7 @@ export class PersonService {
     );
   }
 
-   delete(id: string) {
+  delete(id: string) {
     return this.http.delete<string>(`${this.apiUrl}/${id}`).pipe(
       tap((response: string) => {
         console.log('Cliente deletado com sucesso!', response);
@@ -147,6 +144,10 @@ export class PersonService {
   private clearCache() {
     this.cache = null;
     this.cacheUpdated$.next(null);
+  }
+
+  getById(id: string): Observable<Person> {
+    return this.http.get<Person>(`${this.apiUrl}/${id}`).pipe(first());
   }
 
   getUserRole(): string | null {

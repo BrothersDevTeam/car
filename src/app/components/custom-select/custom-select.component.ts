@@ -2,6 +2,8 @@ import {
   Component,
   HostListener,
   Input,
+  Output,
+  EventEmitter,
   OnChanges,
   OnInit,
   ChangeDetectorRef,
@@ -26,6 +28,7 @@ import { CriateElementConfirmDialogComponent } from '@components/dialogs/criate-
 import { BrandService } from '@services/brand.service';
 import { ModelService } from '@services/model.service';
 import { ColorService } from '@services/color.service';
+import { PersonService } from '@services/person.service';
 
 @Component({
   selector: 'app-custom-select',
@@ -37,11 +40,13 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   @Input() label: string = 'Selecione uma opção';
   @Input() options: { id: string; name: string }[] = [];
   @Input() control!: FormControl | FormGroup;
-  @Input() listType!: 'brand' | 'model' | 'color';
+  @Input() listType!: 'brand' | 'model' | 'color' | 'person';
   @Input() selectedBrand: { id: string; name: string } = { id: '', name: '' };
   @Input() matTooltip: string = '';
   @Input() placeholder: string = '';
   @Input() disabled: boolean = false;
+  @Output() onCreateNew = new EventEmitter<void>();
+  @Output() onEdit = new EventEmitter<string>(); // Emite o ID da pessoa a editar
 
   selectedOption: { id: string; name: string } | null = null;
   isOpen: boolean = false;
@@ -55,6 +60,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     private brandService: BrandService,
     private modelService: ModelService,
     private colorService: ColorService,
+    private personService: PersonService,
     private toastrService: ToastrService,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef
@@ -65,6 +71,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       brand: this.brandService,
       model: this.modelService,
       color: this.colorService,
+      person: this.personService,
     };
   }
 
@@ -158,6 +165,17 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   }
 
   typeListTexts = {
+    person: {
+      create: 'Adicionar novo proprietário',
+      update: 'Editar proprietário',
+      delete: 'Deletar proprietário',
+      message: 'Digite o nome do proprietário',
+      deleteMessage: 'Você tem certeza que deseja deletar este proprietário?',
+      successCreateMessage: 'Proprietário adicionado com sucesso!',
+      successUpdateMessage: 'Proprietário editado com sucesso!',
+      successDeleteMessage: 'Proprietário deletado com sucesso!',
+      errorMessage: 'Erro ao adicionar proprietário. Tente novamente.',
+    },
     brand: {
       create: 'Adicionar nova marca',
       update: 'Editar marca',
@@ -194,13 +212,20 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   };
 
   /**
-   * Cria um novo item baseado no tipo (brand, model, color, fuelType)
+   * Cria um novo item baseado no tipo (brand, model, color, person)
    */
   createNewItem() {
     const service = this.serviceMap[this.listType];
 
     if (!service) {
       console.error(`Serviço não encontrado para o tipo: ${this.listType}`);
+      return;
+    }
+
+    // Para person, emite evento para o componente pai abrir o drawer
+    if (this.listType === 'person') {
+      this.onCreateNew.emit();
+      this.closeDropdown();
       return;
     }
 
@@ -226,6 +251,13 @@ export class CustomSelectComponent implements OnInit, OnChanges {
 
     if (!service) {
       console.error(`Serviço não encontrado para o tipo: ${this.listType}`);
+      return;
+    }
+
+    // Para person, emite evento para o componente pai abrir o drawer
+    if (this.listType === 'person') {
+      this.onEdit.emit(option.id);
+      this.closeDropdown();
       return;
     }
 

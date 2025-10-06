@@ -37,6 +37,20 @@
       "
     />
 
+    <!-- Seleção de Proprietário -->
+    <div class="custom-selects-container">
+      <app-custom-select
+        listType="person"
+        [label]="'Proprietário'"
+        [options]="persons"
+        [control]="ownerControl"
+        placeholder="Selecione um proprietário"
+        matTooltip="Selecione o proprietário do veículo"
+        (onCreateNew)="onCreateNewPerson()"
+        (onEdit)="onEditPerson($event)"
+      ></app-custom-select>
+    </div>
+
     <!-- Seleção de Marca -->
     <div class="custom-selects-container">
       <app-custom-select
@@ -205,3 +219,29 @@
     {{ dataForm?.plate ? 'Editar' : 'Enviar' }}
   </button>
 </form>
+
+<!-- Drawer para criar/editar pessoa -->
+@if (openPersonForm()) {
+  <app-drawer (closeDrawer)="handleClosePersonDrawer()">
+    <mat-tab-group [selectedIndex]="selectedPersonToEdit?.legalEntity ? 1 : 0">
+      <mat-tab
+        label="Pessoa Física"
+        [disabled]="selectedPersonToEdit && selectedPersonToEdit.legalEntity"
+      >
+        <app-natural-person-form
+          [dataForm]="!selectedPersonToEdit?.legalEntity ? selectedPersonToEdit : null"
+          (formSubmitted)="onPersonFormSubmitted()"
+        />
+      </mat-tab>
+      <mat-tab
+        label="Pessoa Jurídica"
+        [disabled]="selectedPersonToEdit && !selectedPersonToEdit.legalEntity"
+      >
+        <app-legal-entity-form
+          [dataForm]="selectedPersonToEdit?.legalEntity ? selectedPersonToEdit : null"
+          (formSubmitted)="onPersonFormSubmitted()"
+        />
+      </mat-tab>
+    </mat-tab-group>
+  </app-drawer>
+}
