@@ -2,7 +2,15 @@ import { ToastrService } from 'ngx-toastr';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
@@ -11,10 +19,16 @@ import { VehicleForm } from '@interfaces/vehicle';
 import { VehicleService } from '@services/vehicle.service';
 import { PersonService } from '@services/person.service';
 import { Person } from '@interfaces/person';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-vehicle-info',
-  imports: [MatButtonModule, MatCardModule, WrapperCardComponent],
+  imports: [
+    MatButtonModule,
+    MatCardModule,
+    WrapperCardComponent,
+    MatIconModule,
+  ],
   templateUrl: './vehicle-info.component.html',
   styleUrl: './vehicle-info.component.scss',
 })

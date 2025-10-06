@@ -117,8 +117,11 @@
           </div>
         }
       } @else {
-        <div class="card-row">
-          <h3 class="label">Sem proprietário</h3>
+        <div class="no-owner-container">
+          <mat-icon class="no-owner-icon">person_off</mat-icon>
+          <h3 class="no-owner-title">Nenhum proprietário cadastrado</h3>
+          <p class="no-owner-message">Este veículo ainda não possui um proprietário vinculado.</p>
+          <p class="no-owner-instruction">Clique em <strong>Editar</strong> para adicionar um proprietário.</p>
         </div>
       }
     </app-wrapper-card>
