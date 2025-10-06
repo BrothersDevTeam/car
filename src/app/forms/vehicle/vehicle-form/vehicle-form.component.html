@@ -4,7 +4,7 @@
       <h2>Veículo placa: {{ dataForm!.plate }}</h2>
     </div>
   }
-  
+
   <app-wrapper-card>
     <!-- Origem do veículo -->
     <div class="radio-button-wrapper-container">
@@ -63,6 +63,18 @@
       ></app-custom-select>
     </div>
 
+    <!-- Seleção de Cor -->
+    <div class="custom-selects-container">
+      <app-custom-select
+        listType="colorDto"
+        [label]="'Cor'"
+        [options]="colors"
+        [control]="colorControl"
+        placeholder="Selecione uma cor"
+        matTooltip="Selecione a cor do veículo"
+      ></app-custom-select>
+    </div>
+
     <!-- Ano -->
     <app-primary-input
       formControlName="year"
@@ -82,18 +94,6 @@
       placeholder="0000/0000"
       mask="0000/0000"
     />
-
-    <!-- Seleção de Cor -->
-    <div class="custom-selects-container">
-      <app-custom-select
-        listType="colorDto"
-        [label]="'Cor'"
-        [options]="colors"
-        [control]="colorControl"
-        placeholder="Selecione uma cor"
-        matTooltip="Selecione a cor do veículo"
-      ></app-custom-select>
-    </div>
 
     <!-- Chassi -->
     <app-primary-input

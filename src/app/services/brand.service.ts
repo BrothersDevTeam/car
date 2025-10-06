@@ -5,7 +5,6 @@ import { BehaviorSubject, first, Observable, of, tap } from 'rxjs';
 
 import { Brand, CreateBrand } from '@interfaces/vehicle';
 import { PaginationResponse } from '@interfaces/pagination';
-import { BrandStatus } from '../enums/brandStatus';
 
 @Injectable({
   providedIn: 'root',
@@ -27,22 +26,20 @@ export class BrandService {
     return this.cacheUpdated$.asObservable();
   }
 
-  filterByActive(array: Brand[]) {
-    return array.filter((brand) => brand.status === BrandStatus.ACTIVE);
-  }
-
   getBrands(): Observable<PaginationResponse<Brand>> {
     if (this.cache) {
       return of(this.cache);
     }
     // Busca todos os registros (size=1000)
-    return this.http.get<PaginationResponse<Brand>>(`${this.apiUrl}?size=1000&status=ACTIVE`).pipe(
-      first(),
-      tap((response) => {
-        console.log('Brands fetched:', response);
-        this.cache = response;
-      })
-    );
+    return this.http
+      .get<PaginationResponse<Brand>>(`${this.apiUrl}?size=1000`)
+      .pipe(
+        first(),
+        tap((response) => {
+          console.log('Brands fetched:', response);
+          this.cache = response;
+        })
+      );
   }
 
   create(data: CreateBrand) {

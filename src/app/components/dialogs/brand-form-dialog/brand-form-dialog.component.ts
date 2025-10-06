@@ -1,4 +1,4 @@
-import { Component, inject, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -19,7 +19,6 @@ import {
   MatDialogTitle,
 } from '@angular/material/dialog';
 import { Brand } from '@interfaces/vehicle';
-import { BrandStatus } from '../../../enums/brandStatus';
 import { AuthService } from '@services/auth/auth.service';
 
 export interface BrandFormDialogData {
@@ -48,25 +47,6 @@ export interface BrandFormDialogData {
 })
 export class BrandFormDialogComponent implements OnInit {
   brandForm!: FormGroup;
-  brandStatuses = Object.values(BrandStatus);
-
-  countries: string[] = [
-    'Alemanha',
-    'Argentina',
-    'Brasil',
-    'China',
-    'Coreia do Sul',
-    'Espanha',
-    'Estados Unidos',
-    'França',
-    'Índia',
-    'Itália',
-    'Japão',
-    'Reino Unido',
-    'República Tcheca',
-    'Romênia',
-    'Suécia',
-  ].sort();
 
   constructor(
     private fb: FormBuilder,
@@ -79,7 +59,9 @@ export class BrandFormDialogComponent implements OnInit {
     this.initForm();
 
     if (this.data.mode === 'edit' && this.data.brand) {
-      this.brandForm.patchValue(this.data.brand);
+      this.brandForm.patchValue({
+        name: this.data.brand.name,
+      });
     }
   }
 
@@ -93,17 +75,6 @@ export class BrandFormDialogComponent implements OnInit {
           Validators.maxLength(100),
         ],
       ],
-      description: ['', [Validators.maxLength(500)]],
-      originCountry: ['', [Validators.required]],
-      logoUrl: [
-        '',
-        [
-          Validators.pattern(
-            /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
-          ),
-        ],
-      ],
-      status: [BrandStatus.ACTIVE, [Validators.required]],
     });
   }
 
@@ -117,15 +88,9 @@ export class BrandFormDialogComponent implements OnInit {
 
       let payload: any = {
         name: formValue.name,
-        description: formValue.description || '',
-        originCountry: formValue.originCountry,
-        logoUrl: formValue.logoUrl || null,
-        status: formValue.status,
         isGlobal: false, // Sempre false para marcas criadas pela loja
         storeId: this.authService.getStoreId(),
       };
-
-      console.log('Payload before ID addition:', payload);
 
       if (this.data.mode === 'edit' && this.data.brand) {
         payload = {
@@ -158,10 +123,6 @@ export class BrandFormDialogComponent implements OnInit {
     if (control?.hasError('maxlength')) {
       const maxLength = control.errors?.['maxlength'].requiredLength;
       return `Máximo de ${maxLength} caracteres`;
-    }
-
-    if (control?.hasError('pattern')) {
-      return 'URL inválida';
     }
 
     return '';

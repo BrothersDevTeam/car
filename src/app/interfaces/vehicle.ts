@@ -1,4 +1,3 @@
-import { BrandStatus } from '../enums/brandStatus';
 import { Person } from './person';
 
 /**
@@ -45,12 +44,9 @@ export interface Brand {
   brandId: string;
   storeId: string | null;
   name: string;
-  description: string;
-  originCountry: string;
-  logoUrl: string;
-  status: BrandStatus;
   isGlobal: boolean;
 }
+
 export type CreateBrand = Omit<Brand, 'brandId'>;
 
 /**
@@ -86,12 +82,8 @@ export interface Color {
   colorId: string;
   storeId?: string;
   isGlobal?: boolean;
-  name: string;              // Nome da cor (campo principal)
-  status?: string;           // Status (ACTIVE/INACTIVE)
-  createdAt?: string;
-  updatedAt?: string;
-  createdBy?: string;
-  updatedBy?: string;
+  name: string; // Nome da cor (campo principal)
+  status?: string; // Status (ACTIVE/INACTIVE)
 }
 
 /**
@@ -100,9 +92,9 @@ export interface Color {
  */
 export interface CreateColor {
   storeId?: string;
-  name: string;              // Nome obrigatório
-  status?: string;           // Status (default: ACTIVE)
-  isGlobal?: boolean;        // Se é cor global
+  name: string; // Nome obrigatório
+  status?: string; // Status (default: ACTIVE)
+  isGlobal?: boolean; // Se é cor global
 }
 
 /**
