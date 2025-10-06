@@ -20,6 +20,33 @@
         padding: 12px;
         width: 100%;
         background-color: var(--gray-secondary-bg);
+
+        /**
+         * CRITICAL FIX: Remove estilos de autocomplete do navegador
+         * Alguns navegadores aplicam cores azuis em campos de email e senha
+         */
+        &:-webkit-autofill,
+        &:-webkit-autofill:hover,
+        &:-webkit-autofill:focus,
+        &:-webkit-autofill:active {
+          -webkit-box-shadow: 0 0 0 30px var(--gray-secondary-bg) inset !important;
+          -webkit-text-fill-color: var(--text-color) !important;
+          box-shadow: 0 0 0 30px var(--gray-secondary-bg) inset !important;
+        }
+
+        // Firefox
+        &:-moz-autofill,
+        &:-moz-autofill:hover,
+        &:-moz-autofill:focus {
+          background-color: var(--gray-secondary-bg) !important;
+          color: var(--text-color) !important;
+        }
+
+        // Edge e outros navegadores
+        &:autofill {
+          background-color: var(--gray-secondary-bg) !important;
+          color: var(--text-color) !important;
+        }
       }
     }
 

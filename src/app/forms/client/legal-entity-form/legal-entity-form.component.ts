@@ -62,6 +62,12 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
   @Output() formSubmitted = new EventEmitter<void>();
   @Output() formChanged = new EventEmitter<boolean>();
 
+  /**
+   * Formulário reativo para cadastro/edição de pessoa jurídica
+   * 
+   * IMPORTANTE: relationshipTypes começa VAZIO e só recebe valor padrão
+   * [CLIENTE] se estiver CRIANDO uma nova pessoa (não editando).
+   */
   protected form = this.formBuilderService.group({
     name: [this.dataForm?.name || '', Validators.required],
     nickName: [''],
@@ -74,14 +80,14 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
     storeId: [''],
     legalEntity: [true],
     relationshipTypes: this.formBuilderService.control<RelationshipTypes[]>(
-      [RelationshipTypes.CLIENTE],
+      [], // ← Começa VAZIO
       {
         validators: [minLengthArray(1)],
       }
     ),
     username: [''],
     password: [''],
-    confirmPassword: [''], // NOVO campo
+    confirmPassword: [''],
     roleName: [''],
   });
 
@@ -125,6 +131,13 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
   ) { }
 
   ngOnInit() {
+    /**
+     * Define o valor padrão de relationshipTypes apenas se NÃO estiver editando
+     */
+    if (!this.dataForm) {
+      this.form.get('relationshipTypes')?.setValue([RelationshipTypes.CLIENTE]);
+    }
+
     // Adiciona o validator de senha no formulário
     this.form.setValidators(this.passwordMatchValidator.bind(this));
 
@@ -192,19 +205,42 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
+  /**
+   * Detecta mudanças no @Input dataForm (quando está editando)
+   * 
+   * IMPORTANTE: O backend envia 'relationships', mapeamos para 'relationshipTypes'!
+   */
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
+      console.log('[legal-entity-form] dataForm recebido:', this.dataForm);
+      console.log('[legal-entity-form] relationshipTypes do banco:', this.dataForm.relationshipTypes);
+      console.log('[legal-entity-form] relationships do banco:', (this.dataForm as any).relationships);
+      
+      /**
+       * Mapeia relationships do backend para relationshipTypes do frontend
+       */
+      const relationshipsFromBackend = (this.dataForm as any).relationships || [];
+      const relationshipTypes = relationshipsFromBackend.map((rel: any) => rel.relationshipName);
+      
+      console.log('[legal-entity-form] relationshipTypes mapeado:', relationshipTypes);
+      
+      /**
+       * Aumentado o timeout para garantir sincronização com as opções
+       */
       setTimeout(() => {
         this.form.patchValue({
           name: this.dataForm!.name || '',
-          relationshipTypes: this.dataForm!.relationshipTypes || [RelationshipTypes.CLIENTE],
+          relationshipTypes: relationshipTypes.length > 0 ? relationshipTypes : [],
           nickName: this.dataForm!.nickName || '',
           email: this.dataForm!.email || '',
           phone: this.dataForm!.phone || '',
           cnpj: this.dataForm!.cnpj || '',
           ie: this.dataForm!.ie || '',
         });
-      });
+        
+        console.log('[legal-entity-form] Formulário após patchValue:', this.form.value);
+        console.log('[legal-entity-form] relationshipTypes após patchValue:', this.form.get('relationshipTypes')?.value);
+      }, 200);
     }
   }
 

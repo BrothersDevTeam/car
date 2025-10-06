@@ -2,50 +2,130 @@
   <label [for]="inputName">{{label}}</label>
   <div class="input-container">
     <div class="input-content">
-      <div class="select-container" (click)="toggleDropdown()">
+      <!-- 
+        Container do select
+        
+        IMPORTANTE: Navegação por teclado:
+        - ↓ / ↑ : Navega entre as opções
+        - ESPAÇO: Marca/desmarca a opção focada
+        - ENTER: Seleciona e fecha (apenas seleção única)
+        - ESC: Fecha o dropdown
+        - HOME/END: Vai para primeira/última opção
+        
+        Atributos ARIA para acessibilidade:
+        - role="combobox": Identifica como combo box
+        - aria-haspopup="listbox": Indica que abre uma lista
+        - aria-expanded: Informa se está aberto ou fechado
+        - aria-controls: Liga ao ID do listbox
+      -->
+      <div 
+        class="select-container" 
+        (click)="toggleDropdown()"
+        role="combobox"
+        [attr.aria-expanded]="isOpen"
+        [attr.aria-haspopup]="'listbox'"
+        [attr.aria-controls]="'dropdown-' + inputName"
+        tabindex="0"
+      >
         <input
           [id]="inputName"
           [placeholder]="placeholder"
           [value]="getDisplayValue()"
           readonly
           class="select-input"
+          [attr.aria-label]="label"
         />
         <span class="dropdown-arrow" [class.rotated]="isOpen">▼</span>
       </div>
 
+      <!-- 
+        Dropdown com as opções
+        
+        ARIA: role="listbox" identifica como lista de opções
+      -->
       @if (isOpen) {
-        <div class="dropdown-options">
+        <div 
+          class="dropdown-options"
+          role="listbox"
+          [id]="'dropdown-' + inputName"
+          [attr.aria-multiselectable]="allowMultiple"
+        >
+          <!-- 
+            MODO MÚLTIPLO: Checkboxes
+            Permite selecionar várias opções
+          -->
           @if (allowMultiple) {
             @for (option of options; track $index) {
               <div
                 class="option-item"
-                (click)="toggleOption(option)"
                 [class.selected]="isSelected(option)"
+                [class.keyboard-focused]="isFocused($index)"
+                (click)="toggleOption(option)"
+                role="option"
+                [attr.aria-selected]="isSelected(option)"
+                [attr.tabindex]="-1"
               >
+                <!-- 
+                  Checkbox visual
+                  O click é tratado no div pai para melhor UX
+                -->
                 <input
                   type="checkbox"
                   [checked]="isSelected(option)"
                   (click)="$event.stopPropagation()"
+                  tabindex="-1"
+                  [attr.aria-hidden]="true"
                 />
                 <span>{{ getOptionLabel(option) }}</span>
+                
+                <!-- 
+                  Indicador visual de foco do teclado
+                  Ajuda o usuário a ver qual opção está focada
+                -->
+                @if (isFocused($index)) {
+                  <span class="keyboard-focus-indicator" aria-hidden="true">◄</span>
+                }
               </div>
             }
-          } @else {
+          } 
+          
+          <!-- 
+            MODO ÚNICO: Seleção simples
+            Apenas uma opção pode ser selecionada
+          -->
+          @else {
             @for (option of options; track $index) {
               <div
                 class="option-item"
-                (click)="selectSingleOption(option)"
                 [class.selected]="isSelected(option)"
+                [class.keyboard-focused]="isFocused($index)"
+                (click)="selectSingleOption(option)"
+                role="option"
+                [attr.aria-selected]="isSelected(option)"
+                [attr.tabindex]="-1"
               >
                 <span>{{ getOptionLabel(option) }}</span>
+                
+                <!-- 
+                  Indicador visual de foco do teclado
+                -->
+                @if (isFocused($index)) {
+                  <span class="keyboard-focus-indicator" aria-hidden="true">◄</span>
+                }
               </div>
             }
           }
         </div>
       }
 
+      <!-- Slot para conteúdo adicional projetado -->
       <ng-content></ng-content>
     </div>
+    
+    <!-- 
+      Mensagem de erro
+      Exibida quando há validação inválida
+    -->
     @if (error) {
       <p class="invalid-field-message">Campo inválido</p>
     }

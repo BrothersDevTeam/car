@@ -2,6 +2,20 @@
   <label [for]="inputName">{{label}}</label>
   <div class="input-container">
     <div class="input-content">
+      <!-- 
+        Input principal do componente
+        
+        IMPORTANTE sobre o uppercase:
+        - Usa [(ngModel)] para two-way binding
+        - (ngModelChange) chama onModelChange onde aplica o uppercase
+        - O uppercase é aplicado ANTES de notificar o FormControl
+        - Por padrão uppercase=true, exceto quando explicitamente [uppercase]="false"
+        
+        Segurança:
+        - maxlength previne inputs muito longos
+        - disabled desabilita o campo quando necessário
+        - mask aplica formatação usando ngx-mask
+      -->
       <input
         [id]="inputName"
         [type]="type"
@@ -11,11 +25,21 @@
         [attr.maxlength]="maxlength"
         [attr.required]="required ? '' : null"
         [disabled]="disabled"
-        (ngModelChange)="onChange($event)"
+        (ngModelChange)="onModelChange($event)"
         (blur)="onBlur($event)"
       />
+      <!-- 
+        Slot para conteúdo projetado (ícones, botões, etc)
+        Exemplo: <mat-icon>search</mat-icon>
+      -->
       <ng-content></ng-content>
     </div>
+    
+    <!-- 
+      Mensagem de erro condicional
+      Exibida quando o input @Input error está true
+      Geralmente controlado pelas validações do FormControl
+    -->
     @if (error) {
       <p class="invalid-field-message">Campo inválido</p>
     }

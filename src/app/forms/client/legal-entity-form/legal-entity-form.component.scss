@@ -1,9 +1,22 @@
+/**
+ * ESTILOS: Formulário de Pessoa Jurídica
+ * 
+ * Layout otimizado com campos lado a lado para economizar espaço
+ * vertical e melhorar a experiência do usuário.
+ * 
+ * ESTRATÉGIA DE LAYOUT:
+ * - Campos relacionados ficam na mesma linha
+ * - Layout em pares: 2 campos por linha (50% cada)
+ * - Layout responsivo: em telas pequenas, campos empilham verticalmente
+ */
+
 form {
   display: flex;
   flex-direction: column;
   gap: 24px;
   padding: 24px;
 
+  // Estilos para cabeçalho com ação de deletar
   .title-trash {
     display: flex;
     justify-content: space-between;
@@ -14,11 +27,13 @@ form {
     }
   }
 
+  // Botão principal de submit
   .submit-btn {
     background-color: var(--primary-color);
     color: white;
   }
 
+  // Botão de busca de CEP
   .search-icon-btn {
     display: flex;
     position: absolute;
@@ -37,23 +52,242 @@ form {
     }
   }
 
-  // Novo: Container para campos de senha lado a lado
-  .password-fields-container {
+  /**
+   * LAYOUTS DE GRID
+   * 
+   * Sistema flexível para organizar campos em linha
+   * com diferentes proporções de espaço
+   */
+
+  // Layout de 2 colunas iguais (50/50)
+  .form-row-2cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+    width: 100%;
 
-    // Em telas pequenas, empilha os campos
+    // Responsivo: empilha em telas menores que 768px
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
       gap: 0;
     }
   }
 
+  // Layout de 3 colunas iguais (33/33/33)
+  .form-row-3cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+
+    // Responsivo: 2 colunas em tablets
+    @media (max-width: 1024px) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    // Responsivo: empilha em mobile
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+
+  /**
+   * Layout de 4 colunas iguais (25/25/25/25)
+   * 
+   * Padrão uniforme para campos de mesma importância
+   */
+  .form-row-4cols {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    width: 100%;
+
+    // Responsivo: 2 colunas em tablets (1024px - 768px)
+    @media (max-width: 1024px) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    // Responsivo: empilha em mobile (<768px)
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+
+  /**
+   * Container genérico para linhas com proporções customizadas
+   */
+  .form-row {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+
+    // Responsivo: empilha em telas pequenas
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+
+  /**
+   * CLASSES DE PROPORÇÃO
+   * 
+   * Definem a largura dos campos dentro de um .form-row
+   * Baseadas em porcentagens para máxima flexibilidade
+   */
+
+  // Campo ocupa 20% da largura
+  .col-20 {
+    flex: 0 0 calc(20% - 8px);
+    min-width: 0;
+
+    @media (max-width: 768px) {
+      flex: 1 1 100%;
+    }
+  }
+
+  // Campo ocupa 25% da largura
+  .col-25 {
+    flex: 0 0 calc(25% - 8px);
+    min-width: 0;
+
+    @media (max-width: 768px) {
+      flex: 1 1 100%;
+    }
+  }
+
+  // Campo ocupa 30% da largura
+  .col-30 {
+    flex: 0 0 calc(30% - 8px);
+    min-width: 0;
+
+    @media (max-width: 768px) {
+      flex: 1 1 100%;
+    }
+  }
+
+  // Campo ocupa 40% da largura
+  .col-40 {
+    flex: 0 0 calc(40% - 8px);
+    min-width: 0;
+
+    @media (max-width: 768px) {
+      flex: 1 1 100%;
+    }
+  }
+
+  // Campo ocupa 45% da largura
+  .col-45 {
+    flex: 0 0 calc(45% - 8px);
+    min-width: 0;
+
+    @media (max-width: 768px) {
+      flex: 1 1 100%;
+    }
+  }
+
+  // Campo ocupa 50% da largura
+  .col-50 {
+    flex: 0 0 calc(50% - 8px);
+    min-width: 0;
+
+    @media (max-width: 768px) {
+      flex: 1 1 100%;
+    }
+  }
+
+  // Campo ocupa 55% da largura
+  .col-55 {
+    flex: 0 0 calc(55% - 8px);
+    min-width: 0;
+
+    @media (max-width: 768px) {
+      flex: 1 1 100%;
+    }
+  }
+
+  // Campo ocupa 60% da largura
+  .col-60 {
+    flex: 0 0 calc(60% - 8px);
+    min-width: 0;
+
+    @media (max-width: 768px) {
+      flex: 1 1 100%;
+    }
+  }
+
+  // Campo ocupa 70% da largura
+  .col-70 {
+    flex: 0 0 calc(70% - 8px);
+    min-width: 0;
+
+    @media (max-width: 768px) {
+      flex: 1 1 100%;
+    }
+  }
+
+  // Campo ocupa 75% da largura
+  .col-75 {
+    flex: 0 0 calc(75% - 8px);
+    min-width: 0;
+
+    @media (max-width: 768px) {
+      flex: 1 1 100%;
+    }
+  }
+
+  // Campo ocupa 80% da largura
+  .col-80 {
+    flex: 0 0 calc(80% - 8px);
+    min-width: 0;
+
+    @media (max-width: 768px) {
+      flex: 1 1 100%;
+    }
+  }
+
+  /**
+   * MENSAGENS DE ERRO
+   * 
+   * Estilo consistente para feedback de validação
+   */
   .error-message {
     color: #d32f2f;
     font-size: 0.875rem;
     margin-top: -16px;
     margin-bottom: 8px;
+    padding-left: 4px;
+    font-weight: 500;
+  }
+
+  /**
+   * ACESSIBILIDADE
+   * 
+   * Garantir que o layout seja utilizável por todos
+   */
+
+  // Aumenta o alvo de toque em dispositivos móveis
+  @media (max-width: 768px) {
+    button,
+    input,
+    select {
+      min-height: 44px;
+    }
+  }
+
+  // Suporte para modo de alto contraste
+  @media (prefers-contrast: high) {
+    .error-message {
+      font-weight: 700;
+      text-decoration: underline;
+    }
+  }
+
+  // Suporte para preferência de movimento reduzido
+  @media (prefers-reduced-motion: reduce) {
+    .search-icon-btn {
+      transition: none;
+    }
   }
 }

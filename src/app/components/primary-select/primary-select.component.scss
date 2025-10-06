@@ -1,5 +1,20 @@
 @use 'abstracts/variables' as *;
 
+/**
+ * Estilos do Componente Primary Select
+ * 
+ * @description
+ * Estilos para o componente de select customizado com suporte
+ * completo à navegação por teclado e acessibilidade.
+ * 
+ * @features
+ * - Design moderno e responsivo
+ * - Feedback visual para hover e seleção
+ * - Indicador visual de foco por teclado
+ * - Transições suaves
+ * - Scroll interno para listas longas
+ */
+
 .input-wrapper {
   color: var(--text-color);
   font-size: 16px;
@@ -19,11 +34,26 @@
       align-items: stretch;
       position: relative;
 
+      /**
+       * Container do input/select
+       * Contém o input readonly e a seta do dropdown
+       */
       .select-container {
         display: flex;
         align-items: center;
         position: relative;
         cursor: pointer;
+        border-radius: 8px;
+        transition: box-shadow 0.2s ease;
+
+        /**
+         * Estado de foco para acessibilidade por teclado
+         * Mostra um outline quando focado via Tab
+         */
+        &:focus-visible {
+          outline: 2px solid var(--primary-color);
+          outline-offset: 2px;
+        }
 
         .select-input {
           border: none;
@@ -33,13 +63,29 @@
           background-color: var(--gray-secondary-bg);
           cursor: pointer;
           padding-right: 40px; // Espaço para a seta
+          font-size: 16px;
+          color: var(--text-color);
+          
+          /**
+           * Remove outline padrão quando clicado
+           * pois já temos feedback visual no container
+           */
+          &:focus {
+            outline: none;
+          }
         }
 
+        /**
+         * Seta do dropdown
+         * Rotaciona quando o dropdown está aberto
+         */
         .dropdown-arrow {
           position: absolute;
           right: 12px;
           transition: transform 0.2s ease;
           pointer-events: none;
+          font-size: 14px;
+          color: var(--text-color);
 
           &.rotated {
             transform: rotate(180deg);
@@ -47,6 +93,15 @@
         }
       }
 
+      /**
+       * Container das opções do dropdown
+       * 
+       * Layout e comportamento:
+       * - Posicionamento absoluto abaixo do input
+       * - Scroll vertical para listas longas
+       * - Box shadow para profundidade
+       * - Z-index alto para aparecer sobre outros elementos
+       */
       .dropdown-options {
         position: absolute;
         top: 100%;
@@ -54,30 +109,101 @@
         right: 0;
         background-color: var(--gray-secondary-bg);
         border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         z-index: 1000;
-        max-height: 200px;
+        max-height: 250px;
         overflow-y: auto;
         margin-top: 4px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
 
+        /**
+         * Customização da scrollbar para melhor UX
+         */
+        &::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 4px;
+
+          &:hover {
+            background: rgba(0, 0, 0, 0.3);
+          }
+        }
+
+        /**
+         * Item individual de opção
+         * 
+         * Estados:
+         * - Normal: Background padrão
+         * - Hover: Background mais claro (interação com mouse)
+         * - Keyboard-focused: Border destacado (navegação por teclado)
+         * - Selected: Background azul (item selecionado)
+         */
         .option-item {
           padding: 12px;
           cursor: pointer;
           display: flex;
           align-items: center;
           gap: 8px;
-          transition: background-color 0.2s ease;
+          transition: all 0.2s ease;
+          position: relative;
+          min-height: 44px; // Altura mínima para boa área de toque (mobile)
 
+          /**
+           * Estado de hover (mouse)
+           * Background levemente mais escuro
+           */
           &:hover {
             background-color: $hover-bg;
           }
 
+          /**
+           * Estado de foco via TECLADO
+           * 
+           * IMPORTANTE: Este é o feedback visual para navegação por setas
+           * Diferente do hover, usa um border mais destacado
+           */
+          &.keyboard-focused {
+            background-color: rgba(var(--primary-color-rgb), 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding-left: 8px; // Compensa o border
+            
+            /**
+             * Quando focado E selecionado, mantém o azul mas com border
+             */
+            &.selected {
+              background-color: var(--primary-color);
+              border-left: 4px solid white;
+            }
+          }
+
+          /**
+           * Estado de SELECIONADO
+           * Background azul primário com texto branco
+           */
           &.selected {
             background-color: var(--primary-color);
             color: white;
             font-weight: 500;
+
+            /**
+             * Checkbox também fica branco quando selecionado
+             */
+            input[type="checkbox"] {
+              accent-color: white;
+            }
           }
 
+          /**
+           * Border radius para primeira e última opção
+           * Mantém o dropdown com cantos arredondados
+           */
           &:first-child {
             border-radius: 8px 8px 0 0;
           }
@@ -90,22 +216,139 @@
             border-radius: 8px;
           }
 
+          /**
+           * Estilização do checkbox (modo múltiplo)
+           */
           input[type="checkbox"] {
             margin: 0;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-color);
           }
 
+          /**
+           * Label da opção
+           * Ocupa todo o espaço disponível
+           */
           span {
             flex: 1;
+            user-select: none; // Previne seleção de texto ao navegar
+          }
+
+          /**
+           * Indicador visual de foco do teclado
+           * 
+           * IMPORTANTE: Ajuda o usuário a identificar visualmente
+           * qual opção está focada ao usar as setas do teclado.
+           * Aparece apenas quando a opção está keyboard-focused.
+           */
+          .keyboard-focus-indicator {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 18px;
+            animation: pulse 1.5s ease-in-out infinite;
+            margin-left: auto;
+            
+            /**
+             * Quando a opção está selecionada, o indicador fica branco
+             */
+            .option-item.selected & {
+              color: white;
+            }
           }
         }
       }
     }
 
+    /**
+     * Mensagem de erro de validação
+     * Aparece quando o campo está inválido
+     */
     .invalid-field-message {
       color: var(--error-color);
       font-size: small;
       align-self: flex-end;
       margin-top: 4px;
+      font-weight: 500;
     }
   }
 }
+
+/**
+ * Animação de pulse para o indicador de foco
+ * 
+ * @description
+ * Faz o indicador "◄" pulsar suavemente para chamar
+ * atenção do usuário sobre qual item está focado
+ */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateX(-3px);
+  }
+}
+
+/**
+ * Estilos responsivos para dispositivos móveis
+ */
+@media (max-width: 768px) {
+  .input-wrapper {
+    .input-content {
+      .dropdown-options {
+        /**
+         * Em mobile, reduz um pouco a altura máxima
+         * para não ocupar toda a tela
+         */
+        max-height: 200px;
+
+        .option-item {
+          /**
+           * Aumenta o padding em mobile para melhor
+           * área de toque (touch targets)
+           */
+          padding: 14px;
+          min-height: 48px;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Modo escuro (se implementado)
+ * Descomente quando tiver suporte a dark mode
+ */
+/*
+@media (prefers-color-scheme: dark) {
+  .input-wrapper {
+    .input-content {
+      .select-container {
+        .select-input {
+          background-color: var(--dark-bg-secondary);
+          color: var(--dark-text-color);
+        }
+      }
+
+      .dropdown-options {
+        background-color: var(--dark-bg-secondary);
+        border-color: rgba(255, 255, 255, 0.1);
+
+        .option-item {
+          &:hover {
+            background-color: var(--dark-hover-bg);
+          }
+
+          &.keyboard-focused {
+            background-color: rgba(var(--primary-color-rgb), 0.2);
+          }
+        }
+      }
+    }
+  }
+}
+*/

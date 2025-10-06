@@ -2,26 +2,54 @@
   [formGroup]="form"
   (keydown.enter)="onEnter($event)"
 >
+  <!-- Seção: Dados Pessoais -->
   <app-wrapper-card title="Dados pessoais">
-    <app-primary-input
-      formControlName="name"
-      label="Nome completo"
-      inputName="name"
-      type="text"
-      [error]="
-        form.get('name')?.invalid && (form.get('name')?.touched || submitted)
-      "
-    />
+    
+   
+    <div class="form-row-2cols">
+      <app-primary-input
+        formControlName="name"
+        label="Nome completo *"
+        inputName="name"
+        type="text"
+        [error]="
+          form.get('name')?.invalid && (form.get('name')?.touched || submitted)
+        "
+      />
+        <app-primary-select
+        label="Tipo *"
+        placeholder="Selecione"
+        inputName="relationshipTypes"
+        [allowMultiple]="true"
+        formControlName="relationshipTypes"
+        [error]="submitted && form.get('relationshipTypes')?.invalid"
+      ></app-primary-select>      
+    
+    </div>
 
-    <!-- Tipos de Relacionamento -->
-    <app-primary-select
-      label="Tipos de Relacionamento *"
-      placeholder="Selecione os tipos"
-      inputName="relationshipTypes"
-      [allowMultiple]="true"
-      formControlName="relationshipTypes"
-      [error]="submitted && form.get('relationshipTypes')?.invalid"
-    ></app-primary-select>
+ 
+    <div class="form-row-2cols">
+      <app-primary-input
+        formControlName="nickName"
+        label="Apelido"
+        inputName="nickName"
+        type="text"
+        placeholder="Como deseja ser chamado?"
+      />  
+
+      <app-primary-input
+        formControlName="cpf"
+        label="CPF"
+        inputName="cpf"
+        type="text"
+        placeholder="000.000.000-00"
+        mask="000.000.000-00"
+        appCpfValidator
+        [error]="
+          form.get('cpf')?.invalid && (form.get('cpf')?.touched || submitted)
+        "
+      />
+    </div>
 
     <!-- Mensagem de erro para relationshipTypes -->
     @if (submitted && form.get('relationshipTypes')?.invalid) {
@@ -30,63 +58,79 @@
     </div>
     }
 
-    <app-primary-input
-      formControlName="nickName"
-      label="Apelido"
-      inputName="nickName"
-      type="text"
-      placeholder="Como deseja ser chamado?"
-    />
-    <app-primary-input
-      formControlName="email"
-      label="Email"
-      inputName="email"
-      type="email"
-      placeholder="exemplo@email.com"
-      [error]="
-        form.get('contact.email')?.invalid &&
-        (form.get('contact.email')?.touched || submitted)
-      "
-    />
-    <app-primary-input
-      formControlName="phone"
-      label="Celular"
-      inputName="phone"
-      type="tel"
-      placeholder="(00) 00000-0000"
-      mask="(00) 00000-0000"
-    />
-    <app-primary-input
-      formControlName="cpf"
-      label="CPF"
-      inputName="cpf"
-      type="text"
-      placeholder="000.000.000-00"
-      mask="000.000.000-00"
-      appCpfValidator
-      [error]="
-        form.get('cpf')?.invalid && (form.get('cpf')?.touched || submitted)
-      "
-    />
+    <!-- 
+      Layout: Email + Celular (2 campos em uma linha - 50% cada)
+      Dados de contato agrupados
+    -->
+    <div class="form-row-2cols">
+      <app-primary-input
+        formControlName="email"
+        label="Email"
+        inputName="email"
+        type="email"
+        placeholder="exemplo@email.com"
+        [error]="
+          form.get('contact.email')?.invalid &&
+          (form.get('contact.email')?.touched || submitted)
+        "
+      />
+      
+      <app-primary-input
+        formControlName="phone"
+        label="Celular"
+        inputName="phone"
+        type="tel"
+        placeholder="(00) 00000-0000"
+        mask="(00) 00000-0000"
+      />
+    </div>
+
   </app-wrapper-card>
 
-@if (shouldShowUserFields) {
+  <!-- 
+    Seção condicional: Dados de Acesso ao Sistema
+    Só aparece para FUNCIONARIO, PROPRIETARIO ou CONTADOR
+  -->
+  @if (shouldShowUserFields) {
   <app-wrapper-card title="Dados de Acesso ao Sistema">
-    <app-primary-input
-      formControlName="username"
-      label="Nome de usuário *"
-      inputName="username"
-      type="text"
-      [uppercase]="false"
-      placeholder="Digite o nome de usuário"
-      [error]="
-        form.get('username')?.invalid &&
-        (form.get('username')?.touched || submitted)
-      "
-    />
+    
+    <!-- 
+      Layout: Nome de Usuário + Função (2 campos - 50% cada)
+      Primeira linha de dados de acesso
+    -->
+    <div class="form-row-2cols">
+      <app-primary-input
+        formControlName="username"
+        label="Nome de usuário *"
+        inputName="username"
+        type="text"
+        [uppercase]="false"
+        placeholder="Digite o nome de usuário"
+        [error]="
+          form.get('username')?.invalid &&
+          (form.get('username')?.touched || submitted)
+        "
+      />
 
-    <!-- Container para os campos de senha lado a lado -->
-    <div class="password-fields-container">
+      <app-primary-select
+        label="Função no Sistema *"
+        placeholder="Selecione a função"
+        inputName="roleName"
+        formControlName="roleName"
+        [error]="submitted && form.get('roleName')?.invalid"
+        [options]="[
+          { value: 'ROLE_MANAGER', label: 'Gerente' },
+          { value: 'ROLE_SELLER', label: 'Vendedor' },
+          { value: 'ROLE_FINANCIAL', label: 'Financeiro' }
+        ]"
+      />
+    </div>
+
+    <!-- 
+      Layout: Senha + Confirmar Senha (2 campos - 50% cada)
+      Segunda linha de dados de acesso
+    -->
+    <div class="form-row-2cols">
       <app-primary-input
         formControlName="password"
         label="Senha *"
@@ -122,20 +166,7 @@
     </div>
     }
 
-    <app-primary-select
-      label="Função no Sistema *"
-      placeholder="Selecione a função"
-      inputName="roleName"
-      formControlName="roleName"
-      [error]="submitted && form.get('roleName')?.invalid"
-      [options]="[
-        { value: 'ROLE_MANAGER', label: 'Gerente' },
-        { value: 'ROLE_SELLER', label: 'Vendedor' },
-        { value: 'ROLE_FINANCIAL', label: 'Financeiro' }
-      ]"
-    />
-
-    <!-- Mensagens de erro -->
+    <!-- Mensagens de erro consolidadas -->
     @if (submitted && form.get('username')?.invalid) {
     <div class="error-message">
       Nome de usuário é obrigatório (mínimo 3 caracteres)
@@ -160,64 +191,93 @@
     </div>
     }
   </app-wrapper-card>
-}
+  }
+
+  <!--
+    Seção de Endereço (comentada)
+    Quando for habilitada, também usa o layout otimizado
+  -->
   <!--
   <app-wrapper-card title="Endereço">
     <div formGroupName="address">
-      <app-primary-input
-        formControlName="zipcode"
-        label="Código Postal"
-        inputName="zipcode"
-        placeholder="00000-000"
-        mask="00000-000"
-        type="text"
-        [error]="
-          form.get('address.zipcode')?.invalid &&
-          (form.get('address.zipcode')?.touched || submitted)"
-      >
-        <button class="search-icon-btn" (click)="getAddressByCep()" [disabled]="!isCepValid()" [class.is-active]="isCepValid()">
-          <mat-icon class="search-icon">search</mat-icon>
-        </button>
-      </app-primary-input>
+      
+      Layout sugerido: CEP (40%) + Rua (60%)
+      <div class="form-row">
+        <div class="col-40">
+          <app-primary-input
+            formControlName="zipcode"
+            label="CEP"
+            inputName="zipcode"
+            placeholder="00000-000"
+            mask="00000-000"
+            type="text"
+            [error]="
+              form.get('address.zipcode')?.invalid &&
+              (form.get('address.zipcode')?.touched || submitted)"
+          >
+            <button class="search-icon-btn" (click)="getAddressByCep()" [disabled]="!isCepValid()" [class.is-active]="isCepValid()">
+              <mat-icon class="search-icon">search</mat-icon>
+            </button>
+          </app-primary-input>
+        </div>
 
-      <app-primary-input
-        formControlName="street"
-        label="Rua"
-        inputName="street"
-        type="text"
-      ></app-primary-input>
-      <app-primary-input
-        formControlName="number"
-        label="Número"
-        inputName="number"
-        type="text"
-      ></app-primary-input>
-      <app-primary-input
-        formControlName="complement"
-        label="Complemento"
-        inputName="complement"
-        type="text"
-      ></app-primary-input>
+        <div class="col-60">
+          <app-primary-input
+            formControlName="street"
+            label="Rua"
+            inputName="street"
+            type="text"
+          ></app-primary-input>
+        </div>
+      </div>
+
+      Layout: Número + Complemento (2 campos - 50% cada)
+      <div class="form-row-2cols">
+        <app-primary-input
+          formControlName="number"
+          label="Número"
+          inputName="number"
+          type="text"
+        ></app-primary-input>
+
+        <app-primary-input
+          formControlName="complement"
+          label="Complemento"
+          inputName="complement"
+          type="text"
+        ></app-primary-input>
+      </div>
+
+      Layout: Bairro + Cidade (2 campos - 50% cada)
+      <div class="form-row-2cols">
+        <app-primary-input
+          formControlName="neighborhood"
+          label="Bairro"
+          inputName="neighborhood"
+          type="text"
+        ></app-primary-input>
+
+        <app-primary-input
+          formControlName="city"
+          label="Cidade"
+          inputName="city"
+          type="text"
+        ></app-primary-input>
+      </div>
+
+      Layout: Estado (última linha)
       <app-primary-input
         formControlName="state"
         label="Estado"
         inputName="state"
         type="text"
       ></app-primary-input>
-      <app-primary-input
-        formControlName="city"
-        label="Cidade"
-        inputName="city"
-        type="text"
-      ></app-primary-input>
-      <app-primary-input
-        formControlName="neighborhood"
-        label="Bairro"
-        inputName="neighborhood"
-        type="text"
-      ></app-primary-input>
+
     </div>
-  </app-wrapper-card> -->
+  </app-wrapper-card>
+  -->
+
+  <!-- Botão de submit -->
   <button
     mat-raised-button
     type="button"

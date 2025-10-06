@@ -64,6 +64,13 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   @Output() formSubmitted = new EventEmitter<void>();
   @Output() formChanged = new EventEmitter<boolean>();
 
+  /**
+   * Formulário reativo para cadastro/edição de pessoa física
+   * 
+   * IMPORTANTE: relationshipTypes começa VAZIO e só recebe valor padrão
+   * [CLIENTE] se estiver CRIANDO uma nova pessoa (não editando).
+   * Isso garante que ao editar, o valor venha do banco de dados.
+   */
   protected form = this.formBuilderService.group({
     name: ['', Validators.required],
     nickName: [''],
@@ -76,7 +83,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     storeId: [''],
     legalEntity: [false],
     relationshipTypes: this.formBuilderService.control<RelationshipTypes[]>(
-      [RelationshipTypes.CLIENTE],
+      [], // ← Começa VAZIO, valor padrão será setado no ngOnInit
       {
         validators: [minLengthArray(1)],
       }
@@ -127,6 +134,16 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   ) { }
 
   ngOnInit() {
+    /**
+     * Define o valor padrão de relationshipTypes apenas se NÃO estiver editando
+     * Isso garante que:
+     * - Ao CRIAR: Campo começa com [CLIENTE]
+     * - Ao EDITAR: Campo começa vazio e será preenchido pelo ngOnChanges
+     */
+    if (!this.dataForm) {
+      this.form.get('relationshipTypes')?.setValue([RelationshipTypes.CLIENTE]);
+    }
+
     // Adiciona o validator de senha no formulário
     this.form.setValidators(this.passwordMatchValidator.bind(this));
 
@@ -194,12 +211,46 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     this.subscriptions.unsubscribe();
   }
 
+  /**
+   * Detecta mudanças no @Input dataForm (quando está editando)
+   * 
+   * @param changes - Mudanças detectadas pelo Angular
+   * 
+   * @description
+   * Quando dataForm é preenchido (modo EDIÇÃO), preenche o formulário
+   * com os dados do banco.
+   * 
+   * IMPORTANTE: O backend envia 'relationships' mas o frontend usa 'relationshipTypes'.
+   * Precisamos fazer o mapeamento correto!
+   */
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
+      console.log('[natural-person-form] dataForm recebido:', this.dataForm);
+      console.log('[natural-person-form] relationshipTypes do banco:', this.dataForm.relationshipTypes);
+      console.log('[natural-person-form] relationships do banco:', (this.dataForm as any).relationships);
+      
+      /**
+       * CORREÇÃO CRÍTICA: O backend retorna um array 'relationships' com objetos:
+       * relationships: [{relationshipId: '...', relationshipName: 'FUNCIONARIO'}]
+       * 
+       * Mas o frontend precisa de um array simples de strings:
+       * relationshipTypes: ['FUNCIONARIO']
+       * 
+       * Fazemos o mapeamento aqui!
+       */
+      const relationshipsFromBackend = (this.dataForm as any).relationships || [];
+      const relationshipTypes = relationshipsFromBackend.map((rel: any) => rel.relationshipName);
+      
+      console.log('[natural-person-form] relationshipTypes mapeado:', relationshipTypes);
+      
+      /**
+       * Aumentado o timeout para garantir que as opções do select
+       * já foram carregadas antes de aplicar o valor
+       */
       setTimeout(() => {
         this.form.patchValue({
           name: this.dataForm!.name || '',
-          relationshipTypes: this.dataForm!.relationshipTypes || [RelationshipTypes.CLIENTE],
+          relationshipTypes: relationshipTypes.length > 0 ? relationshipTypes : [],
           nickName: this.dataForm!.nickName || '',
           email: this.dataForm!.email || '',
           phone: this.dataForm!.phone || '',
@@ -207,7 +258,10 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
           rg: this.dataForm!.rg || '',
           rgIssuer: this.dataForm!.rgIssuer || '',
         });
-      });
+        
+        console.log('[natural-person-form] Formulário após patchValue:', this.form.value);
+        console.log('[natural-person-form] relationshipTypes após patchValue:', this.form.get('relationshipTypes')?.value);
+      }, 200);
     }
   }
 
