@@ -221,10 +221,6 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           (c) => c.name === this.dataForm!.color
         );
 
-        console.log('Editando veículo:', this.dataForm);
-        console.log('Marca encontrada:', selectedBrand);
-        console.log('Cor encontrada:', selectedColor);
-
         this.form.patchValue({
           plate: this.dataForm!.plate || '',
           owner: this.dataForm!.owner || '',
@@ -315,9 +311,6 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
         delete payload[key];
       }
     });
-
-    console.log('Payload enviado ao backend:', payload);
-    console.log('Cor no payload:', payload.color);
 
     // Cria ou atualiza o veículo
     if (this.dataForm?.vehicleId) {

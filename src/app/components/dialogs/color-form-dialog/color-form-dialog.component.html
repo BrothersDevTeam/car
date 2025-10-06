@@ -1,35 +1,20 @@
 <div class="color-form-dialog">
   <h2 mat-dialog-title>{{ data.title }}</h2>
-  
+
   <mat-dialog-content>
     <form [formGroup]="colorForm" class="color-form">
-      
+
       <!-- Nome da Cor -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Nome da Cor *</mat-label>
-        <input 
-          matInput 
-          formControlName="name" 
+        <input
+          matInput
+          formControlName="name"
           placeholder="Ex: Preto, Branco, Azul Metalizado"
           maxlength="100"
         />
         @if (colorForm.get('name')?.invalid && colorForm.get('name')?.touched) {
           <mat-error>{{ getErrorMessage('name') }}</mat-error>
-        }
-      </mat-form-field>
-
-      <!-- Status -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Status *</mat-label>
-        <mat-select formControlName="status">
-          @for (status of colorStatuses; track status.value) {
-            <mat-option [value]="status.value">
-              {{ status.label }}
-            </mat-option>
-          }
-        </mat-select>
-        @if (colorForm.get('status')?.invalid && colorForm.get('status')?.touched) {
-          <mat-error>{{ getErrorMessage('status') }}</mat-error>
         }
       </mat-form-field>
 
@@ -40,10 +25,10 @@
     <button mat-button (click)="onCancel()" type="button">
       Cancelar
     </button>
-    <button 
-      mat-raised-button 
-      color="primary" 
-      (click)="onSubmit()" 
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmit()"
       type="button"
       [disabled]="colorForm.invalid"
     >

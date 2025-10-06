@@ -5,7 +5,12 @@ import {
   OnChanges,
   OnInit,
 } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  FormsModule,
+} from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
@@ -32,7 +37,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   @Input() label: string = 'Selecione uma opção';
   @Input() options: { id: string; name: string }[] = [];
   @Input() control!: FormControl | FormGroup;
-  @Input() listType!: 'brand' | 'model' | 'colorDto' | 'fuelTypeDto';
+  @Input() listType!: 'brand' | 'model' | 'color';
   @Input() selectedBrand: { id: string; name: string } = { id: '', name: '' };
   @Input() matTooltip: string = '';
   @Input() placeholder: string = '';
@@ -59,8 +64,8 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     this.serviceMap = {
       brand: this.brandService,
       model: this.modelService,
-      colorDto: this.colorService,
-      fuelTypeDto: this.fuelTypeService,
+      color: this.colorService,
+      fuelType: this.fuelTypeService,
     };
   }
 
@@ -147,7 +152,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       successDeleteMessage: 'Modelo deletado com sucesso!',
       errorMessage: 'Erro ao adicionar modelo. Tente novamente.',
     },
-    colorDto: {
+    color: {
       create: 'Adicionar nova cor',
       update: 'Editar cor',
       delete: 'Deletar cor',
@@ -157,18 +162,6 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       successUpdateMessage: 'Cor editada com sucesso!',
       successDeleteMessage: 'Cor deletada com sucesso!',
       errorMessage: 'Erro ao adicionar cor. Tente novamente.',
-    },
-    fuelTypeDto: {
-      create: 'Adicionar novo tipo de combustível',
-      update: 'Editar tipo de combustível',
-      delete: 'Deletar tipo de combustível',
-      message: 'Digite o nome do tipo de combustível',
-      deleteMessage:
-        'Você tem certeza que deseja deletar este tipo de combustível?',
-      successCreateMessage: 'Tipo de combustível adicionado com sucesso!',
-      successUpdateMessage: 'Tipo de combustível editado com sucesso!',
-      successDeleteMessage: 'Tipo de combustível deletado com sucesso!',
-      errorMessage: 'Erro ao adicionar tipo de combustível. Tente novamente.',
     },
   };
 
@@ -188,10 +181,9 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       this.openBrandDialog('create');
     } else if (this.listType === 'model') {
       this.openModelDialog('create');
-    } else if (this.listType === 'colorDto') {
+    } else if (this.listType === 'color') {
       this.openColorDialog('create');
     } else {
-      // Para FuelType, usar dialog simples
       this.openSimpleDialog('create', service);
     }
   }
@@ -218,7 +210,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       this.loadFullModelData(option.id).then((fullModel) => {
         this.openModelDialog('edit', fullModel);
       });
-    } else if (this.listType === 'colorDto') {
+    } else if (this.listType === 'color') {
       this.loadFullColorData(option.id).then((fullColor) => {
         this.openColorDialog('edit', fullColor);
       });
@@ -392,8 +384,8 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       data: {
         title:
           mode === 'create'
-            ? this.typeListTexts.colorDto.create
-            : `${this.typeListTexts.colorDto.update}: ${option?.name}`,
+            ? this.typeListTexts.color.create
+            : `${this.typeListTexts.color.update}: ${option?.name}`,
         mode: mode,
         color: mode === 'edit' ? option : undefined,
       },
@@ -407,12 +399,12 @@ export class CustomSelectComponent implements OnInit, OnChanges {
             next: (response: any) => {
               this.reloadColors();
               this.toastrService.success(
-                this.typeListTexts.colorDto.successCreateMessage
+                this.typeListTexts.color.successCreateMessage
               );
             },
             error: (error: any) => {
               console.error('Erro ao criar cor:', error);
-              this.toastrService.error(this.typeListTexts.colorDto.errorMessage);
+              this.toastrService.error(this.typeListTexts.color.errorMessage);
             },
           });
         } else {
@@ -420,14 +412,12 @@ export class CustomSelectComponent implements OnInit, OnChanges {
             next: (response: any) => {
               this.reloadColors();
               this.toastrService.success(
-                this.typeListTexts.colorDto.successUpdateMessage
+                this.typeListTexts.color.successUpdateMessage
               );
             },
             error: (error: any) => {
               console.error('Erro ao editar cor:', error);
-              this.toastrService.error(
-                'Erro ao editar cor. Tente novamente.'
-              );
+              this.toastrService.error('Erro ao editar cor. Tente novamente.');
             },
           });
         }
@@ -460,12 +450,12 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       if (inputValue) {
         if (mode === 'create') {
           const createPayload = { description: inputValue };
-          
+
           service.create(createPayload).subscribe({
             next: (response: any) => {
               const newOption = {
                 id: response.id,
-                name: response.description
+                name: response.description,
               };
               this.options.push(newOption);
               this.filteredOptions = [...this.options];
@@ -482,14 +472,14 @@ export class CustomSelectComponent implements OnInit, OnChanges {
           });
         } else {
           const updatePayload = { id: option.id, description: inputValue };
-          
+
           service.update(updatePayload).subscribe({
             next: (response: any) => {
               const index = this.options.findIndex((o) => o.id === option.id);
               if (index !== -1) {
                 this.options[index] = {
                   id: response.id,
-                  name: response.description
+                  name: response.description,
                 };
                 this.filteredOptions = [...this.options];
               }
@@ -572,7 +562,9 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     return new Promise((resolve, reject) => {
       this.brandService.getBrands().subscribe({
         next: (response) => {
-          const fullBrand = response.content.find((b: any) => b.brandId === brandId);
+          const fullBrand = response.content.find(
+            (b: any) => b.brandId === brandId
+          );
           if (fullBrand) {
             resolve(fullBrand);
           } else {
@@ -595,7 +587,9 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       if (this.selectedBrand?.id) {
         this.modelService.getModelsByBrand(this.selectedBrand.id).subscribe({
           next: (response) => {
-            const fullModel = response.content.find((m: any) => m.modelId === modelId);
+            const fullModel = response.content.find(
+              (m: any) => m.modelId === modelId
+            );
             if (fullModel) {
               resolve(fullModel);
             } else {
@@ -620,7 +614,9 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     return new Promise((resolve, reject) => {
       this.colorService.getColors().subscribe({
         next: (response) => {
-          const fullColor = response.content.find((c: any) => c.colorId === colorId);
+          const fullColor = response.content.find(
+            (c: any) => c.colorId === colorId
+          );
           if (fullColor) {
             resolve(fullColor);
           } else {
@@ -640,13 +636,13 @@ export class CustomSelectComponent implements OnInit, OnChanges {
    */
   onSearch(): void {
     const term = this.searchTerm.toLowerCase().trim();
-    
+
     if (!term) {
       this.filteredOptions = [...this.options];
       return;
     }
 
-    this.filteredOptions = this.options.filter(option =>
+    this.filteredOptions = this.options.filter((option) =>
       option.name.toLowerCase().includes(term)
     );
   }
@@ -664,12 +660,12 @@ export class CustomSelectComponent implements OnInit, OnChanges {
    */
   onMouseLeaveDropdown(event: MouseEvent): void {
     const target = event.relatedTarget as HTMLElement;
-    const dropdown = (event.currentTarget as HTMLElement);
-    
+    const dropdown = event.currentTarget as HTMLElement;
+
     if (target && dropdown.contains(target)) {
       return;
     }
-    
+
     this.closeDropdown();
   }
 }
