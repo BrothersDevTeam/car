@@ -119,7 +119,6 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     engineNumber: [''],
     km: [''],
     vehicleType: [''],
-    age: [''],
     species: [''],
     category: [''],
     features: [''],
@@ -265,10 +264,6 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    console.log('Preenchendo formulário para edição...');
-    console.log('Colors disponíveis:', this.colors);
-    console.log('Dados do veículo:', this.dataForm);
-
     // Para edição, busca a marca pelo nome
     const selectedBrand = this.brands.find(
       (b) => b.name === this.dataForm!.brand
@@ -299,7 +294,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       engineNumber: this.dataForm!.engineNumber || '',
       km: this.dataForm!.km || '',
       vehicleType: this.dataForm!.vehicleType || '',
-      age: this.dataForm!.age || '',
+      species: this.dataForm!.species || '',
       category: this.dataForm!.category || '',
       features: this.dataForm!.features || '',
       fuelTypes: this.dataForm!.fuelTypes || [], // Tipos de combustível
@@ -384,7 +379,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       engineNumber: formValues.engineNumber || '',
       km: formValues.km || '',
       vehicleType: formValues.vehicleType || '',
-      age: formValues.age || '',
+      species: formValues.species || '',
       category: formValues.category || '',
       features: formValues.features || '',
       origin: formValues.origin || 'NACIONAL',

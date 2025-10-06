@@ -21,7 +21,7 @@ export interface Vehicle {
   engineNumber: string;
   km: string;
   vehicleType: string;
-  age: string;
+  species?: string;
   category?: string;
   features?: string;
   fuelTypes: FuelTypes[];
