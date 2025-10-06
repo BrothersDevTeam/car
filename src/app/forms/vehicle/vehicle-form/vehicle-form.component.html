@@ -75,6 +75,18 @@
       ></app-custom-select>
     </div>
 
+    <!-- Tipos de Combustível (múltipla seleção) -->
+    <app-primary-select
+      formControlName="fuelTypes"
+      label="Tipos de Combustível"
+      inputName="fuelTypes"
+      placeholder="Selecione os tipos de combustível"
+      [options]="fuelTypesOptions"
+      [allowMultiple]="true"
+      optionValue="value"
+      optionLabel="label"
+    ></app-primary-select>
+
     <!-- Ano -->
     <app-primary-input
       formControlName="vehicleYear"
@@ -186,6 +198,7 @@
       inputName="features"
       type="text"
     />
+
   </app-wrapper-card>
 
   <!-- Botão de submit -->

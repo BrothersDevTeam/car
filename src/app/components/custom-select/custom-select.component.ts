@@ -4,6 +4,7 @@ import {
   Input,
   OnChanges,
   OnInit,
+  ChangeDetectorRef,
 } from '@angular/core';
 import {
   FormControl,
@@ -55,7 +56,8 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     private modelService: ModelService,
     private colorService: ColorService,
     private toastrService: ToastrService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -69,12 +71,20 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   ngOnChanges(): void {
     if (this.options.length > 0) {
       this.filteredOptions = [...this.options];
-      this.setSelectedOption();
-    } else {
+      // Aguarda o ciclo de detecção de mudanças para pegar o valor correto do control
       setTimeout(() => {
-        this.filteredOptions = [...this.options];
         this.setSelectedOption();
-      }, 0);
+        this.cdr.detectChanges(); // Força detecção de mudanças
+      }, 100); // Aumentado para 100ms
+    } else {
+      // Aguarda um pouco para as opções carregarem
+      setTimeout(() => {
+        if (this.options.length > 0) {
+          this.filteredOptions = [...this.options];
+          this.setSelectedOption();
+          this.cdr.detectChanges();
+        }
+      }, 150);
     }
   }
 
@@ -85,9 +95,30 @@ export class CustomSelectComponent implements OnInit, OnChanges {
         null;
     } else if (this.control instanceof FormGroup) {
       const value = this.control.value;
+
+      // Se o valor está vazio (id e name vazios), não faz nada
+      if (
+        (!value.id && !value.name) ||
+        (value.id === '' && value.name === '')
+      ) {
+        return;
+      }
+
       if (value && value.id) {
         this.selectedOption =
           this.options.find((option) => option.id === value.id) || null;
+      } else if (value && value.name && !value.id) {
+        // Se só tem name, busca pela name
+        this.selectedOption =
+          this.options.find((option) => option.name === value.name) || null;
+      }
+
+      // Log final
+      if (this.selectedOption) {
+        console.log(
+          `[${this.listType}] ✅ selectedOption SETADO:`,
+          this.selectedOption
+        );
       }
     }
   }

@@ -24,7 +24,7 @@ export interface Vehicle {
   age: string;
   category?: string;
   features?: string;
-  fuelTypes?: FuelTypes[];
+  fuelTypes: FuelTypes[];
   origin?: string;
 }
 

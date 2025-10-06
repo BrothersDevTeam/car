@@ -27,11 +27,12 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatRadioModule } from '@angular/material/radio';
 
 import { ToastrService } from 'ngx-toastr';
-import { distinctUntilChanged, Subscription } from 'rxjs';
+import { distinctUntilChanged, forkJoin, Subscription } from 'rxjs';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
+import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
 import { VehicleForm } from '@interfaces/vehicle';
@@ -42,10 +43,13 @@ import { ModelService } from '@services/model.service';
 import { ColorService } from '@services/color.service';
 import { AuthService } from '@services/auth/auth.service';
 
+import { FuelTypes, FuelTypesLabels } from '../../../enums/fuelTypes';
+
 @Component({
   selector: 'app-vehicle-form',
   imports: [
     PrimaryInputComponent,
+    PrimarySelectComponent,
     ReactiveFormsModule,
     WrapperCardComponent,
     MatButtonModule,
@@ -65,6 +69,14 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   brands: { id: string; name: string }[] = [];
   models: { id: string; name: string }[] = [];
   colors: { id: string; name: string }[] = [];
+
+  // Flags para controlar o carregamento
+  private brandsLoaded = false;
+  private colorsLoaded = false;
+  private formFilled = false; // Flag para garantir preenchimento único
+
+  // Opções de tipos de combustível
+  fuelTypesOptions: { value: string; label: string }[] = [];
 
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
@@ -111,7 +123,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     species: [''],
     category: [''],
     features: [''],
-    fuelTypes: [''],
+    fuelTypes: [[]], // Array de FuelTypes
     origin: ['NACIONAL'],
   });
 
@@ -128,6 +140,12 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Carrega opções de tipos de combustível do enum
+    this.fuelTypesOptions = Object.values(FuelTypes).map((fuelType) => ({
+      value: fuelType,
+      label: FuelTypesLabels[fuelType],
+    }));
+
     // Monitora mudanças no formulário
     this.form.valueChanges.subscribe(() => {
       const isDirty = this.form.dirty;
@@ -144,10 +162,14 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
             name: brand.name,
           }));
         }
+        this.brandsLoaded = true;
+        // Tenta preencher o formulário se já tiver dataForm
+        this.tryFillFormOnEdit();
       },
       error: (error) => {
         console.error('Erro ao carregar marcas:', error);
         this.toastrService.error('Erro ao carregar marcas');
+        this.brandsLoaded = true;
       },
     });
 
@@ -161,10 +183,14 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
             name: color.name, // Usar o campo 'name' do backend
           }));
         }
+        this.colorsLoaded = true;
+        // Tenta preencher o formulário se já tiver dataForm
+        this.tryFillFormOnEdit();
       },
       error: (error) => {
         console.error('Erro ao carregar cores:', error);
         this.toastrService.error('Erro ao carregar cores');
+        this.colorsLoaded = true;
       },
     });
 
@@ -209,41 +235,106 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
-      setTimeout(() => {
-        // Para edição, busca a marca pelo nome
-        const selectedBrand = this.brands.find(
-          (b) => b.name === this.dataForm!.brand
-        );
+      // Reset da flag quando recebe novo dataForm
+      this.formFilled = false;
+      // Tenta preencher o formulário (só executa se brands e colors já foram carregados)
+      this.tryFillFormOnEdit();
+    }
+  }
 
-        // Para edição, busca a cor pelo nome
-        const selectedColor = this.colors.find(
-          (c) => c.name === this.dataForm!.color
-        );
+  /**
+   * Tenta preencher o formulário para edição
+   * Só executa quando brands e colors já estiverem carregados
+   */
+  private tryFillFormOnEdit(): void {
+    // Verifica se tem dataForm e se brands e colors já foram carregados
+    if (!this.dataForm || !this.brandsLoaded || !this.colorsLoaded) {
+      console.log('tryFillFormOnEdit - aguardando carregamento:', {
+        hasDataForm: !!this.dataForm,
+        brandsLoaded: this.brandsLoaded,
+        colorsLoaded: this.colorsLoaded,
+      });
+      return;
+    }
 
-        this.form.patchValue({
-          plate: this.dataForm!.plate || '',
-          owner: this.dataForm!.owner || '',
-          brand: selectedBrand
-            ? { id: selectedBrand.id, name: selectedBrand.name }
-            : { id: '', name: '' },
-          model: { id: '', name: this.dataForm!.model || '' },
-          vehicleYear: this.dataForm!.vehicleYear || '',
-          modelYear: this.dataForm!.modelYear || '',
-          color: selectedColor
-            ? { id: selectedColor.id, name: selectedColor.name }
-            : { id: '', name: '' },
-          chassis: this.dataForm!.chassis || '',
-          renavam: this.dataForm!.renavam || '',
-          doors: this.dataForm!.doors || '',
-          horsepower: this.dataForm!.horsepower || '',
-          engineNumber: this.dataForm!.engineNumber || '',
-          km: this.dataForm!.km || '',
-          vehicleType: this.dataForm!.vehicleType || '',
-          age: this.dataForm!.age || '',
-          category: this.dataForm!.category || '',
-          features: this.dataForm!.features || '',
-          origin: this.dataForm!.origin || 'NACIONAL',
-        });
+    // Se já preencheu uma vez, não preenche novamente
+    if (this.formFilled) {
+      console.log(
+        'tryFillFormOnEdit - formulário já foi preenchido, ignorando'
+      );
+      return;
+    }
+
+    console.log('Preenchendo formulário para edição...');
+    console.log('Colors disponíveis:', this.colors);
+    console.log('Dados do veículo:', this.dataForm);
+
+    // Para edição, busca a marca pelo nome
+    const selectedBrand = this.brands.find(
+      (b) => b.name === this.dataForm!.brand
+    );
+
+    // Para edição, busca a cor pelo nome
+    const selectedColor = this.colors.find(
+      (c) => c.name === this.dataForm!.color
+    );
+
+    // Preenche o formulário com os dados do veículo
+    this.form.patchValue({
+      plate: this.dataForm!.plate || '',
+      owner: this.dataForm!.owner || '',
+      brand: selectedBrand
+        ? { id: selectedBrand.id, name: selectedBrand.name }
+        : { id: '', name: '' },
+      model: { id: '', name: this.dataForm!.model || '' },
+      vehicleYear: this.dataForm!.vehicleYear || '',
+      modelYear: this.dataForm!.modelYear || '',
+      color: selectedColor
+        ? { id: selectedColor.id, name: selectedColor.name }
+        : { id: '', name: '' },
+      chassis: this.dataForm!.chassis || '',
+      renavam: this.dataForm!.renavam || '',
+      doors: this.dataForm!.doors || '',
+      horsepower: this.dataForm!.horsepower || '',
+      engineNumber: this.dataForm!.engineNumber || '',
+      km: this.dataForm!.km || '',
+      vehicleType: this.dataForm!.vehicleType || '',
+      age: this.dataForm!.age || '',
+      category: this.dataForm!.category || '',
+      features: this.dataForm!.features || '',
+      fuelTypes: this.dataForm!.fuelTypes || [], // Tipos de combustível
+      origin: this.dataForm!.origin || 'NACIONAL',
+    });
+
+    // Marca que o formulário foi preenchido
+    this.formFilled = true;
+
+    // Se houver uma marca selecionada, carrega os modelos
+    if (selectedBrand && selectedBrand.id) {
+      this.modelService.getModelsByBrand(selectedBrand.id).subscribe({
+        next: (response) => {
+          this.models = response.content.map((model) => ({
+            id: model.modelId,
+            name: model.name,
+          }));
+          this.selectModelDisabled.set(false);
+
+          // Após carregar os modelos, busca o modelo selecionado
+          const selectedModel = this.models.find(
+            (m) => m.name === this.dataForm!.model
+          );
+
+          if (selectedModel) {
+            this.modelControl.patchValue({
+              id: selectedModel.id,
+              name: selectedModel.name,
+            });
+          }
+        },
+        error: (error) => {
+          console.error('Erro ao carregar modelos:', error);
+          this.selectModelDisabled.set(true);
+        },
       });
     }
   }
