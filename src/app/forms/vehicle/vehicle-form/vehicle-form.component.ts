@@ -14,7 +14,6 @@ import {
 } from '@angular/core';
 import {
   FormBuilder,
-  FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
@@ -95,7 +94,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       id: [''],
       name: [''],
     }),
-    year: [''],
+    vehicleYear: [''],
     modelYear: [''],
     color: this.formBuilderService.group({
       id: [''],
@@ -228,7 +227,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
             ? { id: selectedBrand.id, name: selectedBrand.name }
             : { id: '', name: '' },
           model: { id: '', name: this.dataForm!.model || '' },
-          year: this.dataForm!.year || '',
+          vehicleYear: this.dataForm!.vehicleYear || '',
           modelYear: this.dataForm!.modelYear || '',
           color: selectedColor
             ? { id: selectedColor.id, name: selectedColor.name }
@@ -284,7 +283,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       plate: formValues.plate,
       brand: formValues.brand?.name || '', // Nome da marca (String)
       model: formValues.model?.name || '', // Nome do modelo (String)
-      year: formValues.year || '',
+      vehicleYear: formValues.vehicleYear || '',
       modelYear: formValues.modelYear || '',
       color: formValues.color?.name || '', // Nome da cor (String)
       chassis: formValues.chassis || '',

@@ -22,7 +22,6 @@ import { ModelFormDialogComponent } from '@components/dialogs/model-form-dialog/
 import { ColorFormDialogComponent } from '@components/dialogs/color-form-dialog/color-form-dialog.component';
 import { CriateElementConfirmDialogComponent } from '@components/dialogs/criate-element-dialog/criate-element-dialog.component';
 
-import { FuelTypeService } from '@services/fuel-type.service';
 import { BrandService } from '@services/brand.service';
 import { ModelService } from '@services/model.service';
 import { ColorService } from '@services/color.service';
@@ -55,7 +54,6 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     private brandService: BrandService,
     private modelService: ModelService,
     private colorService: ColorService,
-    private fuelTypeService: FuelTypeService,
     private toastrService: ToastrService,
     private dialog: MatDialog
   ) {}
@@ -65,7 +63,6 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       brand: this.brandService,
       model: this.modelService,
       color: this.colorService,
-      fuelType: this.fuelTypeService,
     };
   }
 

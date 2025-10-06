@@ -48,11 +48,6 @@ export interface ColorFormDialogData {
 export class ColorFormDialogComponent implements OnInit {
   colorForm!: FormGroup;
 
-  // colorStatuses = [
-  //   { value: 'ACTIVE', label: 'Ativo' },
-  //   { value: 'INACTIVE', label: 'Inativo' },
-  // ];
-
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -66,7 +61,6 @@ export class ColorFormDialogComponent implements OnInit {
     if (this.data.mode === 'edit' && this.data.color) {
       this.colorForm.patchValue({
         name: this.data.color.name,
-        // status: this.data.color.status || 'ACTIVE',
       });
     }
   }
@@ -81,7 +75,6 @@ export class ColorFormDialogComponent implements OnInit {
           Validators.maxLength(100),
         ],
       ],
-      // status: ['ACTIVE', [Validators.required]],
     });
   }
 
@@ -95,7 +88,6 @@ export class ColorFormDialogComponent implements OnInit {
 
       let payload: any = {
         name: formValue.name,
-        // status: formValue.status,
         isGlobal: false, // Sempre false para cores criadas pela loja
         storeId: this.authService.getStoreId(),
       };

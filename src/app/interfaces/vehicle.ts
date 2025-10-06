@@ -1,3 +1,4 @@
+import { FuelTypes } from '../enums/fuelTypes';
 import { Person } from './person';
 
 /**
@@ -10,7 +11,7 @@ export interface Vehicle {
   plate: string;
   brand: string; // String - nome da marca
   model: string; // String - nome do modelo
-  year: string;
+  vehicleYear: string;
   modelYear?: string;
   color: string;
   chassis: string;
@@ -23,7 +24,7 @@ export interface Vehicle {
   age: string;
   category?: string;
   features?: string;
-  fuelTypes: string[];
+  fuelTypes?: FuelTypes[];
   origin?: string;
 }
 
@@ -67,12 +68,6 @@ export interface Model {
 export type CreateModel = Omit<Model, 'modelId'> & {
   brandId: string;
 };
-
-export interface FuelType {
-  id: string;
-  description: string;
-}
-export type CreateFuelType = Omit<FuelType, 'id'>;
 
 /**
  * Interface para Color (cor de veículo)
