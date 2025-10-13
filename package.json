@@ -5,8 +5,8 @@
     "ng": "ng",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "start:dev": "ng serve --proxy-config proxy.conf.json",
-    "start": "ng serve --proxy-config proxy.conf.prod.json",
+    "start:dev": "ng serve --proxy-config proxy.conf.dev.json",
+    "start": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build",
     "build:prod": "ng build --configuration=production"
   },
