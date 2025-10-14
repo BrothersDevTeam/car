@@ -31,7 +31,7 @@ import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confi
 import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
-import type { createNfe, Nfe, TipoNfe } from '@interfaces/nfe';
+import type { Nfe, NaturezaOperacao } from '@interfaces/nfe';
 import type { Person } from '@interfaces/person';
 import { Vehicle } from '@interfaces/vehicle';
 
@@ -58,20 +58,23 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   vehicles: Vehicle[] = [];
   persons: Person[] = [];
-  tiposNfeEntrada: { value: TipoNfe; label: string }[] = [
+  tiposNfeEntrada: { value: NaturezaOperacao; label: string }[] = [
     {
-      value: 'COMPRA DE VEICULO USADO' as TipoNfe,
+      value: 'COMPRA DE VEICULO USADO' as NaturezaOperacao,
       label: 'Compra de Veículo Usado',
     },
     {
-      value: 'ENTRADA EM CONSIGNAÇÃO' as TipoNfe,
+      value: 'ENTRADA EM CONSIGNAÇÃO' as NaturezaOperacao,
       label: 'Entrada em Consignação',
     },
     {
-      value: 'ENTRADA COMPRA DEFINITIVA' as TipoNfe,
+      value: 'ENTRADA COMPRA DEFINITIVA' as NaturezaOperacao,
       label: 'Entrada Compra Definitiva',
     },
-    { value: 'DEVOLUÇÃO DE VENDA' as TipoNfe, label: 'Devolução de Venda' },
+    {
+      value: 'DEVOLUÇÃO DE VENDA' as NaturezaOperacao,
+      label: 'Devolução de Venda',
+    },
   ];
 
   readonly dialog = inject(MatDialog);
@@ -85,9 +88,10 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   @Output() formChanged = new EventEmitter<boolean>();
 
   protected form: FormGroup = this.formBuilderService.group({
-    idVeiculo: ['', Validators.required],
-    idDestinatario: ['', Validators.required],
-    tipo: ['', Validators.required],
+    storeId: [''],
+    vehicleId: ['', Validators.required],
+    personId: ['', Validators.required],
+    nfeNaturezaOperacao: ['', Validators.required],
   });
 
   constructor(
@@ -125,9 +129,9 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     if (changes['dataForm'] && this.dataForm) {
       setTimeout(() => {
         this.form.patchValue({
-          idVeiculo: this.dataForm!.idVeiculo || '',
-          idDestinatario: this.dataForm!.idDestinatario || '',
-          tipo: this.dataForm!.tipo || '',
+          vehicleId: [{ vehicleId: this.dataForm!.vehicleId || '' }],
+          personId: this.dataForm!.personId || '',
+          nfeNaturezaOperacao: this.dataForm!.nfeNaturezaOperacao || '',
         });
       });
     }
@@ -157,13 +161,15 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    const formValues: createNfe = {
-      idVeiculo: this.form.value.idVeiculo,
-      idDestinatario: this.form.value.idDestinatario,
-      tipo: this.form.value.tipo,
+    const formValues: Nfe = {
+      storeId: '03980353-4b98-4409-94b1-441d6d6baa28', //TODO: Ajustar para pegar a loja correta
+      nfeItens: [{ vehicleId: this.form.value.vehicleId }],
+      personId: this.form.value.personId,
+      nfeTipoDocumento: this.form.value.nfeTipoDocumento,
+      nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
     };
 
-    if (this.dataForm?.id) {
+    if (this.dataForm?.nfeId) {
       // Edição
       this.nfeService.update({ ...this.dataForm, ...formValues }).subscribe({
         next: () => {
@@ -216,8 +222,8 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   deleteConfirmed() {
-    if (this.dataForm?.id) {
-      this.nfeService.delete(this.dataForm.id).subscribe({
+    if (this.dataForm?.nfeId) {
+      this.nfeService.delete(this.dataForm.nfeId).subscribe({
         next: () => {
           this.toastrService.success('NFe cancelada com sucesso');
           this.formSubmitted.emit();

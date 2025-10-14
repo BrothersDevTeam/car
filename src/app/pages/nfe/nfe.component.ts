@@ -22,6 +22,7 @@ import type { PaginationResponse } from '@interfaces/pagination';
 
 import { NfeService } from '@services/nfe.service';
 import { ActionsService } from '@services/actions.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-nfe',
@@ -53,11 +54,11 @@ export class NfeComponent {
   };
   columns: ColumnConfig<Nfe>[] = [
     {
-      key: 'numero',
+      key: 'nfeNumero',
       header: 'Nº NFe',
     },
     {
-      key: 'status',
+      key: 'nfeStatus',
       header: 'Status',
     },
     {
@@ -65,11 +66,15 @@ export class NfeComponent {
       header: 'CFOP',
     },
     {
-      key: 'tipo',
+      key: 'nfeNaturezaOperacao',
       header: 'Natureza da Operação',
     },
     {
-      key: 'dataEmissao',
+      key: 'createdAt',
+      header: 'Criação',
+    },
+    {
+      key: 'nfeDataEmissao',
       header: 'Emissão',
     },
     {
@@ -99,6 +104,7 @@ export class NfeComponent {
 
   constructor(
     private nfeService: NfeService,
+    private toastr: ToastrService,
     private actionsService: ActionsService
   ) {
     this.loadNfeList(
@@ -138,22 +144,31 @@ export class NfeComponent {
     this.actionsService.hasFormChanges.set(false);
   }
 
-  loadNfeList(pageIndex: number, pageSize: number) {
+  loadNfeList(pageIndex: number, pageSize: number, searchValue?: string) {
     this.nfeListLoading.set(true);
+
     this.nfeService
       .getPaginatedData(pageIndex, pageSize)
       .pipe(
         catchError((err) => {
-          this.nfeListError.set(true);
           this.nfeListLoading.set(false);
+          this.nfeListError.set(true);
           console.error('Erro ao carregar a lista de NFes:', err);
+          this.toastr.error('Erro ao buscar dados da tabela de NFes');
           return of();
         })
       )
       .subscribe((response) => {
         this.nfeListLoading.set(false);
-        if (response) {
-          this.nfePaginatedList = response;
+        if (response && response.content) {
+          this.nfePaginatedList = {
+            ...response,
+            content: response.content.map((nfe) => ({
+              ...nfe,
+              // Mapeie os dados conforme necessário para a tabela
+              cfop: nfe.nfeItens[0]?.itemCfop || 'Não informado',
+            })),
+          };
         }
       });
   }
@@ -184,16 +199,16 @@ export class NfeComponent {
   handleEdit(nfe: Nfe) {
     if (nfe) {
       this.selectedNfe = nfe;
-      
+
       // Determina qual aba abrir baseado no tipo de NFe
       const tiposEntrada = [
         'COMPRA DE VEICULO USADO',
         'ENTRADA EM CONSIGNAÇÃO',
         'ENTRADA COMPRA DEFINITIVA',
-        'DEVOLUÇÃO DE VENDA'
+        'DEVOLUÇÃO DE VENDA',
       ];
-      
-      const isEntrada = tiposEntrada.includes(nfe.tipo);
+
+      const isEntrada = tiposEntrada.includes(nfe.nfeTipoDocumento);
       this.selectedTabIndex.set(isEntrada ? 0 : 1);
     }
     this.openInfo.set(false);

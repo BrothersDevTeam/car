@@ -1,7 +1,7 @@
 <form [formGroup]="form" (keydown.enter)="onEnter($event)">
-  @if(dataForm?.numero) {
+  @if(dataForm?.nfeNumero) {
     <div class="title-trash">
-      <h2>NFe Nº: {{ dataForm!.numero }}</h2>
+      <h2>NFe Nº: {{ dataForm!.nfeNumero }}</h2>
     </div>
   }
 
@@ -9,7 +9,7 @@
     <h3 class="section-title">Tipo de Operação*</h3>
     <mat-radio-group
       color="primary"
-      formControlName="tipo"
+      formControlName="nfeNaturezaOperacao"
       aria-label="Selecione o tipo de entrada"
       class="radio-button-group"
     >
@@ -22,7 +22,7 @@
         </mat-radio-button>
       }
     </mat-radio-group>
-    @if (form.get('tipo')?.invalid && (form.get('tipo')?.touched || submitted)) {
+    @if (form.get('nfeNaturezaOperacao')?.invalid && (form.get('nfeNaturezaOperacao')?.touched || submitted)) {
       <div class="error-message">
         Selecione o tipo de operação.
       </div>
@@ -30,29 +30,29 @@
 
     <h3 class="section-title">Informações do Veículo*</h3>
     <app-primary-select
-      formControlName="idVeiculo"
+      formControlName="vehicleId"
       label="Veículo*"
       [options]="vehicles"
       optionValue="vehicleId"
       [optionLabel]="getVehicleDisplay.bind(this)"
       placeholder="Selecione o veículo"
       [error]="
-        form.get('idVeiculo')?.invalid &&
-        (form.get('idVeiculo')?.touched || submitted)
+        form.get('vehicleId')?.invalid &&
+        (form.get('vehicleId')?.touched || submitted)
       "
     />
 
     <h3 class="section-title">Fornecedor/Consignante*</h3>
     <app-primary-select
-      formControlName="idDestinatario"
+      formControlName="personId"
       label="Fornecedor/Consignante*"
       [options]="persons"
       optionValue="personId"
       [optionLabel]="getPersonDisplay.bind(this)"
       placeholder="Selecione o fornecedor"
       [error]="
-        form.get('idDestinatario')?.invalid &&
-        (form.get('idDestinatario')?.touched || submitted)
+        form.get('personId')?.invalid &&
+        (form.get('personId')?.touched || submitted)
       "
     />
   </app-wrapper-card>
@@ -65,10 +65,10 @@
     (click)="onSubmit()"
     #submitButton
   >
-    {{ dataForm?.numero ? 'Atualizar' : 'Criar NFe' }}
+    {{ dataForm?.nfeNumero ? 'Atualizar' : 'Criar NFe' }}
   </button>
 
-  @if (dataForm?.numero && dataForm?.status === 'Em digitacao') {
+  @if (dataForm?.nfeNumero && dataForm?.status === 'Em digitacao') {
     <button
       mat-raised-button
       type="button"

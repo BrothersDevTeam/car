@@ -31,7 +31,7 @@ import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confi
 import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
-import type { createNfe, Nfe, TipoNfe } from '@interfaces/nfe';
+import type { NaturezaOperacao, Nfe } from '@interfaces/nfe';
 import type { Person } from '@interfaces/person';
 import { Vehicle } from '@interfaces/vehicle';
 
@@ -58,28 +58,34 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   vehicles: Vehicle[] = [];
   persons: Person[] = [];
-  tiposNfeSaida: { value: TipoNfe; label: string }[] = [
+  tiposNfeSaida: { value: NaturezaOperacao; label: string }[] = [
     {
-      value: 'VENDA DE VEICULO USADO' as TipoNfe,
+      value: 'VENDA DE VEICULO USADO' as NaturezaOperacao,
       label: 'Venda de Veículo Usado',
     },
     {
-      value: 'DEVOLUÇÃO DE CONSIGNAÇÃO' as TipoNfe,
+      value: 'DEVOLUÇÃO DE CONSIGNAÇÃO' as NaturezaOperacao,
       label: 'Devolução de Consignação',
     },
-    { value: 'VENDA EM CONSIGNAÇÃO' as TipoNfe, label: 'Venda em Consignação' },
     {
-      value: 'DEVOLUÇÃO SIMBÓLICA DE CONSIGNAÇÃO' as TipoNfe,
+      value: 'VENDA EM CONSIGNAÇÃO' as NaturezaOperacao,
+      label: 'Venda em Consignação',
+    },
+    {
+      value: 'DEVOLUÇÃO SIMBÓLICA DE CONSIGNAÇÃO' as NaturezaOperacao,
       label: 'Devolução Simbólica de Consignação',
     },
-    { value: 'DEVOLUÇÃO DE COMPRA' as TipoNfe, label: 'Devolução de Compra' },
     {
-      value: 'SAÍDA PARA CONTRATO EM COMISSÃO' as TipoNfe,
+      value: 'DEVOLUÇÃO DE COMPRA' as NaturezaOperacao,
+      label: 'Devolução de Compra',
+    },
+    {
+      value: 'SAÍDA PARA CONTRATO EM COMISSÃO' as NaturezaOperacao,
       label: 'Saída para Contrato em Comissão',
     },
     {
       value:
-        'TRANSFERÊNCIA DE MERCADORIA ADQUIRIDA OU RECEBIDA DE TERCEIROS' as TipoNfe,
+        'TRANSFERÊNCIA DE MERCADORIA ADQUIRIDA OU RECEBIDA DE TERCEIROS' as NaturezaOperacao,
       label: 'Transferência de Mercadoria',
     },
   ];
@@ -95,9 +101,10 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   @Output() formChanged = new EventEmitter<boolean>();
 
   protected form: FormGroup = this.formBuilderService.group({
-    idVeiculo: ['', Validators.required],
-    idDestinatario: ['', Validators.required],
-    tipo: ['', Validators.required],
+    storeId: [''],
+    vehicleId: ['', Validators.required],
+    personId: ['', Validators.required],
+    nfeNaturezaOperacao: ['', Validators.required],
   });
 
   constructor(
@@ -135,9 +142,9 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     if (changes['dataForm'] && this.dataForm) {
       setTimeout(() => {
         this.form.patchValue({
-          idVeiculo: this.dataForm!.idVeiculo || '',
-          idDestinatario: this.dataForm!.idDestinatario || '',
-          tipo: this.dataForm!.tipo || '',
+          vehicleId: [{ vehicleId: this.form.value.vehicleId || '' }],
+          personId: this.dataForm!.personId || '',
+          nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
         });
       });
     }
@@ -167,13 +174,15 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    const formValues: createNfe = {
-      idVeiculo: this.form.value.idVeiculo,
-      idDestinatario: this.form.value.idDestinatario,
-      tipo: this.form.value.tipo,
+    const formValues: Nfe = {
+      storeId: '03980353-4b98-4409-94b1-441d6d6baa28', // TODO: Ajustar para pegar a loja correta
+      nfeItens: [{ vehicleId: this.form.value.vehicleId }],
+      personId: this.form.value.personId,
+      nfeTipoDocumento: '1', // Saída
+      nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
     };
 
-    if (this.dataForm?.id) {
+    if (this.dataForm?.nfeId) {
       // Edição
       this.nfeService.update({ ...this.dataForm, ...formValues }).subscribe({
         next: () => {
@@ -226,8 +235,8 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   deleteConfirmed() {
-    if (this.dataForm?.id) {
-      this.nfeService.delete(this.dataForm.id).subscribe({
+    if (this.dataForm?.nfeId) {
+      this.nfeService.delete(this.dataForm.nfeId).subscribe({
         next: () => {
           this.toastrService.success('NFe cancelada com sucesso');
           this.formSubmitted.emit();

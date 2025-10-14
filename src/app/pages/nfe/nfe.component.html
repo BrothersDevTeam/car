@@ -55,11 +55,11 @@
               <div class="info-grid">
                 <div class="info-item">
                   <label>Número:</label>
-                  <span>{{ selectedNfe.numero }}</span>
+                  <span>{{ selectedNfe.nfeNumero }}</span>
                 </div>
                 <div class="info-item">
                   <label>Série:</label>
-                  <span>{{ selectedNfe.serie }}</span>
+                  <span>{{ selectedNfe.nfeSerie }}</span>
                 </div>
                 <div class="info-item">
                   <label>Status:</label>
@@ -67,23 +67,23 @@
                 </div>
                 <div class="info-item">
                   <label>CFOP:</label>
-                  <span>{{ selectedNfe.cfop }}</span>
+                  <span>{{ selectedNfe.nfeItens[0].itemCfop }}</span>
                 </div>
                 <div class="info-item">
                   <label>Tipo:</label>
-                  <span>{{ selectedNfe.tipo }}</span>
+                  <span>{{ selectedNfe.nfeTipoDocumento }}</span>
                 </div>
                 <div class="info-item">
                   <label>Data de Emissão:</label>
-                  <span>{{ selectedNfe.dataEmissao }}</span>
+                  <span>{{ selectedNfe.nfeDataEmissao }}</span>
                 </div>
                 <div class="info-item">
                   <label>Valor Total:</label>
                   <span>R$ {{ selectedNfe.valorTotal | number: '1.2-2' }}</span>
                 </div>
-                <div class="info-item full-width">
+                <!-- <div class="info-item full-width">
                   <label>Emitente:</label>
-                  <span>{{ selectedNfe.emitente.razaoSocial }}</span>
+                  <span>{{ selectedNfe.person.razaoSocial }}</span>
                 </div>
                 @if (selectedNfe.emitente.nomeFantasia) {
                   <div class="info-item full-width">
@@ -94,7 +94,7 @@
                 <div class="info-item full-width">
                   <label>CNPJ Emitente:</label>
                   <span>{{ selectedNfe.emitente.cnpj }}</span>
-                </div>
+                </div> -->
               </div>
             </div>
           </mat-tab>
@@ -107,14 +107,14 @@
     <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
       <mat-tab-group [selectedIndex]="selectedTabIndex()">
         <mat-tab label="NFe Entrada">
-          <app-nfe-entrada-form 
+          <app-nfe-entrada-form
             [dataForm]="selectedNfe"
             (formSubmitted)="onFormSubmitted()"
             (formChanged)="handleFormChanged($event)"
           />
         </mat-tab>
         <mat-tab label="NFe Saída">
-          <app-nfe-saida-form 
+          <app-nfe-saida-form
             [dataForm]="selectedNfe"
             (formSubmitted)="onFormSubmitted()"
             (formChanged)="handleFormChanged($event)"
