@@ -2,11 +2,11 @@
   <div class="search-container">
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Buscar pessoa</mat-label>
-      <input 
-        matInput 
+      <input
+        matInput
         [(ngModel)]="searchValue"
         (input)="onSearch($event)"
-        [placeholder]="'Digite o ' + (searchType === 'name' ? 'nome' : searchType === 'cpf' ? 'CPF' : searchType === 'cnpj' ? 'CNPJ' : searchType === 'email' ? 'email' : 'ID da loja')"
+        [placeholder]="'Digite o ' + (searchType === 'name' ? 'nome' : searchType === 'cpf' ? 'CPF' : searchType === 'cnpj' ? 'CNPJ' : searchType === 'email' ? 'email' : searchType === 'storeId' ? 'ID da loja' : 'nome, CPF, CNPJ ou email' )"
       />
       @if (searchValue) {
         <button matSuffix mat-icon-button aria-label="Limpar" (click)="clearSearch()">
