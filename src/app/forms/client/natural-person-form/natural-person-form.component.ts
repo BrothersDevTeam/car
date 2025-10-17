@@ -121,7 +121,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   get shouldShowUserFields(): boolean {
     const selectedTypes = this.form.get('relationshipTypes')?.value || [];
     return selectedTypes.some((type: RelationshipTypes) =>
-      [RelationshipTypes.PROPRIETARIO, RelationshipTypes.FUNCIONARIO, RelationshipTypes.CONTADOR]
+      [RelationshipTypes.PROPRIETARIO, RelationshipTypes.FUNCIONARIO]
         .includes(type)
     );
   }
@@ -150,7 +150,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     this.subscriptions.add(
       this.form.get('relationshipTypes')!.valueChanges.subscribe((types) => {
         this.updateConditionalValidators();
-        this.updateRoleNameForContador(types);
       })
     );
 
@@ -161,14 +160,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
         this.formChanged.emit(isDirty);
       })
     );
-  }
-
-  private updateRoleNameForContador(types: RelationshipTypes[] | null) {
-    const roleNameControl = this.form.get('roleName');
-
-    if (types && types.includes(RelationshipTypes.CONTADOR)) {
-      roleNameControl?.setValue('ROLE_SELLER', { emitEvent: false });
-    }
   }
 
   private updateConditionalValidators() {

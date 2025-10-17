@@ -17,17 +17,19 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="search-type-field">
-      <mat-label>Buscar por</mat-label>
-      <mat-select [(value)]="searchType" (selectionChange)="onSearchTypeChange($event.value)">
-        <mat-option value="name">Nome</mat-option>
-        <mat-option value="cpf">CPF</mat-option>
-        <mat-option value="cnpj">CNPJ</mat-option>
-        <mat-option value="email">Email</mat-option>
-        @if (isCarAdmin) {
-          <mat-option value="storeId">Loja (ID)</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+  <mat-label>Buscar por</mat-label>
+  <mat-select [(value)]="searchType" (selectionChange)="onSearchTypeChange($event.value)">
+    <!-- NOVA OPÇÃO: Buscar em todos os campos -->
+    <mat-option value="all">Todos</mat-option>
+    <mat-option value="name">Nome</mat-option>
+    <mat-option value="cpf">CPF</mat-option>
+    <mat-option value="cnpj">CNPJ</mat-option>
+    <mat-option value="email">Email</mat-option>
+    @if (isCarAdmin) {
+      <mat-option value="storeId">Loja (ID)</mat-option>
+    }
+  </mat-select>
+</mat-form-field>
   </div>
 
   <app-content-header

@@ -69,7 +69,7 @@ export class PersonComponent implements OnInit, OnDestroy {
   personPaginatedList: PaginationResponse<Person> | null = null;
   selectedPerson: Person | null = null;
   searchValue: string = '';
-  searchType: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId' = 'name';
+  searchType: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId' | 'all' = 'all';
   isCarAdmin: boolean = false;
   paginationRequestConfig = {
     pageSize: 1000,
@@ -205,47 +205,56 @@ export class PersonComponent implements OnInit, OnDestroy {
   }
 
   loadPersonList(pageIndex: number, pageSize: number, searchValue?: string) {
-    this.clientListLoading.set(true);
-    
-    // Prepara os parâmetros de busca baseado no tipo selecionado
-    let searchParams: {
-      name?: string;
-      cpf?: string;
-      cnpj?: string;
-      email?: string;
-      storeId?: string;
-    } | undefined;
+  this.clientListLoading.set(true);
+  
+  // Prepara os parâmetros de busca baseado no tipo selecionado
+  let searchParams: {
+    name?: string;
+    cpf?: string;
+    cnpj?: string;
+    email?: string;
+    storeId?: string;
+    search?: string;
+  } | undefined;
 
-    if (searchValue && searchValue.trim()) {
-      searchParams = {};
+  if (searchValue && searchValue.trim()) {
+    searchParams = {};
+    
+    // NOVA LÓGICA: Se o tipo for "all", usa busca global
+    if (this.searchType === 'all') {
+      searchParams.search = searchValue.trim();
+    } 
+    // Caso contrário, usa busca específica por campo
+    else {
       searchParams[this.searchType] = searchValue.trim();
     }
-
-    this.personService
-      .getPaginatedData(pageIndex, pageSize, searchParams)
-      .pipe(
-        catchError((err) => {
-          this.clientListLoading.set(false);
-          this.clientListError.set(true);
-          console.error('Erro ao carregar a lista de pessoas:', err);
-          this.toastr.error('Erro ao buscar dados da tabela de clientes');
-          return of();
-        })
-      )
-      .subscribe((response) => {
-        this.clientListLoading.set(false);
-        if (response && response.content) {
-          // A lista de pessoas está em response.content
-          this.personPaginatedList = {
-            ...response,
-            content: response.content.map((person) => ({
-              ...person,
-              // Mapeie os dados conforme necessário para a tabela
-            })),
-          };
-        }
-      });
   }
+
+  this.personService
+    .getPaginatedData(pageIndex, pageSize, searchParams)
+    .pipe(
+      catchError((err) => {
+        this.clientListLoading.set(false);
+        this.clientListError.set(true);
+        console.error('Erro ao carregar a lista de pessoas:', err);
+        this.toastr.error('Erro ao buscar dados da tabela de clientes');
+        return of();
+      })
+    )
+    .subscribe((response) => {
+      this.clientListLoading.set(false);
+      if (response && response.content) {
+        // A lista de pessoas está em response.content
+        this.personPaginatedList = {
+          ...response,
+          content: response.content.map((person) => ({
+            ...person,
+             // Mapeie os dados conforme necessário para a tabela
+          })),
+        };
+      }
+    });
+}
 
   handleSelectedPerson(person: Person) {
     this.selectedPerson = person;
@@ -272,7 +281,7 @@ export class PersonComponent implements OnInit, OnDestroy {
     this.searchSubject.next(inputValue);
   }
 
-  onSearchTypeChange(type: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId') {
+  onSearchTypeChange(type: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId' | 'all') {
     this.searchType = type;
     if (this.searchValue) {
       this.performSearch();
