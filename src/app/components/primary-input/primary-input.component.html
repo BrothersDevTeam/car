@@ -16,32 +16,31 @@
         - disabled desabilita o campo quando necessário
         - mask aplica formatação usando ngx-mask
       -->
-      <input
-        [id]="inputName"
-        [type]="type"
-        [mask]="mask"
-        [placeholder]="placeholder"
-        [(ngModel)]="value"
-        [attr.maxlength]="maxlength"
-        [attr.required]="required ? '' : null"
-        [disabled]="disabled"
-        (ngModelChange)="onModelChange($event)"
-        (blur)="onBlur($event)"
-      />
+      <input [id]="inputName" [type]="showPassword ? 'text' : type" [mask]="mask" [placeholder]="placeholder"
+        [(ngModel)]="value" [attr.maxlength]="maxlength" [attr.required]="required ? '' : null" [disabled]="disabled"
+        (ngModelChange)="onModelChange($event)" (blur)="onBlur($event)" />
       <!-- 
         Slot para conteúdo projetado (ícones, botões, etc)
         Exemplo: <mat-icon>search</mat-icon>
       -->
-      <ng-content></ng-content>
+
+
+      <ng-content>@if (type === 'password') {
+        <button type="button" class="toggle-password" (click)="togglePasswordVisibility()" tabindex="-1">
+          <mat-icon>
+            {{ showPassword ? 'visibility_off' : 'visibility' }}
+          </mat-icon>
+        </button>
+        }</ng-content>
     </div>
-    
+
     <!-- 
       Mensagem de erro condicional
       Exibida quando o input @Input error está true
       Geralmente controlado pelas validações do FormControl
     -->
     @if (error) {
-      <p class="invalid-field-message">Campo inválido</p>
+    <p class="invalid-field-message">Campo inválido</p>
     }
   </div>
 </div>

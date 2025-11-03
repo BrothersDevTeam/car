@@ -11,8 +11,9 @@
 
     .input-content {
       display: flex;
-      border-radius: 8px;
       align-items: center;
+      border-radius: 8px;
+      position: relative;
 
       input {
         border: none;
@@ -20,11 +21,15 @@
         padding: 12px;
         width: 100%;
         background-color: var(--gray-secondary-bg);
+        color: var(--text-color);
+        font-family: inherit;
+        font-size: 1rem;
+        box-sizing: border-box;
 
-        /**
-         * CRITICAL FIX: Remove estilos de autocomplete do navegador
-         * Alguns navegadores aplicam cores azuis em campos de email e senha
-         */
+        // deixa espaço à direita para o ícone
+        padding-right: 40px; // ✅ evita que o texto encoste no ícone
+
+        // Remove autofill azul do Chrome/Safari
         &:-webkit-autofill,
         &:-webkit-autofill:hover,
         &:-webkit-autofill:focus,
@@ -42,18 +47,37 @@
           color: var(--text-color) !important;
         }
 
-        // Edge e outros navegadores
+        // Edge e outros
         &:autofill {
           background-color: var(--gray-secondary-bg) !important;
           color: var(--text-color) !important;
         }
       }
-    }
 
-    .invalid-field-message {
-      color: var(--error-color);
-      font-size: small;
-      align-self: flex-end;
+      .toggle-password {
+        position: absolute;
+        right: 0.75rem; // ✅ fica dentro do input
+        top: 50%;
+        transform: translateY(-50%); // ✅ centraliza verticalmente
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        color: #666;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s ease;
+
+        &:hover {
+          color: var(--text-color);
+        }
+
+        mat-icon {
+          font-size: 20px;
+          line-height: 1;
+        }
+      }
     }
   }
 }
