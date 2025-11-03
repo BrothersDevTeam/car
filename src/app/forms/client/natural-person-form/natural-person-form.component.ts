@@ -65,11 +65,46 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   @Output() formChanged = new EventEmitter<boolean>();
 
   /**
+   * Controla o estado do checkbox "Cadastrar como funcionário"
+   * 
+   * @property {boolean} isEmployee - Indica se a pessoa será cadastrada como funcionário
+   * @default false - Por padrão, toda pessoa é cadastrada como CLIENTE
+   * 
+   * @description
+   * Esta propriedade está vinculada ao checkbox do template e controla
+   * automaticamente o valor do campo 'relationshipTypes' no formulário.
+   * - Quando false: relationshipTypes = [CLIENTE]
+   * - Quando true: relationshipTypes = [FUNCIONARIO]
+   */
+  protected isEmployee = false;
+
+  /**
+   * Verifica se o usuário logado tem permissão para cadastrar funcionários
+   * 
+   * @returns {boolean} true se o usuário tem ROLE_CAR_ADMIN ou ROLE_MANAGER
+   * 
+   * @description
+   * Apenas usuários com as roles ROLE_CAR_ADMIN ou ROLE_MANAGER podem
+   * visualizar o checkbox e cadastrar funcionários no sistema.
+   * 
+   * Para outros usuários (ROLE_SELLER, ROLE_FINANCIAL):
+   * - O checkbox não será exibido
+   * - Todas as pessoas serão cadastradas como CLIENTE automaticamente
+   */
+  protected get canRegisterEmployee(): boolean {
+    const userRoles = this.authService.getRoles();
+    return userRoles.includes('ROLE_CAR_ADMIN') || userRoles.includes('ROLE_MANAGER');
+  }
+
+  /**
    * Formulário reativo para cadastro/edição de pessoa física
    * 
-   * IMPORTANTE: relationshipTypes começa VAZIO e só recebe valor padrão
-   * [CLIENTE] se estiver CRIANDO uma nova pessoa (não editando).
-   * Isso garante que ao editar, o valor venha do banco de dados.
+   * IMPORTANTE: relationshipTypes agora é controlado pelo checkbox 'isEmployee'
+   * - Por padrão: [CLIENTE]
+   * - Quando checkbox marcado: [FUNCIONARIO]
+   * 
+   * O campo relationshipTypes é SEMPRE um array com apenas UM elemento,
+   * gerenciado automaticamente pelo método toggleEmployeeType()
    */
   protected form = this.formBuilderService.group({
     name: ['', Validators.required],
@@ -83,14 +118,14 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     storeId: [''],
     legalEntity: [false],
     relationshipTypes: this.formBuilderService.control<RelationshipTypes[]>(
-      [], // ← Começa VAZIO, valor padrão será setado no ngOnInit
+      [RelationshipTypes.CLIENTE], // ← Começa sempre com CLIENTE por padrão
       {
         validators: [minLengthArray(1)],
       }
     ),
     username: [''],
     password: [''],
-    confirmPassword: [''], // NOVO campo
+    confirmPassword: [''], // Campo para confirmar senha
     roleName: [''],
   });
 
@@ -135,24 +170,25 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     /**
-     * Define o valor padrão de relationshipTypes apenas se NÃO estiver editando
-     * Isso garante que:
-     * - Ao CRIAR: Campo começa com [CLIENTE]
-     * - Ao EDITAR: Campo começa vazio e será preenchido pelo ngOnChanges
+     * Inicialização do formulário
+     * 
+     * @description
+     * - Define CLIENTE como tipo padrão (já setado no formulário)
+     * - Configura validators dinâmicos
+     * - Inscreve-se nas mudanças do formulário para controlar validações
      */
-    if (!this.dataForm) {
-      this.form.get('relationshipTypes')?.setValue([RelationshipTypes.CLIENTE]);
-    }
 
     // Adiciona o validator de senha no formulário
     this.form.setValidators(this.passwordMatchValidator.bind(this));
 
+    // Observa mudanças no relationshipTypes para atualizar validators dinâmicos
     this.subscriptions.add(
       this.form.get('relationshipTypes')!.valueChanges.subscribe((types) => {
         this.updateConditionalValidators();
       })
     );
 
+    // Observa mudanças gerais no formulário para controlar estado dirty
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
         const isDirty = this.form.dirty;
@@ -160,6 +196,48 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
         this.formChanged.emit(isDirty);
       })
     );
+  }
+
+  /**
+   * Alterna entre CLIENTE e FUNCIONARIO baseado no estado do checkbox
+   * 
+   * @description
+   * Este método é chamado quando o usuário marca/desmarca o checkbox
+   * "Cadastrar como funcionário".
+   * 
+   * IMPORTANTE: O array relationshipTypes sempre terá apenas UM elemento:
+   * - Checkbox DESMARCADO: [CLIENTE]
+   * - Checkbox MARCADO: [FUNCIONARIO]
+   * 
+   * Quando marcado como FUNCIONARIO, os campos de usuário (username, password, roleName)
+   * se tornam obrigatórios automaticamente através do método updateConditionalValidators().
+   * 
+   * @returns {void}
+   * 
+   * @example
+   * // Usuário marca checkbox
+   * toggleEmployeeType() // isEmployee = true, relationshipTypes = [FUNCIONARIO]
+   * 
+   * // Usuário desmarca checkbox
+   * toggleEmployeeType() // isEmployee = false, relationshipTypes = [CLIENTE]
+   */
+  protected toggleEmployeeType(): void {
+    // Inverte o estado do checkbox
+    this.isEmployee = !this.isEmployee;
+
+    // Atualiza o relationshipTypes baseado no novo estado
+    if (this.isEmployee) {
+      // Marcado como funcionário
+      this.form.get('relationshipTypes')?.setValue([RelationshipTypes.FUNCIONARIO]);
+      console.log('[toggleEmployeeType] Alterado para FUNCIONARIO');
+    } else {
+      // Desmarcado (volta para cliente)
+      this.form.get('relationshipTypes')?.setValue([RelationshipTypes.CLIENTE]);
+      console.log('[toggleEmployeeType] Alterado para CLIENTE');
+    }
+
+    // Força a marcação do formulário como modificado
+    this.form.markAsDirty();
   }
 
   private updateConditionalValidators() {
@@ -198,8 +276,18 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     }
   }
 
+  /**
+   * Limpeza ao destruir o componente
+   * 
+   * @description
+   * Cancela todas as inscrições para evitar memory leaks.
+   * Boa prática essencial em Angular para componentes que usam RxJS.
+   * 
+   * @returns {void}
+   */
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    console.log('[ngOnDestroy] Subscriptions canceladas');
   }
 
   /**
@@ -213,6 +301,9 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
    * 
    * IMPORTANTE: O backend envia 'relationships' mas o frontend usa 'relationshipTypes'.
    * Precisamos fazer o mapeamento correto!
+   * 
+   * NOVA LÓGICA: Agora também atualiza o estado do checkbox 'isEmployee'
+   * baseado no tipo de relacionamento que veio do banco.
    */
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
@@ -235,13 +326,21 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       console.log('[natural-person-form] relationshipTypes mapeado:', relationshipTypes);
       
       /**
-       * Aumentado o timeout para garantir que as opções do select
-       * já foram carregadas antes de aplicar o valor
+       * Atualiza o estado do checkbox baseado no tipo de relacionamento
+       * Se for FUNCIONARIO ou PROPRIETARIO, marca o checkbox
+       */
+      this.isEmployee = relationshipTypes.includes(RelationshipTypes.FUNCIONARIO) || 
+                       relationshipTypes.includes(RelationshipTypes.PROPRIETARIO);
+      
+      console.log('[natural-person-form] isEmployee setado para:', this.isEmployee);
+      
+      /**
+       * Timeout para garantir que o formulário está completamente inicializado
        */
       setTimeout(() => {
         this.form.patchValue({
           name: this.dataForm!.name || '',
-          relationshipTypes: relationshipTypes.length > 0 ? relationshipTypes : [],
+          relationshipTypes: relationshipTypes.length > 0 ? relationshipTypes : [RelationshipTypes.CLIENTE],
           nickName: this.dataForm!.nickName || '',
           email: this.dataForm!.email || '',
           phone: this.dataForm!.phone || '',
@@ -273,31 +372,46 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     }
   }
 
+  /**
+   * Submete o formulário para criação ou atualização de pessoa física
+   * 
+   * @description
+   * Valida o formulário e envia os dados para o backend.
+   * 
+   * IMPORTANTE: O campo relationshipTypes sempre terá apenas um elemento:
+   * - [CLIENTE] se checkbox desmarcado
+   * - [FUNCIONARIO] se checkbox marcado
+   * 
+   * Campos de usuário (username, password, roleName) são enviados apenas
+   * quando relationshipTypes inclui FUNCIONARIO ou PROPRIETARIO.
+   * 
+   * @returns {void}
+   */
   onSubmit() {
     this.submitted = true;
+    
+    // Validação do formulário
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      console.log('Formulário inválido: ', this.form.value);
+      console.log('[onSubmit] Formulário inválido:', this.form.value);
+      console.log('[onSubmit] Erros do formulário:', this.form.errors);
       
-      if (this.form.get('relationshipTypes')?.invalid) {
-        console.log('RelationshipTypes é obrigatório e deve ter pelo menos 1 item');
-      }
-      
+      // Logs detalhados para debug
       if (this.shouldShowUserFields) {
         if (this.form.get('username')?.invalid) {
-          console.log('Username é obrigatório para funcionários/contadores/proprietários');
+          console.log('[onSubmit] Username é obrigatório para funcionários');
         }
         if (this.form.get('password')?.invalid) {
-          console.log('Password é obrigatório para funcionários/contadores/proprietários');
+          console.log('[onSubmit] Password é obrigatório para funcionários');
         }
         if (this.form.get('confirmPassword')?.invalid) {
-          console.log('Confirmação de senha é obrigatória');
+          console.log('[onSubmit] Confirmação de senha é obrigatória');
         }
         if (this.form.errors?.['passwordMismatch']) {
-          console.log('As senhas não coincidem');
+          console.log('[onSubmit] As senhas não coincidem');
         }
         if (this.form.get('roleName')?.invalid) {
-          console.log('RoleName é obrigatório para funcionários/contadores/proprietários');
+          console.log('[onSubmit] RoleName é obrigatório para funcionários');
         }
       }
       return;
@@ -375,15 +489,38 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     }
   }
 
-  private resetForm() {
+  /**
+   * Reseta o formulário para o estado inicial
+   * 
+   * @description
+   * Chamado após um cadastro bem-sucedido para limpar o formulário.
+   * 
+   * IMPORTANTE: Sempre reseta para o estado padrão:
+   * - relationshipTypes = [CLIENTE]
+   * - isEmployee = false (checkbox desmarcado)
+   * - active = true
+   * - legalEntity = false
+   * 
+   * @returns {void}
+   * @private
+   */
+  private resetForm(): void {
+    // Limpa todos os campos do formulário
     this.form.reset();
+    
+    // Reseta o estado de submissão
     this.submitted = false;
+    
+    // Reseta o checkbox para desmarcado
+    this.isEmployee = false;
 
-    this.form.get('relationshipTypes')?.setValue([RelationshipTypes.CLIENTE]);
-
+    // Define valores padrão
     this.form.patchValue({
       active: true,
       legalEntity: false,
+      relationshipTypes: [RelationshipTypes.CLIENTE],
     });
+    
+    console.log('[resetForm] Formulário resetado para estado inicial');
   }
 }

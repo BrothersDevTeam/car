@@ -5,27 +5,41 @@
   <!-- Seção: Dados Pessoais -->
   <app-wrapper-card title="Dados pessoais">
     
-   
-    <div class="form-row-2cols">
-      <app-primary-input
-        formControlName="name"
-        label="Nome completo *"
-        inputName="name"
-        type="text"
-        [error]="
-          form.get('name')?.invalid && (form.get('name')?.touched || submitted)
-        "
-      />
-        <app-primary-select
-        label="Tipo *"
-        placeholder="Selecione"
-        inputName="relationshipTypes"
-        [allowMultiple]="true"
-        formControlName="relationshipTypes"
-        [error]="submitted && form.get('relationshipTypes')?.invalid"
-      ></app-primary-select>      
-    
+    <!-- 
+      Checkbox para alternar entre CLIENTE e FUNCIONARIO
+      
+      IMPORTANTE: Este checkbox só é exibido para usuários com permissão:
+      - ROLE_CAR_ADMIN (Administrador)
+      - ROLE_MANAGER (Gerente)
+      
+      Para outros usuários (ROLE_SELLER, ROLE_FINANCIAL):
+      - O checkbox não aparece
+      - Todas as pessoas cadastradas serão automaticamente do tipo CLIENTE
+    -->
+    @if (canRegisterEmployee) { 
+    <div class="checkbox-container">
+      <label class="checkbox-label">
+        <input 
+          type="checkbox" 
+          class="checkbox-input"
+          [checked]="isEmployee"
+          (change)="toggleEmployeeType()"
+        />
+        <span class="checkbox-text">Cadastrar como funcionário</span>
+      </label>
     </div>
+    }
+   
+    <!-- Campo de Nome (ocupa 100% da largura) -->
+    <app-primary-input
+      formControlName="name"
+      label="Nome completo *"
+      inputName="name"
+      type="text"
+      [error]="
+        form.get('name')?.invalid && (form.get('name')?.touched || submitted)
+      "
+    />
 
  
     <div class="form-row-2cols">
@@ -51,12 +65,7 @@
       />
     </div>
 
-    <!-- Mensagem de erro para relationshipTypes -->
-    @if (submitted && form.get('relationshipTypes')?.invalid) {
-    <div class="error-message">
-      Selecione pelo menos um tipo de relacionamento
-    </div>
-    }
+
 
     <!-- 
       Layout: Email + Celular (2 campos em uma linha - 50% cada)

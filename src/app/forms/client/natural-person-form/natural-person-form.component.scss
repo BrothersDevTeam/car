@@ -242,6 +242,63 @@ form {
   }
 
   /**
+   * CHECKBOX CUSTOMIZADO
+   * 
+   * Estilo para o checkbox "Cadastrar como funcionário"
+   * Design moderno e acessível seguindo as melhores práticas
+   */
+  .checkbox-container {
+    margin-bottom: 24px;
+    
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: opacity 200ms ease;
+      
+      &:hover {
+        opacity: 0.8;
+      }
+      
+      // Aumenta área de toque em mobile
+      @media (max-width: 768px) {
+        padding: 8px 0;
+      }
+    }
+    
+    .checkbox-input {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: var(--primary-color);
+      
+      // Aumenta área de toque em mobile
+      @media (max-width: 768px) {
+        width: 24px;
+        height: 24px;
+      }
+      
+      // Estilo de foco para acessibilidade
+      &:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+      }
+    }
+    
+    .checkbox-text {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-color);
+      
+      @media (max-width: 768px) {
+        font-size: 1.125rem;
+      }
+    }
+  }
+
+  /**
    * MENSAGENS DE ERRO
    * 
    * Estilo consistente para feedback de validação

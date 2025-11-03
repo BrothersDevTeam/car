@@ -2,6 +2,7 @@ import { NgxMaskDirective } from 'ngx-mask';
 import { FormsModule } from '@angular/forms';
 import { Component, forwardRef, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { MatIcon } from "@angular/material/icon";
 
 /**
  * Tipos de input permitidos pelo componente
@@ -39,7 +40,7 @@ type InputTypes = 'text' | 'email' | 'password' | 'number' | 'tel';
  */
 @Component({
   selector: 'app-primary-input',
-  imports: [NgxMaskDirective, FormsModule],
+  imports: [NgxMaskDirective, FormsModule, MatIcon],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -114,6 +115,7 @@ export class PrimaryInputComponent implements ControlValueAccessor {
    * Sincronizado com o FormControl através do ControlValueAccessor
    */
   value: string = '';
+  showPassword = false;
   
   /**
    * Função callback chamada quando o valor muda
@@ -250,5 +252,9 @@ export class PrimaryInputComponent implements ControlValueAccessor {
   setDisabledState?(isDisabled: boolean): void {
     this.disabled = isDisabled;
     this.cdr.markForCheck();
+  }
+
+   togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 }
