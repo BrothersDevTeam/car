@@ -22,23 +22,27 @@
         <h3 class="label">CNPJ: </h3>
         <h3 class="value">{{person.cnpj}}</h3>
       </div>
+      <mat-card-footer class="card-footer">
+        <button type="button" class="btn" color="primary" mat-raised-button (click)="editEvent.emit()">Editar</button>
+        <button type="button" class="btn" color="warn" mat-raised-button matListItemIcon
+          (click)="onDelete()">Excluir</button>
+      </mat-card-footer>
     </app-wrapper-card>
 
-    <!-- Seção de Endereços -->
-    @if (person.personId) {
+    <app-wrapper-card>
+      <!-- Seção de Endereços -->
+      @if (person.personId) {
       <div class="address-section">
         <app-address-list
-          [personId]="person.personId"
-          [canEdit]="true"
-          [canDelete]="true"
-          [canAdd]="true">
+        [personId]="person.personId" 
+        [canEdit]="true" 
+        [canDelete]="true" 
+        [canAdd]="true">
         </app-address-list>
       </div>
-    }
+      }
+    </app-wrapper-card>
 
   </mat-card-content>
-  <mat-card-footer class="card-footer">
-    <button type="button" class="btn" color="primary" mat-raised-button (click)="editEvent.emit()">Editar</button>
-    <button type="button" class="btn" color="warn" mat-raised-button matListItemIcon (click)="onDelete()">Excluir</button>
-  </mat-card-footer>
+
 </mat-card>
