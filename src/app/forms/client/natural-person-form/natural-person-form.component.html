@@ -7,10 +7,16 @@
     
     <!-- 
       Checkbox para alternar entre CLIENTE e FUNCIONARIO
-      Por padrão, toda pessoa cadastrada é CLIENTE
-      Ao marcar este checkbox, o tipo muda para FUNCIONARIO
+      
+      IMPORTANTE: Este checkbox só é exibido para usuários com permissão:
+      - ROLE_CAR_ADMIN (Administrador)
+      - ROLE_MANAGER (Gerente)
+      
+      Para outros usuários (ROLE_SELLER, ROLE_FINANCIAL):
+      - O checkbox não aparece
+      - Todas as pessoas cadastradas serão automaticamente do tipo CLIENTE
     -->
-     
+    @if (canRegisterEmployee) { 
     <div class="checkbox-container">
       <label class="checkbox-label">
         <input 
@@ -22,6 +28,7 @@
         <span class="checkbox-text">Cadastrar como funcionário</span>
       </label>
     </div>
+    }
    
     <!-- Campo de Nome (ocupa 100% da largura) -->
     <app-primary-input

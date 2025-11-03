@@ -79,6 +79,24 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   protected isEmployee = false;
 
   /**
+   * Verifica se o usuário logado tem permissão para cadastrar funcionários
+   * 
+   * @returns {boolean} true se o usuário tem ROLE_CAR_ADMIN ou ROLE_MANAGER
+   * 
+   * @description
+   * Apenas usuários com as roles ROLE_CAR_ADMIN ou ROLE_MANAGER podem
+   * visualizar o checkbox e cadastrar funcionários no sistema.
+   * 
+   * Para outros usuários (ROLE_SELLER, ROLE_FINANCIAL):
+   * - O checkbox não será exibido
+   * - Todas as pessoas serão cadastradas como CLIENTE automaticamente
+   */
+  protected get canRegisterEmployee(): boolean {
+    const userRoles = this.authService.getRoles();
+    return userRoles.includes('ROLE_CAR_ADMIN') || userRoles.includes('ROLE_MANAGER');
+  }
+
+  /**
    * Formulário reativo para cadastro/edição de pessoa física
    * 
    * IMPORTANTE: relationshipTypes agora é controlado pelo checkbox 'isEmployee'
