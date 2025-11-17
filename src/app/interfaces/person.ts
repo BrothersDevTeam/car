@@ -1,5 +1,20 @@
 import { RelationshipTypes } from '../enums/relationshipTypes';
 
+// Interface para Role do usuário
+export interface Role {
+  roleId: string;
+  roleName: string;
+}
+
+// Interface para User associado à Person
+export interface User {
+  userId: string;
+  username: string;
+  roles: Role[];
+  userStatus?: string;
+  imageUrl?: string;
+}
+
 export interface Person {
   personId: string;
   storeId: string;
@@ -19,6 +34,7 @@ export interface Person {
   username?: string;
   password?: string;
   roleName?: string;
+  user?: User; // User associado (para funcionários)
 }
 
 export type CreateNaturalPerson = Omit<

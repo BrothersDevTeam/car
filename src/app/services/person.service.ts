@@ -62,12 +62,20 @@ export class PersonService {
     email?: string;
     storeId?: string;
     search?: string;
+    relationshipTypes?: string[];  // Parâmetro para filtrar por tipos de relacionamento
+    roleNames?: string[];  // NOVO: Parâmetro para filtrar por roles
   }
 ): Observable<PaginationResponse<Person>> {
   // Se houver parâmetros de busca, não usa cache
+  // Verifica se há algum parâmetro de busca válido (string com conteúdo ou array não vazio)
   const hasSearchParams =
     searchParams &&
-    Object.values(searchParams).some((value) => value && value.trim());
+    Object.values(searchParams).some((value) => {
+      if (Array.isArray(value)) {
+        return value.length > 0; // Array não vazio
+      }
+      return value && typeof value === 'string' && value.trim(); // String com conteúdo
+    });
 
   if (this.cache && !hasSearchParams) {
     return of(this.cache);
@@ -99,7 +107,25 @@ export class PersonService {
         url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
       }
     }
+    
+    // Adiciona o filtro de relationshipTypes se fornecido
+    // O backend espera múltiplos valores no formato: ?relationshipTypes=CLIENTE&relationshipTypes=FUNCIONARIO
+    if (searchParams.relationshipTypes && searchParams.relationshipTypes.length > 0) {
+      searchParams.relationshipTypes.forEach(type => {
+        url += `&relationshipTypes=${encodeURIComponent(type)}`;
+      });
+    }
+
+    // NOVO: Adiciona o filtro de roleNames se fornecido
+    // O backend espera múltiplos valores no formato: ?roleNames=ROLE_SELLER&roleNames=ROLE_MANAGER
+    if (searchParams.roleNames && searchParams.roleNames.length > 0) {
+      searchParams.roleNames.forEach(role => {
+        url += `&roleNames=${encodeURIComponent(role)}`;
+      });
+    }
   }
+
+  console.log('🔍 URL construída:', url);  // DEBUG: Ver a URL completa
 
   return this.http.get<PaginationResponse<Person>>(url).pipe(
     first(),
