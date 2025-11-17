@@ -3,20 +3,10 @@
   (keydown.enter)="onEnter($event)"
 >
   <!-- Seção: Dados Pessoais -->
-  <app-wrapper-card title="Dados pessoais">
+  <app-wrapper-card title="Dados pessoais">    
     
-    <!-- 
-      Checkbox para alternar entre CLIENTE e FUNCIONARIO
-      
-      IMPORTANTE: Este checkbox só é exibido para usuários com permissão:
-      - ROLE_CAR_ADMIN (Administrador)
-      - ROLE_MANAGER (Gerente)
-      
-      Para outros usuários (ROLE_SELLER, ROLE_FINANCIAL):
-      - O checkbox não aparece
-      - Todas as pessoas cadastradas serão automaticamente do tipo CLIENTE
-    -->
-    @if (canRegisterEmployee) { 
+      <!-- Checkbox para alternar entre CLIENTE e FUNCIONARIO -->
+    @if (canRegisterEmployee && !dataForm) { 
     <div class="checkbox-container">
       <label class="checkbox-label">
         <input 
@@ -64,9 +54,6 @@
         "
       />
     </div>
-
-
-
     <!-- 
       Layout: Email + Celular (2 campos em uma linha - 50% cada)
       Dados de contato agrupados
@@ -95,18 +82,9 @@
     </div>
 
   </app-wrapper-card>
-
-  <!-- 
-    Seção condicional: Dados de Acesso ao Sistema
-    Só aparece para FUNCIONARIO, PROPRIETARIO ou CONTADOR
-  -->
   @if (shouldShowUserFields) {
-  <app-wrapper-card title="Dados de Acesso ao Sistema">
+  <app-wrapper-card title="Dados de Acesso ao Sistema">  
     
-    <!-- 
-      Layout: Nome de Usuário + Função (2 campos - 50% cada)
-      Primeira linha de dados de acesso
-    -->
     <div class="form-row-2cols">
       <app-primary-input
         formControlName="username"
@@ -134,11 +112,6 @@
         ]"
       />
     </div>
-
-    <!-- 
-      Layout: Senha + Confirmar Senha (2 campos - 50% cada)
-      Segunda linha de dados de acesso
-    -->
     <div class="form-row-2cols">
       <app-primary-input
         formControlName="password"

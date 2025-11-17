@@ -153,7 +153,26 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     return null;
   }
 
+  /**
+   * Verifica se deve mostrar os campos de usuário do sistema
+   * 
+   * @returns {boolean} true se deve mostrar os campos
+   * 
+   * @description
+   * Os campos de usuário (username, password, roleName) só aparecem quando:
+   * 1. O tipo selecionado é FUNCIONARIO ou PROPRIETARIO
+   * 2. Está no modo de CRIAÇÃO (dataForm é null)
+   * 
+   * No modo de EDIÇÃO, esses campos NUNCA aparecem.
+   * A edição de dados de acesso será feita posteriormente em outra tela.
+   */
   get shouldShowUserFields(): boolean {
+    // Se estiver editando (dataForm existe), nunca mostra campos de usuário
+    if (this.dataForm) {
+      return false;
+    }
+
+    // Se estiver criando, só mostra se for FUNCIONARIO ou PROPRIETARIO
     const selectedTypes = this.form.get('relationshipTypes')?.value || [];
     return selectedTypes.some((type: RelationshipTypes) =>
       [RelationshipTypes.PROPRIETARIO, RelationshipTypes.FUNCIONARIO]
