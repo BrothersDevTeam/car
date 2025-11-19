@@ -5,6 +5,15 @@
 
 <div class="stores-container">
   
+  @if (isCarAdmin) {
+    <div class="actions-bar">
+      <button mat-raised-button color="primary" (click)="onCreateStore()">
+        <mat-icon>add</mat-icon>
+        Cadastrar Nova Loja
+      </button>
+    </div>
+  }
+  
   @if (loading) {
     <div class="loading-state">
       <mat-icon class="loading-icon spinning">refresh</mat-icon>

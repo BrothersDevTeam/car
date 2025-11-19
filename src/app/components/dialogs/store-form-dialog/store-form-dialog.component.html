@@ -1,0 +1,54 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="storeForm" class="store-form">
+    
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Razão Social *</mat-label>
+      <input matInput formControlName="name" placeholder="Ex: Revenda ABC Ltda">
+      @if (storeForm.get('name')?.invalid && storeForm.get('name')?.touched) {
+        <mat-error>{{ getErrorMessage('name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nome Fantasia</mat-label>
+      <input matInput formControlName="tradeName" placeholder="Ex: ABC Motors">
+      @if (storeForm.get('tradeName')?.invalid && storeForm.get('tradeName')?.touched) {
+        <mat-error>{{ getErrorMessage('tradeName') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>CNPJ *</mat-label>
+      <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" mask="00.000.000/0000-00">
+      @if (storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched) {
+        <mat-error>{{ getErrorMessage('cnpj') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Email *</mat-label>
+      <input matInput type="email" formControlName="email" placeholder="contato@empresa.com">
+      @if (storeForm.get('email')?.invalid && storeForm.get('email')?.touched) {
+        <mat-error>{{ getErrorMessage('email') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Telefone</mat-label>
+      <input matInput formControlName="phoneNumber" placeholder="(00) 00000-0000" mask="(00) 00000-0000||(00) 0000-0000">
+      @if (storeForm.get('phoneNumber')?.invalid && storeForm.get('phoneNumber')?.touched) {
+        <mat-error>{{ getErrorMessage('phoneNumber') }}</mat-error>
+      }
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="storeForm.invalid">
+    {{ data.mode === 'create' ? 'Cadastrar' : 'Salvar' }}
+  </button>
+</mat-dialog-actions>

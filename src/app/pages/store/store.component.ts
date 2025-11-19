@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { StoreCardComponent } from '../../components/store/store-card/store-card.component';
 import { ContentHeaderComponent } from '../../components/content-header/content-header.component';
+import { StoreFormDialogComponent } from '../../components/dialogs/store-form-dialog/store-form-dialog.component';
 import { Store } from '@interfaces/store';
 import { StoreService } from '@services/store.service';
 import { AuthService } from '@services/auth/auth.service';
@@ -14,6 +17,8 @@ import { AuthService } from '@services/auth/auth.service';
   imports: [
     CommonModule,
     MatIconModule,
+    MatButtonModule,
+    MatDialogModule,
     StoreCardComponent,
     ContentHeaderComponent
   ],
@@ -28,7 +33,8 @@ export class StoreComponent implements OnInit {
 
   constructor(
     private storeService: StoreService,
-    private authService: AuthService
+    private authService: AuthService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -84,5 +90,34 @@ export class StoreComponent implements OnInit {
 
   onViewDetails(store: Store): void {
     console.log('ℹ️ Ver detalhes de:', store);
+  }
+
+  onCreateStore(): void {
+    const dialogRef = this.dialog.open(StoreFormDialogComponent, {
+      width: '600px',
+      data: {
+        title: 'Cadastrar Nova Loja',
+        mode: 'create',
+        storeType: 'MATRIZ'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.createMainStore(result);
+      }
+    });
+  }
+
+  private createMainStore(data: any): void {
+    this.storeService.createMainStore(data).subscribe({
+      next: (newStore) => {
+        console.log('✅ Loja criada:', newStore);
+        this.loadStores();
+      },
+      error: (err) => {
+        console.error('❌ Erro ao criar loja:', err);
+      }
+    });
   }
 }
