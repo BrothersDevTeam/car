@@ -79,8 +79,7 @@ interface EmployeeSubFilters {
     GenericTableComponent,
     MatRadioButton,
     MatRadioGroup,
-    MatCard,
-    MatCardContent
+ 
 ],
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss',
