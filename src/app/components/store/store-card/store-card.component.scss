@@ -1,0 +1,223 @@
+.store-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  height: 100%;
+  min-height: 320px;
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+  }
+
+  &.highlighted {
+    border: 2px solid #007bff;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+    box-shadow: 0 4px 16px rgba(0, 123, 255, 0.2);
+  }
+
+  &.inactive {
+    opacity: 0.6;
+    background: #f8f9fa;
+  }
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f8f9fa;
+}
+
+.store-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+
+  .logo-image {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    background: white;
+    padding: 0.5rem;
+  }
+
+  .logo-placeholder {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+    .placeholder-icon {
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
+      color: rgba(0, 0, 0, 0.3);
+    }
+  }
+}
+
+.type-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &.matriz {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  &.filial {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+  }
+}
+
+.badges-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &.highlighted-badge {
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    color: white;
+  }
+
+  &.status-success { background: #d4edda; color: #155724; }
+  &.status-danger { background: #f8d7da; color: #721c24; }
+  &.status-warning { background: #fff3cd; color: #856404; }
+}
+
+.card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.store-name-section {
+  .store-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+  }
+
+  .store-legal-name {
+    font-size: 0.875rem;
+    color: #666;
+    margin: 0.25rem 0 0 0;
+    font-style: italic;
+  }
+}
+
+.store-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-line {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.9rem;
+  color: #555;
+
+  .info-icon {
+    font-size: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    color: #999;
+  }
+
+  .info-label {
+    font-weight: 600;
+    color: #333;
+    min-width: 70px;
+  }
+}
+
+.card-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 2px solid #f8f9fa;
+}
+
+.primary-actions {
+  display: flex;
+  gap: 0.75rem;
+
+  button {
+    flex: 1;
+    height: 40px;
+    mat-icon { margin-right: 0.5rem; }
+  }
+}
+
+.secondary-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  transition: all 0.2s ease;
+
+  &.edit-btn { color: #007bff; &:hover { background-color: rgba(0, 123, 255, 0.1); } }
+  &.upload-btn { color: #28a745; &:hover { background-color: rgba(40, 167, 69, 0.1); } }
+  &.owner-btn { color: #ffc107; &:hover { background-color: rgba(255, 193, 7, 0.1); } }
+  &.delete-btn { color: #dc3545; &:hover { background-color: rgba(220, 53, 69, 0.1); } }
+}
+
+@media (max-width: 768px) {
+  .store-card {
+    padding: 1rem;
+
+    .card-header {
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .badges-container {
+      flex-direction: row;
+      justify-content: center;
+    }
+  }
+}

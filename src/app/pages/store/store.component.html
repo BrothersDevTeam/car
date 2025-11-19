@@ -1,1 +1,47 @@
-<p>store works!</p>
+<app-content-header 
+  title="Gerenciamento de Lojas"
+  subtitle="Visualize e gerencie suas lojas">
+</app-content-header>
+
+<div class="stores-container">
+  
+  @if (loading) {
+    <div class="loading-state">
+      <mat-icon class="loading-icon spinning">refresh</mat-icon>
+      <p>Carregando lojas...</p>
+    </div>
+  } @else if (error) {
+    <div class="error-state">
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <h3>Erro ao carregar lojas</h3>
+      <p>Não foi possível carregar as informações. Tente novamente.</p>
+    </div>
+  } @else {
+    <div class="stores-grid">
+      @for (store of stores; track store.storeId) {
+        <app-store-card
+          [store]="store"
+          [canEdit]="true"
+          [canDelete]="store.storeType === 'BRANCH'"
+          [canViewBranches]="store.storeType === 'MATRIZ' && isCarAdmin"
+          [canManageOwner]="true"
+          [canUploadImage]="true"
+          [isHighlighted]="false"
+          (edit)="onEditStore($event)"
+          (delete)="onDeleteStore($event)"
+          (viewBranches)="onViewBranches($event)"
+          (manageOwner)="onManageOwner($event)"
+          (uploadImage)="onUploadImage($event)"
+          (viewDetails)="onViewDetails($event)">
+        </app-store-card>
+      } @empty {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">store</mat-icon>
+          <h3>Nenhuma loja encontrada</h3>
+          <p>Comece cadastrando sua primeira loja</p>
+        </div>
+      }
+    </div>
+  }
+
+</div>

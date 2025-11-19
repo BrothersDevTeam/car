@@ -1,0 +1,98 @@
+<div class="store-card" [class.highlighted]="isHighlighted" [class.compact]="compactMode" [class.inactive]="!isActive">
+  
+  <div class="card-header">
+    <div class="store-logo">
+      @if (hasValidImage) {
+        <img [src]="store.imageUrl" [alt]="displayName" class="logo-image">
+      } @else {
+        <div class="logo-placeholder">
+          <mat-icon class="placeholder-icon">{{ typeIcon }}</mat-icon>
+        </div>
+      }
+      <div class="type-badge" [class.matriz]="isMainStore" [class.filial]="isBranchStore">
+        <mat-icon class="type-icon">{{ typeIcon }}</mat-icon>
+        <span class="type-label">{{ typeLabel }}</span>
+      </div>
+    </div>
+
+    <div class="badges-container">
+      @if (isHighlighted) {
+        <span class="badge highlighted-badge">
+          <mat-icon>star</mat-icon>
+          Minha Loja
+        </span>
+      }
+      <span class="badge status-badge" [class.status-success]="store.storeStatus === StoreStatus.ACTIVE" [class.status-danger]="store.storeStatus === StoreStatus.CANCELLED" [class.status-warning]="store.storeStatus === StoreStatus.BLOCKED">
+        <mat-icon class="status-icon">{{ statusIcon }}</mat-icon>
+        {{ statusLabel }}
+      </span>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="store-name-section">
+      <h3 class="store-name" [matTooltip]="store.tradeName ? 'Nome Fantasia' : 'Razão Social'">{{ displayName }}</h3>
+      @if (store.tradeName && store.tradeName !== store.name) {
+        <p class="store-legal-name" matTooltip="Razão Social">{{ store.name }}</p>
+      }
+    </div>
+
+    <div class="store-info">
+      <div class="info-line">
+        <mat-icon class="info-icon">business</mat-icon>
+        <span class="info-label">CNPJ:</span>
+        <span class="info-value">{{ formattedCnpj }}</span>
+      </div>
+      <div class="info-line">
+        <mat-icon class="info-icon">email</mat-icon>
+        <span class="info-label">Email:</span>
+        <span class="info-value">{{ store.email }}</span>
+      </div>
+      @if (store.phone) {
+        <div class="info-line">
+          <mat-icon class="info-icon">phone</mat-icon>
+          <span class="info-label">Telefone:</span>
+          <span class="info-value">{{ formattedPhone }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="card-footer">
+    <div class="primary-actions">
+      @if (shouldShowViewBranches) {
+        <button mat-raised-button color="primary" (click)="onViewBranches()" class="btn-view-branches">
+          <mat-icon>store</mat-icon>
+          Ver Filiais
+        </button>
+      }
+      <button mat-stroked-button (click)="onViewDetails()" class="btn-details">
+        <mat-icon>info</mat-icon>
+        Detalhes
+      </button>
+    </div>
+
+    <div class="secondary-actions">
+      @if (canEdit) {
+        <button mat-icon-button (click)="onEdit()" matTooltip="Editar loja" class="action-btn edit-btn">
+          <mat-icon>edit</mat-icon>
+        </button>
+      }
+      @if (canUploadImage) {
+        <button mat-icon-button (click)="onUploadImage()" matTooltip="Alterar logo" class="action-btn upload-btn">
+          <mat-icon>add_photo_alternate</mat-icon>
+        </button>
+      }
+      @if (canManageOwner) {
+        <button mat-icon-button (click)="onManageOwner()" matTooltip="Gerenciar proprietário" class="action-btn owner-btn">
+          <mat-icon>person_add</mat-icon>
+        </button>
+      }
+      @if (canDelete) {
+        <button mat-icon-button (click)="onDelete()" matTooltip="Excluir loja" class="action-btn delete-btn">
+          <mat-icon>delete</mat-icon>
+        </button>
+      }
+    </div>
+  </div>
+</div>
