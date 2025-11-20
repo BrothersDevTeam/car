@@ -34,75 +34,60 @@
         </p>
 
         <!-- Razão Social -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Razão Social</mat-label>
-          <input 
-            matInput 
-            formControlName="name"
-            placeholder="Ex: Revenda de Veículos LTDA"
-            maxlength="50">
-          <mat-icon matPrefix>business</mat-icon>
-          @if (storeForm.get('name')?.invalid && storeForm.get('name')?.touched) {
-            <mat-error>{{ getErrorMessage(storeForm, 'name') }}</mat-error>
-          }
-        </mat-form-field>
+        <app-primary-input
+          formControlName="name"
+          label="Razão Social *"
+          inputName="storeName"
+          type="text"
+          placeholder="Ex: Revenda de Veículos LTDA"
+          maxlength="50"
+          [error]="storeForm.get('name')?.invalid && storeForm.get('name')?.touched"
+        />
 
         <!-- Nome Fantasia -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nome Fantasia (Opcional)</mat-label>
-          <input 
-            matInput 
-            formControlName="tradeName"
-            placeholder="Ex: Auto Premium"
-            maxlength="50">
-          <mat-icon matPrefix>storefront</mat-icon>
-          @if (storeForm.get('tradeName')?.invalid && storeForm.get('tradeName')?.touched) {
-            <mat-error>{{ getErrorMessage(storeForm, 'tradeName') }}</mat-error>
-          }
-        </mat-form-field>
+        <app-primary-input
+          formControlName="tradeName"
+          label="Nome Fantasia (Opcional)"
+          inputName="storeTradeName"
+          type="text"
+          placeholder="Ex: Auto Premium"
+          maxlength="50"
+        />
 
         <!-- CNPJ -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>CNPJ</mat-label>
-          <input 
-            matInput 
-            formControlName="cnpj"
-            mask="00.000.000/0000-00"
-            placeholder="00.000.000/0000-00">
-          <mat-icon matPrefix>badge</mat-icon>
-          @if (storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched) {
-            <mat-error>{{ getErrorMessage(storeForm, 'cnpj') }}</mat-error>
-          }
-        </mat-form-field>
+        <app-primary-input
+          formControlName="cnpj"
+          label="CNPJ *"
+          inputName="storeCnpj"
+          type="text"
+          placeholder="00.000.000/0000-00"
+          mask="00.000.000/0000-00"
+          [uppercase]="false"
+          [error]="storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched"
+        />
 
         <!-- Email -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
-          <input 
-            matInput 
-            type="email"
-            formControlName="email"
-            placeholder="contato@empresa.com.br"
-            maxlength="50">
-          <mat-icon matPrefix>email</mat-icon>
-          @if (storeForm.get('email')?.invalid && storeForm.get('email')?.touched) {
-            <mat-error>{{ getErrorMessage(storeForm, 'email') }}</mat-error>
-          }
-        </mat-form-field>
+        <app-primary-input
+          formControlName="email"
+          label="Email *"
+          inputName="storeEmail"
+          type="email"
+          placeholder="contato@empresa.com.br"
+          maxlength="50"
+          [uppercase]="false"
+          [error]="storeForm.get('email')?.invalid && storeForm.get('email')?.touched"
+        />
 
         <!-- Telefone -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Telefone (Opcional)</mat-label>
-          <input 
-            matInput 
-            formControlName="phoneNumber"
-            mask="(00) 0000-0000||(00) 0 0000-0000"
-            placeholder="(00) 0000-0000">
-          <mat-icon matPrefix>phone</mat-icon>
-          @if (storeForm.get('phoneNumber')?.invalid && storeForm.get('phoneNumber')?.touched) {
-            <mat-error>{{ getErrorMessage(storeForm, 'phoneNumber') }}</mat-error>
-          }
-        </mat-form-field>
+        <app-primary-input
+          formControlName="phoneNumber"
+          label="Telefone (Opcional)"
+          inputName="storePhone"
+          type="tel"
+          placeholder="(00) 0000-0000"
+          mask="(00) 0000-0000||(00) 0 0000-0000"
+          [uppercase]="false"
+        />
 
         <!-- Botões do Step 1 -->
         <div class="step-actions">
@@ -131,116 +116,98 @@
         </div>
 
         <!-- Nome -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nome Completo / Razão Social</mat-label>
-          <input 
-            matInput 
-            formControlName="name"
-            placeholder="Nome completo do proprietário"
-            maxlength="50">
-          <mat-icon matPrefix>person</mat-icon>
-          @if (personForm.get('name')?.invalid && personForm.get('name')?.touched) {
-            <mat-error>{{ getErrorMessage(personForm, 'name') }}</mat-error>
-          }
-        </mat-form-field>
+        <app-primary-input
+          formControlName="name"
+          label="Nome Completo / Razão Social *"
+          inputName="personName"
+          type="text"
+          placeholder="Nome completo do proprietário"
+          maxlength="50"
+          [error]="personForm.get('name')?.invalid && personForm.get('name')?.touched"
+        />
 
         <!-- Apelido -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Apelido / Nome Fantasia (Opcional)</mat-label>
-          <input 
-            matInput 
-            formControlName="nickName"
-            placeholder="Como prefere ser chamado"
-            maxlength="50">
-          <mat-icon matPrefix>badge</mat-icon>
-          @if (personForm.get('nickName')?.invalid && personForm.get('nickName')?.touched) {
-            <mat-error>{{ getErrorMessage(personForm, 'nickName') }}</mat-error>
-          }
-        </mat-form-field>
+        <app-primary-input
+          formControlName="nickName"
+          label="Apelido / Nome Fantasia (Opcional)"
+          inputName="personNickName"
+          type="text"
+          placeholder="Como prefere ser chamado"
+          maxlength="50"
+        />
 
         <!-- CPF (apenas se Pessoa Física) -->
         @if (!personForm.get('legalEntity')?.value) {
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>CPF</mat-label>
-            <input 
-              matInput 
-              formControlName="cpf"
-              mask="000.000.000-00"
-              placeholder="000.000.000-00">
-            <mat-icon matPrefix>badge</mat-icon>
-            @if (personForm.get('cpf')?.invalid && personForm.get('cpf')?.touched) {
-              <mat-error>{{ getErrorMessage(personForm, 'cpf') }}</mat-error>
-            }
-          </mat-form-field>
+          <app-primary-input
+            formControlName="cpf"
+            label="CPF *"
+            inputName="personCpf"
+            type="text"
+            placeholder="000.000.000-00"
+            mask="000.000.000-00"
+            [uppercase]="false"
+            [error]="personForm.get('cpf')?.invalid && personForm.get('cpf')?.touched"
+          />
 
-          <!-- RG (apenas se Pessoa Física) -->
+          <!-- RG e Órgão Emissor (apenas se Pessoa Física) -->
           <div class="row">
-            <mat-form-field appearance="outline" class="half-width">
-              <mat-label>RG (Opcional)</mat-label>
-              <input 
-                matInput 
-                formControlName="rg"
-                placeholder="000000000"
-                maxlength="14">
-              <mat-icon matPrefix>badge</mat-icon>
-            </mat-form-field>
+            <app-primary-input
+              formControlName="rg"
+              label="RG (Opcional)"
+              inputName="personRg"
+              type="text"
+              placeholder="000000000"
+              maxlength="14"
+              [uppercase]="false"
+            />
 
-            <mat-form-field appearance="outline" class="half-width">
-              <mat-label>Órgão Emissor (Opcional)</mat-label>
-              <input 
-                matInput 
-                formControlName="rgIssuer"
-                placeholder="SSP/SP"
-                maxlength="14">
-              <mat-icon matPrefix>account_balance</mat-icon>
-            </mat-form-field>
+            <app-primary-input
+              formControlName="rgIssuer"
+              label="Órgão Emissor (Opcional)"
+              inputName="personRgIssuer"
+              type="text"
+              placeholder="SSP/SP"
+              maxlength="14"
+            />
           </div>
         }
 
         <!-- CNPJ (apenas se Pessoa Jurídica) -->
         @if (personForm.get('legalEntity')?.value) {
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>CNPJ</mat-label>
-            <input 
-              matInput 
-              formControlName="cnpj"
-              mask="00.000.000/0000-00"
-              placeholder="00.000.000/0000-00">
-            <mat-icon matPrefix>badge</mat-icon>
-            @if (personForm.get('cnpj')?.invalid && personForm.get('cnpj')?.touched) {
-              <mat-error>{{ getErrorMessage(personForm, 'cnpj') }}</mat-error>
-            }
-          </mat-form-field>
+          <app-primary-input
+            formControlName="cnpj"
+            label="CNPJ *"
+            inputName="personCnpj"
+            type="text"
+            placeholder="00.000.000/0000-00"
+            mask="00.000.000/0000-00"
+            [uppercase]="false"
+            [error]="personForm.get('cnpj')?.invalid && personForm.get('cnpj')?.touched"
+          />
         }
 
         <!-- Email -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
-          <input 
-            matInput 
-            type="email"
-            formControlName="email"
-            placeholder="email@exemplo.com.br"
-            maxlength="255">
-          <mat-icon matPrefix>email</mat-icon>
-          @if (personForm.get('email')?.invalid && personForm.get('email')?.touched) {
-            <mat-error>{{ getErrorMessage(personForm, 'email') }}</mat-error>
-          }
-        </mat-form-field>
+        <app-primary-input
+          formControlName="email"
+          label="Email *"
+          inputName="personEmail"
+          type="email"
+          placeholder="email@exemplo.com.br"
+          maxlength="255"
+          [uppercase]="false"
+          [error]="personForm.get('email')?.invalid && personForm.get('email')?.touched"
+        />
 
         <!-- Telefone -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Telefone (Opcional)</mat-label>
-          <input 
-            matInput 
-            formControlName="phone"
-            mask="(00) 0000-0000||(00) 0 0000-0000"
-            placeholder="(00) 0000-0000">
-          <mat-icon matPrefix>phone</mat-icon>
-          @if (personForm.get('phone')?.invalid && personForm.get('phone')?.touched) {
-            <mat-error>{{ getErrorMessage(personForm, 'phone') }}</mat-error>
-          }
-        </mat-form-field>
+        <app-primary-input
+          formControlName="phone"
+          label="Telefone (Opcional)"
+          inputName="personPhone"
+          type="tel"
+          placeholder="(00) 0000-0000"
+          mask="(00) 0000-0000||(00) 0 0000-0000"
+          [uppercase]="false"
+        />
 
         <!-- Botões do Step 2 -->
         <div class="step-actions">
@@ -265,53 +232,44 @@
         </p>
 
         <!-- Username -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nome de Usuário</mat-label>
-          <input 
-            matInput 
-            formControlName="username"
-            placeholder="usuario.sistema"
-            maxlength="50"
-            autocomplete="off">
-          <mat-icon matPrefix>account_circle</mat-icon>
-          @if (accessForm.get('username')?.invalid && accessForm.get('username')?.touched) {
-            <mat-error>{{ getErrorMessage(accessForm, 'username') }}</mat-error>
-          }
-          <mat-hint>Será usado para fazer login no sistema</mat-hint>
-        </mat-form-field>
+        <app-primary-input
+          formControlName="username"
+          label="Nome de Usuário *"
+          inputName="username"
+          type="text"
+          placeholder="usuario.sistema"
+          maxlength="50"
+          [uppercase]="false"
+          [error]="accessForm.get('username')?.invalid && accessForm.get('username')?.touched"
+        />
 
         <!-- Senha -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Senha</mat-label>
-          <input 
-            matInput 
-            type="password"
-            formControlName="password"
-            placeholder="••••••••"
-            maxlength="20"
-            autocomplete="new-password">
-          <mat-icon matPrefix>lock</mat-icon>
-          @if (accessForm.get('password')?.invalid && accessForm.get('password')?.touched) {
-            <mat-error>{{ getErrorMessage(accessForm, 'password') }}</mat-error>
-          }
-          <mat-hint>Mínimo de 6 caracteres</mat-hint>
-        </mat-form-field>
+        <app-primary-input
+          formControlName="password"
+          label="Senha *"
+          inputName="password"
+          type="password"
+          placeholder="••••••••"
+          maxlength="20"
+          [uppercase]="false"
+          [error]="accessForm.get('password')?.invalid && accessForm.get('password')?.touched"
+        />
 
         <!-- Confirmar Senha -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Confirmar Senha</mat-label>
-          <input 
-            matInput 
-            type="password"
-            formControlName="confirmPassword"
-            placeholder="••••••••"
-            maxlength="20"
-            autocomplete="new-password">
-          <mat-icon matPrefix>lock</mat-icon>
-          @if (accessForm.get('confirmPassword')?.touched && !passwordsMatch()) {
-            <mat-error>As senhas não conferem</mat-error>
-          }
-        </mat-form-field>
+        <app-primary-input
+          formControlName="confirmPassword"
+          label="Confirmar Senha *"
+          inputName="confirmPassword"
+          type="password"
+          placeholder="••••••••"
+          maxlength="20"
+          [uppercase]="false"
+          [error]="accessForm.get('confirmPassword')?.touched && !passwordsMatch()"
+        />
+
+        @if (accessForm.get('confirmPassword')?.touched && !passwordsMatch()) {
+          <p class="error-message">As senhas não conferem</p>
+        }
 
         <!-- Botões do Step 3 -->
         <div class="step-actions">

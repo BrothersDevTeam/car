@@ -13,6 +13,7 @@ import { Store } from '@interfaces/store';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { StoreService } from '@services/store.service';
 import { PersonService } from '@services/person.service';
+import { PrimaryInputComponent } from '../../primary-input/primary-input.component';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { of, throwError } from 'rxjs';
 
@@ -62,7 +63,8 @@ export interface StoreFormDialogData {
     MatIconModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
-    NgxMaskDirective
+    NgxMaskDirective,
+    PrimaryInputComponent  // Componente de input customizado
   ],
   providers: [provideNgxMask()],
   templateUrl: './store-form-dialog.component.html',
