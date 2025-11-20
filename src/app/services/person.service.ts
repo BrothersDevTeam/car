@@ -157,6 +157,16 @@ export class PersonService {
     );
   }
 
+  /**
+   * Cria uma nova pessoa no sistema
+   * Alias para o método create para melhor clareza
+   * @param data Dados da pessoa a ser criada
+   * @returns Observable com a resposta do backend
+   */
+  createPerson(data: Partial<Person>) {
+    return this.create(data);
+  }
+
   update(data: CreateNaturalPerson | CreateLegalEntity, id: string) {
     return this.http.put<string>(`${this.apiUrl}/${id}`, data).pipe(
       tap((response: string) => {

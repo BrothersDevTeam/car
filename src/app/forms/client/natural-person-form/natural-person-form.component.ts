@@ -93,7 +93,9 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
    */
   protected get canRegisterEmployee(): boolean {
     const userRoles = this.authService.getRoles();
-    return userRoles.includes('ROLE_CAR_ADMIN') || userRoles.includes('ROLE_MANAGER');
+    // return userRoles.includes('ROLE_CAR_ADMIN') || userRoles.includes('ROLE_MANAGER') || userRoles.includes('ROLE_ADMIN');
+    return ["ROLE_CAR_ADMIN", "ROLE_ADMIN", "ROLE_MANAGER"].includes(userRoles[0]);
+
   }
 
   /**
