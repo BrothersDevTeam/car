@@ -7,6 +7,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { StoreCardComponent } from '../../components/store/store-card/store-card.component';
 import { ContentHeaderComponent } from '../../components/content-header/content-header.component';
 import { StoreFormDialogComponent } from '../../components/dialogs/store-form-dialog/store-form-dialog.component';
+import { StoreOwnerDialogComponent } from '../../components/dialogs/store-owner-dialog/store-owner-dialog.component';
 import { Store } from '@interfaces/store';
 import { StoreService } from '@services/store.service';
 import { AuthService } from '@services/auth/auth.service';
@@ -81,7 +82,16 @@ export class StoreComponent implements OnInit {
   }
 
   onManageOwner(store: Store): void {
-    console.log('👤 Gerenciar proprietário de:', store);
+    const dialogRef = this.dialog.open(StoreOwnerDialogComponent, {
+      width: '600px',
+      data: { store }
+    });
+
+    dialogRef.afterClosed().subscribe(personId => {
+      if (personId) {
+        this.setStoreOwner(store.storeId!, personId);
+      }
+    });
   }
 
   onUploadImage(store: Store): void {
@@ -92,19 +102,25 @@ export class StoreComponent implements OnInit {
     console.log('ℹ️ Ver detalhes de:', store);
   }
 
+  /**
+   * Abre o wizard de cadastro completo de loja (Store + Person + User)
+   * O wizard cria tudo automaticamente em sequência
+   */
   onCreateStore(): void {
     const dialogRef = this.dialog.open(StoreFormDialogComponent, {
-      width: '600px',
+      width: '700px',
+      disableClose: true,
       data: {
         title: 'Cadastrar Nova Loja',
-        mode: 'create',
-        storeType: 'MATRIZ'
+        mode: 'create'
       }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.createMainStore(result);
+    dialogRef.afterClosed().subscribe((createdStore: Store | null) => {
+      if (createdStore) {
+        console.log('✅ Loja, proprietário e usuário criados com sucesso!');
+        // Recarrega a lista de lojas para exibir a nova
+        this.loadStores();
       }
     });
   }
@@ -117,6 +133,19 @@ export class StoreComponent implements OnInit {
       },
       error: (err) => {
         console.error('❌ Erro ao criar loja:', err);
+      }
+    });
+  }
+
+  private setStoreOwner(storeId: string, personId: string): void {
+    this.storeService.setOwner(storeId, personId).subscribe({
+      next: (updatedStore) => {
+        console.log('✅ Proprietário vinculado:', updatedStore);
+        this.loadStores();
+      },
+      error: (err) => {
+        console.error('❌ Erro ao vincular proprietário:', err);
+        alert(err.error || 'Erro ao vincular proprietário');
       }
     });
   }

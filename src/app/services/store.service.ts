@@ -74,4 +74,14 @@ export class StoreService {
   setOwner(storeId: string, personId: string): Observable<Store> {
     return this.http.post<Store>(`${this.apiUrl}/owner`, { storeId, personId });
   }
+
+  /**
+   * Vincula uma pessoa como proprietária da loja
+   * @param storeId ID da loja
+   * @param personId ID da pessoa que será o proprietário
+   * @returns Observable com a Store atualizada
+   */
+  setStoreOwner(storeId: string, personId: string): Observable<Store> {
+    return this.setOwner(storeId, personId);
+  }
 }

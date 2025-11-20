@@ -1,0 +1,58 @@
+<h2 mat-dialog-title>Vincular Proprietário</h2>
+
+<mat-dialog-content>
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Carregando pessoas...</p>
+    </div>
+  } @else if (error) {
+    <div class="error-container">
+      <p>Erro ao carregar pessoas. Tente novamente.</p>
+    </div>
+  } @else if (persons.length === 0) {
+    <div class="empty-container">
+      <p>Nenhuma pessoa ativa cadastrada nesta loja.</p>
+      <p class="hint">Cadastre uma pessoa primeiro para vinculá-la como proprietária.</p>
+    </div>
+  } @else {
+    <form [formGroup]="ownerForm" class="owner-form">
+      
+      <div class="info-box">
+        <p><strong>Loja:</strong> {{ data.store.name }}</p>
+        @if (data.store.owner) {
+          <p class="warning">⚠️ Esta loja já possui um proprietário vinculado.</p>
+        }
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Selecione a pessoa</mat-label>
+        <mat-select formControlName="personId">
+          @for (person of persons; track person.personId) {
+            <mat-option [value]="person.personId">
+              {{ getPersonDisplay(person) }}
+            </mat-option>
+          }
+        </mat-select>
+        @if (ownerForm.get('personId')?.invalid && ownerForm.get('personId')?.touched) {
+          <mat-error>Selecione uma pessoa</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="hint-text">
+        <p>💡 Apenas pessoas ativas desta loja podem ser vinculadas como proprietárias.</p>
+        <p>⚠️ Uma vez vinculado, não será possível remover ou alterar o proprietário.</p>
+      </div>
+
+    </form>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancelar</button>
+  @if (!loading && !error && persons.length > 0) {
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="ownerForm.invalid || data.store.owner">
+      Vincular Proprietário
+    </button>
+  }
+</mat-dialog-actions>

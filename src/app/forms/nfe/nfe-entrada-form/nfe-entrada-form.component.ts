@@ -38,6 +38,7 @@ import { Vehicle } from '@interfaces/vehicle';
 import { NfeService } from '@services/nfe.service';
 import { PersonService } from '@services/person.service';
 import { VehicleService } from '@services/vehicle.service';
+import { AuthService } from '@services/auth/auth.service';
 
 @Component({
   selector: 'app-nfe-entrada-form',
@@ -98,7 +99,8 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     private nfeService: NfeService,
     private personService: PersonService,
     private vehicleService: VehicleService,
-    private toastrService: ToastrService
+    private toastrService: ToastrService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -162,10 +164,10 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     const formValues: Nfe = {
-      storeId: '03980353-4b98-4409-94b1-441d6d6baa28', //TODO: Ajustar para pegar a loja correta
+      storeId: this.authService.getStoreId()!,
       nfeItens: [{ vehicleId: this.form.value.vehicleId }],
       personId: this.form.value.personId,
-      nfeTipoDocumento: this.form.value.nfeTipoDocumento,
+      nfeTipoDocumento: "0",
       nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
     };
 
