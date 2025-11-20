@@ -92,6 +92,40 @@ mat-stepper {
     }
   }
 
+  // Estilo para app-primary-input
+  app-primary-input {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  // Container para dois campos lado a lado
+  .row {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+
+    app-primary-input {
+      flex: 1;
+      min-width: 0; // Permite que flex funcione corretamente
+    }
+  }
+
+  // Mensagem de erro customizada
+  .error-message {
+    color: #f44336;
+    font-size: 0.75rem;
+    margin: -0.5rem 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    &::before {
+      content: '⚠';
+      font-size: 1rem;
+    }
+  }
+
   // Checkbox customizado
   .checkbox-field {
     display: flex;
@@ -167,6 +201,10 @@ mat-dialog-actions {
   .step-form {
     .row {
       flex-direction: column;
+
+      app-primary-input {
+        width: 100%;
+      }
 
       mat-form-field.half-width {
         width: 100%;
