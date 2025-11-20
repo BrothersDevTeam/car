@@ -90,26 +90,31 @@ export class SideNavComponent {
     if (roles.length === 0) return 'Sem permissão';
 
     const roleMap: { [key: string]: string } = {
-      'ROLE_CAR_ADMIN': 'Administrador',
-      'ROLE_MANAGER': 'Gerente',
-      'ROLE_SELLER': 'Vendedor',
-      'ROLE_FINANCIAL': 'Financeiro',
+      'ROLE_CAR_ADMIN': 'Administrador',    // Dono do SaaS (nós)
+      'ROLE_ADMIN': 'Administrador',         // Dono da loja cliente (proprietário)
+      'ROLE_MANAGER': 'Gerente',             // Gerente de loja (matriz ou filial)
+      'ROLE_SELLER': 'Vendedor',             // Vendedor
+      'ROLE_FINANCIAL': 'Financeiro',        // Financeiro
     };
 
-    // Se tiver CAR_ADMIN, prioriza mostrar isso
-    if (roles.includes('ROLE_CAR_ADMIN')) {
-      return roleMap['ROLE_CAR_ADMIN'];
-    }
+    // Prioridade: CAR_ADMIN > ADMIN > MANAGER > SELLER > FINANCIAL
+    const priorityOrder = [
+      'ROLE_CAR_ADMIN',
+      'ROLE_ADMIN', 
+      'ROLE_MANAGER',
+      'ROLE_SELLER',
+      'ROLE_FINANCIAL'
+    ];
 
-    // Se tiver múltiplas roles, mostra a primeira mapeada
-    for (const role of roles) {
-      if (roleMap[role]) {
-        return roleMap[role];
+    // Retorna a role de maior prioridade que o usuário possui
+    for (const priorityRole of priorityOrder) {
+      if (roles.includes(priorityRole)) {
+        return roleMap[priorityRole];
       }
     }
 
     // Se não encontrar mapeamento, retorna a primeira role
-    return roles[0];
+    return roles[0].replace('ROLE_', '');
   }
 
   onMenuItemClick(route?: string) {
