@@ -74,13 +74,32 @@
 /* Grid de cards */
 .stores-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 2rem;
   margin-top: 1.5rem;
+
+  /* Desktop: múltiplas colunas com largura mínima confortável */
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
 
   /* Para telas muito grandes, limita a 3 colunas */
   @media (min-width: 1600px) {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Tablet: 2 colunas ou 1 dependendo do espaço */
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  /* Mobile: SEMPRE 1 coluna ocupando largura total */
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  /* Mobile pequeno: ajusta espaçamento */
+  @media (max-width: 480px) {
+    gap: 1rem;
   }
 }
 
@@ -123,22 +142,12 @@
   .stores-container {
     padding: 1.5rem;
   }
-
-  .stores-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-  }
 }
 
 /* Mobile */
 @media (max-width: 768px) {
   .stores-container {
     padding: 1rem;
-  }
-
-  .stores-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
   }
 
   .empty-state {
