@@ -31,6 +31,7 @@ export class StoreComponent implements OnInit {
   loading = true;
   error = false;
   isCarAdmin = false;
+  canCreateStore = false; // Pode ser CAR_ADMIN ou ADMIN
 
   constructor(
     private storeService: StoreService,
@@ -46,6 +47,8 @@ export class StoreComponent implements OnInit {
   private checkUserRole(): void {
     const roles = this.authService.getRoles();
     this.isCarAdmin = roles.includes('ROLE_CAR_ADMIN');
+    // CAR_ADMIN pode cadastrar matriz, ADMIN pode cadastrar filiais
+    this.canCreateStore = roles.includes('ROLE_CAR_ADMIN') || roles.includes('ROLE_ADMIN');
   }
 
   private loadStores(): void {
@@ -105,14 +108,16 @@ export class StoreComponent implements OnInit {
   /**
    * Abre o wizard de cadastro completo de loja (Store + Person + User)
    * O wizard cria tudo automaticamente em sequência
+   * CAR_ADMIN cadastra MATRIZ, ADMIN cadastra FILIAL
    */
   onCreateStore(): void {
     const dialogRef = this.dialog.open(StoreFormDialogComponent, {
       width: '700px',
       disableClose: true,
       data: {
-        title: 'Cadastrar Nova Loja',
-        mode: 'create'
+        title: this.isCarAdmin ? 'Cadastrar Nova Loja Matriz' : 'Cadastrar Nova Filial',
+        mode: 'create',
+        isCarAdmin: this.isCarAdmin // Passa info para o dialog saber qual endpoint usar
       }
     });
 
