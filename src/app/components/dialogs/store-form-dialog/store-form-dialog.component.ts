@@ -13,6 +13,7 @@ import { Store } from '@interfaces/store';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { StoreService } from '@services/store.service';
 import { PersonService } from '@services/person.service';
+import { AuthService } from '@services/auth/auth.service';
 import { PrimaryInputComponent } from '../../primary-input/primary-input.component';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { of, throwError } from 'rxjs';
@@ -23,6 +24,7 @@ import { of, throwError } from 'rxjs';
 export interface StoreFormDialogData {
   title: string;
   mode: 'create' | 'edit';
+  isCarAdmin?: boolean; // Define se usa endpoint de MATRIZ ou FILIAL
 }
 
 /**
@@ -84,6 +86,7 @@ export class StoreFormDialogComponent implements OnInit {
     private fb: FormBuilder,
     private storeService: StoreService,
     private personService: PersonService,
+    private authService: AuthService,
     public dialogRef: MatDialogRef<StoreFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: StoreFormDialogData
   ) {}
@@ -242,10 +245,26 @@ export class StoreFormDialogComponent implements OnInit {
     this.submitError = null;
 
     // Prepara payload da Store
-    const storePayload = this.prepareStorePayload();
+    let storePayload;
+    try {
+      storePayload = this.prepareStorePayload();
+    } catch (error: any) {
+      // Se o prepareStorePayload lançar erro (ex: mainStoreId não encontrado)
+      this.submitError = error.message || 'Erro ao preparar dados da loja';
+      this.isSubmitting = false;
+      return;
+    }
 
-    // PASSO 1: Criar Store
-    this.storeService.createMainStore(storePayload).pipe(
+    // 📝 LOG: Mostra qual endpoint será chamado
+    console.log('🎯 Tipo de cadastro:', this.data.isCarAdmin ? 'MATRIZ' : 'FILIAL');
+    console.log('📦 Payload que será enviado:', JSON.stringify(storePayload, null, 2));
+
+    // PASSO 1: Criar Store (MATRIZ ou FILIAL baseado na role)
+    const createStoreObservable = this.data.isCarAdmin 
+      ? this.storeService.createMainStore(storePayload)      // CAR_ADMIN → POST /stores/mainstore
+      : this.storeService.createBranch(storePayload);        // ADMIN → POST /stores
+
+    createStoreObservable.pipe(
       // Captura o storeId retornado
       tap((createdStore: Store) => {
         console.log('✅ Store criada:', createdStore);
@@ -362,17 +381,42 @@ export class StoreFormDialogComponent implements OnInit {
 
   /**
    * Prepara o payload da Store para envio
+   * Se for ADMIN (filial), adiciona mainStoreId automaticamente
+   * 
+   * IMPORTANTE:
+   * - CAR_ADMIN cria MATRIZ → mainStoreId = null (não envia)
+   * - ADMIN cria FILIAL → mainStoreId = obrigatório (storeId da matriz)
    */
   private prepareStorePayload(): any {
     const formValue = this.storeForm.value;
     
-    return {
+    const payload: any = {
       name: formValue.name,
       tradeName: formValue.tradeName || null,
       cnpj: formValue.cnpj.replace(/\D/g, ''), // Remove formatação
       email: formValue.email,
       phoneNumber: formValue.phoneNumber ? formValue.phoneNumber.replace(/\D/g, '') : null
     };
+
+    // Se não for CAR_ADMIN, é uma filial e precisa do mainStoreId
+    if (!this.data.isCarAdmin) {
+      // Busca o storeId do usuário logado (que é a matriz)
+      const userStoreId = this.authService.getStoreId();
+      
+      // ⚠️ VALIDAÇÃO CRÍTICA: Backend exige mainStoreId para criar filial
+      if (!userStoreId) {
+        throw new Error('Erro: não foi possível identificar a loja matriz. Faça login novamente.');
+      }
+      
+      console.log('🏢 Criando FILIAL da matriz:', userStoreId);
+      payload.mainStoreId = userStoreId;
+    } else {
+      console.log('🏢 Criando MATRIZ (CAR_ADMIN)');
+      // MATRIZ não envia mainStoreId (será null no backend)
+    }
+
+    console.log('📦 Payload da Store preparado:', payload);
+    return payload;
   }
 
   /**
