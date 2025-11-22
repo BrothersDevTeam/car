@@ -10,7 +10,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@interfaces/store';
-import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { StoreService } from '@services/store.service';
 import { PersonService } from '@services/person.service';
 import { AuthService } from '@services/auth/auth.service';
@@ -65,10 +64,9 @@ export interface StoreFormDialogData {
     MatIconModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
-    NgxMaskDirective,
     PrimaryInputComponent  // Componente de input customizado
   ],
-  providers: [provideNgxMask()],
+  providers: [],
   templateUrl: './store-form-dialog.component.html',
   styleUrls: ['./store-form-dialog.component.scss'],
 })
@@ -89,7 +87,7 @@ export class StoreFormDialogComponent implements OnInit {
     private authService: AuthService,
     public dialogRef: MatDialogRef<StoreFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: StoreFormDialogData
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initForms();
@@ -260,7 +258,7 @@ export class StoreFormDialogComponent implements OnInit {
     console.log('📦 Payload que será enviado:', JSON.stringify(storePayload, null, 2));
 
     // PASSO 1: Criar Store (MATRIZ ou FILIAL baseado na role)
-    const createStoreObservable = this.data.isCarAdmin 
+    const createStoreObservable = this.data.isCarAdmin
       ? this.storeService.createMainStore(storePayload)      // CAR_ADMIN → POST /stores/mainstore
       : this.storeService.createBranch(storePayload);        // ADMIN → POST /stores
 
@@ -269,7 +267,7 @@ export class StoreFormDialogComponent implements OnInit {
       tap((createdStore: Store) => {
         console.log('✅ Store criada:', createdStore);
       }),
-      
+
       // PASSO 2: Criar Person com o storeId
       switchMap((createdStore: Store) => {
         // Valida se storeId existe
@@ -280,7 +278,7 @@ export class StoreFormDialogComponent implements OnInit {
         const personPayload = this.preparePersonPayload(createdStore.storeId);
         console.log('📝 Criando proprietário:', personPayload);
         console.log('🆔 StoreId para vinculação:', createdStore.storeId);
-        
+
         return this.personService.createPerson(personPayload).pipe(
           // Backend retorna o objeto Person completo, não apenas o ID
           tap((createdPerson: any) => {
@@ -291,7 +289,7 @@ export class StoreFormDialogComponent implements OnInit {
           // PASSO 3: Vincular Person como owner da Store usando o personId extraído
           switchMap((createdPerson: any) => {
             console.log('🔗 Vinculando proprietário à loja');
-            
+
             // Validação adicional para garantir que storeId ainda existe
             if (!createdStore.storeId) {
               throw new Error('storeId não encontrado');
@@ -336,7 +334,7 @@ export class StoreFormDialogComponent implements OnInit {
       catchError((error) => {
         console.error('❌ Erro no cadastro:', error);
         this.isSubmitting = false;
-        
+
         // Mensagem de erro amigável baseada no tipo de erro
         if (error.error?.message) {
           this.submitError = error.error.message;
@@ -345,7 +343,7 @@ export class StoreFormDialogComponent implements OnInit {
         } else if (error.status === 409 || error.status === 500) {
           // Verifica se é erro de duplicação no corpo do erro
           const errorMessage = JSON.stringify(error.error || error.message || '').toLowerCase();
-          
+
           if (errorMessage.includes('email') && errorMessage.includes('already exists')) {
             this.submitError = '❌ Este email já está cadastrado no sistema. Use outro email para a loja.';
           } else if (errorMessage.includes('cnpj') && errorMessage.includes('already exists')) {
@@ -362,7 +360,7 @@ export class StoreFormDialogComponent implements OnInit {
         } else {
           this.submitError = 'Erro ao cadastrar loja. Tente novamente.';
         }
-        
+
         return throwError(() => error);
       })
     ).subscribe({
@@ -389,7 +387,7 @@ export class StoreFormDialogComponent implements OnInit {
    */
   private prepareStorePayload(): any {
     const formValue = this.storeForm.value;
-    
+
     const payload: any = {
       name: formValue.name,
       tradeName: formValue.tradeName || null,
@@ -402,12 +400,12 @@ export class StoreFormDialogComponent implements OnInit {
     if (!this.data.isCarAdmin) {
       // Busca o storeId do usuário logado (que é a matriz)
       const userStoreId = this.authService.getStoreId();
-      
+
       // ⚠️ VALIDAÇÃO CRÍTICA: Backend exige mainStoreId para criar filial
       if (!userStoreId) {
         throw new Error('Erro: não foi possível identificar a loja matriz. Faça login novamente.');
       }
-      
+
       console.log('🏢 Criando FILIAL da matriz:', userStoreId);
       payload.mainStoreId = userStoreId;
     } else {
@@ -426,7 +424,7 @@ export class StoreFormDialogComponent implements OnInit {
   private preparePersonPayload(storeId: string): any {
     const personValue = this.personForm.value;
     const accessValue = this.accessForm.value;
-    
+
     return {
       storeId: storeId,
       name: personValue.name,

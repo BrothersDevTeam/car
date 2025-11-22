@@ -2,16 +2,26 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { LoginResponse } from '@interfaces/login';
 import { TokenPayload } from '@interfaces/token';
+import { MatDialog } from '@angular/material/dialog';
+import { ActionsService } from '@services/actions.service';
+import { Injector } from '@angular/core';
+import { PersonService } from '@services/person.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly apiUrl: string = '/api/auth/login';
   private readonly TOKEN_KEY = 'car-token';
 
-  constructor(private httpClient: HttpClient, private router: Router) {}
+  constructor(
+    private httpClient: HttpClient,
+    private router: Router,
+    private dialog: MatDialog,
+    private actionsService: ActionsService,
+    private injector: Injector
+  ) { }
 
   login(email: string, password: string) {
     return this.httpClient
@@ -28,6 +38,10 @@ export class AuthService {
   }
 
   logout() {
+    const personService = this.injector.get(PersonService);
+    personService.clearCache();
+    this.actionsService.hasFormChanges.set(false);
+    this.dialog.closeAll();
     sessionStorage.removeItem(this.TOKEN_KEY);
     this.router.navigate(['/login']);
   }

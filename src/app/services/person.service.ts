@@ -22,7 +22,7 @@ export class PersonService {
 
   private readonly apiUrl: string = '/api/persons';
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private http: HttpClient, private authService: AuthService) { }
 
   // Observable público para componentes se inscreverem
   get cacheUpdated(): Observable<PaginationResponse<Person> | null> {
@@ -53,101 +53,101 @@ export class PersonService {
   }
 
   getPaginatedData(
-  pageIndex: number,
-  pageSize: number,
-  searchParams?: {
-    name?: string;
-    cpf?: string;
-    cnpj?: string;
-    email?: string;
-    storeId?: string;
-    search?: string;
-    relationshipTypes?: string[];  // Parâmetro para filtrar por tipos de relacionamento
-    roleNames?: string[];  // NOVO: Parâmetro para filtrar por roles
-  }
-): Observable<PaginationResponse<Person>> {
-  // Se houver parâmetros de busca, não usa cache
-  // Verifica se há algum parâmetro de busca válido (string com conteúdo ou array não vazio)
-  const hasSearchParams =
-    searchParams &&
-    Object.values(searchParams).some((value) => {
-      if (Array.isArray(value)) {
-        return value.length > 0; // Array não vazio
-      }
-      return value && typeof value === 'string' && value.trim(); // String com conteúdo
-    });
-
-  if (this.cache && !hasSearchParams) {
-    return of(this.cache);
-  }
-
-  // Monta a URL com os parâmetros
-  let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
-
-  if (hasSearchParams && searchParams) {
-    // NOVA LÓGICA: Se houver parâmetro "search", usa busca global
-    if (searchParams.search?.trim()) {
-      url += `&search=${encodeURIComponent(searchParams.search.trim())}`;
-    } 
-    // Caso contrário, usa busca específica por campo
-    else {
-      if (searchParams.name?.trim()) {
-        url += `&name=${encodeURIComponent(searchParams.name.trim())}`;
-      }
-      if (searchParams.cpf?.trim()) {
-        url += `&cpf=${encodeURIComponent(searchParams.cpf.trim())}`;
-      }
-      if (searchParams.cnpj?.trim()) {
-        url += `&cnpj=${encodeURIComponent(searchParams.cnpj.trim())}`;
-      }
-      if (searchParams.email?.trim()) {
-        url += `&email=${encodeURIComponent(searchParams.email.trim())}`;
-      }
-      if (searchParams.storeId?.trim()) {
-        url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
-      }
+    pageIndex: number,
+    pageSize: number,
+    searchParams?: {
+      name?: string;
+      cpf?: string;
+      cnpj?: string;
+      email?: string;
+      storeId?: string;
+      search?: string;
+      relationshipTypes?: string[];  // Parâmetro para filtrar por tipos de relacionamento
+      roleNames?: string[];  // NOVO: Parâmetro para filtrar por roles
     }
-    
-    // Adiciona o filtro de relationshipTypes se fornecido
-    // O backend espera múltiplos valores no formato: ?relationshipTypes=CLIENTE&relationshipTypes=FUNCIONARIO
-    if (searchParams.relationshipTypes && searchParams.relationshipTypes.length > 0) {
-      searchParams.relationshipTypes.forEach(type => {
-        url += `&relationshipTypes=${encodeURIComponent(type)}`;
+  ): Observable<PaginationResponse<Person>> {
+    // Se houver parâmetros de busca, não usa cache
+    // Verifica se há algum parâmetro de busca válido (string com conteúdo ou array não vazio)
+    const hasSearchParams =
+      searchParams &&
+      Object.values(searchParams).some((value) => {
+        if (Array.isArray(value)) {
+          return value.length > 0; // Array não vazio
+        }
+        return value && typeof value === 'string' && value.trim(); // String com conteúdo
       });
+
+    if (this.cache && !hasSearchParams) {
+      return of(this.cache);
     }
 
-    // NOVO: Adiciona o filtro de roleNames se fornecido
-    // O backend espera múltiplos valores no formato: ?roleNames=ROLE_SELLER&roleNames=ROLE_MANAGER
-    if (searchParams.roleNames && searchParams.roleNames.length > 0) {
-      searchParams.roleNames.forEach(role => {
-        url += `&roleNames=${encodeURIComponent(role)}`;
-      });
-    }
-  }
+    // Monta a URL com os parâmetros
+    let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
 
-  console.log('🔍 URL construída:', url);  // DEBUG: Ver a URL completa
-
-  return this.http.get<PaginationResponse<Person>>(url).pipe(
-    first(),
-    tap((response) => {
-      console.log('✅ Resposta original do backend:', response);
-
-      // Só atualiza o cache se não houver busca
-      if (!hasSearchParams) {
-        this.cache = response;
-        this.cache.content = this.filterByActive(this.cache.content);
-        this.cache.page.totalElements = this.cache.content.length;
-
-        // Notifica sobre o carregamento inicial com uma nova referência
-        this.cacheUpdated$.next({ ...this.cache });
-      } else {
-        // Se houver busca, filtra mas não armazena em cache
-        response.content = this.filterByActive(response.content);
-        response.page.totalElements = response.content.length;
+    if (hasSearchParams && searchParams) {
+      // NOVA LÓGICA: Se houver parâmetro "search", usa busca global
+      if (searchParams.search?.trim()) {
+        url += `&search=${encodeURIComponent(searchParams.search.trim())}`;
       }
-    })
-  );
-}
+      // Caso contrário, usa busca específica por campo
+      else {
+        if (searchParams.name?.trim()) {
+          url += `&name=${encodeURIComponent(searchParams.name.trim())}`;
+        }
+        if (searchParams.cpf?.trim()) {
+          url += `&cpf=${encodeURIComponent(searchParams.cpf.trim())}`;
+        }
+        if (searchParams.cnpj?.trim()) {
+          url += `&cnpj=${encodeURIComponent(searchParams.cnpj.trim())}`;
+        }
+        if (searchParams.email?.trim()) {
+          url += `&email=${encodeURIComponent(searchParams.email.trim())}`;
+        }
+        if (searchParams.storeId?.trim()) {
+          url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
+        }
+      }
+
+      // Adiciona o filtro de relationshipTypes se fornecido
+      // O backend espera múltiplos valores no formato: ?relationshipTypes=CLIENTE&relationshipTypes=FUNCIONARIO
+      if (searchParams.relationshipTypes && searchParams.relationshipTypes.length > 0) {
+        searchParams.relationshipTypes.forEach(type => {
+          url += `&relationshipTypes=${encodeURIComponent(type)}`;
+        });
+      }
+
+      // NOVO: Adiciona o filtro de roleNames se fornecido
+      // O backend espera múltiplos valores no formato: ?roleNames=ROLE_SELLER&roleNames=ROLE_MANAGER
+      if (searchParams.roleNames && searchParams.roleNames.length > 0) {
+        searchParams.roleNames.forEach(role => {
+          url += `&roleNames=${encodeURIComponent(role)}`;
+        });
+      }
+    }
+
+    console.log('🔍 URL construída:', url);  // DEBUG: Ver a URL completa
+
+    return this.http.get<PaginationResponse<Person>>(url).pipe(
+      first(),
+      tap((response) => {
+        console.log('✅ Resposta original do backend:', response);
+
+        // Só atualiza o cache se não houver busca
+        if (!hasSearchParams) {
+          this.cache = response;
+          this.cache.content = this.filterByActive(this.cache.content);
+          this.cache.page.totalElements = this.cache.content.length;
+
+          // Notifica sobre o carregamento inicial com uma nova referência
+          this.cacheUpdated$.next({ ...this.cache });
+        } else {
+          // Se houver busca, filtra mas não armazena em cache
+          response.content = this.filterByActive(response.content);
+          response.page.totalElements = response.content.length;
+        }
+      })
+    );
+  }
 
   create(data: Partial<Person>) {
     return this.http.post<string>(`${this.apiUrl}`, data).pipe(
@@ -185,7 +185,7 @@ export class PersonService {
     );
   }
 
-  private clearCache() {
+  clearCache() {
     this.cache = null;
     this.cacheUpdated$.next(null);
   }
