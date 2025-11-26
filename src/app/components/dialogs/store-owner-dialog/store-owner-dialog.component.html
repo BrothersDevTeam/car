@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Vincular Proprietário</h2>
+<h2 mat-dialog-title>{{ getDialogTitle() }}</h2>
 
 <mat-dialog-content>
   @if (loading) {
@@ -20,17 +20,26 @@
       
       <div class="info-box">
         <p><strong>Loja:</strong> {{ data.store.name }}</p>
-        @if (data.store.owner) {
-          <p class="warning">⚠️ Esta loja já possui um proprietário vinculado.</p>
+        @if (mode === 'update' && currentOwner) {
+          <div class="current-owner-info">
+            <p><strong>Proprietário Atual:</strong></p>
+            <p class="owner-name">{{ currentOwner.name }}</p>
+            <p class="owner-doc">{{ currentOwner.legalEntity ? 'CNPJ' : 'CPF' }}: {{ currentOwner.legalEntity ? currentOwner.cnpj : currentOwner.cpf }}</p>
+          </div>
         }
       </div>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Selecione a pessoa</mat-label>
+        <mat-label>{{ mode === 'update' ? 'Selecione o novo proprietário' : 'Selecione a pessoa' }}</mat-label>
         <mat-select formControlName="personId">
           @for (person of persons; track person.personId) {
-            <mat-option [value]="person.personId">
+            <mat-option 
+              [value]="person.personId"
+              [disabled]="isCurrentOwner(person.personId)">
               {{ getPersonDisplay(person) }}
+              @if (isCurrentOwner(person.personId)) {
+                <span class="current-badge"> (Atual)</span>
+              }
             </mat-option>
           }
         </mat-select>
@@ -40,8 +49,13 @@
       </mat-form-field>
 
       <div class="hint-text">
-        <p>💡 Apenas pessoas ativas desta loja podem ser vinculadas como proprietárias.</p>
-        <p>⚠️ Uma vez vinculado, não será possível remover ou alterar o proprietário.</p>
+        @if (mode === 'update') {
+          <p>🔄 Você está prestes a <strong>alterar</strong> o proprietário desta loja.</p>
+          <p>💼 O proprietário antigo permanecerá como Person normal na loja.</p>
+          <p>ℹ️ Operação permitida apenas para CAR_ADMIN.</p>
+        } @else {
+          <p>💡 Apenas pessoas ativas desta loja podem ser vinculadas como proprietárias.</p>
+        }
       </div>
 
     </form>
@@ -51,8 +65,12 @@
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancelar</button>
   @if (!loading && !error && persons.length > 0) {
-    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="ownerForm.invalid || data.store.owner">
-      Vincular Proprietário
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="onSubmit()" 
+      [disabled]="ownerForm.invalid">
+      {{ getActionButtonText() }}
     </button>
   }
 </mat-dialog-actions>

@@ -84,4 +84,19 @@ export class StoreService {
   setStoreOwner(storeId: string, personId: string): Observable<Store> {
     return this.setOwner(storeId, personId);
   }
+
+  /**
+   * Altera o proprietário de uma loja existente.
+   * Operação permitida apenas para CAR_ADMIN.
+   * 
+   * Permite trocar o proprietário de uma loja que já possui um owner vinculado.
+   * O proprietário antigo permanece como Person normal na loja.
+   * 
+   * @param storeId ID da loja que terá o proprietário alterado
+   * @param personId ID da Person que será o novo proprietário
+   * @returns Observable com a Store atualizada
+   */
+  updateOwner(storeId: string, personId: string): Observable<Store> {
+    return this.http.put<Store>(`${this.apiUrl}/${storeId}/owner`, { storeId, personId });
+  }
 }

@@ -7,17 +7,11 @@
         [height]="profilePicSize()"
       /> -->
       @if (!sideNavCollapsed()) {
-      <mat-icon
-        class="mat-18 user-icon"
-        fontSet="material-icons-outlined"
-      >
+      <mat-icon class="mat-18 user-icon" fontSet="material-icons-outlined">
         person
       </mat-icon>
       }
-      <div
-        class="header-text"
-        [class.hide-header-text]="sideNavCollapsed()"
-      >
+      <div class="header-text" [class.hide-header-text]="sideNavCollapsed()">
         @if (loggedUsername()) {
         <p class="username">{{ loggedUsername() }}</p>
         <p class="user-role">{{ userRole() }}</p>
@@ -27,19 +21,13 @@
     <mat-nav-list>
       @for (item of menuItems(); track item.label) { @if (!item.subItems &&
       item.route) {
-      <mat-list-item
-        class="menu-item"
-        [class.selected-menu-item]="isRouteActive(item.route!)"
-        (click)="onMenuItemClick(item.route!)"
-      >
-        <mat-icon
-          [fontSet]="
+      <mat-list-item class="menu-item" [class.selected-menu-item]="isRouteActive(item.route!)"
+        (click)="onMenuItemClick(item.route!)">
+        <mat-icon [fontSet]="
             isRouteActive(item.route!)
               ? 'material-icons'
               : 'material-icons-outlined'
-          "
-          matListItemIcon
-        >
+          " matListItemIcon>
           {{ item.icon }}
         </mat-icon>
 
@@ -48,27 +36,17 @@
         }
       </mat-list-item>
       } @else {
-      <mat-expansion-panel
-        [expanded]="isRouteActive(null, item.subItems)"
-        [hideToggle]="sideNavCollapsed()"
-        class="expansion-button"
-      >
-        <mat-expansion-panel-header
-          [ngClass]="{ collapsed: sideNavCollapsed() }"
-        >
+      <mat-expansion-panel [expanded]="isRouteActive(null, item.subItems)" [hideToggle]="sideNavCollapsed()"
+        class="expansion-button">
+        <mat-expansion-panel-header [ngClass]="{ collapsed: sideNavCollapsed() }">
           <mat-panel-title>
-            <mat-icon
-              [fontSet]="!true ? 'material-icons' : 'material-icons-outlined'"
-              [style.color]="'var(--text-color)'"
-            >
+            <mat-icon [fontSet]="!true ? 'material-icons' : 'material-icons-outlined'"
+              [style.color]="'var(--text-color)'">
               {{ item.icon }}
             </mat-icon>
 
             @if (!sideNavCollapsed()) {
-            <span
-              [style.font-size]="'medium'"
-              [style.color]="'var(--text-color)'"
-            >
+            <span [style.font-size]="'medium'" [style.color]="'var(--text-color)'">
               {{ item.label }}
             </span>
             }
@@ -77,19 +55,13 @@
         <div>
           @for (subItem of item.subItems; track subItem.label) { @if
           (subItem.route) {
-          <mat-list-item
-            class="menu-item"
-            [class.selected-menu-item]="isRouteActive(subItem.route!)"
-            (click)="onMenuItemClick(subItem.route!)"
-          >
-            <mat-icon
-              [fontSet]="
+          <mat-list-item class="menu-item" [class.selected-menu-item]="isRouteActive(subItem.route!)"
+            (click)="onMenuItemClick(subItem.route!)">
+            <mat-icon [fontSet]="
                 isRouteActive(subItem.route!)
                   ? 'material-icons'
                   : 'material-icons-outlined'
-              "
-              matListItemIcon
-            >
+              " matListItemIcon>
               {{ subItem.icon }}
             </mat-icon>
 
@@ -103,11 +75,7 @@
       } }
     </mat-nav-list>
   </div>
-  <mat-list-item
-    class="menu-item exit_btn"
-    mat-button
-    (click)="handleLogout()"
-  >
+  <mat-list-item class="menu-item exit_btn" mat-button (click)="handleLogout()">
     <mat-icon matListItemIcon>exit_to_app</mat-icon>
     @if (!sideNavCollapsed()) {
     <span matListItemTitle>Sair</span>
