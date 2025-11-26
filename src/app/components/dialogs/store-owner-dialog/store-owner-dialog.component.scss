@@ -24,6 +24,24 @@
       font-weight: 500;
     }
   }
+
+  // Estilo para informações do proprietário atual
+  .current-owner-info {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
+
+    .owner-name {
+      font-weight: 600;
+      color: #1976d2;
+      font-size: 1rem;
+    }
+
+    .owner-doc {
+      color: #666;
+      font-size: 0.875rem;
+    }
+  }
 }
 
 .hint-text {
@@ -35,6 +53,16 @@
   p {
     margin: 0.25rem 0;
     color: #1976d2;
+  }
+}
+
+// Badge "(Atual)" no select
+::ng-deep .mat-mdc-option {
+  .current-badge {
+    color: #4caf50;
+    font-weight: 600;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
   }
 }
 

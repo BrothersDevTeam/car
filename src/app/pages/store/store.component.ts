@@ -85,14 +85,25 @@ export class StoreComponent implements OnInit {
   }
 
   onManageOwner(store: Store): void {
+    // Determina o modo: se já tem owner, é update, senão é set
+    const mode = store.owner ? 'update' : 'set';
+    
     const dialogRef = this.dialog.open(StoreOwnerDialogComponent, {
       width: '600px',
-      data: { store }
+      data: { 
+        store,
+        mode // Passa o modo para o dialog
+      }
     });
 
     dialogRef.afterClosed().subscribe(personId => {
       if (personId) {
-        this.setStoreOwner(store.storeId!, personId);
+        // Chama o método apropriado baseado no modo
+        if (mode === 'update') {
+          this.updateStoreOwner(store.storeId!, personId);
+        } else {
+          this.setStoreOwner(store.storeId!, personId);
+        }
       }
     });
   }
@@ -151,6 +162,26 @@ export class StoreComponent implements OnInit {
       error: (err) => {
         console.error('❌ Erro ao vincular proprietário:', err);
         alert(err.error || 'Erro ao vincular proprietário');
+      }
+    });
+  }
+
+  /**
+   * Altera o proprietário de uma loja existente.
+   * Chama o endpoint PUT /stores/{storeId}/owner
+   * Permitido apenas para CAR_ADMIN
+   */
+  private updateStoreOwner(storeId: string, personId: string): void {
+    this.storeService.updateOwner(storeId, personId).subscribe({
+      next: (updatedStore) => {
+        console.log('✅ Proprietário alterado com sucesso:', updatedStore);
+        alert(`Proprietário alterado com sucesso para: ${updatedStore.owner?.name || 'novo proprietário'}`);
+        this.loadStores();
+      },
+      error: (err) => {
+        console.error('❌ Erro ao alterar proprietário:', err);
+        const errorMessage = err.error?.message || err.error || 'Erro ao alterar proprietário';
+        alert(errorMessage);
       }
     });
   }

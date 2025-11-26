@@ -12,6 +12,7 @@ import { PersonService } from '@services/person.service';
 
 export interface StoreOwnerDialogData {
   store: Store;
+  mode?: 'set' | 'update'; // 'set' = vincular primeira vez, 'update' = trocar proprietário
 }
 
 @Component({
@@ -34,6 +35,18 @@ export class StoreOwnerDialogComponent implements OnInit {
   persons: Person[] = [];
   loading = true;
   error = false;
+  
+  /**
+   * Modo de operação do dialog:
+   * - 'set': Vincular proprietário pela primeira vez (loja sem owner)
+   * - 'update': Alterar proprietário existente (loja já tem owner)
+   */
+  mode: 'set' | 'update' = 'set';
+  
+  /**
+   * Proprietário atual da loja (quando mode = 'update')
+   */
+  currentOwner: Person | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -43,6 +56,16 @@ export class StoreOwnerDialogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Determina o modo baseado na presença de owner na loja
+    this.mode = this.data.mode || (this.data.store.owner ? 'update' : 'set');
+    
+    // Se for modo update e tiver owner, guarda referência
+    if (this.mode === 'update' && this.data.store.owner) {
+      this.currentOwner = typeof this.data.store.owner === 'object' 
+        ? this.data.store.owner 
+        : null;
+    }
+    
     this.initForm();
     this.loadPersons();
   }
@@ -73,6 +96,31 @@ export class StoreOwnerDialogComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  /**
+   * Retorna o título do dialog baseado no modo
+   */
+  getDialogTitle(): string {
+    return this.mode === 'update' 
+      ? 'Alterar Proprietário' 
+      : 'Vincular Proprietário';
+  }
+  
+  /**
+   * Retorna o texto do botão de ação baseado no modo
+   */
+  getActionButtonText(): string {
+    return this.mode === 'update' 
+      ? 'Alterar Proprietário' 
+      : 'Vincular Proprietário';
+  }
+  
+  /**
+   * Verifica se a Person selecionada é o proprietário atual
+   */
+  isCurrentOwner(personId: string): boolean {
+    return this.currentOwner?.personId === personId;
   }
 
   getPersonDisplay(person: Person): string {
