@@ -1,1 +1,263 @@
+/**
+ * =============================================================================
+ * TOASTR - Sistema de Notificações Toast
+ * =============================================================================
+ * 
+ * @description
+ * Customizações aplicadas aos toasts do ngx-toastr para melhor UX.
+ * Este arquivo sobrescreve os estilos padrão da biblioteca.
+ * 
+ * IMPORT DO CORE:
+ * - Importa os estilos base do ngx-toastr
+ * 
+ * CUSTOMIZAÇÕES:
+ * - Toast centralizado com largura máxima definida
+ * - Estilos melhorados para erro (vermelho), sucesso (verde), aviso (amarelo)
+ * - Animações suaves de entrada e saída
+ * - Responsividade para dispositivos móveis
+ * 
+ * @see https://www.npmjs.com/package/ngx-toastr
+ */
+
+// Importa os estilos base do ngx-toastr
 @use 'ngx-toastr/toastr';
+
+// =============================================================================
+// CUSTOMIZAÇÕES DO TOAST
+// =============================================================================
+
+/**
+ * Container do Toast - Posicionamento Centralizado
+ * 
+ * @description
+ * Ajusta o container do toast para ficar perfeitamente centralizado
+ * no topo da tela, com largura máxima definida para melhor legibilidade.
+ */
+#toast-container {
+  &.toast-top-center {
+    // Posicionamento centralizado no topo
+    top: 20px;
+    right: 0;
+    left: 0;
+    margin: 0 auto;
+    
+    // Largura máxima do toast
+    // Em telas grandes: 500px
+    // Em telas pequenas: 90% da largura
+    width: 100%;
+    max-width: 500px;
+    
+    // Padding lateral para evitar colar nas bordas
+    padding: 0 16px;
+    
+    // Responsividade: telas pequenas
+    @media (max-width: 600px) {
+      top: 10px;
+      max-width: 100%;
+      padding: 0 12px;
+    }
+  }
+  
+  /**
+   * Estilos Individuais de Cada Toast
+   * 
+   * @description
+   * Aplica estilos melhorados para cada tipo de toast:
+   * - Sucesso (verde)
+   * - Erro (vermelho) 
+   * - Aviso (amarelo)
+   * - Informação (azul)
+   */
+  .toast {
+    // Largura completa do container
+    width: 100%;
+    
+    // Padding interno aumentado para melhor legibilidade
+    padding: 16px 20px;
+    
+    // Bordas arredondadas
+    border-radius: 8px;
+    
+    // Sombra suave para destaque
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    // Animação suave de entrada
+    opacity: 1;
+    
+    // Espaçamento entre múltiplos toasts
+    margin-bottom: 12px;
+    
+    /**
+     * Título do Toast
+     * Texto em negrito e com tamanho maior
+     */
+    .toast-title {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    
+    /**
+     * Mensagem do Toast
+     * Texto com contraste adequado para leitura
+     */
+    .toast-message {
+      font-size: 14px;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+    
+    /**
+     * Botão de Fechar (X)
+     * Estilização melhorada do botão de fechar
+     */
+    .toast-close-button {
+      font-size: 20px;
+      font-weight: 400;
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+      
+      &:hover {
+        opacity: 1;
+      }
+    }
+    
+    /**
+     * Barra de Progresso
+     * Indica visualmente o tempo restante do toast
+     */
+    .toast-progress {
+      height: 4px;
+      opacity: 0.8;
+      border-radius: 0 0 8px 8px;
+    }
+  }
+  
+  /**
+   * Toast de SUCESSO - Verde
+   * Usado para: cadastro bem-sucedido, atualização concluída, etc.
+   */
+  .toast-success {
+    background-color: #28a745; // Verde vibrante
+    
+    .toast-progress {
+      background-color: #1e7e34; // Verde mais escuro
+    }
+  }
+  
+  /**
+   * Toast de ERRO - Vermelho
+   * Usado para: erros de validação, falhas de conexão, username duplicado, etc.
+   */
+  .toast-error {
+    background-color: #dc3545; // Vermelho vibrante
+    
+    .toast-progress {
+      background-color: #bd2130; // Vermelho mais escuro
+    }
+  }
+  
+  /**
+   * Toast de AVISO - Amarelo/Laranja
+   * Usado para: alertas, avisos, confirmações pendentes, etc.
+   */
+  .toast-warning {
+    background-color: #ffc107; // Amarelo vibrante
+    color: #212529; // Texto escuro para contraste
+    
+    .toast-progress {
+      background-color: #e0a800; // Amarelo mais escuro
+    }
+    
+    // Ajusta o botão de fechar para texto escuro
+    .toast-close-button {
+      color: #212529;
+      text-shadow: none;
+    }
+  }
+  
+  /**
+   * Toast de INFORMAÇÃO - Azul
+   * Usado para: dicas, informações gerais, etc.
+   */
+  .toast-info {
+    background-color: #17a2b8; // Azul vibrante
+    
+    .toast-progress {
+      background-color: #117a8b; // Azul mais escuro
+    }
+  }
+}
+
+// =============================================================================
+// ANIMAÇÕES
+// =============================================================================
+
+/**
+ * Animação de Entrada - Slide Down + Fade In
+ * Toast desce suavemente do topo com fade in
+ */
+@keyframes toastSlideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/**
+ * Animação de Saída - Fade Out + Slide Up
+ * Toast sobe suavemente enquanto desaparece
+ */
+@keyframes toastSlideOutUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+
+// Aplica as animações aos toasts
+#toast-container .toast {
+  animation: toastSlideInDown 0.3s ease-out;
+  
+  &.ng-leave {
+    animation: toastSlideOutUp 0.3s ease-in;
+  }
+}
+
+// =============================================================================
+// ACESSIBILIDADE
+// =============================================================================
+
+/**
+ * Melhorias de Acessibilidade
+ * 
+ * @description
+ * - Alto contraste entre texto e fundo
+ * - Tamanhos de fonte legíveis
+ * - Área clicável adequada para botão de fechar
+ * - Suporte a leitores de tela (screen readers)
+ */
+#toast-container .toast {
+  // Garante contraste mínimo para WCAG AA
+  color: #ffffff;
+  
+  // Tamanho mínimo de fonte para legibilidade
+  font-size: 14px;
+  
+  // Botão de fechar com área clicável adequada (44x44px mínimo)
+  .toast-close-button {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
