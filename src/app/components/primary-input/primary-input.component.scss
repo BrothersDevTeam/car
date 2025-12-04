@@ -79,5 +79,26 @@
         }
       }
     }
+
+    /**
+     * Mensagem de erro do campo
+     * 
+     * @description
+     * Exibida quando o input tem erro de validação.
+     * Estilo vermelho para indicar visualmente o problema.
+     * 
+     * UX:
+     * - Cor vermelha (#dc3545) para destaque
+     * - Fonte pequena (14px) para não poluir
+     * - Margem superior (4px) para separação
+     * - Peso da fonte 500 para legibilidade
+     */
+    .invalid-field-message {
+      color: #dc3545; // Vermelho - indica erro
+      font-size: 14px;
+      margin-top: 4px;
+      margin-bottom: 0;
+      font-weight: 500;
+    }
   }
 }

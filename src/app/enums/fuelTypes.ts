@@ -3,6 +3,7 @@
  * Corresponde ao enum FuelTypes do backend
  */
 export enum FuelTypes {
+  FLEX = 'FLEX',
   GASOLINA = 'GASOLINA',
   ALCOOL = 'ALCOOL',
   DIESEL = 'DIESEL',
@@ -14,6 +15,7 @@ export enum FuelTypes {
  * Labels amigáveis para exibição
  */
 export const FuelTypesLabels: Record<FuelTypes, string> = {
+  [FuelTypes.FLEX]: 'Flex (Gasolina/Álcool)',
   [FuelTypes.GASOLINA]: 'Gasolina',
   [FuelTypes.ALCOOL]: 'Álcool/Etanol',
   [FuelTypes.DIESEL]: 'Diesel',

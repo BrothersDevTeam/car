@@ -302,9 +302,10 @@ form {
    * MENSAGENS DE ERRO
    * 
    * Estilo consistente para feedback de validação
+   * Cor vermelha (#dc3545) alinhada com o sistema de toasts
    */
   .error-message {
-    color: #d32f2f;
+    color: #dc3545; // Vermelho - mesmo tom do toast de erro
     font-size: 0.875rem;
     margin-top: -16px;
     margin-bottom: 8px;

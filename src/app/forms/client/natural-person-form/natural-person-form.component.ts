@@ -60,6 +60,23 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   @ViewChild('submitButton', { static: false, read: ElementRef })
   submitButton!: ElementRef<HTMLButtonElement>;
 
+  /**
+   * Referência ao campo de input username
+   * 
+   * @description
+   * ViewChild permite acesso direto ao elemento DOM do campo username.
+   * Usado para aplicar foco automaticamente quando há erro de username duplicado.
+   * 
+   * @example
+   * // No template:
+   * // <app-primary-input #usernameInput formControlName="username" />
+   * 
+   * // No componente:
+   * this.usernameInput.nativeElement.querySelector('input')?.focus();
+   */
+  @ViewChild('usernameInput', { static: false, read: ElementRef })
+  usernameInput?: ElementRef;
+
   @Input() dataForm: Person | null = null;
   @Output() formSubmitted = new EventEmitter<void>();
   @Output() formChanged = new EventEmitter<boolean>();
@@ -216,6 +233,28 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
         this.actionsService.hasFormChanges.set(isDirty);
         this.formChanged.emit(isDirty);
       })
+    );
+
+    /**
+     * Remove o erro de usernameConflict quando o usuário começa a digitar
+     * 
+     * @description
+     * Quando o backend retorna erro de username duplicado, marcamos o campo
+     * com o erro 'usernameConflict'. Este listener remove esse erro assim
+     * que o usuário começa a editar o campo, permitindo nova tentativa.
+     * 
+     * UX: O erro só deve aparecer após submissão, não durante a digitação.
+     */
+    this.subscriptions.add(
+      this.form.get('username')?.valueChanges.subscribe(() => {
+        // Se o campo tem o erro de conflito, remove-o quando o usuário digitar
+        const usernameControl = this.form.get('username');
+        if (usernameControl?.hasError('usernameConflict')) {
+          const errors = { ...usernameControl.errors };
+          delete errors['usernameConflict'];
+          usernameControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
+        }
+      }) ?? new Subscription()
     );
   }
 
@@ -484,8 +523,55 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
         },
         error: (error) => {
           console.error('Erro ao atualizar:', error);
+          
+          /**
+           * Tratamento de erros na atualização
+           * 
+           * @description
+           * Aplica o mesmo tratamento de erros usado na criação,
+           * permitindo identificar conflitos de username durante updates.
+           */
+          
+          // Verifica se é um erro de validação do backend (array de erros)
+          if (error.error && Array.isArray(error.error)) {
+            const validationErrors = error.error;
+            
+            // Procura especificamente pelo erro de username duplicado
+            const usernameError = validationErrors.find(
+              (err: any) => err.code === 'usernameConflict'
+            );
+            
+            if (usernameError) {
+              // Mostra mensagem específica para username duplicado
+              this.toastrService.error(
+                'Nome de usuário já cadastrado',
+                'Erro'
+              );
+              
+              // Marca o campo username com erro para feedback visual
+              this.form.get('username')?.setErrors({ 
+                usernameConflict: true 
+              });
+              
+              // Coloca o foco no campo de username para o usuário corrigir
+              this.focusUsernameField();
+              
+              return; // Sai da função para não mostrar mensagem genérica
+            }
+            
+            // Se chegou aqui, é um erro de validação mas não reconhecido
+            const firstError = validationErrors[0];
+            this.toastrService.error(
+              firstError.defaultMessage || 'Erro de validação',
+              'Erro ao atualizar'
+            );
+            return;
+          }
+          
+          // Se não for erro de validação, mostra mensagem genérica
           this.toastrService.error(
-            'Erro inesperado! Tente novamente mais tarde'
+            'Erro inesperado! Tente novamente mais tarde',
+            'Erro'
           );
         },
       });
@@ -502,8 +588,66 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
         },
         error: (error) => {
           console.error('Erro ao criar:', error);
+          
+          /**
+           * Tratamento específico de erros de validação do backend
+           * 
+           * @description
+           * O backend retorna um array de erros de validação quando há problemas.
+           * Cada erro contém:
+           * - code: código identificador do erro (ex: 'usernameConflict')
+           * - field: campo que causou o erro (ex: 'username')
+           * - defaultMessage: mensagem padrão do erro
+           * 
+           * Erros conhecidos:
+           * - usernameConflict: Nome de usuário já existe no sistema
+           * - cpfConflict: CPF já cadastrado (futuro)
+           * - emailConflict: Email já cadastrado (futuro)
+           */
+          
+          // Verifica se é um erro de validação do backend (array de erros)
+          if (error.error && Array.isArray(error.error)) {
+            const validationErrors = error.error;
+            
+            // Procura especificamente pelo erro de username duplicado
+            const usernameError = validationErrors.find(
+              (err: any) => err.code === 'usernameConflict'
+            );
+            
+            if (usernameError) {
+              // Mostra mensagem específica para username duplicado
+              this.toastrService.error(
+                'Nome de usuário já cadastrado',
+                'Erro'
+              );
+              
+              // Marca o campo username com erro para feedback visual
+              this.form.get('username')?.setErrors({ 
+                usernameConflict: true 
+              });
+              
+              // Coloca o foco no campo de username para o usuário corrigir
+              this.focusUsernameField();
+              
+              return; // Sai da função para não mostrar mensagem genérica
+            }
+            
+            // Aqui você pode adicionar tratamento para outros tipos de erro
+            // Exemplo: cpfConflict, emailConflict, etc.
+            
+            // Se chegou aqui, é um erro de validação mas não reconhecido
+            const firstError = validationErrors[0];
+            this.toastrService.error(
+              firstError.defaultMessage || 'Erro de validação',
+              'Erro ao cadastrar'
+            );
+            return;
+          }
+          
+          // Se não for erro de validação, mostra mensagem genérica
           this.toastrService.error(
-            'Erro inesperado! Tente novamente mais tarde'
+            'Erro inesperado! Tente novamente mais tarde',
+            'Erro'
           );
         },
       });
@@ -543,5 +687,41 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     });
     
     console.log('[resetForm] Formulário resetado para estado inicial');
+  }
+
+  /**
+   * Aplica foco no campo de username e seleciona o texto
+   * 
+   * @description
+   * Método auxiliar para focar o campo de username quando houver erro.
+   * - Usa ViewChild para acessar o elemento DOM
+   * - Busca o input dentro do componente app-primary-input
+   * - Seleciona todo o texto para facilitar a edição
+   * - Usa setTimeout para garantir que o DOM está pronto
+   * 
+   * @private
+   * @returns {void}
+   * 
+   * @example
+   * // Após detectar erro de username duplicado:
+   * this.focusUsernameField();
+   */
+  private focusUsernameField(): void {
+    setTimeout(() => {
+      if (this.usernameInput) {
+        // Acessa o input dentro do componente app-primary-input
+        const inputElement = this.usernameInput.nativeElement.querySelector('input') as HTMLInputElement;
+        
+        if (inputElement) {
+          inputElement.focus();     // Coloca o foco no campo
+          inputElement.select();    // Seleciona todo o texto
+          console.log('[focusUsernameField] Foco aplicado no campo username');
+        } else {
+          console.warn('[focusUsernameField] Input username não encontrado no DOM');
+        }
+      } else {
+        console.warn('[focusUsernameField] ViewChild usernameInput não está disponível');
+      }
+    }, 100); // Timeout de 100ms para garantir que o DOM foi atualizado
   }
 }

@@ -87,6 +87,7 @@
     
     <div class="form-row-2cols">
       <app-primary-input
+        #usernameInput
         formControlName="username"
         label="Nome de usuário *"
         inputName="username"
@@ -151,7 +152,13 @@
     <!-- Mensagens de erro consolidadas -->
     @if (submitted && form.get('username')?.invalid) {
     <div class="error-message">
-      Nome de usuário é obrigatório (mínimo 3 caracteres)
+      @if (form.get('username')?.hasError('usernameConflict')) {
+        <!-- Erro específico: Username já existe no sistema -->
+        O nome de usuário já está em uso. Por favor, escolha outro.
+      } @else {
+        <!-- Erro padrão: Campo obrigatório ou tamanho mínimo -->
+        Nome de usuário é obrigatório (mínimo 3 caracteres)
+      }
     </div>
     }
 
