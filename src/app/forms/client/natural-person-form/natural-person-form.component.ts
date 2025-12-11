@@ -14,27 +14,33 @@ import { ToastrService } from 'ngx-toastr';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 
 import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
+import { Observable, of, Subscription } from 'rxjs';
 
-import type {
-  CreateNaturalPerson,
-  Person,
-} from '@interfaces/person';
+import { FormDraftService } from '@services/form-draft.service';
+
+import type { CreateNaturalPerson, Person } from '@interfaces/person';
 
 import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
+import { AuthService } from '@services/auth/auth.service';
 
-import { Subscription } from 'rxjs';
 import { removeEmptyPropertiesFromObject } from '../../../utils/removeEmptyPropertiesFromObject';
 import { minLengthArray } from '../../../utils/minLengthArray';
-import { AuthService } from '@services/auth/auth.service';
 import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
 import { RelationshipTypes } from '../../../enums/relationshipTypes';
+import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-natural-person-form',
@@ -50,7 +56,9 @@ import { RelationshipTypes } from '../../../enums/relationshipTypes';
   templateUrl: './natural-person-form.component.html',
   styleUrl: './natural-person-form.component.scss',
 })
-export class NaturalPersonFormComponent implements OnInit, OnChanges {
+export class NaturalPersonFormComponent
+  implements OnInit, OnChanges, CanComponentDeactivate
+{
   private subscriptions = new Subscription();
   submitted = false;
 
@@ -62,15 +70,15 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
 
   /**
    * Referência ao campo de input username
-   * 
+   *
    * @description
    * ViewChild permite acesso direto ao elemento DOM do campo username.
    * Usado para aplicar foco automaticamente quando há erro de username duplicado.
-   * 
+   *
    * @example
    * // No template:
    * // <app-primary-input #usernameInput formControlName="username" />
-   * 
+   *
    * // No componente:
    * this.usernameInput.nativeElement.querySelector('input')?.focus();
    */
@@ -82,11 +90,34 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
   @Output() formChanged = new EventEmitter<boolean>();
 
   /**
+   * Armazena o valor inicial do formulário para comparação
+   * Usado para detectar se houve mudanças não salvas
+   */
+  private initialFormValue: string = '';
+
+  /**
+   * Flag que indica se o formulário está sendo salvo
+   * Evita verificação de mudanças durante salvamento
+   */
+  private isSaving = false;
+
+  /**
+   * Define os campos obrigatórios do formulário
+   * Usado para verificar se pode salvar completo
+   */
+  private readonly REQUIRED_FIELDS = ['name', 'cpf', 'email'];
+
+  /**
+   * Tipo do formulário para identificação no localStorage
+   */
+  private readonly FORM_TYPE = 'pessoa-fisica';
+
+  /**
    * Controla o estado do checkbox "Cadastrar como funcionário"
-   * 
+   *
    * @property {boolean} isEmployee - Indica se a pessoa será cadastrada como funcionário
    * @default false - Por padrão, toda pessoa é cadastrada como CLIENTE
-   * 
+   *
    * @description
    * Esta propriedade está vinculada ao checkbox do template e controla
    * automaticamente o valor do campo 'relationshipTypes' no formulário.
@@ -97,31 +128,31 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
 
   /**
    * Verifica se o usuário logado tem permissão para cadastrar funcionários
-   * 
+   *
    * @returns {boolean} true se o usuário tem ROLE_CAR_ADMIN ou ROLE_MANAGER
-   * 
+   *
    * @description
    * Apenas usuários com as roles ROLE_CAR_ADMIN ou ROLE_MANAGER podem
    * visualizar o checkbox e cadastrar funcionários no sistema.
-   * 
+   *
    * Para outros usuários (ROLE_SELLER, ROLE_FINANCIAL):
    * - O checkbox não será exibido
    * - Todas as pessoas serão cadastradas como CLIENTE automaticamente
    */
   protected get canRegisterEmployee(): boolean {
     const userRoles = this.authService.getRoles();
-    // return userRoles.includes('ROLE_CAR_ADMIN') || userRoles.includes('ROLE_MANAGER') || userRoles.includes('ROLE_ADMIN');
-    return ["ROLE_CAR_ADMIN", "ROLE_ADMIN", "ROLE_MANAGER"].includes(userRoles[0]);
-
+    return ['ROLE_CAR_ADMIN', 'ROLE_ADMIN', 'ROLE_MANAGER'].includes(
+      userRoles[0]
+    );
   }
 
   /**
    * Formulário reativo para cadastro/edição de pessoa física
-   * 
+   *
    * IMPORTANTE: relationshipTypes agora é controlado pelo checkbox 'isEmployee'
    * - Por padrão: [CLIENTE]
    * - Quando checkbox marcado: [FUNCIONARIO]
-   * 
+   *
    * O campo relationshipTypes é SEMPRE um array com apenas UM elemento,
    * gerenciado automaticamente pelo método toggleEmployeeType()
    */
@@ -137,19 +168,294 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     storeId: [''],
     legalEntity: [false],
     relationshipTypes: this.formBuilderService.control<RelationshipTypes[]>(
-      [RelationshipTypes.CLIENTE], // ← Começa sempre com CLIENTE por padrão
+      [RelationshipTypes.CLIENTE],
       {
         validators: [minLengthArray(1)],
       }
     ),
     username: [''],
     password: [''],
-    confirmPassword: [''], // Campo para confirmar senha
+    confirmPassword: [''],
     roleName: [''],
   });
 
+  /**
+   * Verifica se deve mostrar os campos de usuário do sistema
+   *
+   * @returns {boolean} true se deve mostrar os campos
+   *
+   * @description
+   * Os campos de usuário (username, password, roleName) só aparecem quando:
+   * 1. O tipo selecionado é FUNCIONARIO ou PROPRIETARIO
+   * 2. Está no modo de CRIAÇÃO (dataForm é null)
+   *
+   * No modo de EDIÇÃO, esses campos NUNCA aparecem.
+   * A edição de dados de acesso será feita posteriormente em outra tela.
+   */
+  get shouldShowUserFields(): boolean {
+    if (this.dataForm) {
+      return false;
+    }
+
+    const selectedTypes = this.form.get('relationshipTypes')?.value || [];
+    return selectedTypes.some((type: RelationshipTypes) =>
+      [RelationshipTypes.PROPRIETARIO, RelationshipTypes.FUNCIONARIO].includes(
+        type
+      )
+    );
+  }
+
+  constructor(
+    private personService: PersonService,
+    private toastrService: ToastrService,
+    private actionsService: ActionsService,
+    private authService: AuthService,
+    private formDraftService: FormDraftService
+  ) {}
+
+  /**
+   * Implementação da interface CanComponentDeactivate
+   * Verifica se há mudanças não salvas comparando com valor inicial
+   *
+   * @returns true se há mudanças, false caso contrário
+   */
+  hasUnsavedChanges(): boolean {
+    if (this.isSaving) {
+      return false;
+    }
+
+    if (!this.initialFormValue) {
+      return false;
+    }
+
+    const currentValue = JSON.stringify(this.form.value);
+    const hasChanges = currentValue !== this.initialFormValue;
+
+    console.log('[hasUnsavedChanges] Tem mudanças não salvas?', hasChanges);
+    return hasChanges;
+  }
+
+  /**
+   * Implementação da interface CanComponentDeactivate
+   * Verifica se todos os campos obrigatórios estão preenchidos
+   *
+   * @returns true se pode salvar completo, false caso contrário
+   */
+  canSaveForm(): boolean {
+    if (this.form.valid) {
+      console.log('[canSaveForm] Formulário válido, pode salvar');
+      return true;
+    }
+
+    const canSave = this.REQUIRED_FIELDS.every((field) => {
+      const control = this.form.get(field);
+      const value = control?.value;
+      const filled = value && value.toString().trim() !== '';
+
+      if (!filled) {
+        console.log(`[canSaveForm] Campo obrigatório vazio: ${field}`);
+      }
+
+      return filled;
+    });
+
+    console.log('[canSaveForm] Campos obrigatórios preenchidos?', canSave);
+    return canSave;
+  }
+
+  /**
+   * Implementação da interface CanComponentDeactivate
+   * Salva o formulário no backend
+   *
+   * @param isDraft - Se true, salva como rascunho; se false, salva completo
+   * @returns Observable que emite true quando salvo com sucesso
+   */
+  saveForm(isDraft: boolean): Observable<boolean> {
+    console.log('[saveForm] Salvando formulário. IsDraft:', isDraft);
+
+    this.isSaving = true;
+
+    if (isDraft) {
+      this.saveLocalDraft();
+      this.isSaving = false;
+      return of(true);
+    }
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.toastrService.error(
+        'Por favor, preencha todos os campos obrigatórios'
+      );
+      this.isSaving = false;
+      return of(false);
+    }
+
+    return new Observable((observer) => {
+      try {
+        const storeId = this.authService.getStoreId();
+        if (!storeId) {
+          this.toastrService.error(
+            'Loja não identificada. Faça login novamente.'
+          );
+          this.isSaving = false;
+          observer.next(false);
+          observer.complete();
+          return;
+        }
+
+        const baseData = {
+          name: this.form.value.name || '',
+          storeId,
+          cpf: this.form.value.cpf?.replace(/\D/g, '') || '',
+          active: true as const,
+          email: this.form.value.email || '',
+          phone: this.form.value.phone?.replace(/\D/g, '') || '',
+          nickName: this.form.value.nickName || '',
+          legalEntity: false as const,
+          rg: this.form.value.rg?.replace(/\D/g, '') || '',
+          rgIssuer: '',
+          crc: '',
+          relationshipTypes: this.form.value
+            .relationshipTypes as RelationshipTypes[],
+        };
+
+        let formValue: CreateNaturalPerson;
+
+        if (this.shouldShowUserFields) {
+          formValue = {
+            ...baseData,
+            username: this.form.value.username || '',
+            password: this.form.value.password || '',
+            roleName: this.form.value.roleName || '',
+          };
+        } else {
+          formValue = baseData;
+        }
+
+        if (this.dataForm?.personId) {
+          this.personService
+            .update(formValue, this.dataForm.personId)
+            .subscribe({
+              next: () => {
+                this.toastrService.success('Atualização feita com sucesso');
+                // Converte personId para o tipo correto antes de passar
+                const personId = Number(this.dataForm!.personId);
+                this.formDraftService.removeDraft(
+                  this.FORM_TYPE,
+                  personId
+                );
+                this.isSaving = false;
+                observer.next(true);
+                observer.complete();
+              },
+              error: (error) => {
+                console.error('Erro ao atualizar:', error);
+                this.toastrService.error('Erro ao atualizar pessoa');
+                this.isSaving = false;
+                observer.next(false);
+                observer.complete();
+              },
+            });
+        } else {
+          const clean = removeEmptyPropertiesFromObject<CreateNaturalPerson>(
+            formValue as Person
+          );
+          this.personService.create(clean).subscribe({
+            next: () => {
+              this.toastrService.success('Cadastro realizado com sucesso');
+              this.formDraftService.removeDraft(this.FORM_TYPE);
+              this.isSaving = false;
+              observer.next(true);
+              observer.complete();
+            },
+            error: (error) => {
+              console.error('Erro ao criar:', error);
+              this.toastrService.error('Erro ao criar pessoa');
+              this.isSaving = false;
+              observer.next(false);
+              observer.complete();
+            },
+          });
+        }
+      } catch (error) {
+        console.error('[saveForm] Erro ao salvar:', error);
+        this.isSaving = false;
+        observer.next(false);
+        observer.complete();
+      }
+    });
+  }
+
+  /**
+   * Implementação da interface CanComponentDeactivate
+   * Salva rascunho local no localStorage
+   *
+   * @param silent - Se true, não mostra mensagem de sucesso
+   */
+  saveLocalDraft(silent: boolean = false): void {
+    const draftId = this.formDraftService.saveDraft(
+      this.FORM_TYPE,
+      this.form.value,
+      this.dataForm?.personId
+    );
+
+    if (!silent) {
+      this.toastrService.info('Rascunho salvo localmente');
+    }
+
+    console.log('[saveLocalDraft] Rascunho salvo:', draftId);
+  }
+
+  /**
+   * Captura o valor inicial do formulário após carregar dados
+   * Usado para detectar mudanças não salvas
+   */
+  private captureInitialFormValue(): void {
+    this.initialFormValue = JSON.stringify(this.form.value);
+    console.log('[captureInitialFormValue] Valor inicial capturado');
+  }
+
+  /**
+   * Verifica se existe rascunho salvo e pergunta se deseja carregar
+   */
+  private checkForDrafts(): void {
+    if (this.dataForm?.personId) {
+      return;
+    }
+
+    // Converte personId de string para number
+    const personId = this.dataForm?.personId
+      ? Number(this.dataForm.personId)
+      : undefined;
+
+    const draft = this.formDraftService.getDraft<any>(this.FORM_TYPE, personId);
+
+    if (draft) {
+      const loadDraft = confirm(
+        `Foi encontrado um rascunho salvo em ${draft.lastModified.toLocaleString()}.\n\nDeseja carregar este rascunho?`
+      );
+
+      if (loadDraft) {
+        this.form.patchValue(draft.data);
+
+        const relationshipTypes = draft.data.relationshipTypes || [];
+        this.isEmployee = relationshipTypes.includes(
+          RelationshipTypes.FUNCIONARIO
+        );
+
+        this.toastrService.success('Rascunho carregado com sucesso');
+        console.log('[checkForDrafts] Rascunho carregado:', draft);
+      } else {
+        this.formDraftService.removeDraft(this.FORM_TYPE);
+        console.log('[checkForDrafts] Rascunho removido');
+      }
+    }
+  }
+
   // Validator personalizado para verificar se as senhas coincidem
-  private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+  private passwordMatchValidator(
+    control: AbstractControl
+  ): ValidationErrors | null {
     const password = control.get('password');
     const confirmPassword = control.get('confirmPassword');
 
@@ -161,72 +467,27 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       confirmPassword.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
     } else {
-      // Remove o erro se as senhas coincidem
       const errors = confirmPassword.errors;
       if (errors) {
         delete errors['passwordMismatch'];
-        confirmPassword.setErrors(Object.keys(errors).length > 0 ? errors : null);
+        confirmPassword.setErrors(
+          Object.keys(errors).length > 0 ? errors : null
+        );
       }
     }
 
     return null;
   }
 
-  /**
-   * Verifica se deve mostrar os campos de usuário do sistema
-   * 
-   * @returns {boolean} true se deve mostrar os campos
-   * 
-   * @description
-   * Os campos de usuário (username, password, roleName) só aparecem quando:
-   * 1. O tipo selecionado é FUNCIONARIO ou PROPRIETARIO
-   * 2. Está no modo de CRIAÇÃO (dataForm é null)
-   * 
-   * No modo de EDIÇÃO, esses campos NUNCA aparecem.
-   * A edição de dados de acesso será feita posteriormente em outra tela.
-   */
-  get shouldShowUserFields(): boolean {
-    // Se estiver editando (dataForm existe), nunca mostra campos de usuário
-    if (this.dataForm) {
-      return false;
-    }
-
-    // Se estiver criando, só mostra se for FUNCIONARIO ou PROPRIETARIO
-    const selectedTypes = this.form.get('relationshipTypes')?.value || [];
-    return selectedTypes.some((type: RelationshipTypes) =>
-      [RelationshipTypes.PROPRIETARIO, RelationshipTypes.FUNCIONARIO]
-        .includes(type)
-    );
-  }
-
-  constructor(
-    private personService: PersonService,
-    private toastrService: ToastrService,
-    private actionsService: ActionsService,
-    private authService: AuthService
-  ) { }
-
   ngOnInit() {
-    /**
-     * Inicialização do formulário
-     * 
-     * @description
-     * - Define CLIENTE como tipo padrão (já setado no formulário)
-     * - Configura validators dinâmicos
-     * - Inscreve-se nas mudanças do formulário para controlar validações
-     */
-
-    // Adiciona o validator de senha no formulário
     this.form.setValidators(this.passwordMatchValidator.bind(this));
 
-    // Observa mudanças no relationshipTypes para atualizar validators dinâmicos
     this.subscriptions.add(
       this.form.get('relationshipTypes')!.valueChanges.subscribe((types) => {
         this.updateConditionalValidators();
       })
     );
 
-    // Observa mudanças gerais no formulário para controlar estado dirty
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
         const isDirty = this.form.dirty;
@@ -235,68 +496,39 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       })
     );
 
-    /**
-     * Remove o erro de usernameConflict quando o usuário começa a digitar
-     * 
-     * @description
-     * Quando o backend retorna erro de username duplicado, marcamos o campo
-     * com o erro 'usernameConflict'. Este listener remove esse erro assim
-     * que o usuário começa a editar o campo, permitindo nova tentativa.
-     * 
-     * UX: O erro só deve aparecer após submissão, não durante a digitação.
-     */
     this.subscriptions.add(
       this.form.get('username')?.valueChanges.subscribe(() => {
-        // Se o campo tem o erro de conflito, remove-o quando o usuário digitar
         const usernameControl = this.form.get('username');
         if (usernameControl?.hasError('usernameConflict')) {
           const errors = { ...usernameControl.errors };
           delete errors['usernameConflict'];
-          usernameControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
+          usernameControl.setErrors(
+            Object.keys(errors).length > 0 ? errors : null
+          );
         }
       }) ?? new Subscription()
     );
+
+    this.checkForDrafts();
+
+    setTimeout(() => {
+      this.captureInitialFormValue();
+    }, 500);
   }
 
-  /**
-   * Alterna entre CLIENTE e FUNCIONARIO baseado no estado do checkbox
-   * 
-   * @description
-   * Este método é chamado quando o usuário marca/desmarca o checkbox
-   * "Cadastrar como funcionário".
-   * 
-   * IMPORTANTE: O array relationshipTypes sempre terá apenas UM elemento:
-   * - Checkbox DESMARCADO: [CLIENTE]
-   * - Checkbox MARCADO: [FUNCIONARIO]
-   * 
-   * Quando marcado como FUNCIONARIO, os campos de usuário (username, password, roleName)
-   * se tornam obrigatórios automaticamente através do método updateConditionalValidators().
-   * 
-   * @returns {void}
-   * 
-   * @example
-   * // Usuário marca checkbox
-   * toggleEmployeeType() // isEmployee = true, relationshipTypes = [FUNCIONARIO]
-   * 
-   * // Usuário desmarca checkbox
-   * toggleEmployeeType() // isEmployee = false, relationshipTypes = [CLIENTE]
-   */
   protected toggleEmployeeType(): void {
-    // Inverte o estado do checkbox
     this.isEmployee = !this.isEmployee;
 
-    // Atualiza o relationshipTypes baseado no novo estado
     if (this.isEmployee) {
-      // Marcado como funcionário
-      this.form.get('relationshipTypes')?.setValue([RelationshipTypes.FUNCIONARIO]);
+      this.form
+        .get('relationshipTypes')
+        ?.setValue([RelationshipTypes.FUNCIONARIO]);
       console.log('[toggleEmployeeType] Alterado para FUNCIONARIO');
     } else {
-      // Desmarcado (volta para cliente)
       this.form.get('relationshipTypes')?.setValue([RelationshipTypes.CLIENTE]);
       console.log('[toggleEmployeeType] Alterado para CLIENTE');
     }
 
-    // Força a marcação do formulário como modificado
     this.form.markAsDirty();
   }
 
@@ -309,9 +541,18 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     const roleNameControl = this.form.get('roleName');
 
     if (this.shouldShowUserFields) {
-      usernameControl?.setValidators([Validators.required, Validators.minLength(3)]);
-      passwordControl?.setValidators([Validators.required, Validators.minLength(6)]);
-      confirmPasswordControl?.setValidators([Validators.required, Validators.minLength(6)]);
+      usernameControl?.setValidators([
+        Validators.required,
+        Validators.minLength(3),
+      ]);
+      passwordControl?.setValidators([
+        Validators.required,
+        Validators.minLength(6),
+      ]);
+      confirmPasswordControl?.setValidators([
+        Validators.required,
+        Validators.minLength(6),
+      ]);
       roleNameControl?.setValidators([Validators.required]);
 
       usernameControl?.updateValueAndValidity({ emitEvent: false });
@@ -336,71 +577,50 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     }
   }
 
-  /**
-   * Limpeza ao destruir o componente
-   * 
-   * @description
-   * Cancela todas as inscrições para evitar memory leaks.
-   * Boa prática essencial em Angular para componentes que usam RxJS.
-   * 
-   * @returns {void}
-   */
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
     console.log('[ngOnDestroy] Subscriptions canceladas');
   }
 
-  /**
-   * Detecta mudanças no @Input dataForm (quando está editando)
-   * 
-   * @param changes - Mudanças detectadas pelo Angular
-   * 
-   * @description
-   * Quando dataForm é preenchido (modo EDIÇÃO), preenche o formulário
-   * com os dados do banco.
-   * 
-   * IMPORTANTE: O backend envia 'relationships' mas o frontend usa 'relationshipTypes'.
-   * Precisamos fazer o mapeamento correto!
-   * 
-   * NOVA LÓGICA: Agora também atualiza o estado do checkbox 'isEmployee'
-   * baseado no tipo de relacionamento que veio do banco.
-   */
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
       console.log('[natural-person-form] dataForm recebido:', this.dataForm);
-      console.log('[natural-person-form] relationshipTypes do banco:', this.dataForm.relationshipTypes);
-      console.log('[natural-person-form] relationships do banco:', (this.dataForm as any).relationships);
-      
-      /**
-       * CORREÇÃO CRÍTICA: O backend retorna um array 'relationships' com objetos:
-       * relationships: [{relationshipId: '...', relationshipName: 'FUNCIONARIO'}]
-       * 
-       * Mas o frontend precisa de um array simples de strings:
-       * relationshipTypes: ['FUNCIONARIO']
-       * 
-       * Fazemos o mapeamento aqui!
-       */
-      const relationshipsFromBackend = (this.dataForm as any).relationships || [];
-      const relationshipTypes = relationshipsFromBackend.map((rel: any) => rel.relationshipName);
-      
-      console.log('[natural-person-form] relationshipTypes mapeado:', relationshipTypes);
-      
-      /**
-       * Atualiza o estado do checkbox baseado no tipo de relacionamento
-       * Se for FUNCIONARIO ou PROPRIETARIO, marca o checkbox
-       */
-      this.isEmployee = relationshipTypes.includes(RelationshipTypes.FUNCIONARIO) || 
-                       relationshipTypes.includes(RelationshipTypes.PROPRIETARIO);
-      
-      console.log('[natural-person-form] isEmployee setado para:', this.isEmployee);
-      
-      /**
-       * Timeout para garantir que o formulário está completamente inicializado
-       */
+      console.log(
+        '[natural-person-form] relationshipTypes do banco:',
+        this.dataForm.relationshipTypes
+      );
+      console.log(
+        '[natural-person-form] relationships do banco:',
+        (this.dataForm as any).relationships
+      );
+
+      const relationshipsFromBackend =
+        (this.dataForm as any).relationships || [];
+      const relationshipTypes = relationshipsFromBackend.map(
+        (rel: any) => rel.relationshipName
+      );
+
+      console.log(
+        '[natural-person-form] relationshipTypes mapeado:',
+        relationshipTypes
+      );
+
+      this.isEmployee =
+        relationshipTypes.includes(RelationshipTypes.FUNCIONARIO) ||
+        relationshipTypes.includes(RelationshipTypes.PROPRIETARIO);
+
+      console.log(
+        '[natural-person-form] isEmployee setado para:',
+        this.isEmployee
+      );
+
       setTimeout(() => {
         this.form.patchValue({
           name: this.dataForm!.name || '',
-          relationshipTypes: relationshipTypes.length > 0 ? relationshipTypes : [RelationshipTypes.CLIENTE],
+          relationshipTypes:
+            relationshipTypes.length > 0
+              ? relationshipTypes
+              : [RelationshipTypes.CLIENTE],
           nickName: this.dataForm!.nickName || '',
           email: this.dataForm!.email || '',
           phone: this.dataForm!.phone || '',
@@ -408,9 +628,15 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
           rg: this.dataForm!.rg || '',
           rgIssuer: this.dataForm!.rgIssuer || '',
         });
-        
-        console.log('[natural-person-form] Formulário após patchValue:', this.form.value);
-        console.log('[natural-person-form] relationshipTypes após patchValue:', this.form.get('relationshipTypes')?.value);
+
+        console.log(
+          '[natural-person-form] Formulário após patchValue:',
+          this.form.value
+        );
+        console.log(
+          '[natural-person-form] relationshipTypes após patchValue:',
+          this.form.get('relationshipTypes')?.value
+        );
       }, 200);
     }
   }
@@ -432,31 +658,15 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     }
   }
 
-  /**
-   * Submete o formulário para criação ou atualização de pessoa física
-   * 
-   * @description
-   * Valida o formulário e envia os dados para o backend.
-   * 
-   * IMPORTANTE: O campo relationshipTypes sempre terá apenas um elemento:
-   * - [CLIENTE] se checkbox desmarcado
-   * - [FUNCIONARIO] se checkbox marcado
-   * 
-   * Campos de usuário (username, password, roleName) são enviados apenas
-   * quando relationshipTypes inclui FUNCIONARIO ou PROPRIETARIO.
-   * 
-   * @returns {void}
-   */
   onSubmit() {
     this.submitted = true;
-    
-    // Validação do formulário
+    this.isSaving = true;
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       console.log('[onSubmit] Formulário inválido:', this.form.value);
       console.log('[onSubmit] Erros do formulário:', this.form.errors);
-      
-      // Logs detalhados para debug
+
       if (this.shouldShowUserFields) {
         if (this.form.get('username')?.invalid) {
           console.log('[onSubmit] Username é obrigatório para funcionários');
@@ -474,12 +684,14 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
           console.log('[onSubmit] RoleName é obrigatório para funcionários');
         }
       }
+      this.isSaving = false;
       return;
     }
 
     const storeId = this.authService.getStoreId();
     if (!storeId) {
       this.toastrService.error('Loja não identificada. Faça login novamente.');
+      this.isSaving = false;
       return;
     }
 
@@ -495,13 +707,13 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       rg: this.form.value.rg?.replace(/\D/g, '') || '',
       rgIssuer: '',
       crc: '',
-      relationshipTypes: this.form.value.relationshipTypes as RelationshipTypes[],
+      relationshipTypes: this.form.value
+        .relationshipTypes as RelationshipTypes[],
     };
 
     let formValue: CreateNaturalPerson;
 
     if (this.shouldShowUserFields) {
-      // Só adiciona username, password e roleName se for funcionário/contador/proprietário
       formValue = {
         ...baseData,
         username: this.form.value.username || '',
@@ -509,7 +721,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
         roleName: this.form.value.roleName || '',
       };
     } else {
-      // Cliente: NÃO envia username, password e roleName
       formValue = baseData;
     }
 
@@ -519,47 +730,38 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       this.personService.update(formValue, this.dataForm.personId).subscribe({
         next: () => {
           this.toastrService.success('Atualização feita com sucesso');
+          // Converte personId para o tipo correto antes de passar
+          const personId = Number(this.dataForm!.personId);
+          this.formDraftService.removeDraft(
+            this.FORM_TYPE,
+            personId
+          );
           this.formSubmitted.emit();
+          this.isSaving = false;
         },
         error: (error) => {
           console.error('Erro ao atualizar:', error);
-          
-          /**
-           * Tratamento de erros na atualização
-           * 
-           * @description
-           * Aplica o mesmo tratamento de erros usado na criação,
-           * permitindo identificar conflitos de username durante updates.
-           */
-          
-          // Verifica se é um erro de validação do backend (array de erros)
+          this.isSaving = false;
+
           if (error.error && Array.isArray(error.error)) {
             const validationErrors = error.error;
-            
-            // Procura especificamente pelo erro de username duplicado
+
             const usernameError = validationErrors.find(
               (err: any) => err.code === 'usernameConflict'
             );
-            
+
             if (usernameError) {
-              // Mostra mensagem específica para username duplicado
-              this.toastrService.error(
-                'Nome de usuário já cadastrado',
-                'Erro'
-              );
-              
-              // Marca o campo username com erro para feedback visual
-              this.form.get('username')?.setErrors({ 
-                usernameConflict: true 
+              this.toastrService.error('Nome de usuário já cadastrado', 'Erro');
+
+              this.form.get('username')?.setErrors({
+                usernameConflict: true,
               });
-              
-              // Coloca o foco no campo de username para o usuário corrigir
+
               this.focusUsernameField();
-              
-              return; // Sai da função para não mostrar mensagem genérica
+
+              return;
             }
-            
-            // Se chegou aqui, é um erro de validação mas não reconhecido
+
             const firstError = validationErrors[0];
             this.toastrService.error(
               firstError.defaultMessage || 'Erro de validação',
@@ -567,8 +769,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
             );
             return;
           }
-          
-          // Se não for erro de validação, mostra mensagem genérica
+
           this.toastrService.error(
             'Erro inesperado! Tente novamente mais tarde',
             'Erro'
@@ -583,59 +784,34 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
       this.personService.create(clean).subscribe({
         next: () => {
           this.toastrService.success('Cadastro realizado com sucesso');
+          this.formDraftService.removeDraft(this.FORM_TYPE);
           this.formSubmitted.emit();
           this.resetForm();
+          this.isSaving = false;
         },
         error: (error) => {
           console.error('Erro ao criar:', error);
-          
-          /**
-           * Tratamento específico de erros de validação do backend
-           * 
-           * @description
-           * O backend retorna um array de erros de validação quando há problemas.
-           * Cada erro contém:
-           * - code: código identificador do erro (ex: 'usernameConflict')
-           * - field: campo que causou o erro (ex: 'username')
-           * - defaultMessage: mensagem padrão do erro
-           * 
-           * Erros conhecidos:
-           * - usernameConflict: Nome de usuário já existe no sistema
-           * - cpfConflict: CPF já cadastrado (futuro)
-           * - emailConflict: Email já cadastrado (futuro)
-           */
-          
-          // Verifica se é um erro de validação do backend (array de erros)
+          this.isSaving = false;
+
           if (error.error && Array.isArray(error.error)) {
             const validationErrors = error.error;
-            
-            // Procura especificamente pelo erro de username duplicado
+
             const usernameError = validationErrors.find(
               (err: any) => err.code === 'usernameConflict'
             );
-            
+
             if (usernameError) {
-              // Mostra mensagem específica para username duplicado
-              this.toastrService.error(
-                'Nome de usuário já cadastrado',
-                'Erro'
-              );
-              
-              // Marca o campo username com erro para feedback visual
-              this.form.get('username')?.setErrors({ 
-                usernameConflict: true 
+              this.toastrService.error('Nome de usuário já cadastrado', 'Erro');
+
+              this.form.get('username')?.setErrors({
+                usernameConflict: true,
               });
-              
-              // Coloca o foco no campo de username para o usuário corrigir
+
               this.focusUsernameField();
-              
-              return; // Sai da função para não mostrar mensagem genérica
+
+              return;
             }
-            
-            // Aqui você pode adicionar tratamento para outros tipos de erro
-            // Exemplo: cpfConflict, emailConflict, etc.
-            
-            // Se chegou aqui, é um erro de validação mas não reconhecido
+
             const firstError = validationErrors[0];
             this.toastrService.error(
               firstError.defaultMessage || 'Erro de validação',
@@ -643,8 +819,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
             );
             return;
           }
-          
-          // Se não for erro de validação, mostra mensagem genérica
+
           this.toastrService.error(
             'Erro inesperado! Tente novamente mais tarde',
             'Erro'
@@ -654,74 +829,48 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges {
     }
   }
 
-  /**
-   * Reseta o formulário para o estado inicial
-   * 
-   * @description
-   * Chamado após um cadastro bem-sucedido para limpar o formulário.
-   * 
-   * IMPORTANTE: Sempre reseta para o estado padrão:
-   * - relationshipTypes = [CLIENTE]
-   * - isEmployee = false (checkbox desmarcado)
-   * - active = true
-   * - legalEntity = false
-   * 
-   * @returns {void}
-   * @private
-   */
   private resetForm(): void {
-    // Limpa todos os campos do formulário
     this.form.reset();
-    
-    // Reseta o estado de submissão
-    this.submitted = false;
-    
-    // Reseta o checkbox para desmarcado
-    this.isEmployee = false;
 
-    // Define valores padrão
+    this.submitted = false;
+
+    this.isEmployee = false;
+    this.isSaving = false;
+
     this.form.patchValue({
       active: true,
       legalEntity: false,
       relationshipTypes: [RelationshipTypes.CLIENTE],
     });
-    
+
+    setTimeout(() => {
+      this.captureInitialFormValue();
+    }, 100);
+
     console.log('[resetForm] Formulário resetado para estado inicial');
   }
 
-  /**
-   * Aplica foco no campo de username e seleciona o texto
-   * 
-   * @description
-   * Método auxiliar para focar o campo de username quando houver erro.
-   * - Usa ViewChild para acessar o elemento DOM
-   * - Busca o input dentro do componente app-primary-input
-   * - Seleciona todo o texto para facilitar a edição
-   * - Usa setTimeout para garantir que o DOM está pronto
-   * 
-   * @private
-   * @returns {void}
-   * 
-   * @example
-   * // Após detectar erro de username duplicado:
-   * this.focusUsernameField();
-   */
   private focusUsernameField(): void {
     setTimeout(() => {
       if (this.usernameInput) {
-        // Acessa o input dentro do componente app-primary-input
-        const inputElement = this.usernameInput.nativeElement.querySelector('input') as HTMLInputElement;
-        
+        const inputElement = this.usernameInput.nativeElement.querySelector(
+          'input'
+        ) as HTMLInputElement;
+
         if (inputElement) {
-          inputElement.focus();     // Coloca o foco no campo
-          inputElement.select();    // Seleciona todo o texto
+          inputElement.focus();
+          inputElement.select();
           console.log('[focusUsernameField] Foco aplicado no campo username');
         } else {
-          console.warn('[focusUsernameField] Input username não encontrado no DOM');
+          console.warn(
+            '[focusUsernameField] Input username não encontrado no DOM'
+          );
         }
       } else {
-        console.warn('[focusUsernameField] ViewChild usernameInput não está disponível');
+        console.warn(
+          '[focusUsernameField] ViewChild usernameInput não está disponível'
+        );
       }
-    }, 100); // Timeout de 100ms para garantir que o DOM foi atualizado
+    }, 100);
   }
 }

@@ -24,6 +24,7 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
+import { UnsavedChangesDialogComponent } from '@components/dialogs/unsaved-changes-dialog/unsaved-changes-dialog.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { BusinessDoneTableComponent } from '@components/tables/business-done-table/business-done-table.component';
 
@@ -39,8 +40,7 @@ import type { ColumnConfig } from '@interfaces/genericTable';
 
 import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
-import { MatRadioButton, MatRadioGroup } from "@angular/material/radio";
-import { MatCard, MatCardContent } from "@angular/material/card";
+import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 
 /**
  * Tipo literal para representar os tipos principais de relacionamento
@@ -79,8 +79,7 @@ interface EmployeeSubFilters {
     GenericTableComponent,
     MatRadioButton,
     MatRadioGroup,
- 
-],
+  ],
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss',
 })
@@ -94,7 +93,7 @@ export class PersonComponent implements OnInit, OnDestroy {
   searchValue: string = '';
   searchType: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId' | 'all' = 'all';
   isCarAdmin: boolean = false;
-  
+
   /**
    * Tipo de relacionamento principal selecionado (CLIENTE ou FUNCIONARIO)
    * null = nenhum filtro aplicado
@@ -127,7 +126,7 @@ export class PersonComponent implements OnInit, OnDestroy {
       key: 'nickName',
       header: 'Apelido',
       format: (value: any, row: Person) => {
-        return row.nickName?? '';
+        return row.nickName ?? '';
       },
     },
     {
@@ -161,6 +160,15 @@ export class PersonComponent implements OnInit, OnDestroy {
   openInfo = signal(false);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  /**
+   * Referências aos componentes de formulário para acessar os métodos
+   * da interface CanComponentDeactivate
+   */
+  @ViewChild(NaturalPersonFormComponent)
+  naturalPersonForm?: NaturalPersonFormComponent;
+  @ViewChild(LegalEntityFormComponent)
+  legalEntityForm?: LegalEntityFormComponent;
 
   constructor(
     private personService: PersonService,
@@ -208,15 +216,17 @@ export class PersonComponent implements OnInit, OnDestroy {
   // Configura o debounce de 500ms para a busca
   private setupSearchDebounce() {
     this.subscriptions.push(
-      this.searchSubject.pipe(
-        debounceTime(500) // Aguarda 500ms após o usuário parar de digitar
-      ).subscribe((searchValue) => {
-        this.loadPersonList(
-          0, // Sempre volta para a primeira página ao buscar
-          this.paginationRequestConfig.pageSize,
-          searchValue
-        );
-      })
+      this.searchSubject
+        .pipe(
+          debounceTime(500) // Aguarda 500ms após o usuário parar de digitar
+        )
+        .subscribe((searchValue) => {
+          this.loadPersonList(
+            0, // Sempre volta para a primeira página ao buscar
+            this.paginationRequestConfig.pageSize,
+            searchValue
+          );
+        })
     );
   }
 
@@ -229,12 +239,76 @@ export class PersonComponent implements OnInit, OnDestroy {
     this.actionsService.hasFormChanges.set(isDirty);
   }
 
+  /**
+   * Manipula o fechamento do drawer verificando se há mudanças não salvas
+   * Se houver mudanças, abre o diálogo de confirmação inteligente
+   * que oferece opções baseadas no estado do formulário
+   */
   handleConfirmationCloseDrawer() {
-    if (this.actionsService.hasFormChanges()) {
-      this.openDialog();
-    } else {
+    // Se não há mudanças, fecha direto
+    if (!this.actionsService.hasFormChanges()) {
       this.handleCloseDrawer();
+      return;
     }
+
+    // Verifica qual componente de formulário está aberto
+    const formComponent = this.getActiveFormComponent();
+
+    // Se não conseguir identificar o componente OU se não implementa a interface,
+    // usa o diálogo simples
+    if (!formComponent || !this.hasCanDeactivateMethods(formComponent)) {
+      this.openSimpleDialog();
+      return;
+    }
+
+    // Verifica se o formulário pode ser salvo (campos obrigatórios preenchidos)
+    const canSave = formComponent.canSaveForm();
+
+    // Abre o diálogo inteligente com as opções apropriadas
+    const dialogRef = this.dialog.open(UnsavedChangesDialogComponent, {
+      width: '450px',
+      disableClose: true,
+      data: {
+        canSave,
+        message: canSave
+          ? 'Deseja salvar as alterações antes de sair?'
+          : 'Há campos obrigatórios não preenchidos. Deseja salvar um rascunho para continuar depois?',
+      },
+    });
+
+    dialogRef
+      .afterClosed()
+      .subscribe(
+        (result: 'save' | 'draft' | 'discard' | 'cancel' | undefined) => {
+          // Se cancelou ou fechou, não faz nada
+          if (!result || result === 'cancel') {
+            return;
+          }
+
+          // Se escolheu descartar, fecha o drawer
+          if (result === 'discard') {
+            this.handleCloseDrawer();
+            return;
+          }
+
+          // Se escolheu salvar completo
+          if (result === 'save' && canSave) {
+            formComponent.saveForm(false).subscribe((success: boolean) => {
+              if (success) {
+                this.onFormSubmitted();
+              }
+            });
+            return;
+          }
+
+          // Se escolheu salvar rascunho
+          if (result === 'draft') {
+            formComponent.saveLocalDraft();
+            this.handleCloseDrawer();
+            return;
+          }
+        }
+      );
   }
 
   handleCloseDrawer() {
@@ -245,78 +319,80 @@ export class PersonComponent implements OnInit, OnDestroy {
   }
 
   loadPersonList(pageIndex: number, pageSize: number, searchValue?: string) {
-  this.clientListLoading.set(true);
-  
-  // Prepara os parâmetros de busca baseado no tipo selecionado
-  let searchParams: {
-    name?: string;
-    cpf?: string;
-    cnpj?: string;
-    email?: string;
-    storeId?: string;
-    search?: string;
-    relationshipTypes?: string[];
-    roleNames?: string[];
-  } | undefined;
+    this.clientListLoading.set(true);
 
-  if (searchValue && searchValue.trim()) {
-    searchParams = {};
-    
-    // Se o tipo for "all", usa busca global
-    if (this.searchType === 'all') {
-      searchParams.search = searchValue.trim();
-    } 
-    // Caso contrário, usa busca específica por campo
-    else {
-      searchParams[this.searchType] = searchValue.trim();
-    }
-  }
+    // Prepara os parâmetros de busca baseado no tipo selecionado
+    let searchParams:
+      | {
+          name?: string;
+          cpf?: string;
+          cnpj?: string;
+          email?: string;
+          storeId?: string;
+          search?: string;
+          relationshipTypes?: string[];
+          roleNames?: string[];
+        }
+      | undefined;
 
-  // Adiciona o filtro de relationshipTypes se houver filtros ativos
-  const relationshipTypesFilter = this.buildRelationshipTypesFilter();
-  if (relationshipTypesFilter.length > 0) {
-    // Inicializa searchParams se ainda não foi inicializado
-    if (!searchParams) {
+    if (searchValue && searchValue.trim()) {
       searchParams = {};
-    }
-    searchParams.relationshipTypes = relationshipTypesFilter;
-  }
 
-  // Adiciona o filtro de roleNames se houver sub-filtros ativos
-  const roleNamesFilter = this.buildRoleNamesFilter();
-  if (roleNamesFilter.length > 0) {
-    // Inicializa searchParams se ainda não foi inicializado
-    if (!searchParams) {
-      searchParams = {};
-    }
-    searchParams.roleNames = roleNamesFilter;
-  }
-
-  this.personService
-    .getPaginatedData(pageIndex, pageSize, searchParams)
-    .pipe(
-      catchError((err) => {
-        this.clientListLoading.set(false);
-        this.clientListError.set(true);
-        console.error('Erro ao carregar a lista de pessoas:', err);
-        this.toastr.error('Erro ao buscar dados da tabela de clientes');
-        return of();
-      })
-    )
-    .subscribe((response) => {
-      this.clientListLoading.set(false);
-      if (response && response.content) {
-        // A lista de pessoas está em response.content
-        this.personPaginatedList = {
-          ...response,
-          content: response.content.map((person) => ({
-            ...person,
-             // Mapeie os dados conforme necessário para a tabela
-          })),
-        };
+      // Se o tipo for "all", usa busca global
+      if (this.searchType === 'all') {
+        searchParams.search = searchValue.trim();
       }
-    });
-}
+      // Caso contrário, usa busca específica por campo
+      else {
+        searchParams[this.searchType] = searchValue.trim();
+      }
+    }
+
+    // Adiciona o filtro de relationshipTypes se houver filtros ativos
+    const relationshipTypesFilter = this.buildRelationshipTypesFilter();
+    if (relationshipTypesFilter.length > 0) {
+      // Inicializa searchParams se ainda não foi inicializado
+      if (!searchParams) {
+        searchParams = {};
+      }
+      searchParams.relationshipTypes = relationshipTypesFilter;
+    }
+
+    // Adiciona o filtro de roleNames se houver sub-filtros ativos
+    const roleNamesFilter = this.buildRoleNamesFilter();
+    if (roleNamesFilter.length > 0) {
+      // Inicializa searchParams se ainda não foi inicializado
+      if (!searchParams) {
+        searchParams = {};
+      }
+      searchParams.roleNames = roleNamesFilter;
+    }
+
+    this.personService
+      .getPaginatedData(pageIndex, pageSize, searchParams)
+      .pipe(
+        catchError((err) => {
+          this.clientListLoading.set(false);
+          this.clientListError.set(true);
+          console.error('Erro ao carregar a lista de pessoas:', err);
+          this.toastr.error('Erro ao buscar dados da tabela de clientes');
+          return of();
+        })
+      )
+      .subscribe((response) => {
+        this.clientListLoading.set(false);
+        if (response && response.content) {
+          // A lista de pessoas está em response.content
+          this.personPaginatedList = {
+            ...response,
+            content: response.content.map((person) => ({
+              ...person,
+              // Mapeie os dados conforme necessário para a tabela
+            })),
+          };
+        }
+      });
+  }
 
   handleSelectedPerson(person: Person) {
     this.selectedPerson = person;
@@ -338,12 +414,14 @@ export class PersonComponent implements OnInit, OnDestroy {
   onSearch(event: Event) {
     const inputValue = (event.target as HTMLInputElement).value;
     this.searchValue = inputValue;
-    
+
     // Envia para o Subject que tem debounce
     this.searchSubject.next(inputValue);
   }
 
-  onSearchTypeChange(type: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId' | 'all') {
+  onSearchTypeChange(
+    type: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId' | 'all'
+  ) {
     this.searchType = type;
     if (this.searchValue) {
       this.performSearch();
@@ -409,7 +487,8 @@ export class PersonComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Erro ao excluir pessoa:', error);
           // Verifica se há mensagem de erro específica do backend
-          const errorMessage = error?.error?.message || error?.message || 'Erro ao excluir pessoa';
+          const errorMessage =
+            error?.error?.message || error?.message || 'Erro ao excluir pessoa';
           this.toastr.error(errorMessage);
         },
       });
@@ -434,12 +513,12 @@ export class PersonComponent implements OnInit, OnDestroy {
    * Método chamado quando o radio button de tipo de relacionamento é alterado
    * - Limpa os sub-filtros quando FUNCIONARIO é desmarcado
    * - Recarrega a lista com o novo filtro aplicado
-   * 
+   *
    * @param newType - Novo tipo selecionado (CLIENTE, FUNCIONARIO ou null)
    */
   onRelationshipTypeChange(newType: MainRelationshipType) {
     this.selectedRelationshipType = newType;
-    
+
     // Se não é FUNCIONARIO, limpa todos os sub-filtros de employee
     if (newType !== 'FUNCIONARIO') {
       this.employeeSubFilters = {
@@ -448,7 +527,7 @@ export class PersonComponent implements OnInit, OnDestroy {
         admin: false,
       };
     }
-    
+
     // Aplica os filtros
     this.onFilterChange();
   }
@@ -507,7 +586,7 @@ export class PersonComponent implements OnInit, OnDestroy {
    * Constrói o array de relationshipTypes baseado no tipo selecionado
    * Como usamos radio button, apenas UM tipo pode estar ativo por vez
    * Este array será enviado como parâmetro para a API
-   * 
+   *
    * @returns Array com o tipo de relacionamento selecionado (vazio se nenhum)
    */
   private buildRelationshipTypesFilter(): string[] {
@@ -524,10 +603,10 @@ export class PersonComponent implements OnInit, OnDestroy {
   /**
    * Constrói o array de roleNames baseado nos sub-filtros de funcionário
    * Este array será enviado como parâmetro para a API
-   * 
+   *
    * IMPORTANTE: Só adiciona roles se FUNCIONARIO estiver selecionado como tipo principal
    * Isso garante que o filtro de roles só seja aplicado a funcionários
-   * 
+   *
    * @returns Array com as roles filtradas (vazio se FUNCIONARIO não estiver selecionado)
    */
   private buildRoleNamesFilter(): string[] {
@@ -542,7 +621,7 @@ export class PersonComponent implements OnInit, OnDestroy {
     const roleMapping: Record<keyof EmployeeSubFilters, string> = {
       vendedor: 'ROLE_SELLER',
       gerente: 'ROLE_MANAGER',
-      admin: 'ROLE_ADMIN'
+      admin: 'ROLE_ADMIN',
     };
 
     // Adiciona as roles baseado nos sub-filtros marcados
@@ -553,7 +632,39 @@ export class PersonComponent implements OnInit, OnDestroy {
     return roleNames;
   }
 
-  openDialog() {
+  /**
+   * Verifica se o componente implementa os métodos da interface CanComponentDeactivate
+   */
+  private hasCanDeactivateMethods(component: any): boolean {
+    return (
+      typeof component.canSaveForm === 'function' &&
+      typeof component.saveForm === 'function' &&
+      typeof component.saveLocalDraft === 'function'
+    );
+  }
+
+  /**
+   * Obtém a referência do componente de formulário ativo
+   * Verifica qual formulário está visível (Pessoa Física ou Jurídica)
+   */
+  private getActiveFormComponent():
+    | NaturalPersonFormComponent
+    | LegalEntityFormComponent
+    | null {
+    // Verifica se é pessoa jurídica (CNPJ preenchido)
+    if (this.selectedPerson?.legalEntity) {
+      return this.legalEntityForm || null;
+    }
+
+    // Caso contrário, é pessoa física
+    return this.naturalPersonForm || null;
+  }
+
+  /**
+   * Abre o diálogo simples quando não consegue acessar o componente de formulário
+   * Fallback para o comportamento antigo
+   */
+  private openSimpleDialog() {
     const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
       ConfirmDialogComponent,
       {
