@@ -2,15 +2,58 @@
   [formGroup]="form"
   (keydown.enter)="onEnter($event)"
 >
+  <!-- Combobox de Rascunhos -->
+  @if (availableDrafts.length > 0 && !dataForm) {
+  <app-wrapper-card title="Cadastros em andamento">
+    <div class="drafts-section">
+      <mat-form-field
+        appearance="outline"
+        class="draft-select"
+      >
+        <mat-label>Selecione um cadastro para continuar</mat-label>
+        <mat-select
+          [(value)]="selectedDraftId"
+          (selectionChange)="onDraftSelected($event)"
+        >
+          <mat-option [value]="null">-- Iniciar novo cadastro --</mat-option>
+          @for (draft of availableDrafts; track draft.id) {
+          <mat-option [value]="draft.id">
+            <div class="draft-option">
+              <span class="draft-name">
+                {{ draft.draftName || 'Rascunho sem nome' }}
+              </span>
+              <span class="draft-date">
+                {{ formatDraftDate(draft.lastModified) }}
+              </span>
+            </div>
+          </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (selectedDraftId) {
+      <button
+        mat-icon-button
+        color="warn"
+        class="delete-draft-btn"
+        (click)="deleteDraft(selectedDraftId)"
+        matTooltip="Excluir este rascunho"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+      }
+    </div>
+  </app-wrapper-card>
+  }
+
   <!-- Seção: Dados Pessoais -->
-  <app-wrapper-card title="Dados pessoais">    
-    
-      <!-- Checkbox para alternar entre CLIENTE e FUNCIONARIO -->
-    @if (canRegisterEmployee && !dataForm) { 
+  <app-wrapper-card title="Dados pessoais">
+    <!-- Checkbox para alternar entre CLIENTE e FUNCIONARIO -->
+    @if (canRegisterEmployee && !dataForm) {
     <div class="checkbox-container">
       <label class="checkbox-label">
-        <input 
-          type="checkbox" 
+        <input
+          type="checkbox"
           class="checkbox-input"
           [checked]="isEmployee"
           (change)="toggleEmployeeType()"
@@ -19,7 +62,7 @@
       </label>
     </div>
     }
-   
+
     <!-- Campo de Nome (ocupa 100% da largura) -->
     <app-primary-input
       formControlName="name"
@@ -31,7 +74,6 @@
       "
     />
 
- 
     <div class="form-row-2cols">
       <app-primary-input
         formControlName="nickName"
@@ -39,7 +81,7 @@
         inputName="nickName"
         type="text"
         placeholder="Como deseja ser chamado?"
-      />  
+      />
 
       <app-primary-input
         formControlName="cpf"
@@ -70,7 +112,7 @@
           (form.get('contact.email')?.touched || submitted)
         "
       />
-      
+
       <app-primary-input
         formControlName="phone"
         label="Celular"
@@ -80,11 +122,9 @@
         mask="(00) 00000-0000"
       />
     </div>
-
   </app-wrapper-card>
   @if (shouldShowUserFields) {
-  <app-wrapper-card title="Dados de Acesso ao Sistema">  
-    
+  <app-wrapper-card title="Dados de Acesso ao Sistema">
     <div class="form-row-2cols">
       <app-primary-input
         #usernameInput
@@ -144,40 +184,27 @@
 
     <!-- Mensagem de erro para senhas não coincidentes -->
     @if (submitted && form.errors?.['passwordMismatch']) {
-    <div class="error-message">
-      As senhas não coincidem
-    </div>
+    <div class="error-message">As senhas não coincidem</div>
     }
 
     <!-- Mensagens de erro consolidadas -->
     @if (submitted && form.get('username')?.invalid) {
     <div class="error-message">
       @if (form.get('username')?.hasError('usernameConflict')) {
-        <!-- Erro específico: Username já existe no sistema -->
-        O nome de usuário já está em uso. Por favor, escolha outro.
-      } @else {
-        <!-- Erro padrão: Campo obrigatório ou tamanho mínimo -->
-        Nome de usuário é obrigatório (mínimo 3 caracteres)
-      }
+      <!-- Erro específico: Username já existe no sistema -->
+      O nome de usuário já está em uso. Por favor, escolha outro. } @else {
+      <!-- Erro padrão: Campo obrigatório ou tamanho mínimo -->
+      Nome de usuário é obrigatório (mínimo 3 caracteres) }
     </div>
-    }
-
-    @if (submitted && form.get('password')?.invalid) {
-    <div class="error-message">
-      Senha é obrigatória (mínimo 6 caracteres)
-    </div>
-    }
-
-    @if (submitted && form.get('confirmPassword')?.invalid && !form.errors?.['passwordMismatch']) {
+    } @if (submitted && form.get('password')?.invalid) {
+    <div class="error-message">Senha é obrigatória (mínimo 6 caracteres)</div>
+    } @if (submitted && form.get('confirmPassword')?.invalid &&
+    !form.errors?.['passwordMismatch']) {
     <div class="error-message">
       Confirmação de senha é obrigatória (mínimo 6 caracteres)
     </div>
-    }
-
-    @if (submitted && form.get('roleName')?.invalid) {
-    <div class="error-message">
-      Selecione uma função no sistema
-    </div>
+    } @if (submitted && form.get('roleName')?.invalid) {
+    <div class="error-message">Selecione uma função no sistema</div>
     }
   </app-wrapper-card>
   }
@@ -267,13 +294,29 @@
   -->
 
   <!-- Botão de submit -->
-  <button
-    mat-raised-button
-    type="button"
-    class="submit-btn"
-    (click)="onSubmit()"
-    #submitButton
-  >
-    Salvar
-  </button>
+  <div class="form-actions">
+    @if (form.dirty) {
+    <button
+      mat-stroked-button
+      type="button"
+      color="primary"
+      (click)="openSaveDraftDialog()"
+      [disabled]="isSaving"
+    >
+      <mat-icon>save_as</mat-icon>
+      Salvar Rascunho
+    </button>
+    }
+
+    <button
+      mat-raised-button
+      type="button"
+      class="submit-btn"
+      (click)="onSubmit()"
+      [disabled]="isSaving || (!form.dirty && !selectedDraftId)"
+      #submitButton
+    >
+      Salvar
+    </button>
+  </div>
 </form>

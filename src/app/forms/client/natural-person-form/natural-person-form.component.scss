@@ -93,7 +93,6 @@ form {
     }
   }
 
- 
   .form-row-4cols {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -249,7 +248,7 @@ form {
    */
   .checkbox-container {
     margin-bottom: 24px;
-    
+
     .checkbox-label {
       display: flex;
       align-items: center;
@@ -257,41 +256,41 @@ form {
       cursor: pointer;
       user-select: none;
       transition: opacity 200ms ease;
-      
+
       &:hover {
         opacity: 0.8;
       }
-      
+
       // Aumenta área de toque em mobile
       @media (max-width: 768px) {
         padding: 8px 0;
       }
     }
-    
+
     .checkbox-input {
       width: 20px;
       height: 20px;
       cursor: pointer;
       accent-color: var(--primary-color);
-      
+
       // Aumenta área de toque em mobile
       @media (max-width: 768px) {
         width: 24px;
         height: 24px;
       }
-      
+
       // Estilo de foco para acessibilidade
       &:focus {
         outline: 2px solid var(--primary-color);
         outline-offset: 2px;
       }
     }
-    
+
     .checkbox-text {
       font-size: 1rem;
       font-weight: 500;
       color: var(--text-color);
-      
+
       @media (max-width: 768px) {
         font-size: 1.125rem;
       }
@@ -311,6 +310,55 @@ form {
     margin-bottom: 8px;
     padding-left: 4px;
     font-weight: 500;
+  }
+
+  /**
+   * SEÇÃO DE RASCUNHOS
+   * 
+   * Estilos para o combobox de cadastros em andamento
+   */
+  .drafts-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+
+    .draft-select {
+      flex: 1;
+
+      // Estilos customizados para as opções
+      .draft-option {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .draft-name {
+          font-weight: 500;
+          color: rgba(0, 0, 0, 0.87);
+        }
+
+        .draft-date {
+          font-size: 0.75rem;
+          color: rgba(0, 0, 0, 0.6);
+        }
+      }
+    }
+
+    .delete-draft-btn {
+      flex-shrink: 0;
+      margin-top: -8px; // Alinha com o campo
+    }
+
+    // Responsivo
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
+
+      .delete-draft-btn {
+        margin-top: 0;
+        align-self: flex-end;
+      }
+    }
   }
 
   /**
@@ -340,6 +388,38 @@ form {
   @media (prefers-reduced-motion: reduce) {
     .search-icon-btn {
       transition: none;
+    }
+  }
+
+  /**
+   * AÇÕES DO FORMULÁRIO
+   * 
+   * Botões de ação (Salvar, Salvar Rascunho)
+   * Layout full-width com botões dividindo o espaço
+   */
+  .form-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+    width: 100%;
+
+    button {
+      flex: 1; // Faz os botões ocuparem espaço igual
+      height: 48px; // Altura um pouco maior para facilitar o toque
+      font-size: 1rem;
+
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+
+    // Responsivo: empilha em telas muito pequenas
+    @media (max-width: 480px) {
+      flex-direction: column;
+
+      button {
+        width: 100%;
+      }
     }
   }
 }
