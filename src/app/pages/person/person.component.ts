@@ -8,6 +8,7 @@ import {
   OnDestroy,
   ViewChild,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { catchError, debounceTime, of, Subject, Subscription } from 'rxjs';
 
 import { FormsModule } from '@angular/forms';
@@ -40,7 +41,9 @@ import type { ColumnConfig } from '@interfaces/genericTable';
 
 import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
+import { FormDraftService, FormDraft } from '@services/form-draft.service';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 /**
  * Tipo literal para representar os tipos principais de relacionamento
@@ -61,11 +64,11 @@ interface EmployeeSubFilters {
 @Component({
   selector: 'app-person',
   imports: [
+    CommonModule,
     FormsModule,
     ContentHeaderComponent,
     DrawerComponent,
     MatTabsModule,
-    MatIconModule,
     MatSelectModule,
     MatCheckboxModule,
     LegalEntityFormComponent,
@@ -79,6 +82,8 @@ interface EmployeeSubFilters {
     GenericTableComponent,
     MatRadioButton,
     MatRadioGroup,
+    MatIconModule,
+    MatTooltipModule,
   ],
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss',
@@ -87,9 +92,12 @@ export class PersonComponent implements OnInit, OnDestroy {
   readonly dialog = inject(MatDialog);
   private subscriptions: Subscription[] = [];
   private searchSubject = new Subject<string>();
+  private formDraftService = inject(FormDraftService);
 
   personPaginatedList: PaginationResponse<Person> | null = null;
   selectedPerson: Person | null = null;
+  selectedDraft: FormDraft | null = null;
+  availableDrafts: FormDraft[] = [];
   searchValue: string = '';
   searchType: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId' | 'all' = 'all';
   isCarAdmin: boolean = false;
@@ -196,6 +204,14 @@ export class PersonComponent implements OnInit, OnDestroy {
         this.handleConfirmationCloseDrawer();
       })
     );
+
+    // Carrega rascunhos iniciais e se inscreve para mudanças
+    this.loadDrafts();
+    this.subscriptions.push(
+      this.formDraftService.draftsChanges.subscribe(() => {
+        this.loadDrafts();
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -263,6 +279,7 @@ export class PersonComponent implements OnInit, OnDestroy {
 
     // Verifica se o formulário pode ser salvo (campos obrigatórios preenchidos)
     const canSave = formComponent.canSaveForm();
+    const isNew = !this.selectedPerson?.personId && !this.selectedDraft;
 
     // Abre o diálogo inteligente com as opções apropriadas
     const dialogRef = this.dialog.open(UnsavedChangesDialogComponent, {
@@ -276,45 +293,43 @@ export class PersonComponent implements OnInit, OnDestroy {
       },
     });
 
-    dialogRef
-      .afterClosed()
-      .subscribe(
-        (result: 'save' | 'draft' | 'discard' | 'cancel' | undefined) => {
-          // Se cancelou ou fechou, não faz nada
-          if (!result || result === 'cancel') {
-            return;
-          }
+    dialogRef.afterClosed().subscribe((result: string | undefined) => {
+      // Se cancelou ou fechou, não faz nada
+      if (!result || result === 'cancel') {
+        return;
+      }
 
-          // Se escolheu descartar, fecha o drawer
-          if (result === 'discard') {
-            this.handleCloseDrawer();
-            return;
-          }
+      // Se escolheu descartar, fecha o drawer
+      if (result === 'discard') {
+        this.handleCloseDrawer();
+        return;
+      }
 
-          // Se escolheu salvar completo
-          if (result === 'save' && canSave) {
-            formComponent.saveForm(false).subscribe((success: boolean) => {
-              if (success) {
-                this.onFormSubmitted();
-              }
-            });
-            return;
+      // Se escolheu salvar completo
+      if (result === 'save' && canSave) {
+        (formComponent as any).saveForm(false).subscribe((success: boolean) => {
+          if (success) {
+            this.onFormSubmitted();
           }
+        });
+        return;
+      }
 
-          // Se escolheu salvar rascunho
-          if (result === 'draft') {
-            formComponent.saveLocalDraft();
-            this.handleCloseDrawer();
-            return;
-          }
-        }
-      );
+      // Se escolheu salvar rascunho (result começa com 'draft:')
+      if (result.startsWith('draft:')) {
+        const draftName = result.substring(6); // Remove 'draft:'
+        (formComponent as any).saveLocalDraft(false, draftName);
+        this.handleCloseDrawer();
+        return;
+      }
+    });
   }
 
   handleCloseDrawer() {
     this.openForm.set(false);
     this.openInfo.set(false);
     this.selectedPerson = null;
+    this.selectedDraft = null;
     this.actionsService.hasFormChanges.set(false);
   }
 
@@ -404,7 +419,23 @@ export class PersonComponent implements OnInit, OnDestroy {
   }
 
   handleOpenForm() {
+    this.selectedPerson = null;
+    this.selectedDraft = null;
     this.openForm.set(true);
+  }
+
+  handleDraftSelection(draft: FormDraft) {
+    this.selectedPerson = null;
+    this.selectedDraft = draft;
+    this.openForm.set(true);
+  }
+
+  private loadDrafts() {
+    const pfDrafts = this.formDraftService.getDraftsByType('pessoa-fisica');
+    const pjDrafts = this.formDraftService.getDraftsByType('pessoa-juridica');
+    this.availableDrafts = [...pfDrafts, ...pjDrafts]
+      .filter((d) => !d.entityId || d.entityId.toString().startsWith('new_'))
+      .sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
   }
 
   handlePageEvent(event: PageEvent) {
@@ -630,6 +661,33 @@ export class PersonComponent implements OnInit, OnDestroy {
     if (this.employeeSubFilters.admin) roleNames.push(roleMapping.admin);
 
     return roleNames;
+  }
+
+  /**
+   * Remove um rascunho da lista
+   * @param draft Rascunho a ser removido
+   * @param event Evento de clique (para parar propagação)
+   */
+  removeDraft(draft: FormDraft, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Excluir Rascunho',
+        message: `Tem certeza que deseja excluir o rascunho <strong>"${draft.draftName}"</strong>?`,
+        confirmText: 'Excluir',
+        cancelText: 'Cancelar',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.formDraftService.removeDraftById(draft.id);
+        this.toastr.info('Rascunho excluído com sucesso');
+      }
+    });
   }
 
   /**

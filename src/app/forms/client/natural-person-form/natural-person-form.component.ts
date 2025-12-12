@@ -14,6 +14,9 @@ import { ToastrService } from 'ngx-toastr';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   AbstractControl,
   FormBuilder,
@@ -24,11 +27,15 @@ import {
 
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
+import {
+  SaveDraftDialogComponent,
+  SaveDraftDialogResult,
+} from '@components/dialogs/save-draft-dialog/save-draft-dialog.component'; // Added
 
 import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 import { Observable, of, Subscription } from 'rxjs';
 
-import { FormDraftService } from '@services/form-draft.service';
+import { FormDraftService, FormDraft } from '@services/form-draft.service';
 
 import type { CreateNaturalPerson, Person } from '@interfaces/person';
 
@@ -52,6 +59,9 @@ import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
     MatIconModule,
     CpfValidatorDirective,
     PrimarySelectComponent,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatTooltipModule,
   ],
   templateUrl: './natural-person-form.component.html',
   styleUrl: './natural-person-form.component.scss',
@@ -86,6 +96,7 @@ export class NaturalPersonFormComponent
   usernameInput?: ElementRef;
 
   @Input() dataForm: Person | null = null;
+  @Input() draft: FormDraft | null = null; // Added to receive draft from parent
   @Output() formSubmitted = new EventEmitter<void>();
   @Output() formChanged = new EventEmitter<boolean>();
 
@@ -99,7 +110,7 @@ export class NaturalPersonFormComponent
    * Flag que indica se o formulário está sendo salvo
    * Evita verificação de mudanças durante salvamento
    */
-  private isSaving = false;
+  protected isSaving = false;
 
   /**
    * Define os campos obrigatórios do formulário
@@ -111,6 +122,16 @@ export class NaturalPersonFormComponent
    * Tipo do formulário para identificação no localStorage
    */
   private readonly FORM_TYPE = 'pessoa-fisica';
+
+  /**
+   * Lista de rascunhos disponíveis para este tipo de formulário
+   */
+  protected availableDrafts: any[] = [];
+
+  /**
+   * ID do rascunho selecionado no combobox
+   */
+  protected selectedDraftId: string | null = null;
 
   /**
    * Controla o estado do checkbox "Cadastrar como funcionário"
@@ -340,10 +361,7 @@ export class NaturalPersonFormComponent
                 this.toastrService.success('Atualização feita com sucesso');
                 // Converte personId para o tipo correto antes de passar
                 const personId = Number(this.dataForm!.personId);
-                this.formDraftService.removeDraft(
-                  this.FORM_TYPE,
-                  personId
-                );
+                this.formDraftService.removeDraft(this.FORM_TYPE, personId);
                 this.isSaving = false;
                 observer.next(true);
                 observer.complete();
@@ -360,10 +378,27 @@ export class NaturalPersonFormComponent
           const clean = removeEmptyPropertiesFromObject<CreateNaturalPerson>(
             formValue as Person
           );
+
+          // Captura o ID do rascunho ANTES da requisição
+          // Evita problemas caso resetForm seja chamado durante processamento
+          const draftIdToDelete = this.selectedDraftId || this.draft?.id;
+          console.log(
+            '[saveForm] ID capturado para exclusão futura:',
+            draftIdToDelete
+          );
+
           this.personService.create(clean).subscribe({
             next: () => {
               this.toastrService.success('Cadastro realizado com sucesso');
-              this.formDraftService.removeDraft(this.FORM_TYPE);
+
+              // Remove o rascunho específico se houver
+              if (draftIdToDelete) {
+                this.formDraftService.removeDraftById(draftIdToDelete);
+              } else {
+                // Fallback para comportamento antigo (só se não tiver ID específico)
+                this.formDraftService.removeDraft(this.FORM_TYPE);
+              }
+
               this.isSaving = false;
               observer.next(true);
               observer.complete();
@@ -391,19 +426,128 @@ export class NaturalPersonFormComponent
    * Salva rascunho local no localStorage
    *
    * @param silent - Se true, não mostra mensagem de sucesso
+   * @param draftName - Nome dado pelo usuário ao rascunho (opcional)
+   * @param existingDraftId - ID do rascunho existente para atualizar (opcional)
    */
-  saveLocalDraft(silent: boolean = false): void {
+  saveLocalDraft(
+    silent: boolean = false,
+    draftName?: string,
+    existingDraftId?: string
+  ): void {
+    const personId = this.dataForm?.personId
+      ? Number(this.dataForm.personId)
+      : undefined;
+
+    // Se temos um ID de rascunho existente (seja passado explicitamente ou via unique ID strategy)
+    // O service vai lidar com a criação ou atualização.
+    // Mas para o caso de ID único gerado por timestamp, precisamos garantir que estamos atualizando O MESMO.
+
+    // ATENÇÃO: O serviço saveDraft usa entityId como identificador se fornecido.
+    // Se for edição de registro existente (personId), ok.
+    // Se for novo cadastro, o "entityId" no saveDraft é usado como sufixo.
+    // Precisamos ajustar o service para aceitar um draftId explícito?
+    // O service saveDraft(formType, data, entityId, draftName)
+    // Se entityId não for passado, ele gera um novo timestamp.
+    // ISSO CRIA DUPLICATAS AO ATUALIZAR UM NOVO CADASTRO.
+
+    // CORREÇÃO: Vamos usar o método de salvar do service, mas precisamos passar o identificador correto.
+    // Se já estamos editando um rascunho (selectedDraftId), PRECISAMOS extrair o timestamp/sufixo dele.
+
+    let effectiveEntityId = personId;
+
+    if (!effectiveEntityId && existingDraftId) {
+      // Se estamos editando um rascunho de NOVO CADASTRO (sem personId),
+      // O ID do rascunho é algo como "pessoa-fisica_new_123456789"
+      // O service espera "new_123456789" (ou similar) no parametro entityId?
+      // Vamos olhar o service:
+      // const draftId = entityId ? `${formType}_${entityId}` : ...
+
+      // Se passarmos o sufixo como entityId, funciona?
+      // Se eu passar "new_12345" como entityId -> ID vira "pessoa-fisica_new_12345".
+      // O ID original no storage é "pessoa-fisica_new_12345".
+      // Então sim, precisamos extrair o "identificador" do draftId completo.
+
+      // Formato: formType_SUFIXO
+      const prefix = `${this.FORM_TYPE}_`;
+      if (existingDraftId.startsWith(prefix)) {
+        effectiveEntityId = existingDraftId.replace(prefix, '') as any;
+      }
+    }
+
     const draftId = this.formDraftService.saveDraft(
       this.FORM_TYPE,
       this.form.value,
-      this.dataForm?.personId
+      effectiveEntityId,
+      draftName
     );
+
+    // CRITICAL FIX: Atualiza o ID do rascunho selecionado se for um novo
+    if (!this.selectedDraftId) {
+      this.selectedDraftId = draftId;
+    }
 
     if (!silent) {
       this.toastrService.info('Rascunho salvo localmente');
     }
 
     console.log('[saveLocalDraft] Rascunho salvo:', draftId);
+
+    // Fecha o formulário após salvar
+    this.formSubmitted.emit();
+  }
+
+  /**
+   * Abre o diálogo para salvar rascunho ou atualiza o existente
+   */
+  openSaveDraftDialog() {
+    // 1. Se já tem um rascunho selecionado, atualiza direto
+    if (this.selectedDraftId) {
+      const currentDraft = this.availableDrafts.find(
+        (d) => d.id === this.selectedDraftId
+      );
+      if (currentDraft) {
+        this.saveLocalDraft(
+          false,
+          currentDraft.draftName,
+          this.selectedDraftId
+        ); // Pass ID correctly
+        return;
+      }
+    }
+
+    // 2. Se é novo, abre diálogo para nomear
+    // Sugere o nome atual ou um padrão
+    const suggestedName =
+      this.form.value.name || `Rascunho ${new Date().toLocaleString()}`;
+
+    const dialogRef = this.dialog.open(SaveDraftDialogComponent, {
+      data: {
+        title: 'Salvar Rascunho',
+        suggestedName,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result: SaveDraftDialogResult) => {
+      if (result && result.confirmed) {
+        // Validação estrita de nome único
+        // Verifica se JÁ existe algum rascunho com esse nome EXATO
+        const nameExists = this.availableDrafts.some(
+          (d) => d.draftName === result.draftName
+        );
+
+        if (nameExists) {
+          this.toastrService.error(
+            'Já existe um rascunho com este nome. Por favor, escolha outro.',
+            'Nome Duplicado'
+          );
+          // Reabre o diálogo para o usuário tentar novamente
+          this.openSaveDraftDialog();
+          return;
+        }
+
+        this.saveLocalDraft(false, result.draftName);
+      }
+    });
   }
 
   /**
@@ -413,6 +557,96 @@ export class NaturalPersonFormComponent
   private captureInitialFormValue(): void {
     this.initialFormValue = JSON.stringify(this.form.value);
     console.log('[captureInitialFormValue] Valor inicial capturado');
+  }
+
+  /**
+   * Carrega a lista de rascunhos disponíveis
+   */
+  private loadAvailableDrafts(): void {
+    this.availableDrafts = this.formDraftService.getDraftsByType(
+      this.FORM_TYPE
+    );
+    console.log(
+      '[loadAvailableDrafts] Rascunhos carregados:',
+      this.availableDrafts.length
+    );
+  }
+
+  /**
+   * Manipulador do evento de seleção de rascunho no combobox
+   */
+  protected onDraftSelected(event: any): void {
+    const draftId = event.value;
+
+    if (!draftId) {
+      // Usuário escolheu "Iniciar novo cadastro"
+      this.resetForm();
+      this.selectedDraftId = null;
+      return;
+    }
+
+    const draft = this.availableDrafts.find((d) => d.id === draftId);
+    if (!draft) {
+      console.error('[onDraftSelected] Rascunho não encontrado:', draftId);
+      return;
+    }
+
+    this.loadDraftData(draft);
+  }
+
+  /**
+   * Exclui um rascunho
+   */
+  protected deleteDraft(draftId: string): void {
+    const draft = this.availableDrafts.find((d) => d.id === draftId);
+    if (!draft) {
+      return;
+    }
+
+    const confirmed = confirm(
+      `Tem certeza que deseja excluir o rascunho "${
+        draft.draftName || 'sem nome'
+      }"?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    // Remove do localStorage
+    this.formDraftService.removeDraftById(draft.id);
+
+    // Limpa o formulário se este era o rascunho selecionado
+    if (this.selectedDraftId === draftId) {
+      this.resetForm();
+      this.selectedDraftId = null;
+    }
+
+    this.toastrService.success('Rascunho excluído');
+    console.log('[deleteDraft] Rascunho excluído:', draftId);
+  }
+
+  /**
+   * Formata a data do rascunho para exibição
+   */
+  protected formatDraftDate(date: Date): string {
+    const now = new Date();
+    const diffMs = now.getTime() - new Date(date).getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) {
+      return 'agora mesmo';
+    } else if (diffMins < 60) {
+      return `há ${diffMins} min${diffMins > 1 ? 's' : ''}`;
+    } else if (diffHours < 24) {
+      return `há ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+    } else if (diffDays < 7) {
+      return `há ${diffDays} dia${diffDays > 1 ? 's' : ''}`;
+    } else {
+      return new Date(date).toLocaleDateString('pt-BR');
+    }
   }
 
   /**
@@ -509,11 +743,19 @@ export class NaturalPersonFormComponent
       }) ?? new Subscription()
     );
 
-    this.checkForDrafts();
+    this.loadAvailableDrafts();
+    // this.checkForDrafts(); // Removido verificação automática pois agora é selecionável
 
     setTimeout(() => {
       this.captureInitialFormValue();
     }, 500);
+
+    // Inscreve para atualizar lista quando rascunhos mudarem
+    this.subscriptions.add(
+      this.formDraftService.draftsChanges.subscribe(() => {
+        this.loadAvailableDrafts();
+      })
+    );
   }
 
   protected toggleEmployeeType(): void {
@@ -639,6 +881,31 @@ export class NaturalPersonFormComponent
         );
       }, 200);
     }
+
+    if (changes['draft'] && this.draft) {
+      console.log(
+        '[natural-person-form] Rascunho recebido via input:',
+        this.draft
+      );
+      this.loadDraftData(this.draft);
+    }
+  }
+
+  /**
+   * Carrega os dados de um rascunho no formulário
+   */
+  private loadDraftData(draft: FormDraft): void {
+    this.selectedDraftId = draft.id;
+    this.form.patchValue(draft.data);
+
+    const relationshipTypes = draft.data.relationshipTypes || [];
+    this.isEmployee = relationshipTypes.includes(RelationshipTypes.FUNCIONARIO);
+
+    this.toastrService.success(
+      `Rascunho "${draft.draftName || 'sem nome'}" carregado`
+    );
+
+    console.log('[loadDraftData] Rascunho carregado:', draft);
   }
 
   onEnter(event: Event): void {
@@ -732,10 +999,7 @@ export class NaturalPersonFormComponent
           this.toastrService.success('Atualização feita com sucesso');
           // Converte personId para o tipo correto antes de passar
           const personId = Number(this.dataForm!.personId);
-          this.formDraftService.removeDraft(
-            this.FORM_TYPE,
-            personId
-          );
+          this.formDraftService.removeDraft(this.FORM_TYPE, personId);
           this.formSubmitted.emit();
           this.isSaving = false;
         },
@@ -781,10 +1045,22 @@ export class NaturalPersonFormComponent
         formValue as Person
       );
       console.log('Dados limpos:', clean);
+
+      // Captura o ID do rascunho ANTES da requisição
+      // Evita problemas caso resetForm seja chamado durante processamento
+      const draftIdToDelete = this.selectedDraftId || this.draft?.id;
+
       this.personService.create(clean).subscribe({
         next: () => {
           this.toastrService.success('Cadastro realizado com sucesso');
-          this.formDraftService.removeDraft(this.FORM_TYPE);
+
+          // Remove o rascunho específico se houver
+          if (draftIdToDelete) {
+            this.formDraftService.removeDraftById(draftIdToDelete);
+          } else {
+            this.formDraftService.removeDraft(this.FORM_TYPE);
+          }
+
           this.formSubmitted.emit();
           this.resetForm();
           this.isSaving = false;
