@@ -428,11 +428,13 @@ export class NaturalPersonFormComponent
    * @param silent - Se true, não mostra mensagem de sucesso
    * @param draftName - Nome dado pelo usuário ao rascunho (opcional)
    * @param existingDraftId - ID do rascunho existente para atualizar (opcional)
+   * @param closeAfterSave - Se true, fecha o formulário após salvar (padrão: true)
    */
   saveLocalDraft(
     silent: boolean = false,
     draftName?: string,
-    existingDraftId?: string
+    existingDraftId?: string,
+    closeAfterSave: boolean = true
   ): void {
     const personId = this.dataForm?.personId
       ? Number(this.dataForm.personId)
@@ -492,31 +494,52 @@ export class NaturalPersonFormComponent
 
     console.log('[saveLocalDraft] Rascunho salvo:', draftId);
 
-    // Fecha o formulário após salvar
-    this.formSubmitted.emit();
+    // **IMPORTANTE**: Marca o formulário como pristine após salvar
+    // Isso evita que o sistema peça para salvar novamente ao fechar
+    if (!closeAfterSave) {
+      this.form.markAsPristine();
+      this.actionsService.hasFormChanges.set(false);
+      
+      // Atualiza o valor inicial para o novo estado salvo
+      setTimeout(() => {
+        this.captureInitialFormValue();
+      }, 100);
+      
+      console.log('[saveLocalDraft] Formulário marcado como pristine');
+    }
+
+    // Fecha o formulário após salvar SOMENTE se closeAfterSave for true
+    if (closeAfterSave) {
+      this.formSubmitted.emit();
+    }
   }
 
   /**
    * Abre o diálogo para salvar rascunho ou atualiza o existente
+   * 
+   * @description
+   * Se já existe um rascunho selecionado, atualiza diretamente sem pedir nome.
+   * Se é um novo rascunho, abre o diálogo para o usuário nomear.
    */
   openSaveDraftDialog() {
-    // 1. Se já tem um rascunho selecionado, atualiza direto
+    // 1. Se já tem um rascunho selecionado, atualiza direto SEM fechar
     if (this.selectedDraftId) {
       const currentDraft = this.availableDrafts.find(
         (d) => d.id === this.selectedDraftId
       );
       if (currentDraft) {
+        // Salva silenciosamente, mantendo o formulário aberto
         this.saveLocalDraft(
           false,
           currentDraft.draftName,
-          this.selectedDraftId
-        ); // Pass ID correctly
+          this.selectedDraftId,
+          false // NÃO fechar o formulário
+        );
         return;
       }
     }
 
     // 2. Se é novo, abre diálogo para nomear
-    // Sugere o nome atual ou um padrão
     const suggestedName =
       this.form.value.name || `Rascunho ${new Date().toLocaleString()}`;
 
@@ -530,7 +553,6 @@ export class NaturalPersonFormComponent
     dialogRef.afterClosed().subscribe((result: SaveDraftDialogResult) => {
       if (result && result.confirmed) {
         // Validação estrita de nome único
-        // Verifica se JÁ existe algum rascunho com esse nome EXATO
         const nameExists = this.availableDrafts.some(
           (d) => d.draftName === result.draftName
         );
@@ -545,7 +567,8 @@ export class NaturalPersonFormComponent
           return;
         }
 
-        this.saveLocalDraft(false, result.draftName);
+        // Salva novo rascunho, mantendo o formulário aberto
+        this.saveLocalDraft(false, result.draftName, undefined, false);
       }
     });
   }
