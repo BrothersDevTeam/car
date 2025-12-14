@@ -138,6 +138,7 @@
     >
       <mat-select
         placeholder="Continuar Rascunho"
+        [value]="selectedDraft"
         (selectionChange)="handleDraftSelection($event.value)"
         panelClass="header-draft-panel"
       >
