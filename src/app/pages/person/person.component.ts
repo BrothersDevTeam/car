@@ -101,6 +101,7 @@ export class PersonComponent implements OnInit, OnDestroy {
   searchValue: string = '';
   searchType: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId' | 'all' = 'all';
   isCarAdmin: boolean = false;
+  selectedPeople: Person[] = []; // Stores selected rows
 
   /**
    * Tipo de relacionamento principal selecionado (CLIENTE ou FUNCIONARIO)
@@ -123,6 +124,11 @@ export class PersonComponent implements OnInit, OnDestroy {
     pageIndex: 0,
   };
   columns: ColumnConfig<Person>[] = [
+    {
+      key: 'select',
+      header: '',
+      showCheckbox: () => true,
+    },
     {
       key: 'name',
       header: 'Nome',
@@ -253,6 +259,11 @@ export class PersonComponent implements OnInit, OnDestroy {
 
   handleFormChanged(isDirty: boolean) {
     this.actionsService.hasFormChanges.set(isDirty);
+  }
+
+  handleSelection(selected: Person[]) {
+    this.selectedPeople = selected;
+    console.log('Selected people:', this.selectedPeople);
   }
 
   /**
@@ -535,6 +546,47 @@ export class PersonComponent implements OnInit, OnDestroy {
       console.error('ID não encontrado para exclusão');
       this.toastr.error('ID não encontrado para exclusão');
     }
+  }
+
+  deleteSelectedPeople() {
+    if (this.selectedPeople.length === 0) return;
+
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
+      ConfirmDialogComponent,
+      {
+        data: {
+          title: 'Excluir Selecionados',
+          message: `Tem certeza que deseja <strong>excluir ${this.selectedPeople.length}</strong> pessoas selecionadas?`,
+          confirmText: 'Sim, excluir',
+          cancelText: 'Cancelar',
+        },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        const ids = this.selectedPeople
+          .map((p) => p.personId)
+          .filter((id): id is string => id !== undefined);
+
+        if (ids.length === 0) {
+          this.toastr.error('Nenhum ID válido selecionado.');
+          return;
+        }
+
+        this.personService.deleteMany(ids).subscribe({
+          next: () => {
+            this.toastr.success(`${ids.length} pessoas excluídas com sucesso`);
+            this.selectedPeople = []; // Limpa seleção
+            this.onFormSubmitted();
+          },
+          error: (error) => {
+            console.error('Erro ao excluir pessoas:', error);
+            this.toastr.error('Erro ao excluir itens selecionados');
+          },
+        });
+      }
+    });
   }
 
   onFormSubmitted() {
