@@ -45,4 +45,12 @@ button[mat-icon-button] {
   td.mat-column-delete {
     pointer-events: auto;
   }
+
+  &.selected-row {
+    background-color: rgba(33, 150, 243, 0.12) !important; // Light primary blue
+    
+    &:hover {
+      background-color: rgba(33, 150, 243, 0.2) !important; // Darker on hover
+    }
+  }
 }
