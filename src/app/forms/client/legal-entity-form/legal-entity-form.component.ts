@@ -77,7 +77,7 @@ export class LegalEntityFormComponent
    * Flag que indica se o formulário está sendo salvo
    * Evita verificação de mudanças durante salvamento
    */
-  private isSaving = false;
+  protected isSaving = false;
 
   /**
    * Define os campos obrigatórios do formulário
@@ -430,12 +430,21 @@ export class LegalEntityFormComponent
    * Salva rascunho local no localStorage
    *
    * @param silent - Se true, não mostra mensagem de sucesso
+   * @param draftName - Nome opcional para o rascunho
+   * @param existingDraftId - ID opcional
+   * @param closeAfterSave - Se true, fecha o formulário após salvar
    */
-  saveLocalDraft(silent: boolean = false): void {
+  saveLocalDraft(
+    silent: boolean = false,
+    draftName?: string,
+    existingDraftId?: string,
+    closeAfterSave: boolean = true
+  ): void {
     const draftId = this.formDraftService.saveDraft(
       this.FORM_TYPE,
       this.form.value,
-      this.dataForm?.personId
+      this.dataForm?.personId,
+      draftName
     );
 
     if (!silent) {
@@ -443,6 +452,15 @@ export class LegalEntityFormComponent
     }
 
     console.log('[saveLocalDraft] Rascunho salvo:', draftId);
+
+    if (closeAfterSave) {
+      this.formSubmitted.emit();
+    } else {
+      // Se não fechar, marca como pristine
+      this.form.markAsPristine();
+      this.actionsService.hasFormChanges.set(false);
+      setTimeout(() => this.captureInitialFormValue(), 100);
+    }
   }
 
   /**

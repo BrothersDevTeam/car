@@ -96,7 +96,7 @@ export class PersonComponent implements OnInit, OnDestroy {
 
   personPaginatedList: PaginationResponse<Person> | null = null;
   selectedPerson: Person | null = null;
-  selectedDraft: FormDraft | null = null;
+  selectedDraft: FormDraft | null | undefined = undefined;
   availableDrafts: FormDraft[] = [];
   searchValue: string = '';
   searchType: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId' | 'all' = 'all';
@@ -339,15 +339,15 @@ export class PersonComponent implements OnInit, OnDestroy {
     // Prepara os parâmetros de busca baseado no tipo selecionado
     let searchParams:
       | {
-          name?: string;
-          cpf?: string;
-          cnpj?: string;
-          email?: string;
-          storeId?: string;
-          search?: string;
-          relationshipTypes?: string[];
-          roleNames?: string[];
-        }
+        name?: string;
+        cpf?: string;
+        cnpj?: string;
+        email?: string;
+        storeId?: string;
+        search?: string;
+        relationshipTypes?: string[];
+        roleNames?: string[];
+      }
       | undefined;
 
     if (searchValue && searchValue.trim()) {
@@ -537,6 +537,7 @@ export class PersonComponent implements OnInit, OnDestroy {
     this.openForm.set(false);
     this.openInfo.set(false);
     this.selectedPerson = null;
+    this.selectedDraft = undefined; // Force placeholder
     this.actionsService.hasFormChanges.set(false);
   }
 

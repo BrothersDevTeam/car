@@ -95,7 +95,7 @@ export class NaturalPersonFormComponent
   usernameInput?: ElementRef;
 
   @Input() dataForm: Person | null = null;
-  @Input() draft: FormDraft | null = null; // Added to receive draft from parent
+  @Input() draft: FormDraft | null | undefined = null; // Added to receive draft from parent
   @Output() formSubmitted = new EventEmitter<void>();
   @Output() formChanged = new EventEmitter<boolean>();
 
@@ -537,7 +537,7 @@ export class NaturalPersonFormComponent
           false,
           currentDraft.draftName,
           this.selectedDraftId,
-          false // NÃO fechar o formulário
+          true // FECHAR o formulário
         );
         return;
       }
@@ -571,8 +571,8 @@ export class NaturalPersonFormComponent
           return;
         }
 
-        // Salva novo rascunho, mantendo o formulário aberto
-        this.saveLocalDraft(false, result.draftName, undefined, false);
+        // Salva novo rascunho e fecha
+        this.saveLocalDraft(false, result.draftName, undefined, true);
       }
     });
   }

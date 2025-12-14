@@ -1,31 +1,21 @@
 <form [formGroup]="form" (keydown.enter)="onEnter($event)">
   <!-- Seção: Dados da Empresa -->
   <app-wrapper-card title="Dados da empresa">
-    
+
     <!-- 
       Layout: Nome da Empresa (50%) + Tipo (50%)
       Proporção equilibrada
     -->
     <div class="form-row-2cols">
-      <app-primary-input
-        formControlName="name"
-        label="Nome da Empresa (Razão Social) *"
-        inputName="name"
-        type="text"
+      <app-primary-input formControlName="name" label="Nome da Empresa (Razão Social) *" inputName="name" type="text"
         [error]="
           form.get('name')?.invalid &&
           (form.get('name')?.touched || submitted)
-        "
-      />
-      
-      <app-primary-select
-        label="Tipo *"
-        placeholder="Selecione"
-        inputName="relationshipTypes"
-        [allowMultiple]="true"
+        " />
+
+      <app-primary-select label="Tipo *" placeholder="Selecione" inputName="relationshipTypes" [allowMultiple]="true"
         formControlName="relationshipTypes"
-        [error]="submitted && form.get('relationshipTypes')?.invalid"
-      ></app-primary-select>
+        [error]="submitted && form.get('relationshipTypes')?.invalid"></app-primary-select>
     </div>
 
     <!-- Mensagem de erro para relationshipTypes -->
@@ -40,27 +30,14 @@
       Campos de identificação da empresa agrupados em pares
     -->
     <div class="form-row-2cols">
-      <app-primary-input
-        formControlName="cnpj"
-        label="CNPJ"
-        inputName="cnpj"
-        type="text"
-        placeholder="00.000.000/0000-00"
-        mask="00.000.000/0000-00"
-        appCnpjValidator
-        [error]="
+      <app-primary-input formControlName="cnpj" label="CNPJ" inputName="cnpj" type="text"
+        placeholder="00.000.000/0000-00" mask="00.000.000/0000-00" appCnpjValidator [error]="
           form.get('cnpj')?.invalid &&
           (form.get('cnpj')?.touched || submitted)
-        "
-      />
+        " />
 
-      <app-primary-input
-        formControlName="nickName"
-        label="Nome Fantasia"
-        inputName="nickName"
-        type="text"
-        placeholder="Nome comercial"
-      />
+      <app-primary-input formControlName="nickName" label="Nome Fantasia" inputName="nickName" type="text"
+        placeholder="Nome comercial" />
     </div>
 
     <!-- 
@@ -68,21 +45,11 @@
       Documentos secundários agrupados
     -->
     <div class="form-row-2cols">
-      <app-primary-input
-        formControlName="ie"
-        label="Inscrição Estadual"
-        inputName="ie"
-        type="text"
-        placeholder="Nº da IE"
-      />
-      
-      <app-primary-input
-        formControlName="crc"
-        label="CRC (se aplicável)"
-        inputName="crc"
-        type="text"
-        placeholder="Nº do CRC"
-      />
+      <app-primary-input formControlName="ie" label="Inscrição Estadual" inputName="ie" type="text"
+        placeholder="Nº da IE" />
+
+      <app-primary-input formControlName="crc" label="CRC (se aplicável)" inputName="crc" type="text"
+        placeholder="Nº do CRC" />
     </div>
 
     <!-- 
@@ -90,26 +57,14 @@
       Dados de contato agrupados
     -->
     <div class="form-row-2cols">
-      <app-primary-input
-        formControlName="email"
-        label="Email"
-        inputName="email"
-        type="email"
-        placeholder="exemplo@empresa.com"
-        [error]="
+      <app-primary-input formControlName="email" label="Email" inputName="email" type="email"
+        placeholder="exemplo@empresa.com" [error]="
           form.get('email')?.invalid &&
           (form.get('email')?.touched || submitted)
-        "
-      />
-      
-      <app-primary-input
-        formControlName="phone"
-        label="Telefone/Celular"
-        inputName="phone"
-        type="tel"
-        placeholder="(00) 00000-0000"
-        mask="(00) 00000-0000"
-      />
+        " />
+
+      <app-primary-input formControlName="phone" label="Telefone/Celular" inputName="phone" type="tel"
+        placeholder="(00) 00000-0000" mask="(00) 00000-0000" />
     </div>
 
   </app-wrapper-card>
@@ -120,37 +75,24 @@
   -->
   @if (shouldShowUserFields) {
   <app-wrapper-card title="Dados de Acesso ao Sistema">
-    
+
     <!-- 
       Layout: Nome de Usuário + Função (2 campos - 50% cada)
       Primeira linha de dados de acesso
     -->
     <div class="form-row-2cols">
-      <app-primary-input
-        formControlName="username"
-        label="Nome de usuário *"
-        inputName="username"
-        type="text"
-        [uppercase]="false"
-        placeholder="Digite o nome de usuário"
-        [error]="
+      <app-primary-input formControlName="username" label="Nome de usuário *" inputName="username" type="text"
+        [uppercase]="false" placeholder="Digite o nome de usuário" [error]="
           form.get('username')?.invalid &&
           (form.get('username')?.touched || submitted)
-        "
-      />
+        " />
 
-      <app-primary-select
-        label="Função no Sistema *"
-        placeholder="Selecione a função"
-        inputName="roleName"
-        formControlName="roleName"
-        [error]="submitted && form.get('roleName')?.invalid"
-        [options]="[
+      <app-primary-select label="Função no Sistema *" placeholder="Selecione a função" inputName="roleName"
+        formControlName="roleName" [error]="submitted && form.get('roleName')?.invalid" [options]="[
           { value: 'ROLE_MANAGER', label: 'Gerente' },
           { value: 'ROLE_SELLER', label: 'Vendedor' },
           { value: 'ROLE_FINANCIAL', label: 'Financeiro' }
-        ]"
-      />
+        ]" />
     </div>
 
     <!-- 
@@ -158,32 +100,18 @@
       Segunda linha de dados de acesso
     -->
     <div class="form-row-2cols">
-      <app-primary-input
-        formControlName="password"
-        label="Senha *"
-        inputName="password"
-        type="password"
-        [uppercase]="false"
-        placeholder="Mínimo 6 caracteres"
-        [error]="
+      <app-primary-input formControlName="password" label="Senha *" inputName="password" type="password"
+        [uppercase]="false" placeholder="Mínimo 6 caracteres" [error]="
           form.get('password')?.invalid &&
           (form.get('password')?.touched || submitted)
-        "
-      />
+        " />
 
-      <app-primary-input
-        formControlName="confirmPassword"
-        label="Confirmar Senha *"
-        inputName="confirmPassword"
-        type="password"
-        [uppercase]="false"
-        placeholder="Digite a senha novamente"
-        [error]="
+      <app-primary-input formControlName="confirmPassword" label="Confirmar Senha *" inputName="confirmPassword"
+        type="password" [uppercase]="false" placeholder="Digite a senha novamente" [error]="
           (form.get('confirmPassword')?.invalid ||
           form.errors?.['passwordMismatch']) &&
           (form.get('confirmPassword')?.touched || submitted)
-        "
-      />
+        " />
     </div>
 
     <!-- Mensagem de erro para senhas não coincidentes -->
@@ -304,14 +232,17 @@
   </app-wrapper-card>
   -->
 
-  <!-- Botão de submit -->
-  <button
-    mat-raised-button
-    type="button"
-    class="submit-btn"
-    (click)="onSubmit()"
-    #submitButton
-  >
-    Salvar
-  </button>
+  <div class="form-actions">
+    @if (form.dirty) {
+    <button mat-stroked-button type="button" color="primary" (click)="saveLocalDraft(false, undefined, undefined, true)"
+      [disabled]="isSaving">
+      <mat-icon>save_as</mat-icon>
+      Salvar Rascunho
+    </button>
+    }
+
+    <button mat-raised-button type="button" class="submit-btn" (click)="onSubmit()" #submitButton>
+      Salvar
+    </button>
+  </div>
 </form>
