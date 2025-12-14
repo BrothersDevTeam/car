@@ -6,7 +6,9 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, NgxSpinnerModule],
-  template: ` <router-outlet></router-outlet> `,
+  template: `
+    <router-outlet></router-outlet>
+  `,
 })
 export class AppComponent {
   title = 'car';

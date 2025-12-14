@@ -1,5 +1,8 @@
-<form [formGroup]="form" (keydown.enter)="onEnter($event)">
-  @if(dataForm?.plate) {
+<form
+  [formGroup]="form"
+  (keydown.enter)="onEnter($event)"
+>
+  @if (dataForm?.plate) {
     <div class="title-trash">
       <h2>Veículo placa: {{ dataForm!.plate }}</h2>
     </div>
@@ -15,10 +18,16 @@
         aria-label="Select an option"
         class="radio-button-group"
       >
-        <mat-radio-button class="radio-button" value="NACIONAL">
+        <mat-radio-button
+          class="radio-button"
+          value="NACIONAL"
+        >
           Nacional
         </mat-radio-button>
-        <mat-radio-button class="radio-button" value="IMPORTADO">
+        <mat-radio-button
+          class="radio-button"
+          value="IMPORTADO"
+        >
           Importado
         </mat-radio-button>
       </mat-radio-group>
@@ -32,8 +41,7 @@
       type="text"
       mask="AAA-AAAA"
       [error]="
-        form.get('plate')?.invalid &&
-        (form.get('plate')?.touched || submitted)
+        form.get('plate')?.invalid && (form.get('plate')?.touched || submitted)
       "
     />
 
@@ -70,7 +78,11 @@
         [label]="'Modelo'"
         [options]="models"
         [control]="modelControl"
-        [placeholder]="selectModelDisabled() ? 'Selecione uma marca primeiro' : 'Selecione um modelo'"
+        [placeholder]="
+          selectModelDisabled()
+            ? 'Selecione uma marca primeiro'
+            : 'Selecione um modelo'
+        "
         [disabled]="selectModelDisabled()"
         [selectedBrand]="brandControl.value"
         matTooltip="Selecione o modelo do veículo"
@@ -204,7 +216,6 @@
       inputName="features"
       type="text"
     />
-
   </app-wrapper-card>
 
   <!-- Botão de submit -->
@@ -229,7 +240,9 @@
         [disabled]="selectedPersonToEdit && selectedPersonToEdit.legalEntity"
       >
         <app-natural-person-form
-          [dataForm]="!selectedPersonToEdit?.legalEntity ? selectedPersonToEdit : null"
+          [dataForm]="
+            !selectedPersonToEdit?.legalEntity ? selectedPersonToEdit : null
+          "
           (formSubmitted)="onPersonFormSubmitted()"
         />
       </mat-tab>
@@ -238,7 +251,9 @@
         [disabled]="selectedPersonToEdit && !selectedPersonToEdit.legalEntity"
       >
         <app-legal-entity-form
-          [dataForm]="selectedPersonToEdit?.legalEntity ? selectedPersonToEdit : null"
+          [dataForm]="
+            selectedPersonToEdit?.legalEntity ? selectedPersonToEdit : null
+          "
           (formSubmitted)="onPersonFormSubmitted()"
         />
       </mat-tab>

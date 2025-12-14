@@ -5,7 +5,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { Address } from '@interfaces/address';
-import { AddressTypeLabels, AddressTypeIcons } from '../../../enums/addressTypes';
+import {
+  AddressTypeLabels,
+  AddressTypeIcons,
+} from '../../../enums/addressTypes';
 import { AddressService } from '@services/address.service';
 import { SafePipe } from '../../../pipes/safe.pipe';
 
@@ -20,7 +23,7 @@ import { SafePipe } from '../../../pipes/safe.pipe';
     SafePipe,
   ],
   templateUrl: './address-card.component.html',
-  styleUrl: './address-card.component.scss'
+  styleUrl: './address-card.component.scss',
 })
 export class AddressCardComponent {
   @Input() address!: Address;
@@ -53,7 +56,7 @@ export class AddressCardComponent {
     const parts = [
       this.address.street,
       this.address.number,
-      this.address.complement
+      this.address.complement,
     ].filter(Boolean);
     return parts.join(', ');
   }
@@ -69,7 +72,7 @@ export class AddressCardComponent {
       this.address.neighborhood,
       this.address.city,
       this.address.state,
-      'Brasil'
+      'Brasil',
     ].filter(Boolean);
     return parts.join(', ');
   }
@@ -95,7 +98,7 @@ export class AddressCardComponent {
   toggleMap() {
     this.showMap = !this.showMap;
     this.mapLoadError = false;
-    
+
     if (this.showMap) {
       console.log('🗺️ Abrindo mapa para:', this.fullAddressForMap);
     }

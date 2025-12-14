@@ -1,5 +1,5 @@
 <div class="input-wrapper">
-  <label [for]="inputName">{{label}}</label>
+  <label [for]="inputName">{{ label }}</label>
   <div class="input-container">
     <div class="input-content">
       <!-- 
@@ -16,22 +16,37 @@
         - disabled desabilita o campo quando necessário
         - mask aplica formatação usando ngx-mask
       -->
-      <input [id]="inputName" [type]="showPassword ? 'text' : type" [mask]="mask" [placeholder]="placeholder"
-        [(ngModel)]="value" [attr.maxlength]="maxlength" [attr.required]="required ? '' : null" [disabled]="disabled"
-        (ngModelChange)="onModelChange($event)" (blur)="onBlur($event)" />
+      <input
+        [id]="inputName"
+        [type]="showPassword ? 'text' : type"
+        [mask]="mask"
+        [placeholder]="placeholder"
+        [(ngModel)]="value"
+        [attr.maxlength]="maxlength"
+        [attr.required]="required ? '' : null"
+        [disabled]="disabled"
+        (ngModelChange)="onModelChange($event)"
+        (blur)="onBlur($event)"
+      />
       <!-- 
         Slot para conteúdo projetado (ícones, botões, etc)
         Exemplo: <mat-icon>search</mat-icon>
       -->
 
-
-      <ng-content>@if (type === 'password') {
-        <button type="button" class="toggle-password" (click)="togglePasswordVisibility()" tabindex="-1">
-          <mat-icon>
-            {{ showPassword ? 'visibility_off' : 'visibility' }}
-          </mat-icon>
-        </button>
-        }</ng-content>
+      <ng-content>
+        @if (type === 'password') {
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePasswordVisibility()"
+            tabindex="-1"
+          >
+            <mat-icon>
+              {{ showPassword ? 'visibility_off' : 'visibility' }}
+            </mat-icon>
+          </button>
+        }
+      </ng-content>
     </div>
 
     <!-- 
@@ -40,7 +55,7 @@
       Geralmente controlado pelas validações do FormControl
     -->
     @if (error) {
-    <p class="invalid-field-message">Campo inválido</p>
+      <p class="invalid-field-message">Campo inválido</p>
     }
   </div>
 </div>

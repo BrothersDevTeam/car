@@ -1,13 +1,13 @@
-import { FormControl } from "@angular/forms";
+import { FormControl } from '@angular/forms';
 
 export interface LoginResponse {
-  id: string,
-  fullName: string,
-  role: string,
-  token: string
+  id: string;
+  fullName: string;
+  role: string;
+  token: string;
 }
 
 export interface LoginForm {
-  email: FormControl,
-  password: FormControl
+  email: FormControl;
+  password: FormControl;
 }

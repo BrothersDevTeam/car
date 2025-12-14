@@ -9,9 +9,8 @@ describe('DrawerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DrawerComponent, BrowserAnimationsModule]
-    })
-    .compileComponents();
+      imports: [DrawerComponent, BrowserAnimationsModule],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DrawerComponent);
     component = fixture.componentInstance;

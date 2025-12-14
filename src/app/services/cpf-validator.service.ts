@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CpfValidatorService {
-  constructor() { }
-
+  constructor() {}
 
   public isValid(cpf: string): boolean {
     if (!cpf) return false;

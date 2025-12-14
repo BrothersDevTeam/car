@@ -10,13 +10,9 @@ describe('MainLayoutComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        MainLayoutComponent,
-        RouterModule.forRoot([])
-      ],
-      providers: [provideHttpClient()]
-    })
-    .compileComponents();
+      imports: [MainLayoutComponent, RouterModule.forRoot([])],
+      providers: [provideHttpClient()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(MainLayoutComponent);
     component = fixture.componentInstance;

@@ -1,48 +1,68 @@
-<mat-card class="card-container" appearance="outlined">
+<mat-card
+  class="card-container"
+  appearance="outlined"
+>
   <mat-card-content class="card-content">
     <!-- Dados da Empresa -->
-    <app-wrapper-card class="person-info" title="Dados da empresa">
+    <app-wrapper-card
+      class="person-info"
+      title="Dados da empresa"
+    >
       <div class="card-row">
-        <h3 class="label">Razão Social: </h3>
-        <h3 class="value">{{person.name}}</h3>
+        <h3 class="label">Razão Social:</h3>
+        <h3 class="value">{{ person.name }}</h3>
       </div>
       <div class="card-row">
-        <h3 class="label">Nome Fantasia: </h3>
-        <h3 class="value">{{person.nickName}}</h3>
+        <h3 class="label">Nome Fantasia:</h3>
+        <h3 class="value">{{ person.nickName }}</h3>
       </div>
       <div class="card-row">
-        <h3 class="label">Email: </h3>
-        <h3 class="value">{{person.email}}</h3>
+        <h3 class="label">Email:</h3>
+        <h3 class="value">{{ person.email }}</h3>
       </div>
       <div class="card-row">
-        <h3 class="label">Telefone: </h3>
-        <h3 class="value">{{person.phone}}</h3>
+        <h3 class="label">Telefone:</h3>
+        <h3 class="value">{{ person.phone }}</h3>
       </div>
       <div class="card-row">
-        <h3 class="label">CNPJ: </h3>
-        <h3 class="value">{{person.cnpj}}</h3>
+        <h3 class="label">CNPJ:</h3>
+        <h3 class="value">{{ person.cnpj }}</h3>
       </div>
       <mat-card-footer class="card-footer">
-        <button type="button" class="btn" color="primary" mat-raised-button (click)="editEvent.emit()">Editar</button>
-        <button type="button" class="btn" color="warn" mat-raised-button matListItemIcon
-          (click)="onDelete()">Excluir</button>
+        <button
+          type="button"
+          class="btn"
+          color="primary"
+          mat-raised-button
+          (click)="editEvent.emit()"
+        >
+          Editar
+        </button>
+        <button
+          type="button"
+          class="btn"
+          color="warn"
+          mat-raised-button
+          matListItemIcon
+          (click)="onDelete()"
+        >
+          Excluir
+        </button>
       </mat-card-footer>
     </app-wrapper-card>
 
     <app-wrapper-card>
       <!-- Seção de Endereços -->
       @if (person.personId) {
-      <div class="address-section">
-        <app-address-list
-        [personId]="person.personId" 
-        [canEdit]="true" 
-        [canDelete]="true" 
-        [canAdd]="true">
-        </app-address-list>
-      </div>
+        <div class="address-section">
+          <app-address-list
+            [personId]="person.personId"
+            [canEdit]="true"
+            [canDelete]="true"
+            [canAdd]="true"
+          ></app-address-list>
+        </div>
       }
     </app-wrapper-card>
-
   </mat-card-content>
-
 </mat-card>

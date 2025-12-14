@@ -358,15 +358,15 @@ export class PersonComponent implements OnInit, OnDestroy {
     // Prepara os parâmetros de busca baseado no tipo selecionado
     let searchParams:
       | {
-        name?: string;
-        cpf?: string;
-        cnpj?: string;
-        email?: string;
-        storeId?: string;
-        search?: string;
-        relationshipTypes?: string[];
-        roleNames?: string[];
-      }
+          name?: string;
+          cpf?: string;
+          cnpj?: string;
+          email?: string;
+          storeId?: string;
+          search?: string;
+          relationshipTypes?: string[];
+          roleNames?: string[];
+        }
       | undefined;
 
     if (searchValue && searchValue.trim()) {

@@ -21,7 +21,7 @@ export class AuthService {
     private dialog: MatDialog,
     private actionsService: ActionsService,
     private injector: Injector
-  ) { }
+  ) {}
 
   login(email: string, password: string) {
     return this.httpClient

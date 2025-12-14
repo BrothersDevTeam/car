@@ -1,32 +1,51 @@
 <main>
   <div class="search-container">
-    <mat-form-field appearance="outline" class="search-field">
+    <mat-form-field
+      appearance="outline"
+      class="search-field"
+    >
       <mat-label>Buscar pessoa</mat-label>
-      <input matInput [(ngModel)]="searchValue" (input)="onSearch($event)" [placeholder]="
+      <input
+        matInput
+        [(ngModel)]="searchValue"
+        (input)="onSearch($event)"
+        [placeholder]="
           'Digite o ' +
           (searchType === 'name'
             ? 'nome'
             : searchType === 'cpf'
-            ? 'CPF'
-            : searchType === 'cnpj'
-            ? 'CNPJ'
-            : searchType === 'email'
-            ? 'email'
-            : searchType === 'storeId'
-            ? 'ID da loja'
-            : 'nome, CPF, CNPJ ou email')
-        " />
+              ? 'CPF'
+              : searchType === 'cnpj'
+                ? 'CNPJ'
+                : searchType === 'email'
+                  ? 'email'
+                  : searchType === 'storeId'
+                    ? 'ID da loja'
+                    : 'nome, CPF, CNPJ ou email')
+        "
+      />
       @if (searchValue) {
-      <button matSuffix mat-icon-button aria-label="Limpar" (click)="clearSearch()">
-        <mat-icon>close</mat-icon>
-      </button>
+        <button
+          matSuffix
+          mat-icon-button
+          aria-label="Limpar"
+          (click)="clearSearch()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
       }
       <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="search-type-field">
+    <mat-form-field
+      appearance="outline"
+      class="search-type-field"
+    >
       <mat-label>Buscar por</mat-label>
-      <mat-select [(value)]="searchType" (selectionChange)="onSearchTypeChange($event.value)">
+      <mat-select
+        [(value)]="searchType"
+        (selectionChange)="onSearchTypeChange($event.value)"
+      >
         <!-- NOVA OPÇÃO: Buscar em todos os campos -->
         <mat-option value="all">Todos</mat-option>
         <mat-option value="name">Nome</mat-option>
@@ -34,7 +53,7 @@
         <mat-option value="cnpj">CNPJ</mat-option>
         <mat-option value="email">Email</mat-option>
         @if (isCarAdmin) {
-        <mat-option value="storeId">Loja (ID)</mat-option>
+          <mat-option value="storeId">Loja (ID)</mat-option>
         }
       </mat-select>
     </mat-form-field>
@@ -42,132 +61,212 @@
 
   <div class="filter-section mat-elevation-z2">
     <div class="filter-options">
-      <mat-radio-group [(ngModel)]="selectedRelationshipType" (change)="onRelationshipTypeChange($any($event.value))">
-        <mat-radio-button value="CLIENTE" color="primary">
+      <mat-radio-group
+        [(ngModel)]="selectedRelationshipType"
+        (change)="onRelationshipTypeChange($any($event.value))"
+      >
+        <mat-radio-button
+          value="CLIENTE"
+          color="primary"
+        >
           CLIENTE
         </mat-radio-button>
-        <mat-radio-button value="FUNCIONARIO" color="primary">
+        <mat-radio-button
+          value="FUNCIONARIO"
+          color="primary"
+        >
           FUNCIONÁRIO
         </mat-radio-button>
       </mat-radio-group>
 
       @if (selectedRelationshipType === 'FUNCIONARIO') {
-      <div class="sub-filter-options">
-        <!-- Checkbox: VENDEDOR (ROLE_SELLER) -->
-        <mat-checkbox [(ngModel)]="employeeSubFilters.vendedor" (change)="onEmployeeSubFilterChange()" color="accent"
-          class="sub-checkbox">
-          VENDEDOR
-        </mat-checkbox>
+        <div class="sub-filter-options">
+          <!-- Checkbox: VENDEDOR (ROLE_SELLER) -->
+          <mat-checkbox
+            [(ngModel)]="employeeSubFilters.vendedor"
+            (change)="onEmployeeSubFilterChange()"
+            color="accent"
+            class="sub-checkbox"
+          >
+            VENDEDOR
+          </mat-checkbox>
 
-        <!-- Checkbox: GERENTE (ROLE_MANAGER) -->
-        <mat-checkbox [(ngModel)]="employeeSubFilters.gerente" (change)="onEmployeeSubFilterChange()" color="accent"
-          class="sub-checkbox">
-          GERENTE
-        </mat-checkbox>
+          <!-- Checkbox: GERENTE (ROLE_MANAGER) -->
+          <mat-checkbox
+            [(ngModel)]="employeeSubFilters.gerente"
+            (change)="onEmployeeSubFilterChange()"
+            color="accent"
+            class="sub-checkbox"
+          >
+            GERENTE
+          </mat-checkbox>
 
-        <!-- Checkbox: ADMINISTRADOR (ROLE_ADMIN) -->
+          <!-- Checkbox: ADMINISTRADOR (ROLE_ADMIN) -->
 
-        <!-- <mat-checkbox 
+          <!-- <mat-checkbox 
               [(ngModel)]="employeeSubFilters.admin"
               (change)="onEmployeeSubFilterChange()"
               color="accent"
               class="sub-checkbox">
               ADMINISTRADOR
             </mat-checkbox> -->
-      </div>
-      } @if (hasActiveFilters()) {
-      <button mat-raised-button color="warn" (click)="clearFilters()" class="clear-filters-btn">
-        <mat-icon>clear</mat-icon>
-        Limpar Filtros
-      </button>
+        </div>
+      }
+      @if (hasActiveFilters()) {
+        <button
+          mat-raised-button
+          color="warn"
+          (click)="clearFilters()"
+          class="clear-filters-btn"
+        >
+          <mat-icon>clear</mat-icon>
+          Limpar Filtros
+        </button>
       }
     </div>
   </div>
-  <app-content-header title="Pessoas" btn_label="Novo" fontIcon="add" (onClick)="handleOpenForm()">
+  <app-content-header
+    title="Pessoas"
+    btn_label="Novo"
+    fontIcon="add"
+    (onClick)="handleOpenForm()"
+  >
     @if (availableDrafts.length > 0) {
-    <mat-form-field appearance="outline" class="header-draft-select" subscriptSizing="dynamic">
-      <mat-select placeholder="Continuar Cadastro" [value]="selectedDraft"
-        (selectionChange)="handleDraftSelection($event.value)" panelClass="header-draft-panel">
-        <mat-option [value]="null">Selecione o rascunho</mat-option>
-        @for (draft of availableDrafts; track draft.id) {
-        <mat-option [value]="draft" class="draft-option-item">
-          <span class="draft-text">
-            {{ draft.draftName || 'Sem nome' }} -
-            {{ draft.lastModified | date : 'dd/MM HH:mm' }}
-          </span>
-          <button mat-icon-button (click)="removeDraft(draft, $event)" matTooltip="Excluir rascunho">
-            <mat-icon color="warn">delete</mat-icon>
-          </button>
-        </mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+      <mat-form-field
+        appearance="outline"
+        class="header-draft-select"
+        subscriptSizing="dynamic"
+      >
+        <mat-select
+          placeholder="Continuar Cadastro"
+          [value]="selectedDraft"
+          (selectionChange)="handleDraftSelection($event.value)"
+          panelClass="header-draft-panel"
+        >
+          <mat-option [value]="null">Selecione o rascunho</mat-option>
+          @for (draft of availableDrafts; track draft.id) {
+            <mat-option
+              [value]="draft"
+              class="draft-option-item"
+            >
+              <span class="draft-text">
+                {{ draft.draftName || 'Sem nome' }} -
+                {{ draft.lastModified | date: 'dd/MM HH:mm' }}
+              </span>
+              <button
+                mat-icon-button
+                (click)="removeDraft(draft, $event)"
+                matTooltip="Excluir rascunho"
+              >
+                <mat-icon color="warn">delete</mat-icon>
+              </button>
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     }
 
     @if (selectedPeople.length > 0) {
-    <button mat-raised-button color="warn" (click)="deleteSelectedPeople()" class="delete-selected-btn"
-      style="margin-left: 16px;">
-      <mat-icon>delete</mat-icon>
-      Deletar Selecionados ({{ selectedPeople.length }})
-    </button>
+      <button
+        mat-raised-button
+        color="warn"
+        (click)="deleteSelectedPeople()"
+        class="delete-selected-btn"
+        style="margin-left: 16px"
+      >
+        <mat-icon>delete</mat-icon>
+        Deletar Selecionados ({{ selectedPeople.length }})
+      </button>
     }
   </app-content-header>
 
   @if (personPaginatedList?.page?.totalElements) {
-  <app-generic-table [columns]="columns" [genericPaginatedList]="personPaginatedList"
-    [totalElements]="personPaginatedList!.page.totalElements" [pageSizeOptions]="[5, 10, 25, 100]"
-    (rowClick)="onRowClick($event)" (pageEvent)="handlePageEvent($event)" (editClick)="handleEdit($event)"
-    (deleteClick)="handleDelete($event)" (selectionChange)="handleSelection($event)"></app-generic-table>
-  } @else { @if (clientListLoading()) {
-  <div class="loader-div">
-    <span class="loader"></span>
-  </div>
-  } @else { @if (clientListError()) {
-  <div class="message-error mat-elevation-z8">
-    <h3>Não foi possível acessar os dados da tabela</h3>
-    <h4>Tente novamente em alguns minutos.</h4>
-  </div>
+    <app-generic-table
+      [columns]="columns"
+      [genericPaginatedList]="personPaginatedList"
+      [totalElements]="personPaginatedList!.page.totalElements"
+      [pageSizeOptions]="[5, 10, 25, 100]"
+      (rowClick)="onRowClick($event)"
+      (pageEvent)="handlePageEvent($event)"
+      (editClick)="handleEdit($event)"
+      (deleteClick)="handleDelete($event)"
+      (selectionChange)="handleSelection($event)"
+    ></app-generic-table>
   } @else {
-  <br />
-  <h2>Não há pessoas cadastradas.</h2>
-  } } } @if (openInfo()) {
-  <app-drawer (closeDrawer)="handleCloseDrawer()">
-    @if (!selectedPerson?.legalEntity) {
-    <mat-tab-group [selectedIndex]="0">
-      <mat-tab label="Pessoa Física">
-        <app-natural-person-info (editEvent)="handleEdit()" [person]="selectedPerson!"
-          (formSubmitted)="onFormSubmitted()" />
-      </mat-tab>
-      <mat-tab label="Negócios efetuados">
-        <app-business-done-table />
-      </mat-tab>
-    </mat-tab-group>
-    } @else if(selectedPerson?.legalEntity) {
-    <mat-tab-group [selectedIndex]="0">
-      <mat-tab label="Pessoa Jurídica">
-        <app-legal-entity-info (editEvent)="handleEdit()" [person]="selectedPerson!"
-          (formSubmitted)="onFormSubmitted()" />
-      </mat-tab>
-      <mat-tab label="Negócios efetuados">
-        <app-business-done-table />
-      </mat-tab>
-    </mat-tab-group>
+    @if (clientListLoading()) {
+      <div class="loader-div">
+        <span class="loader"></span>
+      </div>
     } @else {
-    <h1>Dados não encontrados</h1>
+      @if (clientListError()) {
+        <div class="message-error mat-elevation-z8">
+          <h3>Não foi possível acessar os dados da tabela</h3>
+          <h4>Tente novamente em alguns minutos.</h4>
+        </div>
+      } @else {
+        <br />
+        <h2>Não há pessoas cadastradas.</h2>
+      }
     }
-  </app-drawer>
-  } @if (openForm()) {
-  <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
-    <mat-tab-group [selectedIndex]="selectedPerson?.legalEntity ? 1 : 0">
-      <mat-tab label="Pessoa Física" [disabled]="selectedPerson && selectedPerson.legalEntity">
-        <app-natural-person-form [dataForm]="!selectedPerson?.legalEntity ? selectedPerson : null"
-          [draft]="selectedDraft" (formSubmitted)="onFormSubmitted()" (formChanged)="handleFormChanged($event)" />
-      </mat-tab>
-      <mat-tab label="Pessoa Jurídica" [disabled]="selectedPerson && !selectedPerson.legalEntity">
-        <app-legal-entity-form [dataForm]="selectedPerson?.legalEntity ? selectedPerson : null"
-          (formSubmitted)="onFormSubmitted()" (formChanged)="handleFormChanged($event)" />
-      </mat-tab>
-    </mat-tab-group>
-  </app-drawer>
+  }
+  @if (openInfo()) {
+    <app-drawer (closeDrawer)="handleCloseDrawer()">
+      @if (!selectedPerson?.legalEntity) {
+        <mat-tab-group [selectedIndex]="0">
+          <mat-tab label="Pessoa Física">
+            <app-natural-person-info
+              (editEvent)="handleEdit()"
+              [person]="selectedPerson!"
+              (formSubmitted)="onFormSubmitted()"
+            />
+          </mat-tab>
+          <mat-tab label="Negócios efetuados">
+            <app-business-done-table />
+          </mat-tab>
+        </mat-tab-group>
+      } @else if (selectedPerson?.legalEntity) {
+        <mat-tab-group [selectedIndex]="0">
+          <mat-tab label="Pessoa Jurídica">
+            <app-legal-entity-info
+              (editEvent)="handleEdit()"
+              [person]="selectedPerson!"
+              (formSubmitted)="onFormSubmitted()"
+            />
+          </mat-tab>
+          <mat-tab label="Negócios efetuados">
+            <app-business-done-table />
+          </mat-tab>
+        </mat-tab-group>
+      } @else {
+        <h1>Dados não encontrados</h1>
+      }
+    </app-drawer>
+  }
+  @if (openForm()) {
+    <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
+      <mat-tab-group [selectedIndex]="selectedPerson?.legalEntity ? 1 : 0">
+        <mat-tab
+          label="Pessoa Física"
+          [disabled]="selectedPerson && selectedPerson.legalEntity"
+        >
+          <app-natural-person-form
+            [dataForm]="!selectedPerson?.legalEntity ? selectedPerson : null"
+            [draft]="selectedDraft"
+            (formSubmitted)="onFormSubmitted()"
+            (formChanged)="handleFormChanged($event)"
+          />
+        </mat-tab>
+        <mat-tab
+          label="Pessoa Jurídica"
+          [disabled]="selectedPerson && !selectedPerson.legalEntity"
+        >
+          <app-legal-entity-form
+            [dataForm]="selectedPerson?.legalEntity ? selectedPerson : null"
+            (formSubmitted)="onFormSubmitted()"
+            (formChanged)="handleFormChanged($event)"
+          />
+        </mat-tab>
+      </mat-tab-group>
+    </app-drawer>
   }
 </main>

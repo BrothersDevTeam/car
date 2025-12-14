@@ -2,9 +2,15 @@
   <span>{{ title }}</span>
   <div class="button-container">
     <ng-content></ng-content>
-    <button mat-flat-button (click)="handleAction()">
+    <button
+      mat-flat-button
+      (click)="handleAction()"
+    >
       <span matListItemTitle>{{ btn_label }}</span>
-      <mat-icon matListItemIcon [fontIcon]="fontIcon" />
+      <mat-icon
+        matListItemIcon
+        [fontIcon]="fontIcon"
+      />
     </button>
   </div>
 </mat-toolbar>

@@ -2,7 +2,8 @@
 
 ## 📋 Visão Geral
 
-Sistema completo de gerenciamento de endereços para pessoas (clientes, funcionários, etc.) integrado com a API backend.
+Sistema completo de gerenciamento de endereços para pessoas (clientes,
+funcionários, etc.) integrado com a API backend.
 
 ## 🎯 Funcionalidades
 
@@ -12,7 +13,8 @@ Sistema completo de gerenciamento de endereços para pessoas (clientes, funcion�
 - ✅ Definir endereço principal
 - ✅ Busca automática por CEP (ViaCEP)
 - ✅ Validações client-side
-- ✅ Múltiplos tipos de endereço (Residencial, Comercial, Entrega, Cobrança, Outros)
+- ✅ Múltiplos tipos de endereço (Residencial, Comercial, Entrega, Cobrança,
+  Outros)
 - ✅ Suporte a múltiplos endereços por pessoa
 - ✅ Interface responsiva
 
@@ -54,18 +56,18 @@ import { AddressListComponent } from '@components/address/address-list/address-l
   [personId]="person.personId"
   [canEdit]="true"
   [canDelete]="true"
-  [canAdd]="true">
-</app-address-list>
+  [canAdd]="true"
+></app-address-list>
 ```
 
 ### 3. Inputs Disponíveis
 
-| Input | Tipo | Obrigatório | Descrição |
-|-------|------|-------------|-----------|
-| `personId` | string | ✅ Sim | ID da pessoa dona dos endereços |
-| `canEdit` | boolean | ❌ Não | Permite editar (padrão: true) |
-| `canDelete` | boolean | ❌ Não | Permite excluir (padrão: true) |
-| `canAdd` | boolean | ❌ Não | Permite adicionar (padrão: true) |
+| Input       | Tipo    | Obrigatório | Descrição                        |
+| ----------- | ------- | ----------- | -------------------------------- |
+| `personId`  | string  | ✅ Sim      | ID da pessoa dona dos endereços  |
+| `canEdit`   | boolean | ❌ Não      | Permite editar (padrão: true)    |
+| `canDelete` | boolean | ❌ Não      | Permite excluir (padrão: true)   |
+| `canAdd`    | boolean | ❌ Não      | Permite adicionar (padrão: true) |
 
 ## 🔧 Exemplos de Uso
 
@@ -76,8 +78,8 @@ import { AddressListComponent } from '@components/address/address-list/address-l
   [personId]="selectedPerson.personId"
   [canEdit]="true"
   [canDelete]="true"
-  [canAdd]="true">
-</app-address-list>
+  [canAdd]="true"
+></app-address-list>
 ```
 
 ### Exemplo 2: Apenas Visualização (Sem Edição)
@@ -87,8 +89,8 @@ import { AddressListComponent } from '@components/address/address-list/address-l
   [personId]="selectedPerson.personId"
   [canEdit]="false"
   [canDelete]="false"
-  [canAdd]="false">
-</app-address-list>
+  [canAdd]="false"
+></app-address-list>
 ```
 
 ### Exemplo 3: Usando AddressFormComponent Standalone
@@ -102,8 +104,8 @@ import { AddressFormComponent } from '@components/address/address-form/address-f
   [personId]="person.personId"
   [address]="addressToEdit"
   (formSubmitted)="onAddressSubmitted()"
-  (formCancelled)="onAddressCancelled()">
-</app-address-form>
+  (formCancelled)="onAddressCancelled()"
+></app-address-form>
 ```
 
 ### Exemplo 4: Usando AddressService Diretamente
@@ -115,13 +117,13 @@ loadAddresses(personId: string) {
   this.addressService.getByPersonId(personId).subscribe({
     next: (addresses) => {
       console.log('Endereços:', addresses);
-      
+
       // Ordenar (principal primeiro)
       const sorted = this.addressService.sortAddresses(addresses);
-      
+
       // Pegar endereço principal
       const main = this.addressService.getMainAddress(addresses);
-      
+
       // Contar por tipo
       const count = this.addressService.countByType(addresses);
     }
@@ -153,23 +155,23 @@ createAddress(personId: string) {
 
 ```typescript
 enum AddressType {
-  RESIDENCIAL = 'RESIDENCIAL',  // 🏠 Casa/Apartamento
-  COMERCIAL = 'COMERCIAL',      // 🏢 Empresa/Escritório
-  ENTREGA = 'ENTREGA',          // 🚚 Endereço de entrega
-  COBRANCA = 'COBRANCA',        // 📄 Endereço de cobrança
-  OUTROS = 'OUTROS'             // 📍 Outros tipos
+  RESIDENCIAL = 'RESIDENCIAL', // 🏠 Casa/Apartamento
+  COMERCIAL = 'COMERCIAL', // 🏢 Empresa/Escritório
+  ENTREGA = 'ENTREGA', // 🚚 Endereço de entrega
+  COBRANCA = 'COBRANCA', // 📄 Endereço de cobrança
+  OUTROS = 'OUTROS', // 📍 Outros tipos
 }
 ```
 
 ## 🔒 Permissões Necessárias
 
-| Operação | Role Mínimo |
-|----------|-------------|
-| Criar endereço | `ROLE_SELLER` |
-| Listar endereços | `ROLE_SELLER` |
-| Editar endereço | `ROLE_SELLER` |
-| Definir como principal | `ROLE_SELLER` |
-| Excluir endereço | `ROLE_MANAGER` |
+| Operação               | Role Mínimo    |
+| ---------------------- | -------------- |
+| Criar endereço         | `ROLE_SELLER`  |
+| Listar endereços       | `ROLE_SELLER`  |
+| Editar endereço        | `ROLE_SELLER`  |
+| Definir como principal | `ROLE_SELLER`  |
+| Excluir endereço       | `ROLE_MANAGER` |
 
 ## ⚠️ Regras de Negócio
 
@@ -188,6 +190,7 @@ ng test
 ```
 
 Os testes cobrem:
+
 - ✅ Todos os métodos do AddressService
 - ✅ Helpers utilitários (cleanCep, formatCep, etc)
 - ✅ Validações
@@ -197,7 +200,8 @@ Os testes cobrem:
 
 ### Problema: CEP não preenche automaticamente
 
-**Solução**: Verifique se o CepService está corretamente configurado e a API do ViaCEP está acessível.
+**Solução**: Verifique se o CepService está corretamente configurado e a API do
+ViaCEP está acessível.
 
 ### Problema: Erro ao criar endereço "Person not found"
 
@@ -205,11 +209,13 @@ Os testes cobrem:
 
 ### Problema: Não consigo excluir endereço
 
-**Solução**: Verifique se o usuário logado possui `ROLE_MANAGER`. Apenas gerentes podem excluir endereços.
+**Solução**: Verifique se o usuário logado possui `ROLE_MANAGER`. Apenas
+gerentes podem excluir endereços.
 
 ### Problema: Múltiplos endereços principais
 
-**Solução**: Isso não deveria acontecer. O backend garante apenas um principal. Se ocorrer, é um bug no backend.
+**Solução**: Isso não deveria acontecer. O backend garante apenas um principal.
+Se ocorrer, é um bug no backend.
 
 ## 📚 Documentação Adicional
 
@@ -228,6 +234,7 @@ Os testes cobrem:
 ## 👨‍💻 Autor
 
 Desenvolvido seguindo padrões sênior de Angular com foco em:
+
 - Type Safety
 - Boas práticas
 - Código limpo e manutenível

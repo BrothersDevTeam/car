@@ -3,7 +3,11 @@
     {{ isEditMode ? 'Editar Endereço' : 'Novo Endereço' }}
   </h2>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="address-form">
+  <form
+    [formGroup]="form"
+    (ngSubmit)="onSubmit()"
+    class="address-form"
+  >
     <!-- Tipo de Endereço -->
     <div class="form-row">
       <app-primary-select
@@ -11,8 +15,8 @@
         formControlName="addressType"
         [options]="addressTypeOptions"
         [required]="true"
-        placeholder="Selecione o tipo">
-      </app-primary-select>
+        placeholder="Selecione o tipo"
+      ></app-primary-select>
     </div>
 
     <!-- CEP -->
@@ -25,20 +29,21 @@
         [required]="true"
         [uppercase]="false"
         mask="00000-000"
-        (blur)="onCepBlur()">
-        <mat-icon iconSuffix>{{ loadingCep ? 'hourglass_empty' : 'search' }}</mat-icon>
+        (blur)="onCepBlur()"
+      >
+        <mat-icon iconSuffix>
+          {{ loadingCep ? 'hourglass_empty' : 'search' }}
+        </mat-icon>
       </app-primary-input>
-      
+
       @if (!loadingCep) {
         <small class="help-text">
           Digite o CEP e pressione Tab para buscar automaticamente
         </small>
       }
-      
+
       @if (loadingCep) {
-        <small class="help-text loading">
-          Buscando endereço...
-        </small>
+        <small class="help-text loading">Buscando endereço...</small>
       }
     </div>
 
@@ -50,8 +55,8 @@
         type="text"
         placeholder="Ex: Av. Paulista"
         [required]="true"
-        maxlength="100">
-      </app-primary-input>
+        maxlength="100"
+      ></app-primary-input>
     </div>
 
     <!-- Número e Complemento -->
@@ -62,16 +67,16 @@
         type="text"
         [uppercase]="false"
         placeholder="Ex: 1578"
-        maxlength="10">
-      </app-primary-input>
+        maxlength="10"
+      ></app-primary-input>
 
       <app-primary-input
         label="Complemento"
         formControlName="complement"
         type="text"
         placeholder="Ex: Apto 45"
-        maxlength="100">
-      </app-primary-input>
+        maxlength="100"
+      ></app-primary-input>
     </div>
 
     <!-- Bairro -->
@@ -82,8 +87,8 @@
         type="text"
         placeholder="Ex: Bela Vista"
         [required]="true"
-        maxlength="100">
-      </app-primary-input>
+        maxlength="100"
+      ></app-primary-input>
     </div>
 
     <!-- Cidade e Estado -->
@@ -94,50 +99,62 @@
         type="text"
         placeholder="Ex: São Paulo"
         [required]="true"
-        maxlength="100">
-      </app-primary-input>
+        maxlength="100"
+      ></app-primary-input>
 
       <app-primary-select
         label="UF"
         formControlName="state"
         [options]="stateOptions"
         [required]="true"
-        placeholder="UF">
-      </app-primary-select>
+        placeholder="UF"
+      ></app-primary-select>
     </div>
 
     <!-- Checkboxes -->
     <div class="form-row checkboxes">
       <label class="checkbox-label">
-        <input type="checkbox" formControlName="mainAddress">
+        <input
+          type="checkbox"
+          formControlName="mainAddress"
+        />
         <span>Endereço Principal</span>
-        <mat-icon class="info-icon" 
-          matTooltip="Apenas um endereço pode ser principal">
+        <mat-icon
+          class="info-icon"
+          matTooltip="Apenas um endereço pode ser principal"
+        >
           info
         </mat-icon>
       </label>
 
       <label class="checkbox-label">
-        <input type="checkbox" formControlName="active">
+        <input
+          type="checkbox"
+          formControlName="active"
+        />
         <span>Ativo</span>
       </label>
     </div>
 
     <!-- Botões -->
     <div class="form-actions">
-      <button type="button" 
-        mat-stroked-button 
+      <button
+        type="button"
+        mat-stroked-button
         (click)="onCancel()"
-        class="btn-cancel">
+        class="btn-cancel"
+      >
         <mat-icon>close</mat-icon>
         Cancelar
       </button>
 
-      <button type="submit" 
-        mat-raised-button 
+      <button
+        type="submit"
+        mat-raised-button
         color="primary"
         [disabled]="submitted && form.invalid"
-        class="btn-submit">
+        class="btn-submit"
+      >
         <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
         {{ isEditMode ? 'Atualizar' : 'Salvar' }}
       </button>

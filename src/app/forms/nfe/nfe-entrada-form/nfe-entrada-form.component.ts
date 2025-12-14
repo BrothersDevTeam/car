@@ -167,7 +167,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       storeId: this.authService.getStoreId()!,
       nfeItens: [{ vehicleId: this.form.value.vehicleId }],
       personId: this.form.value.personId,
-      nfeTipoDocumento: "0",
+      nfeTipoDocumento: '0',
       nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
     };
 

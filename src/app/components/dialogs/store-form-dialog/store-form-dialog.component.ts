@@ -1,13 +1,22 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@interfaces/store';
 import { StoreService } from '@services/store.service';
@@ -28,26 +37,26 @@ export interface StoreFormDialogData {
 
 /**
  * Componente wizard para cadastro completo de nova loja matriz
- * 
+ *
  * Este componente implementa um fluxo de 3 etapas para resolver o problema
  * do "loop infinito" no cadastro:
- * 
+ *
  * PROBLEMA ORIGINAL:
  * - Para criar Person → precisa de Store
  * - Para fazer login → precisa de User
  * - Para criar User → precisa de Person
  * - LOOP! 🔄
- * 
+ *
  * SOLUÇÃO (3 STEPS):
  * Step 1: Dados da Loja (CNPJ, razão social, email, telefone)
  * Step 2: Dados do Proprietário (CPF/CNPJ, nome, email, telefone)
  * Step 3: Dados de Acesso (username, senha)
- * 
+ *
  * FLUXO DE EXECUÇÃO:
  * 1. POST /stores/mainstore → Cria loja MATRIZ
  * 2. POST /persons → Cria pessoa vinculada à loja (com user e password)
  * 3. POST /stores/owner → Vincula pessoa como proprietária da loja
- * 
+ *
  * Após isso, o cliente pode fazer login e começar a usar o sistema!
  */
 @Component({
@@ -64,7 +73,7 @@ export interface StoreFormDialogData {
     MatIconModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
-    PrimaryInputComponent  // Componente de input customizado
+    PrimaryInputComponent, // Componente de input customizado
   ],
   providers: [],
   templateUrl: './store-form-dialog.component.html',
@@ -72,9 +81,9 @@ export interface StoreFormDialogData {
 })
 export class StoreFormDialogComponent implements OnInit {
   // Formulários dos 3 steps
-  storeForm!: FormGroup;      // Step 1: Dados da Loja
-  personForm!: FormGroup;     // Step 2: Dados do Proprietário
-  accessForm!: FormGroup;     // Step 3: Dados de Acesso
+  storeForm!: FormGroup; // Step 1: Dados da Loja
+  personForm!: FormGroup; // Step 2: Dados do Proprietário
+  accessForm!: FormGroup; // Step 3: Dados de Acesso
 
   // Estados de carregamento e erro
   isSubmitting = false;
@@ -87,7 +96,7 @@ export class StoreFormDialogComponent implements OnInit {
     private authService: AuthService,
     public dialogRef: MatDialogRef<StoreFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: StoreFormDialogData
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.initForms();
@@ -99,73 +108,80 @@ export class StoreFormDialogComponent implements OnInit {
   private initForms(): void {
     // STEP 1: Formulário de dados da loja
     this.storeForm = this.fb.group({
-      name: ['', [
-        Validators.required,
-        Validators.minLength(3),
-        Validators.maxLength(50)
-      ]],
-      tradeName: ['', [
-        Validators.minLength(3),
-        Validators.maxLength(50)
-      ]],
-      cnpj: ['', [
-        Validators.required,
-        Validators.minLength(14),
-        Validators.maxLength(14)
-      ]],
-      email: ['', [
-        Validators.required,
-        Validators.email,
-        Validators.maxLength(50)
-      ]],
-      phoneNumber: ['', [
-        Validators.maxLength(20)
-      ]]
+      name: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(50),
+        ],
+      ],
+      tradeName: ['', [Validators.minLength(3), Validators.maxLength(50)]],
+      cnpj: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(14),
+          Validators.maxLength(14),
+        ],
+      ],
+      email: [
+        '',
+        [Validators.required, Validators.email, Validators.maxLength(50)],
+      ],
+      phoneNumber: ['', [Validators.maxLength(20)]],
     });
 
     // STEP 2: Formulário de dados do proprietário
     this.personForm = this.fb.group({
       legalEntity: [false], // false = Pessoa Física, true = Pessoa Jurídica
-      name: ['', [
-        Validators.required,
-        Validators.minLength(3),
-        Validators.maxLength(50)
-      ]],
-      nickName: ['', [
-        Validators.minLength(3),
-        Validators.maxLength(50)
-      ]],
-      cpf: [''],      // Validação condicional
-      cnpj: [''],     // Validação condicional
+      name: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(50),
+        ],
+      ],
+      nickName: ['', [Validators.minLength(3), Validators.maxLength(50)]],
+      cpf: [''], // Validação condicional
+      cnpj: [''], // Validação condicional
       rg: ['', [Validators.maxLength(14)]],
       rgIssuer: ['', [Validators.maxLength(14)]],
-      email: ['', [
-        Validators.required,
-        Validators.email,
-        Validators.maxLength(255)
-      ]],
-      phone: ['', [Validators.maxLength(14)]]
+      email: [
+        '',
+        [Validators.required, Validators.email, Validators.maxLength(255)],
+      ],
+      phone: ['', [Validators.maxLength(14)]],
     });
 
     // STEP 3: Formulário de dados de acesso
     this.accessForm = this.fb.group({
-      username: ['', [
-        Validators.required,
-        Validators.minLength(3),
-        Validators.maxLength(50)
-      ]],
-      password: ['', [
-        Validators.required,
-        Validators.minLength(6),
-        Validators.maxLength(20)
-      ]],
-      confirmPassword: ['', [Validators.required]]
+      username: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(50),
+        ],
+      ],
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6),
+          Validators.maxLength(20),
+        ],
+      ],
+      confirmPassword: ['', [Validators.required]],
     });
 
     // Listener para alternar validação entre CPF e CNPJ
-    this.personForm.get('legalEntity')?.valueChanges.subscribe((isLegalEntity) => {
-      this.updatePersonDocumentValidation(isLegalEntity);
-    });
+    this.personForm
+      .get('legalEntity')
+      ?.valueChanges.subscribe((isLegalEntity) => {
+        this.updatePersonDocumentValidation(isLegalEntity);
+      });
 
     // Inicializa validação de CPF (padrão é Pessoa Física)
     this.updatePersonDocumentValidation(false);
@@ -185,7 +201,7 @@ export class StoreFormDialogComponent implements OnInit {
       cnpjControl?.setValidators([
         Validators.required,
         Validators.minLength(14),
-        Validators.maxLength(14)
+        Validators.maxLength(14),
       ]);
     } else {
       // Pessoa Física: CPF obrigatório, CNPJ opcional
@@ -193,7 +209,7 @@ export class StoreFormDialogComponent implements OnInit {
       cpfControl?.setValidators([
         Validators.required,
         Validators.minLength(11),
-        Validators.maxLength(11)
+        Validators.maxLength(11),
       ]);
     }
 
@@ -219,7 +235,7 @@ export class StoreFormDialogComponent implements OnInit {
 
   /**
    * Submete o cadastro completo (3 requisições em sequência)
-   * 
+   *
    * FLUXO:
    * 1. Cria Store → retorna storeId
    * 2. Cria Person (com storeId) → retorna personId
@@ -228,7 +244,11 @@ export class StoreFormDialogComponent implements OnInit {
    */
   onSubmit(): void {
     // Valida todos os formulários
-    if (!this.storeForm.valid || !this.personForm.valid || !this.accessForm.valid) {
+    if (
+      !this.storeForm.valid ||
+      !this.personForm.valid ||
+      !this.accessForm.valid
+    ) {
       this.markAllAsTouched();
       return;
     }
@@ -254,133 +274,165 @@ export class StoreFormDialogComponent implements OnInit {
     }
 
     // 📝 LOG: Mostra qual endpoint será chamado
-    console.log('🎯 Tipo de cadastro:', this.data.isCarAdmin ? 'MATRIZ' : 'FILIAL');
-    console.log('📦 Payload que será enviado:', JSON.stringify(storePayload, null, 2));
+    console.log(
+      '🎯 Tipo de cadastro:',
+      this.data.isCarAdmin ? 'MATRIZ' : 'FILIAL'
+    );
+    console.log(
+      '📦 Payload que será enviado:',
+      JSON.stringify(storePayload, null, 2)
+    );
 
     // PASSO 1: Criar Store (MATRIZ ou FILIAL baseado na role)
     const createStoreObservable = this.data.isCarAdmin
-      ? this.storeService.createMainStore(storePayload)      // CAR_ADMIN → POST /stores/mainstore
-      : this.storeService.createBranch(storePayload);        // ADMIN → POST /stores
+      ? this.storeService.createMainStore(storePayload) // CAR_ADMIN → POST /stores/mainstore
+      : this.storeService.createBranch(storePayload); // ADMIN → POST /stores
 
-    createStoreObservable.pipe(
-      // Captura o storeId retornado
-      tap((createdStore: Store) => {
-        console.log('✅ Store criada:', createdStore);
-      }),
+    createStoreObservable
+      .pipe(
+        // Captura o storeId retornado
+        tap((createdStore: Store) => {
+          console.log('✅ Store criada:', createdStore);
+        }),
 
-      // PASSO 2: Criar Person com o storeId
-      switchMap((createdStore: Store) => {
-        // Valida se storeId existe
-        if (!createdStore.storeId) {
-          throw new Error('Store criada sem storeId');
-        }
-
-        const personPayload = this.preparePersonPayload(createdStore.storeId);
-        console.log('📝 Criando proprietário:', personPayload);
-        console.log('🆔 StoreId para vinculação:', createdStore.storeId);
-
-        return this.personService.createPerson(personPayload).pipe(
-          // Backend retorna o objeto Person completo, não apenas o ID
-          tap((createdPerson: any) => {
-            console.log('✅ Proprietário criado:', createdPerson);
-            console.log('🆔 PersonId extraído:', createdPerson.personId);
-            console.log('📊 Tipo do objeto:', typeof createdPerson);
-          }),
-          // PASSO 3: Vincular Person como owner da Store usando o personId extraído
-          switchMap((createdPerson: any) => {
-            console.log('🔗 Vinculando proprietário à loja');
-
-            // Validação adicional para garantir que storeId ainda existe
-            if (!createdStore.storeId) {
-              throw new Error('storeId não encontrado');
-            }
-
-            // Valida se personId existe no objeto retornado
-            if (!createdPerson.personId) {
-              throw new Error('Person criada sem personId');
-            }
-
-            console.log('📤 Payload de vinculação:', {
-              storeId: createdStore.storeId,
-              personId: createdPerson.personId
-            });
-
-            return this.storeService.setStoreOwner(
-              createdStore.storeId,
-              createdPerson.personId  // ✅ Agora extrai do objeto
-            ).pipe(
-              tap({
-                next: (updatedStore) => {
-                  console.log('✅ Proprietário vinculado com sucesso:', updatedStore);
-                },
-                error: (error) => {
-                  console.error('❌ Erro ao vincular proprietário:', error);
-                  console.error('📋 Detalhes do erro:', {
-                    status: error.status,
-                    statusText: error.statusText,
-                    message: error.error?.message || error.message,
-                    fullError: error
-                  });
-                }
-              }),
-              // Retorna a store completa
-              switchMap(() => of(createdStore))
-            );
-          })
-        );
-      }),
-
-      // Tratamento de erro
-      catchError((error) => {
-        console.error('❌ Erro no cadastro:', error);
-        this.isSubmitting = false;
-
-        // Mensagem de erro amigável baseada no tipo de erro
-        if (error.error?.message) {
-          this.submitError = error.error.message;
-        } else if (error.status === 400) {
-          this.submitError = 'Dados inválidos. Verifique os campos e tente novamente.';
-        } else if (error.status === 409 || error.status === 500) {
-          // Verifica se é erro de duplicação no corpo do erro
-          const errorMessage = JSON.stringify(error.error || error.message || '').toLowerCase();
-
-          if (errorMessage.includes('email') && errorMessage.includes('already exists')) {
-            this.submitError = '❌ Este email já está cadastrado no sistema. Use outro email para a loja.';
-          } else if (errorMessage.includes('cnpj') && errorMessage.includes('already exists')) {
-            this.submitError = '❌ Este CNPJ já está cadastrado no sistema.';
-          } else if (errorMessage.includes('cpf') && errorMessage.includes('already exists')) {
-            this.submitError = '❌ Este CPF já está cadastrado no sistema.';
-          } else if (errorMessage.includes('username') && errorMessage.includes('already exists')) {
-            this.submitError = '❌ Este nome de usuário já está em uso. Escolha outro.';
-          } else if (errorMessage.includes('duplicate key')) {
-            this.submitError = '❌ Dados duplicados. Verifique se o email, CNPJ ou CPF já não estão cadastrados.';
-          } else {
-            this.submitError = 'Erro ao cadastrar loja. Tente novamente ou contate o suporte.';
+        // PASSO 2: Criar Person com o storeId
+        switchMap((createdStore: Store) => {
+          // Valida se storeId existe
+          if (!createdStore.storeId) {
+            throw new Error('Store criada sem storeId');
           }
-        } else {
-          this.submitError = 'Erro ao cadastrar loja. Tente novamente.';
-        }
 
-        return throwError(() => error);
-      })
-    ).subscribe({
-      next: (createdStore: Store) => {
-        console.log('🎉 Cadastro completo com sucesso!');
-        this.isSubmitting = false;
-        // Fecha dialog e retorna a store criada
-        this.dialogRef.close(createdStore);
-      },
-      error: () => {
-        // Erro já tratado no catchError
-        this.isSubmitting = false;
-      }
-    });
+          const personPayload = this.preparePersonPayload(createdStore.storeId);
+          console.log('📝 Criando proprietário:', personPayload);
+          console.log('🆔 StoreId para vinculação:', createdStore.storeId);
+
+          return this.personService.createPerson(personPayload).pipe(
+            // Backend retorna o objeto Person completo, não apenas o ID
+            tap((createdPerson: any) => {
+              console.log('✅ Proprietário criado:', createdPerson);
+              console.log('🆔 PersonId extraído:', createdPerson.personId);
+              console.log('📊 Tipo do objeto:', typeof createdPerson);
+            }),
+            // PASSO 3: Vincular Person como owner da Store usando o personId extraído
+            switchMap((createdPerson: any) => {
+              console.log('🔗 Vinculando proprietário à loja');
+
+              // Validação adicional para garantir que storeId ainda existe
+              if (!createdStore.storeId) {
+                throw new Error('storeId não encontrado');
+              }
+
+              // Valida se personId existe no objeto retornado
+              if (!createdPerson.personId) {
+                throw new Error('Person criada sem personId');
+              }
+
+              console.log('📤 Payload de vinculação:', {
+                storeId: createdStore.storeId,
+                personId: createdPerson.personId,
+              });
+
+              return this.storeService
+                .setStoreOwner(
+                  createdStore.storeId,
+                  createdPerson.personId // ✅ Agora extrai do objeto
+                )
+                .pipe(
+                  tap({
+                    next: (updatedStore) => {
+                      console.log(
+                        '✅ Proprietário vinculado com sucesso:',
+                        updatedStore
+                      );
+                    },
+                    error: (error) => {
+                      console.error('❌ Erro ao vincular proprietário:', error);
+                      console.error('📋 Detalhes do erro:', {
+                        status: error.status,
+                        statusText: error.statusText,
+                        message: error.error?.message || error.message,
+                        fullError: error,
+                      });
+                    },
+                  }),
+                  // Retorna a store completa
+                  switchMap(() => of(createdStore))
+                );
+            })
+          );
+        }),
+
+        // Tratamento de erro
+        catchError((error) => {
+          console.error('❌ Erro no cadastro:', error);
+          this.isSubmitting = false;
+
+          // Mensagem de erro amigável baseada no tipo de erro
+          if (error.error?.message) {
+            this.submitError = error.error.message;
+          } else if (error.status === 400) {
+            this.submitError =
+              'Dados inválidos. Verifique os campos e tente novamente.';
+          } else if (error.status === 409 || error.status === 500) {
+            // Verifica se é erro de duplicação no corpo do erro
+            const errorMessage = JSON.stringify(
+              error.error || error.message || ''
+            ).toLowerCase();
+
+            if (
+              errorMessage.includes('email') &&
+              errorMessage.includes('already exists')
+            ) {
+              this.submitError =
+                '❌ Este email já está cadastrado no sistema. Use outro email para a loja.';
+            } else if (
+              errorMessage.includes('cnpj') &&
+              errorMessage.includes('already exists')
+            ) {
+              this.submitError = '❌ Este CNPJ já está cadastrado no sistema.';
+            } else if (
+              errorMessage.includes('cpf') &&
+              errorMessage.includes('already exists')
+            ) {
+              this.submitError = '❌ Este CPF já está cadastrado no sistema.';
+            } else if (
+              errorMessage.includes('username') &&
+              errorMessage.includes('already exists')
+            ) {
+              this.submitError =
+                '❌ Este nome de usuário já está em uso. Escolha outro.';
+            } else if (errorMessage.includes('duplicate key')) {
+              this.submitError =
+                '❌ Dados duplicados. Verifique se o email, CNPJ ou CPF já não estão cadastrados.';
+            } else {
+              this.submitError =
+                'Erro ao cadastrar loja. Tente novamente ou contate o suporte.';
+            }
+          } else {
+            this.submitError = 'Erro ao cadastrar loja. Tente novamente.';
+          }
+
+          return throwError(() => error);
+        })
+      )
+      .subscribe({
+        next: (createdStore: Store) => {
+          console.log('🎉 Cadastro completo com sucesso!');
+          this.isSubmitting = false;
+          // Fecha dialog e retorna a store criada
+          this.dialogRef.close(createdStore);
+        },
+        error: () => {
+          // Erro já tratado no catchError
+          this.isSubmitting = false;
+        },
+      });
   }
 
   /**
    * Prepara o payload da Store para envio
    * Se for ADMIN (filial), adiciona mainStoreId automaticamente
-   * 
+   *
    * IMPORTANTE:
    * - CAR_ADMIN cria MATRIZ → mainStoreId = null (não envia)
    * - ADMIN cria FILIAL → mainStoreId = obrigatório (storeId da matriz)
@@ -393,7 +445,9 @@ export class StoreFormDialogComponent implements OnInit {
       tradeName: formValue.tradeName || null,
       cnpj: formValue.cnpj.replace(/\D/g, ''), // Remove formatação
       email: formValue.email,
-      phoneNumber: formValue.phoneNumber ? formValue.phoneNumber.replace(/\D/g, '') : null
+      phoneNumber: formValue.phoneNumber
+        ? formValue.phoneNumber.replace(/\D/g, '')
+        : null,
     };
 
     // Se não for CAR_ADMIN, é uma filial e precisa do mainStoreId
@@ -403,7 +457,9 @@ export class StoreFormDialogComponent implements OnInit {
 
       // ⚠️ VALIDAÇÃO CRÍTICA: Backend exige mainStoreId para criar filial
       if (!userStoreId) {
-        throw new Error('Erro: não foi possível identificar a loja matriz. Faça login novamente.');
+        throw new Error(
+          'Erro: não foi possível identificar a loja matriz. Faça login novamente.'
+        );
       }
 
       console.log('🏢 Criando FILIAL da matriz:', userStoreId);
@@ -433,7 +489,9 @@ export class StoreFormDialogComponent implements OnInit {
       phone: personValue.phone ? personValue.phone.replace(/\D/g, '') : null,
       legalEntity: personValue.legalEntity,
       cpf: personValue.legalEntity ? null : personValue.cpf?.replace(/\D/g, ''),
-      cnpj: personValue.legalEntity ? personValue.cnpj?.replace(/\D/g, '') : null,
+      cnpj: personValue.legalEntity
+        ? personValue.cnpj?.replace(/\D/g, '')
+        : null,
       rg: personValue.rg || null,
       rgIssuer: personValue.rgIssuer || null,
       ie: null,
@@ -443,7 +501,7 @@ export class StoreFormDialogComponent implements OnInit {
       username: accessValue.username,
       password: accessValue.password,
       roleName: 'ROLE_ADMIN', // Proprietário sempre é ADMIN da loja
-      relationshipTypes: ['PROPRIETARIO'] // Define como proprietário
+      relationshipTypes: ['PROPRIETARIO'], // Define como proprietário
     };
   }
 
@@ -452,13 +510,13 @@ export class StoreFormDialogComponent implements OnInit {
    * para exibir erros de validação
    */
   private markAllAsTouched(): void {
-    Object.keys(this.storeForm.controls).forEach(key => {
+    Object.keys(this.storeForm.controls).forEach((key) => {
       this.storeForm.get(key)?.markAsTouched();
     });
-    Object.keys(this.personForm.controls).forEach(key => {
+    Object.keys(this.personForm.controls).forEach((key) => {
       this.personForm.get(key)?.markAsTouched();
     });
-    Object.keys(this.accessForm.controls).forEach(key => {
+    Object.keys(this.accessForm.controls).forEach((key) => {
       this.accessForm.get(key)?.markAsTouched();
     });
   }

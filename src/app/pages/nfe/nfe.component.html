@@ -1,5 +1,4 @@
 <main>
-
   <app-content-header
     title="NFe"
     btn_label="Novo"
@@ -12,7 +11,7 @@
     <button mat-flat-button>
       <span matListItemTitle>Enviar</span>
     </button>
-</app-content-header>
+  </app-content-header>
 
   @if (nfePaginatedList?.page?.totalElements) {
     <app-generic-table
@@ -30,15 +29,13 @@
       <div class="loader-div">
         <span class="loader"></span>
       </div>
-    }
-    @else {
+    } @else {
       @if (nfeListError()) {
         <div class="message-error mat-elevation-z8">
           <h3>Não foi possível acessar os dados da tabela</h3>
           <h4>Tente novamente em alguns minutos.</h4>
         </div>
-      }
-      @else {
+      } @else {
         <br />
         <h2>Não há NFes cadastradas</h2>
       }
@@ -103,7 +100,8 @@
         <h1>Dados não encontrados</h1>
       }
     </app-drawer>
-  } @if (openForm()) {
+  }
+  @if (openForm()) {
     <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
       <mat-tab-group [selectedIndex]="selectedTabIndex()">
         <mat-tab label="NFe Entrada">

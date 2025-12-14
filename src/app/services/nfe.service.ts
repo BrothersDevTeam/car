@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Nfe, NaturezaOperacao } from '@interfaces/nfe';
+import { Nfe } from '@interfaces/nfe';
 import { PaginationResponse } from '@interfaces/pagination';
 import { BehaviorSubject, first, Observable, of, tap } from 'rxjs';
 
@@ -32,9 +32,9 @@ export class NfeService {
       return of(this.cache);
     }
     return this.http
-      .get<PaginationResponse<Nfe>>(
-        `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`
-      )
+      .get<
+        PaginationResponse<Nfe>
+      >(`${this.apiUrl}?page=${pageIndex}&size=${pageSize}`)
       .pipe(
         first(),
         tap((response) => {

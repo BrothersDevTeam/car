@@ -1,11 +1,20 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { Store } from '@interfaces/store';
 import { Person } from '@interfaces/person';
 import { PersonService } from '@services/person.service';
@@ -25,7 +34,7 @@ export interface StoreOwnerDialogData {
     MatFormFieldModule,
     MatSelectModule,
     MatButtonModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
   ],
   templateUrl: './store-owner-dialog.component.html',
   styleUrls: ['./store-owner-dialog.component.scss'],
@@ -35,14 +44,14 @@ export class StoreOwnerDialogComponent implements OnInit {
   persons: Person[] = [];
   loading = true;
   error = false;
-  
+
   /**
    * Modo de operação do dialog:
    * - 'set': Vincular proprietário pela primeira vez (loja sem owner)
    * - 'update': Alterar proprietário existente (loja já tem owner)
    */
   mode: 'set' | 'update' = 'set';
-  
+
   /**
    * Proprietário atual da loja (quando mode = 'update')
    */
@@ -58,21 +67,22 @@ export class StoreOwnerDialogComponent implements OnInit {
   ngOnInit(): void {
     // Determina o modo baseado na presença de owner na loja
     this.mode = this.data.mode || (this.data.store.owner ? 'update' : 'set');
-    
+
     // Se for modo update e tiver owner, guarda referência
     if (this.mode === 'update' && this.data.store.owner) {
-      this.currentOwner = typeof this.data.store.owner === 'object' 
-        ? this.data.store.owner 
-        : null;
+      this.currentOwner =
+        typeof this.data.store.owner === 'object'
+          ? this.data.store.owner
+          : null;
     }
-    
+
     this.initForm();
     this.loadPersons();
   }
 
   private initForm(): void {
     this.ownerForm = this.fb.group({
-      personId: ['', Validators.required]
+      personId: ['', Validators.required],
     });
   }
 
@@ -80,42 +90,53 @@ export class StoreOwnerDialogComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
-    console.log('🔍 Buscando pessoas da loja:', this.data.store.storeId, '- Nome:', this.data.store.name);
+    console.log(
+      '🔍 Buscando pessoas da loja:',
+      this.data.store.storeId,
+      '- Nome:',
+      this.data.store.name
+    );
 
-    this.personService.getPaginatedData(0, 100, {
-      storeId: this.data.store.storeId
-    }).subscribe({
-      next: (response) => {
-        console.log('✅ Pessoas encontradas:', response.content.length, response.content);
-        this.persons = response.content;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Erro ao carregar pessoas:', err);
-        this.error = true;
-        this.loading = false;
-      }
-    });
+    this.personService
+      .getPaginatedData(0, 100, {
+        storeId: this.data.store.storeId,
+      })
+      .subscribe({
+        next: (response) => {
+          console.log(
+            '✅ Pessoas encontradas:',
+            response.content.length,
+            response.content
+          );
+          this.persons = response.content;
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Erro ao carregar pessoas:', err);
+          this.error = true;
+          this.loading = false;
+        },
+      });
   }
 
   /**
    * Retorna o título do dialog baseado no modo
    */
   getDialogTitle(): string {
-    return this.mode === 'update' 
-      ? 'Alterar Proprietário' 
+    return this.mode === 'update'
+      ? 'Alterar Proprietário'
       : 'Vincular Proprietário';
   }
-  
+
   /**
    * Retorna o texto do botão de ação baseado no modo
    */
   getActionButtonText(): string {
-    return this.mode === 'update' 
-      ? 'Alterar Proprietário' 
+    return this.mode === 'update'
+      ? 'Alterar Proprietário'
       : 'Vincular Proprietário';
   }
-  
+
   /**
    * Verifica se a Person selecionada é o proprietário atual
    */

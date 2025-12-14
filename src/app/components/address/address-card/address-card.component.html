@@ -1,4 +1,7 @@
-<div class="address-card" [class.inactive]="!address.active">
+<div
+  class="address-card"
+  [class.inactive]="!address.active"
+>
   <!-- Header -->
   <div class="card-header">
     <div class="type-badge">
@@ -14,9 +17,7 @@
         </span>
       }
       @if (!address.active) {
-        <span class="badge inactive">
-          Inativo
-        </span>
+        <span class="badge inactive">Inativo</span>
       }
     </div>
   </div>
@@ -49,28 +50,37 @@
     <div class="map-container">
       @if (!mapLoadError) {
         <!-- Usando iframe do Google Maps -->
-        <iframe 
-          [src]="'https://www.google.com/maps?q=' + fullAddressForMap + '&output=embed' | safe"
+        <iframe
+          [src]="
+            'https://www.google.com/maps?q=' +
+              fullAddressForMap +
+              '&output=embed' | safe
+          "
           class="map-iframe"
           frameborder="0"
           (error)="onMapError()"
           (load)="onMapLoad()"
-          allowfullscreen>
-        </iframe>
+          allowfullscreen
+        ></iframe>
       } @else {
         <div class="map-error">
           <mat-icon>error_outline</mat-icon>
           <p>Não foi possível carregar o mapa</p>
-          <button mat-stroked-button (click)="openInGoogleMaps()">
+          <button
+            mat-stroked-button
+            (click)="openInGoogleMaps()"
+          >
             Abrir no Google Maps
           </button>
         </div>
       }
-      
-      <button mat-icon-button 
-              class="close-map-btn"
-              (click)="toggleMap()"
-              matTooltip="Fechar mapa">
+
+      <button
+        mat-icon-button
+        class="close-map-btn"
+        (click)="toggleMap()"
+        matTooltip="Fechar mapa"
+      >
         <mat-icon>close</mat-icon>
       </button>
     </div>
@@ -78,17 +88,21 @@
 
   <!-- Botões de Mapa -->
   <div class="map-actions">
-    <button mat-stroked-button
+    <button
+      mat-stroked-button
       color="primary"
       (click)="toggleMap()"
-      class="btn-map">
+      class="btn-map"
+    >
       <mat-icon>{{ showMap ? 'visibility_off' : 'map' }}</mat-icon>
       {{ showMap ? 'Ocultar Mapa' : 'Ver Mapa' }}
     </button>
 
-    <button mat-stroked-button
+    <button
+      mat-stroked-button
       (click)="openInGoogleMaps()"
-      class="btn-map-external">
+      class="btn-map-external"
+    >
       <mat-icon>open_in_new</mat-icon>
       Abrir no Maps
     </button>
@@ -97,28 +111,34 @@
   <!-- Actions -->
   <div class="card-actions">
     @if (canEdit) {
-      <button mat-icon-button
+      <button
+        mat-icon-button
         (click)="onEdit()"
         matTooltip="Editar endereço"
-        class="action-btn edit">
+        class="action-btn edit"
+      >
         <mat-icon>edit</mat-icon>
       </button>
     }
 
     @if (canDelete) {
-      <button mat-icon-button
+      <button
+        mat-icon-button
         (click)="onDelete()"
         matTooltip="Excluir endereço"
-        class="action-btn delete">
+        class="action-btn delete"
+      >
         <mat-icon>delete</mat-icon>
       </button>
     }
 
     @if (canSetMain && !address.mainAddress) {
-      <button mat-icon-button
+      <button
+        mat-icon-button
         (click)="onSetMain()"
         matTooltip="Definir como principal"
-        class="action-btn star">
+        class="action-btn star"
+      >
         <mat-icon>star_outline</mat-icon>
       </button>
     }

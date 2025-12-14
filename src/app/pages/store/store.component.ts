@@ -21,10 +21,10 @@ import { AuthService } from '@services/auth/auth.service';
     MatButtonModule,
     MatDialogModule,
     StoreCardComponent,
-    ContentHeaderComponent
+    ContentHeaderComponent,
   ],
   templateUrl: './store.component.html',
-  styleUrl: './store.component.scss'
+  styleUrl: './store.component.scss',
 })
 export class StoreComponent implements OnInit {
   stores: Store[] = [];
@@ -48,14 +48,15 @@ export class StoreComponent implements OnInit {
     const roles = this.authService.getRoles();
     this.isCarAdmin = roles.includes('ROLE_CAR_ADMIN');
     // CAR_ADMIN pode cadastrar matriz, ADMIN pode cadastrar filiais
-    this.canCreateStore = roles.includes('ROLE_CAR_ADMIN') || roles.includes('ROLE_ADMIN');
+    this.canCreateStore =
+      roles.includes('ROLE_CAR_ADMIN') || roles.includes('ROLE_ADMIN');
   }
 
   private loadStores(): void {
     this.loading = true;
     this.error = false;
 
-    const serviceCall = this.isCarAdmin 
+    const serviceCall = this.isCarAdmin
       ? this.storeService.getAll({ page: 0, size: 20 })
       : this.storeService.getBranches({ page: 0, size: 20 });
 
@@ -68,7 +69,7 @@ export class StoreComponent implements OnInit {
         console.error('Erro ao carregar lojas:', err);
         this.error = true;
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -87,16 +88,16 @@ export class StoreComponent implements OnInit {
   onManageOwner(store: Store): void {
     // Determina o modo: se já tem owner, é update, senão é set
     const mode = store.owner ? 'update' : 'set';
-    
+
     const dialogRef = this.dialog.open(StoreOwnerDialogComponent, {
       width: '600px',
-      data: { 
+      data: {
         store,
-        mode // Passa o modo para o dialog
-      }
+        mode, // Passa o modo para o dialog
+      },
     });
 
-    dialogRef.afterClosed().subscribe(personId => {
+    dialogRef.afterClosed().subscribe((personId) => {
       if (personId) {
         // Chama o método apropriado baseado no modo
         if (mode === 'update') {
@@ -126,10 +127,12 @@ export class StoreComponent implements OnInit {
       width: '700px',
       disableClose: true,
       data: {
-        title: this.isCarAdmin ? 'Cadastrar Nova Loja Matriz' : 'Cadastrar Nova Filial',
+        title: this.isCarAdmin
+          ? 'Cadastrar Nova Loja Matriz'
+          : 'Cadastrar Nova Filial',
         mode: 'create',
-        isCarAdmin: this.isCarAdmin // Passa info para o dialog saber qual endpoint usar
-      }
+        isCarAdmin: this.isCarAdmin, // Passa info para o dialog saber qual endpoint usar
+      },
     });
 
     dialogRef.afterClosed().subscribe((createdStore: Store | null) => {
@@ -149,7 +152,7 @@ export class StoreComponent implements OnInit {
       },
       error: (err) => {
         console.error('❌ Erro ao criar loja:', err);
-      }
+      },
     });
   }
 
@@ -162,7 +165,7 @@ export class StoreComponent implements OnInit {
       error: (err) => {
         console.error('❌ Erro ao vincular proprietário:', err);
         alert(err.error || 'Erro ao vincular proprietário');
-      }
+      },
     });
   }
 
@@ -175,14 +178,17 @@ export class StoreComponent implements OnInit {
     this.storeService.updateOwner(storeId, personId).subscribe({
       next: (updatedStore) => {
         console.log('✅ Proprietário alterado com sucesso:', updatedStore);
-        alert(`Proprietário alterado com sucesso para: ${updatedStore.owner?.name || 'novo proprietário'}`);
+        alert(
+          `Proprietário alterado com sucesso para: ${updatedStore.owner?.name || 'novo proprietário'}`
+        );
         this.loadStores();
       },
       error: (err) => {
         console.error('❌ Erro ao alterar proprietário:', err);
-        const errorMessage = err.error?.message || err.error || 'Erro ao alterar proprietário';
+        const errorMessage =
+          err.error?.message || err.error || 'Erro ao alterar proprietário';
         alert(errorMessage);
-      }
+      },
     });
   }
 }

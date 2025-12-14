@@ -1,5 +1,18 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,8 +25,18 @@ import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.comp
 import { AddressService } from '@services/address.service';
 import { CepService } from '@services/cep.service';
 
-import { Address, CreateAddress, UpdateAddress, ViaCepResponse } from '@interfaces/address';
-import { AddressType, getAddressTypeOptions, BRAZILIAN_STATES, BrazilianState } from '../../../enums/addressTypes';
+import {
+  Address,
+  CreateAddress,
+  UpdateAddress,
+  ViaCepResponse,
+} from '@interfaces/address';
+import {
+  AddressType,
+  getAddressTypeOptions,
+  BRAZILIAN_STATES,
+  BrazilianState,
+} from '../../../enums/addressTypes';
 
 @Component({
   selector: 'app-address-form',
@@ -28,7 +51,7 @@ import { AddressType, getAddressTypeOptions, BRAZILIAN_STATES, BrazilianState } 
     WrapperCardComponent,
   ],
   templateUrl: './address-form.component.html',
-  styleUrl: './address-form.component.scss'
+  styleUrl: './address-form.component.scss',
 })
 export class AddressFormComponent implements OnInit, OnChanges {
   @Input() personId!: string;
@@ -40,7 +63,10 @@ export class AddressFormComponent implements OnInit, OnChanges {
   loadingCep = false;
 
   addressTypeOptions = getAddressTypeOptions();
-  stateOptions = BRAZILIAN_STATES.map((uf: BrazilianState) => ({ value: uf, label: uf }));
+  stateOptions = BRAZILIAN_STATES.map((uf: BrazilianState) => ({
+    value: uf,
+    label: uf,
+  }));
 
   form!: FormGroup;
 
@@ -52,13 +78,19 @@ export class AddressFormComponent implements OnInit, OnChanges {
   ) {
     this.form = this.fb.group({
       addressType: [AddressType.RESIDENCIAL, Validators.required],
-      cep: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(9)]],
+      cep: [
+        '',
+        [Validators.required, Validators.minLength(8), Validators.maxLength(9)],
+      ],
       street: ['', [Validators.required, Validators.maxLength(100)]],
       number: ['', Validators.maxLength(10)],
       complement: ['', Validators.maxLength(100)],
       neighborhood: ['', [Validators.required, Validators.maxLength(100)]],
       city: ['', [Validators.required, Validators.maxLength(100)]],
-      state: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
+      state: [
+        '',
+        [Validators.required, Validators.minLength(2), Validators.maxLength(2)],
+      ],
       country: ['Brasil'],
       mainAddress: [false],
       active: [true, Validators.required],
@@ -72,13 +104,13 @@ export class AddressFormComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     console.log('🔄 ngOnChanges chamado:', changes);
-    
+
     if (changes['address']) {
       console.log('📝 Mudança no address detectada:');
       console.log('  - Valor anterior:', changes['address'].previousValue);
       console.log('  - Valor atual:', changes['address'].currentValue);
       console.log('  - Primeira mudança?', changes['address'].firstChange);
-      
+
       // Carrega dados sempre que o address mudar (incluindo primeira vez)
       if (this.address) {
         this.loadFormData();
@@ -109,9 +141,9 @@ export class AddressFormComponent implements OnInit, OnChanges {
     };
 
     console.log('📦 Dados para patchValue:', formData);
-    
+
     this.form.patchValue(formData);
-    
+
     console.log('✅ Formulário após patchValue:', this.form.value);
   }
 
@@ -122,7 +154,7 @@ export class AddressFormComponent implements OnInit, OnChanges {
   onCepBlur() {
     const cep = this.form.get('cep')?.value;
     console.log('🔍 onCepBlur chamado - CEP digitado:', cep);
-    
+
     if (!cep || cep.length < 8) {
       console.log('❌ CEP muito curto:', cep);
       return;
@@ -130,7 +162,7 @@ export class AddressFormComponent implements OnInit, OnChanges {
 
     const cleanCep = this.addressService.cleanCep(cep);
     console.log('🧹 CEP limpo:', cleanCep);
-    
+
     if (!this.addressService.isValidCep(cleanCep)) {
       console.log('❌ CEP inválido');
       this.toastr.error('CEP inválido');
@@ -139,11 +171,11 @@ export class AddressFormComponent implements OnInit, OnChanges {
 
     console.log('✅ CEP válido - Iniciando busca...');
     this.loadingCep = true;
-    
+
     this.cepService.getAddressByCep(cleanCep).subscribe({
       next: (data: ViaCepResponse) => {
         console.log('📦 Resposta do ViaCEP:', data);
-        
+
         if (data.erro) {
           console.log('❌ CEP não encontrado no ViaCEP');
           this.toastr.error('CEP não encontrado');
@@ -167,7 +199,7 @@ export class AddressFormComponent implements OnInit, OnChanges {
         console.error('❌ Erro ao buscar CEP:', err);
         this.toastr.error('Erro ao buscar CEP');
         this.loadingCep = false;
-      }
+      },
     });
   }
 
@@ -198,17 +230,19 @@ export class AddressFormComponent implements OnInit, OnChanges {
         active: formValue.active ?? true,
       };
 
-      this.addressService.update(this.address!.addressId!, updateData).subscribe({
-        next: () => {
-          this.toastr.success('Endereço atualizado com sucesso');
-          this.formSubmitted.emit();
-          this.resetForm();
-        },
-        error: (err) => {
-          console.error('Erro ao atualizar:', err);
-          this.toastr.error('Erro ao atualizar endereço');
-        }
-      });
+      this.addressService
+        .update(this.address!.addressId!, updateData)
+        .subscribe({
+          next: () => {
+            this.toastr.success('Endereço atualizado com sucesso');
+            this.formSubmitted.emit();
+            this.resetForm();
+          },
+          error: (err) => {
+            console.error('Erro ao atualizar:', err);
+            this.toastr.error('Erro ao atualizar endereço');
+          },
+        });
     } else {
       const newAddress: CreateAddress = {
         personId: this.personId,
@@ -234,7 +268,7 @@ export class AddressFormComponent implements OnInit, OnChanges {
         error: (err) => {
           console.error('Erro ao criar:', err);
           this.toastr.error('Erro ao cadastrar endereço');
-        }
+        },
       });
     }
   }

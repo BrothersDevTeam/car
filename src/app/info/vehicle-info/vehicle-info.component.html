@@ -1,4 +1,7 @@
-<mat-card class="card-container" appearance="outlined">
+<mat-card
+  class="card-container"
+  appearance="outlined"
+>
   <mat-card-header>
     <mat-card-title class="card-title">Dados do veículo</mat-card-title>
   </mat-card-header>
@@ -10,19 +13,19 @@
       </div>
       <div class="card-row">
         <h3 class="label">Marca:</h3>
-        <h3 class="value">{{ vehicle.brand || "" }}</h3>
+        <h3 class="value">{{ vehicle.brand || '' }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Modelo:</h3>
-        <h3 class="value">{{ vehicle.model || "" }}</h3>
+        <h3 class="value">{{ vehicle.model || '' }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Ano do veículo:</h3>
-        <h3 class="value">{{ vehicle.vehicleYear || "" }}</h3>
+        <h3 class="value">{{ vehicle.vehicleYear || '' }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Ano do modelo:</h3>
-        <h3 class="value">{{ vehicle.modelYear || "" }}</h3>
+        <h3 class="value">{{ vehicle.modelYear || '' }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Cor:</h3>
@@ -36,52 +39,58 @@
     <app-wrapper-card class="second-info-card">
       <div class="card-row">
         <h3 class="label">Número de portas:</h3>
-        <h3 class="value">{{ vehicle.doors || "" }}</h3>
+        <h3 class="value">{{ vehicle.doors || '' }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Km inicial:</h3>
-        <h3 class="value">{{ vehicle.km || "" }}</h3>
+        <h3 class="value">{{ vehicle.km || '' }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Chassi:</h3>
-        <h3 class="value">{{ vehicle.chassis || "" }}</h3>
+        <h3 class="value">{{ vehicle.chassis || '' }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Potência:</h3>
-        <h3 class="value">{{ vehicle.horsepower || "" }}</h3>
+        <h3 class="value">{{ vehicle.horsepower || '' }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Número do motor:</h3>
-        <h3 class="value">{{ vehicle.engineNumber || "" }}</h3>
+        <h3 class="value">{{ vehicle.engineNumber || '' }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Renavam:</h3>
-        <h3 class="value">{{ vehicle.renavam || "" }}</h3>
+        <h3 class="value">{{ vehicle.renavam || '' }}</h3>
       </div>
     </app-wrapper-card>
 
-    <app-wrapper-card class="third-info-card" title="">
+    <app-wrapper-card
+      class="third-info-card"
+      title=""
+    >
       <div class="card-row">
         <h3 class="label">Categoria:</h3>
-        <h3 class="value">{{ vehicle.vehicleType || "" }}</h3>
+        <h3 class="value">{{ vehicle.vehicleType || '' }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Espécie:</h3>
-        <h3 class="value">{{ vehicle.species || "" }}</h3>
+        <h3 class="value">{{ vehicle.species || '' }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Características:</h3>
-        <h3 class="value">{{ vehicle.features || "" }}</h3>
+        <h3 class="value">{{ vehicle.features || '' }}</h3>
       </div>
       <div class="card-row">
         <h3 class="label">Origem:</h3>
-        <h3 class="value">{{ vehicle.origin || "" }}</h3>
+        <h3 class="value">{{ vehicle.origin || '' }}</h3>
       </div>
     </app-wrapper-card>
 
-    <app-wrapper-card class="fourth-info-card" title="Proprietário">
-      @if(proprietario) {
-        @if(proprietario.legalEntity) {
+    <app-wrapper-card
+      class="fourth-info-card"
+      title="Proprietário"
+    >
+      @if (proprietario) {
+        @if (proprietario.legalEntity) {
           <div class="card-row">
             <h3 class="label">Razão Social:</h3>
             <h3 class="value">{{ proprietario.name }}</h3>
@@ -120,15 +129,37 @@
         <div class="no-owner-container">
           <mat-icon class="no-owner-icon">person_off</mat-icon>
           <h3 class="no-owner-title">Nenhum proprietário cadastrado</h3>
-          <p class="no-owner-message">Este veículo ainda não possui um proprietário vinculado.</p>
-          <p class="no-owner-instruction">Clique em <strong>Editar</strong> para adicionar um proprietário.</p>
+          <p class="no-owner-message">
+            Este veículo ainda não possui um proprietário vinculado.
+          </p>
+          <p class="no-owner-instruction">
+            Clique em
+            <strong>Editar</strong>
+            para adicionar um proprietário.
+          </p>
         </div>
       }
     </app-wrapper-card>
-
   </mat-card-content>
   <mat-card-footer class="card-footer">
-    <button type="button" class="btn" color="primary" mat-raised-button (click)="onEdit()">Editar</button>
-    <button type="button" class="btn" color="warn" mat-raised-button matListItemIcon (click)="onDelete()">Excluir</button>
+    <button
+      type="button"
+      class="btn"
+      color="primary"
+      mat-raised-button
+      (click)="onEdit()"
+    >
+      Editar
+    </button>
+    <button
+      type="button"
+      class="btn"
+      color="warn"
+      mat-raised-button
+      matListItemIcon
+      (click)="onDelete()"
+    >
+      Excluir
+    </button>
   </mat-card-footer>
 </mat-card>

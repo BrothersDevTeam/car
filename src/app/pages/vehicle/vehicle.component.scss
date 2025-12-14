@@ -21,7 +21,7 @@
   animation: animloader 3s linear infinite;
 }
 .loader::after {
-  content: "";
+  content: '';
   box-sizing: border-box;
   width: 6px;
   height: 24px;

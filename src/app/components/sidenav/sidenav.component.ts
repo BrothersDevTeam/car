@@ -90,20 +90,20 @@ export class SideNavComponent {
     if (roles.length === 0) return 'Sem permissão';
 
     const roleMap: { [key: string]: string } = {
-      'ROLE_CAR_ADMIN': 'Administrador',    // Dono do SaaS (nós)
-      'ROLE_ADMIN': 'Administrador',         // Dono da loja cliente (proprietário)
-      'ROLE_MANAGER': 'Gerente',             // Gerente de loja (matriz ou filial)
-      'ROLE_SELLER': 'Vendedor',             // Vendedor
-      'ROLE_FINANCIAL': 'Financeiro',        // Financeiro
+      ROLE_CAR_ADMIN: 'Administrador', // Dono do SaaS (nós)
+      ROLE_ADMIN: 'Administrador', // Dono da loja cliente (proprietário)
+      ROLE_MANAGER: 'Gerente', // Gerente de loja (matriz ou filial)
+      ROLE_SELLER: 'Vendedor', // Vendedor
+      ROLE_FINANCIAL: 'Financeiro', // Financeiro
     };
 
     // Prioridade: CAR_ADMIN > ADMIN > MANAGER > SELLER > FINANCIAL
     const priorityOrder = [
       'ROLE_CAR_ADMIN',
-      'ROLE_ADMIN', 
+      'ROLE_ADMIN',
       'ROLE_MANAGER',
       'ROLE_SELLER',
-      'ROLE_FINANCIAL'
+      'ROLE_FINANCIAL',
     ];
 
     // Retorna a role de maior prioridade que o usuário possui

@@ -33,9 +33,9 @@ export class VehicleService {
       return of(this.cache);
     }
     return this.http
-      .get<PaginationResponse<Vehicle>>(
-        `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`
-      )
+      .get<
+        PaginationResponse<Vehicle>
+      >(`${this.apiUrl}?page=${pageIndex}&size=${pageSize}`)
       .pipe(
         first(),
         tap((response) => {

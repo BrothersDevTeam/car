@@ -7,78 +7,114 @@
         [height]="profilePicSize()"
       /> -->
       @if (!sideNavCollapsed()) {
-      <mat-icon class="mat-18 user-icon" fontSet="material-icons-outlined">
-        person
-      </mat-icon>
+        <mat-icon
+          class="mat-18 user-icon"
+          fontSet="material-icons-outlined"
+        >
+          person
+        </mat-icon>
       }
-      <div class="header-text" [class.hide-header-text]="sideNavCollapsed()">
+      <div
+        class="header-text"
+        [class.hide-header-text]="sideNavCollapsed()"
+      >
         @if (loggedUsername()) {
-        <p class="username">{{ loggedUsername() }}</p>
-        <p class="user-role">{{ userRole() }}</p>
+          <p class="username">{{ loggedUsername() }}</p>
+          <p class="user-role">{{ userRole() }}</p>
         }
       </div>
     </div>
     <mat-nav-list>
-      @for (item of menuItems(); track item.label) { @if (!item.subItems &&
-      item.route) {
-      <mat-list-item class="menu-item" [class.selected-menu-item]="isRouteActive(item.route!)"
-        (click)="onMenuItemClick(item.route!)">
-        <mat-icon [fontSet]="
-            isRouteActive(item.route!)
-              ? 'material-icons'
-              : 'material-icons-outlined'
-          " matListItemIcon>
-          {{ item.icon }}
-        </mat-icon>
-
-        @if (!sideNavCollapsed()) {
-        <span matListItemTitle>{{ item.label }}</span>
-        }
-      </mat-list-item>
-      } @else {
-      <mat-expansion-panel [expanded]="isRouteActive(null, item.subItems)" [hideToggle]="sideNavCollapsed()"
-        class="expansion-button">
-        <mat-expansion-panel-header [ngClass]="{ collapsed: sideNavCollapsed() }">
-          <mat-panel-title>
-            <mat-icon [fontSet]="!true ? 'material-icons' : 'material-icons-outlined'"
-              [style.color]="'var(--text-color)'">
+      @for (item of menuItems(); track item.label) {
+        @if (!item.subItems && item.route) {
+          <mat-list-item
+            class="menu-item"
+            [class.selected-menu-item]="isRouteActive(item.route!)"
+            (click)="onMenuItemClick(item.route!)"
+          >
+            <mat-icon
+              [fontSet]="
+                isRouteActive(item.route!)
+                  ? 'material-icons'
+                  : 'material-icons-outlined'
+              "
+              matListItemIcon
+            >
               {{ item.icon }}
             </mat-icon>
 
             @if (!sideNavCollapsed()) {
-            <span [style.font-size]="'medium'" [style.color]="'var(--text-color)'">
-              {{ item.label }}
-            </span>
-            }
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <div>
-          @for (subItem of item.subItems; track subItem.label) { @if
-          (subItem.route) {
-          <mat-list-item class="menu-item" [class.selected-menu-item]="isRouteActive(subItem.route!)"
-            (click)="onMenuItemClick(subItem.route!)">
-            <mat-icon [fontSet]="
-                isRouteActive(subItem.route!)
-                  ? 'material-icons'
-                  : 'material-icons-outlined'
-              " matListItemIcon>
-              {{ subItem.icon }}
-            </mat-icon>
-
-            @if (!sideNavCollapsed()) {
-            <span matListItemTitle>{{ subItem.label }}</span>
+              <span matListItemTitle>{{ item.label }}</span>
             }
           </mat-list-item>
-          } }
-        </div>
-      </mat-expansion-panel>
-      } }
+        } @else {
+          <mat-expansion-panel
+            [expanded]="isRouteActive(null, item.subItems)"
+            [hideToggle]="sideNavCollapsed()"
+            class="expansion-button"
+          >
+            <mat-expansion-panel-header
+              [ngClass]="{ collapsed: sideNavCollapsed() }"
+            >
+              <mat-panel-title>
+                <mat-icon
+                  [fontSet]="
+                    !true ? 'material-icons' : 'material-icons-outlined'
+                  "
+                  [style.color]="'var(--text-color)'"
+                >
+                  {{ item.icon }}
+                </mat-icon>
+
+                @if (!sideNavCollapsed()) {
+                  <span
+                    [style.font-size]="'medium'"
+                    [style.color]="'var(--text-color)'"
+                  >
+                    {{ item.label }}
+                  </span>
+                }
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div>
+              @for (subItem of item.subItems; track subItem.label) {
+                @if (subItem.route) {
+                  <mat-list-item
+                    class="menu-item"
+                    [class.selected-menu-item]="isRouteActive(subItem.route!)"
+                    (click)="onMenuItemClick(subItem.route!)"
+                  >
+                    <mat-icon
+                      [fontSet]="
+                        isRouteActive(subItem.route!)
+                          ? 'material-icons'
+                          : 'material-icons-outlined'
+                      "
+                      matListItemIcon
+                    >
+                      {{ subItem.icon }}
+                    </mat-icon>
+
+                    @if (!sideNavCollapsed()) {
+                      <span matListItemTitle>{{ subItem.label }}</span>
+                    }
+                  </mat-list-item>
+                }
+              }
+            </div>
+          </mat-expansion-panel>
+        }
+      }
     </mat-nav-list>
   </div>
-  <mat-list-item class="menu-item exit_btn" mat-button (click)="handleLogout()">
+  <mat-list-item
+    class="menu-item exit_btn"
+    mat-button
+    (click)="handleLogout()"
+  >
     <mat-icon matListItemIcon>exit_to_app</mat-icon>
     @if (!sideNavCollapsed()) {
-    <span matListItemTitle>Sair</span>
+      <span matListItemTitle>Sair</span>
     }
   </mat-list-item>
 </section>

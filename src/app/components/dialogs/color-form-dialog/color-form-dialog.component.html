@@ -2,10 +2,15 @@
   <h2 mat-dialog-title>{{ data.title }}</h2>
 
   <mat-dialog-content>
-    <form [formGroup]="colorForm" class="color-form">
-
+    <form
+      [formGroup]="colorForm"
+      class="color-form"
+    >
       <!-- Nome da Cor -->
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field
+        appearance="outline"
+        class="full-width"
+      >
         <mat-label>Nome da Cor *</mat-label>
         <input
           matInput
@@ -17,12 +22,15 @@
           <mat-error>{{ getErrorMessage('name') }}</mat-error>
         }
       </mat-form-field>
-
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()" type="button">
+    <button
+      mat-button
+      (click)="onCancel()"
+      type="button"
+    >
       Cancelar
     </button>
     <button

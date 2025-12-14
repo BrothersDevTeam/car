@@ -1,4 +1,10 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -24,7 +30,7 @@ import { Address } from '@interfaces/address';
     AddressFormComponent,
   ],
   templateUrl: './address-list.component.html',
-  styleUrl: './address-list.component.scss'
+  styleUrl: './address-list.component.scss',
 })
 export class AddressListComponent implements OnInit, OnChanges {
   @Input() personId!: string;
@@ -66,7 +72,7 @@ export class AddressListComponent implements OnInit, OnChanges {
         console.error('Erro ao carregar endereços:', err);
         this.toastr.error('Erro ao carregar endereços');
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -86,11 +92,11 @@ export class AddressListComponent implements OnInit, OnChanges {
         title: 'Confirmar Exclusão',
         message: `Tem certeza que deseja excluir o endereço ${address.street}, ${address.number}?`,
         confirmText: 'Excluir',
-        cancelText: 'Cancelar'
-      }
+        cancelText: 'Cancelar',
+      },
     });
 
-    dialogRef.afterClosed().subscribe(confirmed => {
+    dialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
         this.addressService.delete(address.addressId!).subscribe({
           next: () => {
@@ -100,7 +106,7 @@ export class AddressListComponent implements OnInit, OnChanges {
           error: (err) => {
             console.error('Erro ao excluir:', err);
             this.toastr.error('Erro ao excluir endereço');
-          }
+          },
         });
       }
     });
@@ -115,7 +121,7 @@ export class AddressListComponent implements OnInit, OnChanges {
       error: (err) => {
         console.error('Erro ao definir principal:', err);
         this.toastr.error('Erro ao definir endereço principal');
-      }
+      },
     });
   }
 

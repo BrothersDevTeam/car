@@ -16,13 +16,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 
-import  { PaginationComponent } from '@components/pagination/pagination.component';
+import { PaginationComponent } from '@components/pagination/pagination.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 
 import type { Person } from '@interfaces/person';
 import { PaginationResponse } from '@interfaces/pagination';
 import { PersonService } from '@services/person.service';
-
 
 @Component({
   selector: 'app-person-table',
@@ -58,7 +57,7 @@ export class PersonTableComponent implements OnInit, OnChanges {
     private personService: PersonService
   ) {}
 
-  ngAfterViewInit() { }
+  ngAfterViewInit() {}
 
   ngOnInit(): void {
     if (this.personPaginatedList?.content) {
@@ -70,13 +69,12 @@ export class PersonTableComponent implements OnInit, OnChanges {
     this.filteringData();
   }
 
-
   //TODO : REVISAR O CODIGO ABAIXO
-    filteringData() {
+  filteringData() {
     if (this.searchValue?.length) {
       this.filteredData = this.personPaginatedList.content.filter((element) => {
         if (element.name || element.legalEntity === true) {
-          return (element.name)
+          return element.name
             .trim()
             .toLowerCase()
             .includes(this.searchValue!.trim().toLowerCase());
@@ -148,7 +146,8 @@ export class PersonTableComponent implements OnInit, OnChanges {
         error: (error) => {
           console.error('Erro ao excluir pessoa:', error);
           // Verifica se há mensagem de erro específica do backend
-          const errorMessage = error?.error?.message || error?.message || 'Erro ao excluir pessoa';
+          const errorMessage =
+            error?.error?.message || error?.message || 'Erro ao excluir pessoa';
           this.toastrService.error(errorMessage);
         },
       });

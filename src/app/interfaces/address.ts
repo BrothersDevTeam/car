@@ -2,10 +2,10 @@ import { AddressType, BrazilianState } from '../enums/addressTypes';
 
 /**
  * Interface completa que representa um endereço no sistema.
- * 
+ *
  * Esta interface reflete EXATAMENTE a estrutura do AddressModel.java e AddressResponseDto.java
  * do backend para garantir compatibilidade total na comunicação API.
- * 
+ *
  * Design Pattern: DTO (Data Transfer Object)
  * - Usada para transferência de dados entre frontend e backend
  * - Campos opcionais (?) são aqueles que podem não existir em determinados contextos
@@ -14,7 +14,7 @@ import { AddressType, BrazilianState } from '../enums/addressTypes';
 export interface Address {
   /**
    * Identificador único do endereço (UUID).
-   * 
+   *
    * - Gerado automaticamente pelo backend ao criar um novo endereço
    * - Opcional porque não existe durante a criação (POST)
    * - Obrigatório em operações de atualização (PUT) e exclusão (DELETE)
@@ -23,7 +23,7 @@ export interface Address {
 
   /**
    * ID da pessoa dona deste endereço (relacionamento ManyToOne).
-   * 
+   *
    * - Obrigatório: todo endereço DEVE pertencer a uma pessoa
    * - Usado para buscar todos os endereços de uma pessoa específica
    * - Validado no backend para garantir que a pessoa existe
@@ -32,7 +32,7 @@ export interface Address {
 
   /**
    * ID da loja (herdado da pessoa automaticamente pelo backend).
-   * 
+   *
    * - Opcional no frontend porque é preenchido automaticamente pela API
    * - Importante para multi-tenancy e filtros por loja
    * - Sempre presente nas respostas do backend
@@ -41,7 +41,7 @@ export interface Address {
 
   /**
    * Tipo/categoria do endereço.
-   * 
+   *
    * - Enum restrito: apenas valores predefinidos são aceitos
    * - Facilita filtros e organização de endereços
    * - Permite tratamento visual diferenciado por tipo
@@ -50,7 +50,7 @@ export interface Address {
 
   /**
    * CEP (Código de Endereçamento Postal) brasileiro.
-   * 
+   *
    * - Formato: 8 ou 9 dígitos numéricos (com ou sem hífen)
    * - Validado no backend: apenas números
    * - No frontend, pode ser exibido com máscara (00000-000)
@@ -61,7 +61,7 @@ export interface Address {
 
   /**
    * Nome da rua/avenida/logradouro.
-   * 
+   *
    * - Campo obrigatório
    * - Máximo 100 caracteres
    * - Pode ser preenchido automaticamente via ViaCEP
@@ -70,7 +70,7 @@ export interface Address {
 
   /**
    * Número do imóvel/estabelecimento.
-   * 
+   *
    * - Opcional: alguns endereços não possuem número (ex: "S/N")
    * - Máximo 10 caracteres para suportar números compostos (ex: "123-A")
    */
@@ -78,7 +78,7 @@ export interface Address {
 
   /**
    * Complemento do endereço (apartamento, sala, bloco, etc).
-   * 
+   *
    * - Opcional
    * - Máximo 100 caracteres
    * - Exemplos: "Apto 45", "Bloco B", "Sala 302"
@@ -87,7 +87,7 @@ export interface Address {
 
   /**
    * Bairro/distrito.
-   * 
+   *
    * - Campo obrigatório
    * - Máximo 100 caracteres
    * - Pode ser preenchido automaticamente via ViaCEP
@@ -96,7 +96,7 @@ export interface Address {
 
   /**
    * Cidade/município.
-   * 
+   *
    * - Campo obrigatório
    * - Máximo 100 caracteres
    * - Pode ser preenchido automaticamente via ViaCEP
@@ -105,7 +105,7 @@ export interface Address {
 
   /**
    * Unidade Federativa (estado brasileiro).
-   * 
+   *
    * - Campo obrigatório
    * - EXATAMENTE 2 caracteres (UF)
    * - Validado no backend contra lista de UFs válidas
@@ -116,7 +116,7 @@ export interface Address {
 
   /**
    * País.
-   * 
+   *
    * - Opcional no frontend (valor padrão "Brasil" aplicado pelo backend)
    * - Preparado para internacionalização futura
    * - Máximo 100 caracteres
@@ -125,10 +125,10 @@ export interface Address {
 
   /**
    * Flag que indica se este é o endereço principal da pessoa.
-   * 
+   *
    * - Opcional (padrão: false)
    * - REGRA DE NEGÓCIO IMPORTANTE: apenas UM endereço pode ser principal por pessoa
-   * - Ao marcar um endereço como principal, o backend automaticamente 
+   * - Ao marcar um endereço como principal, o backend automaticamente
    *   remove essa flag dos outros endereços da mesma pessoa
    * - Use o endpoint PATCH /set-main para alterar o endereço principal
    */
@@ -136,7 +136,7 @@ export interface Address {
 
   /**
    * Flag que indica se o endereço está ativo.
-   * 
+   *
    * - Campo obrigatório (sempre deve ter valor)
    * - Permite "soft delete" - desativar sem remover do banco
    * - Endereços inativos podem ser filtrados nas listagens
@@ -145,7 +145,7 @@ export interface Address {
 
   /**
    * Data/hora de criação do registro (formato ISO 8601).
-   * 
+   *
    * - Opcional porque é gerado automaticamente pelo backend
    * - Presente apenas nas respostas (GET)
    * - Usado para auditoria e ordenação
@@ -154,7 +154,7 @@ export interface Address {
 
   /**
    * Data/hora da última atualização (formato ISO 8601).
-   * 
+   *
    * - Opcional porque é gerado automaticamente pelo backend
    * - Atualizado automaticamente a cada PUT
    * - Presente apenas nas respostas (GET)
@@ -165,15 +165,15 @@ export interface Address {
 
 /**
  * Type para criação de um novo endereço (POST).
- * 
+ *
  * Omite campos que são gerados/controlados pelo backend:
  * - addressId: gerado automaticamente
  * - storeId: herdado da pessoa
  * - createdAt: timestamp automático
  * - updatedAt: timestamp automático
- * 
+ *
  * Use este type ao fazer requisições POST para /addresses
- * 
+ *
  * @example
  * const newAddress: CreateAddress = {
  *   personId: '123-456-789',
@@ -195,16 +195,16 @@ export type CreateAddress = Omit<
 
 /**
  * Type para atualização de um endereço existente (PUT).
- * 
+ *
  * Omite campos que não devem/podem ser alterados:
  * - personId: não pode trocar o dono do endereço
  * - addressId: identificador (passado na URL)
  * - storeId: herdado da pessoa (imutável)
  * - createdAt: data de criação (imutável)
  * - updatedAt: atualizado automaticamente
- * 
+ *
  * Use este type ao fazer requisições PUT para /addresses/{addressId}
- * 
+ *
  * @example
  * const updateData: UpdateAddress = {
  *   addressType: AddressType.COMERCIAL,
@@ -213,14 +213,11 @@ export type CreateAddress = Omit<
  *   active: true
  * };
  */
-export type UpdateAddress = Omit<
-  CreateAddress,
-  'personId'
->;
+export type UpdateAddress = Omit<CreateAddress, 'personId'>;
 
 /**
  * Interface para resposta de erro de validação do backend.
- * 
+ *
  * Quando o backend retorna erro 400 (Bad Request), geralmente
  * vem com esta estrutura contendo detalhes da validação que falhou.
  */
@@ -243,10 +240,10 @@ export interface AddressValidationError {
 
 /**
  * Interface para filtros de busca de endereços.
- * 
+ *
  * Usada no método getAll() do AddressService para construir
  * query parameters de filtro.
- * 
+ *
  * Todos os campos são opcionais para permitir busca flexível.
  */
 export interface AddressSearchFilters {
@@ -288,22 +285,22 @@ export interface AddressSearchFilters {
 
 /**
  * Interface para resposta do ViaCEP.
- * 
+ *
  * Usada para tipar a resposta da API pública do ViaCEP
  * e facilitar o auto-preenchimento de campos de endereço.
- * 
+ *
  * Documentação: https://viacep.com.br/
  */
 export interface ViaCepResponse {
   cep: string;
-  logradouro: string;    // street
-  complemento: string;   // complement
-  bairro: string;        // neighborhood
-  localidade: string;    // city
-  uf: string;            // state
+  logradouro: string; // street
+  complemento: string; // complement
+  bairro: string; // neighborhood
+  localidade: string; // city
+  uf: string; // state
   ibge?: string;
   gia?: string;
   ddd?: string;
   siafi?: string;
-  erro?: boolean;        // true se CEP não encontrado
+  erro?: boolean; // true se CEP não encontrado
 }

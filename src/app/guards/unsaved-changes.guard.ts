@@ -38,13 +38,13 @@ export interface CanComponentDeactivate {
 /**
  * Guard funcional moderno (Angular 15+) que verifica se há mudanças
  * não salvas antes de sair de um componente.
- * 
+ *
  * Quando há mudanças, abre um diálogo perguntando ao usuário:
  * - "Salvar" - salva as alterações (se possível) e sai
  * - "Salvar rascunho" - salva localmente e sai (se não puder salvar completo)
  * - "Não salvar" - descarta mudanças e sai
  * - "Cancelar" - permanece no componente
- * 
+ *
  * @example
  * ```typescript
  * // No arquivo de rotas
@@ -75,10 +75,10 @@ export const unsavedChangesGuard: CanDeactivateFn<CanComponentDeactivate> = (
     disableClose: true, // Não permite fechar clicando fora
     data: {
       canSave, // Informa ao diálogo se pode salvar completo
-      message: canSave 
+      message: canSave
         ? 'Deseja salvar as alterações antes de sair?'
-        : 'Há campos obrigatórios não preenchidos. Deseja salvar um rascunho para continuar depois?'
-    }
+        : 'Há campos obrigatórios não preenchidos. Deseja salvar um rascunho para continuar depois?',
+    },
   });
 
   // Retorna um Observable que será resolvido com base na escolha do usuário

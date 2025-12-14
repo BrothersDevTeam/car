@@ -8,9 +8,8 @@ describe('NfeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NfeComponent]
-    })
-    .compileComponents();
+      imports: [NfeComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(NfeComponent);
     component = fixture.componentInstance;

@@ -5,7 +5,7 @@ import { AuthGuard } from './auth.guard';
 
 describe('authGuard', () => {
   const executeGuard: CanActivateFn = (...guardParameters) =>
-      TestBed.runInInjectionContext(() => AuthGuard(...guardParameters));
+    TestBed.runInInjectionContext(() => AuthGuard(...guardParameters));
 
   beforeEach(() => {
     TestBed.configureTestingModule({});

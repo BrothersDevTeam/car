@@ -23,11 +23,20 @@
   }
 
   <!-- Stepper com 3 etapas -->
-  <mat-stepper orientation="vertical" linear #stepper>
-    
+  <mat-stepper
+    orientation="vertical"
+    linear
+    #stepper
+  >
     <!-- ========== STEP 1: DADOS DA LOJA ========== -->
-    <mat-step [stepControl]="storeForm" label="Dados da Loja">
-      <form [formGroup]="storeForm" class="step-form">
+    <mat-step
+      [stepControl]="storeForm"
+      label="Dados da Loja"
+    >
+      <form
+        [formGroup]="storeForm"
+        class="step-form"
+      >
         <p class="step-description">
           <mat-icon>info</mat-icon>
           Informe os dados da empresa cliente que será cadastrada no sistema
@@ -41,7 +50,9 @@
           type="text"
           placeholder="Ex: Revenda de Veículos LTDA"
           maxlength="50"
-          [error]="storeForm.get('name')?.invalid && storeForm.get('name')?.touched"
+          [error]="
+            storeForm.get('name')?.invalid && storeForm.get('name')?.touched
+          "
         />
 
         <!-- Nome Fantasia -->
@@ -63,7 +74,9 @@
           placeholder="00.000.000/0000-00"
           mask="00.000.000/0000-00"
           [uppercase]="false"
-          [error]="storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched"
+          [error]="
+            storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched
+          "
         />
 
         <!-- Email -->
@@ -75,7 +88,9 @@
           placeholder="contato@empresa.com.br"
           maxlength="50"
           [uppercase]="false"
-          [error]="storeForm.get('email')?.invalid && storeForm.get('email')?.touched"
+          [error]="
+            storeForm.get('email')?.invalid && storeForm.get('email')?.touched
+          "
         />
 
         <!-- Telefone -->
@@ -91,7 +106,11 @@
 
         <!-- Botões do Step 1 -->
         <div class="step-actions">
-          <button mat-button matStepperNext [disabled]="!storeForm.valid">
+          <button
+            mat-button
+            matStepperNext
+            [disabled]="!storeForm.valid"
+          >
             Próximo
             <mat-icon>arrow_forward</mat-icon>
           </button>
@@ -100,11 +119,18 @@
     </mat-step>
 
     <!-- ========== STEP 2: DADOS DO PROPRIETÁRIO ========== -->
-    <mat-step [stepControl]="personForm" label="Dados do Proprietário">
-      <form [formGroup]="personForm" class="step-form">
+    <mat-step
+      [stepControl]="personForm"
+      label="Dados do Proprietário"
+    >
+      <form
+        [formGroup]="personForm"
+        class="step-form"
+      >
         <p class="step-description">
           <mat-icon>info</mat-icon>
-          Informe os dados do proprietário da loja (pessoa que terá acesso administrativo)
+          Informe os dados do proprietário da loja (pessoa que terá acesso
+          administrativo)
         </p>
 
         <!-- Tipo de Pessoa -->
@@ -123,7 +149,9 @@
           type="text"
           placeholder="Nome completo do proprietário"
           maxlength="50"
-          [error]="personForm.get('name')?.invalid && personForm.get('name')?.touched"
+          [error]="
+            personForm.get('name')?.invalid && personForm.get('name')?.touched
+          "
         />
 
         <!-- Apelido -->
@@ -146,7 +174,9 @@
             placeholder="000.000.000-00"
             mask="000.000.000-00"
             [uppercase]="false"
-            [error]="personForm.get('cpf')?.invalid && personForm.get('cpf')?.touched"
+            [error]="
+              personForm.get('cpf')?.invalid && personForm.get('cpf')?.touched
+            "
           />
 
           <!-- RG e Órgão Emissor (apenas se Pessoa Física) -->
@@ -182,7 +212,9 @@
             placeholder="00.000.000/0000-00"
             mask="00.000.000/0000-00"
             [uppercase]="false"
-            [error]="personForm.get('cnpj')?.invalid && personForm.get('cnpj')?.touched"
+            [error]="
+              personForm.get('cnpj')?.invalid && personForm.get('cnpj')?.touched
+            "
           />
         }
 
@@ -195,7 +227,9 @@
           placeholder="email@exemplo.com.br"
           maxlength="255"
           [uppercase]="false"
-          [error]="personForm.get('email')?.invalid && personForm.get('email')?.touched"
+          [error]="
+            personForm.get('email')?.invalid && personForm.get('email')?.touched
+          "
         />
 
         <!-- Telefone -->
@@ -211,11 +245,18 @@
 
         <!-- Botões do Step 2 -->
         <div class="step-actions">
-          <button mat-button matStepperPrevious>
+          <button
+            mat-button
+            matStepperPrevious
+          >
             <mat-icon>arrow_back</mat-icon>
             Voltar
           </button>
-          <button mat-button matStepperNext [disabled]="!personForm.valid">
+          <button
+            mat-button
+            matStepperNext
+            [disabled]="!personForm.valid"
+          >
             Próximo
             <mat-icon>arrow_forward</mat-icon>
           </button>
@@ -224,8 +265,14 @@
     </mat-step>
 
     <!-- ========== STEP 3: DADOS DE ACESSO ========== -->
-    <mat-step [stepControl]="accessForm" label="Dados de Acesso">
-      <form [formGroup]="accessForm" class="step-form">
+    <mat-step
+      [stepControl]="accessForm"
+      label="Dados de Acesso"
+    >
+      <form
+        [formGroup]="accessForm"
+        class="step-form"
+      >
         <p class="step-description">
           <mat-icon>info</mat-icon>
           Defina o usuário e senha para acesso ao sistema
@@ -240,7 +287,10 @@
           placeholder="usuario.sistema"
           maxlength="50"
           [uppercase]="false"
-          [error]="accessForm.get('username')?.invalid && accessForm.get('username')?.touched"
+          [error]="
+            accessForm.get('username')?.invalid &&
+            accessForm.get('username')?.touched
+          "
         />
 
         <!-- Senha -->
@@ -252,7 +302,10 @@
           placeholder="••••••••"
           maxlength="20"
           [uppercase]="false"
-          [error]="accessForm.get('password')?.invalid && accessForm.get('password')?.touched"
+          [error]="
+            accessForm.get('password')?.invalid &&
+            accessForm.get('password')?.touched
+          "
         />
 
         <!-- Confirmar Senha -->
@@ -264,7 +317,9 @@
           placeholder="••••••••"
           maxlength="20"
           [uppercase]="false"
-          [error]="accessForm.get('confirmPassword')?.touched && !passwordsMatch()"
+          [error]="
+            accessForm.get('confirmPassword')?.touched && !passwordsMatch()
+          "
         />
 
         @if (accessForm.get('confirmPassword')?.touched && !passwordsMatch()) {
@@ -273,7 +328,10 @@
 
         <!-- Botões do Step 3 -->
         <div class="step-actions">
-          <button mat-button matStepperPrevious>
+          <button
+            mat-button
+            matStepperPrevious
+          >
             <mat-icon>arrow_back</mat-icon>
             Voltar
           </button>
@@ -285,19 +343,26 @@
 
 <!-- Botões de ação finais -->
 <mat-dialog-actions align="end">
-  <button 
-    mat-button 
+  <button
+    mat-button
     (click)="onCancel()"
-    [disabled]="isSubmitting">
+    [disabled]="isSubmitting"
+  >
     Cancelar
   </button>
-  
-  <button 
-    mat-raised-button 
+
+  <button
+    mat-raised-button
     color="primary"
     (click)="onSubmit()"
-    [disabled]="!storeForm.valid || !personForm.valid || !accessForm.valid || !passwordsMatch() || isSubmitting">
-    
+    [disabled]="
+      !storeForm.valid ||
+      !personForm.valid ||
+      !accessForm.valid ||
+      !passwordsMatch() ||
+      isSubmitting
+    "
+  >
     @if (isSubmitting) {
       <span class="button-content">
         <mat-spinner diameter="20"></mat-spinner>

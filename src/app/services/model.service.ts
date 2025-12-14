@@ -13,7 +13,9 @@ export class ModelService {
   private cache: Map<string, PaginationResponse<Model>> = new Map();
 
   // Subject para notificar mudanças no cache
-  private cacheUpdated$ = new BehaviorSubject<PaginationResponse<Model> | null>(null);
+  private cacheUpdated$ = new BehaviorSubject<PaginationResponse<Model> | null>(
+    null
+  );
 
   private readonly apiUrl: string = '/api/vehicle-models';
 
@@ -31,14 +33,16 @@ export class ModelService {
    */
   getModelsByBrand(brandId: string): Observable<PaginationResponse<Model>> {
     const cacheKey = `brand_${brandId}`;
-    
+
     if (this.cache.has(cacheKey)) {
       return of(this.cache.get(cacheKey)!);
     }
 
     // Busca todos os modelos da marca (size=1000)
     return this.http
-      .get<PaginationResponse<Model>>(`${this.apiUrl}?brandId=${brandId}&status=ACTIVE&size=1000`)
+      .get<
+        PaginationResponse<Model>
+      >(`${this.apiUrl}?brandId=${brandId}&status=ACTIVE&size=1000`)
       .pipe(
         first(),
         tap((response) => {

@@ -7,7 +7,6 @@ import {
 } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
-import { VehicleTableComponent } from '@components/tables/vehicle-table/vehicle-table.component';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { VehicleService } from '@services/vehicle.service';
 
@@ -20,9 +19,8 @@ describe('VehicleComponent', () => {
       imports: [
         BrowserAnimationsModule,
         ToastrModule.forRoot(),
-        VehicleTableComponent,
-        ContentHeaderComponent,
         VehicleComponent,
+        ContentHeaderComponent,
       ],
       declarations: [],
       providers: [VehicleService, provideHttpClient(withInterceptorsFromDi())],

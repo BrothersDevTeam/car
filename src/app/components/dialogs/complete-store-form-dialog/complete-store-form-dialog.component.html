@@ -1,58 +1,124 @@
 <h2 mat-dialog-title>{{ data.title }}</h2>
 
 <mat-dialog-content>
-  <mat-stepper linear #stepper>
-    
+  <mat-stepper
+    linear
+    #stepper
+  >
     <!-- STEP 1: Dados da Loja -->
     <mat-step [stepControl]="storeForm">
       <form [formGroup]="storeForm">
         <ng-template matStepLabel>Dados da Loja</ng-template>
-        
+
         <h3>Informações da Empresa</h3>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
           <mat-label>Razão Social *</mat-label>
-          <input matInput formControlName="name" placeholder="Ex: Revenda ABC Ltda">
-          @if (storeForm.get('name')?.invalid && storeForm.get('name')?.touched) {
+          <input
+            matInput
+            formControlName="name"
+            placeholder="Ex: Revenda ABC Ltda"
+          />
+          @if (
+            storeForm.get('name')?.invalid && storeForm.get('name')?.touched
+          ) {
             <mat-error>{{ getErrorMessage(storeForm, 'name') }}</mat-error>
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
           <mat-label>Nome Fantasia</mat-label>
-          <input matInput formControlName="tradeName" placeholder="Ex: ABC Motors">
-          @if (storeForm.get('tradeName')?.invalid && storeForm.get('tradeName')?.touched) {
+          <input
+            matInput
+            formControlName="tradeName"
+            placeholder="Ex: ABC Motors"
+          />
+          @if (
+            storeForm.get('tradeName')?.invalid &&
+            storeForm.get('tradeName')?.touched
+          ) {
             <mat-error>{{ getErrorMessage(storeForm, 'tradeName') }}</mat-error>
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
           <mat-label>CNPJ *</mat-label>
-          <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" mask="00.000.000/0000-00">
-          @if (storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched) {
+          <input
+            matInput
+            formControlName="cnpj"
+            placeholder="00.000.000/0000-00"
+            mask="00.000.000/0000-00"
+          />
+          @if (
+            storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched
+          ) {
             <mat-error>{{ getErrorMessage(storeForm, 'cnpj') }}</mat-error>
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
           <mat-label>Email *</mat-label>
-          <input matInput type="email" formControlName="email" placeholder="contato@empresa.com">
-          @if (storeForm.get('email')?.invalid && storeForm.get('email')?.touched) {
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            placeholder="contato@empresa.com"
+          />
+          @if (
+            storeForm.get('email')?.invalid && storeForm.get('email')?.touched
+          ) {
             <mat-error>{{ getErrorMessage(storeForm, 'email') }}</mat-error>
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
           <mat-label>Telefone</mat-label>
-          <input matInput formControlName="phoneNumber" placeholder="(00) 00000-0000" mask="(00) 00000-0000||(00) 0000-0000">
-          @if (storeForm.get('phoneNumber')?.invalid && storeForm.get('phoneNumber')?.touched) {
-            <mat-error>{{ getErrorMessage(storeForm, 'phoneNumber') }}</mat-error>
+          <input
+            matInput
+            formControlName="phoneNumber"
+            placeholder="(00) 00000-0000"
+            mask="(00) 00000-0000||(00) 0000-0000"
+          />
+          @if (
+            storeForm.get('phoneNumber')?.invalid &&
+            storeForm.get('phoneNumber')?.touched
+          ) {
+            <mat-error>
+              {{ getErrorMessage(storeForm, 'phoneNumber') }}
+            </mat-error>
           }
         </mat-form-field>
 
         <div class="step-actions">
-          <button mat-button (click)="onCancel()">Cancelar</button>
-          <button mat-raised-button color="primary" matStepperNext [disabled]="storeForm.invalid">Próximo</button>
+          <button
+            mat-button
+            (click)="onCancel()"
+          >
+            Cancelar
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            matStepperNext
+            [disabled]="storeForm.invalid"
+          >
+            Próximo
+          </button>
         </div>
       </form>
     </mat-step>
@@ -61,59 +127,123 @@
     <mat-step [stepControl]="ownerForm">
       <form [formGroup]="ownerForm">
         <ng-template matStepLabel>Dados do Proprietário</ng-template>
-        
+
         <h3>Informações do Proprietário</h3>
 
-        <mat-radio-group formControlName="legalEntity" class="radio-group">
+        <mat-radio-group
+          formControlName="legalEntity"
+          class="radio-group"
+        >
           <mat-radio-button [value]="false">Pessoa Física</mat-radio-button>
           <mat-radio-button [value]="true">Pessoa Jurídica</mat-radio-button>
         </mat-radio-group>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
           <mat-label>Nome Completo *</mat-label>
-          <input matInput formControlName="name" placeholder="Ex: João da Silva">
-          @if (ownerForm.get('name')?.invalid && ownerForm.get('name')?.touched) {
+          <input
+            matInput
+            formControlName="name"
+            placeholder="Ex: João da Silva"
+          />
+          @if (
+            ownerForm.get('name')?.invalid && ownerForm.get('name')?.touched
+          ) {
             <mat-error>{{ getErrorMessage(ownerForm, 'name') }}</mat-error>
           }
         </mat-form-field>
 
         @if (!ownerForm.value.legalEntity) {
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field
+            appearance="outline"
+            class="full-width"
+          >
             <mat-label>CPF *</mat-label>
-            <input matInput formControlName="cpf" placeholder="000.000.000-00" mask="000.000.000-00">
-            @if (ownerForm.get('cpf')?.invalid && ownerForm.get('cpf')?.touched) {
+            <input
+              matInput
+              formControlName="cpf"
+              placeholder="000.000.000-00"
+              mask="000.000.000-00"
+            />
+            @if (
+              ownerForm.get('cpf')?.invalid && ownerForm.get('cpf')?.touched
+            ) {
               <mat-error>{{ getErrorMessage(ownerForm, 'cpf') }}</mat-error>
             }
           </mat-form-field>
         } @else {
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field
+            appearance="outline"
+            class="full-width"
+          >
             <mat-label>CNPJ *</mat-label>
-            <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" mask="00.000.000/0000-00">
-            @if (ownerForm.get('cnpj')?.invalid && ownerForm.get('cnpj')?.touched) {
+            <input
+              matInput
+              formControlName="cnpj"
+              placeholder="00.000.000/0000-00"
+              mask="00.000.000/0000-00"
+            />
+            @if (
+              ownerForm.get('cnpj')?.invalid && ownerForm.get('cnpj')?.touched
+            ) {
               <mat-error>{{ getErrorMessage(ownerForm, 'cnpj') }}</mat-error>
             }
           </mat-form-field>
         }
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
           <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" placeholder="proprietario@email.com">
-          @if (ownerForm.get('email')?.invalid && ownerForm.get('email')?.touched) {
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            placeholder="proprietario@email.com"
+          />
+          @if (
+            ownerForm.get('email')?.invalid && ownerForm.get('email')?.touched
+          ) {
             <mat-error>{{ getErrorMessage(ownerForm, 'email') }}</mat-error>
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
           <mat-label>Telefone</mat-label>
-          <input matInput formControlName="phone" placeholder="(00) 00000-0000" mask="(00) 00000-0000||(00) 0000-0000">
-          @if (ownerForm.get('phone')?.invalid && ownerForm.get('phone')?.touched) {
+          <input
+            matInput
+            formControlName="phone"
+            placeholder="(00) 00000-0000"
+            mask="(00) 00000-0000||(00) 0000-0000"
+          />
+          @if (
+            ownerForm.get('phone')?.invalid && ownerForm.get('phone')?.touched
+          ) {
             <mat-error>{{ getErrorMessage(ownerForm, 'phone') }}</mat-error>
           }
         </mat-form-field>
 
         <div class="step-actions">
-          <button mat-button matStepperPrevious>Voltar</button>
-          <button mat-raised-button color="primary" matStepperNext [disabled]="ownerForm.invalid">Próximo</button>
+          <button
+            mat-button
+            matStepperPrevious
+          >
+            Voltar
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            matStepperNext
+            [disabled]="ownerForm.invalid"
+          >
+            Próximo
+          </button>
         </div>
       </form>
     </mat-step>
@@ -122,41 +252,84 @@
     <mat-step [stepControl]="userForm">
       <form [formGroup]="userForm">
         <ng-template matStepLabel>Dados de Login</ng-template>
-        
+
         <h3>Credenciais de Acesso</h3>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
           <mat-label>Nome de Usuário *</mat-label>
-          <input matInput formControlName="username" placeholder="Ex: joaosilva">
-          @if (userForm.get('username')?.invalid && userForm.get('username')?.touched) {
+          <input
+            matInput
+            formControlName="username"
+            placeholder="Ex: joaosilva"
+          />
+          @if (
+            userForm.get('username')?.invalid &&
+            userForm.get('username')?.touched
+          ) {
             <mat-error>{{ getErrorMessage(userForm, 'username') }}</mat-error>
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
           <mat-label>Senha *</mat-label>
-          <input matInput type="password" formControlName="password" placeholder="Mínimo 6 caracteres">
-          @if (userForm.get('password')?.invalid && userForm.get('password')?.touched) {
+          <input
+            matInput
+            type="password"
+            formControlName="password"
+            placeholder="Mínimo 6 caracteres"
+          />
+          @if (
+            userForm.get('password')?.invalid &&
+            userForm.get('password')?.touched
+          ) {
             <mat-error>{{ getErrorMessage(userForm, 'password') }}</mat-error>
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
           <mat-label>Confirmar Senha *</mat-label>
-          <input matInput type="password" formControlName="confirmPassword" placeholder="Digite a senha novamente">
-          @if (userForm.get('confirmPassword')?.invalid && userForm.get('confirmPassword')?.touched) {
-            <mat-error>{{ getErrorMessage(userForm, 'confirmPassword') }}</mat-error>
+          <input
+            matInput
+            type="password"
+            formControlName="confirmPassword"
+            placeholder="Digite a senha novamente"
+          />
+          @if (
+            userForm.get('confirmPassword')?.invalid &&
+            userForm.get('confirmPassword')?.touched
+          ) {
+            <mat-error>
+              {{ getErrorMessage(userForm, 'confirmPassword') }}
+            </mat-error>
           }
         </mat-form-field>
 
         <div class="step-actions">
-          <button mat-button matStepperPrevious>Voltar</button>
-          <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="userForm.invalid">
+          <button
+            mat-button
+            matStepperPrevious
+          >
+            Voltar
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="onSubmit()"
+            [disabled]="userForm.invalid"
+          >
             Cadastrar Tudo
           </button>
         </div>
       </form>
     </mat-step>
-
   </mat-stepper>
 </mat-dialog-content>

@@ -1,5 +1,5 @@
 <div class="input-wrapper">
-  <label [for]="inputName">{{label}}</label>
+  <label [for]="inputName">{{ label }}</label>
   <div class="input-container">
     <div class="input-content">
       <!-- 
@@ -18,8 +18,8 @@
         - aria-expanded: Informa se está aberto ou fechado
         - aria-controls: Liga ao ID do listbox
       -->
-      <div 
-        class="select-container" 
+      <div
+        class="select-container"
         (click)="toggleDropdown()"
         role="combobox"
         [attr.aria-expanded]="isOpen"
@@ -35,7 +35,12 @@
           class="select-input"
           [attr.aria-label]="label"
         />
-        <span class="dropdown-arrow" [class.rotated]="isOpen">▼</span>
+        <span
+          class="dropdown-arrow"
+          [class.rotated]="isOpen"
+        >
+          ▼
+        </span>
       </div>
 
       <!-- 
@@ -44,7 +49,7 @@
         ARIA: role="listbox" identifica como lista de opções
       -->
       @if (isOpen) {
-        <div 
+        <div
           class="dropdown-options"
           role="listbox"
           [id]="'dropdown-' + inputName"
@@ -77,18 +82,23 @@
                   [attr.aria-hidden]="true"
                 />
                 <span>{{ getOptionLabel(option) }}</span>
-                
+
                 <!-- 
                   Indicador visual de foco do teclado
                   Ajuda o usuário a ver qual opção está focada
                 -->
                 @if (isFocused($index)) {
-                  <span class="keyboard-focus-indicator" aria-hidden="true">◄</span>
+                  <span
+                    class="keyboard-focus-indicator"
+                    aria-hidden="true"
+                  >
+                    ◄
+                  </span>
                 }
               </div>
             }
-          } 
-          
+          }
+
           <!-- 
             MODO ÚNICO: Seleção simples
             Apenas uma opção pode ser selecionada
@@ -105,12 +115,17 @@
                 [attr.tabindex]="-1"
               >
                 <span>{{ getOptionLabel(option) }}</span>
-                
+
                 <!-- 
                   Indicador visual de foco do teclado
                 -->
                 @if (isFocused($index)) {
-                  <span class="keyboard-focus-indicator" aria-hidden="true">◄</span>
+                  <span
+                    class="keyboard-focus-indicator"
+                    aria-hidden="true"
+                  >
+                    ◄
+                  </span>
                 }
               </div>
             }
@@ -121,7 +136,7 @@
       <!-- Slot para conteúdo adicional projetado -->
       <ng-content></ng-content>
     </div>
-    
+
     <!-- 
       Mensagem de erro
       Exibida quando há validação inválida

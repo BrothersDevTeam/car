@@ -1,12 +1,21 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatRadioModule } from '@angular/material/radio';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 
 export interface CompleteStoreFormData {
@@ -25,7 +34,7 @@ export interface CompleteStoreFormData {
     MatButtonModule,
     MatStepperModule,
     MatRadioModule,
-    NgxMaskDirective
+    NgxMaskDirective,
   ],
   providers: [provideNgxMask()],
   templateUrl: './complete-store-form-dialog.component.html',
@@ -48,16 +57,40 @@ export class CompleteStoreFormDialogComponent implements OnInit {
 
   private initForms(): void {
     this.storeForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
+      name: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(50),
+        ],
+      ],
       tradeName: ['', [Validators.minLength(3), Validators.maxLength(50)]],
-      cnpj: ['', [Validators.required, Validators.minLength(14), Validators.maxLength(14)]],
-      email: ['', [Validators.required, Validators.email, Validators.maxLength(50)]],
+      cnpj: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(14),
+          Validators.maxLength(14),
+        ],
+      ],
+      email: [
+        '',
+        [Validators.required, Validators.email, Validators.maxLength(50)],
+      ],
       phoneNumber: ['', [Validators.maxLength(20)]],
     });
 
     this.ownerForm = this.fb.group({
       legalEntity: [false, Validators.required],
-      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+      name: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(100),
+        ],
+      ],
       cpf: [''],
       cnpj: [''],
       email: ['', [Validators.email, Validators.maxLength(100)]],
@@ -65,22 +98,42 @@ export class CompleteStoreFormDialogComponent implements OnInit {
     });
 
     this.userForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
-      password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(20)]],
-      confirmPassword: ['', Validators.required]
+      username: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(4),
+          Validators.maxLength(50),
+        ],
+      ],
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6),
+          Validators.maxLength(20),
+        ],
+      ],
+      confirmPassword: ['', Validators.required],
     });
 
-    this.ownerForm.get('legalEntity')?.valueChanges.subscribe(isLegalEntity => {
-      if (isLegalEntity) {
-        this.ownerForm.get('cnpj')?.setValidators([Validators.required, Validators.minLength(14)]);
-        this.ownerForm.get('cpf')?.clearValidators();
-      } else {
-        this.ownerForm.get('cpf')?.setValidators([Validators.required, Validators.minLength(11)]);
-        this.ownerForm.get('cnpj')?.clearValidators();
-      }
-      this.ownerForm.get('cpf')?.updateValueAndValidity();
-      this.ownerForm.get('cnpj')?.updateValueAndValidity();
-    });
+    this.ownerForm
+      .get('legalEntity')
+      ?.valueChanges.subscribe((isLegalEntity) => {
+        if (isLegalEntity) {
+          this.ownerForm
+            .get('cnpj')
+            ?.setValidators([Validators.required, Validators.minLength(14)]);
+          this.ownerForm.get('cpf')?.clearValidators();
+        } else {
+          this.ownerForm
+            .get('cpf')
+            ?.setValidators([Validators.required, Validators.minLength(11)]);
+          this.ownerForm.get('cnpj')?.clearValidators();
+        }
+        this.ownerForm.get('cpf')?.updateValueAndValidity();
+        this.ownerForm.get('cnpj')?.updateValueAndValidity();
+      });
   }
 
   onCancel(): void {
@@ -89,7 +142,9 @@ export class CompleteStoreFormDialogComponent implements OnInit {
 
   onSubmit(): void {
     if (this.storeForm.valid && this.ownerForm.valid && this.userForm.valid) {
-      if (this.userForm.value.password !== this.userForm.value.confirmPassword) {
+      if (
+        this.userForm.value.password !== this.userForm.value.confirmPassword
+      ) {
         alert('As senhas não coincidem!');
         return;
       }
@@ -100,20 +155,28 @@ export class CompleteStoreFormDialogComponent implements OnInit {
           tradeName: this.storeForm.value.tradeName || null,
           cnpj: this.storeForm.value.cnpj.replace(/\D/g, ''),
           email: this.storeForm.value.email,
-          phoneNumber: this.storeForm.value.phoneNumber ? this.storeForm.value.phoneNumber.replace(/\D/g, '') : null,
+          phoneNumber: this.storeForm.value.phoneNumber
+            ? this.storeForm.value.phoneNumber.replace(/\D/g, '')
+            : null,
         },
         owner: {
           legalEntity: this.ownerForm.value.legalEntity,
           name: this.ownerForm.value.name,
-          cpf: this.ownerForm.value.legalEntity ? null : this.ownerForm.value.cpf?.replace(/\D/g, ''),
-          cnpj: this.ownerForm.value.legalEntity ? this.ownerForm.value.cnpj?.replace(/\D/g, '') : null,
+          cpf: this.ownerForm.value.legalEntity
+            ? null
+            : this.ownerForm.value.cpf?.replace(/\D/g, ''),
+          cnpj: this.ownerForm.value.legalEntity
+            ? this.ownerForm.value.cnpj?.replace(/\D/g, '')
+            : null,
           email: this.ownerForm.value.email || null,
-          phone: this.ownerForm.value.phone ? this.ownerForm.value.phone.replace(/\D/g, '') : null,
+          phone: this.ownerForm.value.phone
+            ? this.ownerForm.value.phone.replace(/\D/g, '')
+            : null,
         },
         user: {
           username: this.userForm.value.username,
           password: this.userForm.value.password,
-        }
+        },
       };
 
       this.dialogRef.close(payload);

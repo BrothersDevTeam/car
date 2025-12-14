@@ -19,10 +19,10 @@ import { PersonService } from '@services/person.service';
   selector: 'app-legal-entity-info',
   imports: [
     CommonModule,
-    MatButtonModule, 
-    MatCardModule, 
+    MatButtonModule,
+    MatCardModule,
     WrapperCardComponent,
-    AddressListComponent
+    AddressListComponent,
   ],
   templateUrl: './legal-entity-info.component.html',
   styleUrl: './legal-entity-info.component.scss',
@@ -74,7 +74,8 @@ export class LegalEntityInfoComponent {
         },
         error: (error) => {
           console.error('Erro ao excluir pessoa:', error);
-          const errorMessage = error?.error?.message || error?.message || 'Erro ao excluir pessoa';
+          const errorMessage =
+            error?.error?.message || error?.message || 'Erro ao excluir pessoa';
           this.toastrService.error(errorMessage);
         },
       });

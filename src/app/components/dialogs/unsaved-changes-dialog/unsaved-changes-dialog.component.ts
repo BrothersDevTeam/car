@@ -68,13 +68,13 @@ export interface UnsavedChangesDialogData {
 
         <!-- Informação adicional quando não pode salvar completo -->
         @if (!data.canSave) {
-        <div class="info-box">
-          <mat-icon class="info-icon">info</mat-icon>
-          <p class="info-text">
-            O rascunho será salvo localmente no seu navegador e você poderá
-            continuar o preenchimento posteriormente.
-          </p>
-        </div>
+          <div class="info-box">
+            <mat-icon class="info-icon">info</mat-icon>
+            <p class="info-text">
+              O rascunho será salvo localmente no seu navegador e você poderá
+              continuar o preenchimento posteriormente.
+            </p>
+          </div>
         }
       </mat-dialog-content>
 
@@ -82,14 +82,14 @@ export interface UnsavedChangesDialogData {
       <mat-dialog-actions align="end">
         <!-- Botão Salvar: salva completo (só aparece se canSave = true) -->
         @if (data.canSave) {
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="onSave()"
-          class="save-button"
-        >
-          Salvar
-        </button>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="onSave()"
+            class="save-button"
+          >
+            Salvar
+          </button>
         }
 
         <!-- Botão Salvar Rascunho: salva localmente -->
@@ -120,8 +120,8 @@ export interface UnsavedChangesDialogData {
           (click)="onCancel()"
           class="cancel-button"
         >
-        <mat-icon>arrow_forward</mat-icon>
-        Retornar ao formulário
+          <mat-icon>arrow_forward</mat-icon>
+          Retornar ao formulário
         </button>
       </mat-dialog-actions>
     </div>
@@ -190,18 +190,20 @@ export interface UnsavedChangesDialogData {
         grid-template-columns: 1fr;
         gap: 12px;
         padding: 24px 48px 8px 48px; /* Padding lateral aumenta para diminuir a largura dos botões */
-        
+
         button {
           width: 100%;
           height: 44px; /* Altura fixa para consistência */
           margin: 0 !important; /* Remove margem padrão do Material (sibling indent) */
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-          
+          transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+
           &:hover {
             transform: scale(1.02);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
           }
-          
+
           mat-icon {
             margin-right: 8px;
           }
@@ -220,7 +222,7 @@ export interface UnsavedChangesDialogData {
         .save-button {
           background-color: var(--primary-color) !important;
           color: white !important;
-          
+
           mat-icon {
             font-size: 20px;
             width: 20px;

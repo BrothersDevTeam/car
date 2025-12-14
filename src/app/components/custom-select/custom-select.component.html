@@ -1,20 +1,33 @@
-<div class="custom-dropdown" [class.disabled]="disabled">
+<div
+  class="custom-dropdown"
+  [class.disabled]="disabled"
+>
   <span class="label">
     {{ label }}
   </span>
 
   <div class="dropdown-container">
-    <button class="dropdown-button" (click)="toggleDropdown()">
+    <button
+      class="dropdown-button"
+      (click)="toggleDropdown()"
+    >
       {{ selectedOption?.name || placeholder }}
       <span class="dropdown-arrow"></span>
       <span class="vertical-bar"></span>
     </button>
 
     <!-- Dropdown Menu com busca -->
-    <div class="dropdown-menu" [class.open]="isOpen" [class.closed]="!isOpen" (mouseleave)="onMouseLeaveDropdown($event)">
-      
+    <div
+      class="dropdown-menu"
+      [class.open]="isOpen"
+      [class.closed]="!isOpen"
+      (mouseleave)="onMouseLeaveDropdown($event)"
+    >
       <!-- Campo de busca -->
-      <div class="search-container" (click)="$event.stopPropagation()">
+      <div
+        class="search-container"
+        (click)="$event.stopPropagation()"
+      >
         <mat-icon class="search-icon">search</mat-icon>
         <div class="input-wrapper">
           <input
@@ -28,8 +41,8 @@
           />
         </div>
         @if (searchTerm) {
-          <mat-icon 
-            class="clear-icon" 
+          <mat-icon
+            class="clear-icon"
             (click)="clearSearch()"
             aria-label="Limpar busca"
             role="button"
@@ -47,10 +60,16 @@
             <li (click)="selectOption(option)">
               <span>{{ option.name }}</span>
               <div class="select_list_buttons">
-                <button class="edit-button" (click)="editItem(option, $event)">
+                <button
+                  class="edit-button"
+                  (click)="editItem(option, $event)"
+                >
                   ✏️
                 </button>
-                <button class="delete-button" (click)="deleteItem(option, $event)">
+                <button
+                  class="delete-button"
+                  (click)="deleteItem(option, $event)"
+                >
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
@@ -72,7 +91,10 @@
       }
     </div>
 
-    <mat-icon [matTooltip]="matTooltip" (click)="createNewItem()">
+    <mat-icon
+      [matTooltip]="matTooltip"
+      (click)="createNewItem()"
+    >
       add_box
     </mat-icon>
   </div>

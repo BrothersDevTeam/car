@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Store, StorePageResponse, StoreSearchFilters } from '@interfaces/store';
+import {
+  Store,
+  StorePageResponse,
+  StoreSearchFilters,
+} from '@interfaces/store';
 
 @Injectable({
   providedIn: 'root',
@@ -16,14 +20,20 @@ export class StoreService {
 
     if (filters) {
       if (filters.name) params = params.set('name', filters.name);
-      if (filters.tradeName) params = params.set('tradeName', filters.tradeName);
+      if (filters.tradeName)
+        params = params.set('tradeName', filters.tradeName);
       if (filters.cnpj) params = params.set('cnpj', filters.cnpj);
       if (filters.email) params = params.set('email', filters.email);
-      if (filters.storeType) params = params.set('storeType', filters.storeType);
-      if (filters.storeStatus) params = params.set('storeStatus', filters.storeStatus);
-      if (filters.mainStoreId) params = params.set('mainStoreId', filters.mainStoreId);
-      if (filters.page !== undefined) params = params.set('page', filters.page.toString());
-      if (filters.size !== undefined) params = params.set('size', filters.size.toString());
+      if (filters.storeType)
+        params = params.set('storeType', filters.storeType);
+      if (filters.storeStatus)
+        params = params.set('storeStatus', filters.storeStatus);
+      if (filters.mainStoreId)
+        params = params.set('mainStoreId', filters.mainStoreId);
+      if (filters.page !== undefined)
+        params = params.set('page', filters.page.toString());
+      if (filters.size !== undefined)
+        params = params.set('size', filters.size.toString());
       if (filters.sort) params = params.set('sort', filters.sort);
     }
 
@@ -35,12 +45,17 @@ export class StoreService {
 
     if (filters) {
       if (filters.name) params = params.set('name', filters.name);
-      if (filters.storeStatus) params = params.set('storeStatus', filters.storeStatus);
-      if (filters.page !== undefined) params = params.set('page', filters.page.toString());
-      if (filters.size !== undefined) params = params.set('size', filters.size.toString());
+      if (filters.storeStatus)
+        params = params.set('storeStatus', filters.storeStatus);
+      if (filters.page !== undefined)
+        params = params.set('page', filters.page.toString());
+      if (filters.size !== undefined)
+        params = params.set('size', filters.size.toString());
     }
 
-    return this.http.get<StorePageResponse>(`${this.apiUrl}/branches`, { params });
+    return this.http.get<StorePageResponse>(`${this.apiUrl}/branches`, {
+      params,
+    });
   }
 
   getById(storeId: string): Observable<Store> {
@@ -64,7 +79,9 @@ export class StoreService {
   }
 
   updateImage(storeId: string, imageUrl: string): Observable<Store> {
-    return this.http.put<Store>(`${this.apiUrl}/${storeId}/image`, { imageUrl });
+    return this.http.put<Store>(`${this.apiUrl}/${storeId}/image`, {
+      imageUrl,
+    });
   }
 
   delete(storeId: string): Observable<void> {
@@ -88,15 +105,18 @@ export class StoreService {
   /**
    * Altera o proprietário de uma loja existente.
    * Operação permitida apenas para CAR_ADMIN.
-   * 
+   *
    * Permite trocar o proprietário de uma loja que já possui um owner vinculado.
    * O proprietário antigo permanece como Person normal na loja.
-   * 
+   *
    * @param storeId ID da loja que terá o proprietário alterado
    * @param personId ID da Person que será o novo proprietário
    * @returns Observable com a Store atualizada
    */
   updateOwner(storeId: string, personId: string): Observable<Store> {
-    return this.http.put<Store>(`${this.apiUrl}/${storeId}/owner`, { storeId, personId });
+    return this.http.put<Store>(`${this.apiUrl}/${storeId}/owner`, {
+      storeId,
+      personId,
+    });
   }
 }

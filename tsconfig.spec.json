@@ -11,11 +11,8 @@
       "@services/*": ["./src/app/services/*"],
       "@interfaces/*": ["./src/app/interfaces/*"],
       "@forms/*": ["./src/app/forms/*"],
-      "@info/*": ["./src/app/info/*"],
+      "@info/*": ["./src/app/info/*"]
     }
   },
-  "include": [
-    "src/**/*.spec.ts",
-    "src/**/*.d.ts"
-  ]
+  "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
 }

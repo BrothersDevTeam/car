@@ -1,12 +1,12 @@
 export enum StoreType {
   MATRIZ = 'MATRIZ',
-  BRANCH = 'BRANCH'
+  BRANCH = 'BRANCH',
 }
 
 export enum StoreStatus {
   ACTIVE = 'ACTIVE',
   CANCELLED = 'CANCELLED',
-  BLOCKED = 'BLOCKED'
+  BLOCKED = 'BLOCKED',
 }
 
 export const StoreTypeLabels: Record<StoreType, string> = {

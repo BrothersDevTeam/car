@@ -5,7 +5,7 @@ services:
       dockerfile: ./Dockerfile.dev
     container_name: car_angular_dev
     ports:
-      - "4200:4200"
+      - '4200:4200'
     volumes:
       - ./:/home/node/app
     environment:

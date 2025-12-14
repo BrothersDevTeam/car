@@ -1,5 +1,8 @@
-<form [formGroup]="form" (keydown.enter)="onEnter($event)">
-  @if(dataForm?.nfeNumero) {
+<form
+  [formGroup]="form"
+  (keydown.enter)="onEnter($event)"
+>
+  @if (dataForm?.nfeNumero) {
     <div class="title-trash">
       <h2>NFe Nº: {{ dataForm!.nfeNumero }}</h2>
     </div>
@@ -22,10 +25,11 @@
         </mat-radio-button>
       }
     </mat-radio-group>
-    @if (form.get('nfeNaturezaOperacao')?.invalid && (form.get('nfeNaturezaOperacao')?.touched || submitted)) {
-      <div class="error-message">
-        Selecione o tipo de operação.
-      </div>
+    @if (
+      form.get('nfeNaturezaOperacao')?.invalid &&
+      (form.get('nfeNaturezaOperacao')?.touched || submitted)
+    ) {
+      <div class="error-message">Selecione o tipo de operação.</div>
     }
 
     <h3 class="section-title">Informações do Veículo*</h3>

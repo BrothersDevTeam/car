@@ -1,5 +1,9 @@
-import type { Person } from '@interfaces/person';import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
-import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';import { DrawerComponent } from '@components/drawer/drawer.component';import { MatTabsModule } from '@angular/material/tabs';import {
+import type { Person } from '@interfaces/person';
+import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
+import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
+import { DrawerComponent } from '@components/drawer/drawer.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import {
   Component,
   ElementRef,
   EventEmitter,

@@ -43,9 +43,8 @@ describe('TableComponent', () => {
           active: true,
           ie: '123456789',
           crc: '123456789',
-          relationshipTypes: []
+          relationshipTypes: [],
         },
-
       ],
 
       page: {
@@ -53,8 +52,7 @@ describe('TableComponent', () => {
         size: 2,
         totalElements: 2,
         totalPages: 1,
-      }
-
+      },
     };
 
     component.personPaginatedList = mockPersonPaginatedList;

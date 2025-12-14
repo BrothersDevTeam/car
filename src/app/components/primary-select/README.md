@@ -2,47 +2,55 @@
 
 ## 📋 Visão Geral
 
-O componente `primary-select` agora possui **navegação completa por teclado**, permitindo que os usuários naveguem e selecionem opções usando apenas o teclado, sem necessidade do mouse.
+O componente `primary-select` agora possui **navegação completa por teclado**,
+permitindo que os usuários naveguem e selecionem opções usando apenas o teclado,
+sem necessidade do mouse.
 
 ## ⌨️ Atalhos de Teclado
 
 ### Quando o dropdown está **FECHADO**:
 
-| Tecla | Ação |
-|-------|------|
-| `Enter` | Abre o dropdown |
-| `Espaço` | Abre o dropdown |
-| `Tab` | Navega para o próximo campo |
+| Tecla    | Ação                        |
+| -------- | --------------------------- |
+| `Enter`  | Abre o dropdown             |
+| `Espaço` | Abre o dropdown             |
+| `Tab`    | Navega para o próximo campo |
 
 ### Quando o dropdown está **ABERTO**:
 
-| Tecla | Ação |
-|-------|------|
-| `↓` (Seta para baixo) | Move o foco para a próxima opção |
-| `↑` (Seta para cima) | Move o foco para a opção anterior |
-| `Espaço` | Marca/desmarca a opção focada (modo múltiplo) ou seleciona (modo único) |
-| `Enter` | Seleciona a opção focada e fecha o dropdown (modo único) |
-| `Esc` | Fecha o dropdown sem selecionar |
-| `Home` | Vai para a primeira opção |
-| `End` | Vai para a última opção |
-| `Tab` | Fecha o dropdown e vai para o próximo campo |
+| Tecla                 | Ação                                                                    |
+| --------------------- | ----------------------------------------------------------------------- |
+| `↓` (Seta para baixo) | Move o foco para a próxima opção                                        |
+| `↑` (Seta para cima)  | Move o foco para a opção anterior                                       |
+| `Espaço`              | Marca/desmarca a opção focada (modo múltiplo) ou seleciona (modo único) |
+| `Enter`               | Seleciona a opção focada e fecha o dropdown (modo único)                |
+| `Esc`                 | Fecha o dropdown sem selecionar                                         |
+| `Home`                | Vai para a primeira opção                                               |
+| `End`                 | Vai para a última opção                                                 |
+| `Tab`                 | Fecha o dropdown e vai para o próximo campo                             |
 
 ## 🎨 Feedback Visual
 
 ### 1. **Indicador de Foco por Teclado**
+
 Quando você navega com as setas, a opção focada mostra:
+
 - ✅ Background destacado (azul claro)
 - ✅ Borda esquerda azul (4px)
 - ✅ Indicador visual "◄" piscando
 
 ### 2. **Indicador de Seleção**
+
 Opções selecionadas têm:
+
 - ✅ Background azul
 - ✅ Texto branco
 - ✅ Checkbox marcado (modo múltiplo)
 
 ### 3. **Combinação Foco + Seleção**
+
 Quando uma opção está focada E selecionada:
+
 - ✅ Background azul (selecionado)
 - ✅ Borda branca (focado)
 - ✅ Indicador "◄" branco
@@ -50,6 +58,7 @@ Quando uma opção está focada E selecionada:
 ## 🔄 Comportamentos
 
 ### Modo Seleção Única (Single Select)
+
 ```html
 <app-primary-select
   formControlName="estado"
@@ -59,11 +68,13 @@ Quando uma opção está focada E selecionada:
 ```
 
 **Comportamento:**
+
 - `Espaço` ou `Enter` selecionam a opção e **fecham** o dropdown
 - Apenas uma opção pode estar selecionada por vez
 - Navegação circular (ao chegar no final, volta para o início)
 
 ### Modo Seleção Múltipla (Multiple Select)
+
 ```html
 <app-primary-select
   formControlName="relationshipTypes"
@@ -74,6 +85,7 @@ Quando uma opção está focada E selecionada:
 ```
 
 **Comportamento:**
+
 - `Espaço` marca/desmarca a opção focada **SEM fechar** o dropdown
 - `Enter` também marca/desmarca (igual ao Espaço)
 - Múltiplas opções podem estar selecionadas
@@ -82,6 +94,7 @@ Quando uma opção está focada E selecionada:
 ## 🎯 Exemplo de Uso Completo
 
 ### HTML (Template)
+
 ```html
 <form [formGroup]="form">
   <!-- Select Simples -->
@@ -109,6 +122,7 @@ Quando uma opção está focada E selecionada:
 ```
 
 ### TypeScript (Component)
+
 ```typescript
 export class MeuFormularioComponent implements OnInit {
   form!: FormGroup;
@@ -116,7 +130,7 @@ export class MeuFormularioComponent implements OnInit {
   ngOnInit() {
     this.form = this.fb.group({
       estado: ['', Validators.required],
-      relationshipTypes: [[], Validators.required]
+      relationshipTypes: [[], Validators.required],
     });
   }
 }
@@ -127,6 +141,7 @@ export class MeuFormularioComponent implements OnInit {
 O componente segue as diretrizes de acessibilidade:
 
 ### Atributos ARIA Implementados:
+
 - ✅ `role="combobox"` - Identifica como combo box
 - ✅ `role="listbox"` - Identifica a lista de opções
 - ✅ `role="option"` - Identifica cada opção
@@ -138,6 +153,7 @@ O componente segue as diretrizes de acessibilidade:
 - ✅ `tabindex` - Controle de navegação por Tab
 
 ### Suporte a Leitores de Tela:
+
 - ✅ NVDA
 - ✅ JAWS
 - ✅ VoiceOver (macOS/iOS)
@@ -159,19 +175,30 @@ O componente segue as diretrizes de acessibilidade:
 ## 🐛 Troubleshooting
 
 ### O foco do teclado não está funcionando
-**Solução:** Verifique se o componente tem `tabindex="0"` no container principal.
+
+**Solução:** Verifique se o componente tem `tabindex="0"` no container
+principal.
 
 ### As setas não navegam
+
 **Solução:** Certifique-se de que o dropdown está aberto (`isOpen = true`).
 
 ### O scroll não acompanha a opção focada
-**Solução:** A função `scrollToFocusedOption()` deve ser chamada automaticamente. Verifique o console por erros.
+
+**Solução:** A função `scrollToFocusedOption()` deve ser chamada
+automaticamente. Verifique o console por erros.
 
 ### ESC fecha o drawer/dialog pai
-**Solução:** ✅ **Já corrigido!** O componente usa `event.stopPropagation()` em todos os eventos de teclado para prevenir que eles afetem componentes pais (drawers, dialogs, etc).
+
+**Solução:** ✅ **Já corrigido!** O componente usa `event.stopPropagation()` em
+todos os eventos de teclado para prevenir que eles afetem componentes pais
+(drawers, dialogs, etc).
 
 ### Conflito com outras teclas
-**Solução:** O componente usa `event.preventDefault()` e `event.stopPropagation()` para evitar conflitos. Se houver problemas, verifique outros event listeners na página.
+
+**Solução:** O componente usa `event.preventDefault()` e
+`event.stopPropagation()` para evitar conflitos. Se houver problemas, verifique
+outros event listeners na página.
 
 ## 📚 Referências
 

@@ -4,37 +4,53 @@
     <div class="header-title">
       <mat-icon>location_on</mat-icon>
       <h3>Endereços</h3>
-      <span class="count-badge" *ngIf="addressCount > 0">{{ addressCount }}</span>
+      <span
+        class="count-badge"
+        *ngIf="addressCount > 0"
+      >
+        {{ addressCount }}
+      </span>
     </div>
 
-    <button mat-raised-button
+    <button
+      mat-raised-button
       color="primary"
       *ngIf="canAdd && !showForm"
       (click)="onAddNew()"
-      class="btn-add">
+      class="btn-add"
+    >
       <mat-icon>add</mat-icon>
       Adicionar Endereço
     </button>
   </div>
 
   <!-- Formulário (quando visível) -->
-  <div class="form-container" *ngIf="showForm">
+  <div
+    class="form-container"
+    *ngIf="showForm"
+  >
     <app-address-form
       [personId]="personId"
       [address]="editingAddress"
       (formSubmitted)="onFormSubmitted()"
-      (formCancelled)="onFormCancelled()">
-    </app-address-form>
+      (formCancelled)="onFormCancelled()"
+    ></app-address-form>
   </div>
 
   <!-- Loading -->
-  <div class="loading-container" *ngIf="loading">
+  <div
+    class="loading-container"
+    *ngIf="loading"
+  >
     <mat-icon class="spinner">hourglass_empty</mat-icon>
     <p>Carregando endereços...</p>
   </div>
 
   <!-- Lista de Endereços -->
-  <div class="addresses-grid" *ngIf="!loading && !showForm && addresses.length > 0">
+  <div
+    class="addresses-grid"
+    *ngIf="!loading && !showForm && addresses.length > 0"
+  >
     <app-address-card
       *ngFor="let address of addresses"
       [address]="address"
@@ -43,27 +59,38 @@
       [canSetMain]="true"
       (edit)="onEdit($event)"
       (delete)="onDelete($event)"
-      (setMain)="onSetMain($event)">
-    </app-address-card>
+      (setMain)="onSetMain($event)"
+    ></app-address-card>
   </div>
 
   <!-- Empty State -->
-  <div class="empty-state" *ngIf="!loading && !showForm && addresses.length === 0">
+  <div
+    class="empty-state"
+    *ngIf="!loading && !showForm && addresses.length === 0"
+  >
     <mat-icon>location_off</mat-icon>
     <h4>Nenhum endereço cadastrado</h4>
     <p>Adicione um endereço para esta pessoa</p>
-    <button mat-raised-button
+    <button
+      mat-raised-button
       color="primary"
       *ngIf="canAdd"
-      (click)="onAddNew()">
+      (click)="onAddNew()"
+    >
       <mat-icon>add</mat-icon>
       Adicionar Primeiro Endereço
     </button>
   </div>
 
   <!-- Info sobre endereço principal -->
-  <div class="info-message" *ngIf="!loading && addresses.length > 0 && !hasMainAddress">
+  <div
+    class="info-message"
+    *ngIf="!loading && addresses.length > 0 && !hasMainAddress"
+  >
     <mat-icon>info</mat-icon>
-    <span>Nenhum endereço está marcado como principal. Considere definir um endereço principal.</span>
+    <span>
+      Nenhum endereço está marcado como principal. Considere definir um endereço
+      principal.
+    </span>
   </div>
 </div>

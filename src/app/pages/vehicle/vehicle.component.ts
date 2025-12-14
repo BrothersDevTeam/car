@@ -213,13 +213,17 @@ export class VehicleComponent {
    */
   handleEdit(vehicle: Vehicle | VehicleForm) {
     // Se for Vehicle (tem propriedade owner do tipo Person), converte
-    if ('owner' in vehicle && vehicle.owner && typeof vehicle.owner === 'object') {
+    if (
+      'owner' in vehicle &&
+      vehicle.owner &&
+      typeof vehicle.owner === 'object'
+    ) {
       this.selectedVehicle = this.vehicleToForm(vehicle as Vehicle);
     } else {
       // Já é VehicleForm
       this.selectedVehicle = vehicle as VehicleForm;
     }
-    
+
     this.openInfo.set(false);
     this.openForm.set(true);
   }

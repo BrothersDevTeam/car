@@ -3,7 +3,10 @@
     <h1>Controle Auto Revenda</h1>
     <h2>Faça seu login</h2>
 
-    <form [formGroup]="loginForm" (keydown.enter)="submit()">
+    <form
+      [formGroup]="loginForm"
+      (keydown.enter)="submit()"
+    >
       <app-primary-input
         formControlName="email"
         label="Email"
@@ -21,12 +24,20 @@
         [type]="passwordVisible() ? 'text' : 'password'"
         [uppercase]="false"
       >
-        <mat-icon (click)="togglePasswordVisibility()" style="cursor: pointer;" >
+        <mat-icon
+          (click)="togglePasswordVisibility()"
+          style="cursor: pointer"
+        >
           {{ passwordVisible() ? 'visibility' : 'visibility_off' }}
         </mat-icon>
       </app-primary-input>
     </form>
 
-    <button (click)="submit()" [disabled]="!disablePrimaryBtn">Enviar</button>
+    <button
+      (click)="submit()"
+      [disabled]="!disablePrimaryBtn"
+    >
+      Enviar
+    </button>
   </section>
 </main>

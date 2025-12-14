@@ -10,6 +10,8 @@ export class CepService {
   constructor(private http: HttpClient) {}
 
   getAddressByCep(cep: string): Observable<ViaCepResponse> {
-    return this.http.get<ViaCepResponse>(`https://viacep.com.br/ws/${cep}/json/`);
+    return this.http.get<ViaCepResponse>(
+      `https://viacep.com.br/ws/${cep}/json/`
+    );
   }
 }

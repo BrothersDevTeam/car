@@ -1,7 +1,23 @@
-<div class="container" @slideInOut fxLayout="" fxFlexFill>
-  <mat-sidenav position="end" #sidenav mode="side" opened>
+<div
+  class="container"
+  @slideInOut
+  fxLayout=""
+  fxFlexFill
+>
+  <mat-sidenav
+    position="end"
+    #sidenav
+    mode="side"
+    opened
+  >
     <mat-nav-list>
-      <mat-icon class="closeX" matListItemIcon (click)="handleCloseDrawer()">close</mat-icon>
+      <mat-icon
+        class="closeX"
+        matListItemIcon
+        (click)="handleCloseDrawer()"
+      >
+        close
+      </mat-icon>
 
       <div class="content">
         <ng-content></ng-content>

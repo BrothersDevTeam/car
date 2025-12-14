@@ -22,7 +22,10 @@ export class PersonService {
 
   private readonly apiUrl: string = '/api/persons';
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
   // Observable público para componentes se inscreverem
   get cacheUpdated(): Observable<PaginationResponse<Person> | null> {
@@ -62,8 +65,8 @@ export class PersonService {
       email?: string;
       storeId?: string;
       search?: string;
-      relationshipTypes?: string[];  // Parâmetro para filtrar por tipos de relacionamento
-      roleNames?: string[];  // NOVO: Parâmetro para filtrar por roles
+      relationshipTypes?: string[]; // Parâmetro para filtrar por tipos de relacionamento
+      roleNames?: string[]; // NOVO: Parâmetro para filtrar por roles
     }
   ): Observable<PaginationResponse<Person>> {
     // Se houver parâmetros de busca, não usa cache
@@ -110,8 +113,11 @@ export class PersonService {
 
       // Adiciona o filtro de relationshipTypes se fornecido
       // O backend espera múltiplos valores no formato: ?relationshipTypes=CLIENTE&relationshipTypes=FUNCIONARIO
-      if (searchParams.relationshipTypes && searchParams.relationshipTypes.length > 0) {
-        searchParams.relationshipTypes.forEach(type => {
+      if (
+        searchParams.relationshipTypes &&
+        searchParams.relationshipTypes.length > 0
+      ) {
+        searchParams.relationshipTypes.forEach((type) => {
           url += `&relationshipTypes=${encodeURIComponent(type)}`;
         });
       }
@@ -119,13 +125,13 @@ export class PersonService {
       // NOVO: Adiciona o filtro de roleNames se fornecido
       // O backend espera múltiplos valores no formato: ?roleNames=ROLE_SELLER&roleNames=ROLE_MANAGER
       if (searchParams.roleNames && searchParams.roleNames.length > 0) {
-        searchParams.roleNames.forEach(role => {
+        searchParams.roleNames.forEach((role) => {
           url += `&roleNames=${encodeURIComponent(role)}`;
         });
       }
     }
 
-    console.log('🔍 URL construída:', url);  // DEBUG: Ver a URL completa
+    console.log('🔍 URL construída:', url); // DEBUG: Ver a URL completa
 
     return this.http.get<PaginationResponse<Person>>(url).pipe(
       first(),
@@ -186,7 +192,9 @@ export class PersonService {
   }
 
   deleteMany(ids: string[]) {
-    const deleteRequests = ids.map(id => this.http.delete<string>(`${this.apiUrl}/${id}`));
+    const deleteRequests = ids.map((id) =>
+      this.http.delete<string>(`${this.apiUrl}/${id}`)
+    );
     return forkJoin(deleteRequests).pipe(
       tap((responses) => {
         console.log('Clientes deletados com sucesso!', responses);

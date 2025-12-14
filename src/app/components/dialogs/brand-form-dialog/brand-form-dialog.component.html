@@ -1,15 +1,20 @@
 <div class="brand-form-dialog">
   <h2 mat-dialog-title>{{ data.title }}</h2>
-  
+
   <mat-dialog-content>
-    <form [formGroup]="brandForm" class="brand-form">
-      
+    <form
+      [formGroup]="brandForm"
+      class="brand-form"
+    >
       <!-- Nome da Marca -->
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field
+        appearance="outline"
+        class="full-width"
+      >
         <mat-label>Nome da Marca *</mat-label>
-        <input 
-          matInput 
-          formControlName="name" 
+        <input
+          matInput
+          formControlName="name"
           placeholder="Ex: Toyota, Honda, Ford"
           maxlength="100"
         />
@@ -17,18 +22,21 @@
           <mat-error>{{ getErrorMessage('name') }}</mat-error>
         }
       </mat-form-field>
-
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()" type="button">
+    <button
+      mat-button
+      (click)="onCancel()"
+      type="button"
+    >
       Cancelar
     </button>
-    <button 
-      mat-raised-button 
-      color="primary" 
-      (click)="onSubmit()" 
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmit()"
       type="button"
       [disabled]="brandForm.invalid"
     >

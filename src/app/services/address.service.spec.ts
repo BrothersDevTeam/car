@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 
 import { AddressService } from './address.service';
 import { Address, CreateAddress, UpdateAddress } from '@interfaces/address';
@@ -7,13 +10,13 @@ import { AddressType } from '../enums/addressTypes';
 
 /**
  * Suite de testes para AddressService.
- * 
+ *
  * Estes testes verificam:
  * - Chamadas corretas aos endpoints da API
  * - Construção adequada de query parameters
  * - Tratamento de respostas
  * - Métodos helpers utilitários
- * 
+ *
  * PADRÃO AAA (Arrange, Act, Assert):
  * - Arrange: configurar dados de teste
  * - Act: executar a ação
@@ -29,9 +32,9 @@ describe('AddressService', () => {
     TestBed.configureTestingModule({
       // HttpClientTestingModule: mock do HttpClient para testes
       imports: [HttpClientTestingModule],
-      providers: [AddressService]
+      providers: [AddressService],
     });
-    
+
     // Injeta as dependências
     service = TestBed.inject(AddressService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -66,7 +69,7 @@ describe('AddressService', () => {
         city: 'São Paulo',
         state: 'SP',
         active: true,
-        mainAddress: true
+        mainAddress: true,
       };
 
       const mockResponse: Address = {
@@ -74,11 +77,11 @@ describe('AddressService', () => {
         addressId: 'abc-123',
         storeId: 'store-456',
         createdAt: '2025-01-01T10:00:00Z',
-        updatedAt: '2025-01-01T10:00:00Z'
+        updatedAt: '2025-01-01T10:00:00Z',
       };
 
       // Act: executa o método
-      service.create(newAddress).subscribe(response => {
+      service.create(newAddress).subscribe((response) => {
         // Assert: verifica o resultado
         expect(response).toEqual(mockResponse);
         expect(response.addressId).toBe('abc-123');
@@ -108,7 +111,7 @@ describe('AddressService', () => {
         neighborhood: 'Bela Vista',
         city: 'São Paulo',
         state: 'SP',
-        active: true
+        active: true,
       };
 
       const mockResponse: Address = {
@@ -117,10 +120,10 @@ describe('AddressService', () => {
         personId: '123',
         storeId: 'store-456',
         createdAt: '2025-01-01T10:00:00Z',
-        updatedAt: '2025-01-01T11:00:00Z'
+        updatedAt: '2025-01-01T11:00:00Z',
       };
 
-      service.update(addressId, updateData).subscribe(response => {
+      service.update(addressId, updateData).subscribe((response) => {
         expect(response).toEqual(mockResponse);
       });
 
@@ -138,7 +141,7 @@ describe('AddressService', () => {
     it('should delete an address via DELETE', () => {
       const addressId = 'abc-123';
 
-      service.delete(addressId).subscribe(response => {
+      service.delete(addressId).subscribe((response) => {
         expect(response).toBeUndefined();
       });
 
@@ -168,10 +171,10 @@ describe('AddressService', () => {
         active: true,
         mainAddress: true,
         createdAt: '2025-01-01T10:00:00Z',
-        updatedAt: '2025-01-01T10:00:00Z'
+        updatedAt: '2025-01-01T10:00:00Z',
       };
 
-      service.getById(addressId).subscribe(response => {
+      service.getById(addressId).subscribe((response) => {
         expect(response).toEqual(mockAddress);
       });
 
@@ -202,7 +205,7 @@ describe('AddressService', () => {
           active: true,
           mainAddress: true,
           createdAt: '2025-01-01T10:00:00Z',
-          updatedAt: '2025-01-01T10:00:00Z'
+          updatedAt: '2025-01-01T10:00:00Z',
         },
         {
           addressId: 'addr-2',
@@ -218,11 +221,11 @@ describe('AddressService', () => {
           active: true,
           mainAddress: false,
           createdAt: '2025-01-01T11:00:00Z',
-          updatedAt: '2025-01-01T11:00:00Z'
-        }
+          updatedAt: '2025-01-01T11:00:00Z',
+        },
       ];
 
-      service.getByPersonId(personId).subscribe(response => {
+      service.getByPersonId(personId).subscribe((response) => {
         expect(response.length).toBe(2);
         expect(response).toEqual(mockAddresses);
       });
@@ -253,10 +256,10 @@ describe('AddressService', () => {
         active: true,
         mainAddress: true,
         createdAt: '2025-01-01T10:00:00Z',
-        updatedAt: '2025-01-01T12:00:00Z'
+        updatedAt: '2025-01-01T12:00:00Z',
       };
 
-      service.setMainAddress(addressId).subscribe(response => {
+      service.setMainAddress(addressId).subscribe((response) => {
         expect(response.mainAddress).toBe(true);
         expect(response).toEqual(mockResponse);
       });
@@ -279,25 +282,28 @@ describe('AddressService', () => {
           size: 10,
           totalElements: 0,
           totalPages: 0,
-          number: 0
-        }
+          number: 0,
+        },
       };
 
-      service.getAll(0, 10, {
-        addressType: AddressType.RESIDENCIAL,
-        state: 'SP',
-        city: 'São Paulo'
-      }).subscribe(response => {
-        expect(response).toEqual(mockResponse);
-      });
+      service
+        .getAll(0, 10, {
+          addressType: AddressType.RESIDENCIAL,
+          state: 'SP',
+          city: 'São Paulo',
+        })
+        .subscribe((response) => {
+          expect(response).toEqual(mockResponse);
+        });
 
-      const req = httpMock.expectOne(req =>
-        req.url === '/api/addresses' &&
-        req.params.get('page') === '0' &&
-        req.params.get('size') === '10' &&
-        req.params.get('addressType') === 'RESIDENCIAL' &&
-        req.params.get('state') === 'SP' &&
-        req.params.get('city') === 'São Paulo'
+      const req = httpMock.expectOne(
+        (req) =>
+          req.url === '/api/addresses' &&
+          req.params.get('page') === '0' &&
+          req.params.get('size') === '10' &&
+          req.params.get('addressType') === 'RESIDENCIAL' &&
+          req.params.get('state') === 'SP' &&
+          req.params.get('city') === 'São Paulo'
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockResponse);
@@ -364,7 +370,7 @@ describe('AddressService', () => {
             state: 'SP',
             active: true,
             mainAddress: false,
-            createdAt: '2025-01-01T10:00:00Z'
+            createdAt: '2025-01-01T10:00:00Z',
           },
           {
             addressId: 'addr-2',
@@ -377,8 +383,8 @@ describe('AddressService', () => {
             state: 'SP',
             active: true,
             mainAddress: true,
-            createdAt: '2025-01-01T11:00:00Z'
-          }
+            createdAt: '2025-01-01T11:00:00Z',
+          },
         ];
 
         const sorted = service.sortAddresses(addresses);
@@ -399,7 +405,7 @@ describe('AddressService', () => {
             state: 'SP',
             active: true,
             mainAddress: false,
-            createdAt: '2025-01-01T10:00:00Z'
+            createdAt: '2025-01-01T10:00:00Z',
           },
           {
             addressId: 'addr-2',
@@ -412,8 +418,8 @@ describe('AddressService', () => {
             state: 'SP',
             active: true,
             mainAddress: false,
-            createdAt: '2025-01-01T12:00:00Z'
-          }
+            createdAt: '2025-01-01T12:00:00Z',
+          },
         ];
 
         const sorted = service.sortAddresses(addresses);
@@ -435,8 +441,8 @@ describe('AddressService', () => {
             city: 'São Paulo',
             state: 'SP',
             active: true,
-            mainAddress: true
-          }
+            mainAddress: true,
+          },
         ];
 
         expect(service.hasMainAddress(addresses)).toBe(true);
@@ -454,8 +460,8 @@ describe('AddressService', () => {
             city: 'São Paulo',
             state: 'SP',
             active: true,
-            mainAddress: false
-          }
+            mainAddress: false,
+          },
         ];
 
         expect(service.hasMainAddress(addresses)).toBe(false);
@@ -475,7 +481,7 @@ describe('AddressService', () => {
             city: 'São Paulo',
             state: 'SP',
             active: true,
-            mainAddress: false
+            mainAddress: false,
           },
           {
             addressId: 'addr-2',
@@ -487,8 +493,8 @@ describe('AddressService', () => {
             city: 'São Paulo',
             state: 'SP',
             active: true,
-            mainAddress: true
-          }
+            mainAddress: true,
+          },
         ];
 
         const main = service.getMainAddress(addresses);
@@ -508,8 +514,8 @@ describe('AddressService', () => {
             city: 'São Paulo',
             state: 'SP',
             active: true,
-            mainAddress: false
-          }
+            mainAddress: false,
+          },
         ];
 
         const main = service.getMainAddress(addresses);
@@ -530,7 +536,7 @@ describe('AddressService', () => {
             city: 'São Paulo',
             state: 'SP',
             active: true,
-            mainAddress: true
+            mainAddress: true,
           },
           {
             addressId: 'addr-2',
@@ -542,7 +548,7 @@ describe('AddressService', () => {
             city: 'São Paulo',
             state: 'SP',
             active: true,
-            mainAddress: false
+            mainAddress: false,
           },
           {
             addressId: 'addr-3',
@@ -554,8 +560,8 @@ describe('AddressService', () => {
             city: 'São Paulo',
             state: 'SP',
             active: true,
-            mainAddress: false
-          }
+            mainAddress: false,
+          },
         ];
 
         const count = service.countByType(addresses);
