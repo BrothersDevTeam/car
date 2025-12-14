@@ -57,8 +57,7 @@ import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
   styleUrl: './legal-entity-form.component.scss',
 })
 export class LegalEntityFormComponent
-  implements OnInit, OnChanges, OnDestroy, CanComponentDeactivate
-{
+  implements OnInit, OnChanges, OnDestroy, CanComponentDeactivate {
   private subscriptions = new Subscription();
   submitted = false;
 
@@ -167,7 +166,7 @@ export class LegalEntityFormComponent
     private actionsService: ActionsService,
     private authService: AuthService,
     private formDraftService: FormDraftService
-  ) {}
+  ) { }
 
   ngOnInit() {
     /**
@@ -258,6 +257,10 @@ export class LegalEntityFormComponent
    */
   hasUnsavedChanges(): boolean {
     if (this.isSaving) {
+      return false;
+    }
+
+    if (this.form.pristine) {
       return false;
     }
 
@@ -475,6 +478,12 @@ export class LegalEntityFormComponent
         this.form.patchValue(draft.data);
         this.toastrService.success('Rascunho carregado com sucesso');
         console.log('[checkForDrafts] Rascunho carregado:', draft);
+
+        setTimeout(() => {
+          this.captureInitialFormValue();
+          this.form.markAsPristine();
+          this.actionsService.hasFormChanges.set(false);
+        }, 500);
       } else {
         this.formDraftService.removeDraft(this.FORM_TYPE);
         console.log('[checkForDrafts] Rascunho removido');

@@ -67,8 +67,7 @@ import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
   styleUrl: './natural-person-form.component.scss',
 })
 export class NaturalPersonFormComponent
-  implements OnInit, OnChanges, CanComponentDeactivate
-{
+  implements OnInit, OnChanges, CanComponentDeactivate {
   private subscriptions = new Subscription();
   submitted = false;
 
@@ -232,7 +231,7 @@ export class NaturalPersonFormComponent
     private actionsService: ActionsService,
     private authService: AuthService,
     private formDraftService: FormDraftService
-  ) {}
+  ) { }
 
   /**
    * Implementação da interface CanComponentDeactivate
@@ -245,6 +244,11 @@ export class NaturalPersonFormComponent
       return false;
     }
 
+    if (this.form.pristine) {
+      console.log('[hasUnsavedChanges] Formulário pristine');
+      return false;
+    }
+
     if (!this.initialFormValue) {
       return false;
     }
@@ -252,7 +256,7 @@ export class NaturalPersonFormComponent
     const currentValue = JSON.stringify(this.form.value);
     const hasChanges = currentValue !== this.initialFormValue;
 
-    console.log('[hasUnsavedChanges] Tem mudanças não salvas?', hasChanges);
+    console.log('[hasUnsavedChanges] Tem mudanças?', hasChanges);
     return hasChanges;
   }
 
@@ -499,12 +503,12 @@ export class NaturalPersonFormComponent
     if (!closeAfterSave) {
       this.form.markAsPristine();
       this.actionsService.hasFormChanges.set(false);
-      
+
       // Atualiza o valor inicial para o novo estado salvo
       setTimeout(() => {
         this.captureInitialFormValue();
       }, 100);
-      
+
       console.log('[saveLocalDraft] Formulário marcado como pristine');
     }
 
@@ -627,8 +631,7 @@ export class NaturalPersonFormComponent
     }
 
     const confirmed = confirm(
-      `Tem certeza que deseja excluir o rascunho "${
-        draft.draftName || 'sem nome'
+      `Tem certeza que deseja excluir o rascunho "${draft.draftName || 'sem nome'
       }"?`
     );
 
@@ -929,6 +932,13 @@ export class NaturalPersonFormComponent
     );
 
     console.log('[loadDraftData] Rascunho carregado:', draft);
+
+    setTimeout(() => {
+      this.captureInitialFormValue();
+      this.form.markAsPristine();
+      this.actionsService.hasFormChanges.set(false);
+      console.log('[loadDraftData] Formulário marcado como pristine');
+    }, 500);
   }
 
   onEnter(event: Event): void {
