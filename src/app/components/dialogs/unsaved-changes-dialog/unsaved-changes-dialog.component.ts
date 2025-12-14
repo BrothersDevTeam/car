@@ -20,6 +20,8 @@ export interface UnsavedChangesDialogData {
   canSave: boolean;
   /** Mensagem customizada a ser exibida */
   message: string;
+  /** Nome do rascunho atual, se houver (para edição) */
+  currentDraftName?: string;
 }
 
 /**
@@ -275,6 +277,12 @@ export class UnsavedChangesDialogComponent {
    * Fecha o diálogo retornando 'draft:nome' com o nome escolhido
    */
   onSaveDraft(): void {
+    // Se já tem nome (rascunho existente), usa ele direto
+    if (this.data.currentDraftName) {
+      this.dialogRef.close(`draft:${this.data.currentDraftName}`);
+      return;
+    }
+
     // Abre o diálogo para nomear o rascunho
     const nameDraftDialog = this.dialog.open(SaveDraftDialogComponent, {
       width: '500px',

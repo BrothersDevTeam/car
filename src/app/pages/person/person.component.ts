@@ -290,6 +290,7 @@ export class PersonComponent implements OnInit, OnDestroy {
         message: canSave
           ? 'Deseja salvar as alterações antes de sair?'
           : 'Há campos obrigatórios não preenchidos. Deseja salvar um rascunho para continuar depois?',
+        currentDraftName: this.selectedDraft?.draftName,
       },
     });
 
@@ -318,7 +319,14 @@ export class PersonComponent implements OnInit, OnDestroy {
       // Se escolheu salvar rascunho (result começa com 'draft:')
       if (result.startsWith('draft:')) {
         const draftName = result.substring(6); // Remove 'draft:'
-        (formComponent as any).saveLocalDraft(false, draftName);
+        // Passa o ID do rascunho existente para garantir atualização
+        const existingDraftId = this.selectedDraft?.id;
+
+        (formComponent as any).saveLocalDraft(
+          false,
+          draftName,
+          existingDraftId
+        );
         this.handleCloseDrawer();
         return;
       }
