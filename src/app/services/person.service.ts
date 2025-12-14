@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, first, Observable, of, tap } from 'rxjs';
+import { BehaviorSubject, first, Observable, of, tap, forkJoin } from 'rxjs';
 
 import {
   CreateLegalEntity,
@@ -180,6 +180,16 @@ export class PersonService {
     return this.http.delete<string>(`${this.apiUrl}/${id}`).pipe(
       tap((response: string) => {
         console.log('Cliente deletado com sucesso!', response);
+        this.clearCache();
+      })
+    );
+  }
+
+  deleteMany(ids: string[]) {
+    const deleteRequests = ids.map(id => this.http.delete<string>(`${this.apiUrl}/${id}`));
+    return forkJoin(deleteRequests).pipe(
+      tap((responses) => {
+        console.log('Clientes deletados com sucesso!', responses);
         this.clearCache();
       })
     );

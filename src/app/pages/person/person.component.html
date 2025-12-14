@@ -103,13 +103,21 @@
       </mat-select>
     </mat-form-field>
     }
+
+    @if (selectedPeople.length > 0) {
+    <button mat-raised-button color="warn" (click)="deleteSelectedPeople()" class="delete-selected-btn"
+      style="margin-left: 16px;">
+      <mat-icon>delete</mat-icon>
+      Deletar Selecionados ({{ selectedPeople.length }})
+    </button>
+    }
   </app-content-header>
 
   @if (personPaginatedList?.page?.totalElements) {
   <app-generic-table [columns]="columns" [genericPaginatedList]="personPaginatedList"
     [totalElements]="personPaginatedList!.page.totalElements" [pageSizeOptions]="[5, 10, 25, 100]"
     (rowClick)="onRowClick($event)" (pageEvent)="handlePageEvent($event)" (editClick)="handleEdit($event)"
-    (deleteClick)="handleDelete($event)"></app-generic-table>
+    (deleteClick)="handleDelete($event)" (selectionChange)="handleSelection($event)"></app-generic-table>
   } @else { @if (clientListLoading()) {
   <div class="loader-div">
     <span class="loader"></span>

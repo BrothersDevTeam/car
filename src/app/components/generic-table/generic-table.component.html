@@ -2,75 +2,51 @@
   <table mat-table [dataSource]="tableDataSource">
     <!-- Colunas dinâmicas -->
     @for (column of columns; track column) {
-      <ng-container [matColumnDef]="column.key">
-        <th mat-header-cell *matHeaderCellDef>
-          <!-- Checkbox no cabeçalho para a coluna 'select' -->
-          @if (column.key === 'select' && hasSelectColumn) {
-            <mat-checkbox
-              (change)="toggleAllRows()"
-              [checked]="isAllSelected()"
-              [indeterminate]="isSomeSelected() && !isAllSelected()"
-              color="primary"
-            ></mat-checkbox>
-          }
-          <!-- Cabeçalho normal para outras colunas -->
-          @if (column.key !== 'select') {
-            {{ column.header }}
-          }
-        </th>
-        <td mat-cell *matCellDef="let element" class="nowrap">
-          <!-- Checkbox para a coluna 'select' -->
-          @if (column.key === 'select' && shouldShowCheckbox(element)) {
-            <mat-checkbox
-              (change)="toggleRow(element)"
-              [checked]="isSelected(element)"
-              (click)="$event.stopPropagation()"
-              color="primary"
-            ></mat-checkbox>
-          }
-          <!-- Ícone de edição para a coluna 'edit' -->
-          @if (column.key === 'edit' && shouldShowEditIcon(element)) {
-            <button
-              mat-icon-button
-              (click)="$event.stopPropagation(); onEditClick(element)"
-              aria-label="Editar"
-              >
-              <mat-icon>edit</mat-icon>
-            </button>
-          }
-          <!-- Ícone de deleção para a coluna 'delete' -->
-          @if (column.key === 'delete' && shouldShowDeleteIcon(element)) {
-            <button
-              mat-icon-button
-              (click)="$event.stopPropagation(); onDeleteClick(element)"
-              aria-label="Deletar"
-              class="delete-btn"
-              >
-              <mat-icon>delete</mat-icon>
-            </button>
-          }
-          <!-- Dados normais para outras colunas -->
-          @if (column.key !== 'select' && column.key !== 'edit' && column.key !== 'delete') {
-            {{ formatValue(column, element) }}
-          }
-        </td>
-      </ng-container>
+    <ng-container [matColumnDef]="column.key">
+      <th mat-header-cell *matHeaderCellDef>
+        <!-- Checkbox no cabeçalho para a coluna 'select' -->
+        @if (column.key === 'select' && hasSelectColumn) {
+        <mat-checkbox (change)="toggleAllRows()" [checked]="isAllSelected()"
+          [indeterminate]="isSomeSelected() && !isAllSelected()" color="primary"></mat-checkbox>
+        }
+        <!-- Cabeçalho normal para outras colunas -->
+        @if (column.key !== 'select') {
+        {{ column.header }}
+        }
+      </th>
+      <td mat-cell *matCellDef="let element" class="nowrap">
+        <!-- Checkbox para a coluna 'select' -->
+        @if (column.key === 'select' && shouldShowCheckbox(element)) {
+        <mat-checkbox (change)="toggleRow(element)" [checked]="isSelected(element)" (click)="$event.stopPropagation()"
+          color="primary"></mat-checkbox>
+        }
+        <!-- Ícone de edição para a coluna 'edit' -->
+        @if (column.key === 'edit' && shouldShowEditIcon(element)) {
+        <button mat-icon-button (click)="$event.stopPropagation(); onEditClick(element)" aria-label="Editar">
+          <mat-icon>edit</mat-icon>
+        </button>
+        }
+        <!-- Ícone de deleção para a coluna 'delete' -->
+        @if (column.key === 'delete' && shouldShowDeleteIcon(element)) {
+        <button mat-icon-button (click)="$event.stopPropagation(); onDeleteClick(element)" aria-label="Deletar"
+          class="delete-btn">
+          <mat-icon>delete</mat-icon>
+        </button>
+        }
+        <!-- Dados normais para outras colunas -->
+        @if (column.key !== 'select' && column.key !== 'edit' && column.key !== 'delete') {
+        {{ formatValue(column, element) }}
+        }
+      </td>
+    </ng-container>
     }
 
     <!-- Definição das linhas -->
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr
-      mat-row
-      *matRowDef="let row; columns: displayedColumns; let i = index"
-      (click)="onRowClick(row)"
-      class="row-clickable"
-      [class.even-row]="i % 2 === 0"
-      [class.odd-row]="i % 2 !== 0"
-    ></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns; let i = index" (click)="onRowClick(row)"
+      class="row-clickable" [class.even-row]="i % 2 === 0" [class.odd-row]="i % 2 !== 0"
+      [class.selected-row]="isSelected(row)"></tr>
   </table>
-  <app-pagination
-    [totalElement]="totalElements"
-    [pageSizeOptions]="pageSizeOptions"
-    (pageEvent)="handlePageEvent($event)"
-    />
+  <app-pagination [totalElement]="totalElements" [pageSizeOptions]="pageSizeOptions"
+    (pageEvent)="handlePageEvent($event)" />
 </div>
