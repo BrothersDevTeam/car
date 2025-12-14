@@ -78,36 +78,6 @@ export interface UnsavedChangesDialogData {
 
       <!-- Rodapé com botões de ação -->
       <mat-dialog-actions align="end">
-        <!-- Botão Cancelar: volta ao formulário -->
-        <button
-          mat-button
-          (click)="onCancel()"
-          class="cancel-button"
-        >
-          Cancelar
-        </button>
-
-        <!-- Botão Não Salvar: descarta mudanças -->
-        <button
-          mat-button
-          color="warn"
-          (click)="onDiscard()"
-          class="discard-button"
-        >
-          Não salvar
-        </button>
-
-        <!-- Botão Salvar Rascunho: salva localmente -->
-        <button
-          mat-raised-button
-          color="accent"
-          (click)="onSaveDraft()"
-          class="draft-button"
-        >
-          <mat-icon>save</mat-icon>
-          Salvar rascunho
-        </button>
-
         <!-- Botão Salvar: salva completo (só aparece se canSave = true) -->
         @if (data.canSave) {
         <button
@@ -120,6 +90,38 @@ export interface UnsavedChangesDialogData {
           Salvar
         </button>
         }
+
+        <!-- Botão Salvar Rascunho: salva localmente -->
+        <button
+          mat-stroked-button
+          color="primary"
+          (click)="onSaveDraft()"
+          class="draft-button"
+        >
+          <mat-icon>save</mat-icon>
+          Salvar rascunho
+        </button>
+
+        <!-- Botão Não Salvar: descarta mudanças -->
+        <button
+          mat-stroked-button
+          color="warn"
+          (click)="onDiscard()"
+          class="discard-button"
+        >
+          <mat-icon>delete_forever</mat-icon>
+          Descartar
+        </button>
+
+        <!-- Botão Cancelar: volta ao formulário -->
+        <button
+          mat-stroked-button
+          (click)="onCancel()"
+          class="cancel-button"
+        >
+          <mat-icon>arrow_back</mat-icon>
+          Retornar
+        </button>
       </mat-dialog-actions>
     </div>
   `,
@@ -183,10 +185,15 @@ export interface UnsavedChangesDialogData {
       }
 
       mat-dialog-actions {
-        gap: 8px;
-        padding: 16px 0 8px 0;
-
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 24px 0 8px 0;
+        
         button {
+          width: 100%;
+          height: 44px; /* Altura fixa para consistência */
+          
           mat-icon {
             margin-right: 8px;
           }
@@ -194,31 +201,28 @@ export interface UnsavedChangesDialogData {
 
         .cancel-button {
           color: rgba(0, 0, 0, 0.6);
+          border-color: rgba(0, 0, 0, 0.2);
         }
 
         .discard-button {
           color: #d32f2f;
+          border-color: #d32f2f;
         }
 
         .save-button,
         .draft-button {
           mat-icon {
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
           }
         }
       }
 
-      /* Responsividade para telas menores */
-      @media (max-width: 500px) {
+      /* Responsividade para telas muito pequenas */
+      @media (max-width: 380px) {
         mat-dialog-actions {
-          flex-direction: column;
-          align-items: stretch;
-
-          button {
-            width: 100%;
-          }
+          grid-template-columns: 1fr; /* 1 coluna em telas muito pequenas */
         }
       }
     `,
