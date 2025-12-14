@@ -88,7 +88,6 @@ export interface UnsavedChangesDialogData {
           (click)="onSave()"
           class="save-button"
         >
-          <mat-icon>check</mat-icon>
           Salvar
         </button>
         }
@@ -100,8 +99,8 @@ export interface UnsavedChangesDialogData {
           (click)="onSaveDraft()"
           class="draft-button"
         >
-          <mat-icon>save</mat-icon>
-          Salvar rascunho
+          <mat-icon>save_as</mat-icon>
+          Salvar Rascunho
         </button>
 
         <!-- Botão Não Salvar: descarta mudanças -->
@@ -112,7 +111,7 @@ export interface UnsavedChangesDialogData {
           class="discard-button"
         >
           <mat-icon>delete_forever</mat-icon>
-          Descartar
+          Descartar alterações
         </button>
 
         <!-- Botão Cancelar: volta ao formulário -->
@@ -121,8 +120,8 @@ export interface UnsavedChangesDialogData {
           (click)="onCancel()"
           class="cancel-button"
         >
-          <mat-icon>arrow_back</mat-icon>
-          Retornar
+        <mat-icon>arrow_forward</mat-icon>
+        Retornar ao formulário
         </button>
       </mat-dialog-actions>
     </div>
@@ -190,11 +189,18 @@ export interface UnsavedChangesDialogData {
         display: grid;
         grid-template-columns: 1fr;
         gap: 12px;
-        padding: 24px 0 8px 0;
+        padding: 24px 48px 8px 48px; /* Padding lateral aumenta para diminuir a largura dos botões */
         
         button {
           width: 100%;
           height: 44px; /* Altura fixa para consistência */
+          margin: 0 !important; /* Remove margem padrão do Material (sibling indent) */
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          
+          &:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          }
           
           mat-icon {
             margin-right: 8px;
@@ -211,7 +217,17 @@ export interface UnsavedChangesDialogData {
           border-color: #d32f2f;
         }
 
-        .save-button,
+        .save-button {
+          background-color: var(--primary-color) !important;
+          color: white !important;
+          
+          mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+        }
+
         .draft-button {
           mat-icon {
             font-size: 20px;
