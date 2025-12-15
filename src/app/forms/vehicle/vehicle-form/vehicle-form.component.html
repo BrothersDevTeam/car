@@ -108,7 +108,7 @@
       inputName="fuelTypes"
       placeholder="Selecione os tipos de combustível"
       [options]="fuelTypesOptions"
-      [allowMultiple]="true"
+      [allowMultiple]="false"
       optionValue="value"
       optionLabel="label"
     ></app-primary-select>
@@ -116,7 +116,7 @@
     <!-- Ano -->
     <app-primary-input
       formControlName="vehicleYear"
-      label="Ano"
+      label="Ano Fabricação"
       inputName="vehicleYear"
       type="text"
       placeholder="0000"
@@ -126,11 +126,11 @@
     <!-- Ano/Modelo -->
     <app-primary-input
       formControlName="modelYear"
-      label="Ano/Modelo"
+      label="Ano Modelo"
       inputName="modelYear"
       type="text"
-      placeholder="0000/0000"
-      mask="0000/0000"
+      placeholder="0000"
+      mask="0000"
     />
 
     <!-- Chassi -->
