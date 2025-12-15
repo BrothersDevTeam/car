@@ -292,6 +292,13 @@ export class PersonComponent implements OnInit, OnDestroy {
     const canSave = formComponent.canSaveForm();
     const isNew = !this.selectedPerson?.personId && !this.selectedDraft;
 
+    // Obtém o nome sugerido do formulário se possível
+    let suggestedDraftName = '';
+    if (formComponent && (formComponent as any).form) {
+      const formValue = (formComponent as any).form.value;
+      suggestedDraftName = formValue.name || '';
+    }
+
     // Abre o diálogo inteligente com as opções apropriadas
     const dialogRef = this.dialog.open(UnsavedChangesDialogComponent, {
       width: '450px',
@@ -302,6 +309,7 @@ export class PersonComponent implements OnInit, OnDestroy {
           ? 'Deseja salvar as alterações antes de sair?'
           : 'Há campos obrigatórios não preenchidos. Deseja salvar um rascunho para continuar depois?',
         currentDraftName: this.selectedDraft?.draftName,
+        suggestedDraftName, // Passa o nome sugerido
       },
     });
 

@@ -21,7 +21,10 @@ export interface UnsavedChangesDialogData {
   /** Mensagem customizada a ser exibida */
   message: string;
   /** Nome do rascunho atual, se houver (para edição) */
+  /** Nome do rascunho atual, se houver (para edição) */
   currentDraftName?: string;
+  /** Nome sugerido para um NOVO rascunho */
+  suggestedDraftName?: string;
 }
 
 /**
@@ -307,7 +310,7 @@ export class UnsavedChangesDialogComponent {
       disableClose: true,
       data: {
         title: 'Salvar rascunho',
-        suggestedName: '',
+        suggestedName: this.data.suggestedDraftName || '',
       },
     });
 
