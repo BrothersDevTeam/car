@@ -8,6 +8,6 @@ export interface LoginResponse {
 }
 
 export interface LoginForm {
-  email: FormControl;
+  username: FormControl;
   password: FormControl;
 }

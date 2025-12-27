@@ -31,7 +31,7 @@ export class LoginComponent {
     private toastrService: ToastrService
   ) {
     this.loginForm = new FormGroup({
-      email: new FormControl('', [Validators.required, Validators.email]),
+      username: new FormControl('', [Validators.required]),
       password: new FormControl('', [
         Validators.required,
         Validators.minLength(4),
@@ -48,7 +48,7 @@ export class LoginComponent {
 
   submit() {
     this.authService
-      .login(this.loginForm.value.email, this.loginForm.value.password)
+      .login(this.loginForm.value.username, this.loginForm.value.password)
       .subscribe({
         next: () => this.toastrService.success('Login feito com sucesso'),
         error: () =>

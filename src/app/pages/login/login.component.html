@@ -1,43 +1,51 @@
 <main>
-  <section>
-    <h1>Controle Auto Revenda</h1>
-    <h2>Faça seu login</h2>
+  <section class="glass-card">
+    <div class="header">
+      <h1>Controle Auto Revenda</h1>
+      <h2>Faça seu login</h2>
+    </div>
 
     <form
       [formGroup]="loginForm"
       (keydown.enter)="submit()"
     >
-      <app-primary-input
-        formControlName="email"
-        label="Email"
-        inputName="email"
-        type="email"
-        placeholder="exemplo@email.com"
-        [uppercase]="false"
-      >
-        <mat-icon>email</mat-icon>
-      </app-primary-input>
-      <app-primary-input
-        formControlName="password"
-        label="Senha"
-        inputName="password"
-        [type]="passwordVisible() ? 'text' : 'password'"
-        [uppercase]="false"
-      >
-        <mat-icon
-          (click)="togglePasswordVisibility()"
-          style="cursor: pointer"
+      <div class="input-wrapper">
+        <app-primary-input
+          formControlName="username"
+          label="Usuário"
+          inputName="username"
+          type="text"
+          placeholder="Digite seu usuário"
+          [uppercase]="false"
         >
-          {{ passwordVisible() ? 'visibility' : 'visibility_off' }}
-        </mat-icon>
-      </app-primary-input>
+          <mat-icon>person</mat-icon>
+        </app-primary-input>
+      </div>
+
+      <div class="input-wrapper">
+        <app-primary-input
+          formControlName="password"
+          label="Senha"
+          inputName="password"
+          [type]="passwordVisible() ? 'text' : 'password'"
+          [uppercase]="false"
+        >
+          <mat-icon
+            (click)="togglePasswordVisibility()"
+            style="cursor: pointer"
+          >
+            {{ passwordVisible() ? 'visibility' : 'visibility_off' }}
+          </mat-icon>
+        </app-primary-input>
+      </div>
     </form>
 
     <button
+      class="login-btn"
       (click)="submit()"
       [disabled]="!disablePrimaryBtn"
     >
-      Enviar
+      Entrar
     </button>
   </section>
 </main>
