@@ -1,51 +1,80 @@
-<main>
-  <section class="glass-card">
-    <div class="header">
-      <h1>Controle Auto Revenda</h1>
-      <h2>Faça seu login</h2>
+<main class="login-container">
+  <div class="content">
+    <div class="left-panel">
+      <h1>
+        C A R
+        <br />
+      </h1>
+      <div class="footer-text">
+        <p>Bem-vindo de volta!</p>
+        <h2>CONTROLE DE AUTO REVENDA</h2>
+      </div>
     </div>
 
-    <form
-      [formGroup]="loginForm"
-      (keydown.enter)="submit()"
-    >
-      <div class="input-wrapper">
-        <app-primary-input
-          formControlName="username"
-          label="Usuário"
-          inputName="username"
-          type="text"
-          placeholder="Digite seu usuário"
-          [uppercase]="false"
-        >
-          <mat-icon>person</mat-icon>
-        </app-primary-input>
-      </div>
-
-      <div class="input-wrapper">
-        <app-primary-input
-          formControlName="password"
-          label="Senha"
-          inputName="password"
-          [type]="passwordVisible() ? 'text' : 'password'"
-          [uppercase]="false"
-        >
-          <mat-icon
-            (click)="togglePasswordVisibility()"
-            style="cursor: pointer"
+    <section class="glass-card">
+      <form
+        [formGroup]="loginForm"
+        (keydown.enter)="submit()"
+      >
+        <div class="input-group">
+          <app-primary-input
+            formControlName="username"
+            inputName="username"
+            type="text"
+            placeholder="USUÁRIO"
+            [uppercase]="false"
           >
-            {{ passwordVisible() ? 'visibility' : 'visibility_off' }}
-          </mat-icon>
-        </app-primary-input>
-      </div>
-    </form>
+            <mat-icon>person_outline</mat-icon>
+          </app-primary-input>
+        </div>
 
-    <button
-      class="login-btn"
-      (click)="submit()"
-      [disabled]="!disablePrimaryBtn"
-    >
-      Entrar
-    </button>
-  </section>
+        <div class="input-group">
+          <app-primary-input
+            formControlName="password"
+            inputName="password"
+            [type]="passwordVisible() ? 'text' : 'password'"
+            placeholder="SENHA"
+            [uppercase]="false"
+          >
+            <mat-icon
+              (click)="togglePasswordVisibility()"
+              style="cursor: pointer"
+            >
+              {{ passwordVisible() ? 'visibility' : 'visibility_off' }}
+            </mat-icon>
+          </app-primary-input>
+        </div>
+
+        <button
+          class="login-btn"
+          (click)="submit()"
+          [disabled]="!disablePrimaryBtn"
+          type="button"
+        >
+          ENTRAR
+        </button>
+
+        <div class="form-footer">
+          <label class="checkbox-container">
+            <input type="checkbox" />
+            <span class="checkmark"></span>
+            Lembre-me
+          </label>
+          <a
+            href="#"
+            class="forgot-password"
+          >
+            Esqueceu a senha?
+          </a>
+        </div>
+
+        <button
+          class="signup-btn"
+          type="button"
+        >
+          CADASTRE-SE
+        </button>
+      </form>
+    </section>
+  </div>
 </main>

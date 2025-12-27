@@ -1,94 +1,318 @@
 @use 'abstracts/variables' as *;
 
-main {
+.login-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
+  // Background image similar to the reference - darker city/car night vibe
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+    url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80')
+      no-repeat center center;
+  background-size: cover;
+  overflow: hidden;
+  font-family: 'Roboto', sans-serif; // Assuming a sans-serif font is available
 }
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  padding: 3rem;
+.content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
-  max-width: 450px;
+  max-width: 1200px;
+  padding: 2rem;
+  height: 80vh;
+}
+
+.left-panel {
+  flex: 1;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  color: white; /* Ou uma cor escura dependendo do design */
+  justify-content: space-between;
+  color: white;
+  padding-right: 2rem;
 
-  .header {
-    text-align: center;
-    margin-bottom: 2rem;
+  h1 {
+    font-size: 5rem;
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.8);
+    // Slight transparency effect on text
+    mask-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 1),
+      rgba(0, 0, 0, 0.6)
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 1),
+      rgba(0, 0, 0, 0.6)
+    );
+  }
 
-    h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
+  .footer-text {
+    p {
+      font-size: 1.5rem;
+      font-weight: 500;
       margin-bottom: 0.5rem;
-      color: #fff;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     h2 {
-      font-size: 1.1rem;
-      font-weight: 400;
-      color: rgba(255, 255, 255, 0.9);
-      margin: 0;
+      font-size: 2.5rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
     }
   }
+}
+
+.glass-card {
+  width: 400px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 
   form {
-    width: 100%;
-    margin-bottom: 2rem;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
   }
+}
 
-  .login-btn {
-    width: 100%;
-    padding: 14px;
-    border-radius: 30px;
-    background: linear-gradient(90deg, #48b8d1 0%, #3a7bd5 100%);
-    border: none;
-    color: white;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    text-transform: uppercase;
-    letter-spacing: 1px;
+.input-group {
+  width: 100%;
+}
 
-    &:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+// Deep overrides for app-primary-input to match the specific design
+::ng-deep app-primary-input {
+  .input-wrapper {
+    margin-top: 0 !important;
+
+    label {
+      display: none !important; // Hide the external label
     }
 
-    &:active:not(:disabled) {
-      transform: translateY(1px);
-    }
+    .input-container {
+      margin-top: 0 !important;
 
-    &:disabled {
-      background: rgba(255, 255, 255, 0.3);
-      cursor: not-allowed;
-      opacity: 0.7;
+      .input-content {
+        background: transparent !important;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50px !important; // Pill shape
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(5px);
+        background: rgba(255, 255, 255, 0.1) !important;
+
+        &:focus-within {
+          border-color: #a855f7; // Purple glow
+          box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+          background: rgba(255, 255, 255, 0.15) !important;
+        }
+
+        input {
+          background: transparent !important;
+          color: white !important;
+          padding: 15px 20px !important;
+          padding-left: 50px !important; // Space for icon if we moved it left, but icon is right in component.. wait
+          // The component puts icon on right. The design has icon on LEFT.
+          // Since we can't easily change the DOM order of the component without changing the component file,
+          // we might have to live with icon on right OR use specific absolute positioning overrides if the icon is projected content.
+          // The projected content uses <ng-content>, so we can try to position it absolutely to the left.
+
+          &::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+          }
+        }
+
+        // Override projected icon position
+        mat-icon {
+          color: #a855f7; // Purple icon color
+          position: absolute;
+          left: 15px !important; // Force left
+          right: auto !important;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 10;
+        }
+
+        // We need to adjust input padding since we moved icon to left
+        input {
+          padding-left: 50px !important;
+          padding-right: 15px !important;
+        }
+
+        // Adjust the password toggle button if flexible
+        .toggle-password {
+          right: 15px !important;
+          left: auto !important;
+          color: rgba(255, 255, 255, 0.7) !important;
+
+          mat-icon {
+            position: static !important; // let it be positioned by the button
+            color: inherit;
+            transform: none;
+          }
+        }
+      }
     }
   }
 }
 
-app-primary-input {
+.login-btn {
+  width: 100%;
+  padding: 15px;
+  border-radius: 50px;
+  background: linear-gradient(
+    90deg,
+    #3b82f6 0%,
+    #a855f7 100%
+  ); // Blue to Purple gradient
+  border: none;
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  margin-top: 1rem;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.signup-btn {
+  width: 100%;
+  padding: 15px;
+  border-radius: 50px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+  }
+}
+
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  width: 100%;
+
+  .forgot-password {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+
+    &:hover {
+      color: white;
+      border-color: white;
+    }
+  }
+}
+
+/* Checkbox styling */
+.checkbox-container {
+  display: block;
   position: relative;
+  padding-left: 30px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 
-  mat-icon {
+  input {
     position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
 
-    right: 10px;
+    &:checked ~ .checkmark {
+      background-color: transparent;
+      border-color: white;
+    }
+
+    &:checked ~ .checkmark:after {
+      display: block;
+    }
+  }
+
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 18px;
+    width: 18px;
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+
+    &:after {
+      content: '';
+      position: absolute;
+      display: none;
+      left: 6px;
+      top: 2px;
+      width: 4px;
+      height: 9px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      -webkit-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+      transform: rotate(45deg);
+    }
+  }
+
+  &:hover input ~ .checkmark {
+    border-color: white;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 900px) {
+  .left-panel {
+    display: none; // Hide layout text on small screens or stack it
+  }
+
+  .glass-card {
+    width: 100%;
+    max-width: 400px;
   }
 }
