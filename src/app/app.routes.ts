@@ -29,5 +29,12 @@ export const routes: Routes = [
     component: LoginLayoutComponent,
     children: [{ path: '', component: LoginComponent }],
   },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./pages/reset-password/reset-password').then(
+        (m) => m.ResetPasswordComponent
+      ),
+  },
   { path: '**', redirectTo: '' },
 ];

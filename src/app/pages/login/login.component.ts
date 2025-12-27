@@ -1,9 +1,11 @@
+import { HttpClient } from '@angular/common/http';
 import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastrService } from 'ngx-toastr';
@@ -16,19 +18,27 @@ import { AuthService } from '@services/auth/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [PrimaryInputComponent, ReactiveFormsModule, MatIconModule],
+  imports: [
+    PrimaryInputComponent,
+    ReactiveFormsModule,
+    MatIconModule,
+    CommonModule,
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
   loginForm!: FormGroup<LoginForm>;
+  forgotPasswordForm!: FormGroup;
 
   disableBtn = signal(false);
   passwordVisible = signal(false);
+  forgotPasswordMode = signal(false);
 
   constructor(
     private authService: AuthService,
-    private toastrService: ToastrService
+    private toastrService: ToastrService,
+    private httpClient: HttpClient
   ) {
     this.loginForm = new FormGroup({
       username: new FormControl('', [Validators.required]),
@@ -36,6 +46,10 @@ export class LoginComponent {
         Validators.required,
         Validators.minLength(4),
       ]),
+    });
+
+    this.forgotPasswordForm = new FormGroup({
+      email: new FormControl('', [Validators.required, Validators.email]),
     });
   }
 
@@ -60,5 +74,83 @@ export class LoginComponent {
 
   togglePasswordVisibility() {
     this.passwordVisible.set(!this.passwordVisible());
+  }
+
+  // --- Recovery Logic ---
+  // valid states: 'LOGIN', 'SELECTION', 'FORGOT_PASSWORD', 'FORGOT_USERNAME'
+  viewState = signal<
+    'LOGIN' | 'SELECTION' | 'FORGOT_PASSWORD' | 'FORGOT_USERNAME'
+  >('LOGIN');
+
+  setViewState(
+    state: 'LOGIN' | 'SELECTION' | 'FORGOT_PASSWORD' | 'FORGOT_USERNAME'
+  ) {
+    this.viewState.set(state);
+  }
+
+  submitForgotUsername() {
+    if (this.forgotPasswordForm.invalid) return;
+
+    this.httpClient
+      .post(
+        '/api/auth/forgot-username',
+        {
+          email: this.forgotPasswordForm.value.email,
+        },
+        { responseType: 'text' }
+      )
+      .subscribe({
+        next: () => {
+          this.toastrService.success(
+            'Nome de usuário enviado para seu email! Verifique sua caixa de entrada.'
+          );
+          this.setViewState('LOGIN');
+        },
+        error: (err) => {
+          this.toastrService.error(
+            err.error || 'Erro ao recuperar usuário. Verifique o email.'
+          );
+        },
+      });
+  }
+
+  submitForgotPassword() {
+    if (this.forgotPasswordForm.invalid) return;
+
+    this.httpClient
+      .post(
+        '/api/auth/forgot-password',
+        {
+          email: this.forgotPasswordForm.value.email,
+        },
+        { responseType: 'text' }
+      )
+      .subscribe({
+        next: () => {
+          this.toastrService.success(
+            'Email de recuperação enviado! Verifique sua caixa de entrada (ou logs).'
+          );
+          this.setViewState('LOGIN');
+        },
+        error: (err) => {
+          this.toastrService.error(
+            err.error || 'Erro ao solicitar recuperação de senha.'
+          );
+        },
+      });
+  }
+
+  // Helper getters for template
+  isLogin() {
+    return this.viewState() === 'LOGIN';
+  }
+  isSelection() {
+    return this.viewState() === 'SELECTION';
+  }
+  isForgotPassword() {
+    return this.viewState() === 'FORGOT_PASSWORD';
+  }
+  isForgotUsername() {
+    return this.viewState() === 'FORGOT_USERNAME';
   }
 }

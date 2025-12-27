@@ -116,7 +116,7 @@
         background: rgba(255, 255, 255, 0.1) !important;
 
         &:focus-within {
-          border-color: #a855f7; // Purple glow
+          // border-color: #a855f7; // Purple glow
           box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
           background: rgba(255, 255, 255, 0.15) !important;
         }
@@ -130,6 +130,8 @@
           // Since we can't easily change the DOM order of the component without changing the component file,
           // we might have to live with icon on right OR use specific absolute positioning overrides if the icon is projected content.
           // The projected content uses <ng-content>, so we can try to position it absolutely to the left.
+
+          outline: none; // Remove default browser focus ring
 
           &::placeholder {
             color: rgba(255, 255, 255, 0.7);
