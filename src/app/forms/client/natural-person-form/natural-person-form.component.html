@@ -108,8 +108,8 @@
         type="email"
         placeholder="exemplo@email.com"
         [error]="
-          form.get('contact.email')?.invalid &&
-          (form.get('contact.email')?.touched || submitted)
+          form.get('email')?.invalid &&
+          (form.get('email')?.touched || submitted)
         "
       />
 

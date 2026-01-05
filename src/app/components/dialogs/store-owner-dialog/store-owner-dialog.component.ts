@@ -2,10 +2,12 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,6 +17,7 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@interfaces/store';
 import { Person } from '@interfaces/person';
 import { PersonService } from '@services/person.service';
@@ -32,9 +35,11 @@ export interface StoreOwnerDialogData {
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
+    MatInputModule,
     MatSelectModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    MatIconModule,
   ],
   templateUrl: './store-owner-dialog.component.html',
   styleUrls: ['./store-owner-dialog.component.scss'],
@@ -44,6 +49,9 @@ export class StoreOwnerDialogComponent implements OnInit {
   persons: Person[] = [];
   loading = true;
   error = false;
+  searchControl = new FormControl('');
+  private searchTimeout: any;
+  isCarAdmin = false;
 
   /**
    * Modo de operação do dialog:
@@ -77,7 +85,23 @@ export class StoreOwnerDialogComponent implements OnInit {
     }
 
     this.initForm();
+    this.initForm();
+    this.checkForCarAdmin();
     this.loadPersons();
+
+    // Subscribe to search changes with debounce
+    this.searchControl.valueChanges.subscribe((value) => {
+      // Debounce manual simplificado ou usar rxJS (vou usar timeout simples para nao importar mais coisas)
+      if (this.searchTimeout) clearTimeout(this.searchTimeout);
+      this.searchTimeout = setTimeout(() => {
+        this.loadPersons(value || '');
+      }, 500);
+    });
+  }
+
+  checkForCarAdmin() {
+    this.isCarAdmin = this.personService.hasRole('ROLE_CAR_ADMIN');
+    console.log('👑 StoreOwnerDialog - isCarAdmin:', this.isCarAdmin);
   }
 
   private initForm(): void {
@@ -86,37 +110,46 @@ export class StoreOwnerDialogComponent implements OnInit {
     });
   }
 
-  private loadPersons(): void {
+  private loadPersons(search: string = ''): void {
     this.loading = true;
     this.error = false;
 
+    const params: any = {
+      includeInactive: true, // Traz inativos para vermos se existe
+    };
+
+    // Se tiver busca, usa o parametro de busca global
+    if (search) {
+      params['search'] = search;
+    }
+
+    // Se NAO for CAR_ADMIN, filtra pela loja atual.
+    // Se for CAR_ADMIN, não envia storeId para ver todos (global).
+    if (!this.isCarAdmin) {
+      params['storeId'] = this.data.store.storeId;
+    }
+
     console.log(
-      '🔍 Buscando pessoas da loja:',
-      this.data.store.storeId,
-      '- Nome:',
-      this.data.store.name
+      '🔍 Buscando pessoas. Search:',
+      search,
+      'StoreId:',
+      params['storeId'],
+      'IsCarAdmin:',
+      this.isCarAdmin
     );
 
-    this.personService
-      .getPaginatedData(0, 100, {
-        storeId: this.data.store.storeId,
-      })
-      .subscribe({
-        next: (response) => {
-          console.log(
-            '✅ Pessoas encontradas:',
-            response.content.length,
-            response.content
-          );
-          this.persons = response.content;
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error('Erro ao carregar pessoas:', err);
-          this.error = true;
-          this.loading = false;
-        },
-      });
+    this.personService.getPaginatedData(0, 100, params).subscribe({
+      next: (response) => {
+        console.log('✅ Pessoas encontradas:', response.content.length);
+        this.persons = response.content;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar pessoas:', err);
+        this.error = true;
+        this.loading = false;
+      },
+    });
   }
 
   /**
@@ -147,7 +180,8 @@ export class StoreOwnerDialogComponent implements OnInit {
   getPersonDisplay(person: Person): string {
     const type = person.legalEntity ? 'CNPJ' : 'CPF';
     const doc = person.legalEntity ? person.cnpj : person.cpf;
-    return `${person.name} - ${type}: ${doc}`;
+    const accessStatus = person.hasUser ? '✅ Com acesso' : '❌ Sem acesso';
+    return `${person.name} - ${type}: ${doc} (${accessStatus})`;
   }
 
   onCancel(): void {
@@ -156,7 +190,19 @@ export class StoreOwnerDialogComponent implements OnInit {
 
   onSubmit(): void {
     if (this.ownerForm.valid) {
-      this.dialogRef.close(this.ownerForm.value.personId);
+      const selectedPersonId = this.ownerForm.value.personId;
+      const selectedPerson = this.persons.find(
+        (p) => p.personId === selectedPersonId
+      );
+
+      if (selectedPerson && !selectedPerson.hasUser) {
+        alert(
+          'Esta pessoa não possui um usuário de sistema (login/senha) vinculado. \n\nPor favor, cadastre um usuário para esta pessoa antes de vinculá-la como proprietária.'
+        );
+        return;
+      }
+
+      this.dialogRef.close(selectedPersonId);
     }
   }
 }

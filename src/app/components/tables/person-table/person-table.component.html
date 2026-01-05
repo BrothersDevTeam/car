@@ -15,11 +15,11 @@
         *matCellDef="let element"
         class="nowrap"
       >
-        {{ element.person.name }}
+        {{ element.name }}
         <!-- {{
-          element.person.fullName
-            ? element.person.fullName
-            : element.person.legalName
+          element.fullName
+            ? element.fullName
+            : element.legalName
         }} -->
       </td>
     </ng-container>
@@ -35,7 +35,7 @@
         mat-cell
         *matCellDef="let element"
       >
-        {{ element.person.active ? 'Sim' : 'Não' }}
+        {{ element.active ? 'Sim' : 'Não' }}
       </td>
     </ng-container>
 
@@ -50,7 +50,7 @@
         mat-cell
         *matCellDef="let element"
       >
-        {{ element.person.cpf ? 'Não' : 'Sim' }}
+        {{ element.cpf ? 'Não' : 'Sim' }}
       </td>
     </ng-container>
 
@@ -65,7 +65,7 @@
         mat-cell
         *matCellDef="let element"
       >
-        {{ element.person.cpf ? element.person.cpf : element.person.cnpj }}
+        {{ element.cpf ? element.cpf : element.cnpj }}
       </td>
     </ng-container>
 

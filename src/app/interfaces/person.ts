@@ -35,6 +35,7 @@ export interface Person {
   password?: string;
   roleName?: string;
   user?: User; // User associado (para funcionários)
+  hasUser?: boolean;
 }
 
 export type CreateNaturalPerson = Omit<

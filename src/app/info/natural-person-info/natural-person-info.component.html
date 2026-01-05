@@ -54,6 +54,18 @@
         </button>
       </mat-card-footer>
     </app-wrapper-card>
+    <app-wrapper-card
+      title="Acesso ao Sistema"
+      class="access-card"
+    >
+      <app-user-access-management
+        [personId]="person.personId"
+        [hasUser]="person.hasUser ?? false"
+        [existingUsername]="person.user?.username"
+        (accessUpdated)="onAccessUpdated()"
+      ></app-user-access-management>
+    </app-wrapper-card>
+
     <app-wrapper-card>
       <!-- Seção de Endereços -->
       @if (person.personId) {

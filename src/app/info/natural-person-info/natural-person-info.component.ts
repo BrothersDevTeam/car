@@ -1,28 +1,29 @@
-import { ToastrService } from 'ngx-toastr';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { EventType } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { AddressListComponent } from '@components/address/address-list/address-list.component';
+import { UserAccessManagementComponent } from '../../components/user-access-management/user-access-management.component';
 
-import type { Person } from '@interfaces/person';
-
+import { Person } from '@interfaces/person';
 import { PersonService } from '@services/person.service';
 
 @Component({
   selector: 'app-natural-person-info',
+  standalone: true,
   imports: [
     CommonModule,
     MatButtonModule,
     MatCardModule,
     WrapperCardComponent,
     AddressListComponent,
+    UserAccessManagementComponent,
   ],
   templateUrl: './natural-person-info.component.html',
   styleUrl: './natural-person-info.component.scss',
@@ -41,6 +42,10 @@ export class NaturalPersonInfoComponent {
 
   onDelete() {
     this.openDialog();
+  }
+
+  onAccessUpdated() {
+    this.formSubmitted.emit(); // Refresh list to get updated data from backend
   }
 
   openDialog() {

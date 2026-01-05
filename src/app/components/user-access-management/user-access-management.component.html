@@ -1,0 +1,135 @@
+<div class="access-container">
+  @if (hasUser) {
+    <div class="access-status active">
+      <mat-icon class="status-icon">check_circle</mat-icon>
+      <div class="status-info">
+        <h4>Acesso Ativo</h4>
+        <p>Esta pessoa possui usuário de sistema vinculado.</p>
+        @if (existingUsername) {
+          <small>
+            Usuário:
+            <strong>{{ existingUsername }}</strong>
+          </small>
+        }
+      </div>
+      <!-- Future: Add 'Redefinir Senha' button here -->
+    </div>
+  } @else {
+    <div class="access-status inactive">
+      <mat-icon class="status-icon">lock</mat-icon>
+      <div class="status-info">
+        <h4>Sem Acesso ao Sistema</h4>
+        <p>Esta pessoa não possui login/senha cadastrados.</p>
+      </div>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="toggleForm()"
+        *ngIf="!isFormVisible"
+      >
+        <mat-icon>add_moderator</mat-icon>
+        Criar Acesso
+      </button>
+    </div>
+
+    @if (isFormVisible) {
+      <mat-card
+        appearance="outlined"
+        class="form-card"
+      >
+        <mat-card-header>
+          <mat-card-title>Novo Usuário de Sistema</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form
+            [formGroup]="userForm"
+            (ngSubmit)="onSubmit()"
+          >
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Nome de Usuário</mat-label>
+                <input
+                  matInput
+                  formControlName="username"
+                  placeholder="ex: joao.silva"
+                />
+                <mat-error
+                  *ngIf="userForm.get('username')?.hasError('required')"
+                >
+                  Obrigatório
+                </mat-error>
+                <mat-error
+                  *ngIf="userForm.get('username')?.hasError('minlength')"
+                >
+                  Mínimo 3 caracteres
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Senha</mat-label>
+                <input
+                  matInput
+                  type="password"
+                  formControlName="password"
+                  placeholder="******"
+                />
+                <mat-error
+                  *ngIf="userForm.get('password')?.hasError('required')"
+                >
+                  Obrigatório
+                </mat-error>
+                <mat-error
+                  *ngIf="userForm.get('password')?.hasError('minlength')"
+                >
+                  Mínimo 6 caracteres
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Função / Permissão</mat-label>
+                <mat-select formControlName="roleName">
+                  @for (role of roles; track role.value) {
+                    <mat-option [value]="role.value">
+                      {{ role.label }}
+                    </mat-option>
+                  }
+                </mat-select>
+                <mat-error
+                  *ngIf="userForm.get('roleName')?.hasError('required')"
+                >
+                  Selecione uma função
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-actions">
+              <button
+                mat-button
+                type="button"
+                (click)="toggleForm()"
+              >
+                Cancelar
+              </button>
+              <button
+                mat-flat-button
+                color="primary"
+                type="submit"
+                [disabled]="isLoading || userForm.invalid"
+              >
+                @if (isLoading) {
+                  Saving...
+                } @else {
+                  Salvar Acesso
+                }
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+</div>

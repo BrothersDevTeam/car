@@ -67,6 +67,7 @@ export class PersonService {
       search?: string;
       relationshipTypes?: string[]; // Parâmetro para filtrar por tipos de relacionamento
       roleNames?: string[]; // NOVO: Parâmetro para filtrar por roles
+      includeInactive?: boolean; // NOVO: Se true, retorna inativos
     }
   ): Observable<PaginationResponse<Person>> {
     // Se houver parâmetros de busca, não usa cache
@@ -148,7 +149,10 @@ export class PersonService {
           this.cacheUpdated$.next({ ...this.cache });
         } else {
           // Se houver busca, filtra mas não armazena em cache
-          response.content = this.filterByActive(response.content);
+          // Se includeInactive for true, NÃO filtra por ativo
+          if (!searchParams?.includeInactive) {
+            response.content = this.filterByActive(response.content);
+          }
           response.page.totalElements = response.content.length;
         }
       })
@@ -161,6 +165,15 @@ export class PersonService {
         this.clearCache();
       })
     );
+  }
+
+  /**
+   * Cria um usuário para um funcionário/proprietário existente
+   * @param personId ID da pessoa
+   * @param data Dados do usuário (username, password, roleName)
+   */
+  createEmployeeUser(personId: string, data: any) {
+    return this.http.post<any>(`/api/employees/${personId}/create-user`, data);
   }
 
   /**

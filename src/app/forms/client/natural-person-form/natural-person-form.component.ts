@@ -966,8 +966,10 @@ export class NaturalPersonFormComponent
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      console.log('[onSubmit] Formulário inválido:', this.form.value);
-      console.log('[onSubmit] Erros do formulário:', this.form.errors);
+      this.toastrService.error(
+        'Por favor, verifique os campos em vermelho.',
+        'Formulário Inválido'
+      );
 
       if (this.shouldShowUserFields) {
         if (this.form.get('username')?.invalid) {

@@ -1,0 +1,72 @@
+.access-container {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.access-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  &.active {
+    color: #059669;
+    .status-icon {
+      color: #059669;
+    }
+  }
+
+  &.inactive {
+    color: #6b7280;
+    .status-icon {
+      color: #9ca3af;
+    }
+    justify-content: space-between; // Push button to right
+  }
+
+  .status-icon {
+    font-size: 28px;
+    height: 28px;
+    width: 28px;
+  }
+
+  .status-info {
+    flex: 1;
+    h4 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    p {
+      margin: 4px 0 0;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    small {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+    }
+  }
+}
+
+.form-card {
+  margin-top: 16px;
+  background-color: #fff;
+
+  .form-row {
+    margin-bottom: 8px;
+    mat-form-field {
+      width: 100%;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+  }
+}
