@@ -100,6 +100,21 @@ export class AddressFormComponent implements OnInit, OnChanges {
   ngOnInit() {
     console.log('📋 ngOnInit - address recebido:', this.address);
     this.loadFormData();
+
+    if (!this.isEditMode && this.personId) {
+      this.addressService.getByPersonId(this.personId).subscribe({
+        next: (addresses) => {
+          if (!addresses || addresses.length === 0) {
+            console.log(
+              '🏁 Primeiro endereço identificado! Marcando como principal.'
+            );
+            this.form.patchValue({ mainAddress: true });
+          }
+        },
+        error: (err) =>
+          console.error('Erro ao verificar endereços da pessoa:', err),
+      });
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
