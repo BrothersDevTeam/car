@@ -49,7 +49,9 @@ export class StoreComponent implements OnInit {
     this.isCarAdmin = roles.includes('ROLE_CAR_ADMIN');
     // CAR_ADMIN pode cadastrar matriz, ADMIN pode cadastrar filiais
     this.canCreateStore =
-      roles.includes('ROLE_CAR_ADMIN') || roles.includes('ROLE_ADMIN');
+      roles.includes('ROLE_CAR_ADMIN') ||
+      roles.includes('ROLE_ADMIN') ||
+      roles.includes('ROLE_OWNER');
   }
 
   private loadStores(): void {
