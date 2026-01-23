@@ -4,6 +4,7 @@ import {
   OnInit,
   OnChanges,
   SimpleChanges,
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,6 +15,7 @@ import { ToastrService } from 'ngx-toastr';
 import { AddressCardComponent } from '../address-card/address-card.component';
 import { AddressFormComponent } from '../address-form/address-form.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
+import { UnsavedChangesDialogComponent } from '@components/dialogs/unsaved-changes-dialog/unsaved-changes-dialog.component';
 
 import { AddressService } from '@services/address.service';
 import { Address } from '@interfaces/address';
@@ -42,6 +44,8 @@ export class AddressListComponent implements OnInit, OnChanges {
   loading = false;
   showForm = false;
   editingAddress: Address | null = null;
+
+  @ViewChild(AddressFormComponent) addressForm?: AddressFormComponent;
 
   constructor(
     private addressService: AddressService,
@@ -132,6 +136,60 @@ export class AddressListComponent implements OnInit, OnChanges {
   }
 
   onFormCancelled() {
+    // Verifica se há mudanças não salvas
+    if (this.addressForm?.hasUnsavedChanges()) {
+      const canSave = this.addressForm.canSaveForm();
+      const dialogRef = this.dialog.open(UnsavedChangesDialogComponent, {
+        width: '450px',
+        disableClose: true,
+        data: {
+          canSave,
+          message: canSave
+            ? 'Deseja salvar as alterações antes de sair?'
+            : 'Há campos obrigatórios não preenchidos. Deseja salvar um rascunho para continuar depois?',
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((result: string | undefined) => {
+        if (!result || result === 'cancel') {
+          return;
+        }
+
+        if (result === 'discard') {
+          this.closeForm();
+          return;
+        }
+
+        if (result === 'save' && canSave) {
+          this.addressForm?.saveForm(false).subscribe((success: boolean) => {
+            if (success) {
+              this.closeForm();
+            }
+          });
+          return;
+        }
+
+        // Se o resultado começa com 'draft:', extrai o nome do rascunho
+        if (result.startsWith('draft:')) {
+          const draftName = result.substring(6);
+          this.addressForm?.saveLocalDraft(false, draftName, undefined, true);
+          this.closeForm();
+          return;
+        }
+
+        // Caso o retorno do diálogo seja apenas 'draft' (legado ou simplificado)
+        if (result === 'draft') {
+          this.addressForm?.saveLocalDraft();
+          this.closeForm();
+          return;
+        }
+      });
+    } else {
+      this.closeForm();
+    }
+  }
+
+  private closeForm() {
     this.showForm = false;
     this.editingAddress = null;
   }

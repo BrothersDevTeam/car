@@ -183,6 +183,10 @@ export class PersonComponent implements OnInit, OnDestroy {
   naturalPersonForm?: NaturalPersonFormComponent;
   @ViewChild(LegalEntityFormComponent)
   legalEntityForm?: LegalEntityFormComponent;
+  @ViewChild(NaturalPersonInfoComponent)
+  naturalPersonInfo?: NaturalPersonInfoComponent;
+  @ViewChild(LegalEntityInfoComponent)
+  legalEntityInfo?: LegalEntityInfoComponent;
 
   constructor(
     private personService: PersonService,
@@ -774,17 +778,28 @@ export class PersonComponent implements OnInit, OnDestroy {
    * Obtém a referência do componente de formulário ativo
    * Verifica qual formulário está visível (Pessoa Física ou Jurídica)
    */
-  private getActiveFormComponent():
-    | NaturalPersonFormComponent
-    | LegalEntityFormComponent
-    | null {
-    // Verifica se é pessoa jurídica (CNPJ preenchido)
-    if (this.selectedPerson?.legalEntity) {
-      return this.legalEntityForm || null;
+  /**
+   * Obtém a referência do componente de formulário ativo
+   * Verifica qual formulário está visível (Pessoa Física, Jurídica ou Endereço em Info)
+   */
+  private getActiveFormComponent(): any {
+    // Se o formulário principal está aberto
+    if (this.openForm()) {
+      if (this.selectedPerson?.legalEntity) {
+        return this.legalEntityForm || null;
+      }
+      return this.naturalPersonForm || null;
     }
 
-    // Caso contrário, é pessoa física
-    return this.naturalPersonForm || null;
+    // Se a tela de info está aberta (possível edição de endereço)
+    if (this.openInfo()) {
+      if (this.selectedPerson?.legalEntity) {
+        return this.legalEntityInfo?.getActiveFormComponent();
+      }
+      return this.naturalPersonInfo?.getActiveFormComponent();
+    }
+
+    return null;
   }
 
   /**

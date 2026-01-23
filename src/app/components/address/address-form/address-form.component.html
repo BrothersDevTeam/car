@@ -8,6 +8,52 @@
     (ngSubmit)="onSubmit()"
     class="address-form"
   >
+    <!-- Combobox de Rascunhos -->
+    @if (availableDrafts.length > 0 && !isEditMode) {
+      <div class="drafts-section">
+        <div class="drafts-header">
+          <mat-icon>drafts</mat-icon>
+          <span>Cadastros em andamento</span>
+        </div>
+
+        <mat-form-field
+          appearance="outline"
+          class="draft-select-field"
+        >
+          <mat-label>Selecione um cadastro para continuar</mat-label>
+          <mat-select
+            [(value)]="selectedDraftId"
+            (selectionChange)="onDraftSelected($event)"
+          >
+            <mat-option [value]="null">-- Iniciar novo cadastro --</mat-option>
+            @for (draft of availableDrafts; track draft.id) {
+              <mat-option [value]="draft.id">
+                <div class="draft-option-content">
+                  <div class="draft-info">
+                    <span class="draft-name">
+                      {{ draft.draftName || 'Rascunho sem nome' }}
+                    </span>
+                    <span class="draft-date">
+                      {{ formatDraftDate(draft.lastModified) }}
+                    </span>
+                  </div>
+                  @if (selectedDraftId === draft.id) {
+                    <mat-icon
+                      class="delete-icon"
+                      (click)="deleteDraft(draft.id, $event)"
+                      matTooltip="Excluir este rascunho"
+                    >
+                      delete
+                    </mat-icon>
+                  }
+                </div>
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    }
+
     <!-- Tipo de Endereço -->
     <div class="form-row">
       <app-primary-select
@@ -148,12 +194,26 @@
         Cancelar
       </button>
 
+      @if (form.dirty) {
+        <button
+          mat-stroked-button
+          type="button"
+          color="primary"
+          (click)="openSaveDraftDialog()"
+          [disabled]="isSaving"
+        >
+          <mat-icon>save_as</mat-icon>
+          Salvar Rascunho
+        </button>
+      }
+
       <button
         type="submit"
         mat-raised-button
         color="primary"
-        [disabled]="submitted && form.invalid"
+        [disabled]="isSaving || (!form.dirty && !selectedDraftId)"
         class="btn-submit"
+        #submitButton
       >
         <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
         {{ isEditMode ? 'Atualizar' : 'Salvar' }}

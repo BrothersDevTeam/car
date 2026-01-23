@@ -5,7 +5,14 @@ import { EventType } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  Output,
+  ViewChild,
+} from '@angular/core';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
@@ -33,6 +40,11 @@ export class LegalEntityInfoComponent {
   @Input() person!: Person;
   @Output() editEvent = new EventEmitter<EventType>();
   @Output() formSubmitted = new EventEmitter<void>();
+  @ViewChild(AddressListComponent) addressList?: AddressListComponent;
+
+  getActiveFormComponent(): any {
+    return this.addressList?.addressForm;
+  }
 
   constructor(
     private toastrService: ToastrService,
