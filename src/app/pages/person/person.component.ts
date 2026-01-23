@@ -15,7 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -102,7 +102,7 @@ export class PersonComponent implements OnInit, OnDestroy {
   searchType: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId' | 'all' = 'all';
   isCarAdmin: boolean = false;
   selectedPeople: Person[] = []; // Stores selected rows
-
+  pendingAddressDraftId: string | null = null;
   /**
    * Tipo de relacionamento principal selecionado (CLIENTE ou FUNCIONARIO)
    * null = nenhum filtro aplicado
@@ -183,6 +183,10 @@ export class PersonComponent implements OnInit, OnDestroy {
   naturalPersonForm?: NaturalPersonFormComponent;
   @ViewChild(LegalEntityFormComponent)
   legalEntityForm?: LegalEntityFormComponent;
+  @ViewChild(NaturalPersonInfoComponent)
+  naturalPersonInfo?: NaturalPersonInfoComponent;
+  @ViewChild(LegalEntityInfoComponent)
+  legalEntityInfo?: LegalEntityInfoComponent;
 
   constructor(
     private personService: PersonService,
@@ -357,6 +361,7 @@ export class PersonComponent implements OnInit, OnDestroy {
     this.openInfo.set(false);
     this.selectedPerson = null;
     this.selectedDraft = null;
+    this.pendingAddressDraftId = null;
     this.actionsService.hasFormChanges.set(false);
   }
 
@@ -451,16 +456,69 @@ export class PersonComponent implements OnInit, OnDestroy {
     this.openForm.set(true);
   }
 
+  @ViewChild('draftSelect') draftSelect?: MatSelect;
+
   handleDraftSelection(draft: FormDraft) {
+    if (draft.formType === 'endereco') {
+      console.log('PersonComponent: Address draft selected', draft);
+      const data = draft.data as any;
+      if (data.personId) {
+        this.clientListLoading.set(true);
+        this.personService.getById(data.personId).subscribe({
+          next: (person) => {
+            console.log('PersonComponent: Person loaded', person);
+            this.clientListLoading.set(false);
+            this.pendingAddressDraftId = draft.id;
+            console.log(
+              'PersonComponent: pendingAddressDraftId set to',
+              this.pendingAddressDraftId
+            );
+            this.handleSelectedPerson(person);
+
+            // Explicitly reset the dropdown
+            setTimeout(() => {
+              if (this.draftSelect) this.draftSelect.value = null;
+              this.selectedDraft = null;
+            });
+          },
+          error: (err) => {
+            this.clientListLoading.set(false);
+            this.toastr.error('Erro ao carregar pessoa do rascunho');
+            console.error(err);
+            setTimeout(() => {
+              if (this.draftSelect) this.draftSelect.value = null;
+              this.selectedDraft = null;
+            });
+          },
+        });
+      } else {
+        setTimeout(() => {
+          if (this.draftSelect) this.draftSelect.value = null;
+          this.selectedDraft = null;
+        });
+      }
+      return;
+    }
+
     this.selectedPerson = null;
     this.selectedDraft = draft;
     this.openForm.set(true);
+
+    // For Person drafts, wait for child component to sync before resetting
+    setTimeout(() => {
+      if (this.draftSelect) this.draftSelect.value = null;
+      // We don't reset 'selectedDraft' here because it might be bound to the form
+      // (though the form should ideally clone it).
+      // However, resetting the ViewChild value visually clears the dropdown.
+    }, 500);
   }
 
   private loadDrafts() {
     const pfDrafts = this.formDraftService.getDraftsByType('pessoa-fisica');
     const pjDrafts = this.formDraftService.getDraftsByType('pessoa-juridica');
-    this.availableDrafts = [...pfDrafts, ...pjDrafts]
+    const addressDrafts = this.formDraftService.getDraftsByType('endereco');
+
+    this.availableDrafts = [...pfDrafts, ...pjDrafts, ...addressDrafts]
       .filter((d) => !d.entityId || d.entityId.toString().startsWith('new_'))
       .sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
   }
@@ -774,17 +832,28 @@ export class PersonComponent implements OnInit, OnDestroy {
    * Obtém a referência do componente de formulário ativo
    * Verifica qual formulário está visível (Pessoa Física ou Jurídica)
    */
-  private getActiveFormComponent():
-    | NaturalPersonFormComponent
-    | LegalEntityFormComponent
-    | null {
-    // Verifica se é pessoa jurídica (CNPJ preenchido)
-    if (this.selectedPerson?.legalEntity) {
-      return this.legalEntityForm || null;
+  /**
+   * Obtém a referência do componente de formulário ativo
+   * Verifica qual formulário está visível (Pessoa Física, Jurídica ou Endereço em Info)
+   */
+  private getActiveFormComponent(): any {
+    // Se o formulário principal está aberto
+    if (this.openForm()) {
+      if (this.selectedPerson?.legalEntity) {
+        return this.legalEntityForm || null;
+      }
+      return this.naturalPersonForm || null;
     }
 
-    // Caso contrário, é pessoa física
-    return this.naturalPersonForm || null;
+    // Se a tela de info está aberta (possível edição de endereço)
+    if (this.openInfo()) {
+      if (this.selectedPerson?.legalEntity) {
+        return this.legalEntityInfo?.getActiveFormComponent();
+      }
+      return this.naturalPersonInfo?.getActiveFormComponent();
+    }
+
+    return null;
   }
 
   /**

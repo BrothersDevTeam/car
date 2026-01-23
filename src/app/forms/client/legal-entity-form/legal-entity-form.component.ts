@@ -426,24 +426,21 @@ export class LegalEntityFormComponent
     });
   }
 
-  /**
-   * Implementação da interface CanComponentDeactivate
-   * Salva rascunho local no localStorage
-   *
-   * @param silent - Se true, não mostra mensagem de sucesso
-   * @param draftName - Nome opcional para o rascunho
-   * @param existingDraftId - ID opcional
-   * @param closeAfterSave - Se true, fecha o formulário após salvar
-   */
   saveLocalDraft(
     silent: boolean = false,
     draftName?: string,
     existingDraftId?: string,
     closeAfterSave: boolean = true
   ): void {
+    // Prepara os dados do rascunho incluindo ID de edição se aplicável
+    const draftData = {
+      ...this.form.value,
+      _editingId: this.dataForm?.personId, // Preserva o ID se estiver editando
+    };
+
     const draftId = this.formDraftService.saveDraft(
       this.FORM_TYPE,
-      this.form.value,
+      draftData,
       this.dataForm?.personId,
       draftName
     );

@@ -359,14 +359,28 @@ export class NaturalPersonFormComponent
         }
 
         if (this.dataForm?.personId) {
+          // Captura o ID do rascunho ANTES da requisição
+          const draftIdToDelete = this.selectedDraftId;
+
           this.personService
             .update(formValue, this.dataForm.personId)
             .subscribe({
               next: () => {
                 this.toastrService.success('Atualização feita com sucesso');
-                // Converte personId para o tipo correto antes de passar
-                const personId = Number(this.dataForm!.personId);
-                this.formDraftService.removeDraft(this.FORM_TYPE, personId);
+
+                // Remove pelo ID específico do rascunho se houver
+                if (draftIdToDelete) {
+                  console.log(
+                    '[saveForm] Removendo rascunho de edição:',
+                    draftIdToDelete
+                  );
+                  this.formDraftService.removeDraftById(draftIdToDelete);
+                } else {
+                  // Fallback: Remove pelo personId
+                  const personId = Number(this.dataForm!.personId);
+                  this.formDraftService.removeDraft(this.FORM_TYPE, personId);
+                }
+
                 this.isSaving = false;
                 observer.next(true);
                 observer.complete();
@@ -481,17 +495,22 @@ export class NaturalPersonFormComponent
       }
     }
 
+    // Prepara os dados do rascunho incluindo ID de edição se aplicável
+    const draftData = {
+      ...this.form.value,
+      _editingId: this.dataForm?.personId, // Preserva o ID se estiver editando
+    };
+
     const draftId = this.formDraftService.saveDraft(
       this.FORM_TYPE,
-      this.form.value,
+      draftData,
       effectiveEntityId,
       draftName
     );
 
-    // CRITICAL FIX: Atualiza o ID do rascunho selecionado se for um novo
-    if (!this.selectedDraftId) {
-      this.selectedDraftId = draftId;
-    }
+    // CRITICAL FIX: SEMPRE atualiza o ID do rascunho selecionado
+    this.selectedDraftId = draftId;
+    console.log('[saveLocalDraft] selectedDraftId atualizado para:', draftId);
 
     if (!silent) {
       this.toastrService.info('Rascunho salvo localmente');
@@ -923,7 +942,19 @@ export class NaturalPersonFormComponent
    * Carrega os dados de um rascunho no formulário
    */
   private loadDraftData(draft: FormDraft): void {
+    // CRITICAL: Define o selectedDraftId ANTES de tudo
     this.selectedDraftId = draft.id;
+    console.log('[loadDraftData] selectedDraftId definido para:', draft.id);
+
+    // Se o rascunho tem _editingId, significa que é edição de registro existente
+    if (draft.data._editingId) {
+      // Restaura o dataForm para indicar modo de edição
+      this.dataForm = {
+        personId: draft.data._editingId,
+        ...draft.data,
+      } as any;
+    }
+
     this.form.patchValue(draft.data);
 
     const relationshipTypes = draft.data.relationshipTypes || [];
@@ -934,6 +965,7 @@ export class NaturalPersonFormComponent
     );
 
     console.log('[loadDraftData] Rascunho carregado:', draft);
+    console.log('[loadDraftData] Modo de edição:', !!draft.data._editingId);
 
     setTimeout(() => {
       this.captureInitialFormValue();

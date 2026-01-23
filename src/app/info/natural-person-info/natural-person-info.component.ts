@@ -1,4 +1,11 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EventType } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -32,8 +39,14 @@ export class NaturalPersonInfoComponent {
   readonly dialog = inject(MatDialog);
 
   @Input() person!: Person;
+  @Input() initialAddressDraftId: string | null = null;
   @Output() editEvent = new EventEmitter<EventType>();
   @Output() formSubmitted = new EventEmitter<void>();
+  @ViewChild(AddressListComponent) addressList?: AddressListComponent;
+
+  getActiveFormComponent(): any {
+    return this.addressList?.addressForm;
+  }
 
   constructor(
     private toastrService: ToastrService,

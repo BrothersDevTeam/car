@@ -138,6 +138,7 @@
         subscriptSizing="dynamic"
       >
         <mat-select
+          #draftSelect
           placeholder="Continuar Cadastro"
           [value]="selectedDraft"
           (selectionChange)="handleDraftSelection($event.value)"
@@ -210,13 +211,14 @@
     }
   }
   @if (openInfo()) {
-    <app-drawer (closeDrawer)="handleCloseDrawer()">
+    <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
       @if (!selectedPerson?.legalEntity) {
         <mat-tab-group [selectedIndex]="0">
           <mat-tab label="Pessoa Física">
             <app-natural-person-info
               (editEvent)="handleEdit()"
               [person]="selectedPerson!"
+              [initialAddressDraftId]="pendingAddressDraftId"
               (formSubmitted)="onFormSubmitted()"
             />
           </mat-tab>
@@ -230,6 +232,7 @@
             <app-legal-entity-info
               (editEvent)="handleEdit()"
               [person]="selectedPerson!"
+              [initialAddressDraftId]="pendingAddressDraftId"
               (formSubmitted)="onFormSubmitted()"
             />
           </mat-tab>
