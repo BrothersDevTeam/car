@@ -12,6 +12,39 @@
       </span>
     </div>
 
+    <mat-form-field
+      appearance="outline"
+      class="header-draft-select"
+      subscriptSizing="dynamic"
+      *ngIf="availableDrafts.length > 0"
+    >
+      <mat-select
+        placeholder="Continuar Cadastro"
+        [value]="selectedDraft"
+        (selectionChange)="handleDraftSelection($event.value)"
+        panelClass="header-draft-panel"
+      >
+        <mat-option [value]="null">Selecione o rascunho</mat-option>
+        <mat-option
+          *ngFor="let draft of availableDrafts"
+          [value]="draft"
+          class="draft-option-item"
+        >
+          <span class="draft-text">
+            {{ draft.draftName || 'Sem nome' }} -
+            {{ draft.lastModified | date: 'dd/MM HH:mm' }}
+          </span>
+          <button
+            mat-icon-button
+            (click)="removeDraft(draft, $event)"
+            matTooltip="Excluir rascunho"
+          >
+            <mat-icon color="warn">delete</mat-icon>
+          </button>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <button
       mat-raised-button
       color="primary"
@@ -28,10 +61,12 @@
   <div
     class="form-container"
     *ngIf="showForm"
+    #formContainer
   >
     <app-address-form
       [personId]="personId"
       [address]="editingAddress"
+      [initialDraftId]="selectedDraftId"
       (formSubmitted)="onFormSubmitted()"
       (formCancelled)="onFormCancelled()"
     ></app-address-form>

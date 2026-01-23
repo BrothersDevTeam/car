@@ -38,6 +38,7 @@ export class LegalEntityInfoComponent {
   readonly dialog = inject(MatDialog);
 
   @Input() person!: Person;
+  @Input() initialAddressDraftId: string | null = null;
   @Output() editEvent = new EventEmitter<EventType>();
   @Output() formSubmitted = new EventEmitter<void>();
   @ViewChild(AddressListComponent) addressList?: AddressListComponent;

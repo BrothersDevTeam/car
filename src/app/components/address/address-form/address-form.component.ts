@@ -19,7 +19,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -39,6 +39,7 @@ import {
   SaveDraftDialogComponent,
   SaveDraftDialogResult,
 } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
+import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 
 import {
   Address,
@@ -76,6 +77,7 @@ export class AddressFormComponent
 {
   @Input() personId!: string;
   @Input() address: Address | null = null;
+  @Input() initialDraftId: string | null = null;
   @Output() formSubmitted = new EventEmitter<void>();
   @Output() formCancelled = new EventEmitter<void>();
   @Output() formChanged = new EventEmitter<boolean>();
@@ -187,6 +189,10 @@ export class AddressFormComponent
     // Carrega rascunhos disponíveis
     this.loadAvailableDrafts();
 
+    if (this.initialDraftId) {
+      this.selectedDraftId = this.initialDraftId;
+    }
+
     // Monitora mudanças no formulário
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
@@ -250,7 +256,13 @@ export class AddressFormComponent
     console.log('📦 Dados para patchValue:', formData);
 
     this.form.patchValue(formData);
-    this.captureInitialFormValue();
+
+    // When loading data (including drafts), we consider this the new "clean" state
+    setTimeout(() => {
+      this.captureInitialFormValue();
+      this.form.markAsPristine();
+      this.actionsService.hasFormChanges.set(false);
+    }, 100);
 
     console.log('✅ Formulário após patchValue:', this.form.value);
   }
@@ -494,6 +506,7 @@ export class AddressFormComponent
     const draftData = {
       ...this.form.value,
       _editingId: this.address?.addressId, // Preserva o ID se estiver editando
+      personId: this.personId, // Include personId so PersonComponent can identify the owner
     };
 
     const draftId = this.formDraftService.saveDraft(
@@ -662,8 +675,29 @@ export class AddressFormComponent
   }
 
   onCancel() {
-    this.resetForm();
-    this.formCancelled.emit();
+    if (this.hasUnsavedChanges()) {
+      const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
+        ConfirmDialogComponent,
+        {
+          data: {
+            title: 'Descartar Alterações',
+            message: 'Existem alterações não salvas. Deseja descartá-las?',
+            confirmText: 'Descartar',
+            cancelText: 'Continuar Editando',
+          },
+        }
+      );
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result) {
+          this.resetForm();
+          this.formCancelled.emit();
+        }
+      });
+    } else {
+      this.resetForm();
+      this.formCancelled.emit();
+    }
   }
 
   private resetForm() {
