@@ -26,7 +26,7 @@
     mat-icon {
       position: absolute;
       right: 8px;
-      color: green;
+      color: var(--primary-color);
       cursor: pointer;
       transition: transform 0.3s ease;
 
@@ -97,19 +97,15 @@
       display: flex;
       align-items: center;
       padding: 12px;
-      border-bottom: 2px solid rgba(76, 175, 80, 0.35);
-      background: linear-gradient(
-        135deg,
-        rgba(76, 175, 80, 0.1) 0%,
-        rgba(76, 175, 80, 0.05) 100%
-      );
+      border-bottom: 1px solid var(--gray-secondary-bg);
+      background: #ffffff;
       position: sticky;
       top: 0;
       z-index: 1;
       gap: 8px;
 
       .search-icon {
-        color: #66bb6a;
+        color: var(--primary-color);
         font-size: 22px;
         margin-right: 4px;
         position: static;
@@ -123,35 +119,35 @@
 
       .search-input {
         flex: 1;
-        background: rgba(76, 175, 80, 0.12);
-        border: 1.5px solid rgba(76, 175, 80, 0.45);
+        background: var(--gray-secondary-bg);
+        border: 1px solid transparent;
         border-radius: 8px;
         outline: none;
-        color: green;
+        color: var(--text-color);
         font-size: 14px;
         padding: 10px 14px;
         transition: all 0.3s ease;
         font-weight: 500;
 
         &::placeholder {
-          color: rgba(129, 199, 132, 0.85);
+          color: #999;
           font-weight: 400;
         }
 
         &:focus {
-          background: rgba(76, 175, 80, 0.18);
-          border-color: #66bb6a;
-          box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.25);
+          background: #ffffff;
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px rgba(59, 122, 184, 0.25);
         }
 
         &:hover {
-          border-color: rgba(102, 187, 106, 0.65);
-          background: rgba(76, 175, 80, 0.15);
+          background: #ffffff;
+          border-color: #ccc;
         }
       }
 
       .clear-icon {
-        color: #81c784;
+        color: #999;
         font-size: 22px;
         cursor: pointer;
         position: static;
@@ -162,8 +158,8 @@
 
         &:hover {
           transform: scale(1.15);
-          color: #ef5350;
-          background-color: rgba(239, 83, 80, 0.15);
+          color: var(--danger-color);
+          background-color: rgba(239, 83, 80, 0.1);
         }
 
         &:active {
@@ -187,16 +183,16 @@
       }
 
       &::-webkit-scrollbar-track {
-        background: rgba(76, 175, 80, 0.05);
+        background: rgba(0, 0, 0, 0.05);
         border-radius: 4px;
       }
 
       &::-webkit-scrollbar-thumb {
-        background: rgba(76, 175, 80, 0.35);
+        background: rgba(0, 0, 0, 0.2);
         border-radius: 4px;
 
         &:hover {
-          background: rgba(76, 175, 80, 0.5);
+          background: rgba(0, 0, 0, 0.3);
         }
       }
 
@@ -221,16 +217,16 @@
 
         &.no-results {
           cursor: default;
-          color: rgba(129, 199, 132, 0.85);
+          color: #999;
           font-style: italic;
           justify-content: center;
           padding: 24px;
-          background-color: rgba(76, 175, 80, 0.08);
+          background-color: transparent;
           text-align: center;
           font-size: 14px;
 
           &:hover {
-            background-color: rgba(76, 175, 80, 0.08);
+            background-color: transparent;
           }
         }
 
