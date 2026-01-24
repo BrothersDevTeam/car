@@ -65,6 +65,10 @@
       min-height: 60px;
     }
 
+    input:not([type='number']) {
+      text-transform: uppercase;
+    }
+
     input[type='number'] {
       &::-webkit-inner-spin-button,
       &::-webkit-outer-spin-button {

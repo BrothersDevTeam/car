@@ -76,6 +76,14 @@ export class BrandFormDialogComponent implements OnInit {
         ],
       ],
     });
+
+    this.brandForm.get('name')?.valueChanges.subscribe((value) => {
+      if (value) {
+        this.brandForm
+          .get('name')
+          ?.setValue(value.toUpperCase(), { emitEvent: false });
+      }
+    });
   }
 
   onCancel(): void {

@@ -91,6 +91,14 @@ export class ModelFormDialogComponent implements OnInit {
         ],
       ],
     });
+
+    this.modelForm.get('name')?.valueChanges.subscribe((value) => {
+      if (value) {
+        this.modelForm
+          .get('name')
+          ?.setValue(value.toUpperCase(), { emitEvent: false });
+      }
+    });
   }
 
   // Validator customizado para garantir que yearEnd >= yearStart
