@@ -54,17 +54,14 @@ export type CreateBrand = Omit<Brand, 'brandId'>;
  * Interface para Model (modelo de veículo)
  */
 export interface Model {
-  modelId: string;
-  storeId: string | null;
   brandId: string;
-  name: string;
-  description: string;
-  yearStart?: string;
-  yearEnd?: string;
-  category?: string;
-  status: string;
   isGlobal: boolean;
+  name: string;
+  status: string;
+  storeId: string | null;
+  modelId: string;
 }
+
 export type CreateModel = Omit<Model, 'modelId'> & {
   brandId: string;
 };
