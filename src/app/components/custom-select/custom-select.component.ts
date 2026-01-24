@@ -7,6 +7,8 @@ import {
   OnChanges,
   OnInit,
   ChangeDetectorRef,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import {
   FormControl,
@@ -54,6 +56,8 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   searchTerm: string = '';
   filteredOptions: { id: string; name: string }[] = [];
   isLoading: boolean = false;
+
+  @ViewChild('searchInput') searchInput!: ElementRef;
 
   private serviceMap: { [key: string]: any } = {};
 
@@ -149,6 +153,11 @@ export class CustomSelectComponent implements OnInit, OnChanges {
     if (this.isOpen) {
       this.searchTerm = '';
       this.filteredOptions = [...this.options];
+      setTimeout(() => {
+        if (this.searchInput) {
+          this.searchInput.nativeElement.focus();
+        }
+      }, 100);
     }
   }
 
