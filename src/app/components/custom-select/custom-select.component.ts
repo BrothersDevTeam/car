@@ -47,6 +47,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   @Input() disabled: boolean = false;
   @Output() onCreateNew = new EventEmitter<void>();
   @Output() onEdit = new EventEmitter<string>(); // Emite o ID da pessoa a editar
+  @Output() itemChanged = new EventEmitter<void>(); // Notifica que um item foi criado/editado/deletado
 
   selectedOption: { id: string; name: string } | null = null;
   isOpen: boolean = false;
@@ -76,18 +77,31 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(): void {
+    console.log(
+      `[${this.listType}] ngOnChanges - options received:`,
+      this.options?.length
+    );
     if (this.options.length > 0) {
       this.filteredOptions = [...this.options];
+      console.log(
+        `[${this.listType}] ngOnChanges - filteredOptions updated:`,
+        this.filteredOptions.length
+      );
       // Aguarda o ciclo de detecção de mudanças para pegar o valor correto do control
       setTimeout(() => {
         this.setSelectedOption();
         this.cdr.detectChanges(); // Força detecção de mudanças
       }, 100); // Aumentado para 100ms
     } else {
+      console.log(`[${this.listType}] ngOnChanges - options empty or null`);
       // Aguarda um pouco para as opções carregarem
       setTimeout(() => {
         if (this.options.length > 0) {
           this.filteredOptions = [...this.options];
+          console.log(
+            `[${this.listType}] ngOnChanges (delayed) - filteredOptions updated:`,
+            this.filteredOptions.length
+          );
           this.setSelectedOption();
           this.cdr.detectChanges();
         }
@@ -312,6 +326,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
             this.toastrService.success(
               this.typeListTexts[this.listType].successDeleteMessage
             );
+            this.itemChanged.emit();
           },
           error: (error: any) => {
             console.error('Erro ao deletar:', error);
@@ -405,10 +420,16 @@ export class CustomSelectComponent implements OnInit, OnChanges {
         if (mode === 'create') {
           this.modelService.create(payload).subscribe({
             next: (response: any) => {
+              console.log(
+                'CustomSelect - Modelo criado, recarregando...',
+                response
+              );
               this.reloadModels();
               this.toastrService.success(
                 this.typeListTexts.model.successCreateMessage
               );
+              console.log('CustomSelect - Emitting itemChanged');
+              this.itemChanged.emit();
             },
             error: (error: any) => {
               console.error('Erro ao criar modelo:', error);
@@ -522,6 +543,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
               this.toastrService.success(
                 this.typeListTexts[this.listType].successCreateMessage
               );
+              this.itemChanged.emit();
             },
             error: (error: any) => {
               console.error('Erro ao criar:', error);
@@ -546,6 +568,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
               this.toastrService.success(
                 this.typeListTexts[this.listType].successUpdateMessage
               );
+              this.itemChanged.emit();
             },
             error: (error: any) => {
               console.error('Erro ao editar:', error);
@@ -570,6 +593,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
           name: brand.name,
         }));
         this.filteredOptions = [...this.options];
+        this.itemChanged.emit();
       },
       error: (error) => {
         console.error('Erro ao recarregar marcas:', error);
@@ -589,6 +613,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
             name: model.name,
           }));
           this.filteredOptions = [...this.options];
+          this.itemChanged.emit();
         },
         error: (error) => {
           console.error('Erro ao recarregar modelos:', error);
@@ -608,6 +633,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
           name: color.name,
         }));
         this.filteredOptions = [...this.options];
+        this.itemChanged.emit();
       },
       error: (error) => {
         console.error('Erro ao recarregar cores:', error);

@@ -158,6 +158,86 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     private toastrService: ToastrService
   ) {}
 
+  // Métodos de carregamento para serem chamados quando houver alteração
+  loadBrands() {
+    this.brandService.getBrands().subscribe({
+      next: (response) => {
+        if (response.page.totalElements > 0) {
+          this.brands = response.content.map((brand) => ({
+            id: brand.brandId,
+            name: brand.name,
+          }));
+        }
+        this.brandsLoaded = true;
+        this.tryFillFormOnEdit();
+      },
+      error: (error) => {
+        console.error('Erro ao carregar marcas:', error);
+        this.toastrService.error('Erro ao carregar marcas');
+        this.brandsLoaded = true;
+      },
+    });
+  }
+
+  loadModels() {
+    const brandControlValue = this.brandControl.value;
+    const brandId = brandControlValue?.id;
+    console.log('loadModels - brandControl value:', brandControlValue);
+    console.log('loadModels - brandId:', brandId);
+
+    if (brandId) {
+      this.modelService.getModelsByBrand(brandId).subscribe({
+        next: (response) => {
+          console.log('loadModels - response:', response);
+          this.models = response.content.map((model) => ({
+            id: model.modelId,
+            name: model.name,
+          }));
+          this.selectModelDisabled.set(false);
+
+          // Se estamos editando, tenta selecionar o modelo correto
+          if (this.dataForm?.model) {
+            const selectedModel = this.models.find(
+              (m) => m.name === this.dataForm!.model
+            );
+            if (selectedModel && !this.modelControl.value?.id) {
+              this.modelControl.patchValue({
+                id: selectedModel.id,
+                name: selectedModel.name,
+              });
+            }
+          }
+        },
+        error: (error) => {
+          console.error('Erro ao carregar modelos:', error);
+          this.toastrService.error('Erro ao carregar modelos');
+          this.models = [];
+          this.selectModelDisabled.set(true);
+        },
+      });
+    }
+  }
+
+  loadColors() {
+    this.colorService.getColors().subscribe({
+      next: (response) => {
+        if (response.page.totalElements > 0) {
+          this.colors = response.content.map((color) => ({
+            id: color.colorId,
+            name: color.name,
+          }));
+        }
+        this.colorsLoaded = true;
+        this.tryFillFormOnEdit();
+      },
+      error: (error) => {
+        console.error('Erro ao carregar cores:', error);
+        this.toastrService.error('Erro ao carregar cores');
+        this.colorsLoaded = true;
+      },
+    });
+  }
+
   ngOnInit() {
     // Carrega opções de tipos de combustível do enum
     this.fuelTypesOptions = Object.values(FuelTypes).map((fuelType) => ({
@@ -172,25 +252,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     // Carrega marcas do backend
-    this.brandService.getBrands().subscribe({
-      next: (response) => {
-        console.log('Marcas carregadas:', response);
-        if (response.page.totalElements > 0) {
-          this.brands = response.content.map((brand) => ({
-            id: brand.brandId,
-            name: brand.name,
-          }));
-        }
-        this.brandsLoaded = true;
-        // Tenta preencher o formulário se já tiver dataForm
-        this.tryFillFormOnEdit();
-      },
-      error: (error) => {
-        console.error('Erro ao carregar marcas:', error);
-        this.toastrService.error('Erro ao carregar marcas');
-        this.brandsLoaded = true;
-      },
-    });
+    this.loadBrands();
 
     // Carrega pessoas do backend
     this.personService.getPaginatedData(0, 1000).subscribe({
@@ -214,25 +276,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     // Carrega cores do backend
-    this.colorService.getColors().subscribe({
-      next: (response) => {
-        console.log('Cores carregadas:', response);
-        if (response.page.totalElements > 0) {
-          this.colors = response.content.map((color) => ({
-            id: color.colorId,
-            name: color.name, // Usar o campo 'name' do backend
-          }));
-        }
-        this.colorsLoaded = true;
-        // Tenta preencher o formulário se já tiver dataForm
-        this.tryFillFormOnEdit();
-      },
-      error: (error) => {
-        console.error('Erro ao carregar cores:', error);
-        this.toastrService.error('Erro ao carregar cores');
-        this.colorsLoaded = true;
-      },
-    });
+    this.loadColors();
 
     // Quando a marca mudar, carrega os modelos
     this.subscriptions.add(
@@ -244,22 +288,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
             this.modelControl.reset();
 
             // Carrega modelos da marca
-            this.modelService.getModelsByBrand(brand.id).subscribe({
-              next: (response) => {
-                console.log('Modelos carregados:', response);
-                this.models = response.content.map((model) => ({
-                  id: model.modelId,
-                  name: model.name,
-                }));
-                this.selectModelDisabled.set(false);
-              },
-              error: (error) => {
-                console.error('Erro ao carregar modelos:', error);
-                this.toastrService.error('Erro ao carregar modelos');
-                this.models = [];
-                this.selectModelDisabled.set(true);
-              },
-            });
+            this.loadModels();
           } else {
             this.models = [];
             this.modelControl.reset();
@@ -438,7 +467,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       category: formValues.category || '',
       features: formValues.features || '',
       origin: formValues.origin || 'NACIONAL',
-      fuelTypes: formValues.fuelTypes || [],
+      fuelTypes: this.mapFuelTypeToBackend(formValues.fuelTypes),
     };
 
     // Remove campos vazios, EXCETO color que pode ser string vazia
@@ -596,5 +625,71 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
         console.error('Erro ao recarregar pessoas:', error);
       },
     });
+  }
+
+  /**
+   * Mapeia os valores complexos do frontend para o Enum simples do backend
+   */
+  private mapFuelTypeToBackend(frontendValue: string | string[]): string[] {
+    const valueToCheck = Array.isArray(frontendValue)
+      ? frontendValue[0] // Assumindo seleção única por enquanto, pega o primeiro
+      : frontendValue;
+
+    if (!valueToCheck) return [];
+
+    // Normaliza para maiúsculas para facilitar comparação
+    const upperValue = valueToCheck.toUpperCase();
+
+    // Mapeamento baseado no FuelTypes.ts do frontend
+    switch (upperValue) {
+      case 'ÁLCOOL':
+        return ['ALCOOL'];
+      case 'GASOLINA':
+        return ['GASOLINA'];
+      case 'DIESEL':
+        return ['DIESEL'];
+      case 'GÁS NATURAL VEICULAR':
+        return ['GNV'];
+
+      // Elétricos
+      case 'ELÉTRICO/FONTE INTERNA':
+      case 'ELÉTRICO/FONTE EXTERNA':
+        return ['ELETRICO'];
+
+      // Flex e Misturas
+      case 'ÁLCOOL/GASOLINA': // Flex
+        return ['ALCOOL', 'GASOLINA'];
+
+      // Híbridos
+      case 'GASOLINA/ELÉTRICO':
+        return ['GASOLINA', 'ELETRICO'];
+
+      // GNV Combinado
+      case 'GASOLINA/GÁS NATURAL VEICULAR':
+      case 'GASOLINA/GÁS NATURAL COMBUSTÍVEL':
+        return ['GASOLINA', 'GNV'];
+
+      case 'ÁLCOOL/GÁS NATURAL VEICULAR':
+      case 'ÁLCOOL/GÁS NATURAL COMBUSTÍVEL':
+        return ['ALCOOL', 'GNV'];
+
+      case 'DIESEL/GÁS NATURAL VEICULAR':
+      case 'DIESEL/GÁS NATURAL COMBUSTÍVEL':
+        return ['DIESEL', 'GNV'];
+
+      case 'GASOLINA/ÁLCOOL/GÁS NATURAL VEICULAR': // Flex + GNV
+        return ['GASOLINA', 'ALCOOL', 'GNV'];
+
+      default:
+        // Se não encontrar mapeamento exato, tenta retornar o próprio valor
+        // se ele for um dos aceitos pelo backend (ex: GASOLINA, ALCOOL)
+        // Remove acentos e caracteres especiais para tentar dar match
+        return [
+          valueToCheck
+            .normalize('NFD') // Decomponha acentos
+            .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+            .toUpperCase(),
+        ];
+    }
   }
 }

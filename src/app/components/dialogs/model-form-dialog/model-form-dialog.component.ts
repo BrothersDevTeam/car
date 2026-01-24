@@ -81,50 +81,29 @@ export class ModelFormDialogComponent implements OnInit {
   }
 
   private initForm(): void {
-    this.modelForm = this.fb.group(
-      {
-        name: [
-          '',
-          [
-            Validators.required,
-            Validators.minLength(1),
-            Validators.maxLength(100),
-          ],
+    this.modelForm = this.fb.group({
+      name: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(1),
+          Validators.maxLength(100),
         ],
-        description: ['', [Validators.maxLength(500)]],
-        yearStart: [
-          '',
-          [
-            Validators.pattern(/^\d{4}$/),
-            Validators.min(1900),
-            Validators.max(this.currentYear + 1),
-          ],
-        ],
-        yearEnd: [
-          '',
-          [
-            Validators.pattern(/^\d{4}$/),
-            Validators.min(1900),
-            Validators.max(this.currentYear + 1),
-          ],
-        ],
-        category: [''],
-      },
-      { validators: this.yearRangeValidator }
-    );
+      ],
+    });
   }
 
   // Validator customizado para garantir que yearEnd >= yearStart
-  private yearRangeValidator(form: FormGroup) {
-    const yearStart = form.get('yearStart')?.value;
-    const yearEnd = form.get('yearEnd')?.value;
+  // private yearRangeValidator(form: FormGroup) {
+  //   const yearStart = form.get('yearStart')?.value;
+  //   const yearEnd = form.get('yearEnd')?.value;
 
-    if (yearStart && yearEnd && parseInt(yearEnd) < parseInt(yearStart)) {
-      return { yearRange: true };
-    }
+  //   if (yearStart && yearEnd && parseInt(yearEnd) < parseInt(yearStart)) {
+  //     return { yearRange: true };
+  //   }
 
-    return null;
-  }
+  //   return null;
+  // }
 
   onCancel(): void {
     this.dialogRef.close(null);
@@ -136,10 +115,10 @@ export class ModelFormDialogComponent implements OnInit {
 
       let payload: any = {
         name: formValue.name,
-        description: formValue.description || '',
-        yearStart: formValue.yearStart || null,
-        yearEnd: formValue.yearEnd || null,
-        category: formValue.category || null,
+        // description: formValue.description || '',
+        // yearStart: formValue.yearStart || null,
+        // yearEnd: formValue.yearEnd || null,
+        // category: formValue.category || null,
         status: 'ACTIVE', // Sempre ativo ao criar/editar via diálogo
         isGlobal: false, // Sempre false para modelos criados pela loja
         storeId: this.authService.getStoreId(), // Será preenchido pelo backend com a loja do usuário

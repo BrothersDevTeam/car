@@ -68,6 +68,7 @@
         [control]="brandControl"
         placeholder="Selecione uma marca"
         matTooltip="Selecione a marca do veículo"
+        (itemChanged)="loadBrands()"
       ></app-custom-select>
     </div>
 
@@ -86,6 +87,7 @@
         [disabled]="selectModelDisabled()"
         [selectedBrand]="brandControl.value"
         matTooltip="Selecione o modelo do veículo"
+        (itemChanged)="loadModels()"
       ></app-custom-select>
     </div>
 
@@ -98,6 +100,7 @@
         [control]="colorControl"
         placeholder="Selecione uma cor"
         matTooltip="Selecione a cor do veículo"
+        (itemChanged)="loadColors()"
       ></app-custom-select>
     </div>
 

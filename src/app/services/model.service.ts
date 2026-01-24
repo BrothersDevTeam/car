@@ -34,11 +34,8 @@ export class ModelService {
   getModelsByBrand(brandId: string): Observable<PaginationResponse<Model>> {
     const cacheKey = `brand_${brandId}`;
 
-    if (this.cache.has(cacheKey)) {
-      return of(this.cache.get(cacheKey)!);
-    }
-
     // Busca todos os modelos da marca (size=1000)
+    // REMOVIDO CACHE TEMPORARIAMENTE PARA DEBUG
     return this.http
       .get<
         PaginationResponse<Model>
@@ -46,8 +43,11 @@ export class ModelService {
       .pipe(
         first(),
         tap((response) => {
-          console.log('Modelos carregados para marca:', brandId, response);
-          this.cache.set(cacheKey, response);
+          console.log(
+            'Modelos carregados para marca (SEM CACHE):',
+            brandId,
+            response
+          );
         })
       );
   }
