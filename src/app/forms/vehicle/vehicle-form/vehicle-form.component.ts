@@ -40,7 +40,13 @@ import { PrimaryInputComponent } from '@components/primary-input/primary-input.c
 import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
-import { VehicleForm } from '@interfaces/vehicle';
+import {
+  VehicleForm,
+  SPECIES_OPTIONS,
+  CATEGORY_OPTIONS,
+  VEHICLE_TYPE_OPTIONS,
+} from '@interfaces/vehicle';
+import { FuelTypes, FuelTypesLabels } from '../../../enums/fuelTypes';
 
 import { VehicleService } from '@services/vehicle.service';
 import { BrandService } from '@services/brand.service';
@@ -48,8 +54,6 @@ import { ModelService } from '@services/model.service';
 import { ColorService } from '@services/color.service';
 import { AuthService } from '@services/auth/auth.service';
 import { PersonService } from '@services/person.service';
-
-import { FuelTypes, FuelTypesLabels } from '../../../enums/fuelTypes';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -100,6 +104,11 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   @ViewChild('submitButton', { static: false, read: ElementRef })
   submitButton!: ElementRef<HTMLButtonElement>;
+
+  // Opções para os selects
+  speciesOptions = SPECIES_OPTIONS;
+  categoryOptions = CATEGORY_OPTIONS;
+  vehicleTypeOptions = VEHICLE_TYPE_OPTIONS;
 
   @Input() dataForm: VehicleForm | null = null;
   @Output() formSubmitted = new EventEmitter<void>();

@@ -188,29 +188,59 @@
       type="text"
     />
 
-    <!-- Espécie -->
+    <app-primary-select
+      formControlName="species"
+      label="Espécie"
+      inputName="species"
+      placeholder="Selecione a espécie"
+      [options]="speciesOptions"
+      optionLabel="label"
+      optionValue="value"
+    ></app-primary-select>
+
+    <!-- Espécie
     <app-primary-input
       formControlName="species"
       label="Espécie"
       inputName="species"
       type="text"
-    />
+    /> -->
 
     <!-- Categoria -->
-    <app-primary-input
+
+    <app-primary-select
+      formControlName="category"
+      label="Categoria"
+      inputName="category"
+      placeholder="Selecione a categoria"
+      [options]="categoryOptions"
+      optionLabel="label"
+      optionValue="value"
+    ></app-primary-select>
+    <!-- <app-primary-input
       formControlName="category"
       label="Categoria"
       inputName="category"
       type="text"
-    />
+    /> -->
 
     <!-- Tipo de Veículo -->
-    <app-primary-input
+
+    <app-primary-select
+      formControlName="vehicleType"
+      label="Tipo de Veículo"
+      inputName="vehicleType"
+      placeholder="Selecione o tipo"
+      [options]="vehicleTypeOptions"
+      optionLabel="label"
+      optionValue="value"
+    ></app-primary-select>
+    <!-- <app-primary-input
       formControlName="vehicleType"
       label="Tipo de Veículo"
       inputName="vehicleType"
       type="text"
-    />
+    /> -->
 
     <!-- Características -->
     <app-primary-input

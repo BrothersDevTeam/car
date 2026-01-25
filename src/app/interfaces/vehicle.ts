@@ -1,4 +1,7 @@
 import { FuelTypes } from '../enums/fuelTypes';
+import { VehicleCategory } from '../enums/vehicleCategoryTypes';
+import { VehicleSpecies } from '../enums/vehicleSpeciesTypes';
+import { VehicleType } from '../enums/vehicleType';
 import { Person } from './person';
 
 /**
@@ -98,3 +101,30 @@ export interface UpdateColor {
   status?: string;
   isGlobal?: boolean;
 }
+
+export const SPECIES_OPTIONS = [
+  { label: 'Passageiro', value: VehicleSpecies.PASSAGEIRO },
+  { label: 'Carga', value: VehicleSpecies.CARGA },
+  { label: 'Misto', value: VehicleSpecies.MISTO },
+  { label: 'Tração', value: VehicleSpecies.TRACAO },
+  { label: 'Especial', value: VehicleSpecies.ESPECIAL },
+  { label: 'Coleção', value: VehicleSpecies.COLECAO },
+];
+
+export const VEHICLE_TYPE_OPTIONS = [
+  { label: 'Automóvel', value: VehicleType.AUTOMOVEL },
+  { label: 'Motocicleta', value: VehicleType.MOTOCICLETA },
+  { label: 'Caminhonete (Carga, ex: Hilux)', value: VehicleType.CAMINHONETE },
+  { label: 'Camioneta (Misto, ex: SW4, SUV)', value: VehicleType.CAMIONETA },
+  { label: 'Caminhão', value: VehicleType.CAMINHAO },
+  { label: 'Ônibus', value: VehicleType.ONIBUS },
+  { label: 'Reboque / Carretinha', value: VehicleType.REBOQUE },
+];
+
+export const CATEGORY_OPTIONS = [
+  { label: 'Particular', value: VehicleCategory.PARTICULAR },
+  { label: 'Aluguel (Comercial)', value: VehicleCategory.ALUGUEL },
+  { label: 'Oficial', value: VehicleCategory.OFICIAL },
+  { label: 'Aprendizagem (Autoescola)', value: VehicleCategory.APRENDIZAGEM },
+  { label: 'Diplomático', value: VehicleCategory.DIPLOMATICO },
+];

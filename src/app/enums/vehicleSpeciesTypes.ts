@@ -1,0 +1,8 @@
+export enum VehicleSpecies {
+  PASSAGEIRO = 'PASSAGEIRO',
+  CARGA = 'CARGA',
+  MISTO = 'MISTO',
+  TRACAO = 'TRACAO',
+  ESPECIAL = 'ESPECIAL',
+  COLECAO = 'COLECAO',
+}
