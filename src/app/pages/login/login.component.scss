@@ -13,7 +13,7 @@
       no-repeat center center;
   background-size: cover;
   overflow: hidden;
-  font-family: 'Roboto', sans-serif; // Assuming a sans-serif font is available
+  font-family: 'Nasalization', sans-serif;
 }
 
 .content {
@@ -36,10 +36,11 @@
   padding-right: 2rem;
 
   h1 {
-    font-size: 5rem;
+    font-size: 6rem;
     font-weight: 800;
     line-height: 1;
     text-transform: uppercase;
+    font-family: 'Nasalization', sans-serif;
     color: rgba(255, 255, 255, 0.8);
     // Slight transparency effect on text
     mask-image: linear-gradient(
@@ -60,12 +61,14 @@
       font-weight: 500;
       margin-bottom: 0.5rem;
       padding-bottom: 0.5rem;
+      // font-family: 'Nasalization', sans-serif;
     }
 
     h2 {
       font-size: 2.5rem;
       font-weight: 800;
       text-transform: uppercase;
+      font-family: 'Nasalization', sans-serif;
       color: rgba(255, 255, 255, 0.5);
     }
   }
@@ -189,6 +192,7 @@
   color: white;
   font-size: 1rem;
   font-weight: 700;
+  font-family: 'Nasalization', sans-serif;
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
@@ -221,6 +225,7 @@
   letter-spacing: 1px;
   cursor: pointer;
   transition: all 0.2s;
+  font-family: 'Nasalization', sans-serif;
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);

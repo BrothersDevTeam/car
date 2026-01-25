@@ -1,1 +1,12 @@
 @use './styles/main' as *;
+
+@font-face {
+  font-family: 'Nasalization';
+  src: url('/fonts/nasalization-rg.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.font-nasalization {
+  font-family: 'Nasalization', sans-serif;
+}
