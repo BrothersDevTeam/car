@@ -33,6 +33,17 @@
       </mat-radio-group>
     </div>
 
+    <!-- Tipo de Veículo -->
+    <app-primary-select
+      formControlName="vehicleType"
+      label="Tipo de Veículo"
+      inputName="vehicleType"
+      placeholder="Selecione o tipo"
+      [options]="vehicleTypeOptions"
+      optionLabel="label"
+      optionValue="value"
+    ></app-primary-select>
+
     <!-- Placa (obrigatório) -->
     <app-primary-input
       formControlName="plate"
@@ -72,7 +83,7 @@
       ></app-custom-select>
     </div>
 
-    <!-- Seleção de Modelo (habilitado apenas após selecionar marca) -->
+    <!-- Seleção de Modelo -->
     <div class="custom-selects-container">
       <app-custom-select
         listType="model"
@@ -82,14 +93,43 @@
         [placeholder]="
           selectModelDisabled()
             ? 'Selecione uma marca primeiro'
-            : 'Selecione um modelo'
+            : loadingModels()
+              ? 'Carregando modelos...'
+              : 'Selecione um modelo'
         "
-        [disabled]="selectModelDisabled()"
+        [disabled]="selectModelDisabled() || loadingModels()"
         [selectedBrand]="brandControl.value"
         matTooltip="Selecione o modelo do veículo"
         (itemChanged)="loadModels()"
       ></app-custom-select>
     </div>
+
+    <!-- Seleção de Ano/Versão (FIPE) -->
+    <div class="custom-selects-container">
+      <app-custom-select
+        listType="model"
+        [label]="'Ano/Versão (FIPE)'"
+        [options]="years"
+        [control]="fipeYearControl"
+        [placeholder]="
+          selectYearDisabled()
+            ? 'Selecione um modelo primeiro'
+            : loadingYears()
+              ? 'Carregando versões...'
+              : 'Selecione o ano/versão'
+        "
+        [disabled]="selectYearDisabled() || loadingYears()"
+        [selectedBrand]="brandControl.value"
+        matTooltip="Selecione o ano/versão para preencher os dados automaticamente"
+      ></app-custom-select>
+    </div>
+
+    @if (loadingDetails()) {
+      <div class="loading-details">
+        <mat-icon class="spin">autorenew</mat-icon>
+        <span>Buscando detalhes do veículo na FIPE...</span>
+      </div>
+    }
 
     <!-- Seleção de Cor -->
     <div class="custom-selects-container">
@@ -221,24 +261,6 @@
       formControlName="category"
       label="Categoria"
       inputName="category"
-      type="text"
-    /> -->
-
-    <!-- Tipo de Veículo -->
-
-    <app-primary-select
-      formControlName="vehicleType"
-      label="Tipo de Veículo"
-      inputName="vehicleType"
-      placeholder="Selecione o tipo"
-      [options]="vehicleTypeOptions"
-      optionLabel="label"
-      optionValue="value"
-    ></app-primary-select>
-    <!-- <app-primary-input
-      formControlName="vehicleType"
-      label="Tipo de Veículo"
-      inputName="vehicleType"
       type="text"
     /> -->
 

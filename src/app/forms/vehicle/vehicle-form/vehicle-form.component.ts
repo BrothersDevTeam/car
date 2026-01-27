@@ -32,7 +32,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatRadioModule } from '@angular/material/radio';
 
 import { ToastrService } from 'ngx-toastr';
-import { distinctUntilChanged, forkJoin, Subscription } from 'rxjs';
+import { distinctUntilChanged, Subscription } from 'rxjs';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
@@ -49,11 +49,10 @@ import {
 import { FuelTypes, FuelTypesLabels } from '../../../enums/fuelTypes';
 
 import { VehicleService } from '@services/vehicle.service';
-import { BrandService } from '@services/brand.service';
-import { ModelService } from '@services/model.service';
 import { ColorService } from '@services/color.service';
 import { AuthService } from '@services/auth/auth.service';
 import { PersonService } from '@services/person.service';
+import { FipeService } from '@services/fipe.service';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -82,6 +81,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   brands: { id: string; name: string }[] = [];
   models: { id: string; name: string }[] = [];
+  years: { id: string; name: string }[] = []; // FIPE Years
   colors: { id: string; name: string }[] = [];
   persons: { id: string; name: string }[] = [];
 
@@ -90,10 +90,15 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   selectedPersonToEdit: Person | null = null;
 
   // Flags para controlar o carregamento
-  private brandsLoaded = false;
-  private colorsLoaded = false;
-  private personsLoaded = false;
+  brandsLoaded = false;
+  colorsLoaded = false;
+  personsLoaded = false;
   private formFilled = false; // Flag para garantir preenchimento único
+
+  // Loading states for new FIPE fields
+  loadingModels = signal(false);
+  loadingYears = signal(false);
+  loadingDetails = signal(false);
 
   // Opções de tipos de combustível
   fuelTypesOptions: { value: string; label: string }[] = [];
@@ -115,6 +120,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   @Output() formChanged = new EventEmitter<boolean>();
 
   selectModelDisabled = signal(true);
+  selectYearDisabled = signal(true);
 
   /**
    * Formulário com FormGroups aninhados para brand, model e color
@@ -131,6 +137,10 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       name: [''],
     }),
     model: this.formBuilderService.group({
+      id: [''],
+      name: [''],
+    }),
+    fipeYear: this.formBuilderService.group({
       id: [''],
       name: [''],
     }),
@@ -160,29 +170,47 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   constructor(
     private vehicleService: VehicleService,
-    private brandService: BrandService,
-    private modelService: ModelService,
+    private fipeService: FipeService, // Injected FipeService
     private colorService: ColorService,
     private personService: PersonService,
     private toastrService: ToastrService
-  ) {}
+  ) { }
+
+  // Método auxiliar para mapear o tipo de veículo do formulário para o tipo da API FIPE
+  private getFipeVehicleType(): string {
+    const rawType = this.form.get('vehicleType')?.value;
+
+    // Mapeamento baseado no enum VehicleType
+    switch (rawType) {
+      case 'MOTOCICLETA':
+        return 'motos';
+      case 'CAMINHAO':
+      case 'ONIBUS': // Assumindo caminhões para ônibus por enquanto
+        return 'caminhoes';
+      case 'AUTOMOVEL':
+      case 'CAMINHONETE':
+      case 'CAMIONETA':
+      default:
+        return 'carros';
+    }
+  }
 
   // Métodos de carregamento para serem chamados quando houver alteração
   loadBrands() {
-    this.brandService.getBrands().subscribe({
+    const fipeType = this.getFipeVehicleType();
+
+    this.fipeService.getMarcas(fipeType).subscribe({
       next: (response) => {
-        if (response.page.totalElements > 0) {
-          this.brands = response.content.map((brand) => ({
-            id: brand.brandId,
-            name: brand.name,
-          }));
-        }
+        this.brands = response.map((brand) => ({
+          id: brand.codigo,
+          name: brand.nome,
+        }));
         this.brandsLoaded = true;
         this.tryFillFormOnEdit();
       },
       error: (error) => {
-        console.error('Erro ao carregar marcas:', error);
-        this.toastrService.error('Erro ao carregar marcas');
+        console.error('Erro ao carregar marcas FIPE:', error);
+        this.toastrService.error('Erro ao carregar marcas (FIPE)');
         this.brandsLoaded = true;
       },
     });
@@ -191,18 +219,18 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   loadModels() {
     const brandControlValue = this.brandControl.value;
     const brandId = brandControlValue?.id;
-    console.log('loadModels - brandControl value:', brandControlValue);
-    console.log('loadModels - brandId:', brandId);
+    const fipeType = this.getFipeVehicleType();
 
     if (brandId) {
-      this.modelService.getModelsByBrand(brandId).subscribe({
+      this.loadingModels.set(true);
+      this.fipeService.getModelos(fipeType, brandId).subscribe({
         next: (response) => {
-          console.log('loadModels - response:', response);
-          this.models = response.content.map((model) => ({
-            id: model.modelId,
-            name: model.name,
+          this.models = response.modelos.map((model) => ({
+            id: model.codigo.toString(),
+            name: model.nome,
           }));
           this.selectModelDisabled.set(false);
+          this.loadingModels.set(false);
 
           // Se estamos editando, tenta selecionar o modelo correto
           if (this.dataForm?.model) {
@@ -218,11 +246,70 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           }
         },
         error: (error) => {
-          console.error('Erro ao carregar modelos:', error);
+          console.error('Erro ao carregar modelos FIPE:', error);
           this.toastrService.error('Erro ao carregar modelos');
           this.models = [];
           this.selectModelDisabled.set(true);
+          this.loadingModels.set(false);
         },
+      });
+    }
+  }
+
+  loadYears() {
+    const brandId = this.brandControl.value?.id;
+    const modelId = this.modelControl.value?.id;
+    const fipeType = this.getFipeVehicleType();
+
+    if (brandId && modelId) {
+      this.loadingYears.set(true);
+      this.fipeService.getAnos(fipeType, brandId, modelId).subscribe({
+        next: (response) => {
+          this.years = response.map((ano) => ({
+            id: ano.codigo,
+            name: ano.nome,
+          }));
+          this.selectYearDisabled.set(false);
+          this.loadingYears.set(false);
+        },
+        error: (error) => {
+          console.error('Erro ao carregar anos FIPE:', error);
+          this.toastrService.error('Erro ao carregar versões/anos');
+          this.years = [];
+          this.selectYearDisabled.set(true);
+          this.loadingYears.set(false);
+        },
+      });
+    }
+  }
+
+  loadVehicleDetails() {
+    const brandId = this.brandControl.value?.id;
+    const modelId = this.modelControl.value?.id;
+    const yearId = this.fipeYearControl.value?.id;
+    const fipeType = this.getFipeVehicleType();
+
+    if (brandId && modelId && yearId) {
+      this.loadingDetails.set(true);
+      this.fipeService.getVehicleDetails(fipeType, brandId, modelId, yearId).subscribe({
+        next: (details) => {
+          this.loadingDetails.set(false);
+
+          // Preenche automaticamente os campos com dados da FIPE
+          this.form.patchValue({
+            vehicleYear: details.AnoModelo,
+            modelYear: details.AnoModelo, // FIPE geralmente retorna apenas AnoModelo
+            fuelTypes: this.mapFuelTypeToBackend(details.Combustivel)
+          });
+
+          // Opcional: Se quiser salvar o valor da tabela FIPE em algum lugar, pode fazer aqui
+          console.log('Detalhes FIPE:', details);
+          this.toastrService.info(`Valor tabela FIPE: ${details.Valor}`, 'Dados carregados');
+        },
+        error: (error) => {
+          console.error('Erro ao carregar detalhes FIPE:', error);
+          this.loadingDetails.set(false);
+        }
       });
     }
   }
@@ -287,21 +374,62 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Carrega cores do backend
     this.loadColors();
 
-    // Quando a marca mudar, carrega os modelos
+    // Quando o tipo de veículo mudar, recarrega as marcas
+    this.subscriptions.add(
+      this.form.get('vehicleType')?.valueChanges.subscribe(() => {
+        // Limpa seleções dependentes
+        this.brandControl.reset();
+
+        // Recarrega marcas com o novo tipo
+        this.loadBrands();
+      })
+    );
+
+    // Cascata: Marca -> Modelo
     this.subscriptions.add(
       this.brandControl.valueChanges
         .pipe(distinctUntilChanged((prev, curr) => prev?.id === curr?.id))
         .subscribe((brand) => {
           if (brand && brand.id) {
-            // Limpa o modelo selecionado
             this.modelControl.reset();
-
-            // Carrega modelos da marca
+            this.fipeYearControl.reset();
+            this.years = [];
+            this.selectYearDisabled.set(true);
             this.loadModels();
           } else {
             this.models = [];
+            this.years = [];
             this.modelControl.reset();
+            this.fipeYearControl.reset(); // Reset ano também
             this.selectModelDisabled.set(true);
+            this.selectYearDisabled.set(true);
+          }
+        })
+    );
+
+    // Cascata: Modelo -> Ano
+    this.subscriptions.add(
+      this.modelControl.valueChanges
+        .pipe(distinctUntilChanged((prev, curr) => prev?.id === curr?.id))
+        .subscribe((model) => {
+          if (model && model.id) {
+            this.fipeYearControl.reset();
+            this.loadYears();
+          } else {
+            this.years = [];
+            this.fipeYearControl.reset();
+            this.selectYearDisabled.set(true);
+          }
+        })
+    );
+
+    // Cascata: Ano -> Detalhes
+    this.subscriptions.add(
+      this.fipeYearControl.valueChanges
+        .pipe(distinctUntilChanged((prev, curr) => prev?.id === curr?.id))
+        .subscribe((year) => {
+          if (year && year.id) {
+            this.loadVehicleDetails();
           }
         })
     );
@@ -350,8 +478,9 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // Para edição, busca a marca pelo nome
+    // FIPE retorna nomes em maiúsculo ou formato específico, pode precisar de normalização de comparação
     const selectedBrand = this.brands.find(
-      (b) => b.name === this.dataForm!.brand
+      (b) => b.name.toLowerCase() === this.dataForm!.brand.toLowerCase()
     );
 
     // Para edição, busca a cor pelo nome
@@ -372,7 +501,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
         : { id: '', name: '' },
       brand: selectedBrand
         ? { id: selectedBrand.id, name: selectedBrand.name }
-        : { id: '', name: '' },
+        : { id: '', name: this.dataForm!.brand || '' }, // Fallback se não encontrar ID
       model: { id: '', name: this.dataForm!.model || '' },
       vehicleYear: this.dataForm!.vehicleYear || '',
       modelYear: this.dataForm!.modelYear || '',
@@ -396,19 +525,22 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Marca que o formulário foi preenchido
     this.formFilled = true;
 
-    // Se houver uma marca selecionada, carrega os modelos
+    // Se houver uma marca selecionada (com ID), carrega os modelos
     if (selectedBrand && selectedBrand.id) {
-      this.modelService.getModelsByBrand(selectedBrand.id).subscribe({
+      const fipeType = this.getFipeVehicleType();
+      this.loadingModels.set(true);
+      this.fipeService.getModelos(fipeType, selectedBrand.id).subscribe({
         next: (response) => {
-          this.models = response.content.map((model) => ({
-            id: model.modelId,
-            name: model.name,
+          this.models = response.modelos.map((model) => ({
+            id: model.codigo.toString(),
+            name: model.nome,
           }));
           this.selectModelDisabled.set(false);
+          this.loadingModels.set(false);
 
           // Após carregar os modelos, busca o modelo selecionado
           const selectedModel = this.models.find(
-            (m) => m.name === this.dataForm!.model
+            (m) => m.name.toLowerCase() === this.dataForm!.model.toLowerCase()
           );
 
           if (selectedModel) {
@@ -416,11 +548,13 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
               id: selectedModel.id,
               name: selectedModel.name,
             });
+            // Opcional: Carregar anos se o modelo for encontrado
           }
         },
         error: (error) => {
           console.error('Erro ao carregar modelos:', error);
           this.selectModelDisabled.set(true);
+          this.loadingModels.set(false);
         },
       });
     }
@@ -567,6 +701,10 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   get modelControl(): FormGroup {
     return this.form.get('model') as FormGroup;
+  }
+
+  get fipeYearControl(): FormGroup {
+    return this.form.get('fipeYear') as FormGroup;
   }
 
   get colorControl(): FormGroup {
