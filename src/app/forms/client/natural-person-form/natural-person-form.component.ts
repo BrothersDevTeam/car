@@ -59,7 +59,6 @@ import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
     MatButtonModule,
     MatIconModule,
     CpfValidatorDirective,
-    PrimarySelectComponent,
     AccessDataFormComponent,
     MatSelectModule,
     MatFormFieldModule,
@@ -69,7 +68,8 @@ import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
   styleUrl: './natural-person-form.component.scss',
 })
 export class NaturalPersonFormComponent
-  implements OnInit, OnChanges, CanComponentDeactivate {
+  implements OnInit, OnChanges, CanComponentDeactivate
+{
   private subscriptions = new Subscription();
   submitted = false;
 
@@ -233,7 +233,7 @@ export class NaturalPersonFormComponent
     private actionsService: ActionsService,
     private authService: AuthService,
     private formDraftService: FormDraftService
-  ) { }
+  ) {}
 
   /**
    * Implementação da interface CanComponentDeactivate
@@ -652,7 +652,8 @@ export class NaturalPersonFormComponent
     }
 
     const confirmed = confirm(
-      `Tem certeza que deseja excluir o rascunho "${draft.draftName || 'sem nome'
+      `Tem certeza que deseja excluir o rascunho "${
+        draft.draftName || 'sem nome'
       }"?`
     );
 
