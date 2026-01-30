@@ -45,66 +45,11 @@
             [formGroup]="userForm"
             (ngSubmit)="onSubmit()"
           >
-            <div class="form-row">
-              <mat-form-field appearance="outline">
-                <mat-label>Nome de Usuário</mat-label>
-                <input
-                  matInput
-                  formControlName="username"
-                  placeholder="ex: joao.silva"
-                />
-                <mat-error
-                  *ngIf="userForm.get('username')?.hasError('required')"
-                >
-                  Obrigatório
-                </mat-error>
-                <mat-error
-                  *ngIf="userForm.get('username')?.hasError('minlength')"
-                >
-                  Mínimo 3 caracteres
-                </mat-error>
-              </mat-form-field>
-            </div>
-
-            <div class="form-row">
-              <mat-form-field appearance="outline">
-                <mat-label>Senha</mat-label>
-                <input
-                  matInput
-                  type="password"
-                  formControlName="password"
-                  placeholder="******"
-                />
-                <mat-error
-                  *ngIf="userForm.get('password')?.hasError('required')"
-                >
-                  Obrigatório
-                </mat-error>
-                <mat-error
-                  *ngIf="userForm.get('password')?.hasError('minlength')"
-                >
-                  Mínimo 6 caracteres
-                </mat-error>
-              </mat-form-field>
-            </div>
-
-            <div class="form-row">
-              <mat-form-field appearance="outline">
-                <mat-label>Função / Permissão</mat-label>
-                <mat-select formControlName="roleName">
-                  @for (role of roles; track role.value) {
-                    <mat-option [value]="role.value">
-                      {{ role.label }}
-                    </mat-option>
-                  }
-                </mat-select>
-                <mat-error
-                  *ngIf="userForm.get('roleName')?.hasError('required')"
-                >
-                  Selecione uma função
-                </mat-error>
-              </mat-form-field>
-            </div>
+            <!-- Reusable Access Data Form -->
+            <app-access-data-form
+              [form]="userForm"
+              [submitted]="submitted"
+            ></app-access-data-form>
 
             <div class="form-actions">
               <button
