@@ -69,8 +69,7 @@ import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
   styleUrl: './natural-person-form.component.scss',
 })
 export class NaturalPersonFormComponent
-  implements OnInit, OnChanges, CanComponentDeactivate
-{
+  implements OnInit, OnChanges, CanComponentDeactivate {
   private subscriptions = new Subscription();
   submitted = false;
 
@@ -234,7 +233,7 @@ export class NaturalPersonFormComponent
     private actionsService: ActionsService,
     private authService: AuthService,
     private formDraftService: FormDraftService
-  ) {}
+  ) { }
 
   /**
    * Implementação da interface CanComponentDeactivate
@@ -653,8 +652,7 @@ export class NaturalPersonFormComponent
     }
 
     const confirmed = confirm(
-      `Tem certeza que deseja excluir o rascunho "${
-        draft.draftName || 'sem nome'
+      `Tem certeza que deseja excluir o rascunho "${draft.draftName || 'sem nome'
       }"?`
     );
 
@@ -773,9 +771,9 @@ export class NaturalPersonFormComponent
 
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
-        const isDirty = this.form.dirty;
-        this.actionsService.hasFormChanges.set(isDirty);
-        this.formChanged.emit(isDirty);
+        const hasChanges = this.hasUnsavedChanges();
+        this.actionsService.hasFormChanges.set(hasChanges);
+        this.formChanged.emit(hasChanges);
       })
     );
 

@@ -57,8 +57,7 @@ import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
   styleUrl: './legal-entity-form.component.scss',
 })
 export class LegalEntityFormComponent
-  implements OnInit, OnChanges, OnDestroy, CanComponentDeactivate
-{
+  implements OnInit, OnChanges, OnDestroy, CanComponentDeactivate {
   private subscriptions = new Subscription();
   submitted = false;
 
@@ -167,7 +166,7 @@ export class LegalEntityFormComponent
     private actionsService: ActionsService,
     private authService: AuthService,
     private formDraftService: FormDraftService
-  ) {}
+  ) { }
 
   ngOnInit() {
     /**
@@ -188,9 +187,9 @@ export class LegalEntityFormComponent
 
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
-        const isDirty = this.form.dirty;
-        this.actionsService.hasFormChanges.set(isDirty);
-        this.formChanged.emit(isDirty);
+        const hasChanges = this.hasUnsavedChanges();
+        this.actionsService.hasFormChanges.set(hasChanges);
+        this.formChanged.emit(hasChanges);
       })
     );
 
