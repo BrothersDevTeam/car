@@ -45,8 +45,7 @@ import { AuthService } from '@services/auth/auth.service';
 
 import { removeEmptyPropertiesFromObject } from '../../../utils/removeEmptyPropertiesFromObject';
 import { minLengthArray } from '../../../utils/minLengthArray';
-import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
-import { AccessDataFormComponent } from '@components/access-data-form/access-data-form.component'; // Added
+import { AccessDataFormComponent } from '@components/access-data-form/access-data-form.component';
 import { RelationshipTypes } from '../../../enums/relationshipTypes';
 import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
 
@@ -59,7 +58,6 @@ import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
     MatButtonModule,
     MatIconModule,
     CpfValidatorDirective,
-    PrimarySelectComponent,
     AccessDataFormComponent,
     MatSelectModule,
     MatFormFieldModule,
@@ -69,7 +67,8 @@ import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
   styleUrl: './natural-person-form.component.scss',
 })
 export class NaturalPersonFormComponent
-  implements OnInit, OnChanges, CanComponentDeactivate {
+  implements OnInit, OnChanges, CanComponentDeactivate
+{
   private subscriptions = new Subscription();
   submitted = false;
 
@@ -233,7 +232,7 @@ export class NaturalPersonFormComponent
     private actionsService: ActionsService,
     private authService: AuthService,
     private formDraftService: FormDraftService
-  ) { }
+  ) {}
 
   /**
    * Implementação da interface CanComponentDeactivate
@@ -652,7 +651,8 @@ export class NaturalPersonFormComponent
     }
 
     const confirmed = confirm(
-      `Tem certeza que deseja excluir o rascunho "${draft.draftName || 'sem nome'
+      `Tem certeza que deseja excluir o rascunho "${
+        draft.draftName || 'sem nome'
       }"?`
     );
 
