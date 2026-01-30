@@ -21,6 +21,7 @@ export interface Vehicle {
   renavam: string;
   doors: string;
   horsepower: string;
+  engineDisplacement: string;
   engineNumber: string;
   km: string;
   vehicleType: string;

@@ -45,8 +45,7 @@ import { AuthService } from '@services/auth/auth.service';
 
 import { removeEmptyPropertiesFromObject } from '../../../utils/removeEmptyPropertiesFromObject';
 import { minLengthArray } from '../../../utils/minLengthArray';
-import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
-import { AccessDataFormComponent } from '@components/access-data-form/access-data-form.component'; // Added
+import { AccessDataFormComponent } from '@components/access-data-form/access-data-form.component';
 import { RelationshipTypes } from '../../../enums/relationshipTypes';
 import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
 
