@@ -125,97 +125,10 @@
   </app-wrapper-card>
   @if (shouldShowUserFields) {
     <app-wrapper-card title="Dados de Acesso ao Sistema">
-      <div class="form-row-2cols">
-        <app-primary-input
-          #usernameInput
-          formControlName="username"
-          label="Nome de usuário *"
-          inputName="username"
-          type="text"
-          [uppercase]="false"
-          placeholder="Digite o nome de usuário"
-          [error]="
-            form.get('username')?.invalid &&
-            (form.get('username')?.touched || submitted)
-          "
-        />
-
-        <app-primary-select
-          label="Função no Sistema *"
-          placeholder="Selecione a função"
-          inputName="roleName"
-          formControlName="roleName"
-          [error]="submitted && form.get('roleName')?.invalid"
-          [options]="[
-            { value: 'ROLE_MANAGER', label: 'Gerente' },
-            { value: 'ROLE_SELLER', label: 'Vendedor' },
-            { value: 'ROLE_FINANCIAL', label: 'Financeiro' },
-          ]"
-        />
-      </div>
-      <div class="form-row-2cols">
-        <app-primary-input
-          formControlName="password"
-          label="Senha *"
-          inputName="password"
-          type="password"
-          [uppercase]="false"
-          placeholder="Mínimo 6 caracteres"
-          [error]="
-            form.get('password')?.invalid &&
-            (form.get('password')?.touched || submitted)
-          "
-        />
-
-        <app-primary-input
-          formControlName="confirmPassword"
-          label="Confirmar Senha *"
-          inputName="confirmPassword"
-          type="password"
-          [uppercase]="false"
-          placeholder="Digite a senha novamente"
-          [error]="
-            (form.get('confirmPassword')?.invalid ||
-              form.errors?.['passwordMismatch']) &&
-            (form.get('confirmPassword')?.touched || submitted)
-          "
-        />
-      </div>
-
-      <!-- Mensagem de erro para senhas não coincidentes -->
-      @if (submitted && form.errors?.['passwordMismatch']) {
-        <div class="error-message">As senhas não coincidem</div>
-      }
-
-      <!-- Mensagens de erro consolidadas -->
-      @if (submitted && form.get('username')?.invalid) {
-        <div class="error-message">
-          @if (form.get('username')?.hasError('usernameConflict')) {
-            <!-- Erro específico: Username já existe no sistema -->
-            O nome de usuário já está em uso. Por favor, escolha outro.
-          } @else {
-            <!-- Erro padrão: Campo obrigatório ou tamanho mínimo -->
-            Nome de usuário é obrigatório (mínimo 3 caracteres)
-          }
-        </div>
-      }
-      @if (submitted && form.get('password')?.invalid) {
-        <div class="error-message">
-          Senha é obrigatória (mínimo 6 caracteres)
-        </div>
-      }
-      @if (
-        submitted &&
-        form.get('confirmPassword')?.invalid &&
-        !form.errors?.['passwordMismatch']
-      ) {
-        <div class="error-message">
-          Confirmação de senha é obrigatória (mínimo 6 caracteres)
-        </div>
-      }
-      @if (submitted && form.get('roleName')?.invalid) {
-        <div class="error-message">Selecione uma função no sistema</div>
-      }
+      <app-access-data-form
+        [form]="form"
+        [submitted]="submitted"
+      ></app-access-data-form>
     </app-wrapper-card>
   }
 

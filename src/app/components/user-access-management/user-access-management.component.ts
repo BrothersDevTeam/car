@@ -1,9 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
+  AbstractControl,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,6 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { PersonService } from '@services/person.service';
+import { AccessDataFormComponent } from '../access-data-form/access-data-form.component';
 
 @Component({
   selector: 'app-user-access-management',
@@ -29,6 +32,7 @@ import { PersonService } from '@services/person.service';
     MatSelectModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    AccessDataFormComponent, // Added
   ],
   templateUrl: './user-access-management.component.html',
   styleUrls: ['./user-access-management.component.scss'],
@@ -42,24 +46,50 @@ export class UserAccessManagementComponent {
   userForm: FormGroup;
   isFormVisible = false;
   isLoading = false;
-
-  roles = [
-    { value: 'ROLE_OWNER', label: 'Proprietário' },
-    { value: 'ROLE_MANAGER', label: 'Gerente' },
-    { value: 'ROLE_SELLER', label: 'Vendedor' },
-    { value: 'ROLE_FINANCIAL', label: 'Financeiro' },
-  ];
+  submitted = false; // Added for validation
 
   constructor(
     private fb: FormBuilder,
     private personService: PersonService,
     private toastr: ToastrService
   ) {
-    this.userForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      roleName: ['', Validators.required],
-    });
+    this.userForm = this.fb.group(
+      {
+        username: ['', [Validators.required, Validators.minLength(3)]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', [Validators.required]], // Added
+        roleName: ['', Validators.required],
+      },
+      { validators: this.passwordMatchValidator }
+    ); // Added validator
+  }
+
+  // Custom validator for password match
+  private passwordMatchValidator(
+    control: AbstractControl
+  ): ValidationErrors | null {
+    const password = control.get('password');
+    const confirmPassword = control.get('confirmPassword');
+
+    if (!password || !confirmPassword) {
+      return null;
+    }
+
+    if (password.value !== confirmPassword.value) {
+      confirmPassword.setErrors({ passwordMismatch: true });
+      return { passwordMismatch: true };
+    } else {
+      // Clear specific error if it exists but preserve others
+      const errors = confirmPassword.errors;
+      if (errors) {
+        delete errors['passwordMismatch'];
+        confirmPassword.setErrors(
+          Object.keys(errors).length > 0 ? errors : null
+        );
+      }
+    }
+
+    return null;
   }
 
   toggleForm() {
@@ -70,6 +100,8 @@ export class UserAccessManagementComponent {
   }
 
   onSubmit() {
+    this.submitted = true; // Mark as submitted to show errors
+
     if (this.userForm.invalid) {
       this.userForm.markAllAsTouched();
       return;
