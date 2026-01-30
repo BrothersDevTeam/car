@@ -153,7 +153,9 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     chassis: [''],
     renavam: [''],
     doors: [''],
+
     horsepower: [''],
+    engineDisplacement: [''],
     engineNumber: [''],
     km: [''],
     vehicleType: [''],
@@ -296,9 +298,18 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           this.loadingDetails.set(false);
 
           // Preenche automaticamente os campos com dados da FIPE
+          // Se o ano for 32000, considera como Zero KM (usa o ano atual)
+          const fipeYear = details.AnoModelo === 32000 ? new Date().getFullYear() : details.AnoModelo;
+
+          // Extração de cilindrada do modelo (ex: "GOL 1.0" -> "1.0" ou "2.0")
+          // Procura por padrão número.número (ex: 1.0, 2.0, 1.6)
+          const engineDisplacementMatch = details.Modelo.match(/(\d+\.\d+)/);
+          const extractedDisplacement = engineDisplacementMatch ? engineDisplacementMatch[0] : '';
+
           this.form.patchValue({
-            vehicleYear: details.AnoModelo,
-            modelYear: details.AnoModelo, // FIPE geralmente retorna apenas AnoModelo
+            vehicleYear: fipeYear,
+            modelYear: fipeYear, // FIPE geralmente retorna apenas AnoModelo
+            engineDisplacement: extractedDisplacement,
             fuelTypes: this.mapFuelTypeToBackend(details.Combustivel)
           });
 
@@ -512,6 +523,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       renavam: this.dataForm!.renavam || '',
       doors: this.dataForm!.doors || '',
       horsepower: this.dataForm!.horsepower || '',
+      engineDisplacement: this.dataForm!.engineDisplacement || '',
       engineNumber: this.dataForm!.engineNumber || '',
       km: this.dataForm!.km || '',
       vehicleType: this.dataForm!.vehicleType || '',
@@ -603,6 +615,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       renavam: formValues.renavam || '',
       doors: formValues.doors || '',
       horsepower: formValues.horsepower || '',
+      engineDisplacement: formValues.engineDisplacement || '',
       engineNumber: formValues.engineNumber || '',
       km: formValues.km || '',
       vehicleType: formValues.vehicleType || '',

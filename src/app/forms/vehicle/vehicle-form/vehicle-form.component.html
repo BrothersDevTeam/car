@@ -193,14 +193,23 @@
       inputName="doors"
       type="text"
     />
+    <div class="custom-selects-container">
+      <!-- Motor (Cilindrada) -->
+      <app-primary-input
+        formControlName="engineDisplacement"
+        label="Motor (Cilindrada)"
+        inputName="engineDisplacement"
+        type="text"
+      />
 
-    <!-- Potência -->
-    <app-primary-input
-      formControlName="horsepower"
-      label="Potência"
-      inputName="horsepower"
-      type="text"
-    />
+      <!-- Potência (CV) -->
+      <app-primary-input
+        formControlName="horsepower"
+        label="Potência (CV)"
+        inputName="horsepower"
+        type="text"
+      />
+    </div>
 
     <!-- Número do motor -->
     <app-primary-input
