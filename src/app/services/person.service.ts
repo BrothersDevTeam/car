@@ -173,7 +173,13 @@ export class PersonService {
    * @param data Dados do usuário (username, password, roleName)
    */
   createEmployeeUser(personId: string, data: any) {
-    return this.http.post<any>(`/api/employees/${personId}/create-user`, data);
+    return this.http
+      .post<any>(`/api/employees/${personId}/create-user`, data)
+      .pipe(
+        tap(() => {
+          this.clearCache();
+        })
+      );
   }
 
   /**
