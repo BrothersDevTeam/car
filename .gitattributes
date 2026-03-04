@@ -1,0 +1,5 @@
+# Força todos os arquivos de texto a usarem LF (Unix) como final de linha
+* text=auto eol=lf
+
+# Define explicitamente arquivos/pastas de sistema caso existam
+*.bat text eol=crlf
