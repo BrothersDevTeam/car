@@ -63,7 +63,7 @@ export class ColorService {
     );
   }
 
-  private clearCache() {
+  public clearCache() {
     this.cache = null;
   }
 }

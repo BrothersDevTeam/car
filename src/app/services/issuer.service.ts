@@ -2,13 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { first, tap } from 'rxjs';
 
-import { GenericClient } from '@interfaces/person';
+import { Person } from '@interfaces/person';
 
 @Injectable({
   providedIn: 'root',
 })
 export class IssuerService {
-  private cache: GenericClient[] | null = null;
+  private cache: Person[] | null = null;
   private readonly apiUrl: string = '/api/issuer';
 
   constructor(private http: HttpClient) {}
@@ -17,7 +17,7 @@ export class IssuerService {
     if (this.cache) {
       return this.cache;
     }
-    return this.http.get<GenericClient[]>(this.apiUrl).pipe(
+    return this.http.get<Person[]>(this.apiUrl).pipe(
       first(),
       tap((response) => {
         this.cache = response;
@@ -34,7 +34,7 @@ export class IssuerService {
     );
   }
 
-  update(data: GenericClient, id: string) {
+  update(data: Person, id: string) {
     return this.http.put<string>(`${this.apiUrl}/${id}`, data).pipe(
       tap((response: string) => {
         console.log('Formulário enviado com sucesso!', response);
@@ -52,7 +52,7 @@ export class IssuerService {
     );
   }
 
-  private clearCache() {
+  public clearCache() {
     this.cache = null;
   }
 }

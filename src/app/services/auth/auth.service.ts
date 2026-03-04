@@ -9,6 +9,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActionsService } from '@services/actions.service';
 import { Injector } from '@angular/core';
 import { PersonService } from '@services/person.service';
+import { VehicleService } from '@services/vehicle.service';
+import { NfeService } from '@services/nfe.service';
+import { ModelService } from '@services/model.service';
+import { IssuerService } from '@services/issuer.service';
+import { ColorService } from '@services/color.service';
+import { BrandService } from '@services/brand.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -38,8 +44,20 @@ export class AuthService {
   }
 
   logout() {
-    const personService = this.injector.get(PersonService);
-    personService.clearCache();
+    // Abaixo limpamos os caches de estado em memória (serviços singletons no Angular)
+    // para evitar que dados da loja/sessão anterior fiquem presentes no próximo login.
+    try {
+      this.injector.get(PersonService).clearCache();
+      this.injector.get(VehicleService).clearCache();
+      this.injector.get(NfeService).clearCache();
+      this.injector.get(ModelService).clearCache();
+      this.injector.get(IssuerService).clearCache();
+      this.injector.get(ColorService).clearCache();
+      this.injector.get(BrandService).clearCache();
+    } catch (e) {
+      console.warn('Erro ao limpar cache de serviços no logout', e);
+    }
+    
     this.actionsService.hasFormChanges.set(false);
     this.dialog.closeAll();
     sessionStorage.removeItem(this.TOKEN_KEY);

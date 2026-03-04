@@ -76,7 +76,7 @@ export class VehicleService {
     );
   }
 
-  private clearCache() {
+  public clearCache() {
     this.cache = null;
     this.cacheUpdated$.next(null);
   }

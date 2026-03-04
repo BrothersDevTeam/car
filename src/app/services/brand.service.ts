@@ -74,7 +74,7 @@ export class BrandService {
     );
   }
 
-  private clearCache() {
+  public clearCache() {
     this.cache = null;
   }
 }

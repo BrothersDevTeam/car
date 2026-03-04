@@ -77,7 +77,7 @@ export class NfeService {
     );
   }
 
-  private clearCache() {
+  public clearCache() {
     this.cache = null;
   }
 }

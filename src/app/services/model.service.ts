@@ -113,7 +113,7 @@ export class ModelService {
   /**
    * Limpa o cache de modelos
    */
-  private clearCache() {
+  public clearCache() {
     this.cache.clear();
     this.cacheUpdated$.next(null);
   }
