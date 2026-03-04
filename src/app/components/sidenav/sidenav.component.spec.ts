@@ -12,11 +12,10 @@ describe('SideNavComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         SideNavComponent,
-        RouterModule.forRoot([]) // Configuração de rota vazia para os testes
+        RouterModule.forRoot([]), // Configuração de rota vazia para os testes
       ],
-      providers: [provideHttpClient()]
-    })
-    .compileComponents();
+      providers: [provideHttpClient()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(SideNavComponent);
     component = fixture.componentInstance;

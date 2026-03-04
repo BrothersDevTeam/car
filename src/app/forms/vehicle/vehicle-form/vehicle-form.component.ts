@@ -177,7 +177,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     private colorService: ColorService,
     private personService: PersonService,
     private toastrService: ToastrService
-  ) { }
+  ) {}
 
   // Método auxiliar para mapear o tipo de veículo do formulário para o tipo da API FIPE
   private getFipeVehicleType(): string {
@@ -294,35 +294,45 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
     if (brandId && modelId && yearId) {
       this.loadingDetails.set(true);
-      this.fipeService.getVehicleDetails(fipeType, brandId, modelId, yearId).subscribe({
-        next: (details) => {
-          this.loadingDetails.set(false);
+      this.fipeService
+        .getVehicleDetails(fipeType, brandId, modelId, yearId)
+        .subscribe({
+          next: (details) => {
+            this.loadingDetails.set(false);
 
-          // Preenche automaticamente os campos com dados da FIPE
-          // Se o ano for 32000, considera como Zero KM (usa o ano atual)
-          const fipeYear = details.AnoModelo === 32000 ? new Date().getFullYear() : details.AnoModelo;
+            // Preenche automaticamente os campos com dados da FIPE
+            // Se o ano for 32000, considera como Zero KM (usa o ano atual)
+            const fipeYear =
+              details.AnoModelo === 32000
+                ? new Date().getFullYear()
+                : details.AnoModelo;
 
-          // Extração de cilindrada do modelo (ex: "GOL 1.0" -> "1.0" ou "2.0")
-          // Procura por padrão número.número (ex: 1.0, 2.0, 1.6)
-          const engineDisplacementMatch = details.Modelo.match(/(\d+\.\d+)/);
-          const extractedDisplacement = engineDisplacementMatch ? engineDisplacementMatch[0] : '';
+            // Extração de cilindrada do modelo (ex: "GOL 1.0" -> "1.0" ou "2.0")
+            // Procura por padrão número.número (ex: 1.0, 2.0, 1.6)
+            const engineDisplacementMatch = details.Modelo.match(/(\d+\.\d+)/);
+            const extractedDisplacement = engineDisplacementMatch
+              ? engineDisplacementMatch[0]
+              : '';
 
-          this.form.patchValue({
-            vehicleYear: fipeYear,
-            modelYear: fipeYear, // FIPE geralmente retorna apenas AnoModelo
-            engineDisplacement: extractedDisplacement,
-            fuelTypes: this.mapFuelTypeToBackend(details.Combustivel)
-          });
+            this.form.patchValue({
+              vehicleYear: fipeYear,
+              modelYear: fipeYear, // FIPE geralmente retorna apenas AnoModelo
+              engineDisplacement: extractedDisplacement,
+              fuelTypes: this.mapFuelTypeToBackend(details.Combustivel),
+            });
 
-          // Opcional: Se quiser salvar o valor da tabela FIPE em algum lugar, pode fazer aqui
-          console.log('Detalhes FIPE:', details);
-          this.toastrService.info(`Valor tabela FIPE: ${details.Valor}`, 'Dados carregados');
-        },
-        error: (error) => {
-          console.error('Erro ao carregar detalhes FIPE:', error);
-          this.loadingDetails.set(false);
-        }
-      });
+            // Opcional: Se quiser salvar o valor da tabela FIPE em algum lugar, pode fazer aqui
+            console.log('Detalhes FIPE:', details);
+            this.toastrService.info(
+              `Valor tabela FIPE: ${details.Valor}`,
+              'Dados carregados'
+            );
+          },
+          error: (error) => {
+            console.error('Erro ao carregar detalhes FIPE:', error);
+            this.loadingDetails.set(false);
+          },
+        });
     }
   }
 

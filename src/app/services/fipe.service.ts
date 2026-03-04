@@ -30,7 +30,7 @@ export interface FipeVehicleDetails {
 export class FipeService {
   private readonly API_URL = 'https://parallelum.com.br/fipe/api/v1';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getMarcas(type: string): Observable<FipeReference[]> {
     return this.http.get<FipeReference[]>(`${this.API_URL}/${type}/marcas`);
@@ -42,7 +42,11 @@ export class FipeService {
     );
   }
 
-  getAnos(type: string, marcaId: string, modeloId: string): Observable<FipeReference[]> {
+  getAnos(
+    type: string,
+    marcaId: string,
+    modeloId: string
+  ): Observable<FipeReference[]> {
     return this.http.get<FipeReference[]>(
       `${this.API_URL}/${type}/marcas/${marcaId}/modelos/${modeloId}/anos`
     );

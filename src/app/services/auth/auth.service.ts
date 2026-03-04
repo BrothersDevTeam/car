@@ -57,7 +57,7 @@ export class AuthService {
     } catch (e) {
       console.warn('Erro ao limpar cache de serviços no logout', e);
     }
-    
+
     this.actionsService.hasFormChanges.set(false);
     this.dialog.closeAll();
     sessionStorage.removeItem(this.TOKEN_KEY);
