@@ -179,10 +179,11 @@ export class VehicleComponent {
    * VehicleForm.owner é string | undefined (ID da pessoa)
    */
   private vehicleToForm(vehicle: Vehicle): VehicleForm {
-    return {
+    const form = {
       ...vehicle,
       owner: vehicle.owner?.personId || undefined,
     };
+    return form;
   }
 
   handleSelectedVehicle(vehicle: Vehicle) {
