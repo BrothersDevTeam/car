@@ -6,6 +6,7 @@ import {
   EventEmitter,
   OnChanges,
   OnInit,
+  OnDestroy,
   ChangeDetectorRef,
   ViewChild,
   ElementRef,
@@ -21,6 +22,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 
+import { Subscription } from 'rxjs';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { BrandFormDialogComponent } from '@components/dialogs/brand-form-dialog/brand-form-dialog.component';
 import { ModelFormDialogComponent } from '@components/dialogs/model-form-dialog/model-form-dialog.component';
@@ -38,7 +40,7 @@ import { PersonService } from '@services/person.service';
   templateUrl: './custom-select.component.html',
   styleUrls: ['./custom-select.component.scss'],
 })
-export class CustomSelectComponent implements OnInit, OnChanges {
+export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
   @Input() label: string = 'Selecione uma opção';
   @Input() options: { id: string; name: string }[] = [];
   @Input() control!: FormControl | FormGroup;
@@ -60,6 +62,7 @@ export class CustomSelectComponent implements OnInit, OnChanges {
   @ViewChild('searchInput') searchInput!: ElementRef;
 
   private serviceMap: { [key: string]: any } = {};
+  private valueSub?: Subscription;
 
   constructor(
     private brandService: BrandService,
@@ -78,6 +81,19 @@ export class CustomSelectComponent implements OnInit, OnChanges {
       color: this.colorService,
       person: this.personService,
     };
+
+    if (this.control) {
+      this.valueSub = this.control.valueChanges.subscribe(() => {
+        this.setSelectedOption();
+        this.cdr.detectChanges();
+      });
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.valueSub) {
+      this.valueSub.unsubscribe();
+    }
   }
 
   ngOnChanges(): void {

@@ -94,6 +94,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   colorsLoaded = false;
   personsLoaded = false;
   private formFilled = false; // Flag para garantir preenchimento único
+  private isFillingForm = false; // Flag para evitar resete em cascata ao editar
 
   // Loading states for new FIPE fields
   loadingModels = signal(false);
@@ -388,6 +389,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Quando o tipo de veículo mudar, recarrega as marcas
     this.subscriptions.add(
       this.form.get('vehicleType')?.valueChanges.subscribe(() => {
+        if (this.isFillingForm) return;
         // Limpa seleções dependentes
         this.brandControl.reset();
 
@@ -401,6 +403,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       this.brandControl.valueChanges
         .pipe(distinctUntilChanged((prev, curr) => prev?.id === curr?.id))
         .subscribe((brand) => {
+          if (this.isFillingForm) return;
           if (brand && brand.id) {
             this.modelControl.reset();
             this.fipeYearControl.reset();
@@ -423,6 +426,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       this.modelControl.valueChanges
         .pipe(distinctUntilChanged((prev, curr) => prev?.id === curr?.id))
         .subscribe((model) => {
+          if (this.isFillingForm) return;
           if (model && model.id) {
             this.fipeYearControl.reset();
             this.loadYears();
@@ -505,6 +509,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       : null;
 
     // Preenche o formulário com os dados do veículo
+    this.isFillingForm = true;
     this.form.patchValue({
       plate: this.dataForm!.plate || '',
       owner: selectedOwner
@@ -533,6 +538,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       fuelTypes: this.dataForm!.fuelTypes || [], // Tipos de combustível
       origin: this.dataForm!.origin || 'NACIONAL',
     });
+    this.isFillingForm = false;
 
     // Marca que o formulário foi preenchido
     this.formFilled = true;
