@@ -30,6 +30,11 @@ export interface Vehicle {
   features?: string;
   fuelTypes: FuelTypes[];
   origin?: string;
+  valorCompra?: string;
+  valorVenda?: string;
+  observation?: string;
+  entryDate?: string;
+  exitDate?: string;
 }
 
 export type CreateVehicle = Omit<Vehicle, 'vehicleId'>;
