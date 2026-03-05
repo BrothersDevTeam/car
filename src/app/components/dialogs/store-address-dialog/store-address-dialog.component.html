@@ -1,0 +1,17 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>Endereço da Loja: {{ data.store.tradeName || data.store.name }}</h2>
+  <button mat-icon-button (click)="close()" class="close-btn">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content>
+  <!-- Utilizamos o componente existente de endereços passando o storeId como personId -->
+  <app-address-list
+    [ownerId]="data.store.storeId!"
+    ownerType="store"
+    [canEdit]="true"
+    [canDelete]="true"
+    [canAdd]="true"
+  ></app-address-list>
+</mat-dialog-content>

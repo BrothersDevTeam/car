@@ -1,0 +1,19 @@
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 8px;
+
+  h2 {
+    margin: 0;
+  }
+
+  .close-btn {
+    margin-top: -10px;
+  }
+}
+
+mat-dialog-content {
+  padding-top: 10px;
+  min-height: 400px;
+}

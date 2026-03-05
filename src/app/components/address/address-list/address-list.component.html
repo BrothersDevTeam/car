@@ -64,7 +64,8 @@
     #formContainer
   >
     <app-address-form
-      [personId]="personId"
+      [ownerId]="ownerId"
+      [ownerType]="ownerType"
       [address]="editingAddress"
       [initialDraftId]="selectedDraftId"
       (formSubmitted)="onFormSubmitted()"

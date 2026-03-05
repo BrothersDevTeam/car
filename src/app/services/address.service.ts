@@ -215,6 +215,25 @@ export class AddressService {
   }
 
   /**
+   * Busca TODOS os endereços de uma loja específica. (Loja deve ter apenas 1 endereço)
+   *
+   * ENDPOINT: GET /api/addresses/store/{storeId}
+   * PERMISSÕES: ROLE_SELLER
+   *
+   * @param storeId - UUID da loja
+   * @returns Observable<Address[]> - array com os endereços da loja
+   */
+  getByStoreId(storeId: string): Observable<Address[]> {
+    return this.http.get<Address[]>(`${this.apiUrl}/store/${storeId}`).pipe(
+      tap((addresses) => {
+        console.log(
+          `✅ ${addresses.length} endereço(s) encontrado(s) para loja ${storeId}`
+        );
+      })
+    );
+  }
+
+  /**
    * Define um endereço como principal.
    *
    * ENDPOINT: PATCH /api/addresses/{addressId}/set-main
