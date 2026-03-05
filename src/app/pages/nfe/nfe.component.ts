@@ -60,7 +60,14 @@ export class NfeComponent {
     {
       key: 'nfeStatus',
       header: 'Status',
-      format: (val) => (val === 'rascunho' ? 'Em digitação' : val),
+      // Badge personalizada para cada status possível de NFe
+      badgeConfig: {
+        rascunho: { label: 'Em digitação', cssClass: 'badge-rascunho' },
+        processando: { label: 'Processando', cssClass: 'badge-processando' },
+        autorizado: { label: 'Autorizado', cssClass: 'badge-autorizado' },
+        cancelado: { label: 'Cancelado', cssClass: 'badge-cancelado' },
+        erro: { label: 'Erro', cssClass: 'badge-erro' },
+      },
     },
     {
       key: 'cfop',
