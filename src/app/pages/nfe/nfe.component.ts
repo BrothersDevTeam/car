@@ -233,15 +233,8 @@ export class NfeComponent {
     if (nfe) {
       this.selectedNfe = nfe;
 
-      // Determina qual aba abrir baseado no tipo de NFe
-      const tiposEntrada = [
-        'COMPRA DE VEICULO USADO',
-        'ENTRADA EM CONSIGNAÇÃO',
-        'ENTRADA COMPRA DEFINITIVA',
-        'DEVOLUÇÃO DE VENDA',
-      ];
-
-      const isEntrada = tiposEntrada.includes(nfe.nfeTipoDocumento);
+      // nfeTipoDocumento: '0' = Entrada, '1' = Saída
+      const isEntrada = nfe.nfeTipoDocumento === '0';
       this.selectedTabIndex.set(isEntrada ? 0 : 1);
     }
     this.openInfo.set(false);

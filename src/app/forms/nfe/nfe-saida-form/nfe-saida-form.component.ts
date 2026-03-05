@@ -124,15 +124,24 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
       })
     );
 
-    // Carregar lista de veículos
-    this.vehicleService.getPaginatedData(0, 1000).subscribe((response) => {
-      this.vehicles = response.content;
-    });
+    // Carrega veículos e pessoas em paralelo; após ambos terminarem,
+    // faz o patchValue caso já exista um dataForm (modo edição)
+    const vehiclesLoaded = this.vehicleService
+      .getPaginatedData(0, 1000)
+      .subscribe((response) => {
+        this.vehicles = response.content;
+        this.tryPatchForm();
+      });
 
-    // Carregar lista de pessoas
-    this.personService.getPaginatedData(0, 1000).subscribe((response) => {
-      this.persons = response.content;
-    });
+    const personsLoaded = this.personService
+      .getPaginatedData(0, 1000)
+      .subscribe((response) => {
+        this.persons = response.content;
+        this.tryPatchForm();
+      });
+
+    this.subscriptions.add(vehiclesLoaded);
+    this.subscriptions.add(personsLoaded);
   }
 
   ngOnDestroy() {
@@ -141,14 +150,23 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
-      setTimeout(() => {
-        this.form.patchValue({
-          vehicleId: [{ vehicleId: this.form.value.vehicleId || '' }],
-          personId: this.dataForm!.personId || '',
-          nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
-        });
-      });
+      // Tenta preencher o form imediatamente;
+      // se as listas ainda não carregaram, tryPatchForm
+      // será chamado novamente quando elas chegarem.
+      this.tryPatchForm();
     }
+  }
+
+  /** Aplica patchValue apenas quando veículos e pessoas já estão carregados */
+  private tryPatchForm() {
+    if (!this.dataForm || this.vehicles.length === 0 || this.persons.length === 0) {
+      return;
+    }
+    this.form.patchValue({
+      vehicleId: this.dataForm.vehicleId || '',
+      personId: this.dataForm.personId || '',
+      nfeNaturezaOperacao: this.dataForm.nfeNaturezaOperacao || '',
+    });
   }
 
   onEnter(event: Event): void {
