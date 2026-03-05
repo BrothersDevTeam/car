@@ -148,8 +148,8 @@ export class PersonComponent implements OnInit, OnDestroy {
         const relationshipTypes = row.relationships?.map((r: any) => r.relationshipName) || [];
         
         // Add roles if employee
-        if (relationshipTypes.includes(RelationshipTypes.FUNCIONARIO) && row.user?.roles?.length) {
-          const roleNames = row.user.roles.map((r: any) => r.roleName);
+        if (relationshipTypes.includes(RelationshipTypes.FUNCIONARIO) && row.roleNames?.length) {
+          const roleNames = row.roleNames;
           
           if (roleNames.includes('ROLE_ADMIN') || roleNames.includes('CAR_ADMIN')) {
             types.push('Administrador');
