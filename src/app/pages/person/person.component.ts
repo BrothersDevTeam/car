@@ -42,6 +42,7 @@ import type { ColumnConfig } from '@interfaces/genericTable';
 
 import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
+import { AuthService } from '@services/auth/auth.service';
 import { FormDraftService, FormDraft } from '@services/form-draft.service';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -192,12 +193,44 @@ export class PersonComponent implements OnInit, OnDestroy {
     {
       key: 'edit',
       header: '',
-      showEditIcon: (row) => true,
+      showEditIcon: (row) => {
+        const roles = this.authService.getRoles();
+        const isOnlySeller = roles.includes('ROLE_SELLER') && 
+                            !roles.includes('ROLE_MANAGER') && 
+                            !roles.includes('ROLE_ADMIN') && 
+                            !roles.includes('CAR_ADMIN');
+                            
+        const relationshipTypes = (row as any).relationships?.map((r: any) => r.relationshipName) || [];
+        const isClientOnly = relationshipTypes.includes('CLIENTE') && !relationshipTypes.includes('FUNCIONARIO') && !relationshipTypes.includes('PROPRIETARIO');
+
+        // Se for *apenas* um Vendedor, e a pessoa NÃO for *apenas* um Cliente, esconde o botão
+        if (isOnlySeller && !isClientOnly) {
+           return false;
+        }
+
+        return true;
+      },
     },
     {
       key: 'delete',
       header: '',
-      showDeleteIcon: (row) => true,
+      showDeleteIcon: (row) => {
+        const roles = this.authService.getRoles();
+        const isOnlySeller = roles.includes('ROLE_SELLER') && 
+                            !roles.includes('ROLE_MANAGER') && 
+                            !roles.includes('ROLE_ADMIN') && 
+                            !roles.includes('CAR_ADMIN');
+                            
+        const relationshipTypes = (row as any).relationships?.map((r: any) => r.relationshipName) || [];
+        const isClientOnly = relationshipTypes.includes('CLIENTE') && !relationshipTypes.includes('FUNCIONARIO') && !relationshipTypes.includes('PROPRIETARIO');
+
+        // Se for *apenas* um Vendedor, e a pessoa NÃO for *apenas* um Cliente, esconde o botão
+        if (isOnlySeller && !isClientOnly) {
+           return false;
+        }
+
+        return true;
+      },
     },
   ];
 
@@ -224,7 +257,8 @@ export class PersonComponent implements OnInit, OnDestroy {
   constructor(
     private personService: PersonService,
     private toastr: ToastrService,
-    private actionsService: ActionsService
+    private actionsService: ActionsService,
+    private authService: AuthService
   ) {
     // Verifica se o usuário é CAR_ADMIN
     this.checkUserRole();
