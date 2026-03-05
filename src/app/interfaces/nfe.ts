@@ -1,18 +1,85 @@
+export interface NfeEmitente {
+  emitenteCnpj?: string;
+  emitenteCpf?: string;
+  emitenteRazaoSocial?: string;
+  emitenteNomeFantasia?: string;
+  emitenteLogradouro?: string;
+  emitenteNumero?: string;
+  emitenteComplemento?: string;
+  emitenteBairro?: string;
+  emitenteCodigoMunicipio?: string;
+  emitenteMunicipio?: string;
+  emitenteUf?: string;
+  emitenteCep?: string;
+  emitentePais?: string;
+  emitenteTelefone?: string;
+  emitenteInscricaoEstadual?: string;
+  emitenteRegimeTributario?: string; // '1' Simples, '2' Simples excesso, '3' Normal
+}
+
+export interface NfeDestinatario {
+  destinatarioCpf?: string;
+  destinatarioCnpj?: string;
+  destinatarioIdEstrangeiro?: string;
+  destinatarioNome?: string;
+  destinatarioLogradouro?: string;
+  destinatarioNumero?: string;
+  destinatarioComplemento?: string;
+  destinatarioBairro?: string;
+  destinatarioCodigoMunicipio?: string;
+  destinatarioMunicipio?: string;
+  destinatarioUf?: string;
+  destinatarioCep?: string;
+  destinatarioPais?: string;
+  destinatarioTelefone?: string;
+  destinatarioEmail?: string;
+  destinatarioIe?: string;
+  destinatarioIndicadorIe?: string;
+}
+
 export interface Nfe {
   nfeId?: string;
-  storeId: string; // Emitente
-  personId: string; // Destinatário
-  nfeTipoDocumento: string; // "0" entrada, "1" saída
-  nfeNaturezaOperacao: NaturezaOperacao; // Ex: "Compra", "Venda", "Remessa", "Devolução" ...
+  storeId: string;              // Emitente (ID da loja)
+  personId: string;             // Destinatário (ID da pessoa)
+  nfeTipoDocumento: string;     // '0' entrada, '1' saída
+  nfeNaturezaOperacao: NaturezaOperacao;
   nfeItens: nfeItem[];
-  vehicleId?: string; // Se houver apenas um veículo na NFe, para facilitar buscas
+  vehicleId?: string;           // ID do veículo do primeiro item
 
-  chaveAcesso?: string;
+  // === Numeração ===
   nfeNumero?: number;
   nfeSerie?: string;
+
+  // === Datas ===
   nfeDataEmissao?: string;
-  valorTotal?: number;
-  nfeStatus?: string; // Exemplo: 'rascunho', 'Autorizada', 'Cancelada', etc.
+  createdAt?: string;           // Data de criação (auditoria)
+  updatedAt?: string;           // Data de atualização (auditoria)
+
+  // === Status e controle ===
+  nfeStatus?: string;           // 'rascunho', 'processando', 'autorizado', 'cancelado', 'erro'
+  nfeChave?: string;            // Chave de 44 dígitos da SEFAZ
+  nfeMensagemErro?: string;     // Mensagem de erro da SEFAZ
+
+  // === Partes da NFe ===
+  nfeEmitente?: NfeEmitente;
+  nfeDestinatario?: NfeDestinatario;
+
+  // === Totalizadores ===
+  valorTotal?: number;          // Mantido por compatibilidade
+  nfeValorTotal?: string;
+  nfeValorProdutos?: string;
+  nfeValorFrete?: string;
+  nfeValorSeguro?: string;
+  nfeValorDesconto?: string;
+  nfeValorOutrasDespesas?: string;
+
+  // === Tributos ===
+  nfeIcmsBaseCalculo?: string;
+  nfeIcmsValorTotal?: string;
+  nfeValorIpi?: string;
+  nfeValorPis?: string;
+  nfeValorCofins?: string;
+  nfeValorTotalTributos?: string;
 }
 
 export enum NaturezaOperacao {
@@ -31,7 +98,8 @@ export enum NaturezaOperacao {
 }
 
 export interface nfeItem {
-  vehicleId?: string; // Se informado, usa dados do veículo cadastrado
+  vehicleId?: string;           // Se informado, usa dados do veículo cadastrado
+  itemNumero?: number;          // Sequencial do item na NFe
 
   // Preencher os campos do item se vehicleId não for informado
   itemCodigoProduto?: string;

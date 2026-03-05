@@ -4,9 +4,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { Component, inject, signal, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
@@ -33,10 +34,12 @@ import { ToastrService } from 'ngx-toastr';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
     GenericTableComponent,
     NfeEntradaFormComponent,
     NfeSaidaFormComponent,
-    DecimalPipe,
+    DatePipe,
+    NgClass,
   ],
   templateUrl: './nfe.component.html',
   styleUrl: './nfe.component.scss',
