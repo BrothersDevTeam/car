@@ -60,6 +60,7 @@ export class NfeComponent {
     {
       key: 'nfeStatus',
       header: 'Status',
+      format: (val) => val === 'rascunho' ? 'Em digitação' : val,
     },
     {
       key: 'cfop',
@@ -85,12 +86,14 @@ export class NfeComponent {
     {
       key: 'edit',
       header: '',
-      showEditIcon: (row) => row.status === 'Em digitacao',
+      // Mostra o botão de editar apenas para NFes em rascunho
+      showEditIcon: (row) => row.nfeStatus === 'rascunho',
     },
     {
       key: 'delete',
       header: '',
-      showDeleteIcon: (row) => row.status === 'Em digitacao',
+      // Mostra o botão de deletar apenas para NFes em rascunho
+      showDeleteIcon: (row) => row.nfeStatus === 'rascunho',
     },
   ];
 

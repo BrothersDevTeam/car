@@ -12,7 +12,7 @@ export interface Nfe {
   nfeSerie?: string;
   nfeDataEmissao?: string;
   valorTotal?: number;
-  status?: string; // Exemplo: 'Autorizada', 'Cancelada', etc.
+  nfeStatus?: string; // Exemplo: 'rascunho', 'Autorizada', 'Cancelada', etc.
 }
 
 export enum NaturezaOperacao {
