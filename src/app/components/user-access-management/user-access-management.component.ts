@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -17,6 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { PersonService } from '@services/person.service';
+import { AuthService } from '@services/auth/auth.service';
 import { AccessDataFormComponent } from '../access-data-form/access-data-form.component';
 
 @Component({
@@ -37,7 +38,7 @@ import { AccessDataFormComponent } from '../access-data-form/access-data-form.co
   templateUrl: './user-access-management.component.html',
   styleUrls: ['./user-access-management.component.scss'],
 })
-export class UserAccessManagementComponent {
+export class UserAccessManagementComponent implements OnInit {
   @Input() personId!: string;
   @Input() hasUser: boolean = false;
   @Input() existingUsername?: string; // Optional: show current username if available
@@ -47,11 +48,13 @@ export class UserAccessManagementComponent {
   isFormVisible = false;
   isLoading = false;
   submitted = false; // Added for validation
+  hasPermissionToCreateAccess = false;
 
   constructor(
     private fb: FormBuilder,
     private personService: PersonService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private authService: AuthService
   ) {
     this.userForm = this.fb.group(
       {
@@ -62,6 +65,25 @@ export class UserAccessManagementComponent {
       },
       { validators: this.passwordMatchValidator }
     ); // Added validator
+  }
+  
+  ngOnInit(): void {
+    this.checkUserPermissions();
+  }
+
+  private checkUserPermissions(): void {
+    const roles = this.authService.getRoles();
+    this.hasPermissionToCreateAccess = roles.some(role => 
+      ['ROLE_MANAGER', 'ROLE_ADMIN', 'ROLE_OWNER', 'CAR_ADMIN'].includes(role)
+    );
+  }
+
+  handleCreateAccessClick(): void {
+    if (!this.hasPermissionToCreateAccess) {
+      this.toastr.warning('Sem permissão para criar acesso ao sistema. O acesso pode ser liberado apenas por Gerentes ou Administradores.', 'Acesso Negado');
+      return;
+    }
+    this.toggleForm();
   }
 
   // Custom validator for password match
