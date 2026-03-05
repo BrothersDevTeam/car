@@ -69,7 +69,7 @@
     (click)="onSubmit()"
     #submitButton
   >
-    {{ dataForm?.nfeNumero ? 'Atualizar' : 'Criar NFe' }}
+    {{ dataForm?.nfeId ? 'Atualizar NFe' : 'Criar NFe' }}
   </button>
 
   @if (dataForm?.nfeNumero && dataForm?.nfeStatus === 'Em digitacao') {
