@@ -60,7 +60,7 @@ export class NfeComponent {
     {
       key: 'nfeStatus',
       header: 'Status',
-      format: (val) => val === 'rascunho' ? 'Em digitação' : val,
+      format: (val) => (val === 'rascunho' ? 'Em digitação' : val),
     },
     {
       key: 'cfop',

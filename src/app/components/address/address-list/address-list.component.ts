@@ -234,9 +234,10 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
   loadAddresses() {
     this.loading = true;
 
-    const request$ = this.ownerType === 'store'
-      ? this.addressService.getByStoreId(this.ownerId)
-      : this.addressService.getByPersonId(this.ownerId);
+    const request$ =
+      this.ownerType === 'store'
+        ? this.addressService.getByStoreId(this.ownerId)
+        : this.addressService.getByPersonId(this.ownerId);
 
     request$.subscribe({
       next: (addresses) => {

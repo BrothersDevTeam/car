@@ -143,15 +143,22 @@ export class PersonComponent implements OnInit, OnDestroy {
       header: 'Vínculo',
       format: (value: any, row: any) => {
         const types: string[] = [];
-        
+
         // Extract string values from relationships object array
-        const relationshipTypes = row.relationships?.map((r: any) => r.relationshipName) || [];
-        
+        const relationshipTypes =
+          row.relationships?.map((r: any) => r.relationshipName) || [];
+
         // Add roles if employee
-        if (relationshipTypes.includes(RelationshipTypes.FUNCIONARIO) && row.roleNames?.length) {
+        if (
+          relationshipTypes.includes(RelationshipTypes.FUNCIONARIO) &&
+          row.roleNames?.length
+        ) {
           const roleNames = row.roleNames;
-          
-          if (roleNames.includes('ROLE_ADMIN') || roleNames.includes('CAR_ADMIN')) {
+
+          if (
+            roleNames.includes('ROLE_ADMIN') ||
+            roleNames.includes('CAR_ADMIN')
+          ) {
             types.push('Administrador');
           } else if (roleNames.includes('ROLE_MANAGER')) {
             types.push('Gerente');
@@ -161,11 +168,13 @@ export class PersonComponent implements OnInit, OnDestroy {
             types.push('Funcionário');
           }
         } else if (relationshipTypes.includes(RelationshipTypes.FUNCIONARIO)) {
-            types.push('Funcionário');
+          types.push('Funcionário');
         }
 
-        if (relationshipTypes.includes(RelationshipTypes.CLIENTE)) types.push('Cliente');
-        if (relationshipTypes.includes(RelationshipTypes.PROPRIETARIO)) types.push('Proprietário');
+        if (relationshipTypes.includes(RelationshipTypes.CLIENTE))
+          types.push('Cliente');
+        if (relationshipTypes.includes(RelationshipTypes.PROPRIETARIO))
+          types.push('Proprietário');
 
         return types.length > 0 ? types.join(', ') : '-';
       },
@@ -195,17 +204,22 @@ export class PersonComponent implements OnInit, OnDestroy {
       header: '',
       showEditIcon: (row) => {
         const roles = this.authService.getRoles();
-        const isOnlySeller = roles.includes('ROLE_SELLER') && 
-                            !roles.includes('ROLE_MANAGER') && 
-                            !roles.includes('ROLE_ADMIN') && 
-                            !roles.includes('CAR_ADMIN');
-                            
-        const relationshipTypes = (row as any).relationships?.map((r: any) => r.relationshipName) || [];
-        const isClientOnly = relationshipTypes.includes('CLIENTE') && !relationshipTypes.includes('FUNCIONARIO') && !relationshipTypes.includes('PROPRIETARIO');
+        const isOnlySeller =
+          roles.includes('ROLE_SELLER') &&
+          !roles.includes('ROLE_MANAGER') &&
+          !roles.includes('ROLE_ADMIN') &&
+          !roles.includes('CAR_ADMIN');
+
+        const relationshipTypes =
+          (row as any).relationships?.map((r: any) => r.relationshipName) || [];
+        const isClientOnly =
+          relationshipTypes.includes('CLIENTE') &&
+          !relationshipTypes.includes('FUNCIONARIO') &&
+          !relationshipTypes.includes('PROPRIETARIO');
 
         // Se for *apenas* um Vendedor, e a pessoa NÃO for *apenas* um Cliente, esconde o botão
         if (isOnlySeller && !isClientOnly) {
-           return false;
+          return false;
         }
 
         return true;
@@ -216,17 +230,22 @@ export class PersonComponent implements OnInit, OnDestroy {
       header: '',
       showDeleteIcon: (row) => {
         const roles = this.authService.getRoles();
-        const isOnlySeller = roles.includes('ROLE_SELLER') && 
-                            !roles.includes('ROLE_MANAGER') && 
-                            !roles.includes('ROLE_ADMIN') && 
-                            !roles.includes('CAR_ADMIN');
-                            
-        const relationshipTypes = (row as any).relationships?.map((r: any) => r.relationshipName) || [];
-        const isClientOnly = relationshipTypes.includes('CLIENTE') && !relationshipTypes.includes('FUNCIONARIO') && !relationshipTypes.includes('PROPRIETARIO');
+        const isOnlySeller =
+          roles.includes('ROLE_SELLER') &&
+          !roles.includes('ROLE_MANAGER') &&
+          !roles.includes('ROLE_ADMIN') &&
+          !roles.includes('CAR_ADMIN');
+
+        const relationshipTypes =
+          (row as any).relationships?.map((r: any) => r.relationshipName) || [];
+        const isClientOnly =
+          relationshipTypes.includes('CLIENTE') &&
+          !relationshipTypes.includes('FUNCIONARIO') &&
+          !relationshipTypes.includes('PROPRIETARIO');
 
         // Se for *apenas* um Vendedor, e a pessoa NÃO for *apenas* um Cliente, esconde o botão
         if (isOnlySeller && !isClientOnly) {
-           return false;
+          return false;
         }
 
         return true;

@@ -116,7 +116,7 @@ export class StoreComponent implements OnInit {
   onManageAddress(store: Store): void {
     this.dialog.open(StoreAddressDialogComponent, {
       width: '800px',
-      data: { store }
+      data: { store },
     });
   }
   // Fim de código gerado pelo antigravity

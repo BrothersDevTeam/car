@@ -173,9 +173,10 @@ export class AddressFormComponent
     this.loadFormData();
 
     if (!this.isEditMode && this.ownerId) {
-      const request$ = this.ownerType === 'store'
-        ? this.addressService.getByStoreId(this.ownerId)
-        : this.addressService.getByPersonId(this.ownerId);
+      const request$ =
+        this.ownerType === 'store'
+          ? this.addressService.getByStoreId(this.ownerId)
+          : this.addressService.getByPersonId(this.ownerId);
 
       request$.subscribe({
         next: (addresses) => {
@@ -186,8 +187,7 @@ export class AddressFormComponent
             this.form.patchValue({ mainAddress: true });
           }
         },
-        error: (err) =>
-          console.error('Erro ao verificar endereços:', err),
+        error: (err) => console.error('Erro ao verificar endereços:', err),
       });
     }
 

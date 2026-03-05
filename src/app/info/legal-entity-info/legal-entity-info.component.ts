@@ -62,16 +62,22 @@ export class LegalEntityInfoComponent {
 
   checkPermissions() {
     const roles = this.authService.getRoles();
-    const isOnlySeller = roles.includes('ROLE_SELLER') && 
-                        !roles.includes('ROLE_MANAGER') && 
-                        !roles.includes('ROLE_ADMIN') && 
-                        !roles.includes('CAR_ADMIN');
-                        
-    const relationshipTypes = (this.person as any).relationships?.map((r: any) => r.relationshipName) || [];
-    const isClientOnly = relationshipTypes.includes('CLIENTE') && !relationshipTypes.includes('FUNCIONARIO') && !relationshipTypes.includes('PROPRIETARIO');
+    const isOnlySeller =
+      roles.includes('ROLE_SELLER') &&
+      !roles.includes('ROLE_MANAGER') &&
+      !roles.includes('ROLE_ADMIN') &&
+      !roles.includes('CAR_ADMIN');
+
+    const relationshipTypes =
+      (this.person as any).relationships?.map((r: any) => r.relationshipName) ||
+      [];
+    const isClientOnly =
+      relationshipTypes.includes('CLIENTE') &&
+      !relationshipTypes.includes('FUNCIONARIO') &&
+      !relationshipTypes.includes('PROPRIETARIO');
 
     if (isOnlySeller && !isClientOnly) {
-       this.canEditOrDelete = false;
+      this.canEditOrDelete = false;
     }
   }
 

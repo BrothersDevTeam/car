@@ -29,11 +29,11 @@ export class StoreCardComponent {
   @Input() canViewBranches = false;
   @Input() canManageOwner = false;
   @Input() canUploadImage = true;
-  
+
   // Início de código gerado pelo antigravity
   @Input() canManageAddress = true;
   // Fim de código gerado pelo antigravity
-  
+
   @Input() isHighlighted = false;
   @Input() showFullDetails = false;
   @Input() compactMode = false;
@@ -42,11 +42,11 @@ export class StoreCardComponent {
   @Output() delete = new EventEmitter<Store>();
   @Output() viewBranches = new EventEmitter<Store>();
   @Output() manageOwner = new EventEmitter<Store>();
-  
+
   // Início de código gerado pelo antigravity
   @Output() manageAddress = new EventEmitter<Store>();
   // Fim de código gerado pelo antigravity
-  
+
   @Output() uploadImage = new EventEmitter<Store>();
   @Output() viewDetails = new EventEmitter<Store>();
 
@@ -120,13 +120,13 @@ export class StoreCardComponent {
   onManageOwner(): void {
     this.manageOwner.emit(this.store);
   }
-  
+
   // Início de código gerado pelo antigravity
   onManageAddress(): void {
     this.manageAddress.emit(this.store);
   }
   // Fim de código gerado pelo antigravity
-  
+
   onUploadImage(): void {
     this.uploadImage.emit(this.store);
   }
