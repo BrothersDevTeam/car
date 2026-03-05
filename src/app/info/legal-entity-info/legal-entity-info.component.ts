@@ -62,17 +62,42 @@ export class LegalEntityInfoComponent {
 
   checkPermissions() {
     const roles = this.authService.getRoles();
-    const isOnlySeller = roles.includes('ROLE_SELLER') && 
-                        !roles.includes('ROLE_MANAGER') && 
-                        !roles.includes('ROLE_ADMIN') && 
-                        !roles.includes('CAR_ADMIN');
-                        
-    const relationshipTypes = (this.person as any).relationships?.map((r: any) => r.relationshipName) || [];
-    const isClientOnly = relationshipTypes.includes('CLIENTE') && !relationshipTypes.includes('FUNCIONARIO') && !relationshipTypes.includes('PROPRIETARIO');
-
-    if (isOnlySeller && !isClientOnly) {
-       this.canEditOrDelete = false;
+    if (roles.includes('CAR_ADMIN') || roles.includes('ROLE_CAR_ADMIN') || roles.includes('ROLE_ADMIN')) {
+        this.canEditOrDelete = true;
+        return;
     }
+
+    const relationshipTypes = (this.person as any).relationships?.map((r: any) => r.relationshipName) || [];
+    const isTargetProprietario = relationshipTypes.includes('PROPRIETARIO');
+    const isTargetFuncionario = relationshipTypes.includes('FUNCIONARIO');
+    const isTargetCliente = relationshipTypes.includes('CLIENTE');
+
+    const isTargetOnlyClient = isTargetCliente && !isTargetFuncionario && !isTargetProprietario;
+
+    let isTargetSeller = false;
+    if (isTargetFuncionario && this.person.user?.roles?.length) {
+        const targetRoles = this.person.user.roles.map((r: any) => r.roleName);
+        isTargetSeller = targetRoles.includes('ROLE_SELLER') && 
+                         !targetRoles.includes('ROLE_MANAGER') && 
+                         !targetRoles.includes('ROLE_ADMIN') && 
+                         !targetRoles.includes('ROLE_CAR_ADMIN') && 
+                         !targetRoles.includes('CAR_ADMIN');
+    }
+
+    const isManager = roles.includes('ROLE_MANAGER');
+    const isSeller = roles.includes('ROLE_SELLER');
+
+    if (isManager) {
+        this.canEditOrDelete = isTargetOnlyClient || (isTargetSeller && !isTargetProprietario);
+        return;
+    }
+
+    if (isSeller) {
+        this.canEditOrDelete = isTargetOnlyClient;
+        return;
+    }
+
+    this.canEditOrDelete = false;
   }
 
   onDelete() {

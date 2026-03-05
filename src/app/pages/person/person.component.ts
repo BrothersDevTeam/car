@@ -195,20 +195,39 @@ export class PersonComponent implements OnInit, OnDestroy {
       header: '',
       showEditIcon: (row) => {
         const roles = this.authService.getRoles();
-        const isOnlySeller = roles.includes('ROLE_SELLER') && 
-                            !roles.includes('ROLE_MANAGER') && 
-                            !roles.includes('ROLE_ADMIN') && 
-                            !roles.includes('CAR_ADMIN');
-                            
-        const relationshipTypes = (row as any).relationships?.map((r: any) => r.relationshipName) || [];
-        const isClientOnly = relationshipTypes.includes('CLIENTE') && !relationshipTypes.includes('FUNCIONARIO') && !relationshipTypes.includes('PROPRIETARIO');
+        if (roles.includes('CAR_ADMIN') || roles.includes('ROLE_CAR_ADMIN') || roles.includes('ROLE_ADMIN')) return true;
 
-        // Se for *apenas* um Vendedor, e a pessoa NÃO for *apenas* um Cliente, esconde o botão
-        if (isOnlySeller && !isClientOnly) {
-           return false;
+        const relationshipTypes = (row as any).relationships?.map((r: any) => r.relationshipName) || [];
+        const isTargetProprietario = relationshipTypes.includes('PROPRIETARIO');
+        const isTargetFuncionario = relationshipTypes.includes('FUNCIONARIO');
+        const isTargetCliente = relationshipTypes.includes('CLIENTE');
+
+        const isTargetOnlyClient = isTargetCliente && !isTargetFuncionario && !isTargetProprietario;
+
+        let isTargetSeller = false;
+        if (isTargetFuncionario && row.user?.roles?.length) {
+            const targetRoles = row.user.roles.map((r: any) => r.roleName);
+            isTargetSeller = targetRoles.includes('ROLE_SELLER') && 
+                             !targetRoles.includes('ROLE_MANAGER') && 
+                             !targetRoles.includes('ROLE_ADMIN') && 
+                             !targetRoles.includes('ROLE_CAR_ADMIN') && 
+                             !targetRoles.includes('CAR_ADMIN');
         }
 
-        return true;
+        const isManager = roles.includes('ROLE_MANAGER');
+        const isSeller = roles.includes('ROLE_SELLER');
+
+        if (isManager) {
+            // Gerente edita clientes e vendedores (desde que não seja proprietário)
+            return isTargetOnlyClient || (isTargetSeller && !isTargetProprietario);
+        }
+
+        if (isSeller) {
+            // Vendedor edita apenas clientes
+            return isTargetOnlyClient;
+        }
+
+        return false;
       },
     },
     {
@@ -216,20 +235,39 @@ export class PersonComponent implements OnInit, OnDestroy {
       header: '',
       showDeleteIcon: (row) => {
         const roles = this.authService.getRoles();
-        const isOnlySeller = roles.includes('ROLE_SELLER') && 
-                            !roles.includes('ROLE_MANAGER') && 
-                            !roles.includes('ROLE_ADMIN') && 
-                            !roles.includes('CAR_ADMIN');
-                            
-        const relationshipTypes = (row as any).relationships?.map((r: any) => r.relationshipName) || [];
-        const isClientOnly = relationshipTypes.includes('CLIENTE') && !relationshipTypes.includes('FUNCIONARIO') && !relationshipTypes.includes('PROPRIETARIO');
+        if (roles.includes('CAR_ADMIN') || roles.includes('ROLE_CAR_ADMIN') || roles.includes('ROLE_ADMIN')) return true;
 
-        // Se for *apenas* um Vendedor, e a pessoa NÃO for *apenas* um Cliente, esconde o botão
-        if (isOnlySeller && !isClientOnly) {
-           return false;
+        const relationshipTypes = (row as any).relationships?.map((r: any) => r.relationshipName) || [];
+        const isTargetProprietario = relationshipTypes.includes('PROPRIETARIO');
+        const isTargetFuncionario = relationshipTypes.includes('FUNCIONARIO');
+        const isTargetCliente = relationshipTypes.includes('CLIENTE');
+
+        const isTargetOnlyClient = isTargetCliente && !isTargetFuncionario && !isTargetProprietario;
+
+        let isTargetSeller = false;
+        if (isTargetFuncionario && row.user?.roles?.length) {
+            const targetRoles = row.user.roles.map((r: any) => r.roleName);
+            isTargetSeller = targetRoles.includes('ROLE_SELLER') && 
+                             !targetRoles.includes('ROLE_MANAGER') && 
+                             !targetRoles.includes('ROLE_ADMIN') && 
+                             !targetRoles.includes('ROLE_CAR_ADMIN') && 
+                             !targetRoles.includes('CAR_ADMIN');
         }
 
-        return true;
+        const isManager = roles.includes('ROLE_MANAGER');
+        const isSeller = roles.includes('ROLE_SELLER');
+
+        if (isManager) {
+            // Gerente edita clientes e vendedores (desde que não seja proprietário)
+            return isTargetOnlyClient || (isTargetSeller && !isTargetProprietario);
+        }
+
+        if (isSeller) {
+            // Vendedor edita apenas clientes
+            return isTargetOnlyClient;
+        }
+
+        return false;
       },
     },
   ];
