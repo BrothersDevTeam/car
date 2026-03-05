@@ -80,10 +80,33 @@ export class NfeComponent {
     {
       key: 'createdAt',
       header: 'Criação',
+      // Formata a data para o padrão brasileiro: dd/MM/yyyy às HH:mm
+      format: (val) => {
+        if (!val) return '—';
+        const date = new Date(val);
+        return new Intl.DateTimeFormat('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(date);
+      },
     },
     {
       key: 'nfeDataEmissao',
       header: 'Emissão',
+      format: (val) => {
+        if (!val) return '—';
+        const date = new Date(val);
+        return new Intl.DateTimeFormat('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(date);
+      },
     },
     {
       key: 'select',
