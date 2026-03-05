@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { catchError, debounceTime, of, Subject, Subscription } from 'rxjs';
+import { RelationshipTypes } from '../../enums/relationshipTypes';
 
 import { FormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -134,6 +135,38 @@ export class PersonComponent implements OnInit, OnDestroy {
       header: 'Nome',
       format: (value: any, row: Person) => {
         return row.name;
+      },
+    },
+    {
+      key: 'relationship',
+      header: 'Vínculo',
+      format: (value: any, row: any) => {
+        const types: string[] = [];
+        
+        // Extract string values from relationships object array
+        const relationshipTypes = row.relationships?.map((r: any) => r.relationshipName) || [];
+        
+        // Add roles if employee
+        if (relationshipTypes.includes(RelationshipTypes.FUNCIONARIO) && row.user?.roles?.length) {
+          const roleNames = row.user.roles.map((r: any) => r.roleName);
+          
+          if (roleNames.includes('ROLE_ADMIN') || roleNames.includes('CAR_ADMIN')) {
+            types.push('Administrador');
+          } else if (roleNames.includes('ROLE_MANAGER')) {
+            types.push('Gerente');
+          } else if (roleNames.includes('ROLE_SELLER')) {
+            types.push('Vendedor');
+          } else {
+            types.push('Funcionário');
+          }
+        } else if (relationshipTypes.includes(RelationshipTypes.FUNCIONARIO)) {
+            types.push('Funcionário');
+        }
+
+        if (relationshipTypes.includes(RelationshipTypes.CLIENTE)) types.push('Cliente');
+        if (relationshipTypes.includes(RelationshipTypes.PROPRIETARIO)) types.push('Proprietário');
+
+        return types.length > 0 ? types.join(', ') : '-';
       },
     },
     {
