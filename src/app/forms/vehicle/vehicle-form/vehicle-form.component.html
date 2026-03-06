@@ -96,6 +96,31 @@
         </div>
         <div class="custom-selects-container">
           <app-custom-select
+            listType="model"
+            [label]="'Ano/Versão (FIPE)'"
+            [options]="years"
+            [control]="fipeYearControl"
+            [placeholder]="
+              selectYearDisabled()
+                ? 'Selecione um modelo primeiro'
+                : loadingYears()
+                  ? 'Carregando versões...'
+                  : 'Selecione o ano/versão'
+            "
+            [disabled]="selectYearDisabled() || loadingYears()"
+            [selectedBrand]="brandControl.value"
+            matTooltip="Selecione o ano/versão para preencher os dados automaticamente"
+          ></app-custom-select>
+        </div>
+
+        @if (loadingDetails()) {
+          <div class="loading-details">
+            <mat-icon class="spin">autorenew</mat-icon>
+            <span>Buscando detalhes do veículo na FIPE...</span>
+          </div>
+        }
+        <div class="custom-selects-container">
+          <app-custom-select
             listType="color"
             [label]="'Cor'"
             [options]="colors"
