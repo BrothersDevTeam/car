@@ -65,7 +65,20 @@
             column.key !== 'edit' &&
             column.key !== 'delete'
           ) {
-            {{ formatValue(column, element) }}
+            <!-- Badge personalizada quando badgeConfig está definido -->
+            @if (column.badgeConfig) {
+              @let badgeKey = getNestedValue(element, column.key);
+              @let badge = column.badgeConfig[badgeKey];
+              @if (badge) {
+                <span class="status-badge" [ngClass]="badge.cssClass">
+                  {{ badge.label }}
+                </span>
+              } @else {
+                <span>{{ badgeKey }}</span>
+              }
+            } @else {
+              {{ formatValue(column, element) }}
+            }
           }
         </td>
       </ng-container>

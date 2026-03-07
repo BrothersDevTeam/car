@@ -45,62 +45,361 @@
   @if (openInfo()) {
     <app-drawer (closeDrawer)="handleCloseDrawer()">
       @if (selectedNfe) {
-        <mat-tab-group [selectedIndex]="0">
-          <mat-tab label="NFe">
-            <div class="nfe-info-container">
-              <h2>Informações da NFe</h2>
-              <div class="info-grid">
-                <div class="info-item">
-                  <label>Número:</label>
-                  <span>{{ selectedNfe.nfeNumero }}</span>
-                </div>
-                <div class="info-item">
-                  <label>Série:</label>
-                  <span>{{ selectedNfe.nfeSerie }}</span>
-                </div>
-                <div class="info-item">
-                  <label>Status:</label>
-                  <span>{{ selectedNfe.status }}</span>
-                </div>
-                <div class="info-item">
-                  <label>CFOP:</label>
-                  <span>{{ selectedNfe.nfeItens[0].itemCfop }}</span>
-                </div>
-                <div class="info-item">
-                  <label>Tipo:</label>
-                  <span>{{ selectedNfe.nfeTipoDocumento }}</span>
-                </div>
-                <div class="info-item">
-                  <label>Data de Emissão:</label>
-                  <span>{{ selectedNfe.nfeDataEmissao }}</span>
-                </div>
-                <div class="info-item">
-                  <label>Valor Total:</label>
-                  <span>R$ {{ selectedNfe.valorTotal | number: '1.2-2' }}</span>
-                </div>
-                <!-- <div class="info-item full-width">
-                  <label>Emitente:</label>
-                  <span>{{ selectedNfe.person.razaoSocial }}</span>
-                </div>
-                @if (selectedNfe.emitente.nomeFantasia) {
-                  <div class="info-item full-width">
-                    <label>Nome Fantasia:</label>
-                    <span>{{ selectedNfe.emitente.nomeFantasia }}</span>
-                  </div>
-                }
-                <div class="info-item full-width">
-                  <label>CNPJ Emitente:</label>
-                  <span>{{ selectedNfe.emitente.cnpj }}</span>
-                </div> -->
-              </div>
+
+        <!-- Cabeçalho do Drawer: título + botão editar -->
+        <div class="nfe-drawer-header">
+          <div class="nfe-drawer-title">
+            <span class="nfe-numero">
+              NFe {{ selectedNfe.nfeNumero ? '#' + selectedNfe.nfeNumero : '(Rascunho)' }}
+            </span>
+            <span
+              class="nfe-status-badge"
+              [ngClass]="'badge-' + (selectedNfe.nfeStatus || 'rascunho')"
+            >
+              {{ selectedNfe.nfeStatus === 'rascunho' ? 'Em digitação' : selectedNfe.nfeStatus }}
+            </span>
+          </div>
+          @if (selectedNfe.nfeStatus === 'rascunho') {
+            <button
+              mat-raised-button
+              color="primary"
+              class="btn-editar-nfe"
+              (click)="handleEdit(selectedNfe)"
+            >
+              <mat-icon>edit</mat-icon> Editar NFe
+            </button>
+          }
+        </div>
+
+        <!-- ======= SEÇÃO 1: DADOS GERAIS ======= -->
+        <div class="nfe-section">
+          <h3 class="section-title">
+            <mat-icon>receipt_long</mat-icon> Dados Gerais
+          </h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Nº NFe</label>
+              <span>{{ selectedNfe.nfeNumero ?? '—' }}</span>
             </div>
-          </mat-tab>
-        </mat-tab-group>
+            <div class="info-item">
+              <label>Série</label>
+              <span>{{ selectedNfe.nfeSerie ?? '—' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Tipo</label>
+              <span>{{ selectedNfe.nfeTipoDocumento === '0' ? 'Entrada' : selectedNfe.nfeTipoDocumento === '1' ? 'Saída' : '—' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Natureza da Operação</label>
+              <span>{{ selectedNfe.nfeNaturezaOperacao || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Data de Emissão</label>
+              <span>{{ selectedNfe.nfeDataEmissao ? (selectedNfe.nfeDataEmissao | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Criado em</label>
+              <span>{{ selectedNfe.createdAt ? (selectedNfe.createdAt | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
+            </div>
+            @if (selectedNfe.nfeChave) {
+              <div class="info-item full-width">
+                <label>Chave de Acesso</label>
+                <span class="chave-acesso">{{ selectedNfe.nfeChave }}</span>
+              </div>
+            }
+            @if (selectedNfe.nfeMensagemErro) {
+              <div class="info-item full-width error-item">
+                <label>Mensagem de Erro</label>
+                <span>{{ selectedNfe.nfeMensagemErro }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- ======= SEÇÃO 2: VALORES ======= -->
+        @if (selectedNfe.nfeValorTotal || selectedNfe.nfeValorProdutos) {
+          <div class="nfe-section">
+            <h3 class="section-title">
+              <mat-icon>monetization_on</mat-icon> Valores
+            </h3>
+            <div class="info-grid">
+              @if (selectedNfe.nfeValorProdutos) {
+                <div class="info-item">
+                  <label>Valor dos Produtos</label>
+                  <span>R$ {{ selectedNfe.nfeValorProdutos }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeValorTotal) {
+                <div class="info-item">
+                  <label>Valor Total</label>
+                  <span class="valor-destaque">R$ {{ selectedNfe.nfeValorTotal }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeValorFrete) {
+                <div class="info-item">
+                  <label>Valor do Frete</label>
+                  <span>R$ {{ selectedNfe.nfeValorFrete }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeValorDesconto) {
+                <div class="info-item">
+                  <label>Desconto</label>
+                  <span>R$ {{ selectedNfe.nfeValorDesconto }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeIcmsValorTotal) {
+                <div class="info-item">
+                  <label>ICMS Total</label>
+                  <span>R$ {{ selectedNfe.nfeIcmsValorTotal }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeValorIpi) {
+                <div class="info-item">
+                  <label>IPI</label>
+                  <span>R$ {{ selectedNfe.nfeValorIpi }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeValorPis) {
+                <div class="info-item">
+                  <label>PIS</label>
+                  <span>R$ {{ selectedNfe.nfeValorPis }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeValorCofins) {
+                <div class="info-item">
+                  <label>COFINS</label>
+                  <span>R$ {{ selectedNfe.nfeValorCofins }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- ======= SEÇÃO 3: EMITENTE ======= -->
+        @if (selectedNfe.nfeEmitente) {
+          <div class="nfe-section">
+            <h3 class="section-title">
+              <mat-icon>store</mat-icon> Emitente
+            </h3>
+            <div class="info-grid">
+              @if (selectedNfe.nfeEmitente.emitenteRazaoSocial) {
+                <div class="info-item full-width">
+                  <label>Razão Social</label>
+                  <span>{{ selectedNfe.nfeEmitente.emitenteRazaoSocial }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeEmitente.emitenteNomeFantasia) {
+                <div class="info-item full-width">
+                  <label>Nome Fantasia</label>
+                  <span>{{ selectedNfe.nfeEmitente.emitenteNomeFantasia }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeEmitente.emitenteCnpj) {
+                <div class="info-item">
+                  <label>CNPJ</label>
+                  <span>{{ selectedNfe.nfeEmitente.emitenteCnpj }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeEmitente.emitenteCpf) {
+                <div class="info-item">
+                  <label>CPF</label>
+                  <span>{{ selectedNfe.nfeEmitente.emitenteCpf }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeEmitente.emitenteInscricaoEstadual) {
+                <div class="info-item">
+                  <label>Inscrição Estadual</label>
+                  <span>{{ selectedNfe.nfeEmitente.emitenteInscricaoEstadual }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeEmitente.emitenteRegimeTributario) {
+                <div class="info-item">
+                  <label>Regime Tributário</label>
+                  <span>{{ selectedNfe.nfeEmitente.emitenteRegimeTributario === '1' ? 'Simples Nacional' : selectedNfe.nfeEmitente.emitenteRegimeTributario === '2' ? 'Simples Nacional — Excesso' : 'Regime Normal' }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeEmitente.emitenteTelefone) {
+                <div class="info-item">
+                  <label>Telefone</label>
+                  <span>{{ selectedNfe.nfeEmitente.emitenteTelefone }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeEmitente.emitenteLogradouro) {
+                <div class="info-item full-width">
+                  <label>Endereço</label>
+                  <span>
+                    {{ selectedNfe.nfeEmitente.emitenteLogradouro }},
+                    {{ selectedNfe.nfeEmitente.emitenteNumero }}
+                    @if (selectedNfe.nfeEmitente.emitenteComplemento) { — {{ selectedNfe.nfeEmitente.emitenteComplemento }} }
+                    — {{ selectedNfe.nfeEmitente.emitenteBairro }}
+                    — {{ selectedNfe.nfeEmitente.emitenteMunicipio }}/{{ selectedNfe.nfeEmitente.emitenteUf }}
+                    — CEP: {{ selectedNfe.nfeEmitente.emitenteCep }}
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- ======= SEÇÃO 4: DESTINATÁRIO ======= -->
+        @if (selectedNfe.nfeDestinatario) {
+          <div class="nfe-section">
+            <h3 class="section-title">
+              <mat-icon>person_pin</mat-icon> Destinatário
+            </h3>
+            <div class="info-grid">
+              @if (selectedNfe.nfeDestinatario.destinatarioNome) {
+                <div class="info-item full-width">
+                  <label>Nome / Razão Social</label>
+                  <span>{{ selectedNfe.nfeDestinatario.destinatarioNome }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeDestinatario.destinatarioCnpj) {
+                <div class="info-item">
+                  <label>CNPJ</label>
+                  <span>{{ selectedNfe.nfeDestinatario.destinatarioCnpj }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeDestinatario.destinatarioCpf) {
+                <div class="info-item">
+                  <label>CPF</label>
+                  <span>{{ selectedNfe.nfeDestinatario.destinatarioCpf }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeDestinatario.destinatarioIe) {
+                <div class="info-item">
+                  <label>Inscrição Estadual</label>
+                  <span>{{ selectedNfe.nfeDestinatario.destinatarioIe }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeDestinatario.destinatarioEmail) {
+                <div class="info-item">
+                  <label>E-mail</label>
+                  <span>{{ selectedNfe.nfeDestinatario.destinatarioEmail }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeDestinatario.destinatarioTelefone) {
+                <div class="info-item">
+                  <label>Telefone</label>
+                  <span>{{ selectedNfe.nfeDestinatario.destinatarioTelefone }}</span>
+                </div>
+              }
+              @if (selectedNfe.nfeDestinatario.destinatarioLogradouro) {
+                <div class="info-item full-width">
+                  <label>Endereço</label>
+                  <span>
+                    {{ selectedNfe.nfeDestinatario.destinatarioLogradouro }},
+                    {{ selectedNfe.nfeDestinatario.destinatarioNumero }}
+                    @if (selectedNfe.nfeDestinatario.destinatarioComplemento) { — {{ selectedNfe.nfeDestinatario.destinatarioComplemento }} }
+                    — {{ selectedNfe.nfeDestinatario.destinatarioBairro }}
+                    — {{ selectedNfe.nfeDestinatario.destinatarioMunicipio }}/{{ selectedNfe.nfeDestinatario.destinatarioUf }}
+                    — CEP: {{ selectedNfe.nfeDestinatario.destinatarioCep }}
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- ======= SEÇÃO 5: ITENS DA NFe ======= -->
+        @if (selectedNfe.nfeItens && selectedNfe.nfeItens.length > 0) {
+          <div class="nfe-section">
+            <h3 class="section-title">
+              <mat-icon>inventory_2</mat-icon>
+              Itens da NFe
+              <span class="item-count">({{ selectedNfe.nfeItens.length }} {{ selectedNfe.nfeItens.length === 1 ? 'item' : 'itens' }})</span>
+            </h3>
+
+            @for (item of selectedNfe.nfeItens; track item.itemNumero; let idx = $index) {
+              <div class="nfe-item-card">
+                <div class="nfe-item-header">
+                  <span class="item-numero">Item {{ item.itemNumero || (idx + 1) }}</span>
+                  @if (item.itemDescricao) {
+                    <span class="item-descricao">{{ item.itemDescricao }}</span>
+                  }
+                </div>
+                <div class="info-grid">
+                  @if (item.itemCodigoProduto) {
+                    <div class="info-item">
+                      <label>Código</label>
+                      <span>{{ item.itemCodigoProduto }}</span>
+                    </div>
+                  }
+                  @if (item.itemCfop) {
+                    <div class="info-item">
+                      <label>CFOP</label>
+                      <span>{{ item.itemCfop }}</span>
+                    </div>
+                  }
+                  @if (item.itemCodigoNcm) {
+                    <div class="info-item">
+                      <label>NCM</label>
+                      <span>{{ item.itemCodigoNcm }}</span>
+                    </div>
+                  }
+                  @if (item.itemCest) {
+                    <div class="info-item">
+                      <label>CEST</label>
+                      <span>{{ item.itemCest }}</span>
+                    </div>
+                  }
+                  @if (item.itemUnidadeComercial) {
+                    <div class="info-item">
+                      <label>Unidade</label>
+                      <span>{{ item.itemUnidadeComercial }}</span>
+                    </div>
+                  }
+                  @if (item.itemQuantidadeComercial) {
+                    <div class="info-item">
+                      <label>Quantidade</label>
+                      <span>{{ item.itemQuantidadeComercial }}</span>
+                    </div>
+                  }
+                  @if (item.itemValorUnitarioComercial) {
+                    <div class="info-item">
+                      <label>Valor Unit.</label>
+                      <span>R$ {{ item.itemValorUnitarioComercial }}</span>
+                    </div>
+                  }
+                  @if (item.itemValorBruto) {
+                    <div class="info-item">
+                      <label>Valor Bruto</label>
+                      <span>R$ {{ item.itemValorBruto }}</span>
+                    </div>
+                  }
+                  @if (item.itemValorDesconto) {
+                    <div class="info-item">
+                      <label>Desconto</label>
+                      <span>R$ {{ item.itemValorDesconto }}</span>
+                    </div>
+                  }
+                  @if (item.itemOrigemMercadoria) {
+                    <div class="info-item">
+                      <label>Origem</label>
+                      <span>{{ item.itemOrigemMercadoria }}</span>
+                    </div>
+                  }
+                  @if (item.itemInformacoesAdicionais) {
+                    <div class="info-item full-width">
+                      <label>Informações Adicionais</label>
+                      <span>{{ item.itemInformacoesAdicionais }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
       } @else {
-        <h1>Dados não encontrados</h1>
+        <div class="nfe-not-found">
+          <mat-icon>error_outline</mat-icon>
+          <h2>Dados não encontrados</h2>
+        </div>
       }
     </app-drawer>
   }
+  <!-- === ANTIGRAVITY END ==== -->
   @if (openForm()) {
     <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
       <mat-tab-group [selectedIndex]="selectedTabIndex()">

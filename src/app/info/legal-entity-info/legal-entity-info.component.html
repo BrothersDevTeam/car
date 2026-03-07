@@ -29,25 +29,27 @@
         <h3 class="value">{{ person.cnpj }}</h3>
       </div>
       <mat-card-footer class="card-footer">
-        <button
-          type="button"
-          class="btn"
-          color="primary"
-          mat-raised-button
-          (click)="editEvent.emit()"
-        >
-          Editar
-        </button>
-        <button
-          type="button"
-          class="btn"
-          color="warn"
-          mat-raised-button
-          matListItemIcon
-          (click)="onDelete()"
-        >
-          Excluir
-        </button>
+        @if (canEditOrDelete) {
+          <button
+            type="button"
+            class="btn"
+            color="primary"
+            mat-raised-button
+            (click)="editEvent.emit()"
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            class="btn"
+            color="warn"
+            mat-raised-button
+            matListItemIcon
+            (click)="onDelete()"
+          >
+            Excluir
+          </button>
+        }
       </mat-card-footer>
     </app-wrapper-card>
 
@@ -56,7 +58,7 @@
       @if (person.personId) {
         <div class="address-section">
           <app-address-list
-            [personId]="person.personId"
+            [ownerId]="person.personId"
             [canEdit]="true"
             [canDelete]="true"
             [canAdd]="true"

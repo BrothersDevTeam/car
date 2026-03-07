@@ -24,18 +24,14 @@ export interface Address {
   /**
    * ID da pessoa dona deste endereço (relacionamento ManyToOne).
    *
-   * - Obrigatório: todo endereço DEVE pertencer a uma pessoa
-   * - Usado para buscar todos os endereços de uma pessoa específica
-   * - Validado no backend para garantir que a pessoa existe
+   * - Opcional se for endereço de loja
    */
-  personId: string;
+  personId?: string;
 
   /**
-   * ID da loja (herdado da pessoa automaticamente pelo backend).
+   * ID da loja.
    *
-   * - Opcional no frontend porque é preenchido automaticamente pela API
-   * - Importante para multi-tenancy e filtros por loja
-   * - Sempre presente nas respostas do backend
+   * - Opcional se for endereço de pessoa
    */
   storeId?: string;
 
@@ -190,7 +186,7 @@ export interface Address {
  */
 export type CreateAddress = Omit<
   Address,
-  'addressId' | 'storeId' | 'createdAt' | 'updatedAt'
+  'addressId' | 'createdAt' | 'updatedAt'
 >;
 
 /**
@@ -213,7 +209,7 @@ export type CreateAddress = Omit<
  *   active: true
  * };
  */
-export type UpdateAddress = Omit<CreateAddress, 'personId'>;
+export type UpdateAddress = Omit<CreateAddress, 'personId' | 'storeId'>;
 
 /**
  * Interface para resposta de erro de validação do backend.

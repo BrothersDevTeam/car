@@ -75,7 +75,8 @@ import {
 export class AddressFormComponent
   implements OnInit, OnChanges, CanComponentDeactivate
 {
-  @Input() personId!: string;
+  @Input() ownerId!: string;
+  @Input() ownerType: 'person' | 'store' = 'person';
   @Input() address: Address | null = null;
   @Input() initialDraftId: string | null = null;
   @Output() formSubmitted = new EventEmitter<void>();
@@ -171,8 +172,13 @@ export class AddressFormComponent
     console.log('📋 ngOnInit - address recebido:', this.address);
     this.loadFormData();
 
-    if (!this.isEditMode && this.personId) {
-      this.addressService.getByPersonId(this.personId).subscribe({
+    if (!this.isEditMode && this.ownerId) {
+      const request$ =
+        this.ownerType === 'store'
+          ? this.addressService.getByStoreId(this.ownerId)
+          : this.addressService.getByPersonId(this.ownerId);
+
+      request$.subscribe({
         next: (addresses) => {
           if (!addresses || addresses.length === 0) {
             console.log(
@@ -181,8 +187,7 @@ export class AddressFormComponent
             this.form.patchValue({ mainAddress: true });
           }
         },
-        error: (err) =>
-          console.error('Erro ao verificar endereços da pessoa:', err),
+        error: (err) => console.error('Erro ao verificar endereços:', err),
       });
     }
 
@@ -437,7 +442,8 @@ export class AddressFormComponent
           });
       } else {
         const newAddress: CreateAddress = {
-          personId: this.personId,
+          personId: this.ownerType === 'person' ? this.ownerId : undefined,
+          storeId: this.ownerType === 'store' ? this.ownerId : undefined,
           addressType: formValue.addressType,
           cep: cepClean,
           street: formValue.street,
@@ -506,7 +512,7 @@ export class AddressFormComponent
     const draftData = {
       ...this.form.value,
       _editingId: this.address?.addressId, // Preserva o ID se estiver editando
-      personId: this.personId, // Include personId so PersonComponent can identify the owner
+      ownerId: this.ownerId, // Include ownerId so PersonComponent can identify the owner
     };
 
     const draftId = this.formDraftService.saveDraft(
@@ -586,7 +592,8 @@ export class AddressFormComponent
     // Filtra rascunhos relacionados à pessoa atual
     this.availableDrafts = this.availableDrafts.filter((d) => {
       const data = d.data as any;
-      return !data.personId || data.personId === this.personId;
+      const draftOwnerId = data.ownerId;
+      return !draftOwnerId || draftOwnerId === this.ownerId;
     });
   }
 

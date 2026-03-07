@@ -45,6 +45,8 @@ export class NaturalPersonInfoComponent {
   @Output() formSubmitted = new EventEmitter<void>();
   @ViewChild(AddressListComponent) addressList?: AddressListComponent;
 
+  canEditOrDelete: boolean = true;
+
   getActiveFormComponent(): any {
     return this.addressList?.addressForm;
   }
@@ -57,6 +59,32 @@ export class NaturalPersonInfoComponent {
     private authService: AuthService
   ) {
     this.isSeller = this.authService.getRoles().includes('ROLE_SELLER');
+  }
+
+
+  ngOnInit() {
+    this.checkPermissions();
+  }
+
+  checkPermissions() {
+    const roles = this.authService.getRoles();
+    const isOnlySeller =
+      roles.includes('ROLE_SELLER') &&
+      !roles.includes('ROLE_MANAGER') &&
+      !roles.includes('ROLE_ADMIN') &&
+      !roles.includes('CAR_ADMIN');
+
+    const relationshipTypes =
+      (this.person as any).relationships?.map((r: any) => r.relationshipName) ||
+      [];
+    const isClientOnly =
+      relationshipTypes.includes('CLIENTE') &&
+      !relationshipTypes.includes('FUNCIONARIO') &&
+      !relationshipTypes.includes('PROPRIETARIO');
+
+    if (isOnlySeller && !isClientOnly) {
+      this.canEditOrDelete = false;
+    }
   }
 
   onDelete() {

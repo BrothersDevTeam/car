@@ -66,21 +66,26 @@ export class UserAccessManagementComponent implements OnInit {
       { validators: this.passwordMatchValidator }
     ); // Added validator
   }
-  
+
   ngOnInit(): void {
     this.checkUserPermissions();
   }
 
   private checkUserPermissions(): void {
     const roles = this.authService.getRoles();
-    this.hasPermissionToCreateAccess = roles.some(role => 
-      ['ROLE_MANAGER', 'ROLE_ADMIN', 'ROLE_OWNER', 'ROLE_CAR_ADMIN'].includes(role)
+
+    this.hasPermissionToCreateAccess = roles.some((role) =>
+      ['ROLE_MANAGER', 'ROLE_ADMIN', 'ROLE_OWNER', 'CAR_ADMIN'].includes(role)
+
     );
   }
 
   handleCreateAccessClick(): void {
     if (!this.hasPermissionToCreateAccess) {
-      this.toastr.warning('Sem permissão para criar acesso ao sistema. O acesso pode ser liberado apenas por Gerentes ou Administradores.', 'Acesso Negado');
+      this.toastr.warning(
+        'Sem permissão para criar acesso ao sistema. O acesso pode ser liberado apenas por Gerentes ou Administradores.',
+        'Acesso Negado'
+      );
       return;
     }
     this.toggleForm();

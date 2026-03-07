@@ -46,7 +46,8 @@ import { Address } from '@interfaces/address';
   styleUrl: './address-list.component.scss',
 })
 export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
-  @Input() personId!: string;
+  @Input() ownerId!: string;
+  @Input() ownerType: 'person' | 'store' = 'person';
   @Input() canEdit = true;
   @Input() canDelete = true;
   @Input() canAdd = true;
@@ -73,7 +74,7 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
   ) {}
 
   ngOnInit() {
-    if (this.personId) {
+    if (this.ownerId) {
       this.loadAddresses();
       this.loadAvailableDrafts();
     }
@@ -90,12 +91,12 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['personId']) {
+    if (changes['ownerId']) {
       console.log(
-        'AddressList: personId changed',
-        changes['personId'].currentValue
+        'AddressList: ownerId changed',
+        changes['ownerId'].currentValue
       );
-      if (!changes['personId'].firstChange) {
+      if (!changes['ownerId'].firstChange) {
         this.loadAddresses();
         this.loadAvailableDrafts();
       }
@@ -134,12 +135,12 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
           foundInAll
         );
         console.warn('Filter check:', {
-          draftPersonId: (foundInAll.data as any).personId,
-          componentPersonId: this.personId,
-          match: (foundInAll.data as any).personId == this.personId,
+          draftPersonId: (foundInAll.data as any).ownerId,
+          componentPersonId: this.ownerId,
+          match: (foundInAll.data as any).ownerId == this.ownerId,
         });
         // If found, force open it?
-        if ((foundInAll.data as any).personId == this.personId) {
+        if ((foundInAll.data as any).ownerId == this.ownerId) {
           console.log('AddressList: forcing open because ID matches roughly');
           this.handleDraftSelection(foundInAll);
         }
@@ -148,13 +149,14 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   loadAvailableDrafts() {
-    console.log('AddressList: loading drafts for personId', this.personId);
+    console.log('AddressList: loading drafts for ownerId', this.ownerId);
     this.availableDrafts = this.formDraftService
       .getDraftsByType('endereco')
       .filter((d) => {
         const data = d.data as any;
+        const draftOwnerId = data.ownerId;
         // Use loose equality to handle string/number differences
-        return !data.personId || data.personId == this.personId;
+        return !draftOwnerId || draftOwnerId == this.ownerId;
       })
       .sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
     console.log('AddressList: Drafts loaded', this.availableDrafts.length);
@@ -231,9 +233,15 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
 
   loadAddresses() {
     this.loading = true;
-    this.addressService.getByPersonId(this.personId).subscribe({
+
+    const request$ =
+      this.ownerType === 'store'
+        ? this.addressService.getByStoreId(this.ownerId)
+        : this.addressService.getByPersonId(this.ownerId);
+
+    request$.subscribe({
       next: (addresses) => {
-        this.addresses = this.addressService.sortAddresses(addresses);
+        this.addresses = this.addressService.sortAddresses(addresses || []);
         this.loading = false;
       },
       error: (err) => {

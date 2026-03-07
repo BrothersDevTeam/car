@@ -129,6 +129,18 @@
           <mat-icon>add_photo_alternate</mat-icon>
         </button>
       }
+      <!-- Início de código gerado pelo antigravity -->
+      @if (canManageAddress) {
+        <button
+          mat-icon-button
+          (click)="onManageAddress()"
+          matTooltip="Endereços da loja"
+          class="action-btn address-btn"
+        >
+          <mat-icon>location_on</mat-icon>
+        </button>
+      }
+      <!-- Fim de código gerado pelo antigravity -->
       @if (canManageOwner) {
         <button
           mat-icon-button

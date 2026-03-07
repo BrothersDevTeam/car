@@ -21,6 +21,7 @@ import { AddressListComponent } from '@components/address/address-list/address-l
 import type { Person } from '@interfaces/person';
 
 import { PersonService } from '@services/person.service';
+import { AuthService } from '@services/auth/auth.service';
 
 @Component({
   selector: 'app-legal-entity-info',
@@ -43,14 +44,42 @@ export class LegalEntityInfoComponent {
   @Output() formSubmitted = new EventEmitter<void>();
   @ViewChild(AddressListComponent) addressList?: AddressListComponent;
 
+  canEditOrDelete: boolean = true;
+
   getActiveFormComponent(): any {
     return this.addressList?.addressForm;
   }
 
   constructor(
     private toastrService: ToastrService,
-    private personService: PersonService
+    private personService: PersonService,
+    private authService: AuthService
   ) {}
+
+  ngOnInit() {
+    this.checkPermissions();
+  }
+
+  checkPermissions() {
+    const roles = this.authService.getRoles();
+    const isOnlySeller =
+      roles.includes('ROLE_SELLER') &&
+      !roles.includes('ROLE_MANAGER') &&
+      !roles.includes('ROLE_ADMIN') &&
+      !roles.includes('CAR_ADMIN');
+
+    const relationshipTypes =
+      (this.person as any).relationships?.map((r: any) => r.relationshipName) ||
+      [];
+    const isClientOnly =
+      relationshipTypes.includes('CLIENTE') &&
+      !relationshipTypes.includes('FUNCIONARIO') &&
+      !relationshipTypes.includes('PROPRIETARIO');
+
+    if (isOnlySeller && !isClientOnly) {
+      this.canEditOrDelete = false;
+    }
+  }
 
   onDelete() {
     this.openDialog();

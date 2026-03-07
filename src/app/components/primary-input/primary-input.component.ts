@@ -15,7 +15,7 @@ import { MatIcon } from '@angular/material/icon';
  * Tipos de input permitidos pelo componente
  * Define os tipos HTML5 válidos para o elemento input
  */
-type InputTypes = 'text' | 'email' | 'password' | 'number' | 'tel';
+type InputTypes = 'text' | 'email' | 'password' | 'number' | 'tel' | 'date' | 'datetime-local';
 
 /**
  * Componente de Input Reutilizável com suporte a maiúsculas automáticas

@@ -12,6 +12,7 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core';
+import { NgClass } from '@angular/common';
 
 import { PaginationComponent } from '@components/pagination/pagination.component';
 
@@ -26,6 +27,7 @@ import type { PaginationResponse } from '@interfaces/pagination';
     MatCheckboxModule,
     MatIconModule,
     MatButtonModule,
+    NgClass,
   ],
   templateUrl: './generic-table.component.html',
   styleUrl: './generic-table.component.scss',

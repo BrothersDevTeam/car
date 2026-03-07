@@ -8,279 +8,264 @@
     </div>
   }
 
-  <app-wrapper-card>
-    <!-- Origem do veículo -->
-    <div class="radio-button-wrapper-container">
-      <label class="radio-button-label">Origem:</label>
-      <mat-radio-group
-        color="primary"
-        formControlName="origin"
-        aria-label="Select an option"
-        class="radio-button-group"
-      >
-        <mat-radio-button
-          class="radio-button"
-          value="NACIONAL"
-        >
-          Nacional
-        </mat-radio-button>
-        <mat-radio-button
-          class="radio-button"
-          value="IMPORTADO"
-        >
-          Importado
-        </mat-radio-button>
-      </mat-radio-group>
-    </div>
+  <mat-tab-group>
+    <mat-tab label="Veículo">
+      <app-wrapper-card>
+        <div class="radio-button-wrapper-container">
+          <label class="radio-button-label">Origem:</label>
+          <mat-radio-group
+            color="primary"
+            formControlName="origin"
+            aria-label="Select an option"
+            class="radio-button-group"
+          >
+            <mat-radio-button
+              class="radio-button"
+              value="NACIONAL"
+            >
+              Nacional
+            </mat-radio-button>
+            <mat-radio-button
+              class="radio-button"
+              value="IMPORTADO"
+            >
+              Importado
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+        <app-primary-select
+          formControlName="vehicleType"
+          label="Tipo de Veículo"
+          inputName="vehicleType"
+          placeholder="Selecione o tipo"
+          [options]="vehicleTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+        ></app-primary-select>
+        <app-primary-input
+          formControlName="plate"
+          label="Placa*"
+          inputName="plate"
+          type="text"
+          mask="AAA-AAAA"
+          [error]="
+            form.get('plate')?.invalid && (form.get('plate')?.touched || submitted)
+          "
+        />
+        <div class="custom-selects-container">
+          <app-custom-select
+            listType="person"
+            [label]="'Proprietário'"
+            [options]="persons"
+            [control]="ownerControl"
+            placeholder="Selecione um proprietário"
+            matTooltip="Selecione o proprietário do veículo"
+            (onCreateNew)="onCreateNewPerson()"
+            (onEdit)="onEditPerson($event)"
+          ></app-custom-select>
+        </div>
+        <div class="custom-selects-container">
+          <app-custom-select
+            listType="brand"
+            [label]="'Marca'"
+            [options]="brands"
+            [control]="brandControl"
+            placeholder="Selecione uma marca"
+            matTooltip="Selecione a marca do veículo"
+            (itemChanged)="loadBrands()"
+          ></app-custom-select>
+        </div>
+        <div class="custom-selects-container">
+          <app-custom-select
+            listType="model"
+            [label]="'Modelo'"
+            [options]="models"
+            [control]="modelControl"
+            [placeholder]="
+              selectModelDisabled()
+                ? 'Selecione uma marca primeiro'
+                : loadingModels()
+                  ? 'Carregando modelos...'
+                  : 'Selecione um modelo'
+            "
+            [disabled]="selectModelDisabled() || loadingModels()"
+            [selectedBrand]="brandControl.value"
+            matTooltip="Selecione o modelo do veículo"
+            (itemChanged)="loadModels()"
+          ></app-custom-select>
+        </div>
+        <div class="custom-selects-container">
+          <app-custom-select
+            listType="model"
+            [label]="'Ano/Versão (FIPE)'"
+            [options]="years"
+            [control]="fipeYearControl"
+            [placeholder]="
+              selectYearDisabled()
+                ? 'Selecione um modelo primeiro'
+                : loadingYears()
+                  ? 'Carregando versões...'
+                  : 'Selecione o ano/versão'
+            "
+            [disabled]="selectYearDisabled() || loadingYears()"
+            [selectedBrand]="brandControl.value"
+            matTooltip="Selecione o ano/versão para preencher os dados automaticamente"
+          ></app-custom-select>
+        </div>
 
-    <!-- Tipo de Veículo -->
-    <app-primary-select
-      formControlName="vehicleType"
-      label="Tipo de Veículo"
-      inputName="vehicleType"
-      placeholder="Selecione o tipo"
-      [options]="vehicleTypeOptions"
-      optionLabel="label"
-      optionValue="value"
-    ></app-primary-select>
+        @if (loadingDetails()) {
+          <div class="loading-details">
+            <mat-icon class="spin">autorenew</mat-icon>
+            <span>Buscando detalhes do veículo na FIPE...</span>
+          </div>
+        }
+        <div class="custom-selects-container">
+          <app-custom-select
+            listType="color"
+            [label]="'Cor'"
+            [options]="colors"
+            [control]="colorControl"
+            placeholder="Selecione uma cor"
+            matTooltip="Selecione a cor do veículo"
+            (itemChanged)="loadColors()"
+          ></app-custom-select>
+        </div>
+        <app-primary-select
+          formControlName="fuelTypes"
+          label="Tipos de Combustível"
+          inputName="fuelTypes"
+          placeholder="Selecione os tipos de combustível"
+          [options]="fuelTypesOptions"
+          [allowMultiple]="false"
+          optionValue="value"
+          optionLabel="label"
+        ></app-primary-select>
+        <app-primary-input
+          formControlName="vehicleYear"
+          label="Ano Fabricação"
+          inputName="vehicleYear"
+          type="text"
+          placeholder="0000"
+          mask="0000"
+        />
+        <app-primary-input
+          formControlName="modelYear"
+          label="Ano Modelo"
+          inputName="modelYear"
+          type="text"
+          placeholder="0000"
+          mask="0000"
+        />
+        <app-primary-input
+          formControlName="chassis"
+          label="Chassi"
+          inputName="chassis"
+          type="text"
+          placeholder="Insira os 17 caracteres do chassi"
+          mask="AAAAAAAAAAAAAAAAA"
+        />
+        <app-primary-input
+          formControlName="doors"
+          label="Número de portas"
+          inputName="doors"
+          type="text"
+        />
+        <div class="custom-selects-container">
+          <app-primary-input
+            formControlName="engineDisplacement"
+            label="Motor (Cilindrada)"
+            inputName="engineDisplacement"
+            type="text"
+          />
+          <app-primary-input
+            formControlName="horsepower"
+            label="Potência (CV)"
+            inputName="horsepower"
+            type="text"
+          />
+        </div>
+        <app-primary-input
+          formControlName="engineNumber"
+          label="Número do motor"
+          inputName="engineNumber"
+          type="text"
+          placeholder="Digite o Número do Motor"
+          mask="AAAAAAAAAAAAAAAAAAAA"
+        />
+        <app-primary-input
+          formControlName="km"
+          label="KM inicial"
+          inputName="km"
+          type="text"
+        />
+        <app-primary-input
+          formControlName="renavam"
+          label="Renavam"
+          inputName="renavam"
+          type="text"
+        />
+        <app-primary-select
+          formControlName="species"
+          label="Espécie"
+          inputName="species"
+          placeholder="Selecione a espécie"
+          [options]="speciesOptions"
+          optionLabel="label"
+          optionValue="value"
+        ></app-primary-select>
+        <app-primary-select
+          formControlName="category"
+          label="Categoria"
+          inputName="category"
+          placeholder="Selecione a categoria"
+          [options]="categoryOptions"
+          optionLabel="label"
+          optionValue="value"
+        ></app-primary-select>
+        <app-primary-input
+          formControlName="features"
+          label="Características"
+          inputName="features"
+          type="text"
+        />
+      </app-wrapper-card>
+    </mat-tab>
 
-    <!-- Placa (obrigatório) -->
-    <app-primary-input
-      formControlName="plate"
-      label="Placa*"
-      inputName="plate"
-      type="text"
-      mask="AAA-AAAA"
-      [error]="
-        form.get('plate')?.invalid && (form.get('plate')?.touched || submitted)
-      "
-    />
-
-    <!-- Seleção de Proprietário -->
-    <div class="custom-selects-container">
-      <app-custom-select
-        listType="person"
-        [label]="'Proprietário'"
-        [options]="persons"
-        [control]="ownerControl"
-        placeholder="Selecione um proprietário"
-        matTooltip="Selecione o proprietário do veículo"
-        (onCreateNew)="onCreateNewPerson()"
-        (onEdit)="onEditPerson($event)"
-      ></app-custom-select>
-    </div>
-
-    <!-- Seleção de Marca -->
-    <div class="custom-selects-container">
-      <app-custom-select
-        listType="brand"
-        [label]="'Marca'"
-        [options]="brands"
-        [control]="brandControl"
-        placeholder="Selecione uma marca"
-        matTooltip="Selecione a marca do veículo"
-        (itemChanged)="loadBrands()"
-      ></app-custom-select>
-    </div>
-
-    <!-- Seleção de Modelo -->
-    <div class="custom-selects-container">
-      <app-custom-select
-        listType="model"
-        [label]="'Modelo'"
-        [options]="models"
-        [control]="modelControl"
-        [placeholder]="
-          selectModelDisabled()
-            ? 'Selecione uma marca primeiro'
-            : loadingModels()
-              ? 'Carregando modelos...'
-              : 'Selecione um modelo'
-        "
-        [disabled]="selectModelDisabled() || loadingModels()"
-        [selectedBrand]="brandControl.value"
-        matTooltip="Selecione o modelo do veículo"
-        (itemChanged)="loadModels()"
-      ></app-custom-select>
-    </div>
-
-    <!-- Seleção de Ano/Versão (FIPE) -->
-    <div class="custom-selects-container">
-      <app-custom-select
-        listType="model"
-        [label]="'Ano/Versão (FIPE)'"
-        [options]="years"
-        [control]="fipeYearControl"
-        [placeholder]="
-          selectYearDisabled()
-            ? 'Selecione um modelo primeiro'
-            : loadingYears()
-              ? 'Carregando versões...'
-              : 'Selecione o ano/versão'
-        "
-        [disabled]="selectYearDisabled() || loadingYears()"
-        [selectedBrand]="brandControl.value"
-        matTooltip="Selecione o ano/versão para preencher os dados automaticamente"
-      ></app-custom-select>
-    </div>
-
-    @if (loadingDetails()) {
-      <div class="loading-details">
-        <mat-icon class="spin">autorenew</mat-icon>
-        <span>Buscando detalhes do veículo na FIPE...</span>
-      </div>
-    }
-
-    <!-- Seleção de Cor -->
-    <div class="custom-selects-container">
-      <app-custom-select
-        listType="color"
-        [label]="'Cor'"
-        [options]="colors"
-        [control]="colorControl"
-        placeholder="Selecione uma cor"
-        matTooltip="Selecione a cor do veículo"
-        (itemChanged)="loadColors()"
-      ></app-custom-select>
-    </div>
-
-    <!-- Tipos de Combustível (múltipla seleção) -->
-    <app-primary-select
-      formControlName="fuelTypes"
-      label="Tipos de Combustível"
-      inputName="fuelTypes"
-      placeholder="Selecione os tipos de combustível"
-      [options]="fuelTypesOptions"
-      [allowMultiple]="false"
-      optionValue="value"
-      optionLabel="label"
-    ></app-primary-select>
-
-    <!-- Ano -->
-    <app-primary-input
-      formControlName="vehicleYear"
-      label="Ano Fabricação"
-      inputName="vehicleYear"
-      type="text"
-      placeholder="0000"
-      mask="0000"
-    />
-
-    <!-- Ano/Modelo -->
-    <app-primary-input
-      formControlName="modelYear"
-      label="Ano Modelo"
-      inputName="modelYear"
-      type="text"
-      placeholder="0000"
-      mask="0000"
-    />
-
-    <!-- Chassi -->
-    <app-primary-input
-      formControlName="chassis"
-      label="Chassi"
-      inputName="chassis"
-      type="text"
-      placeholder="Insira os 17 caracteres do chassi"
-      mask="AAAAAAAAAAAAAAAAA"
-    />
-
-    <!-- Número de portas -->
-    <app-primary-input
-      formControlName="doors"
-      label="Número de portas"
-      inputName="doors"
-      type="text"
-    />
-    <div class="custom-selects-container">
-      <!-- Motor (Cilindrada) -->
-      <app-primary-input
-        formControlName="engineDisplacement"
-        label="Motor (Cilindrada)"
-        inputName="engineDisplacement"
-        type="text"
-      />
-
-      <!-- Potência (CV) -->
-      <app-primary-input
-        formControlName="horsepower"
-        label="Potência (CV)"
-        inputName="horsepower"
-        type="text"
-      />
-    </div>
-
-    <!-- Número do motor -->
-    <app-primary-input
-      formControlName="engineNumber"
-      label="Número do motor"
-      inputName="engineNumber"
-      type="text"
-      placeholder="Digite o Número do Motor"
-      mask="AAAAAAAAAAAAAAAAAAAA"
-    />
-
-    <!-- KM inicial -->
-    <app-primary-input
-      formControlName="km"
-      label="KM inicial"
-      inputName="km"
-      type="text"
-    />
-
-    <!-- Renavam -->
-    <app-primary-input
-      formControlName="renavam"
-      label="Renavam"
-      inputName="renavam"
-      type="text"
-    />
-
-    <app-primary-select
-      formControlName="species"
-      label="Espécie"
-      inputName="species"
-      placeholder="Selecione a espécie"
-      [options]="speciesOptions"
-      optionLabel="label"
-      optionValue="value"
-    ></app-primary-select>
-
-    <!-- Espécie
-    <app-primary-input
-      formControlName="species"
-      label="Espécie"
-      inputName="species"
-      type="text"
-    /> -->
-
-    <!-- Categoria -->
-
-    <app-primary-select
-      formControlName="category"
-      label="Categoria"
-      inputName="category"
-      placeholder="Selecione a categoria"
-      [options]="categoryOptions"
-      optionLabel="label"
-      optionValue="value"
-    ></app-primary-select>
-    <!-- <app-primary-input
-      formControlName="category"
-      label="Categoria"
-      inputName="category"
-      type="text"
-    /> -->
-
-    <!-- Características -->
-    <app-primary-input
-      formControlName="features"
-      label="Características"
-      inputName="features"
-      type="text"
-    />
-  </app-wrapper-card>
+    <mat-tab label="Dados Gerais" [disabled]="!dataForm?.vehicleId">
+      <app-wrapper-card>
+        <app-primary-input
+          formControlName="valorCompra"
+          label="Compra (R$)"
+          inputName="valorCompra"
+          type="text"
+        />
+        <app-primary-input
+          formControlName="valorVenda"
+          label="Preço de venda (R$)"
+          inputName="valorVenda"
+          type="text"
+        />
+        <app-primary-input
+          formControlName="entryDate"
+          label="Data/Hora Entrada"
+          inputName="entryDate"
+          type="datetime-local"
+        />
+        <app-primary-input
+          formControlName="exitDate"
+          label="Data/Hora Saída"
+          inputName="exitDate"
+          type="datetime-local"
+        />
+        <app-primary-input
+          formControlName="observation"
+          label="Observações"
+          inputName="observation"
+          type="text"
+        />
+      </app-wrapper-card>
+    </mat-tab>
+  </mat-tab-group>
 
   <!-- Botão de submit -->
   <button

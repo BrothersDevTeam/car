@@ -59,7 +59,7 @@ export class NfeService {
   }
 
   update(data: Nfe) {
-    return this.http.put<string>(`${this.apiUrl}`, data).pipe(
+    return this.http.put<string>(`${this.apiUrl}/${data.nfeId}`, data).pipe(
       tap((response: string) => {
         console.log('Formulário enviado com sucesso!', response);
         this.clearCache();

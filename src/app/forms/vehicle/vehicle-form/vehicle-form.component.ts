@@ -165,6 +165,11 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     features: [''],
     fuelTypes: [[]], // Array de FuelTypes
     origin: ['NACIONAL'],
+    valorCompra: [''],
+    valorVenda: [''],
+    observation: [''],
+    entryDate: [''],
+    exitDate: [''],
   });
 
   public get vehicleForm(): FormGroup {
@@ -547,6 +552,15 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       features: this.dataForm!.features || '',
       fuelTypes: this.dataForm!.fuelTypes || [], // Tipos de combustível
       origin: this.dataForm!.origin || 'NACIONAL',
+      valorCompra: this.dataForm!.valorCompra || '',
+      valorVenda: this.dataForm!.valorVenda || '',
+      observation: this.dataForm!.observation || '',
+      entryDate: this.dataForm!.entryDate
+        ? this.dataForm!.entryDate.toString().substring(0, 16)
+        : '',
+      exitDate: this.dataForm!.exitDate
+        ? this.dataForm!.exitDate.toString().substring(0, 16)
+        : '',
     });
     this.isFillingForm = false;
 
@@ -640,6 +654,11 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       features: formValues.features || '',
       origin: formValues.origin || 'NACIONAL',
       fuelTypes: this.mapFuelTypeToBackend(formValues.fuelTypes),
+      valorCompra: formValues.valorCompra || '',
+      valorVenda: formValues.valorVenda || '',
+      observation: formValues.observation || '',
+      entryDate: formValues.entryDate || '',
+      exitDate: formValues.exitDate || '',
     };
 
     // Remove campos vazios, EXCETO color que pode ser string vazia

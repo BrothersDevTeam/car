@@ -4,9 +4,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { Component, inject, signal, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
@@ -33,10 +34,12 @@ import { ToastrService } from 'ngx-toastr';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
     GenericTableComponent,
     NfeEntradaFormComponent,
     NfeSaidaFormComponent,
-    DecimalPipe,
+    DatePipe,
+    NgClass,
   ],
   templateUrl: './nfe.component.html',
   styleUrl: './nfe.component.scss',
@@ -60,6 +63,14 @@ export class NfeComponent {
     {
       key: 'nfeStatus',
       header: 'Status',
+      // Badge personalizada para cada status possível de NFe
+      badgeConfig: {
+        rascunho: { label: 'Em digitação', cssClass: 'badge-rascunho' },
+        processando: { label: 'Processando', cssClass: 'badge-processando' },
+        autorizado: { label: 'Autorizado', cssClass: 'badge-autorizado' },
+        cancelado: { label: 'Cancelado', cssClass: 'badge-cancelado' },
+        erro: { label: 'Erro', cssClass: 'badge-erro' },
+      },
     },
     {
       key: 'cfop',
@@ -72,10 +83,33 @@ export class NfeComponent {
     {
       key: 'createdAt',
       header: 'Criação',
+      // Formata a data para o padrão brasileiro: dd/MM/yyyy às HH:mm
+      format: (val) => {
+        if (!val) return '—';
+        const date = new Date(val);
+        return new Intl.DateTimeFormat('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(date);
+      },
     },
     {
       key: 'nfeDataEmissao',
       header: 'Emissão',
+      format: (val) => {
+        if (!val) return '—';
+        const date = new Date(val);
+        return new Intl.DateTimeFormat('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(date);
+      },
     },
     {
       key: 'select',
@@ -85,12 +119,14 @@ export class NfeComponent {
     {
       key: 'edit',
       header: '',
-      showEditIcon: (row) => row.status === 'Em digitacao',
+      // Mostra o botão de editar apenas para NFes em rascunho
+      showEditIcon: (row) => row.nfeStatus === 'rascunho',
     },
     {
       key: 'delete',
       header: '',
-      showDeleteIcon: (row) => row.status === 'Em digitacao',
+      // Mostra o botão de deletar apenas para NFes em rascunho
+      showDeleteIcon: (row) => row.nfeStatus === 'rascunho',
     },
   ];
 
@@ -200,15 +236,8 @@ export class NfeComponent {
     if (nfe) {
       this.selectedNfe = nfe;
 
-      // Determina qual aba abrir baseado no tipo de NFe
-      const tiposEntrada = [
-        'COMPRA DE VEICULO USADO',
-        'ENTRADA EM CONSIGNAÇÃO',
-        'ENTRADA COMPRA DEFINITIVA',
-        'DEVOLUÇÃO DE VENDA',
-      ];
-
-      const isEntrada = tiposEntrada.includes(nfe.nfeTipoDocumento);
+      // nfeTipoDocumento: '0' = Entrada, '1' = Saída
+      const isEntrada = nfe.nfeTipoDocumento === '0';
       this.selectedTabIndex.set(isEntrada ? 0 : 1);
     }
     this.openInfo.set(false);
