@@ -51,11 +51,16 @@ export class NaturalPersonInfoComponent {
     return this.addressList?.addressForm;
   }
 
+  isSeller: boolean = false;
+
   constructor(
     private toastrService: ToastrService,
     private personService: PersonService,
     private authService: AuthService
-  ) {}
+  ) {
+    this.isSeller = this.authService.getRoles().includes('ROLE_SELLER');
+  }
+
 
   ngOnInit() {
     this.checkPermissions();
