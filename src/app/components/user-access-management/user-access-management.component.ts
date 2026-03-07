@@ -75,8 +75,7 @@ export class UserAccessManagementComponent implements OnInit {
     const roles = this.authService.getRoles();
 
     this.hasPermissionToCreateAccess = roles.some((role) =>
-      ['ROLE_MANAGER', 'ROLE_ADMIN', 'ROLE_OWNER', 'CAR_ADMIN'].includes(role)
-
+      ['ROLE_MANAGER', 'ROLE_ADMIN', 'ROLE_OWNER', 'ROLE_CAR_ADMIN'].includes(role)
     );
   }
 
