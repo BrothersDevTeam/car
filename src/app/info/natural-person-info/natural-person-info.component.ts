@@ -20,6 +20,7 @@ import { UserAccessManagementComponent } from '../../components/user-access-mana
 
 import { Person } from '@interfaces/person';
 import { PersonService } from '@services/person.service';
+import { AuthService } from '@services/auth/auth.service';
 
 @Component({
   selector: 'app-natural-person-info',
@@ -48,10 +49,15 @@ export class NaturalPersonInfoComponent {
     return this.addressList?.addressForm;
   }
 
+  isSeller: boolean = false;
+
   constructor(
     private toastrService: ToastrService,
-    private personService: PersonService
-  ) {}
+    private personService: PersonService,
+    private authService: AuthService
+  ) {
+    this.isSeller = this.authService.getRoles().includes('ROLE_SELLER');
+  }
 
   onDelete() {
     this.openDialog();
