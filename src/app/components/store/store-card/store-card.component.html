@@ -151,6 +151,16 @@
           <mat-icon>person_add</mat-icon>
         </button>
       }
+      @if (canManageAuthorizations) {
+        <button
+          mat-icon-button
+          (click)="onManageAuthorizations()"
+          matTooltip="Gerenciar autorizações"
+          class="action-btn auth-btn"
+        >
+          <mat-icon>security</mat-icon>
+        </button>
+      }
       @if (canDelete) {
         <button
           mat-icon-button

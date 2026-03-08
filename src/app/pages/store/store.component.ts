@@ -9,6 +9,7 @@ import { ContentHeaderComponent } from '../../components/content-header/content-
 import { StoreFormDialogComponent } from '../../components/dialogs/store-form-dialog/store-form-dialog.component';
 import { StoreOwnerDialogComponent } from '../../components/dialogs/store-owner-dialog/store-owner-dialog.component';
 import { StoreAddressDialogComponent } from '../../components/dialogs/store-address-dialog/store-address-dialog.component';
+import { StoreEmployeesDialogComponent } from '../../components/dialogs/store-employees-dialog/store-employees-dialog.component';
 import { Store } from '@interfaces/store';
 import { StoreService } from '@services/store.service';
 import { AuthService } from '@services/auth/auth.service';
@@ -109,6 +110,13 @@ export class StoreComponent implements OnInit {
           this.setStoreOwner(store.storeId!, personId);
         }
       }
+    });
+  }
+
+  onManageAuthorizations(store: Store): void {
+    this.dialog.open(StoreEmployeesDialogComponent, {
+      width: '800px',
+      data: { store },
     });
   }
 

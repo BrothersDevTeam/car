@@ -1,0 +1,54 @@
+<h2 mat-dialog-title>
+  <mat-icon class="title-icon">people</mat-icon>
+  Funcionários da Loja
+</h2>
+
+<mat-dialog-content>
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Carregando funcionários...</p>
+    </div>
+  } @else if (error) {
+    <div class="error-state">
+      <mat-icon color="warn">error</mat-icon>
+      <p>Ocorreu um erro ao carregar os funcionários.</p>
+    </div>
+  } @else if (employees.length === 0) {
+    <div class="empty-state">
+      <mat-icon>group_off</mat-icon>
+      <p>Nenhum funcionário encontrado para esta loja.</p>
+    </div>
+  } @else {
+    <mat-list>
+      @for (person of employees; track person.personId) {
+        <mat-list-item>
+          <span matListItemTitle>{{ person.name }}</span>
+          <span matListItemLine>
+            {{ person.email || 'Sem e-mail' }} | 
+            Nível: {{ person.relationship }}
+            @if (!person.hasUser) {
+              <span class="no-user-badge">⚠️ Sem Acesso (Sem Login)</span>
+            }
+          </span>
+          <div matListItemMeta>
+            <button
+              mat-stroked-button
+              color="primary"
+              (click)="openAuthorizationsDialog(person)"
+              [disabled]="!person.hasUser"
+            >
+              <mat-icon>security</mat-icon>
+              Permissões
+            </button>
+          </div>
+        </mat-list-item>
+        <mat-divider></mat-divider>
+      }
+    </mat-list>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Fechar</button>
+</mat-dialog-actions>

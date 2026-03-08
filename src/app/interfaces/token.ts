@@ -5,4 +5,5 @@ export interface TokenPayload {
   username: string;
   iat: number;
   exp: number;
+  authorizations?: string;
 }

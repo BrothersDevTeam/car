@@ -11,6 +11,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { catchError, debounceTime, of, Subject, Subscription } from 'rxjs';
 import { RelationshipTypes } from '../../enums/relationshipTypes';
+import { Authorizations } from '../../enums/authorizations';
 
 import { FormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -54,13 +55,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 type MainRelationshipType = 'CLIENTE' | 'FUNCIONARIO' | null;
 
 /**
- * Interface para controlar os sub-filtros de FUNCIONÁRIO
- * Estes filtros só são aplicados quando o tipo principal é FUNCIONARIO
+ * Sub-filtros para quando FUNCIONÁRIO está selecionado.
+ * Filtra por types reais da API: VENDEDOR ou GERENTE.
  */
 interface EmployeeSubFilters {
   vendedor: boolean;
   gerente: boolean;
-  admin: boolean;
 }
 
 @Component({
@@ -113,14 +113,13 @@ export class PersonComponent implements OnInit, OnDestroy {
   selectedRelationshipType: MainRelationshipType = null;
 
   /**
-   * Sub-filtros para quando FUNCIONARIO está selecionado
-   * Permite filtrar por roles específicas (VENDEDOR, GERENTE, ADMIN)
+   * Sub-filtros de funcionário: VENDEDOR e GERENTE
    */
   employeeSubFilters: EmployeeSubFilters = {
     vendedor: false,
     gerente: false,
-    admin: false,
   };
+
   paginationRequestConfig = {
     pageSize: 1000,
     pageIndex: 0,
@@ -142,41 +141,17 @@ export class PersonComponent implements OnInit, OnDestroy {
       key: 'relationship',
       header: 'Vínculo',
       format: (value: any, row: any) => {
-        const types: string[] = [];
+        const relationship = row.relationship as RelationshipTypes;
 
-        // Extract string values from relationships object array
-        const relationshipTypes =
-          row.relationships?.map((r: any) => r.relationshipName) || [];
+        // Mapeia diretamente o campo relationship para um label human-readable
+        const labels: Partial<Record<RelationshipTypes, string>> = {
+          [RelationshipTypes.PROPRIETARIO]: 'Proprietário',
+          [RelationshipTypes.GERENTE]: 'Gerente',
+          [RelationshipTypes.VENDEDOR]: 'Vendedor',
+          [RelationshipTypes.CLIENTE]: 'Cliente',
+        };
 
-        // Add roles if employee
-        if (
-          relationshipTypes.includes(RelationshipTypes.FUNCIONARIO) &&
-          row.roleNames?.length
-        ) {
-          const roleNames = row.roleNames;
-
-          if (
-            roleNames.includes('ROLE_ADMIN') ||
-            roleNames.includes('CAR_ADMIN')
-          ) {
-            types.push('Administrador');
-          } else if (roleNames.includes('ROLE_MANAGER')) {
-            types.push('Gerente');
-          } else if (roleNames.includes('ROLE_SELLER')) {
-            types.push('Vendedor');
-          } else {
-            types.push('Funcionário');
-          }
-        } else if (relationshipTypes.includes(RelationshipTypes.FUNCIONARIO)) {
-          types.push('Funcionário');
-        }
-
-        if (relationshipTypes.includes(RelationshipTypes.CLIENTE))
-          types.push('Cliente');
-        if (relationshipTypes.includes(RelationshipTypes.PROPRIETARIO))
-          types.push('Proprietário');
-
-        return types.length > 0 ? types.join(', ') : '-';
+        return labels[relationship] ?? '-';
       },
     },
     {
@@ -202,54 +177,16 @@ export class PersonComponent implements OnInit, OnDestroy {
     {
       key: 'edit',
       header: '',
-      showEditIcon: (row) => {
-        const roles = this.authService.getRoles();
-        const isOnlySeller =
-          roles.includes('ROLE_SELLER') &&
-          !roles.includes('ROLE_MANAGER') &&
-          !roles.includes('ROLE_ADMIN') &&
-          !roles.includes('CAR_ADMIN');
-
-        const relationshipTypes =
-          (row as any).relationships?.map((r: any) => r.relationshipName) || [];
-        const isClientOnly =
-          relationshipTypes.includes('CLIENTE') &&
-          !relationshipTypes.includes('FUNCIONARIO') &&
-          !relationshipTypes.includes('PROPRIETARIO');
-
-        // Se for *apenas* um Vendedor, e a pessoa NÃO for *apenas* um Cliente, esconde o botão
-        if (isOnlySeller && !isClientOnly) {
-          return false;
-        }
-
-        return true;
-      },
+      showEditIcon: () =>
+        // Exibe o botão de edição apenas para quem tem autorização granular de editar pessoas
+        this.authService.hasAuthority(Authorizations.EDIT_PERSON),
     },
     {
       key: 'delete',
       header: '',
-      showDeleteIcon: (row) => {
-        const roles = this.authService.getRoles();
-        const isOnlySeller =
-          roles.includes('ROLE_SELLER') &&
-          !roles.includes('ROLE_MANAGER') &&
-          !roles.includes('ROLE_ADMIN') &&
-          !roles.includes('CAR_ADMIN');
-
-        const relationshipTypes =
-          (row as any).relationships?.map((r: any) => r.relationshipName) || [];
-        const isClientOnly =
-          relationshipTypes.includes('CLIENTE') &&
-          !relationshipTypes.includes('FUNCIONARIO') &&
-          !relationshipTypes.includes('PROPRIETARIO');
-
-        // Se for *apenas* um Vendedor, e a pessoa NÃO for *apenas* um Cliente, esconde o botão
-        if (isOnlySeller && !isClientOnly) {
-          return false;
-        }
-
-        return true;
-      },
+      showDeleteIcon: () =>
+        // Exibe o botão de exclusão apenas para quem tem autorização granular de excluir pessoas
+        this.authService.hasAuthority(Authorizations.DELETE_PERSON),
     },
   ];
 
@@ -342,9 +279,9 @@ export class PersonComponent implements OnInit, OnDestroy {
     );
   }
 
-  // Verifica se o usuário é CAR_ADMIN
+  // Verifica se o usuário é root:admin (CAR_ADMIN)
   private checkUserRole() {
-    this.isCarAdmin = this.personService.hasRole('ROLE_CAR_ADMIN');
+    this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
   }
 
   handleFormChanged(isDirty: boolean) {
@@ -481,24 +418,13 @@ export class PersonComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Adiciona o filtro de relationshipTypes se houver filtros ativos
-    const relationshipTypesFilter = this.buildRelationshipTypesFilter();
-    if (relationshipTypesFilter.length > 0) {
-      // Inicializa searchParams se ainda não foi inicializado
+    // Adiciona o filtro de relationship se houver filtros ativos
+    const relationshipFilter = this.buildRelationshipTypesFilter();
+    if (relationshipFilter.length > 0) {
       if (!searchParams) {
         searchParams = {};
       }
-      searchParams.relationshipTypes = relationshipTypesFilter;
-    }
-
-    // Adiciona o filtro de roleNames se houver sub-filtros ativos
-    const roleNamesFilter = this.buildRoleNamesFilter();
-    if (roleNamesFilter.length > 0) {
-      // Inicializa searchParams se ainda não foi inicializado
-      if (!searchParams) {
-        searchParams = {};
-      }
-      searchParams.roleNames = roleNamesFilter;
+      (searchParams as any)['relationship'] = relationshipFilter;
     }
 
     this.personService
@@ -763,12 +689,11 @@ export class PersonComponent implements OnInit, OnDestroy {
   onRelationshipTypeChange(newType: MainRelationshipType) {
     this.selectedRelationshipType = newType;
 
-    // Se não é FUNCIONARIO, limpa todos os sub-filtros de employee
+    // Se não é FUNCIONARIO, limpa os sub-filtros de employee
     if (newType !== 'FUNCIONARIO') {
       this.employeeSubFilters = {
         vendedor: false,
         gerente: false,
-        admin: false,
       };
     }
 
@@ -806,8 +731,7 @@ export class PersonComponent implements OnInit, OnDestroy {
     return (
       this.selectedRelationshipType !== null ||
       this.employeeSubFilters.vendedor ||
-      this.employeeSubFilters.gerente ||
-      this.employeeSubFilters.admin
+      this.employeeSubFilters.gerente
     );
   }
 
@@ -821,59 +745,27 @@ export class PersonComponent implements OnInit, OnDestroy {
     this.employeeSubFilters = {
       vendedor: false,
       gerente: false,
-      admin: false,
     };
     this.onFilterChange();
   }
 
   /**
-   * Constrói o array de relationshipTypes baseado no tipo selecionado
-   * Como usamos radio button, apenas UM tipo pode estar ativo por vez
-   * Este array será enviado como parâmetro para a API
-   *
-   * @returns Array com o tipo de relacionamento selecionado (vazio se nenhum)
+   * Constrói o array de relationship baseado no tipo selecionado.
+   * Para FUNCIONARIO, expande em GERENTE e VENDEDOR (os tipos reais da API).
    */
   private buildRelationshipTypesFilter(): string[] {
-    const relationshipTypes: string[] = [];
+    if (!this.selectedRelationshipType) return [];
 
-    // Adiciona o tipo selecionado ao array (se houver algum selecionado)
-    if (this.selectedRelationshipType) {
-      relationshipTypes.push(this.selectedRelationshipType);
+    // Para funcionario, filtra pelos sub-filtros marcados ou expande para ambos
+    if (this.selectedRelationshipType === 'FUNCIONARIO') {
+      const types: string[] = [];
+      if (this.employeeSubFilters.vendedor) types.push('VENDEDOR');
+      if (this.employeeSubFilters.gerente) types.push('GERENTE');
+      // Se nenhum sub-filtro, retorna ambos os tipos de funcionários
+      return types.length > 0 ? types : ['GERENTE', 'VENDEDOR'];
     }
 
-    return relationshipTypes;
-  }
-
-  /**
-   * Constrói o array de roleNames baseado nos sub-filtros de funcionário
-   * Este array será enviado como parâmetro para a API
-   *
-   * IMPORTANTE: Só adiciona roles se FUNCIONARIO estiver selecionado como tipo principal
-   * Isso garante que o filtro de roles só seja aplicado a funcionários
-   *
-   * @returns Array com as roles filtradas (vazio se FUNCIONARIO não estiver selecionado)
-   */
-  private buildRoleNamesFilter(): string[] {
-    const roleNames: string[] = [];
-
-    // Só filtra por roles se "FUNCIONARIO" estiver selecionado
-    if (this.selectedRelationshipType !== 'FUNCIONARIO') {
-      return roleNames; // Retorna vazio se não for funcionário
-    }
-
-    // Mapeamento dos sub-filtros para as roles correspondentes no backend
-    const roleMapping: Record<keyof EmployeeSubFilters, string> = {
-      vendedor: 'ROLE_SELLER',
-      gerente: 'ROLE_MANAGER',
-      admin: 'ROLE_ADMIN',
-    };
-
-    // Adiciona as roles baseado nos sub-filtros marcados
-    if (this.employeeSubFilters.vendedor) roleNames.push(roleMapping.vendedor);
-    if (this.employeeSubFilters.gerente) roleNames.push(roleMapping.gerente);
-    if (this.employeeSubFilters.admin) roleNames.push(roleMapping.admin);
-
-    return roleNames;
+    return [this.selectedRelationshipType];
   }
 
   /**

@@ -29,6 +29,7 @@ export class StoreCardComponent {
   @Input() canViewBranches = false;
   @Input() canManageOwner = false;
   @Input() canUploadImage = true;
+  @Input() canManageAuthorizations = false;
 
   // Início de código gerado pelo antigravity
   @Input() canManageAddress = true;
@@ -42,6 +43,7 @@ export class StoreCardComponent {
   @Output() delete = new EventEmitter<Store>();
   @Output() viewBranches = new EventEmitter<Store>();
   @Output() manageOwner = new EventEmitter<Store>();
+  @Output() manageAuthorizations = new EventEmitter<Store>();
 
   // Início de código gerado pelo antigravity
   @Output() manageAddress = new EventEmitter<Store>();
@@ -119,6 +121,9 @@ export class StoreCardComponent {
   }
   onManageOwner(): void {
     this.manageOwner.emit(this.store);
+  }
+  onManageAuthorizations(): void {
+    this.manageAuthorizations.emit(this.store);
   }
 
   // Início de código gerado pelo antigravity

@@ -3,6 +3,7 @@ import {
   EventEmitter,
   inject,
   Input,
+  OnInit,
   Output,
   ViewChild,
 } from '@angular/core';
@@ -21,6 +22,7 @@ import { UserAccessManagementComponent } from '../../components/user-access-mana
 import { Person } from '@interfaces/person';
 import { PersonService } from '@services/person.service';
 import { AuthService } from '@services/auth/auth.service';
+import { Authorizations } from '../../enums/authorizations';
 
 @Component({
   selector: 'app-natural-person-info',
@@ -36,7 +38,7 @@ import { AuthService } from '@services/auth/auth.service';
   templateUrl: './natural-person-info.component.html',
   styleUrl: './natural-person-info.component.scss',
 })
-export class NaturalPersonInfoComponent {
+export class NaturalPersonInfoComponent implements OnInit {
   readonly dialog = inject(MatDialog);
 
   @Input() person!: Person;
@@ -45,21 +47,25 @@ export class NaturalPersonInfoComponent {
   @Output() formSubmitted = new EventEmitter<void>();
   @ViewChild(AddressListComponent) addressList?: AddressListComponent;
 
-  canEditOrDelete: boolean = true;
+  /** Indica se o usuário pode editar a pessoa exibida. */
+  canEdit: boolean = false;
 
+  /** Indica se o usuário pode excluir a pessoa exibida. */
+  canDelete: boolean = false;
+
+  /** Indica se o usuário pode gerenciar o acesso ao sistema desta pessoa (seção "Acesso ao Sistema"). */
+  canManageUserAccess: boolean = false;
+
+  /** Retorna o componente de formulário ativo (usado pelo drawer para controle de estado). */
   getActiveFormComponent(): any {
     return this.addressList?.addressForm;
   }
-
-  isSeller: boolean = false;
 
   constructor(
     private toastrService: ToastrService,
     private personService: PersonService,
     private authService: AuthService
-  ) {
-    this.isSeller = this.authService.getRoles().includes('ROLE_SELLER');
-  }
+  ) {}
 
 
   ngOnInit() {
@@ -67,24 +73,10 @@ export class NaturalPersonInfoComponent {
   }
 
   checkPermissions() {
-    const roles = this.authService.getRoles();
-    const isOnlySeller =
-      roles.includes('ROLE_SELLER') &&
-      !roles.includes('ROLE_MANAGER') &&
-      !roles.includes('ROLE_ADMIN') &&
-      !roles.includes('CAR_ADMIN');
-
-    const relationshipTypes =
-      (this.person as any).relationships?.map((r: any) => r.relationshipName) ||
-      [];
-    const isClientOnly =
-      relationshipTypes.includes('CLIENTE') &&
-      !relationshipTypes.includes('FUNCIONARIO') &&
-      !relationshipTypes.includes('PROPRIETARIO');
-
-    if (isOnlySeller && !isClientOnly) {
-      this.canEditOrDelete = false;
-    }
+    // Utiliza authorizations granulares: sem dependência de ROLE_
+    this.canEdit = this.authService.hasAuthority(Authorizations.EDIT_PERSON);
+    this.canDelete = this.authService.hasAuthority(Authorizations.DELETE_PERSON);
+    this.canManageUserAccess = this.authService.hasAuthority(Authorizations.CREATE_USER);
   }
 
   onDelete() {
