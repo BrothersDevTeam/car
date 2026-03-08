@@ -1,0 +1,59 @@
+<h2 mat-dialog-title>
+  <mat-icon class="title-icon">security</mat-icon>
+  Gerenciar Permissões
+</h2>
+
+<mat-dialog-content>
+  <p class="subtitle">
+    Selecione as permissões para o usuário <strong>{{ data.person.name }}</strong> na loja <strong>{{ data.store.tradeName || data.store.name }}</strong>.
+  </p>
+
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Carregando opções...</p>
+    </div>
+  } @else {
+    <div class="modules-container">
+      @for (module of modules; track module.module) {
+        <div class="module-section">
+          <h3 class="module-title">
+            <mat-checkbox
+              [checked]="isModuleAllSelected(module)"
+              [indeterminate]="isModulePartiallySelected(module)"
+              (change)="toggleModuleAuths(module, $event)"
+            >
+              {{ getTranslatedModule(module.module) }}
+            </mat-checkbox>
+          </h3>
+          <div class="auth-grid">
+            @for (auth of module.authorizations; track auth.key) {
+              <mat-checkbox
+                [checked]="hasAuth(auth.key)"
+                (change)="onToggleAuth(auth.key, $event)"
+              >
+                {{ auth.label }}
+              </mat-checkbox>
+            }
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+      }
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()" [disabled]="saving">Cancelar</button>
+  @if (saving) {
+    <button mat-raised-button color="primary" disabled>
+      <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+      <span>Salvando...</span>
+    </button>
+  } @else {
+    <button mat-raised-button color="primary" (click)="save()" [disabled]="loading">
+      <mat-icon>save</mat-icon>
+      <span>Salvar</span>
+    </button>
+  }>
+</mat-dialog-actions>

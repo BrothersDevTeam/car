@@ -1,0 +1,36 @@
+.title-icon {
+  vertical-align: middle;
+  margin-right: 8px;
+  color: #3f51b5;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #666;
+  text-align: center;
+
+  mat-spinner,
+  mat-icon {
+    margin-bottom: 16px;
+  }
+}
+
+.error-state p {
+  color: #f44336;
+}
+
+.no-user-badge {
+  background-color: #ff9800;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  margin-left: 8px;
+  font-weight: 500;
+}
