@@ -43,7 +43,7 @@ describe('TableComponent', () => {
           active: true,
           ie: '123456789',
           crc: '123456789',
-          relationshipTypes: [],
+          relationship: 'CLIENTE' as any,
         },
       ],
 
