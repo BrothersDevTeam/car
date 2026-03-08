@@ -93,6 +93,24 @@ export class AuthService {
     return roles ? roles.split(',') : [];
   }
 
+  /**
+   * Retorna a lista de autorizações granulares do usuário logado.
+   * Ex: ['read:person', 'edit:store', 'root:admin']
+   */
+  getAuthorizations(): string[] {
+    const auths = this.getDecodedToken()?.authorizations;
+    return auths ? auths.split(',').map(a => a.trim()) : [];
+  }
+
+  /**
+   * Verifica se o usuário possui uma autorização granular específica.
+   * Ex: hasAuthority('edit:person')
+   */
+  hasAuthority(authority: string): boolean {
+    return this.getAuthorizations().includes(authority) ||
+           this.getAuthorizations().includes('root:admin');
+  }
+
   isLoggedIn(): boolean {
     const token = this.getDecodedToken();
     if (!token) return false;
