@@ -22,7 +22,7 @@ export interface Person {
   nickName?: string;
   email?: string;
   phone?: string;
-  legalEntity: Boolean;
+  legalEntity: boolean;
   cpf: string;
   cnpj: string;
   rg?: string;
@@ -30,11 +30,13 @@ export interface Person {
   ie?: string;
   crc?: string;
   active: boolean;
-  relationshipTypes: RelationshipTypes[];
+  relationship: RelationshipTypes;
   username?: string;
   password?: string;
   roleName?: string;
   roleNames?: string[]; // Arrays dos roles do user para exibição
+  authorizations?: string[]; // Permissions (Claims) do user
+  userId?: string;
   user?: User; // User associado (para funcionários)
   hasUser?: boolean;
 }
