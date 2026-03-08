@@ -112,10 +112,10 @@ export class LegalEntityFormComponent
     active: [true],
     storeId: [''],
     legalEntity: [true],
-    relationshipTypes: this.formBuilderService.control<RelationshipTypes[]>(
-      [], // ← Começa VAZIO
+    relationship: this.formBuilderService.control<RelationshipTypes>(
+      RelationshipTypes.CLIENTE,
       {
-        validators: [minLengthArray(1)],
+        validators: [Validators.required],
       }
     ),
     username: [''],
@@ -152,12 +152,8 @@ export class LegalEntityFormComponent
   }
 
   get shouldShowUserFields(): boolean {
-    const selectedTypes = this.form.get('relationshipTypes')?.value || [];
-    return selectedTypes.some((type: RelationshipTypes) =>
-      [RelationshipTypes.PROPRIETARIO, RelationshipTypes.FUNCIONARIO].includes(
-        type
-      )
-    );
+    const selectedType = this.form.get('relationship')?.value;
+    return !!selectedType && [RelationshipTypes.PROPRIETARIO, RelationshipTypes.GERENTE, RelationshipTypes.VENDEDOR].includes(selectedType);
   }
 
   constructor(
@@ -174,14 +170,14 @@ export class LegalEntityFormComponent
      * Define o valor padrão de relationshipTypes apenas se NÃO estiver editando
      */
     if (!this.dataForm) {
-      this.form.get('relationshipTypes')?.setValue([RelationshipTypes.CLIENTE]);
+      this.form.get('relationship')?.setValue(RelationshipTypes.CLIENTE);
     }
 
     // Adiciona o validator de senha no formulário
     this.form.setValidators(this.passwordMatchValidator.bind(this));
 
     this.subscriptions.add(
-      this.form.get('relationshipTypes')!.valueChanges.subscribe((types) => {
+      this.form.get('relationship')!.valueChanges.subscribe(() => {
         this.updateConditionalValidators();
       })
     );
@@ -355,8 +351,8 @@ export class LegalEntityFormComponent
           storeId,
           legalEntity: true as const,
           crc: this.form.value.crc || '',
-          relationshipTypes: this.form.value
-            .relationshipTypes as RelationshipTypes[],
+          relationship: this.form.value
+            .relationship as RelationshipTypes,
         };
 
         let formValue: CreateLegalEntity;
@@ -516,26 +512,15 @@ export class LegalEntityFormComponent
     if (changes['dataForm'] && this.dataForm) {
       console.log('[legal-entity-form] dataForm recebido:', this.dataForm);
       console.log(
-        '[legal-entity-form] relationshipTypes do banco:',
-        this.dataForm.relationshipTypes
-      );
-      console.log(
-        '[legal-entity-form] relationships do banco:',
-        (this.dataForm as any).relationships
+        '[legal-entity-form] relationship do banco:',
+        this.dataForm.relationship
       );
 
-      /**
-       * Mapeia relationships do backend para relationshipTypes do frontend
-       */
-      const relationshipsFromBackend =
-        (this.dataForm as any).relationships || [];
-      const relationshipTypes = relationshipsFromBackend.map(
-        (rel: any) => rel.relationshipName
-      );
+      const relationship = this.dataForm.relationship || RelationshipTypes.CLIENTE;
 
       console.log(
-        '[legal-entity-form] relationshipTypes mapeado:',
-        relationshipTypes
+        '[legal-entity-form] relationship mapeado:',
+        relationship
       );
 
       /**
@@ -544,8 +529,7 @@ export class LegalEntityFormComponent
       setTimeout(() => {
         this.form.patchValue({
           name: this.dataForm!.name || '',
-          relationshipTypes:
-            relationshipTypes.length > 0 ? relationshipTypes : [],
+          relationship: relationship,
           nickName: this.dataForm!.nickName || '',
           email: this.dataForm!.email || '',
           phone: this.dataForm!.phone || '',
@@ -558,8 +542,8 @@ export class LegalEntityFormComponent
           this.form.value
         );
         console.log(
-          '[legal-entity-form] relationshipTypes após patchValue:',
-          this.form.get('relationshipTypes')?.value
+          '[legal-entity-form] relationship após patchValue:',
+          this.form.get('relationship')?.value
         );
       }, 200);
     }
@@ -636,8 +620,8 @@ export class LegalEntityFormComponent
       storeId,
       legalEntity: true as const,
       crc: this.form.value.crc || '',
-      relationshipTypes: this.form.value
-        .relationshipTypes as RelationshipTypes[],
+      relationship: this.form.value
+        .relationship as RelationshipTypes,
     };
 
     let formValue: CreateLegalEntity;
@@ -695,7 +679,7 @@ export class LegalEntityFormComponent
     this.form.reset();
     this.submitted = false;
 
-    this.form.get('relationshipTypes')?.setValue([RelationshipTypes.CLIENTE]);
+    this.form.get('relationship')?.setValue(RelationshipTypes.CLIENTE);
 
     this.form.patchValue({
       active: true,

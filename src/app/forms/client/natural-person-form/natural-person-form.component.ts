@@ -30,7 +30,7 @@ import { PrimaryInputComponent } from '@components/primary-input/primary-input.c
 import {
   SaveDraftDialogComponent,
   SaveDraftDialogResult,
-} from '@components/dialogs/save-draft-dialog/save-draft-dialog.component'; // Added
+} from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 
 import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 import { Observable, of, Subscription } from 'rxjs';
@@ -162,20 +162,15 @@ export class NaturalPersonFormComponent
    */
   protected get canRegisterEmployee(): boolean {
     const userRoles = this.authService.getRoles();
-    return ['ROLE_CAR_ADMIN', 'ROLE_ADMIN', 'ROLE_MANAGER'].includes(
-      userRoles[0]
-    );
+    return userRoles.includes('root:admin') || userRoles.includes('create:user') || userRoles.includes('edit:store');
   }
 
   /**
    * Formulário reativo para cadastro/edição de pessoa física
    *
-   * IMPORTANTE: relationshipTypes agora é controlado pelo checkbox 'isEmployee'
+   * IMPORTANTE: relationship agora é controlado pelo checkbox 'isEmployee'
    * - Por padrão: [CLIENTE]
    * - Quando checkbox marcado: [FUNCIONARIO]
-   *
-   * O campo relationshipTypes é SEMPRE um array com apenas UM elemento,
-   * gerenciado automaticamente pelo método toggleEmployeeType()
    */
   protected form = this.formBuilderService.group({
     name: ['', Validators.required],
@@ -188,10 +183,10 @@ export class NaturalPersonFormComponent
     active: [true],
     storeId: [''],
     legalEntity: [false],
-    relationshipTypes: this.formBuilderService.control<RelationshipTypes[]>(
-      [RelationshipTypes.CLIENTE],
+    relationship: this.formBuilderService.control<RelationshipTypes>(
+      RelationshipTypes.CLIENTE,
       {
-        validators: [minLengthArray(1)],
+        validators: [Validators.required],
       }
     ),
     username: [''],
@@ -218,12 +213,8 @@ export class NaturalPersonFormComponent
       return false;
     }
 
-    const selectedTypes = this.form.get('relationshipTypes')?.value || [];
-    return selectedTypes.some((type: RelationshipTypes) =>
-      [RelationshipTypes.PROPRIETARIO, RelationshipTypes.FUNCIONARIO].includes(
-        type
-      )
-    );
+    const selectedType = this.form.get('relationship')?.value;
+    return !!selectedType && [RelationshipTypes.PROPRIETARIO, RelationshipTypes.GERENTE, RelationshipTypes.VENDEDOR].includes(selectedType);
   }
 
   constructor(
@@ -341,8 +332,8 @@ export class NaturalPersonFormComponent
           rg: this.form.value.rg?.replace(/\D/g, '') || '',
           rgIssuer: '',
           crc: '',
-          relationshipTypes: this.form.value
-            .relationshipTypes as RelationshipTypes[],
+          relationship: this.form.value
+            .relationship as RelationshipTypes,
         };
 
         let formValue: CreateNaturalPerson;
@@ -719,10 +710,8 @@ export class NaturalPersonFormComponent
       if (loadDraft) {
         this.form.patchValue(draft.data);
 
-        const relationshipTypes = draft.data.relationshipTypes || [];
-        this.isEmployee = relationshipTypes.includes(
-          RelationshipTypes.FUNCIONARIO
-        );
+        const relationship = draft.data.relationship;
+        this.isEmployee = relationship === RelationshipTypes.GERENTE || relationship === RelationshipTypes.VENDEDOR || relationship === RelationshipTypes.PROPRIETARIO;
 
         this.toastrService.success('Rascunho carregado com sucesso');
         console.log('[checkForDrafts] Rascunho carregado:', draft);
@@ -764,7 +753,7 @@ export class NaturalPersonFormComponent
     this.form.setValidators(this.passwordMatchValidator.bind(this));
 
     this.subscriptions.add(
-      this.form.get('relationshipTypes')!.valueChanges.subscribe((types) => {
+      this.form.get('relationship')!.valueChanges.subscribe(() => {
         this.updateConditionalValidators();
       })
     );
@@ -810,11 +799,11 @@ export class NaturalPersonFormComponent
 
     if (this.isEmployee) {
       this.form
-        .get('relationshipTypes')
-        ?.setValue([RelationshipTypes.FUNCIONARIO]);
-      console.log('[toggleEmployeeType] Alterado para FUNCIONARIO');
+        .get('relationship')
+        ?.setValue(RelationshipTypes.VENDEDOR);
+      console.log('[toggleEmployeeType] Alterado para VENDEDOR');
     } else {
-      this.form.get('relationshipTypes')?.setValue([RelationshipTypes.CLIENTE]);
+      this.form.get('relationship')?.setValue(RelationshipTypes.CLIENTE);
       console.log('[toggleEmployeeType] Alterado para CLIENTE');
     }
 
@@ -874,29 +863,11 @@ export class NaturalPersonFormComponent
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
       console.log('[natural-person-form] dataForm recebido:', this.dataForm);
-      console.log(
-        '[natural-person-form] relationshipTypes do banco:',
-        this.dataForm.relationshipTypes
-      );
-      console.log(
-        '[natural-person-form] relationships do banco:',
-        (this.dataForm as any).relationships
-      );
-
-      const relationshipsFromBackend =
-        (this.dataForm as any).relationships || [];
-      const relationshipTypes = relationshipsFromBackend.map(
-        (rel: any) => rel.relationshipName
-      );
-
-      console.log(
-        '[natural-person-form] relationshipTypes mapeado:',
-        relationshipTypes
-      );
-
+      const relationship = this.dataForm.relationship || RelationshipTypes.CLIENTE;
       this.isEmployee =
-        relationshipTypes.includes(RelationshipTypes.FUNCIONARIO) ||
-        relationshipTypes.includes(RelationshipTypes.PROPRIETARIO);
+        relationship === RelationshipTypes.GERENTE ||
+        relationship === RelationshipTypes.VENDEDOR ||
+        relationship === RelationshipTypes.PROPRIETARIO;
 
       console.log(
         '[natural-person-form] isEmployee setado para:',
@@ -906,10 +877,7 @@ export class NaturalPersonFormComponent
       setTimeout(() => {
         this.form.patchValue({
           name: this.dataForm!.name || '',
-          relationshipTypes:
-            relationshipTypes.length > 0
-              ? relationshipTypes
-              : [RelationshipTypes.CLIENTE],
+          relationship: relationship || RelationshipTypes.CLIENTE,
           nickName: this.dataForm!.nickName || '',
           email: this.dataForm!.email || '',
           phone: this.dataForm!.phone || '',
@@ -923,8 +891,8 @@ export class NaturalPersonFormComponent
           this.form.value
         );
         console.log(
-          '[natural-person-form] relationshipTypes após patchValue:',
-          this.form.get('relationshipTypes')?.value
+          '[natural-person-form] relationship após patchValue:',
+          this.form.get('relationship')?.value
         );
       }, 200);
     }
@@ -957,8 +925,8 @@ export class NaturalPersonFormComponent
 
     this.form.patchValue(draft.data);
 
-    const relationshipTypes = draft.data.relationshipTypes || [];
-    this.isEmployee = relationshipTypes.includes(RelationshipTypes.FUNCIONARIO);
+    const relationship = draft.data.relationship;
+    this.isEmployee = relationship === RelationshipTypes.GERENTE || relationship === RelationshipTypes.VENDEDOR || relationship === RelationshipTypes.PROPRIETARIO;
 
     this.toastrService.success(
       `Rascunho "${draft.draftName || 'sem nome'}" carregado`
@@ -1043,8 +1011,8 @@ export class NaturalPersonFormComponent
       rg: this.form.value.rg?.replace(/\D/g, '') || '',
       rgIssuer: '',
       crc: '',
-      relationshipTypes: this.form.value
-        .relationshipTypes as RelationshipTypes[],
+      relationship: this.form.value
+        .relationship as RelationshipTypes,
     };
 
     let formValue: CreateNaturalPerson;
@@ -1185,7 +1153,7 @@ export class NaturalPersonFormComponent
     this.form.patchValue({
       active: true,
       legalEntity: false,
-      relationshipTypes: [RelationshipTypes.CLIENTE],
+      relationship: RelationshipTypes.CLIENTE,
     });
 
     setTimeout(() => {
