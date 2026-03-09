@@ -13,6 +13,7 @@ import { StoreEmployeesDialogComponent } from '../../components/dialogs/store-em
 import { Store } from '@interfaces/store';
 import { StoreService } from '@services/store.service';
 import { AuthService } from '@services/auth/auth.service';
+import { Authorizations } from '../../enums/authorizations';
 
 @Component({
   selector: 'app-store',
@@ -47,13 +48,13 @@ export class StoreComponent implements OnInit {
   }
 
   private checkUserRole(): void {
-    const roles = this.authService.getRoles();
-    this.isCarAdmin = roles.includes('ROLE_CAR_ADMIN');
-    // CAR_ADMIN pode cadastrar matriz, ADMIN pode cadastrar filiais
+    // Verifica se é administrador master (CAR_ADMIN)
+    this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+    
+    // CAR_ADMIN cadastra matriz (root:admin), ADMIN cadastra filiais (edit:store)
     this.canCreateStore =
-      roles.includes('ROLE_CAR_ADMIN') ||
-      roles.includes('ROLE_ADMIN') ||
-      roles.includes('ROLE_OWNER');
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
+      this.authService.hasAuthority(Authorizations.EDIT_STORE);
   }
 
   private loadStores(): void {
