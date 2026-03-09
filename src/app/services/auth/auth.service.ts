@@ -93,6 +93,14 @@ export class AuthService {
     return roles ? roles.split(',') : [];
   }
 
+  getPersonName(): string | null {
+    return this.getDecodedToken()?.personName ?? null;
+  }
+
+  getPersonRelationship(): string | null {
+    return this.getDecodedToken()?.personRelationship ?? null;
+  }
+
   /**
    * Retorna a lista de autorizações granulares do usuário logado.
    * Ex: ['read:person', 'edit:store', 'root:admin']
