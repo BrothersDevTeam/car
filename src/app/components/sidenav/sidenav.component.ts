@@ -42,8 +42,8 @@ export class SideNavComponent {
     private actionsService: ActionsService,
     private router: Router
   ) {
-    this.loggedUsername.set(this.authService.getUsername() || 'Usuário');
-    this.userRole.set(this.formatRole(this.authService.getRoles()));
+    this.loggedUsername.set(this.authService.getPersonName() || this.authService.getUsername() || 'Usuário');
+    this.userRole.set(this.authService.getPersonRelationship() || this.formatRole(this.authService.getRoles()));
   }
 
   sideNavCollapsed = signal(false);
