@@ -424,7 +424,7 @@ export class PersonComponent implements OnInit, OnDestroy {
       if (!searchParams) {
         searchParams = {};
       }
-      (searchParams as any)['relationship'] = relationshipFilter;
+      (searchParams as any)['relationshipTypes'] = relationshipFilter;
     }
 
     this.personService
