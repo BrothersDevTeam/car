@@ -103,11 +103,10 @@ export class AuthService {
 
   /**
    * Retorna a lista de autorizações granulares do usuário logado.
-   * Ex: ['read:person', 'edit:store', 'root:admin']
+   * O backend Spring Security envia todas as roles e authorities juntas na claim "roles".
    */
   getAuthorizations(): string[] {
-    const auths = this.getDecodedToken()?.authorizations;
-    return auths ? auths.split(',').map(a => a.trim()) : [];
+    return this.getRoles();
   }
 
   /**

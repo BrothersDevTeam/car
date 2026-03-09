@@ -1,22 +1,13 @@
 <app-content-header
   title="Gerenciamento de Lojas"
   subtitle="Visualize e gerencie suas lojas"
-></app-content-header>
+  [btn_label]="canCreateStore ? 'Cadastrar Nova Loja' : ''"
+  fontIcon="add"
+  (onClick)="onCreateStore()"
+>
+</app-content-header>
 
 <div class="stores-container">
-  @if (canCreateStore) {
-    <div class="actions-bar">
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="onCreateStore()"
-      >
-        <mat-icon>add</mat-icon>
-        Cadastrar Nova Loja
-      </button>
-    </div>
-  }
-
   @if (loading) {
     <div class="loading-state">
       <mat-icon class="loading-icon spinning">refresh</mat-icon>
