@@ -792,6 +792,20 @@ export class NaturalPersonFormComponent
         this.loadAvailableDrafts();
       })
     );
+
+    this.subscriptions.add(
+      this.form.get('roleName')?.valueChanges.subscribe((role) => {
+        if (!role) return;
+        
+        if (role === 'ROLE_MANAGER') {
+          this.form.get('relationship')?.setValue(RelationshipTypes.GERENTE);
+        } else if (role === 'ROLE_OWNER') {
+          this.form.get('relationship')?.setValue(RelationshipTypes.PROPRIETARIO);
+        } else if (role === 'ROLE_SELLER' || role === 'ROLE_FINANCIAL') {
+          this.form.get('relationship')?.setValue(RelationshipTypes.VENDEDOR);
+        }
+      }) ?? new Subscription()
+    );
   }
 
   protected toggleEmployeeType(): void {
