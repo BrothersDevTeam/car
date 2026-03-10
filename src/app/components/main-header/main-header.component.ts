@@ -12,10 +12,15 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { EventType } from '@angular/router';
 import { AuthService } from '@services/auth/auth.service';
 import { StoreService } from '@services/store.service';
+import { StoreContextService } from '@services/store-context.service';
+import { Authorizations } from '../../enums/authorizations';
+import { Store } from '@interfaces/store';
+import { MatSelectModule } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-main-header',
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatSelectModule, FormsModule],
   templateUrl: './main-header.component.html',
   styleUrl: './main-header.component.scss',
 })
@@ -26,11 +31,40 @@ export class MainHeaderComponent implements OnInit {
 
   private authService = inject(AuthService);
   private storeService = inject(StoreService);
+  private storeContextService = inject(StoreContextService);
+
+  isCarAdmin = false;
+  stores: Store[] = [];
+  selectedStoreId: string = 'ALL';
 
   ngOnInit(): void {
-    const storeId = this.authService.getStoreId();
-    if (storeId) {
-      this.storeService.getById(storeId).subscribe({
+    this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+    
+    // Configura o ID inicial pelo contexto global (usando 'ALL' em vez de null para o html renderizar)
+    this.selectedStoreId = this.storeContextService.currentStoreId ?? 'ALL';
+
+    if (this.isCarAdmin) {
+      this.loadAllStores();
+    } else {
+      this.loadCurrentStoreName();
+    }
+  }
+
+  private loadAllStores() {
+    this.storeName.set('Carregando Lojas...');
+    this.storeService.getAll({ size: 1000 }).subscribe({
+      next: (response) => {
+        if (response && response.content) {
+          this.stores = response.content;
+        }
+      },
+      error: () => this.storeName.set('Lojas indisponíveis')
+    });
+  }
+
+  private loadCurrentStoreName() {
+    if (this.selectedStoreId) {
+      this.storeService.getById(this.selectedStoreId).subscribe({
         next: (store) => {
           this.storeName.set(store.tradeName || store.name || 'Filial');
         },
@@ -39,5 +73,10 @@ export class MainHeaderComponent implements OnInit {
     } else {
       this.storeName.set('Filial');
     }
+  }
+
+  onStoreChange() {
+    const storeToEmit = this.selectedStoreId === 'ALL' ? null : this.selectedStoreId;
+    this.storeContextService.setStoreId(storeToEmit);
   }
 }

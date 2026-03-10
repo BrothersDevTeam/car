@@ -1,21 +1,5 @@
 <main>
   <div class="search-container">
-    @if (isCarAdmin) {
-      <mat-form-field appearance="outline" class="store-field" style="margin-right: 16px;">
-        <mat-label>Loja</mat-label>
-        <mat-select
-          [(value)]="selectedStoreId"
-          (selectionChange)="onStoreChange()"
-          panelClass="store-select-panel"
-        >
-          <mat-option [value]="null">Todas as Lojas</mat-option>
-          @for (store of stores; track store.storeId) {
-            <mat-option [value]="store.storeId">{{ store.name }} - {{ store.cnpj }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    }
-
     <mat-form-field
       appearance="outline"
       class="search-field"

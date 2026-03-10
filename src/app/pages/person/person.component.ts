@@ -46,7 +46,7 @@ import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
 import { AuthService } from '@services/auth/auth.service';
 import { FormDraftService, FormDraft } from '@services/form-draft.service';
-import { StoreService } from '@services/store.service';
+import { StoreContextService } from '@services/store-context.service';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -97,9 +97,8 @@ export class PersonComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private searchSubject = new Subject<string>();
   private formDraftService = inject(FormDraftService);
-  private storeService = inject(StoreService);
+  private storeContextService = inject(StoreContextService);
 
-  stores: Store[] = [];
   personPaginatedList: PaginationResponse<Person> | null = null;
   selectedPerson: Person | null = null;
   selectedDraft: FormDraft | null | undefined = undefined;
@@ -250,6 +249,17 @@ export class PersonComponent implements OnInit, OnDestroy {
         this.loadDrafts();
       })
     );
+
+    // Contexto Global de Loja
+    this.subscriptions.push(
+      this.storeContextService.currentStoreId$.subscribe((storeId) => {
+        // Ignora caso valor seja igual (previne triggers duplos na inicialização)
+        if (this.selectedStoreId !== storeId) {
+          this.selectedStoreId = storeId;
+          this.performSearch(); // Executa a busca baseada na nova loja global selecionada
+        }
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -287,23 +297,6 @@ export class PersonComponent implements OnInit, OnDestroy {
   // Verifica se o usuário é root:admin (CAR_ADMIN)
   private checkUserRole() {
     this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
-    if (this.isCarAdmin) {
-      this.loadStores();
-    }
-  }
-
-  private loadStores() {
-    this.storeService.getAll({ size: 1000 }).subscribe({
-      next: (response) => {
-        if (response && response.content) {
-          this.stores = response.content;
-        }
-      },
-      error: (err) => {
-        console.error('Erro ao carregar lojas', err);
-        this.toastr.error('Erro ao carregar lista de lojas');
-      }
-    });
   }
 
   handleFormChanged(isDirty: boolean) {
@@ -583,10 +576,6 @@ export class PersonComponent implements OnInit, OnDestroy {
     this.searchType = type;
     
     // Perform search in all cases: if there is a value, it will filter, if not, it will just reload to correct state without filters.
-    this.performSearch();
-  }
-
-  onStoreChange() {
     this.performSearch();
   }
 

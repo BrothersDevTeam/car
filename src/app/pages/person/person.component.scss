@@ -16,31 +16,6 @@
   width: 180px;
 }
 
-.store-field {
-  min-width: 250px;
-  flex: 1;
-}
-
-// ===== PANEL DO COMBOBOX DE LOJAS =====
-::ng-deep .store-select-panel {
-  min-width: 350px !important;
-  max-width: 600px !important;
-  width: auto !important;
-
-  .mat-mdc-option {
-    white-space: normal;
-    height: auto;
-    min-height: 48px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    line-height: normal;
-
-    .mdc-list-item__primary-text {
-      white-space: normal;
-    }
-  }
-}
-
 // ===== ESTILOS DA SEÇÃO DE FILTROS =====
 .filter-section {
   background-color: #ffffff;
@@ -224,7 +199,6 @@
     flex-direction: column;
     align-items: stretch;
 
-    .store-field,
     .search-field,
     .search-type-field {
       width: 100%;

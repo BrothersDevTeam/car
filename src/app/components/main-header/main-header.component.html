@@ -7,5 +7,20 @@
   </button>
   <span>C.A.R.</span>
   <span class="spacer"></span>
-  <span class="company-name">{{ storeName() }}</span>
+  
+  @if (isCarAdmin) {
+    <mat-select
+      [(ngModel)]="selectedStoreId"
+      (selectionChange)="onStoreChange()"
+      class="header-store-select"
+      panelClass="header-store-select-panel"
+    >
+      <mat-option value="ALL">Toda a Rede (Global)</mat-option>
+      @for (store of stores; track store.storeId) {
+        <mat-option [value]="store.storeId">{{ store.name }} - {{ store.cnpj }}</mat-option>
+      }
+    </mat-select>
+  } @else {
+    <span class="company-name">{{ storeName() }}</span>
+  }
 </mat-toolbar>
