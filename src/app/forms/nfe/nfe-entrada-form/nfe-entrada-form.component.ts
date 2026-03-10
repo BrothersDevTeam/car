@@ -147,7 +147,11 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   /** Aplica patchValue apenas quando veículos e pessoas já estão carregados */
   private tryPatchForm() {
-    if (!this.dataForm || this.vehicles.length === 0 || this.persons.length === 0) {
+    if (
+      !this.dataForm ||
+      this.vehicles.length === 0 ||
+      this.persons.length === 0
+    ) {
       return;
     }
     this.form.patchValue({

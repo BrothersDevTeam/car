@@ -163,7 +163,11 @@ export class NaturalPersonFormComponent
    */
   protected get canRegisterEmployee(): boolean {
     const userRoles = this.authService.getRoles();
-    return userRoles.includes('root:admin') || userRoles.includes('create:user') || userRoles.includes('edit:store');
+    return (
+      userRoles.includes('root:admin') ||
+      userRoles.includes('create:user') ||
+      userRoles.includes('edit:store')
+    );
   }
 
   /**
@@ -215,7 +219,14 @@ export class NaturalPersonFormComponent
     }
 
     const selectedType = this.form.get('relationship')?.value;
-    return !!selectedType && [RelationshipTypes.PROPRIETARIO, RelationshipTypes.GERENTE, RelationshipTypes.VENDEDOR].includes(selectedType);
+    return (
+      !!selectedType &&
+      [
+        RelationshipTypes.PROPRIETARIO,
+        RelationshipTypes.GERENTE,
+        RelationshipTypes.VENDEDOR,
+      ].includes(selectedType)
+    );
   }
 
   constructor(
@@ -333,8 +344,7 @@ export class NaturalPersonFormComponent
           rg: this.form.value.rg?.replace(/\D/g, '') || '',
           rgIssuer: '',
           crc: '',
-          relationship: this.form.value
-            .relationship as RelationshipTypes,
+          relationship: this.form.value.relationship as RelationshipTypes,
         };
 
         let formValue: CreateNaturalPerson;
@@ -712,7 +722,10 @@ export class NaturalPersonFormComponent
         this.form.patchValue(draft.data);
 
         const relationship = draft.data.relationship;
-        this.isEmployee = relationship === RelationshipTypes.GERENTE || relationship === RelationshipTypes.VENDEDOR || relationship === RelationshipTypes.PROPRIETARIO;
+        this.isEmployee =
+          relationship === RelationshipTypes.GERENTE ||
+          relationship === RelationshipTypes.VENDEDOR ||
+          relationship === RelationshipTypes.PROPRIETARIO;
 
         this.toastrService.success('Rascunho carregado com sucesso');
         console.log('[checkForDrafts] Rascunho carregado:', draft);
@@ -797,11 +810,13 @@ export class NaturalPersonFormComponent
     this.subscriptions.add(
       this.form.get('roleName')?.valueChanges.subscribe((role) => {
         if (!role) return;
-        
+
         if (role === 'ROLE_MANAGER') {
           this.form.get('relationship')?.setValue(RelationshipTypes.GERENTE);
         } else if (role === 'ROLE_OWNER') {
-          this.form.get('relationship')?.setValue(RelationshipTypes.PROPRIETARIO);
+          this.form
+            .get('relationship')
+            ?.setValue(RelationshipTypes.PROPRIETARIO);
         } else if (role === 'ROLE_SELLER' || role === 'ROLE_FINANCIAL') {
           this.form.get('relationship')?.setValue(RelationshipTypes.VENDEDOR);
         }
@@ -813,9 +828,7 @@ export class NaturalPersonFormComponent
     this.isEmployee = !this.isEmployee;
 
     if (this.isEmployee) {
-      this.form
-        .get('relationship')
-        ?.setValue(RelationshipTypes.VENDEDOR);
+      this.form.get('relationship')?.setValue(RelationshipTypes.VENDEDOR);
       console.log('[toggleEmployeeType] Alterado para VENDEDOR');
     } else {
       this.form.get('relationship')?.setValue(RelationshipTypes.CLIENTE);
@@ -878,7 +891,8 @@ export class NaturalPersonFormComponent
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
       console.log('[natural-person-form] dataForm recebido:', this.dataForm);
-      const relationship = this.dataForm.relationship || RelationshipTypes.CLIENTE;
+      const relationship =
+        this.dataForm.relationship || RelationshipTypes.CLIENTE;
       this.isEmployee =
         relationship === RelationshipTypes.GERENTE ||
         relationship === RelationshipTypes.VENDEDOR ||
@@ -941,7 +955,10 @@ export class NaturalPersonFormComponent
     this.form.patchValue(draft.data);
 
     const relationship = draft.data.relationship;
-    this.isEmployee = relationship === RelationshipTypes.GERENTE || relationship === RelationshipTypes.VENDEDOR || relationship === RelationshipTypes.PROPRIETARIO;
+    this.isEmployee =
+      relationship === RelationshipTypes.GERENTE ||
+      relationship === RelationshipTypes.VENDEDOR ||
+      relationship === RelationshipTypes.PROPRIETARIO;
 
     this.toastrService.success(
       `Rascunho "${draft.draftName || 'sem nome'}" carregado`
@@ -1026,8 +1043,7 @@ export class NaturalPersonFormComponent
       rg: this.form.value.rg?.replace(/\D/g, '') || '',
       rgIssuer: '',
       crc: '',
-      relationship: this.form.value
-        .relationship as RelationshipTypes,
+      relationship: this.form.value.relationship as RelationshipTypes,
     };
 
     let formValue: CreateNaturalPerson;

@@ -39,9 +39,9 @@ export class NfeService {
     if (this.cache && !hasSearchParams) {
       return of(this.cache);
     }
-    
+
     let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
-    
+
     if (searchParams) {
       if (searchParams.search?.trim()) {
         url += `&search=${encodeURIComponent(searchParams.search.trim())}`;
@@ -50,22 +50,20 @@ export class NfeService {
         url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
       }
     }
-    
-    return this.http
-      .get<PaginationResponse<Nfe>>(url)
-      .pipe(
-        first(),
-        tap((response) => {
-          // Only update general cache if it's not a search result
-          if (!hasSearchParams) {
-            this.cache = response;
-            this.cache.page.totalElements = this.cache.content.length;
-            this.cacheUpdated$.next({ ...this.cache });
-          } else {
-             response.page.totalElements = response.content.length;
-          }
-        })
-      );
+
+    return this.http.get<PaginationResponse<Nfe>>(url).pipe(
+      first(),
+      tap((response) => {
+        // Only update general cache if it's not a search result
+        if (!hasSearchParams) {
+          this.cache = response;
+          this.cache.page.totalElements = this.cache.content.length;
+          this.cacheUpdated$.next({ ...this.cache });
+        } else {
+          response.page.totalElements = response.content.length;
+        }
+      })
+    );
   }
 
   getNfe(id: string): Observable<Nfe> {

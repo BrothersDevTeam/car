@@ -114,8 +114,10 @@ export class AuthService {
    * Ex: hasAuthority('edit:person')
    */
   hasAuthority(authority: string): boolean {
-    return this.getAuthorizations().includes(authority) ||
-           this.getAuthorizations().includes('root:admin');
+    return (
+      this.getAuthorizations().includes(authority) ||
+      this.getAuthorizations().includes('root:admin')
+    );
   }
 
   isLoggedIn(): boolean {

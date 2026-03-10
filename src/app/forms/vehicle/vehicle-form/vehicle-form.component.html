@@ -49,7 +49,8 @@
           type="text"
           mask="AAA-AAAA"
           [error]="
-            form.get('plate')?.invalid && (form.get('plate')?.touched || submitted)
+            form.get('plate')?.invalid &&
+            (form.get('plate')?.touched || submitted)
           "
         />
         <div class="custom-selects-container">
@@ -231,7 +232,10 @@
       </app-wrapper-card>
     </mat-tab>
 
-    <mat-tab label="Dados Gerais" [disabled]="!dataForm?.vehicleId">
+    <mat-tab
+      label="Dados Gerais"
+      [disabled]="!dataForm?.vehicleId"
+    >
       <app-wrapper-card>
         <app-primary-input
           formControlName="valorCompra"

@@ -238,7 +238,7 @@ export class NfeComponent {
 
   loadNfeList(pageIndex: number, pageSize: number, searchValue?: string) {
     this.nfeListLoading.set(true);
-    
+
     let searchParams: { search?: string; storeId?: string } | undefined;
 
     if (searchValue && searchValue.trim()) {

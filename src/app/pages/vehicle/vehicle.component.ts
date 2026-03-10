@@ -126,7 +126,7 @@ export class VehicleComponent {
         this.handleConfirmationCloseDrawer();
       })
     );
-    
+
     // Contexto Global de Loja
     this.subscription.add(
       this.storeContextService.currentStoreId$.subscribe((storeId) => {

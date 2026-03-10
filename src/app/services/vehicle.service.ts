@@ -40,9 +40,9 @@ export class VehicleService {
     if (this.cache && !hasSearchParams) {
       return of(this.cache);
     }
-    
+
     let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
-    
+
     if (searchParams) {
       if (searchParams.search?.trim()) {
         url += `&search=${encodeURIComponent(searchParams.search.trim())}`;
@@ -51,19 +51,17 @@ export class VehicleService {
         url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
       }
     }
-    
-    return this.http
-      .get<PaginationResponse<Vehicle>>(url)
-      .pipe(
-        first(),
-        tap((response) => {
-          // Only update general cache if it's not a search result
-          if (!hasSearchParams) {
-            this.cache = response;
-            this.cacheUpdated$.next({ ...this.cache });
-          }
-        })
-      );
+
+    return this.http.get<PaginationResponse<Vehicle>>(url).pipe(
+      first(),
+      tap((response) => {
+        // Only update general cache if it's not a search result
+        if (!hasSearchParams) {
+          this.cache = response;
+          this.cacheUpdated$.next({ ...this.cache });
+        }
+      })
+    );
   }
 
   create(data: CreateVehicle) {

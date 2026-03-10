@@ -152,7 +152,14 @@ export class LegalEntityFormComponent
 
   get shouldShowUserFields(): boolean {
     const selectedType = this.form.get('relationship')?.value;
-    return !!selectedType && [RelationshipTypes.PROPRIETARIO, RelationshipTypes.GERENTE, RelationshipTypes.VENDEDOR].includes(selectedType);
+    return (
+      !!selectedType &&
+      [
+        RelationshipTypes.PROPRIETARIO,
+        RelationshipTypes.GERENTE,
+        RelationshipTypes.VENDEDOR,
+      ].includes(selectedType)
+    );
   }
 
   constructor(
@@ -348,8 +355,7 @@ export class LegalEntityFormComponent
           storeId,
           legalEntity: true as const,
           crc: this.form.value.crc || '',
-          relationship: this.form.value
-            .relationship as RelationshipTypes,
+          relationship: this.form.value.relationship as RelationshipTypes,
         };
 
         let formValue: CreateLegalEntity;
@@ -513,12 +519,10 @@ export class LegalEntityFormComponent
         this.dataForm.relationship
       );
 
-      const relationship = this.dataForm.relationship || RelationshipTypes.CLIENTE;
+      const relationship =
+        this.dataForm.relationship || RelationshipTypes.CLIENTE;
 
-      console.log(
-        '[legal-entity-form] relationship mapeado:',
-        relationship
-      );
+      console.log('[legal-entity-form] relationship mapeado:', relationship);
 
       /**
        * Aumentado o timeout para garantir sincronização com as opções
@@ -617,8 +621,7 @@ export class LegalEntityFormComponent
       storeId,
       legalEntity: true as const,
       crc: this.form.value.crc || '',
-      relationship: this.form.value
-        .relationship as RelationshipTypes,
+      relationship: this.form.value.relationship as RelationshipTypes,
     };
 
     let formValue: CreateLegalEntity;

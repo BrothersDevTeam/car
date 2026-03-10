@@ -80,7 +80,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
       width: '600px',
       data: {
         person,
-        store: this.data.store
+        store: this.data.store,
       },
     });
 
@@ -95,4 +95,3 @@ export class StoreEmployeesDialogComponent implements OnInit {
     this.dialogRef.close();
   }
 }
-

@@ -39,12 +39,12 @@ export interface NfeDestinatario {
 
 export interface Nfe {
   nfeId?: string;
-  storeId: string;              // Emitente (ID da loja)
-  personId: string;             // Destinatário (ID da pessoa)
-  nfeTipoDocumento: string;     // '0' entrada, '1' saída
+  storeId: string; // Emitente (ID da loja)
+  personId: string; // Destinatário (ID da pessoa)
+  nfeTipoDocumento: string; // '0' entrada, '1' saída
   nfeNaturezaOperacao: NaturezaOperacao;
   nfeItens: nfeItem[];
-  vehicleId?: string;           // ID do veículo do primeiro item
+  vehicleId?: string; // ID do veículo do primeiro item
 
   // === Numeração ===
   nfeNumero?: number;
@@ -52,20 +52,20 @@ export interface Nfe {
 
   // === Datas ===
   nfeDataEmissao?: string;
-  createdAt?: string;           // Data de criação (auditoria)
-  updatedAt?: string;           // Data de atualização (auditoria)
+  createdAt?: string; // Data de criação (auditoria)
+  updatedAt?: string; // Data de atualização (auditoria)
 
   // === Status e controle ===
-  nfeStatus?: string;           // 'rascunho', 'processando', 'autorizado', 'cancelado', 'erro'
-  nfeChave?: string;            // Chave de 44 dígitos da SEFAZ
-  nfeMensagemErro?: string;     // Mensagem de erro da SEFAZ
+  nfeStatus?: string; // 'rascunho', 'processando', 'autorizado', 'cancelado', 'erro'
+  nfeChave?: string; // Chave de 44 dígitos da SEFAZ
+  nfeMensagemErro?: string; // Mensagem de erro da SEFAZ
 
   // === Partes da NFe ===
   nfeEmitente?: NfeEmitente;
   nfeDestinatario?: NfeDestinatario;
 
   // === Totalizadores ===
-  valorTotal?: number;          // Mantido por compatibilidade
+  valorTotal?: number; // Mantido por compatibilidade
   nfeValorTotal?: string;
   nfeValorProdutos?: string;
   nfeValorFrete?: string;
@@ -98,8 +98,8 @@ export enum NaturezaOperacao {
 }
 
 export interface nfeItem {
-  vehicleId?: string;           // Se informado, usa dados do veículo cadastrado
-  itemNumero?: number;          // Sequencial do item na NFe
+  vehicleId?: string; // Se informado, usa dados do veículo cadastrado
+  itemNumero?: number; // Sequencial do item na NFe
 
   // Preencher os campos do item se vehicleId não for informado
   itemCodigoProduto?: string;

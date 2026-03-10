@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthService } from './auth/auth.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class StoreContextService {
   // Guarda o storeId atual. Inicializa com a loja padrão do usuário vinda do token.
