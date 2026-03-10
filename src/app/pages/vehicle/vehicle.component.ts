@@ -10,6 +10,7 @@ import { DrawerComponent } from '@components/drawer/drawer.component';
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
+import { StoreContextService } from '@services/store-context.service';
 import { Subject, Subscription, catchError, debounceTime, of } from 'rxjs';
 
 import { FormsModule } from '@angular/forms';
@@ -47,13 +48,14 @@ import { ActionsService } from '@services/actions.service';
 })
 export class VehicleComponent {
   readonly dialog = inject(MatDialog);
-  private subscription!: Subscription;
+  private subscription: Subscription = new Subscription();
   private cacheSubscription!: Subscription;
   private searchSubject = new Subject<string>();
 
   vehiclePaginatedList: PaginationResponse<Vehicle> | null = null;
   selectedVehicle: VehicleForm | null = null;
   searchValue: string = '';
+  selectedStoreId: string | null = null;
   paginationRequestConfig = {
     pageSize: 1000,
     pageIndex: 0,
@@ -105,7 +107,8 @@ export class VehicleComponent {
   constructor(
     private vehicleService: VehicleService,
     private toastr: ToastrService,
-    private actionsService: ActionsService
+    private actionsService: ActionsService,
+    private storeContextService: StoreContextService
   ) {
     this.loadVehicleList(
       this.paginationRequestConfig.pageIndex,
@@ -118,9 +121,25 @@ export class VehicleComponent {
   }
 
   ngOnInit() {
-    this.subscription = this.actionsService.sidebarClick$.subscribe(() => {
-      this.handleConfirmationCloseDrawer();
-    });
+    this.subscription.add(
+      this.actionsService.sidebarClick$.subscribe(() => {
+        this.handleConfirmationCloseDrawer();
+      })
+    );
+    
+    // Contexto Global de Loja
+    this.subscription.add(
+      this.storeContextService.currentStoreId$.subscribe((storeId) => {
+        if (this.selectedStoreId !== storeId) {
+          this.selectedStoreId = storeId;
+          this.loadVehicleList(
+            0,
+            this.paginationRequestConfig.pageSize,
+            this.searchValue
+          );
+        }
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -182,20 +201,25 @@ export class VehicleComponent {
   loadVehicleList(pageIndex: number, pageSize: number, searchValue?: string) {
     this.vehicleListLoading.set(true);
 
-    let searchParams: { search?: string } | undefined;
+    let searchParams: { search?: string; storeId?: string } | undefined;
 
     if (searchValue && searchValue.trim()) {
       searchParams = { search: searchValue.trim() };
     }
 
+    if (this.selectedStoreId) {
+      searchParams ??= {};
+      searchParams.storeId = this.selectedStoreId;
+    }
+
     this.vehicleService
       .getPaginatedData(pageIndex, pageSize, searchParams)
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
           this.vehicleListError.set(true);
           console.error('Erro ao carregar a lista de veículos:', err);
           this.toastr.error('Erro ao buscar dados da tabela de veículos');
-          return of();
+          return of(null as unknown as PaginationResponse<Vehicle>);
         })
       )
       .subscribe((response) => {

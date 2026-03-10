@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
+import { StoreContextService } from '@services/store-context.service';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 
@@ -48,13 +49,14 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class NfeComponent {
   readonly dialog = inject(MatDialog);
-  private subscription!: Subscription;
+  private subscription: Subscription = new Subscription();
   private cacheSubscription!: Subscription;
   private searchSubject = new Subject<string>();
 
   nfePaginatedList: PaginationResponse<Nfe> | null = null;
   selectedNfe: Nfe | null = null;
   searchValue: string = '';
+  selectedStoreId: string | null = null;
   paginationRequestConfig = {
     pageSize: 1000,
     pageIndex: 0,
@@ -145,7 +147,8 @@ export class NfeComponent {
   constructor(
     private nfeService: NfeService,
     private toastr: ToastrService,
-    private actionsService: ActionsService
+    private actionsService: ActionsService,
+    private storeContextService: StoreContextService
   ) {
     this.loadNfeList(
       this.paginationRequestConfig.pageIndex,
@@ -156,9 +159,25 @@ export class NfeComponent {
   }
 
   ngOnInit() {
-    this.subscription = this.actionsService.sidebarClick$.subscribe(() => {
-      this.handleConfirmationCloseDrawer();
-    });
+    this.subscription.add(
+      this.actionsService.sidebarClick$.subscribe(() => {
+        this.handleConfirmationCloseDrawer();
+      })
+    );
+
+    // Contexto Global de Loja
+    this.subscription.add(
+      this.storeContextService.currentStoreId$.subscribe((storeId) => {
+        if (this.selectedStoreId !== storeId) {
+          this.selectedStoreId = storeId;
+          this.loadNfeList(
+            0,
+            this.paginationRequestConfig.pageSize,
+            this.searchValue
+          );
+        }
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -220,21 +239,26 @@ export class NfeComponent {
   loadNfeList(pageIndex: number, pageSize: number, searchValue?: string) {
     this.nfeListLoading.set(true);
     
-    let searchParams: { search?: string } | undefined;
+    let searchParams: { search?: string; storeId?: string } | undefined;
 
     if (searchValue && searchValue.trim()) {
       searchParams = { search: searchValue.trim() };
     }
 
+    if (this.selectedStoreId) {
+      searchParams ??= {};
+      searchParams.storeId = this.selectedStoreId;
+    }
+
     this.nfeService
       .getPaginatedData(pageIndex, pageSize, searchParams)
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
           this.nfeListLoading.set(false);
           this.nfeListError.set(true);
           console.error('Erro ao carregar a lista de NFes:', err);
           this.toastr.error('Erro ao buscar dados da tabela de NFes');
-          return of();
+          return of(null as unknown as PaginationResponse<Nfe>);
         })
       )
       .subscribe((response) => {
