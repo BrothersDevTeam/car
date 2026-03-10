@@ -1,3 +1,17 @@
+.search-container {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 4px;
+  align-items: flex-start;
+  flex-direction: row;
+  flex-wrap: wrap; // Permite quebrar linha em telas médias
+}
+
+.search-field {
+  flex: 1;
+  min-width: 300px;
+}
+
 .loader-div,
 .message-error {
   width: 100%;
