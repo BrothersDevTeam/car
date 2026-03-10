@@ -501,7 +501,7 @@ export class StoreFormDialogComponent implements OnInit {
       username: accessValue.username,
       password: accessValue.password,
       roleName: 'ROLE_ADMIN', // Proprietário sempre é ADMIN da loja
-      relationshipTypes: ['PROPRIETARIO'], // Define como proprietário
+      relationship: 'PROPRIETARIO', // Define como proprietário
     };
   }
 
