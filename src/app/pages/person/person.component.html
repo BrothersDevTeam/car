@@ -5,25 +5,35 @@
       class="search-field"
     >
       <mat-label>Buscar pessoa</mat-label>
-      <input
-        matInput
-        [(ngModel)]="searchValue"
-        (input)="onSearch($event)"
-        [placeholder]="
-          'Digite o ' +
-          (searchType === 'name'
-            ? 'nome'
-            : searchType === 'cpf'
-              ? 'CPF'
-              : searchType === 'cnpj'
-                ? 'CNPJ'
-                : searchType === 'email'
-                  ? 'email'
-                  : searchType === 'storeId'
-                    ? 'ID da loja'
+      @if (searchType === 'storeId') {
+        <mat-select
+          [(ngModel)]="searchValue"
+          (selectionChange)="performSearch()"
+          placeholder="Selecione a loja"
+        >
+          @for (store of stores; track store.storeId) {
+            <mat-option [value]="store.storeId">{{ store.name }} - {{ store.cnpj }}</mat-option>
+          }
+        </mat-select>
+      } @else {
+        <input
+          matInput
+          [(ngModel)]="searchValue"
+          (input)="onSearch($event)"
+          [placeholder]="
+            'Digite o ' +
+            (searchType === 'name'
+              ? 'nome'
+              : searchType === 'cpf'
+                ? 'CPF'
+                : searchType === 'cnpj'
+                  ? 'CNPJ'
+                  : searchType === 'email'
+                    ? 'email'
                     : 'nome, CPF, CNPJ ou email')
-        "
-      />
+          "
+        />
+      }
       @if (searchValue) {
         <button
           matSuffix

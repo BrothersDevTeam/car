@@ -40,11 +40,13 @@ import { NaturalPersonInfoComponent } from '@info/natural-person-info/natural-pe
 import type { Person } from '@interfaces/person';
 import type { PaginationResponse } from '@interfaces/pagination';
 import type { ColumnConfig } from '@interfaces/genericTable';
+import type { Store } from '@interfaces/store';
 
 import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
 import { AuthService } from '@services/auth/auth.service';
 import { FormDraftService, FormDraft } from '@services/form-draft.service';
+import { StoreService } from '@services/store.service';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -95,7 +97,9 @@ export class PersonComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private searchSubject = new Subject<string>();
   private formDraftService = inject(FormDraftService);
+  private storeService = inject(StoreService);
 
+  stores: Store[] = [];
   personPaginatedList: PaginationResponse<Person> | null = null;
   selectedPerson: Person | null = null;
   selectedDraft: FormDraft | null | undefined = undefined;
@@ -282,6 +286,23 @@ export class PersonComponent implements OnInit, OnDestroy {
   // Verifica se o usuário é root:admin (CAR_ADMIN)
   private checkUserRole() {
     this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+    if (this.isCarAdmin) {
+      this.loadStores();
+    }
+  }
+
+  private loadStores() {
+    this.storeService.getAll({ size: 1000 }).subscribe({
+      next: (response) => {
+        if (response && response.content) {
+          this.stores = response.content;
+        }
+      },
+      error: (err) => {
+        console.error('Erro ao carregar lojas', err);
+        this.toastr.error('Erro ao carregar lista de lojas');
+      }
+    });
   }
 
   handleFormChanged(isDirty: boolean) {
@@ -550,10 +571,14 @@ export class PersonComponent implements OnInit, OnDestroy {
   onSearchTypeChange(
     type: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId' | 'all'
   ) {
-    this.searchType = type;
-    if (this.searchValue) {
-      this.performSearch();
+    if (type === 'storeId' || this.searchType === 'storeId') {
+      this.searchValue = '';
     }
+
+    this.searchType = type;
+    
+    // Perform search in all cases: if there is a value, it will filter, if not, it will just reload to correct state without filters.
+    this.performSearch();
   }
 
   performSearch() {
