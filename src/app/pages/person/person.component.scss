@@ -4,6 +4,7 @@
   margin-bottom: 4px;
   align-items: flex-start;
   flex-direction: row;
+  flex-wrap: wrap; // Permite quebrar linha em telas médias
 }
 
 .search-field {
@@ -13,6 +14,31 @@
 
 .search-type-field {
   width: 180px;
+}
+
+.store-field {
+  min-width: 250px;
+  flex: 1;
+}
+
+// ===== PANEL DO COMBOBOX DE LOJAS =====
+::ng-deep .store-select-panel {
+  min-width: 350px !important;
+  max-width: 600px !important;
+  width: auto !important;
+
+  .mat-mdc-option {
+    white-space: normal;
+    height: auto;
+    min-height: 48px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    line-height: normal;
+
+    .mdc-list-item__primary-text {
+      white-space: normal;
+    }
+  }
 }
 
 // ===== ESTILOS DA SEÇÃO DE FILTROS =====
@@ -194,6 +220,18 @@
 // ===== RESPONSIVIDADE =====
 // Ajusta layout para telas menores (tablets e móveis)
 @media (max-width: 768px) {
+  .search-container {
+    flex-direction: column;
+    align-items: stretch;
+
+    .store-field,
+    .search-field,
+    .search-type-field {
+      width: 100%;
+      min-width: 100%;
+    }
+  }
+
   .filter-section {
     .filter-options {
       flex-direction: column;

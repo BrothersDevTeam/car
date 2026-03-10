@@ -107,9 +107,11 @@ export class PersonService {
         if (searchParams.email?.trim()) {
           url += `&email=${encodeURIComponent(searchParams.email.trim())}`;
         }
-        if (searchParams.storeId?.trim()) {
-          url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
-        }
+      }
+
+      // O storeId tem que ser concatenado independentemente de ser uma busca global ('search') ou em campo específico
+      if (searchParams.storeId?.trim()) {
+        url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
       }
 
       // Adiciona o filtro de relationshipTypes se fornecido

@@ -105,7 +105,8 @@ export class PersonComponent implements OnInit, OnDestroy {
   selectedDraft: FormDraft | null | undefined = undefined;
   availableDrafts: FormDraft[] = [];
   searchValue: string = '';
-  searchType: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId' | 'all' = 'all';
+  searchType: 'name' | 'cpf' | 'cnpj' | 'email' | 'all' = 'all';
+  selectedStoreId: string | null = null;
   isCarAdmin: boolean = false;
   selectedPeople: Person[] = []; // Stores selected rows
   pendingAddressDraftId: string | null = null;
@@ -439,6 +440,14 @@ export class PersonComponent implements OnInit, OnDestroy {
       }
     }
 
+    // Adiciona o filtro de loja se houver
+    if (this.selectedStoreId) {
+      if (!searchParams) {
+        searchParams = {};
+      }
+      searchParams.storeId = this.selectedStoreId;
+    }
+
     // Adiciona o filtro de relationship se houver filtros ativos
     const relationshipFilter = this.buildRelationshipTypesFilter();
     if (relationshipFilter.length > 0) {
@@ -569,15 +578,15 @@ export class PersonComponent implements OnInit, OnDestroy {
   }
 
   onSearchTypeChange(
-    type: 'name' | 'cpf' | 'cnpj' | 'email' | 'storeId' | 'all'
+    type: 'name' | 'cpf' | 'cnpj' | 'email' | 'all'
   ) {
-    if (type === 'storeId' || this.searchType === 'storeId') {
-      this.searchValue = '';
-    }
-
     this.searchType = type;
     
     // Perform search in all cases: if there is a value, it will filter, if not, it will just reload to correct state without filters.
+    this.performSearch();
+  }
+
+  onStoreChange() {
     this.performSearch();
   }
 
