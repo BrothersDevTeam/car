@@ -27,24 +27,41 @@ export class VehicleService {
 
   getPaginatedData(
     pageIndex: number,
-    pageSize: number
+    pageSize: number,
+    searchParams?: { search?: string; storeId?: string }
   ): Observable<PaginationResponse<Vehicle>> {
-    if (this.cache) {
+    const hasSearchParams =
+      searchParams &&
+      Object.values(searchParams).some((value) => {
+        return value && typeof value === 'string' && value.trim();
+      });
+
+    // Only use cache if there are no search params
+    if (this.cache && !hasSearchParams) {
       return of(this.cache);
     }
-    return this.http
-      .get<
-        PaginationResponse<Vehicle>
-      >(`${this.apiUrl}?page=${pageIndex}&size=${pageSize}`)
-      .pipe(
-        first(),
-        tap((response) => {
-          this.cache = response;
 
-          // Notifica sobre o carregamento inicial com uma nova referência
+    let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
+
+    if (searchParams) {
+      if (searchParams.search?.trim()) {
+        url += `&search=${encodeURIComponent(searchParams.search.trim())}`;
+      }
+      if (searchParams.storeId?.trim()) {
+        url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
+      }
+    }
+
+    return this.http.get<PaginationResponse<Vehicle>>(url).pipe(
+      first(),
+      tap((response) => {
+        // Only update general cache if it's not a search result
+        if (!hasSearchParams) {
+          this.cache = response;
           this.cacheUpdated$.next({ ...this.cache });
-        })
-      );
+        }
+      })
+    );
   }
 
   create(data: CreateVehicle) {

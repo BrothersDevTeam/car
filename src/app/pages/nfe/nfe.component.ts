@@ -1,4 +1,4 @@
-import { catchError, of, Subscription } from 'rxjs';
+import { catchError, debounceTime, of, Subject, Subscription } from 'rxjs';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,9 +8,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { Component, inject, signal, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { DatePipe, NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
+import { StoreContextService } from '@services/store-context.service';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 
@@ -40,17 +42,21 @@ import { ToastrService } from 'ngx-toastr';
     NfeSaidaFormComponent,
     DatePipe,
     NgClass,
+    FormsModule,
   ],
   templateUrl: './nfe.component.html',
   styleUrl: './nfe.component.scss',
 })
 export class NfeComponent {
   readonly dialog = inject(MatDialog);
-  private subscription!: Subscription;
+  private subscription: Subscription = new Subscription();
+  private cacheSubscription!: Subscription;
+  private searchSubject = new Subject<string>();
 
   nfePaginatedList: PaginationResponse<Nfe> | null = null;
   selectedNfe: Nfe | null = null;
   searchValue: string = '';
+  selectedStoreId: string | null = null;
   paginationRequestConfig = {
     pageSize: 1000,
     pageIndex: 0,
@@ -141,24 +147,74 @@ export class NfeComponent {
   constructor(
     private nfeService: NfeService,
     private toastr: ToastrService,
-    private actionsService: ActionsService
+    private actionsService: ActionsService,
+    private storeContextService: StoreContextService
   ) {
     this.loadNfeList(
       this.paginationRequestConfig.pageIndex,
       this.paginationRequestConfig.pageSize
     );
+    this.setupCacheSubscription();
+    this.setupSearchDebounce();
   }
 
   ngOnInit() {
-    this.subscription = this.actionsService.sidebarClick$.subscribe(() => {
-      this.handleConfirmationCloseDrawer();
-    });
+    this.subscription.add(
+      this.actionsService.sidebarClick$.subscribe(() => {
+        this.handleConfirmationCloseDrawer();
+      })
+    );
+
+    // Contexto Global de Loja
+    this.subscription.add(
+      this.storeContextService.currentStoreId$.subscribe((storeId) => {
+        if (this.selectedStoreId !== storeId) {
+          this.selectedStoreId = storeId;
+          this.loadNfeList(
+            0,
+            this.paginationRequestConfig.pageSize,
+            this.searchValue
+          );
+        }
+      })
+    );
   }
 
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    if (this.cacheSubscription) {
+      this.cacheSubscription.unsubscribe();
+    }
+  }
+
+  // Método para configurar a inscrição do cache
+  private setupCacheSubscription() {
+    this.cacheSubscription = this.nfeService.cacheUpdated.subscribe(
+      (updatedCache) => {
+        if (updatedCache) {
+          this.nfePaginatedList = updatedCache;
+        }
+      }
+    );
+  }
+
+  // Configura o debounce de 500ms para a busca
+  private setupSearchDebounce() {
+    this.subscription.add(
+      this.searchSubject
+        .pipe(
+          debounceTime(500) // Aguarda 500ms após o usuário parar de digitar
+        )
+        .subscribe((searchValue) => {
+          this.loadNfeList(
+            0, // Sempre volta para a primeira página ao buscar
+            this.paginationRequestConfig.pageSize,
+            searchValue
+          );
+        })
+    );
   }
 
   handleFormChanged(isDirty: boolean) {
@@ -183,15 +239,26 @@ export class NfeComponent {
   loadNfeList(pageIndex: number, pageSize: number, searchValue?: string) {
     this.nfeListLoading.set(true);
 
+    let searchParams: { search?: string; storeId?: string } | undefined;
+
+    if (searchValue && searchValue.trim()) {
+      searchParams = { search: searchValue.trim() };
+    }
+
+    if (this.selectedStoreId) {
+      searchParams ??= {};
+      searchParams.storeId = this.selectedStoreId;
+    }
+
     this.nfeService
-      .getPaginatedData(pageIndex, pageSize)
+      .getPaginatedData(pageIndex, pageSize, searchParams)
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
           this.nfeListLoading.set(false);
           this.nfeListError.set(true);
           console.error('Erro ao carregar a lista de NFes:', err);
           this.toastr.error('Erro ao buscar dados da tabela de NFes');
-          return of();
+          return of(null as unknown as PaginationResponse<Nfe>);
         })
       )
       .subscribe((response) => {
@@ -230,6 +297,15 @@ export class NfeComponent {
 
   onSearch(event: Event) {
     this.searchValue = (event.target as HTMLInputElement).value;
+    this.searchSubject.next(this.searchValue);
+  }
+
+  clearSearch() {
+    this.searchValue = '';
+    this.loadNfeList(
+      this.paginationRequestConfig.pageIndex,
+      this.paginationRequestConfig.pageSize
+    );
   }
 
   handleEdit(nfe: Nfe) {

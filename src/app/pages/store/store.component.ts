@@ -50,7 +50,7 @@ export class StoreComponent implements OnInit {
   private checkUserRole(): void {
     // Verifica se é administrador master (CAR_ADMIN)
     this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
-    
+
     // CAR_ADMIN cadastra matriz (root:admin), ADMIN cadastra filiais (edit:store)
     this.canCreateStore =
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||

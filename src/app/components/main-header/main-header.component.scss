@@ -18,12 +18,18 @@ mat-toolbar {
     max-width: 50vw;
     width: auto;
     margin-right: 16px;
-    font-family: Roboto, "Helvetica Neue", sans-serif; /* fallback to normal font for store names */
+    font-family:
+      Roboto, 'Helvetica Neue', sans-serif; /* fallback to normal font for store names */
     font-size: 14px;
-    background: rgba(0, 0, 0, 0.04); /* Light gray background to distinguish the select slightly */
+    background: rgba(
+      0,
+      0,
+      0,
+      0.04
+    ); /* Light gray background to distinguish the select slightly */
     border-radius: 4px;
     padding: 4px 8px;
-    
+
     ::ng-deep .mat-mdc-select-value {
       color: #333333; /* Dark text for contrast against the white header */
       font-weight: 500;
@@ -40,7 +46,7 @@ mat-toolbar {
   min-width: 350px !important;
   max-width: 600px !important;
   width: auto !important;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 
   .mat-mdc-option {
     white-space: normal;

@@ -20,7 +20,13 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-main-header',
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatSelectModule, FormsModule],
+  imports: [
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    FormsModule,
+  ],
   templateUrl: './main-header.component.html',
   styleUrl: './main-header.component.scss',
 })
@@ -39,7 +45,7 @@ export class MainHeaderComponent implements OnInit {
 
   ngOnInit(): void {
     this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
-    
+
     // Configura o ID inicial pelo contexto global (usando 'ALL' em vez de null para o html renderizar)
     this.selectedStoreId = this.storeContextService.currentStoreId ?? 'ALL';
 
@@ -58,7 +64,7 @@ export class MainHeaderComponent implements OnInit {
           this.stores = response.content;
         }
       },
-      error: () => this.storeName.set('Lojas indisponíveis')
+      error: () => this.storeName.set('Lojas indisponíveis'),
     });
   }
 
@@ -76,7 +82,8 @@ export class MainHeaderComponent implements OnInit {
   }
 
   onStoreChange() {
-    const storeToEmit = this.selectedStoreId === 'ALL' ? null : this.selectedStoreId;
+    const storeToEmit =
+      this.selectedStoreId === 'ALL' ? null : this.selectedStoreId;
     this.storeContextService.setStoreId(storeToEmit);
   }
 }

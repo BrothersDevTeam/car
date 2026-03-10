@@ -1,4 +1,30 @@
 <main>
+  <div class="search-container">
+    <mat-form-field
+      appearance="outline"
+      class="search-field"
+    >
+      <mat-label>Buscar NFe</mat-label>
+      <input
+        matInput
+        [(ngModel)]="searchValue"
+        (input)="onSearch($event)"
+        placeholder="Digite a chave, natureza, ou nome do remetente/destinatário"
+      />
+      @if (searchValue) {
+        <button
+          matSuffix
+          mat-icon-button
+          aria-label="Limpar"
+          (click)="clearSearch()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
   <app-content-header
     title="NFe"
     btn_label="Novo"
@@ -45,18 +71,26 @@
   @if (openInfo()) {
     <app-drawer (closeDrawer)="handleCloseDrawer()">
       @if (selectedNfe) {
-
         <!-- Cabeçalho do Drawer: título + botão editar -->
         <div class="nfe-drawer-header">
           <div class="nfe-drawer-title">
             <span class="nfe-numero">
-              NFe {{ selectedNfe.nfeNumero ? '#' + selectedNfe.nfeNumero : '(Rascunho)' }}
+              NFe
+              {{
+                selectedNfe.nfeNumero
+                  ? '#' + selectedNfe.nfeNumero
+                  : '(Rascunho)'
+              }}
             </span>
             <span
               class="nfe-status-badge"
               [ngClass]="'badge-' + (selectedNfe.nfeStatus || 'rascunho')"
             >
-              {{ selectedNfe.nfeStatus === 'rascunho' ? 'Em digitação' : selectedNfe.nfeStatus }}
+              {{
+                selectedNfe.nfeStatus === 'rascunho'
+                  ? 'Em digitação'
+                  : selectedNfe.nfeStatus
+              }}
             </span>
           </div>
           @if (selectedNfe.nfeStatus === 'rascunho') {
@@ -66,7 +100,8 @@
               class="btn-editar-nfe"
               (click)="handleEdit(selectedNfe)"
             >
-              <mat-icon>edit</mat-icon> Editar NFe
+              <mat-icon>edit</mat-icon>
+              Editar NFe
             </button>
           }
         </div>
@@ -74,7 +109,8 @@
         <!-- ======= SEÇÃO 1: DADOS GERAIS ======= -->
         <div class="nfe-section">
           <h3 class="section-title">
-            <mat-icon>receipt_long</mat-icon> Dados Gerais
+            <mat-icon>receipt_long</mat-icon>
+            Dados Gerais
           </h3>
           <div class="info-grid">
             <div class="info-item">
@@ -87,7 +123,15 @@
             </div>
             <div class="info-item">
               <label>Tipo</label>
-              <span>{{ selectedNfe.nfeTipoDocumento === '0' ? 'Entrada' : selectedNfe.nfeTipoDocumento === '1' ? 'Saída' : '—' }}</span>
+              <span>
+                {{
+                  selectedNfe.nfeTipoDocumento === '0'
+                    ? 'Entrada'
+                    : selectedNfe.nfeTipoDocumento === '1'
+                      ? 'Saída'
+                      : '—'
+                }}
+              </span>
             </div>
             <div class="info-item">
               <label>Natureza da Operação</label>
@@ -95,11 +139,23 @@
             </div>
             <div class="info-item">
               <label>Data de Emissão</label>
-              <span>{{ selectedNfe.nfeDataEmissao ? (selectedNfe.nfeDataEmissao | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
+              <span>
+                {{
+                  selectedNfe.nfeDataEmissao
+                    ? (selectedNfe.nfeDataEmissao | date: 'dd/MM/yyyy HH:mm')
+                    : '—'
+                }}
+              </span>
             </div>
             <div class="info-item">
               <label>Criado em</label>
-              <span>{{ selectedNfe.createdAt ? (selectedNfe.createdAt | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
+              <span>
+                {{
+                  selectedNfe.createdAt
+                    ? (selectedNfe.createdAt | date: 'dd/MM/yyyy HH:mm')
+                    : '—'
+                }}
+              </span>
             </div>
             @if (selectedNfe.nfeChave) {
               <div class="info-item full-width">
@@ -120,7 +176,8 @@
         @if (selectedNfe.nfeValorTotal || selectedNfe.nfeValorProdutos) {
           <div class="nfe-section">
             <h3 class="section-title">
-              <mat-icon>monetization_on</mat-icon> Valores
+              <mat-icon>monetization_on</mat-icon>
+              Valores
             </h3>
             <div class="info-grid">
               @if (selectedNfe.nfeValorProdutos) {
@@ -132,7 +189,9 @@
               @if (selectedNfe.nfeValorTotal) {
                 <div class="info-item">
                   <label>Valor Total</label>
-                  <span class="valor-destaque">R$ {{ selectedNfe.nfeValorTotal }}</span>
+                  <span class="valor-destaque">
+                    R$ {{ selectedNfe.nfeValorTotal }}
+                  </span>
                 </div>
               }
               @if (selectedNfe.nfeValorFrete) {
@@ -179,7 +238,8 @@
         @if (selectedNfe.nfeEmitente) {
           <div class="nfe-section">
             <h3 class="section-title">
-              <mat-icon>store</mat-icon> Emitente
+              <mat-icon>store</mat-icon>
+              Emitente
             </h3>
             <div class="info-grid">
               @if (selectedNfe.nfeEmitente.emitenteRazaoSocial) {
@@ -191,7 +251,9 @@
               @if (selectedNfe.nfeEmitente.emitenteNomeFantasia) {
                 <div class="info-item full-width">
                   <label>Nome Fantasia</label>
-                  <span>{{ selectedNfe.nfeEmitente.emitenteNomeFantasia }}</span>
+                  <span>
+                    {{ selectedNfe.nfeEmitente.emitenteNomeFantasia }}
+                  </span>
                 </div>
               }
               @if (selectedNfe.nfeEmitente.emitenteCnpj) {
@@ -209,13 +271,24 @@
               @if (selectedNfe.nfeEmitente.emitenteInscricaoEstadual) {
                 <div class="info-item">
                   <label>Inscrição Estadual</label>
-                  <span>{{ selectedNfe.nfeEmitente.emitenteInscricaoEstadual }}</span>
+                  <span>
+                    {{ selectedNfe.nfeEmitente.emitenteInscricaoEstadual }}
+                  </span>
                 </div>
               }
               @if (selectedNfe.nfeEmitente.emitenteRegimeTributario) {
                 <div class="info-item">
                   <label>Regime Tributário</label>
-                  <span>{{ selectedNfe.nfeEmitente.emitenteRegimeTributario === '1' ? 'Simples Nacional' : selectedNfe.nfeEmitente.emitenteRegimeTributario === '2' ? 'Simples Nacional — Excesso' : 'Regime Normal' }}</span>
+                  <span>
+                    {{
+                      selectedNfe.nfeEmitente.emitenteRegimeTributario === '1'
+                        ? 'Simples Nacional'
+                        : selectedNfe.nfeEmitente.emitenteRegimeTributario ===
+                            '2'
+                          ? 'Simples Nacional — Excesso'
+                          : 'Regime Normal'
+                    }}
+                  </span>
                 </div>
               }
               @if (selectedNfe.nfeEmitente.emitenteTelefone) {
@@ -230,9 +303,13 @@
                   <span>
                     {{ selectedNfe.nfeEmitente.emitenteLogradouro }},
                     {{ selectedNfe.nfeEmitente.emitenteNumero }}
-                    @if (selectedNfe.nfeEmitente.emitenteComplemento) { — {{ selectedNfe.nfeEmitente.emitenteComplemento }} }
-                    — {{ selectedNfe.nfeEmitente.emitenteBairro }}
-                    — {{ selectedNfe.nfeEmitente.emitenteMunicipio }}/{{ selectedNfe.nfeEmitente.emitenteUf }}
+                    @if (selectedNfe.nfeEmitente.emitenteComplemento) {
+                      — {{ selectedNfe.nfeEmitente.emitenteComplemento }}
+                    }
+                    — {{ selectedNfe.nfeEmitente.emitenteBairro }} —
+                    {{ selectedNfe.nfeEmitente.emitenteMunicipio }}/{{
+                      selectedNfe.nfeEmitente.emitenteUf
+                    }}
                     — CEP: {{ selectedNfe.nfeEmitente.emitenteCep }}
                   </span>
                 </div>
@@ -245,19 +322,24 @@
         @if (selectedNfe.nfeDestinatario) {
           <div class="nfe-section">
             <h3 class="section-title">
-              <mat-icon>person_pin</mat-icon> Destinatário
+              <mat-icon>person_pin</mat-icon>
+              Destinatário
             </h3>
             <div class="info-grid">
               @if (selectedNfe.nfeDestinatario.destinatarioNome) {
                 <div class="info-item full-width">
                   <label>Nome / Razão Social</label>
-                  <span>{{ selectedNfe.nfeDestinatario.destinatarioNome }}</span>
+                  <span>
+                    {{ selectedNfe.nfeDestinatario.destinatarioNome }}
+                  </span>
                 </div>
               }
               @if (selectedNfe.nfeDestinatario.destinatarioCnpj) {
                 <div class="info-item">
                   <label>CNPJ</label>
-                  <span>{{ selectedNfe.nfeDestinatario.destinatarioCnpj }}</span>
+                  <span>
+                    {{ selectedNfe.nfeDestinatario.destinatarioCnpj }}
+                  </span>
                 </div>
               }
               @if (selectedNfe.nfeDestinatario.destinatarioCpf) {
@@ -275,13 +357,17 @@
               @if (selectedNfe.nfeDestinatario.destinatarioEmail) {
                 <div class="info-item">
                   <label>E-mail</label>
-                  <span>{{ selectedNfe.nfeDestinatario.destinatarioEmail }}</span>
+                  <span>
+                    {{ selectedNfe.nfeDestinatario.destinatarioEmail }}
+                  </span>
                 </div>
               }
               @if (selectedNfe.nfeDestinatario.destinatarioTelefone) {
                 <div class="info-item">
                   <label>Telefone</label>
-                  <span>{{ selectedNfe.nfeDestinatario.destinatarioTelefone }}</span>
+                  <span>
+                    {{ selectedNfe.nfeDestinatario.destinatarioTelefone }}
+                  </span>
                 </div>
               }
               @if (selectedNfe.nfeDestinatario.destinatarioLogradouro) {
@@ -290,9 +376,14 @@
                   <span>
                     {{ selectedNfe.nfeDestinatario.destinatarioLogradouro }},
                     {{ selectedNfe.nfeDestinatario.destinatarioNumero }}
-                    @if (selectedNfe.nfeDestinatario.destinatarioComplemento) { — {{ selectedNfe.nfeDestinatario.destinatarioComplemento }} }
-                    — {{ selectedNfe.nfeDestinatario.destinatarioBairro }}
-                    — {{ selectedNfe.nfeDestinatario.destinatarioMunicipio }}/{{ selectedNfe.nfeDestinatario.destinatarioUf }}
+                    @if (selectedNfe.nfeDestinatario.destinatarioComplemento) {
+                      —
+                      {{ selectedNfe.nfeDestinatario.destinatarioComplemento }}
+                    }
+                    — {{ selectedNfe.nfeDestinatario.destinatarioBairro }} —
+                    {{ selectedNfe.nfeDestinatario.destinatarioMunicipio }}/{{
+                      selectedNfe.nfeDestinatario.destinatarioUf
+                    }}
                     — CEP: {{ selectedNfe.nfeDestinatario.destinatarioCep }}
                   </span>
                 </div>
@@ -307,13 +398,22 @@
             <h3 class="section-title">
               <mat-icon>inventory_2</mat-icon>
               Itens da NFe
-              <span class="item-count">({{ selectedNfe.nfeItens.length }} {{ selectedNfe.nfeItens.length === 1 ? 'item' : 'itens' }})</span>
+              <span class="item-count">
+                ({{ selectedNfe.nfeItens.length }}
+                {{ selectedNfe.nfeItens.length === 1 ? 'item' : 'itens' }})
+              </span>
             </h3>
 
-            @for (item of selectedNfe.nfeItens; track item.itemNumero; let idx = $index) {
+            @for (
+              item of selectedNfe.nfeItens;
+              track item.itemNumero;
+              let idx = $index
+            ) {
               <div class="nfe-item-card">
                 <div class="nfe-item-header">
-                  <span class="item-numero">Item {{ item.itemNumero || (idx + 1) }}</span>
+                  <span class="item-numero">
+                    Item {{ item.itemNumero || idx + 1 }}
+                  </span>
                   @if (item.itemDescricao) {
                     <span class="item-descricao">{{ item.itemDescricao }}</span>
                   }
@@ -390,7 +490,6 @@
             }
           </div>
         }
-
       } @else {
         <div class="nfe-not-found">
           <mat-icon>error_outline</mat-icon>

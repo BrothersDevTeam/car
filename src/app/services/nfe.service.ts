@@ -26,23 +26,44 @@ export class NfeService {
 
   getPaginatedData(
     pageIndex: number,
-    pageSize: number
+    pageSize: number,
+    searchParams?: { search?: string; storeId?: string }
   ): Observable<PaginationResponse<Nfe>> {
-    if (this.cache) {
+    const hasSearchParams =
+      searchParams &&
+      Object.values(searchParams).some((value) => {
+        return value && typeof value === 'string' && value.trim();
+      });
+
+    // Only use cache if there are no search params
+    if (this.cache && !hasSearchParams) {
       return of(this.cache);
     }
-    return this.http
-      .get<
-        PaginationResponse<Nfe>
-      >(`${this.apiUrl}?page=${pageIndex}&size=${pageSize}`)
-      .pipe(
-        first(),
-        tap((response) => {
-          this.cache = response;
 
+    let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
+
+    if (searchParams) {
+      if (searchParams.search?.trim()) {
+        url += `&search=${encodeURIComponent(searchParams.search.trim())}`;
+      }
+      if (searchParams.storeId?.trim()) {
+        url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
+      }
+    }
+
+    return this.http.get<PaginationResponse<Nfe>>(url).pipe(
+      first(),
+      tap((response) => {
+        // Only update general cache if it's not a search result
+        if (!hasSearchParams) {
+          this.cache = response;
           this.cache.page.totalElements = this.cache.content.length;
-        })
-      );
+          this.cacheUpdated$.next({ ...this.cache });
+        } else {
+          response.page.totalElements = response.content.length;
+        }
+      })
+    );
   }
 
   getNfe(id: string): Observable<Nfe> {
@@ -79,5 +100,6 @@ export class NfeService {
 
   public clearCache() {
     this.cache = null;
+    this.cacheUpdated$.next(null);
   }
 }

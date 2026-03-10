@@ -70,7 +70,10 @@
               @let badgeKey = getNestedValue(element, column.key);
               @let badge = column.badgeConfig[badgeKey];
               @if (badge) {
-                <span class="status-badge" [ngClass]="badge.cssClass">
+                <span
+                  class="status-badge"
+                  [ngClass]="badge.cssClass"
+                >
                   {{ badge.label }}
                 </span>
               } @else {
