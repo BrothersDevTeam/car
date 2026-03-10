@@ -50,9 +50,9 @@ import { FuelTypes, FuelTypesLabels } from '../../../enums/fuelTypes';
 
 import { VehicleService } from '@services/vehicle.service';
 import { ColorService } from '@services/color.service';
-import { AuthService } from '@services/auth/auth.service';
 import { PersonService } from '@services/person.service';
 import { FipeService } from '@services/fipe.service';
+import { StoreContextService } from '@services/store-context.service';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -106,7 +106,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
-  private authService = inject(AuthService);
+  private storeContextService = inject(StoreContextService);
 
   @ViewChild('submitButton', { static: false, read: ElementRef })
   submitButton!: ElementRef<HTMLButtonElement>;
@@ -633,7 +633,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
     // Monta o payload para o backend (brand, model e color são Strings)
     const payload: any = {
-      storeId: this.authService.getStoreId(),
+      storeId: this.storeContextService.currentStoreId,
       ownerId: formValues.owner?.id || null, // ID do proprietário (UUID)
       plate: formValues.plate,
       brand: formValues.brand?.name || '', // Nome da marca (String)

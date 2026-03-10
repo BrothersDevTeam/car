@@ -1,4 +1,4 @@
-import { Component, inject, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -19,7 +19,7 @@ import {
   MatDialogTitle,
 } from '@angular/material/dialog';
 import { Color } from '@interfaces/vehicle';
-import { AuthService } from '@services/auth/auth.service';
+import { StoreContextService } from '@services/store-context.service';
 
 export interface ColorFormDialogData {
   title: string;
@@ -50,7 +50,7 @@ export class ColorFormDialogComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService,
+    private storeContextService: StoreContextService,
     public dialogRef: MatDialogRef<ColorFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ColorFormDialogData
   ) {}
@@ -89,7 +89,7 @@ export class ColorFormDialogComponent implements OnInit {
       let payload: any = {
         name: formValue.name,
         isGlobal: false, // Sempre false para cores criadas pela loja
-        storeId: this.authService.getStoreId(),
+        storeId: this.storeContextService.currentStoreId,
       };
 
       console.log('Color Payload before ID addition:', payload);

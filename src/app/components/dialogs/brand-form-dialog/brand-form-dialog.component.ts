@@ -19,7 +19,7 @@ import {
   MatDialogTitle,
 } from '@angular/material/dialog';
 import { Brand } from '@interfaces/vehicle';
-import { AuthService } from '@services/auth/auth.service';
+import { StoreContextService } from '@services/store-context.service';
 
 export interface BrandFormDialogData {
   title: string;
@@ -50,7 +50,7 @@ export class BrandFormDialogComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService,
+    private storeContextService: StoreContextService,
     public dialogRef: MatDialogRef<BrandFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: BrandFormDialogData
   ) {}
@@ -97,7 +97,7 @@ export class BrandFormDialogComponent implements OnInit {
       let payload: any = {
         name: formValue.name,
         isGlobal: false, // Sempre false para marcas criadas pela loja
-        storeId: this.authService.getStoreId(),
+        storeId: this.storeContextService.currentStoreId,
       };
 
       if (this.data.mode === 'edit' && this.data.brand) {

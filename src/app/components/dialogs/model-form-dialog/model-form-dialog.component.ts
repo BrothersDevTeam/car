@@ -19,7 +19,7 @@ import {
   MatDialogTitle,
 } from '@angular/material/dialog';
 import { Model } from '@interfaces/vehicle';
-import { AuthService } from '@services/auth/auth.service';
+import { StoreContextService } from '@services/store-context.service';
 
 export interface ModelFormDialogData {
   title: string;
@@ -68,7 +68,7 @@ export class ModelFormDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<ModelFormDialogComponent>,
-    private authService: AuthService,
+    private storeContextService: StoreContextService,
     @Inject(MAT_DIALOG_DATA) public data: ModelFormDialogData
   ) {}
 
@@ -101,18 +101,6 @@ export class ModelFormDialogComponent implements OnInit {
     });
   }
 
-  // Validator customizado para garantir que yearEnd >= yearStart
-  // private yearRangeValidator(form: FormGroup) {
-  //   const yearStart = form.get('yearStart')?.value;
-  //   const yearEnd = form.get('yearEnd')?.value;
-
-  //   if (yearStart && yearEnd && parseInt(yearEnd) < parseInt(yearStart)) {
-  //     return { yearRange: true };
-  //   }
-
-  //   return null;
-  // }
-
   onCancel(): void {
     this.dialogRef.close(null);
   }
@@ -123,27 +111,16 @@ export class ModelFormDialogComponent implements OnInit {
 
       let payload: any = {
         name: formValue.name,
-        // description: formValue.description || '',
-        // yearStart: formValue.yearStart || null,
-        // yearEnd: formValue.yearEnd || null,
-        // category: formValue.category || null,
         status: 'ACTIVE', // Sempre ativo ao criar/editar via diálogo
         isGlobal: false, // Sempre false para modelos criados pela loja
-        storeId: this.authService.getStoreId(), // Será preenchido pelo backend com a loja do usuário
+        storeId: this.storeContextService.currentStoreId, // Será preenchido pelo backend com a loja do usuário
       };
-
-      console.log('\n########  #########\nthis.data.model:', this.data.model);
-      console.log('\n#######  ##########\nthis.data.mode:', this.data.mode);
 
       if (this.data.mode === 'create') {
         // Para criação, usa o brandId passado
         payload.brandId = this.data.brandId;
       } else if (this.data.mode === 'edit' && this.data.model) {
         // Para edição, mantém o brandId do modelo e adiciona o modelId
-        console.log(
-          '\n#################\nModelo sendo editado:',
-          this.data.model
-        );
         payload.brandId = this.data.model.brandId;
         payload.modelId = this.data.model.modelId;
       }

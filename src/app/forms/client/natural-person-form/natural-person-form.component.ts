@@ -42,9 +42,9 @@ import type { CreateNaturalPerson, Person } from '@interfaces/person';
 import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
 import { AuthService } from '@services/auth/auth.service';
+import { StoreContextService } from '@services/store-context.service';
 
 import { removeEmptyPropertiesFromObject } from '../../../utils/removeEmptyPropertiesFromObject';
-import { minLengthArray } from '../../../utils/minLengthArray';
 import { AccessDataFormComponent } from '@components/access-data-form/access-data-form.component';
 import { RelationshipTypes } from '../../../enums/relationshipTypes';
 import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
@@ -74,6 +74,7 @@ export class NaturalPersonFormComponent
 
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
+  private storeContextService = inject(StoreContextService);
 
   @ViewChild('submitButton', { static: false, read: ElementRef })
   submitButton!: ElementRef<HTMLButtonElement>;
@@ -309,7 +310,7 @@ export class NaturalPersonFormComponent
 
     return new Observable((observer) => {
       try {
-        const storeId = this.authService.getStoreId();
+        const storeId = this.storeContextService.currentStoreId;
         if (!storeId) {
           this.toastrService.error(
             'Loja não identificada. Faça login novamente.'
@@ -1006,7 +1007,7 @@ export class NaturalPersonFormComponent
       return;
     }
 
-    const storeId = this.authService.getStoreId();
+    const storeId = this.storeContextService.currentStoreId;
     if (!storeId) {
       this.toastrService.error('Loja não identificada. Faça login novamente.');
       this.isSaving = false;

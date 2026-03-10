@@ -21,7 +21,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@interfaces/store';
 import { StoreService } from '@services/store.service';
 import { PersonService } from '@services/person.service';
-import { AuthService } from '@services/auth/auth.service';
+import { StoreContextService } from '@services/store-context.service';
 import { PrimaryInputComponent } from '../../primary-input/primary-input.component';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { of, throwError } from 'rxjs';
@@ -93,7 +93,7 @@ export class StoreFormDialogComponent implements OnInit {
     private fb: FormBuilder,
     private storeService: StoreService,
     private personService: PersonService,
-    private authService: AuthService,
+    private storeContextService: StoreContextService,
     public dialogRef: MatDialogRef<StoreFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: StoreFormDialogData
   ) {}
@@ -453,7 +453,7 @@ export class StoreFormDialogComponent implements OnInit {
     // Se não for CAR_ADMIN, é uma filial e precisa do mainStoreId
     if (!this.data.isCarAdmin) {
       // Busca o storeId do usuário logado (que é a matriz)
-      const userStoreId = this.authService.getStoreId();
+      const userStoreId = this.storeContextService.currentStoreId;
 
       // ⚠️ VALIDAÇÃO CRÍTICA: Backend exige mainStoreId para criar filial
       if (!userStoreId) {

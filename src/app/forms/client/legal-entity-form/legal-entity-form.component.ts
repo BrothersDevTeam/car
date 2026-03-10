@@ -29,17 +29,15 @@ import { PrimaryInputComponent } from '@components/primary-input/primary-input.c
 
 import type { CreateLegalEntity, Person } from '@interfaces/person';
 
-import { CepService } from '@services/cep.service';
 import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
-import { AuthService } from '@services/auth/auth.service';
 import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
 import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
-import { minLengthArray } from '../../../utils/minLengthArray';
 import { removeEmptyPropertiesFromObject } from '../../../utils/removeEmptyPropertiesFromObject';
 import { Subscription, Observable, of } from 'rxjs';
 import { RelationshipTypes } from '../../../enums/relationshipTypes';
 import { FormDraftService } from '@services/form-draft.service';
+import { StoreContextService } from '@services/store-context.service';
 import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
 
 @Component({
@@ -64,6 +62,7 @@ export class LegalEntityFormComponent
 
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
+  private storeContextService = inject(StoreContextService);
 
   @ViewChild('submitButton', { static: false, read: ElementRef })
   submitButton!: ElementRef<HTMLButtonElement>;
@@ -159,9 +158,7 @@ export class LegalEntityFormComponent
   constructor(
     private personService: PersonService,
     private toastrService: ToastrService,
-    private cepService: CepService,
     private actionsService: ActionsService,
-    private authService: AuthService,
     private formDraftService: FormDraftService
   ) {}
 
@@ -329,7 +326,7 @@ export class LegalEntityFormComponent
 
     return new Observable((observer) => {
       try {
-        const storeId = this.authService.getStoreId();
+        const storeId = this.storeContextService.currentStoreId;
         if (!storeId) {
           this.toastrService.error(
             'Loja não identificada. Faça login novamente.'
@@ -603,7 +600,7 @@ export class LegalEntityFormComponent
       return;
     }
 
-    const storeId = this.authService.getStoreId();
+    const storeId = this.storeContextService.currentStoreId;
     if (!storeId) {
       this.toastrService.error('Loja não identificada. Faça login novamente.');
       return;

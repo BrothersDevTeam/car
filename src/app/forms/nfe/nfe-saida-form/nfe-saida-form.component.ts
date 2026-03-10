@@ -37,7 +37,7 @@ import { Vehicle } from '@interfaces/vehicle';
 import { NfeService } from '@services/nfe.service';
 import { PersonService } from '@services/person.service';
 import { VehicleService } from '@services/vehicle.service';
-import { AuthService } from '@services/auth/auth.service';
+import { StoreContextService } from '@services/store-context.service';
 
 @Component({
   selector: 'app-nfe-saida-form',
@@ -92,6 +92,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
+  private storeContextService = inject(StoreContextService);
 
   @ViewChild('submitButton', { static: false, read: ElementRef })
   submitButton!: ElementRef<HTMLButtonElement>;
@@ -111,8 +112,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     private nfeService: NfeService,
     private personService: PersonService,
     private vehicleService: VehicleService,
-    private toastrService: ToastrService,
-    private authService: AuthService
+    private toastrService: ToastrService
   ) {}
 
   ngOnInit() {
@@ -194,7 +194,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     const formValues: Nfe = {
-      storeId: this.authService.getStoreId()!,
+      storeId: this.storeContextService.currentStoreId!,
       nfeItens: [{ vehicleId: this.form.value.vehicleId }],
       personId: this.form.value.personId,
       nfeTipoDocumento: '1', // Saída
