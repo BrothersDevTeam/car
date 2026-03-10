@@ -26,21 +26,33 @@ export class NfeService {
 
   getPaginatedData(
     pageIndex: number,
-    pageSize: number
+    pageSize: number,
+    searchParams?: { search?: string }
   ): Observable<PaginationResponse<Nfe>> {
-    if (this.cache) {
+    // Only use cache if there are no search params
+    if (this.cache && (!searchParams || !searchParams.search)) {
       return of(this.cache);
     }
+    
+    let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
+    
+    if (searchParams?.search) {
+      url += `&search=${searchParams.search}`;
+    }
+    
     return this.http
-      .get<
-        PaginationResponse<Nfe>
-      >(`${this.apiUrl}?page=${pageIndex}&size=${pageSize}`)
+      .get<PaginationResponse<Nfe>>(url)
       .pipe(
         first(),
         tap((response) => {
-          this.cache = response;
-
-          this.cache.page.totalElements = this.cache.content.length;
+          // Only update general cache if it's not a search result
+          if (!searchParams || !searchParams.search) {
+            this.cache = response;
+            this.cache.page.totalElements = this.cache.content.length;
+            this.cacheUpdated$.next({ ...this.cache });
+          } else {
+             response.page.totalElements = response.content.length;
+          }
         })
       );
   }
@@ -79,5 +91,6 @@ export class NfeService {
 
   public clearCache() {
     this.cache = null;
+    this.cacheUpdated$.next(null);
   }
 }

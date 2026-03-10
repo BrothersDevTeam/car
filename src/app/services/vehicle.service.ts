@@ -27,22 +27,30 @@ export class VehicleService {
 
   getPaginatedData(
     pageIndex: number,
-    pageSize: number
+    pageSize: number,
+    searchParams?: { search?: string }
   ): Observable<PaginationResponse<Vehicle>> {
-    if (this.cache) {
+    // Only use cache if there are no search params
+    if (this.cache && (!searchParams || !searchParams.search)) {
       return of(this.cache);
     }
+    
+    let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
+    
+    if (searchParams?.search) {
+      url += `&search=${searchParams.search}`;
+    }
+    
     return this.http
-      .get<
-        PaginationResponse<Vehicle>
-      >(`${this.apiUrl}?page=${pageIndex}&size=${pageSize}`)
+      .get<PaginationResponse<Vehicle>>(url)
       .pipe(
         first(),
         tap((response) => {
-          this.cache = response;
-
-          // Notifica sobre o carregamento inicial com uma nova referência
-          this.cacheUpdated$.next({ ...this.cache });
+          // Only update general cache if it's not a search result
+          if (!searchParams || !searchParams.search) {
+            this.cache = response;
+            this.cacheUpdated$.next({ ...this.cache });
+          }
         })
       );
   }

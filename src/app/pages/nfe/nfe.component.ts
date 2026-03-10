@@ -1,4 +1,4 @@
-import { catchError, of, Subscription } from 'rxjs';
+import { catchError, debounceTime, of, Subject, Subscription } from 'rxjs';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Component, inject, signal, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { DatePipe, NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
@@ -40,6 +41,7 @@ import { ToastrService } from 'ngx-toastr';
     NfeSaidaFormComponent,
     DatePipe,
     NgClass,
+    FormsModule,
   ],
   templateUrl: './nfe.component.html',
   styleUrl: './nfe.component.scss',
@@ -47,6 +49,8 @@ import { ToastrService } from 'ngx-toastr';
 export class NfeComponent {
   readonly dialog = inject(MatDialog);
   private subscription!: Subscription;
+  private cacheSubscription!: Subscription;
+  private searchSubject = new Subject<string>();
 
   nfePaginatedList: PaginationResponse<Nfe> | null = null;
   selectedNfe: Nfe | null = null;
@@ -147,6 +151,8 @@ export class NfeComponent {
       this.paginationRequestConfig.pageIndex,
       this.paginationRequestConfig.pageSize
     );
+    this.setupCacheSubscription();
+    this.setupSearchDebounce();
   }
 
   ngOnInit() {
@@ -159,6 +165,37 @@ export class NfeComponent {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    if (this.cacheSubscription) {
+      this.cacheSubscription.unsubscribe();
+    }
+  }
+
+  // Método para configurar a inscrição do cache
+  private setupCacheSubscription() {
+    this.cacheSubscription = this.nfeService.cacheUpdated.subscribe(
+      (updatedCache) => {
+        if (updatedCache) {
+          this.nfePaginatedList = updatedCache;
+        }
+      }
+    );
+  }
+
+  // Configura o debounce de 500ms para a busca
+  private setupSearchDebounce() {
+    this.subscription.add(
+      this.searchSubject
+        .pipe(
+          debounceTime(500) // Aguarda 500ms após o usuário parar de digitar
+        )
+        .subscribe((searchValue) => {
+          this.loadNfeList(
+            0, // Sempre volta para a primeira página ao buscar
+            this.paginationRequestConfig.pageSize,
+            searchValue
+          );
+        })
+    );
   }
 
   handleFormChanged(isDirty: boolean) {
@@ -182,9 +219,15 @@ export class NfeComponent {
 
   loadNfeList(pageIndex: number, pageSize: number, searchValue?: string) {
     this.nfeListLoading.set(true);
+    
+    let searchParams: { search?: string } | undefined;
+
+    if (searchValue && searchValue.trim()) {
+      searchParams = { search: searchValue.trim() };
+    }
 
     this.nfeService
-      .getPaginatedData(pageIndex, pageSize)
+      .getPaginatedData(pageIndex, pageSize, searchParams)
       .pipe(
         catchError((err) => {
           this.nfeListLoading.set(false);
@@ -230,6 +273,15 @@ export class NfeComponent {
 
   onSearch(event: Event) {
     this.searchValue = (event.target as HTMLInputElement).value;
+    this.searchSubject.next(this.searchValue);
+  }
+
+  clearSearch() {
+    this.searchValue = '';
+    this.loadNfeList(
+      this.paginationRequestConfig.pageIndex,
+      this.paginationRequestConfig.pageSize
+    );
   }
 
   handleEdit(nfe: Nfe) {
