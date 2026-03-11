@@ -40,16 +40,18 @@ export class MainHeaderComponent implements OnInit {
   private storeContextService = inject(StoreContextService);
 
   isCarAdmin = false;
+  canReadStoreOthers = false;
   stores: Store[] = [];
   selectedStoreId: string = 'ALL';
 
   ngOnInit(): void {
     this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+    this.canReadStoreOthers = this.authService.hasAuthority(Authorizations.READ_STORE_OTHERS);
 
     // Configura o ID inicial pelo contexto global (usando 'ALL' em vez de null para o html renderizar)
     this.selectedStoreId = this.storeContextService.currentStoreId ?? 'ALL';
 
-    if (this.isCarAdmin) {
+    if (this.isCarAdmin || this.canReadStoreOthers) {
       this.loadAllStores();
     } else {
       this.loadCurrentStoreName();
@@ -58,7 +60,11 @@ export class MainHeaderComponent implements OnInit {
 
   private loadAllStores() {
     this.storeName.set('Carregando Lojas...');
-    this.storeService.getAll({ size: 1000 }).subscribe({
+    const serviceCall = this.isCarAdmin
+      ? this.storeService.getAll({ size: 1000 })
+      : this.storeService.getBranches({ size: 1000 });
+
+    serviceCall.subscribe({
       next: (response) => {
         if (response && response.content) {
           this.stores = response.content;
