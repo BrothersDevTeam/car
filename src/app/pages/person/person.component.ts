@@ -223,11 +223,6 @@ export class PersonComponent implements OnInit, OnDestroy {
     // Verifica se o usuário é CAR_ADMIN
     this.checkUserRole();
 
-    this.loadPersonList(
-      this.paginationRequestConfig.pageIndex,
-      this.paginationRequestConfig.pageSize
-    );
-
     // Inscrever-se nas mudanças do cache
     this.setupCacheSubscription();
 

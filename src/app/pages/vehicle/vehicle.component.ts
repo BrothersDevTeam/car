@@ -110,11 +110,6 @@ export class VehicleComponent {
     private actionsService: ActionsService,
     private storeContextService: StoreContextService
   ) {
-    this.loadVehicleList(
-      this.paginationRequestConfig.pageIndex,
-      this.paginationRequestConfig.pageSize
-    );
-
     // Inscrever-se nas mudanças do cache
     this.setupCacheSubscription();
     this.setupSearchDebounce();

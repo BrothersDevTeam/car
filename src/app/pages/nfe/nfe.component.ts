@@ -150,10 +150,6 @@ export class NfeComponent {
     private actionsService: ActionsService,
     private storeContextService: StoreContextService
   ) {
-    this.loadNfeList(
-      this.paginationRequestConfig.pageIndex,
-      this.paginationRequestConfig.pageSize
-    );
     this.setupCacheSubscription();
     this.setupSearchDebounce();
   }
