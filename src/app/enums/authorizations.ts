@@ -14,8 +14,11 @@ export enum Authorizations {
   // STORE – Gerenciamento de Lojas
   // ─────────────────────────────────────────────────
 
-  /** Visualizar dados da loja (inclui filiais). */
+  /** Visualizar dados da loja. */
   READ_STORE = 'read:store',
+
+  /** Visualizar dados das lojas da rede. */
+  READ_STORE_OTHERS = 'read:store:others',
 
   /** Criar e editar lojas, filiais, endereços e proprietário. */
   EDIT_STORE = 'edit:store',

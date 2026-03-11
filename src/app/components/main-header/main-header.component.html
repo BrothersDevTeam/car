@@ -8,21 +8,26 @@
   <span>C.A.R.</span>
   <span class="spacer"></span>
 
-  @if (isCarAdmin) {
-    <mat-select
-      [(ngModel)]="selectedStoreId"
-      (selectionChange)="onStoreChange()"
-      class="header-store-select"
-      panelClass="header-store-select-panel"
-    >
-      <mat-option value="ALL">Toda a Rede (Global)</mat-option>
+  <mat-select
+    [(ngModel)]="selectedStoreId"
+    (selectionChange)="onStoreChange()"
+    class="header-store-select"
+    panelClass="header-store-select-panel"
+    [disabled]="!isCarAdmin && !canReadStoreOthers"
+  >
+    @if (isCarAdmin || canReadStoreOthers) {
+      <mat-option value="ALL">
+        {{ isCarAdmin ? 'Toda a Rede (Global)' : 'Toda a Rede' }}
+      </mat-option>
       @for (store of stores; track store.storeId) {
         <mat-option [value]="store.storeId">
           {{ store.name }} - {{ store.cnpj }}
         </mat-option>
       }
-    </mat-select>
-  } @else {
-    <span class="company-name">{{ storeName() }}</span>
-  }
+    } @else {
+      <mat-option [value]="selectedStoreId">
+        {{ storeName() || 'Filial' }}
+      </mat-option>
+    }
+  </mat-select>
 </mat-toolbar>
