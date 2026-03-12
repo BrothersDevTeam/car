@@ -104,7 +104,11 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
   }
 
   isAllSelected(): boolean {
-    return this.tableDataSource.data.every((row) => this.isSelected(row));
+    const selectableRows = this.tableDataSource.data.filter((row) =>
+      this.shouldShowCheckbox(row)
+    );
+    if (selectableRows.length === 0) return false;
+    return selectableRows.every((row) => this.isSelected(row));
   }
 
   isSomeSelected(): boolean {
@@ -118,7 +122,11 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
     if (this.isAllSelected()) {
       this.selectedRows.clear();
     } else {
-      this.tableDataSource.data.forEach((row) => this.selectedRows.add(row));
+      this.tableDataSource.data.forEach((row) => {
+        if (this.shouldShowCheckbox(row)) {
+          this.selectedRows.add(row);
+        }
+      });
     }
     this.selectionChange.emit(Array.from(this.selectedRows));
   }

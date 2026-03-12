@@ -132,7 +132,22 @@ export class PersonComponent implements OnInit, OnDestroy {
     {
       key: 'select',
       header: '',
-      showCheckbox: () => true,
+      showCheckbox: (row: Person) => {
+        const loggedUserRelationship = this.authService.getPersonRelationship();
+        
+        // Proprietário não pode excluir outro proprietário (e consequentemente ele mesmo)
+        if (loggedUserRelationship === RelationshipTypes.PROPRIETARIO && row.relationship === RelationshipTypes.PROPRIETARIO) {
+          return false;
+        }
+
+        // Gerente não pode excluir outro gerente nem proprietário
+        if (loggedUserRelationship === RelationshipTypes.GERENTE && 
+           (row.relationship === RelationshipTypes.GERENTE || row.relationship === RelationshipTypes.PROPRIETARIO)) {
+          return false;
+        }
+
+        return true;
+      },
     },
     {
       key: 'name',
@@ -188,9 +203,27 @@ export class PersonComponent implements OnInit, OnDestroy {
     {
       key: 'delete',
       header: '',
-      showDeleteIcon: () =>
+      showDeleteIcon: (row: Person) => {
         // Exibe o botão de exclusão apenas para quem tem autorização granular de excluir pessoas
-        this.authService.hasAuthority(Authorizations.DELETE_PERSON),
+        if (!this.authService.hasAuthority(Authorizations.DELETE_PERSON)) {
+          return false;
+        }
+
+        const loggedUserRelationship = this.authService.getPersonRelationship();
+
+        // Proprietário não pode excluir outro proprietário (e consequentemente ele mesmo)
+        if (loggedUserRelationship === RelationshipTypes.PROPRIETARIO && row.relationship === RelationshipTypes.PROPRIETARIO) {
+          return false;
+        }
+
+        // Gerente não pode excluir outro gerente nem proprietário
+        if (loggedUserRelationship === RelationshipTypes.GERENTE && 
+           (row.relationship === RelationshipTypes.GERENTE || row.relationship === RelationshipTypes.PROPRIETARIO)) {
+          return false;
+        }
+
+        return true;
+      },
     },
   ];
 
