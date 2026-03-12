@@ -2,6 +2,7 @@ import {
   Component,
   EventEmitter,
   OnInit,
+  OnDestroy,
   Output,
   inject,
   signal,
@@ -17,6 +18,7 @@ import { Authorizations } from '../../enums/authorizations';
 import { Store } from '@interfaces/store';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-main-header',
@@ -30,8 +32,10 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './main-header.component.html',
   styleUrl: './main-header.component.scss',
 })
-export class MainHeaderComponent implements OnInit {
+export class MainHeaderComponent implements OnInit, OnDestroy {
   @Output() collapsedEvent = new EventEmitter<EventType>();
+
+  private destroy$ = new Subject<void>();
 
   storeName = signal<string>('Carregando...');
 
@@ -48,14 +52,24 @@ export class MainHeaderComponent implements OnInit {
     this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
     this.canReadStoreOthers = this.authService.hasAuthority(Authorizations.READ_STORE_OTHERS);
 
-    // Configura o ID inicial pelo contexto global (usando 'ALL' em vez de null para o html renderizar)
-    this.selectedStoreId = this.storeContextService.currentStoreId ?? 'ALL';
+    // Escuta mudanças na loja globalmente selecionada
+    this.storeContextService.currentStoreId$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((storeId) => {
+        // Configura o ID inicial pelo contexto global (usando 'ALL' em vez de null para o html renderizar)
+        this.selectedStoreId = storeId ?? 'ALL';
 
-    if (this.isCarAdmin || this.canReadStoreOthers) {
-      this.loadAllStores();
-    } else {
-      this.loadCurrentStoreName();
-    }
+        if (this.isCarAdmin || this.canReadStoreOthers) {
+          this.loadAllStores();
+        } else {
+          this.loadCurrentStoreName();
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private loadAllStores() {

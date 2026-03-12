@@ -15,6 +15,7 @@ import { ModelService } from '@services/model.service';
 import { IssuerService } from '@services/issuer.service';
 import { ColorService } from '@services/color.service';
 import { BrandService } from '@services/brand.service';
+import { StoreContextService } from '@services/store-context.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -38,6 +39,11 @@ export class AuthService {
       .pipe(
         tap((value) => {
           sessionStorage.setItem(this.TOKEN_KEY, value.token);
+          try {
+            this.injector.get(StoreContextService).refreshFromToken();
+          } catch (e) {
+            console.warn('Erro ao atualizar StoreContextService no login', e);
+          }
           this.router.navigate(['/home']);
         })
       );
@@ -61,6 +67,11 @@ export class AuthService {
     this.actionsService.hasFormChanges.set(false);
     this.dialog.closeAll();
     sessionStorage.removeItem(this.TOKEN_KEY);
+    try {
+      this.injector.get(StoreContextService).refreshFromToken();
+    } catch (e) {
+      console.warn('Erro ao atualizar StoreContextService no logout', e);
+    }
     this.router.navigate(['/login']);
   }
 

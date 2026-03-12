@@ -39,4 +39,16 @@ export class StoreContextService {
       this.storeIdSubject.next(storeId);
     }
   }
+
+  /**
+   * Recarrega o estado inicial a partir do token de autenticação atual
+   */
+  refreshFromToken(): void {
+    const defaultStoreId = this.authService.getStoreId();
+    if (defaultStoreId) {
+      this.storeIdSubject.next(defaultStoreId);
+    } else {
+      this.storeIdSubject.next(null);
+    }
+  }
 }
