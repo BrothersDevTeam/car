@@ -8,6 +8,7 @@ import { PersonComponent } from './pages/person/person.component';
 import { StoreComponent } from './pages/store/store.component';
 import { LoginComponent } from './pages/login/login.component';
 import { NfeComponent } from './pages/nfe/nfe.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
 import { AuthGuard } from './services/auth/auth.guard';
 
@@ -17,11 +18,12 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     canActivate: [AuthGuard],
     children: [
-      { path: '', redirectTo: 'person', pathMatch: 'full' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'person', component: PersonComponent },
       { path: 'vehicle', component: VehicleComponent },
       { path: 'store', component: StoreComponent },
       { path: 'nfe', component: NfeComponent },
+      { path: 'dashboard', component: DashboardComponent },
     ],
   },
   {
