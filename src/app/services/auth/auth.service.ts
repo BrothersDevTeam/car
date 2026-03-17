@@ -44,7 +44,7 @@ export class AuthService {
           } catch (e) {
             console.warn('Erro ao atualizar StoreContextService no login', e);
           }
-          this.router.navigate(['/home']);
+          this.router.navigate(['/dashboard']);
         })
       );
   }

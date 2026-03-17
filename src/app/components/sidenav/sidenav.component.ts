@@ -15,6 +15,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { ActionsService } from '@services/actions.service';
 import { AuthService } from '@services/auth/auth.service';
 import { CommonModule } from '@angular/common';
+import { Authorizations } from '../../enums/authorizations';
 
 export type MenuItem = {
   icon: string;
@@ -37,6 +38,18 @@ export type MenuItem = {
   styleUrl: './sidenav.component.scss',
 })
 export class SideNavComponent {
+  sideNavCollapsed = signal(false);
+  isSmallScreen = signal(false);
+  loggedUsername = signal('');
+  userRole = signal('');
+
+  @Input() set collapsed(val: boolean) {
+    this.sideNavCollapsed.set(val);
+  }
+  @Output() toggleSidebar = new EventEmitter<void>();
+
+  menuItems = signal<MenuItem[]>([]);
+
   constructor(
     private authService: AuthService,
     private actionsService: ActionsService,
@@ -51,46 +64,44 @@ export class SideNavComponent {
       this.authService.getPersonRelationship() ||
         this.formatRole(this.authService.getRoles())
     );
+
+    this.initializeMenuItems();
   }
 
-  sideNavCollapsed = signal(false);
-  isSmallScreen = signal(false);
-  loggedUsername = signal('');
-  userRole = signal('');
+  private initializeMenuItems() {
+    const baseMenu: MenuItem[] = [
+      {
+        icon: 'store',
+        label: 'Loja',
+        route: '/store',
+      },
+      {
+        icon: 'person',
+        label: 'Pessoas',
+        route: '/person',
+      },
+      {
+        icon: 'directions_car',
+        label: 'Veículos',
+        route: '/vehicle',
+      },
+      {
+        icon: 'description',
+        label: 'Notas Fiscais',
+        route: '/nfe',
+      },
+    ];
 
-  @Input() set collapsed(val: boolean) {
-    this.sideNavCollapsed.set(val);
+    if (this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+      baseMenu.unshift({
+        icon: 'dashboard',
+        label: 'Dashboard',
+        route: '/dashboard',
+      });
+    }
+
+    this.menuItems.set(baseMenu);
   }
-  @Output() toggleSidebar = new EventEmitter<void>();
-
-  menuItems = signal<MenuItem[]>([
-    // {
-    //   icon: 'settings',
-    //   label: 'Cadastros',
-    //   subItems: [],
-    // },
-    {
-      icon: 'store',
-      label: 'Loja',
-      route: '/store',
-    },
-    {
-      icon: 'person',
-      label: 'Pessoas',
-      route: '/person',
-    },
-    {
-      icon: 'directions_car',
-      label: 'Veículos',
-      route: '/vehicle',
-    },
-
-    {
-      icon: 'description',
-      label: 'Notas Fiscais',
-      route: '/nfe',
-    },
-  ]);
 
   // Formata as roles para exibição amigável
   private formatRole(roles: string[]): string {
