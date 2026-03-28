@@ -59,7 +59,7 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<EmployeeAuthorizationsDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: EmployeeAuthorizationsDialogData
-  ) {}
+  ) { }
 
   getTranslatedModule(moduleStr: string): string {
     const translations: Record<string, string> = {
@@ -68,6 +68,7 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
       STORE: 'Loja',
       NFE: 'Notas Fiscais',
       USER: 'Usuário',
+      AUTH: 'Autorizações',
     };
     return translations[moduleStr] || moduleStr;
   }
