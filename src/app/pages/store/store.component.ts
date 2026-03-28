@@ -10,6 +10,7 @@ import { StoreFormDialogComponent } from '../../components/dialogs/store-form-di
 import { StoreOwnerDialogComponent } from '../../components/dialogs/store-owner-dialog/store-owner-dialog.component';
 import { StoreAddressDialogComponent } from '../../components/dialogs/store-address-dialog/store-address-dialog.component';
 import { StoreEmployeesDialogComponent } from '../../components/dialogs/store-employees-dialog/store-employees-dialog.component';
+import { StoreFiscalDialogComponent } from '../../components/dialogs/store-fiscal-dialog/store-fiscal-dialog.component';
 import { Store } from '@interfaces/store';
 import { StoreService } from '@services/store.service';
 import { AuthService } from '@services/auth/auth.service';
@@ -35,6 +36,7 @@ export class StoreComponent implements OnInit {
   error = false;
   isCarAdmin = false;
   canCreateStore = false; // Pode ser CAR_ADMIN ou ADMIN
+  canManageFiscal = false;
 
   constructor(
     private storeService: StoreService,
@@ -55,6 +57,12 @@ export class StoreComponent implements OnInit {
     this.canCreateStore =
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
       this.authService.hasAuthority(Authorizations.EDIT_STORE);
+
+    // Pode gerenciar config fiscal quem pode editar a loja ou emitir nota localmente
+    this.canManageFiscal =
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
+      this.authService.hasAuthority(Authorizations.EDIT_STORE) ||
+      this.authService.hasAuthority(Authorizations.SYNC_FOCUSNFE as Authorizations);
   }
 
   private loadStores(): void {
@@ -129,6 +137,13 @@ export class StoreComponent implements OnInit {
     });
   }
   // Fim de código gerado pelo antigravity
+
+  onManageFiscal(store: Store): void {
+    this.dialog.open(StoreFiscalDialogComponent, {
+      width: '700px',
+      data: { store },
+    });
+  }
 
   onUploadImage(store: Store): void {
     console.log('📷 Upload de imagem para:', store);

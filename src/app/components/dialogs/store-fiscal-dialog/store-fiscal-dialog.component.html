@@ -1,0 +1,76 @@
+<h2 mat-dialog-title class="dialog-title">Configuração Fiscal</h2>
+<mat-dialog-content>
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Carregando parâmetros...</p>
+    </div>
+  } @else {
+    <form [formGroup]="form" class="fiscal-form">
+      <div class="status-banner" [ngClass]="{'is-synced': isSync, 'not-synced': !isSync}">
+        <mat-icon>{{ isSync ? 'check_circle' : 'error_outline' }}</mat-icon>
+        <div class="status-text">
+          <h3>Sincronização Fiscal</h3>
+          <p>{{ isSync ? 'A loja está perfeitamente integrada e pronta para emitir Notas Fiscais.' : 'A loja não possui integração com o emissor fiscal Focus NFe. Preencha os dados e clique em "Sincronizar".' }}</p>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Regime Tributário</mat-label>
+          <mat-select formControlName="parametroFiscalRegimeTributario">
+            @for (regime of regimes; track regime.value) {
+              <mat-option [value]="regime.value">{{ regime.label }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls['parametroFiscalRegimeTributario'].hasError('required')) {
+            <mat-error>Regime Tributário é obrigatório</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-row file-upload-row">
+        <div class="file-info">
+          <mat-label class="file-label">Certificado Digital (.pfx):</mat-label>
+          <span class="file-name">{{ selectedFileName || (hasExistingConfig && form.get('parametroFiscalCertificadoBase64')?.value ? 'Certificado já cadastrado no servidor' : 'Nenhum arquivo...') }}</span>
+        </div>
+        <button mat-stroked-button color="primary" type="button" (click)="fileInput.click()">
+          <mat-icon>upload_file</mat-icon>
+          Escolher Arquivo
+        </button>
+        <input type="file" #fileInput accept=".pfx" (change)="onFileSelected($event)" style="display: none;" />
+      </div>
+
+      <div class="form-row mt-3">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Senha do Certificado Digital</mat-label>
+          <input matInput type="password" formControlName="parametroFiscalSenhaCertificado" placeholder="Deixe em branco se já estiver salva e não quiser trocar">
+        </mat-form-field>
+      </div>
+
+      <div class="checkbox-group">
+        <h4>Opções de Emissão</h4>
+        <mat-checkbox formControlName="parametroFiscalHabilitaNfe">Habilitar NFe</mat-checkbox>
+        <mat-checkbox formControlName="parametroFiscalHabilitaNfce">Habilitar NFC-e</mat-checkbox>
+        <mat-checkbox formControlName="parametroFiscalCalculoAutomaticoImpostos">Cálculo Automático de Impostos</mat-checkbox>
+        <mat-checkbox formControlName="parametroFiscalUtilizarCreditoIcms">Utilizar Crédito de ICMS</mat-checkbox>
+        <mat-checkbox formControlName="parametroFiscalUtilizarCreditoPisCofins">Utilizar Crédito PIS/COFINS</mat-checkbox>
+      </div>
+    </form>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="saving || syncing">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()" [disabled]="saving || syncing || form.invalid">
+    {{ saving ? 'Salvando...' : 'Salvar Parâmetros' }}
+  </button>
+  <button mat-flat-button class="sync-button" (click)="onSyncFocusNfe()" [disabled]="saving || syncing || !hasExistingConfig">
+    @if (syncing) {
+      <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+      <mat-icon>sync</mat-icon>
+      Sincronizar loja Focus NFe
+    }
+  </button>
+</mat-dialog-actions>

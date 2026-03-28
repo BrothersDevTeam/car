@@ -161,6 +161,16 @@
           <mat-icon>security</mat-icon>
         </button>
       }
+      @if (canManageFiscal) {
+        <button
+          mat-icon-button
+          (click)="onManageFiscal()"
+          matTooltip="Configuração Fiscal (NFe)"
+          class="action-btn fiscal-btn"
+        >
+          <mat-icon>receipt_long</mat-icon>
+        </button>
+      }
       @if (canDelete) {
         <button
           mat-icon-button

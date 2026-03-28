@@ -98,6 +98,13 @@ export enum Authorizations {
 
   /** Cancelar Notas Fiscais. */
   CANCEL_NFE = 'nfe:cancelar',
+
+  // ─────────────────────────────────────────────────
+  // INTEGRATIONS – Integrações da Loja
+  // ─────────────────────────────────────────────────
+
+  /** Sincronizar dados fiscais e cadastrais com a Focus NFe. */
+  SYNC_FOCUSNFE = 'focusnfe:sync',
 }
 
 /**
