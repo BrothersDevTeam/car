@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, delay } from 'rxjs';
 
 export interface AdminDashboardMetrics {
@@ -19,7 +19,11 @@ export class DashboardService {
 
   constructor(private http: HttpClient) {}
 
-  getAdminMetrics(): Observable<AdminDashboardMetrics> {
-    return this.http.get<AdminDashboardMetrics>(`${this.apiUrl}/admin`);
+  getAdminMetrics(storeId?: string | null): Observable<AdminDashboardMetrics> {
+    let params = new HttpParams();
+    if (storeId) {
+      params = params.set('storeId', storeId);
+    }
+    return this.http.get<AdminDashboardMetrics>(`${this.apiUrl}/admin`, { params });
   }
 }

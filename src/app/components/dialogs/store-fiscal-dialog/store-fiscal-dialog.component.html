@@ -68,8 +68,11 @@
   <button mat-flat-button class="sync-button" (click)="onSyncFocusNfe()" [disabled]="saving || syncing || !hasExistingConfig">
     @if (syncing) {
       <mat-spinner diameter="20"></mat-spinner>
-    } @else {
+    }
+    @if (!syncing) {
       <mat-icon>sync</mat-icon>
+    }
+    @if (!syncing) {
       Sincronizar loja Focus NFe
     }
   </button>
