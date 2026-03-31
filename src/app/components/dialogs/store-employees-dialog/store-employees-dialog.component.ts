@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
-import { PersonService } from '@services/person.service';
+import { EmployeeService } from '@services/employee.service';
 import { Person } from '@interfaces/person';
 import { Store } from '@interfaces/store';
 import { EmployeeAuthorizationsDialogComponent } from '../employee-authorizations-dialog/employee-authorizations-dialog.component';
@@ -41,7 +41,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
   error = false;
 
   constructor(
-    private personService: PersonService,
+    private employeeService: EmployeeService,
     private dialog: MatDialog,
     public dialogRef: MatDialogRef<StoreEmployeesDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: StoreEmployeesDialogData
@@ -55,14 +55,13 @@ export class StoreEmployeesDialogComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
-    // Busca funcionários da loja: proprietários, gerentes e vendedores
+    // Busca funcionários da loja: (Gerentes e Vendedores) através do novo serviço
     const params = {
       storeId: this.data.store.storeId,
-      relationship: ['PROPRIETARIO', 'GERENTE', 'VENDEDOR'],
       includeInactive: true,
     };
 
-    this.personService.getPaginatedData(0, 100, params).subscribe({
+    this.employeeService.getPaginatedEmployees(0, 100, params).subscribe({
       next: (response) => {
         this.employees = response.content;
         this.loading = false;
