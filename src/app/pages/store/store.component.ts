@@ -104,10 +104,14 @@ export class StoreComponent implements OnInit {
         const allFetchedStores = response.content;
         if (this.selectedStoreId) {
           this.stores = allFetchedStores.filter(
-            (store) => store.storeId === this.selectedStoreId || store.mainStoreId === this.selectedStoreId
+            (store: any) => store.storeId === this.selectedStoreId || store.mainStoreId === this.selectedStoreId
           );
         } else {
-          this.stores = allFetchedStores;
+          if (this.isCarAdmin) {
+            this.stores = allFetchedStores.filter((store: any) => store.storeType === 'MATRIZ');
+          } else {
+            this.stores = allFetchedStores;
+          }
         }
         this.loading = false;
       },
