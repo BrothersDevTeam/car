@@ -106,4 +106,23 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
       this.selectedStoreId === 'ALL' ? null : this.selectedStoreId;
     this.storeContextService.setStoreId(storeToEmit);
   }
+
+  getSelectedStoreName(): string {
+    if (this.selectedStoreId === 'ALL') {
+      return this.isCarAdmin ? 'Toda a Rede (Global)' : 'Toda a Rede';
+    }
+    const store = this.stores.find((s) => s.storeId === this.selectedStoreId);
+    if (store) {
+      const name = store.tradeName || store.name;
+      return `${name} - ${this.formatCnpj(store.cnpj)}`;
+    }
+    return this.storeName() || 'Filial';
+  }
+
+  formatCnpj(cnpj: string | undefined): string {
+    if (!cnpj) return '';
+    const cleanCnpj = cnpj.replace(/\D/g, '');
+    if (cleanCnpj.length !== 14) return cnpj;
+    return cleanCnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+  }
 }

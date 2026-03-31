@@ -34,6 +34,110 @@
     opacity: 0.6;
     background: #f8f9fa;
   }
+
+  &.compact {
+    min-height: auto;
+    padding: 1.25rem;
+    gap: 0.75rem;
+
+    .card-header {
+      padding-bottom: 0;
+      border-bottom: none;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .store-logo {
+      flex-direction: row;
+      align-items: center;
+      gap: 0.75rem;
+
+      .logo-image, .logo-placeholder {
+        width: 42px;
+        height: 42px;
+        padding: 0;
+        border-radius: 6px;
+      }
+      
+      .logo-placeholder .placeholder-icon {
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+
+    .type-badge {
+      padding: 4px 10px;
+      font-size: 0.7rem;
+    }
+
+    .badges-container {
+      margin-left: auto;
+      justify-content: flex-start;
+      .badge {
+        padding: 4px 10px;
+        font-size: 0.7rem;
+      }
+    }
+
+    .card-body {
+      gap: 0.25rem;
+    }
+
+    .store-name-section .store-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-top: 0.25rem;
+    }
+
+    .card-footer {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.75rem;
+      margin-top: auto;
+      border-top: none; // remove border like in screenshot
+    }
+    
+    .primary-actions {
+      flex: 1;
+      gap: 0.5rem;
+
+      button {
+        flex: 0 1 auto;
+        height: 32px;
+        font-size: 0.8rem;
+        padding: 0 12px;
+
+        mat-icon {
+          font-size: 1.1rem;
+          width: 1.1rem;
+          height: 1.1rem;
+          margin-right: 0.25rem;
+        }
+      }
+    }
+
+    .secondary-actions {
+      margin-left: 0.5rem;
+
+      button {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+  }
 }
 
 // ========== HEADER DO CARD ==========
@@ -134,12 +238,7 @@
     font-size: 1rem;
     width: 1rem;
     height: 1rem;
-  }
-
-  &.highlighted-badge {
-    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
-    color: white;
-  }
+}
 
   &.status-success {
     background: #d4edda;

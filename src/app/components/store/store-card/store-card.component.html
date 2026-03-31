@@ -28,12 +28,6 @@
     </div>
 
     <div class="badges-container">
-      @if (isHighlighted) {
-        <span class="badge highlighted-badge">
-          <mat-icon>star</mat-icon>
-          Minha Loja
-        </span>
-      }
       <span
         class="badge status-badge"
         [class.status-success]="store.storeStatus === StoreStatus.ACTIVE"
@@ -54,7 +48,7 @@
       >
         {{ displayName }}
       </h3>
-      @if (store.tradeName && store.tradeName !== store.name) {
+      @if (store.tradeName && store.tradeName !== store.name && !compactMode) {
         <p
           class="store-legal-name"
           matTooltip="Razão Social"
@@ -64,25 +58,27 @@
       }
     </div>
 
-    <div class="store-info">
-      <div class="info-line">
-        <mat-icon class="info-icon">business</mat-icon>
-        <span class="info-label">CNPJ:</span>
-        <span class="info-value">{{ formattedCnpj }}</span>
-      </div>
-      <div class="info-line">
-        <mat-icon class="info-icon">email</mat-icon>
-        <span class="info-label">Email:</span>
-        <span class="info-value">{{ store.email }}</span>
-      </div>
-      @if (store.phone) {
+    @if (!compactMode) {
+      <div class="store-info">
         <div class="info-line">
-          <mat-icon class="info-icon">phone</mat-icon>
-          <span class="info-label">Telefone:</span>
-          <span class="info-value">{{ formattedPhone }}</span>
+          <mat-icon class="info-icon">business</mat-icon>
+          <span class="info-label">CNPJ:</span>
+          <span class="info-value">{{ formattedCnpj }}</span>
         </div>
-      }
-    </div>
+        <div class="info-line">
+          <mat-icon class="info-icon">email</mat-icon>
+          <span class="info-label">Email:</span>
+          <span class="info-value">{{ store.email }}</span>
+        </div>
+        @if (store.phone) {
+          <div class="info-line">
+            <mat-icon class="info-icon">phone</mat-icon>
+            <span class="info-label">Telefone:</span>
+            <span class="info-value">{{ formattedPhone }}</span>
+          </div>
+        }
+      </div>
+    }
   </div>
 
   <div class="card-footer">
@@ -109,77 +105,61 @@
     </div>
 
     <div class="secondary-actions">
-      @if (canEdit) {
+      @if (compactMode) {
         <button
           mat-icon-button
-          (click)="onEdit()"
-          matTooltip="Editar loja"
-          class="action-btn edit-btn"
+          [matMenuTriggerFor]="compactMenu"
+          aria-label="Ações Secundárias"
         >
-          <mat-icon>edit</mat-icon>
+          <mat-icon>more_horiz</mat-icon>
         </button>
-      }
-      @if (canUploadImage) {
-        <button
-          mat-icon-button
-          (click)="onUploadImage()"
-          matTooltip="Alterar logo"
-          class="action-btn upload-btn"
-        >
-          <mat-icon>add_photo_alternate</mat-icon>
-        </button>
-      }
-      <!-- Início de código gerado pelo antigravity -->
-      @if (canManageAddress) {
-        <button
-          mat-icon-button
-          (click)="onManageAddress()"
-          matTooltip="Endereços da loja"
-          class="action-btn address-btn"
-        >
-          <mat-icon>location_on</mat-icon>
-        </button>
-      }
-      <!-- Fim de código gerado pelo antigravity -->
-      @if (canManageOwner) {
-        <button
-          mat-icon-button
-          (click)="onManageOwner()"
-          matTooltip="Gerenciar proprietário"
-          class="action-btn owner-btn"
-        >
-          <mat-icon>person_add</mat-icon>
-        </button>
-      }
-      @if (canManageAuthorizations) {
-        <button
-          mat-icon-button
-          (click)="onManageAuthorizations()"
-          matTooltip="Gerenciar autorizações"
-          class="action-btn auth-btn"
-        >
-          <mat-icon>security</mat-icon>
-        </button>
-      }
-      @if (canManageFiscal) {
-        <button
-          mat-icon-button
-          (click)="onManageFiscal()"
-          matTooltip="Configuração Fiscal (NFe)"
-          class="action-btn fiscal-btn"
-        >
-          <mat-icon>receipt_long</mat-icon>
-        </button>
-      }
-      @if (canDelete) {
-        <button
-          mat-icon-button
-          (click)="onDelete()"
-          matTooltip="Excluir loja"
-          class="action-btn delete-btn"
-        >
-          <mat-icon>delete</mat-icon>
-        </button>
+        <mat-menu #compactMenu="matMenu">
+          @if (canEdit) {
+            <button mat-menu-item (click)="onEdit()"><mat-icon>edit</mat-icon><span>Editar</span></button>
+          }
+          @if (canUploadImage) {
+            <button mat-menu-item (click)="onUploadImage()"><mat-icon>add_photo_alternate</mat-icon><span>Logo</span></button>
+          }
+          <mat-divider></mat-divider>
+          @if (canManageAddress) {
+            <button mat-menu-item (click)="onManageAddress()"><mat-icon>location_on</mat-icon><span>Endereços</span></button>
+          }
+          @if (canManageOwner) {
+            <button mat-menu-item (click)="onManageOwner()"><mat-icon>person_add</mat-icon><span>Proprietário</span></button>
+          }
+          @if (canManageAuthorizations) {
+            <button mat-menu-item (click)="onManageAuthorizations()"><mat-icon>security</mat-icon><span>Autorizações</span></button>
+          }
+          <mat-divider></mat-divider>
+          @if (canManageFiscal) {
+            <button mat-menu-item (click)="onManageFiscal()"><mat-icon>receipt_long</mat-icon><span>Configuração Fiscal</span></button>
+          }
+          @if (canDelete) {
+            <button mat-menu-item (click)="onDelete()"><mat-icon color="warn">delete</mat-icon><span>Excluir</span></button>
+          }
+        </mat-menu>
+      } @else {
+        @if (canEdit) {
+          <button mat-icon-button (click)="onEdit()" matTooltip="Editar loja" class="action-btn edit-btn"><mat-icon>edit</mat-icon></button>
+        }
+        @if (canUploadImage) {
+          <button mat-icon-button (click)="onUploadImage()" matTooltip="Alterar logo" class="action-btn upload-btn"><mat-icon>add_photo_alternate</mat-icon></button>
+        }
+        @if (canManageAddress) {
+          <button mat-icon-button (click)="onManageAddress()" matTooltip="Endereços da loja" class="action-btn address-btn"><mat-icon>location_on</mat-icon></button>
+        }
+        @if (canManageOwner) {
+          <button mat-icon-button (click)="onManageOwner()" matTooltip="Gerenciar proprietário" class="action-btn owner-btn"><mat-icon>person_add</mat-icon></button>
+        }
+        @if (canManageAuthorizations) {
+          <button mat-icon-button (click)="onManageAuthorizations()" matTooltip="Gerenciar autorizações" class="action-btn auth-btn"><mat-icon>security</mat-icon></button>
+        }
+        @if (canManageFiscal) {
+          <button mat-icon-button (click)="onManageFiscal()" matTooltip="Configuração Fiscal (NFe)" class="action-btn fiscal-btn"><mat-icon>receipt_long</mat-icon></button>
+        }
+        @if (canDelete) {
+          <button mat-icon-button (click)="onDelete()" matTooltip="Excluir loja" class="action-btn delete-btn"><mat-icon>delete</mat-icon></button>
+        }
       }
     </div>
   </div>

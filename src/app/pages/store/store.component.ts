@@ -3,6 +3,11 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
 
 import { StoreCardComponent } from '../../components/store/store-card/store-card.component';
 import { ContentHeaderComponent } from '../../components/content-header/content-header.component';
@@ -14,7 +19,9 @@ import { StoreFiscalDialogComponent } from '../../components/dialogs/store-fisca
 import { Store } from '@interfaces/store';
 import { StoreService } from '@services/store.service';
 import { AuthService } from '@services/auth/auth.service';
+import { StoreContextService } from '@services/store-context.service';
 import { Authorizations } from '../../enums/authorizations';
+import { StoreStatus, StoreStatusLabels, StoreStatusIcons, StoreStatusColors } from '../../enums/storeTypes';
 
 @Component({
   selector: 'app-store',
@@ -24,6 +31,11 @@ import { Authorizations } from '../../enums/authorizations';
     MatIconModule,
     MatButtonModule,
     MatDialogModule,
+    MatButtonToggleModule,
+    MatMenuModule,
+    MatTableModule,
+    MatTooltipModule,
+    MatDividerModule,
     StoreCardComponent,
     ContentHeaderComponent,
   ],
@@ -38,15 +50,29 @@ export class StoreComponent implements OnInit {
   canCreateStore = false; // Pode ser CAR_ADMIN ou ADMIN
   canManageFiscal = false;
 
+  viewMode: 'grid' | 'compact' | 'table' = 'grid';
+  displayedColumns: string[] = ['logo', 'name', 'cnpj', 'status', 'actions'];
+  selectedStoreId: string | null = null;
+  StoreStatus = StoreStatus;
+
   constructor(
     private storeService: StoreService,
     private authService: AuthService,
+    private storeContextService: StoreContextService,
     private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
+    const savedViewMode = localStorage.getItem('storeViewMode');
+    if (savedViewMode === 'grid' || savedViewMode === 'compact' || savedViewMode === 'table') {
+      this.viewMode = savedViewMode;
+    }
+
     this.checkUserRole();
-    this.loadStores();
+    this.storeContextService.currentStoreId$.subscribe((storeId) => {
+      this.selectedStoreId = storeId;
+      this.loadStores();
+    });
   }
 
   private checkUserRole(): void {
@@ -70,12 +96,19 @@ export class StoreComponent implements OnInit {
     this.error = false;
 
     const serviceCall = this.isCarAdmin
-      ? this.storeService.getAll({ page: 0, size: 20 })
-      : this.storeService.getBranches({ page: 0, size: 20 });
+      ? this.storeService.getAll({ page: 0, size: 100 })
+      : this.storeService.getBranches({ page: 0, size: 100 });
 
     serviceCall.subscribe({
       next: (response) => {
-        this.stores = response.content;
+        const allFetchedStores = response.content;
+        if (this.selectedStoreId) {
+          this.stores = allFetchedStores.filter(
+            (store) => store.storeId === this.selectedStoreId || store.mainStoreId === this.selectedStoreId
+          );
+        } else {
+          this.stores = allFetchedStores;
+        }
         this.loading = false;
       },
       error: (err) => {
@@ -84,6 +117,37 @@ export class StoreComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  changeViewMode(mode: 'grid' | 'compact' | 'table'): void {
+    this.viewMode = mode;
+    localStorage.setItem('storeViewMode', mode);
+  }
+
+  onSelectStore(store: Store): void {
+    if (store.storeId) {
+      this.storeContextService.setStoreId(store.storeId);
+      // O header se atualizará automaticamente devido ao serviço
+    }
+  }
+
+  getStatusLabel(status: any): string {
+    return StoreStatusLabels[status as StoreStatus] || status as string;
+  }
+
+  getStatusIcon(status: any): string {
+    return StoreStatusIcons[status as StoreStatus] || 'help';
+  }
+
+  getStatusColor(status: any): string {
+    return StoreStatusColors[status as StoreStatus] || '#000';
+  }
+
+  getFormattedCnpj(cnpj: string | undefined): string {
+    if (!cnpj) return '';
+    const cleanCnpj = cnpj.replace(/\D/g, '');
+    if (cleanCnpj.length !== 14) return cnpj;
+    return cleanCnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
   }
 
   onEditStore(store: Store): void {

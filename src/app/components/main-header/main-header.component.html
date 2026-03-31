@@ -15,18 +15,41 @@
     panelClass="header-store-select-panel"
     [disabled]="!isCarAdmin && !canReadStoreOthers"
   >
+    <mat-select-trigger>
+      <div class="store-trigger-content">
+        <mat-icon class="store-trigger-icon">storefront</mat-icon>
+        <div class="store-trigger-text-wrapper">
+          <span class="store-trigger-label">Loja atual</span>
+          <span class="store-trigger-value">{{ getSelectedStoreName() }}</span>
+        </div>
+      </div>
+    </mat-select-trigger>
+
     @if (isCarAdmin || canReadStoreOthers) {
-      <mat-option value="ALL">
-        {{ isCarAdmin ? 'Toda a Rede (Global)' : 'Toda a Rede' }}
+      <mat-option value="ALL" class="custom-store-option global-option">
+        <div class="option-content-container">
+          <mat-icon color="accent">public</mat-icon>
+          <span class="option-title">{{ isCarAdmin ? 'Toda a Rede (Global)' : 'Toda a Rede' }}</span>
+        </div>
       </mat-option>
+      
       @for (store of stores; track store.storeId) {
-        <mat-option [value]="store.storeId">
-          {{ store.name }} - {{ store.cnpj }}
+        <mat-option [value]="store.storeId" class="custom-store-option">
+          <div class="option-content-container">
+            <mat-icon color="primary">store</mat-icon>
+            <div class="option-text-group">
+              <span class="option-title">{{ store.tradeName || store.name }}</span>
+              <span class="option-subtitle">CNPJ: {{ formatCnpj(store.cnpj) }}</span>
+            </div>
+          </div>
         </mat-option>
       }
     } @else {
-      <mat-option [value]="selectedStoreId">
-        {{ storeName() || 'Filial' }}
+      <mat-option [value]="selectedStoreId" class="custom-store-option">
+        <div class="option-content-container">
+          <mat-icon color="primary">store</mat-icon>
+          <span class="option-title">{{ storeName() || 'Filial' }}</span>
+        </div>
       </mat-option>
     }
   </mat-select>
