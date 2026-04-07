@@ -5,8 +5,8 @@
  */
 
 .stores-container {
-  padding: 2rem;
-  max-width: 1400px;
+  // padding: 1rem;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -290,14 +290,14 @@
 /* Tablet */
 @media (max-width: 1024px) {
   .stores-container {
-    padding: 1.5rem;
+    padding: 0;
   }
 }
 
 /* Mobile */
 @media (max-width: 768px) {
   .stores-container {
-    padding: 1rem;
+    padding: 0;
   }
 
   .empty-state {

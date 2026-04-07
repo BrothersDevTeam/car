@@ -12,6 +12,7 @@ import { EventType } from '@angular/router';
 })
 export class ContentHeaderComponent {
   @Input() title = '';
+  @Input() subtitle = '';
   @Input() btn_label = '';
   @Input() fontIcon = '';
 

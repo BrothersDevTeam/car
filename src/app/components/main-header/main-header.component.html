@@ -37,10 +37,7 @@
         <mat-option [value]="store.storeId" class="custom-store-option">
           <div class="option-content-container">
             <mat-icon color="primary">store</mat-icon>
-            <div class="option-text-group">
-              <span class="option-title">{{ store.tradeName || store.name }}</span>
-              <span class="option-subtitle">CNPJ: {{ formatCnpj(store.cnpj) }}</span>
-            </div>
+            <span class="option-title">{{ store.tradeName || store.name }}</span>
           </div>
         </mat-option>
       }

@@ -1,18 +1,28 @@
-<mat-toolbar class="mat-elevation-z2">
-  <span>{{ title }}</span>
-  <div class="button-container">
+<div class="header-container">
+  <mat-toolbar class="dark-bar mat-elevation-z2">
+    <div class="header-titles">
+      <span class="page-title">{{ title }}</span>
+      @if (subtitle) {
+        <span class="page-subtitle">{{ subtitle }}</span>
+      }
+    </div>
+  </mat-toolbar>
+
+  <div class="header-actions">
     <ng-content></ng-content>
     @if (btn_label) {
       <button
         mat-flat-button
+        color="primary"
+        class="primary-action-btn"
         (click)="handleAction()"
       >
-        <span matListItemTitle>{{ btn_label }}</span>
         <mat-icon
           matListItemIcon
           [fontIcon]="fontIcon"
         />
+        <span matListItemTitle>{{ btn_label }}</span>
       </button>
     }
   </div>
-</mat-toolbar>
+</div>
