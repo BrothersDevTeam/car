@@ -1,4 +1,58 @@
 <main>
+  <app-content-header
+    title="Cadastro de Pessoas"
+    [showIconOnly]="true"
+    fontIcon="person_add"
+    (onClick)="handleOpenForm()"
+  >
+    @if (availableDrafts.length > 0) {
+      <mat-form-field
+        appearance="outline"
+        class="header-draft-select"
+        subscriptSizing="dynamic"
+      >
+        <mat-select
+          #draftSelect
+          placeholder="Continuar Cadastro"
+          [value]="selectedDraft"
+          (selectionChange)="handleDraftSelection($event.value)"
+          panelClass="header-draft-panel"
+        >
+          <mat-option [value]="null">Selecione o rascunho</mat-option>
+          @for (draft of availableDrafts; track draft.id) {
+            <mat-option
+              [value]="draft"
+              class="draft-option-item"
+            >
+              <span class="draft-text">
+                {{ draft.draftName || 'Sem nome' }} -
+                {{ draft.lastModified | date: 'dd/MM HH:mm' }}
+              </span>
+              <button
+                mat-icon-button
+                (click)="removeDraft(draft, $event)"
+                matTooltip="Excluir rascunho"
+              >
+                <mat-icon color="warn">delete</mat-icon>
+              </button>
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+  
+    @if (selectedPeople.length > 0) {
+      <button
+        mat-raised-button
+        color="warn"
+        (click)="deleteSelectedPeople()"
+        class="delete-selected-btn"
+        style="margin-left: 16px"
+      >
+        <mat-icon>delete</mat-icon>
+        Deletar Selecionados ({{ selectedPeople.length }})
+      </button>
+    }
   <div class="search-container">
     <mat-form-field
       appearance="outline"
@@ -53,6 +107,7 @@
       </mat-select>
     </mat-form-field>
   </div>
+  </app-content-header>
 
   <div class="filter-section mat-elevation-z2">
     <div class="filter-options">
@@ -110,61 +165,6 @@
       }
     </div>
   </div>
-  <app-content-header
-    title="Pessoas"
-    btn_label="Novo"
-    fontIcon="add"
-    (onClick)="handleOpenForm()"
-  >
-    @if (availableDrafts.length > 0) {
-      <mat-form-field
-        appearance="outline"
-        class="header-draft-select"
-        subscriptSizing="dynamic"
-      >
-        <mat-select
-          #draftSelect
-          placeholder="Continuar Cadastro"
-          [value]="selectedDraft"
-          (selectionChange)="handleDraftSelection($event.value)"
-          panelClass="header-draft-panel"
-        >
-          <mat-option [value]="null">Selecione o rascunho</mat-option>
-          @for (draft of availableDrafts; track draft.id) {
-            <mat-option
-              [value]="draft"
-              class="draft-option-item"
-            >
-              <span class="draft-text">
-                {{ draft.draftName || 'Sem nome' }} -
-                {{ draft.lastModified | date: 'dd/MM HH:mm' }}
-              </span>
-              <button
-                mat-icon-button
-                (click)="removeDraft(draft, $event)"
-                matTooltip="Excluir rascunho"
-              >
-                <mat-icon color="warn">delete</mat-icon>
-              </button>
-            </mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    }
-
-    @if (selectedPeople.length > 0) {
-      <button
-        mat-raised-button
-        color="warn"
-        (click)="deleteSelectedPeople()"
-        class="delete-selected-btn"
-        style="margin-left: 16px"
-      >
-        <mat-icon>delete</mat-icon>
-        Deletar Selecionados ({{ selectedPeople.length }})
-      </button>
-    }
-  </app-content-header>
 
   @if (personPaginatedList?.page?.totalElements) {
     <app-generic-table

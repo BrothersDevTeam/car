@@ -15,6 +15,8 @@ export class ContentHeaderComponent {
   @Input() subtitle = '';
   @Input() btn_label = '';
   @Input() fontIcon = '';
+  @Input() showIconOnly = false;
+  @Input() showAddBadge = false; // Overlay a + sign on the icon
 
   @Output() onClick = new EventEmitter<EventType>();
 
@@ -22,3 +24,4 @@ export class ContentHeaderComponent {
     this.onClick.emit();
   }
 }
+

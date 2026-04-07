@@ -10,18 +10,27 @@
 
   <div class="header-actions">
     <ng-content></ng-content>
-    @if (btn_label) {
+    @if (btn_label || showIconOnly) {
       <button
         mat-flat-button
         color="primary"
         class="primary-action-btn"
+        [class.icon-only]="showIconOnly"
+        [class.has-add-badge]="showAddBadge"
         (click)="handleAction()"
       >
-        <mat-icon
-          matListItemIcon
-          [fontIcon]="fontIcon"
-        />
-        <span matListItemTitle>{{ btn_label }}</span>
+        <div class="icon-wrapper">
+          <mat-icon
+            matListItemIcon
+            [fontIcon]="fontIcon"
+          />
+          @if (showAddBadge) {
+            <mat-icon class="add-badge">add</mat-icon>
+          }
+        </div>
+        @if (!showIconOnly) {
+          <span matListItemTitle>{{ btn_label }}</span>
+        }
       </button>
     }
   </div>

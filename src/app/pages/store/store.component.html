@@ -1,7 +1,8 @@
 <app-content-header
-  title="Gerenciamento de Lojas"
-  [btn_label]="canCreateStore ? 'Cadastrar Nova Loja' : ''"
-  fontIcon="add"
+  title="Cadastro de Lojas"
+  [showIconOnly]="canCreateStore"
+  [showAddBadge]="canCreateStore"
+  fontIcon="store"
   (onClick)="onCreateStore()"
 >
   <mat-button-toggle-group [value]="viewMode" (change)="changeViewMode($event.value)" class="view-mode-toggle" aria-label="Modo de Visualização" hideSingleSelectionIndicator>
