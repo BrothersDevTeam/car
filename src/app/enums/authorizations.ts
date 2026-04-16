@@ -93,11 +93,30 @@ export enum Authorizations {
   /** Visualizar Notas Fiscais. */
   READ_NFE = 'read:nfe',
 
+  /** Criar Notas Fiscais. */
+  CREATE_NFE = 'create:nfe',
+
   /** Emitir Notas Fiscais (entrada e saída). */
-  EMITIR_NFE = 'nfe:emitir',
+  EMITIR_NFE = 'emitir:nfe',
 
   /** Cancelar Notas Fiscais. */
-  CANCEL_NFE = 'nfe:cancelar',
+  CANCEL_NFE = 'cancelar:nfe',
+
+  // ─────────────────────────────────────────────────
+  // VENDA – Módulo de Vendas de Veículos
+  // ─────────────────────────────────────────────────
+
+  /** Visualizar vendas registradas na loja. */
+  READ_VENDA = 'read:venda',
+
+  /** Registrar uma nova venda de veículo. */
+  CREATE_VENDA = 'create:venda',
+
+  /** Editar dados de uma venda existente. */
+  EDIT_VENDA = 'edit:venda',
+
+  /** Cancelar uma venda registrada. */
+  CANCEL_VENDA = 'cancel:venda',
 
   // ─────────────────────────────────────────────────
   // INTEGRATIONS – Integrações da Loja
