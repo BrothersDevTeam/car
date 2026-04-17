@@ -86,6 +86,11 @@ export class SideNavComponent {
         route: '/vehicle',
       },
       {
+        icon: 'sell',
+        label: 'Vendas',
+        route: '/vendas',
+      },
+      {
         icon: 'description',
         label: 'Notas Fiscais',
         route: '/nfe',
