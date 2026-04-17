@@ -12,7 +12,8 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { PaginationComponent } from '@components/pagination/pagination.component';
 
@@ -28,6 +29,8 @@ import type { PaginationResponse } from '@interfaces/pagination';
     MatIconModule,
     MatButtonModule,
     NgClass,
+    NgIf,
+    MatProgressSpinnerModule
   ],
   templateUrl: './generic-table.component.html',
   styleUrl: './generic-table.component.scss',
@@ -37,6 +40,7 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
   @Input() genericPaginatedList: PaginationResponse<T> | null = null;
   @Input() totalElements: number = 0;
   @Input() pageSizeOptions: number[] = [5, 10, 25, 100];
+  @Input() loading: boolean = false;
 
   @Output() rowClick = new EventEmitter<T>();
   @Output() pageEvent = new EventEmitter<PageEvent>();

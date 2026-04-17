@@ -9,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
@@ -115,7 +115,6 @@ export class VendasListComponent implements OnInit, OnDestroy {
     }
   ];
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   ngOnInit() {
     // Escuta mudança de loja no contexto global

@@ -21,22 +21,15 @@
     <!-- Tabela Genérica -->
     <div class="table-card mat-elevation-z2">
         <app-generic-table
-            [data]="vendasPaginatedList?.content || []"
+            [genericPaginatedList]="vendasPaginatedList"
             [columns]="columns"
+            [totalElements]="vendasPaginatedList?.page?.totalElements || 0"
             [loading]="vendasListLoading()"
-            (rowClick)="onRowClick($event)"
-            (edit)="handleEdit($event)"
-            (delete)="handleDelete($event)">
-        </app-generic-table>
-
-        <!-- Paginação -->
-        <mat-paginator
-            [length]="vendasPaginatedList?.totalElements || 0"
-            [pageSize]="paginationConfig.pageSize"
-            [pageIndex]="paginationConfig.pageIndex"
             [pageSizeOptions]="[5, 10, 25, 50]"
-            (page)="handlePageEvent($event)"
-            aria-label="Selecionar página de vendas">
-        </mat-paginator>
+            (rowClick)="onRowClick($event)"
+            (editClick)="handleEdit($event)"
+            (deleteClick)="handleDelete($event)"
+            (pageEvent)="handlePageEvent($event)">
+        </app-generic-table>
     </div>
 </div>
