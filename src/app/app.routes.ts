@@ -23,6 +23,11 @@ export const routes: Routes = [
       { path: 'vehicle', component: VehicleComponent },
       { path: 'store', component: StoreComponent },
       { path: 'nfe', component: NfeComponent },
+      {
+        path: 'vendas',
+        loadChildren: () =>
+          import('./pages/vendas/vendas.routes').then((m) => m.VENDAS_ROUTES),
+      },
       { path: 'dashboard', component: DashboardComponent },
     ],
   },
