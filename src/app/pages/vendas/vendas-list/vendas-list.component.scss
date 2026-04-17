@@ -1,0 +1,53 @@
+.vendas-container {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .filters-bar {
+        display: flex;
+        align-items: center;
+        width: 100%;
+
+        .search-field {
+            width: 100%;
+            max-width: 450px;
+        }
+    }
+
+    .table-card {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+}
+
+// Estilos para as badges (repetindo padrões do projeto ou importando globals se existir)
+::ng-deep {
+    .badge-autorizado {
+        background-color: #e6f4ea;
+        color: #1e8e3e;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-cancelado {
+        background-color: #fce8e6;
+        color: #d93025;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-processando {
+        background-color: #fef7e0;
+        color: #f29900;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+}

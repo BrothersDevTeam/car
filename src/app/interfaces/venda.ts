@@ -101,6 +101,8 @@ export interface VendaResponseDto {
   updatedAt: string;
   createdBy: string;
   updatedBy: string;
+  buyerName?: string;
+  vehicleDescription?: string;
 }
 
 /**
