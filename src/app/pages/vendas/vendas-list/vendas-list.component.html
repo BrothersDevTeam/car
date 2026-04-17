@@ -1,29 +1,29 @@
-<app-content-header title="Vendas" subtitle="Gestão e consulta de vendas de veículos">
-    <button mat-flat-button color="primary" (click)="goToNewVenda()">
-        <mat-icon>add</mat-icon>
-        Registrar Venda
-    </button>
-</app-content-header>
+<main>
+    <app-content-header 
+        title="Vendas" 
+        subtitle="Gestão e consulta de vendas de veículos"
+        [showIconOnly]="true"
+        [showAddBadge]="true"
+        fontIcon="sell"
+        (onClick)="goToNewVenda()">
+        
+        <div class="search-container">
+            <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Pesquisar</mat-label>
+                <input matInput placeholder="Busque por Comprador ou Placa..." [(ngModel)]="searchValue" (input)="onSearch($event)">
+                <mat-icon matPrefix>search</mat-icon>
+                <button *ngIf="searchValue" matSuffix mat-icon-button aria-label="Limpar" (click)="searchValue=''; loadVendasList()">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-form-field>
+        </div>
+    </app-content-header>
 
-<div class="vendas-container">
-    <!-- Barra de Ferramentas / Filtros -->
-    <div class="filters-bar">
-        <mat-form-field appearance="outline" class="search-field">
-            <mat-label>Pesquisar</mat-label>
-            <input matInput placeholder="Busque por Comprador ou Placa..." [(ngModel)]="searchValue" (input)="onSearch($event)">
-            <mat-icon matPrefix>search</mat-icon>
-            <button *ngIf="searchValue" matSuffix mat-icon-button aria-label="Limpar" (click)="searchValue=''; loadVendasList()">
-                <mat-icon>close</mat-icon>
-            </button>
-        </mat-form-field>
-    </div>
-
-    <!-- Tabela Genérica -->
-    <div class="table-card mat-elevation-z2">
+    @if (vendasPaginatedList?.page?.totalElements) {
         <app-generic-table
             [genericPaginatedList]="vendasPaginatedList"
             [columns]="columns"
-            [totalElements]="vendasPaginatedList?.page?.totalElements || 0"
+            [totalElements]="vendasPaginatedList!.page.totalElements"
             [loading]="vendasListLoading()"
             [pageSizeOptions]="[5, 10, 25, 50]"
             (rowClick)="onRowClick($event)"
@@ -31,5 +31,14 @@
             (deleteClick)="handleDelete($event)"
             (pageEvent)="handlePageEvent($event)">
         </app-generic-table>
-    </div>
-</div>
+    } @else {
+        @if (vendasListLoading()) {
+            <div class="loader-div">
+                <span class="loader"></span>
+            </div>
+        } @else {
+            <br />
+            <h2 style="padding: 24px;">Não há vendas cadastradas</h2>
+        }
+    }
+</main>
