@@ -127,4 +127,18 @@ button[mat-icon-button] {
     color: #b71c1c;
     border: 1px solid rgba(183, 28, 28, 0.4);
   }
+
+  // Disponível (Veículo) → Verde
+  &.badge-disponivel {
+    background-color: rgba(56, 142, 60, 0.12);
+    color: #1b5e20;
+    border: 1px solid rgba(56, 142, 60, 0.3);
+  }
+
+  // Vendido (Veículo) → Cinza neutro
+  &.badge-vendido {
+    background-color: rgba(117, 117, 117, 0.12);
+    color: #424242;
+    border: 1px solid rgba(117, 117, 117, 0.3);
+  }
 }

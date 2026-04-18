@@ -86,6 +86,14 @@ export class VehicleComponent {
       header: 'Origem',
     },
     {
+      key: 'status',
+      header: 'Status',
+      badgeConfig: {
+        DISPONIVEL: { label: 'Disponível', cssClass: 'badge-disponivel' },
+        VENDIDO: { label: 'Vendido', cssClass: 'badge-vendido' },
+      },
+    },
+    {
       key: 'edit',
       header: '',
       showEditIcon: (row) => true,
@@ -219,7 +227,12 @@ export class VehicleComponent {
       )
       .subscribe((response) => {
         this.vehicleListLoading.set(false);
-        if (response) {
+        if (response && response.content) {
+          // Mapear dados para injetar o status virtual
+          response.content = response.content.map((vehicle) => ({
+            ...vehicle,
+            status: vehicle.exitDate ? 'VENDIDO' : 'DISPONIVEL',
+          }));
           this.vehiclePaginatedList = response;
         }
       });

@@ -35,6 +35,7 @@ export interface Vehicle {
   observation?: string;
   entryDate?: string;
   exitDate?: string;
+  status?: string;
 }
 
 export type CreateVehicle = Omit<Vehicle, 'vehicleId'>;
