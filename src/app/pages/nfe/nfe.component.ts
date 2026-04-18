@@ -328,7 +328,9 @@ export class NfeComponent {
     }
 
     if (this.selectedRows.length > 1) {
-      this.toastr.warning('Por favor, selecione apenas uma NFe por vez para envio.');
+      this.toastr.warning(
+        'Por favor, selecione apenas uma NFe por vez para envio.'
+      );
       return;
     }
 
@@ -336,7 +338,9 @@ export class NfeComponent {
 
     // Impedir envio de NFes que não sejam rascunho ou com erro
     if (nfe.nfeStatus !== 'rascunho' && nfe.nfeStatus !== 'erro') {
-      this.toastr.info('Apenas NFes em rascunho ou com erro de digitação podem ser reenviadas.');
+      this.toastr.info(
+        'Apenas NFes em rascunho ou com erro de digitação podem ser reenviadas.'
+      );
       return;
     }
 
@@ -358,13 +362,15 @@ export class NfeComponent {
       },
       error: (err) => {
         this.nfeListLoading.set(false);
-        this.toastr.error('Ocorreu um erro ao enviar a NFe. Verifique os dados e tente novamente.');
+        this.toastr.error(
+          'Ocorreu um erro ao enviar a NFe. Verifique os dados e tente novamente.'
+        );
         // Recarregar a lista caso a NFe tenha sido processada e retornado erro do SEFAZ
         this.loadNfeList(
           this.paginationRequestConfig.pageIndex,
           this.paginationRequestConfig.pageSize
         );
-      }
+      },
     });
   }
 

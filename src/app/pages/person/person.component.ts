@@ -640,8 +640,6 @@ export class PersonComponent implements OnInit, OnDestroy {
     this.searchSubject.next(inputValue);
   }
 
-
-
   performSearch() {
     // Busca com os parâmetros atuais
     this.loadPersonList(

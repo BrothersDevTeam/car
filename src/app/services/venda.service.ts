@@ -77,7 +77,10 @@ export class VendaService {
   }
 
   gerarNfe(vendaId: string): Observable<VendaResponseDto> {
-    return this.http.post<VendaResponseDto>(`${this.getBaseUrl()}/${vendaId}/gerar-nfe`, {});
+    return this.http.post<VendaResponseDto>(
+      `${this.getBaseUrl()}/${vendaId}/gerar-nfe`,
+      {}
+    );
   }
 
   create(data: VendaRequestDto): Observable<VendaResponseDto> {

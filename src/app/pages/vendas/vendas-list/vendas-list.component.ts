@@ -234,7 +234,9 @@ export class VendasListComponent implements OnInit, OnDestroy {
         this.vendasListLoading.set(true);
         this.vendaService.gerarNfe(venda.vendaId).subscribe({
           next: () => {
-            this.toastr.success('Rascunho da NFe gerado com sucesso! A emissão foi disparada.');
+            this.toastr.success(
+              'Rascunho da NFe gerado com sucesso! A emissão foi disparada.'
+            );
             this.loadVendasList();
           },
           error: (err) => {
@@ -244,7 +246,10 @@ export class VendasListComponent implements OnInit, OnDestroy {
 
             // Tratamento específico para falta de endereço
             if (details && details['missingAddressPersonId']) {
-              this.handleMissingAddressError(details['missingAddressPersonId'], errorMessage);
+              this.handleMissingAddressError(
+                details['missingAddressPersonId'],
+                errorMessage
+              );
             } else {
               this.toastr.error(errorMessage);
             }
@@ -271,7 +276,9 @@ export class VendasListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         // Navega para a tela de pessoas passando o ID para edição
-        this.router.navigate(['/person'], { queryParams: { editId: personId } });
+        this.router.navigate(['/person'], {
+          queryParams: { editId: personId },
+        });
       }
     });
   }
