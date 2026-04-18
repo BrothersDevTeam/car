@@ -55,6 +55,7 @@ export class NfeComponent {
 
   nfePaginatedList: PaginationResponse<Nfe> | null = null;
   selectedNfe: Nfe | null = null;
+  selectedRows: Nfe[] = [];
   searchValue: string = '';
   selectedStoreId: string | null = null;
   paginationRequestConfig = {
@@ -316,8 +317,55 @@ export class NfeComponent {
     this.openForm.set(true);
   }
 
-  handleSelectionChange(selectedRows: any[]) {
-    console.log('Linhas selecionadas:', selectedRows);
+  handleSelectionChange(selectedRows: Nfe[]) {
+    this.selectedRows = selectedRows;
+  }
+
+  onEnviarNfe() {
+    if (!this.selectedRows || this.selectedRows.length === 0) {
+      this.toastr.warning('Por favor, selecione ao menos uma NFe para enviar.');
+      return;
+    }
+
+    if (this.selectedRows.length > 1) {
+      this.toastr.warning('Por favor, selecione apenas uma NFe por vez para envio.');
+      return;
+    }
+
+    const nfe = this.selectedRows[0];
+
+    // Impedir envio de NFes que não sejam rascunho ou com erro
+    if (nfe.nfeStatus !== 'rascunho' && nfe.nfeStatus !== 'erro') {
+      this.toastr.info('Apenas NFes em rascunho ou com erro de digitação podem ser reenviadas.');
+      return;
+    }
+
+    if (!nfe.nfeId) {
+      this.toastr.error('Erro de integridade: ID da Nfe não encontrado.');
+      return;
+    }
+
+    this.nfeListLoading.set(true);
+    this.nfeService.enviarNfe(nfe.nfeId).subscribe({
+      next: (response: any) => {
+        this.nfeListLoading.set(false);
+        this.selectedRows = [];
+        this.toastr.success('NFe enviada para processamento com sucesso!');
+        this.loadNfeList(
+          this.paginationRequestConfig.pageIndex,
+          this.paginationRequestConfig.pageSize
+        );
+      },
+      error: (err) => {
+        this.nfeListLoading.set(false);
+        this.toastr.error('Ocorreu um erro ao enviar a NFe. Verifique os dados e tente novamente.');
+        // Recarregar a lista caso a NFe tenha sido processada e retornado erro do SEFAZ
+        this.loadNfeList(
+          this.paginationRequestConfig.pageIndex,
+          this.paginationRequestConfig.pageSize
+        );
+      }
+    });
   }
 
   onFormSubmitted() {

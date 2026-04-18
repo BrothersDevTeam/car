@@ -98,6 +98,15 @@ export class NfeService {
     );
   }
 
+  enviarNfe(id: string) {
+    return this.http.post<any>(`${this.apiUrl}/${id}/enviar`, {}).pipe(
+      tap((response) => {
+        console.log('Ordem de envio solicitada com sucesso!', response);
+        this.clearCache();
+      })
+    );
+  }
+
   public clearCache() {
     this.cache = null;
     this.cacheUpdated$.next(null);
