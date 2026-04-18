@@ -80,62 +80,67 @@
     </div>
   </app-content-header>
 
-  <div class="filter-section mat-elevation-z2">
-    <div class="filter-options">
-      <mat-radio-group
-        [(ngModel)]="selectedRelationshipType"
-        (change)="onRelationshipTypeChange($any($event.value))"
-      >
-        <mat-radio-button
-          value="CLIENTE"
-          color="primary"
-        >
-          CLIENTE
-        </mat-radio-button>
-        <mat-radio-button
-          value="FUNCIONARIO"
-          color="primary"
-        >
-          FUNCIONÁRIO
-        </mat-radio-button>
-      </mat-radio-group>
+  <div class="premium-filter-bar">
+    <mat-button-toggle-group
+      [(ngModel)]="selectedRelationshipType"
+      (change)="onRelationshipTypeChange($event.value)"
+      class="status-toggle-group"
+    >
+      <mat-button-toggle [value]="null">
+        <div class="toggle-content">
+          <mat-icon>groups</mat-icon>
+          <span>Tudo</span>
+        </div>
+      </mat-button-toggle>
+      <mat-button-toggle value="CLIENTE">
+        <div class="toggle-content">
+          <mat-icon>person</mat-icon>
+          <span>Clientes</span>
+        </div>
+      </mat-button-toggle>
+      <mat-button-toggle value="FUNCIONARIO">
+        <div class="toggle-content">
+          <mat-icon>badge</mat-icon>
+          <span>Funcionários</span>
+        </div>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
 
+  @if (selectedRelationshipType === 'FUNCIONARIO' || hasActiveFilters()) {
+    <div class="sub-filter-section">
       @if (selectedRelationshipType === 'FUNCIONARIO') {
-        <div class="sub-filter-options">
-          <!-- Checkbox: VENDEDOR (ROLE_SELLER) -->
+        <div class="employee-types">
           <mat-checkbox
             [(ngModel)]="employeeSubFilters.vendedor"
             (change)="onEmployeeSubFilterChange()"
-            color="accent"
-            class="sub-checkbox"
+            color="primary"
           >
             VENDEDOR
           </mat-checkbox>
-
-          <!-- Checkbox: GERENTE (ROLE_MANAGER) -->
           <mat-checkbox
             [(ngModel)]="employeeSubFilters.gerente"
             (change)="onEmployeeSubFilterChange()"
-            color="accent"
-            class="sub-checkbox"
+            color="primary"
           >
             GERENTE
           </mat-checkbox>
         </div>
       }
+
       @if (hasActiveFilters()) {
         <button
-          mat-raised-button
+          mat-button
           color="warn"
           (click)="clearFilters()"
           class="clear-filters-btn"
         >
-          <mat-icon>clear</mat-icon>
+          <mat-icon>backspace</mat-icon>
           Limpar Filtros
         </button>
       }
     </div>
-  </div>
+  }
 
   @if (personPaginatedList?.page?.totalElements) {
     <app-generic-table

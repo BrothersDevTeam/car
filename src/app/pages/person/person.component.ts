@@ -48,7 +48,7 @@ import { ActionsService } from '@services/actions.service';
 import { AuthService } from '@services/auth/auth.service';
 import { FormDraftService, FormDraft } from '@services/form-draft.service';
 import { StoreContextService } from '@services/store-context.service';
-import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 /**
@@ -85,10 +85,9 @@ interface EmployeeSubFilters {
     NaturalPersonInfoComponent,
     BusinessDoneTableComponent,
     GenericTableComponent,
-    MatRadioButton,
-    MatRadioGroup,
     MatIconModule,
     MatTooltipModule,
+    MatButtonToggleModule,
   ],
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss',
