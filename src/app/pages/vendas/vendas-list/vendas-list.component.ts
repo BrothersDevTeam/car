@@ -177,7 +177,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
       .getPaginatedData(
         this.paginationConfig.pageIndex,
         this.paginationConfig.pageSize,
-        { search: this.searchValue }
+        { search: this.searchValue, storeId: this.selectedStoreId }
       )
       .pipe(
         catchError((err) => {

@@ -42,19 +42,20 @@ export class VendaService {
   getPaginatedData(
     pageIndex: number,
     pageSize: number,
-    searchParams?: { search?: string }
+    searchParams?: { search?: string; storeId?: string }
   ): Observable<PaginationResponse<VendaResponseDto>> {
-    const hasSearchParams = searchParams && searchParams.search?.trim();
+    const hasSearchParams =
+      searchParams && (searchParams.search?.trim() || searchParams.storeId);
 
-    // Só usa cache se não houver busca ativa
+    // Só usa cache se não houver busca ou filtro de loja ativo
     if (this.cache && !hasSearchParams) {
       return of(this.cache);
     }
 
     let url = `${this.getBaseUrl()}?page=${pageIndex}&size=${pageSize}`;
 
-    if (hasSearchParams) {
-      url += `&search=${encodeURIComponent(searchParams.search!.trim())}`;
+    if (searchParams?.search?.trim()) {
+      url += `&search=${encodeURIComponent(searchParams.search.trim())}`;
     }
 
     return this.http.get<PaginationResponse<VendaResponseDto>>(url).pipe(
