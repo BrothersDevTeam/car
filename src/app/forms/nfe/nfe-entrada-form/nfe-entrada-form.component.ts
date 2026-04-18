@@ -112,24 +112,36 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       })
     );
 
+    // Contexto Global de Loja - Carrega dados iniciais e reage a mudanças
+    this.subscriptions.add(
+      this.storeContextService.currentStoreId$.subscribe((storeId) => {
+        if (storeId) {
+          this.loadInitialData(storeId);
+        }
+      })
+    );
+  }
+
+  /**
+   * Carrega veículos e pessoas filtrados pela loja atual.
+   * Chamado no OnInit e sempre que a loja global mudar.
+   */
+  private loadInitialData(storeId: string) {
     // Carrega veículos e pessoas em paralelo; após ambos terminarem,
     // faz o patchValue caso já exista um dataForm (modo edição)
-    const vehiclesLoaded = this.vehicleService
-      .getPaginatedData(0, 1000)
+    this.vehicleService
+      .getPaginatedData(0, 1000, { storeId })
       .subscribe((response) => {
-        this.vehicles = response.content;
+        this.vehicles = response.content || [];
         this.tryPatchForm();
       });
 
-    const personsLoaded = this.personService
-      .getPaginatedData(0, 1000)
+    this.personService
+      .getPaginatedData(0, 1000, { storeId })
       .subscribe((response) => {
-        this.persons = response.content;
+        this.persons = response.content || [];
         this.tryPatchForm();
       });
-
-    this.subscriptions.add(vehiclesLoaded);
-    this.subscriptions.add(personsLoaded);
   }
 
   ngOnDestroy() {
