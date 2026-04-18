@@ -59,7 +59,6 @@ export interface VendaRequestDto {
   vehicleId: string;
   buyerPersonId: string;
   sellerPersonId?: string;
-  nfeId?: string;
   dataVenda: string;
   valor: number;
   valorFinal?: number;
