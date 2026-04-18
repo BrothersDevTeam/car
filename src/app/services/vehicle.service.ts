@@ -28,13 +28,11 @@ export class VehicleService {
   getPaginatedData(
     pageIndex: number,
     pageSize: number,
-    searchParams?: { search?: string; storeId?: string }
+    searchParams?: { search?: string; storeId?: string; onlyInStock?: boolean }
   ): Observable<PaginationResponse<Vehicle>> {
     const hasSearchParams =
       searchParams &&
-      Object.values(searchParams).some((value) => {
-        return value && typeof value === 'string' && value.trim();
-      });
+      Object.keys(searchParams).length > 0;
 
     // Only use cache if there are no search params
     if (this.cache && !hasSearchParams) {
@@ -49,6 +47,9 @@ export class VehicleService {
       }
       if (searchParams.storeId?.trim()) {
         url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
+      }
+      if (searchParams.onlyInStock) {
+        url += `&exitDate=true`; // kaczmarzyk Null spec checks for existence of param
       }
     }
 
