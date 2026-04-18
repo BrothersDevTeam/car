@@ -10,6 +10,7 @@ export interface ColumnConfig<T> {
   format?: (value: any, row: T) => string;
   showEditIcon?: (row: T) => boolean;
   showDeleteIcon?: (row: T) => boolean;
+  showNfeIcon?: (row: T) => boolean;
   showCheckbox?: (row: T) => boolean;
   // Mapa de valor → BadgeConfig. Se definido, renderiza uma badge no lugar do texto puro.
   badgeConfig?: { [key: string]: BadgeConfig };

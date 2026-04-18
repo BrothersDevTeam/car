@@ -70,6 +70,18 @@
               <mat-icon>delete</mat-icon>
             </button>
           }
+          <!-- Ícone de NFe para a coluna 'nfe' -->
+          @if (column.key === 'nfe' && shouldShowNfeIcon(element)) {
+            <button
+              mat-icon-button
+              (click)="$event.stopPropagation(); onNfeClick(element)"
+              aria-label="Emitir NFe"
+              class="nfe-btn"
+              title="Emitir NFe"
+            >
+              <mat-icon>receipt</mat-icon>
+            </button>
+          }
           <!-- Dados normais para outras colunas -->
           @if (
             column.key !== 'select' &&

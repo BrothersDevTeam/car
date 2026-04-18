@@ -44,8 +44,12 @@ mat-icon {
 }
 
 .delete-btn {
-  &:hover {
-    color: var(--danger-color-light);
+  .delete-btn {
+    color: var(--status-cancelado-text);
+  }
+
+  .nfe-btn {
+    color: var(--primary-color);
   }
 }
 

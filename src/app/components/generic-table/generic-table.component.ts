@@ -46,6 +46,7 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
   @Output() pageEvent = new EventEmitter<PageEvent>();
   @Output() editClick = new EventEmitter<T>();
   @Output() deleteClick = new EventEmitter<T>();
+  @Output() nfeClick = new EventEmitter<T>();
   @Output() selectionChange = new EventEmitter<T[]>();
 
   tableDataSource = new MatTableDataSource<T>();
@@ -143,6 +144,10 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
     this.deleteClick.emit(row);
   }
 
+  onNfeClick(row: T): void {
+    this.nfeClick.emit(row);
+  }
+
   shouldShowEditIcon(row: T): boolean {
     const editColumn = this.columns.find((col) => col.key === 'edit');
     return editColumn?.showEditIcon ? editColumn.showEditIcon(row) : true;
@@ -153,6 +158,11 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
     return deleteColumn?.showDeleteIcon
       ? deleteColumn.showDeleteIcon(row)
       : true;
+  }
+
+  shouldShowNfeIcon(row: T): boolean {
+    const nfeColumn = this.columns.find((col) => col.key === 'nfe');
+    return nfeColumn?.showNfeIcon ? nfeColumn.showNfeIcon(row) : true;
   }
 
   shouldShowCheckbox(row: T): boolean {
