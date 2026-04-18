@@ -85,8 +85,11 @@
         <span class="loader"></span>
       </div>
     } @else {
-      <br />
-      <h2 style="padding: 24px">Não há vendas cadastradas</h2>
+      <app-empty-state
+        [icon]="emptyStateIcon"
+        [title]="emptyStateTitle"
+        [description]="emptyStateDescription"
+      ></app-empty-state>
     }
   }
 </main>

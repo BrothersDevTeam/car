@@ -12,6 +12,7 @@ import { ContentHeaderComponent } from '@components/content-header/content-heade
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { StoreContextService } from '@services/store-context.service';
 import { Subject, Subscription, catchError, debounceTime, of } from 'rxjs';
+import { EmptyStateComponent } from '@components/empty-state/empty-state.component';
 
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -40,10 +41,11 @@ import { ActionsService } from '@services/actions.service';
     VehicleInfoComponent,
     VehicleFormComponent,
     GenericTableComponent,
-    FormsModule,
-    MatIconModule,
     MatButtonModule,
     MatButtonToggleModule,
+    EmptyStateComponent,
+    FormsModule,
+    MatIconModule,
   ],
   templateUrl: './vehicle.component.html',
   styleUrl: './vehicle.component.scss',
@@ -112,6 +114,49 @@ export class VehicleComponent {
   vehicleListError = signal(false);
   openForm = signal(false);
   openInfo = signal(false);
+
+  // Configurações dinâmicas para o Empty State baseadas no status do veículo
+  private readonly emptyStateConfigs: Record<
+    string,
+    { icon: string; title: string; description: string }
+  > = {
+    TODOS: {
+      icon: 'no_sim',
+      title: 'Nenhum veículo no estoque',
+      description:
+        'Sua lista de veículos aparecerá aqui assim que você adicionar novos itens ao estoque.',
+    },
+    DISPONIVEL: {
+      icon: 'check_circle',
+      title: 'Nenhum veículo disponível',
+      description:
+        'Todos os seus veículos foram vendidos ou o estoque está vazio.',
+    },
+    VENDIDO: {
+      icon: 'sell',
+      title: 'Nenhum veículo vendido',
+      description:
+        'O histórico de veículos comercializados aparecerá neste filtro.',
+    },
+  };
+
+  get emptyStateIcon(): string {
+    return this.emptyStateConfigs[this.selectedStatus]?.icon || 'no_sim';
+  }
+
+  get emptyStateTitle(): string {
+    return (
+      this.emptyStateConfigs[this.selectedStatus]?.title ||
+      'Nenhum veículo encontrado'
+    );
+  }
+
+  get emptyStateDescription(): string {
+    return (
+      this.emptyStateConfigs[this.selectedStatus]?.description ||
+      'Sua lista de veículos aparecerá aqui.'
+    );
+  }
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 

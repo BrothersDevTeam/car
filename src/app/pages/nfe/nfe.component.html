@@ -124,13 +124,17 @@
       </div>
     } @else {
       @if (nfeListError()) {
-        <div class="message-error mat-elevation-z8">
-          <h3>Não foi possível acessar os dados da tabela</h3>
-          <h4>Tente novamente em alguns minutos.</h4>
-        </div>
+        <app-empty-state
+          icon="cloud_off"
+          title="Erro na conexão"
+          description="Não foi possível sincronizar com o servidor. Tente novamente em alguns minutos."
+        ></app-empty-state>
       } @else {
-        <br />
-        <h2>Não há NFes cadastradas</h2>
+        <app-empty-state
+          [icon]="emptyStateIcon"
+          [title]="emptyStateTitle"
+          [description]="emptyStateDescription"
+        ></app-empty-state>
       }
     }
   }

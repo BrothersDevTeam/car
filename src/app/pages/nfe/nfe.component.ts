@@ -16,6 +16,7 @@ import { GenericTableComponent } from '@components/generic-table/generic-table.c
 import { StoreContextService } from '@services/store-context.service';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
+import { EmptyStateComponent } from '@components/empty-state/empty-state.component';
 
 import { NfeSaidaFormComponent } from '../../forms/nfe/nfe-saida-form/nfe-saida-form.component';
 import { NfeEntradaFormComponent } from '../../forms/nfe/nfe-entrada-form/nfe-entrada-form.component';
@@ -45,6 +46,7 @@ import { ToastrService } from 'ngx-toastr';
     NgClass,
     FormsModule,
     MatButtonToggleModule,
+    EmptyStateComponent,
   ],
   templateUrl: './nfe.component.html',
   styleUrl: './nfe.component.scss',
@@ -147,6 +149,76 @@ export class NfeComponent {
   openForm = signal(false);
   openInfo = signal(false);
   selectedTabIndex = signal(0); // 0 = Entrada, 1 = Saída
+
+  // Configurações dinâmicas para o Empty State baseadas no status selecionado
+  private readonly emptyStateConfigs: Record<
+    string,
+    { icon: string; title: string; description: string }
+  > = {
+    TODOS: {
+      icon: 'file_present',
+      title: 'Nenhuma NFe encontrada',
+      description:
+        'Seu histórico de Notas Fiscais Eletrônicas aparecerá aqui após a sincronização ou emissão.',
+    },
+    rascunho: {
+      icon: 'edit_note',
+      title: 'Nenhum rascunho encontrado',
+      description: 'Você não possui Notas Fiscais em fase de digitação.',
+    },
+    processando: {
+      icon: 'sync',
+      title: 'Nada sendo processado',
+      description:
+        'Nenhuma Nota Fiscal está em fila de processamento no momento.',
+    },
+    autorizado: {
+      icon: 'check_circle',
+      title: 'Nenhuma NFe autorizada',
+      description:
+        'As notas que forem aprovadas pela SEFAZ serão listadas aqui.',
+    },
+    cancelado: {
+      icon: 'block',
+      title: 'Nenhuma NFe cancelada',
+      description:
+        'Notas fiscais canceladas ou estornadas aparecerão neste filtro.',
+    },
+    erro: {
+      icon: 'error',
+      title: 'Nenhum erro detectado',
+      description: 'Notas com falhas de validação ou rejeição aparecerão aqui.',
+    },
+    denegado: {
+      icon: 'gavel',
+      title: 'Nenhuma NFe denegada',
+      description: 'Notas que sofreram denegação de uso estarão nesta lista.',
+    },
+    inutilizada: {
+      icon: 'delete_sweep',
+      title: 'Nenhuma NFe inutilizada',
+      description:
+        'Numerações de notas que foram inutilizadas aparecerão aqui.',
+    },
+  };
+
+  get emptyStateIcon(): string {
+    return this.emptyStateConfigs[this.selectedStatus]?.icon || 'file_present';
+  }
+
+  get emptyStateTitle(): string {
+    return (
+      this.emptyStateConfigs[this.selectedStatus]?.title ||
+      'Nenhuma NFe encontrada'
+    );
+  }
+
+  get emptyStateDescription(): string {
+    return (
+      this.emptyStateConfigs[this.selectedStatus]?.description ||
+      'Seu histórico de Notas Fiscais Eletrônicas aparecerá aqui.'
+    );
+  }
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 

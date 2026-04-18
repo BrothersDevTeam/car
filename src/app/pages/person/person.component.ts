@@ -31,6 +31,7 @@ import { ContentHeaderComponent } from '@components/content-header/content-heade
 import { UnsavedChangesDialogComponent } from '@components/dialogs/unsaved-changes-dialog/unsaved-changes-dialog.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { BusinessDoneTableComponent } from '@components/tables/business-done-table/business-done-table.component';
+import { EmptyStateComponent } from '@components/empty-state/empty-state.component';
 
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
@@ -88,6 +89,7 @@ interface EmployeeSubFilters {
     MatIconModule,
     MatTooltipModule,
     MatButtonToggleModule,
+    EmptyStateComponent,
   ],
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss',
@@ -110,6 +112,56 @@ export class PersonComponent implements OnInit, OnDestroy {
   isCarAdmin: boolean = false;
   selectedPeople: Person[] = []; // Stores selected rows
   pendingAddressDraftId: string | null = null;
+
+  // Configurações dinâmicas para o Empty State baseadas no tipo de relacionamento
+  private readonly emptyStateConfigs: Record<
+    string,
+    { icon: string; title: string; description: string }
+  > = {
+    null: {
+      icon: 'person_off',
+      title: 'Nenhuma pessoa encontrada',
+      description:
+        'Cadastre novos clientes ou funcionários para começar a gerenciar sua rede.',
+    },
+    CLIENTE: {
+      icon: 'person',
+      title: 'Nenhum cliente cadastrado',
+      description:
+        'Sua lista de clientes aparecerá aqui. Adicione um novo cliente para começar.',
+    },
+    FUNCIONARIO: {
+      icon: 'badge',
+      title: 'Nenhum funcionário encontrado',
+      description:
+        'Parece que não há colaboradores registrados com este filtro.',
+    },
+  };
+
+  get emptyStateIcon(): string {
+    const key = this.selectedRelationshipType
+      ? this.selectedRelationshipType.toString()
+      : 'null';
+    return this.emptyStateConfigs[key]?.icon || 'person_off';
+  }
+
+  get emptyStateTitle(): string {
+    const key = this.selectedRelationshipType
+      ? this.selectedRelationshipType.toString()
+      : 'null';
+    return this.emptyStateConfigs[key]?.title || 'Nenhuma pessoa encontrada';
+  }
+
+  get emptyStateDescription(): string {
+    const key = this.selectedRelationshipType
+      ? this.selectedRelationshipType.toString()
+      : 'null';
+    return (
+      this.emptyStateConfigs[key]?.description ||
+      'Cadastre pessoas para gerenciar sua rede.'
+    );
+  }
+
   /**
    * Tipo de relacionamento principal selecionado (CLIENTE ou FUNCIONARIO)
    * null = nenhum filtro aplicado

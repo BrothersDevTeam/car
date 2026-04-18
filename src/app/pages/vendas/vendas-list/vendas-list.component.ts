@@ -24,6 +24,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
+import { EmptyStateComponent } from '@components/empty-state/empty-state.component';
 
 import { VendaService } from '@services/venda.service';
 import { StoreContextService } from '@services/store-context.service';
@@ -50,6 +51,7 @@ import { VendaStatus } from '@enums/venda-status';
     MatInputModule,
     MatPaginatorModule,
     MatButtonToggleModule,
+    EmptyStateComponent,
   ],
   providers: [DatePipe, CurrencyPipe],
   templateUrl: './vendas-list.component.html',
@@ -144,6 +146,52 @@ export class VendasListComponent implements OnInit, OnDestroy {
         row.vendaStatus !== VendaStatus.CANCELADA,
     },
   ];
+
+  // Configurações dinâmicas para o Empty State baseadas no status da venda
+  private readonly emptyStateConfigs: Record<
+    string,
+    { icon: string; title: string; description: string }
+  > = {
+    TODOS: {
+      icon: 'receipt_long',
+      title: 'Nenhuma venda realizada',
+      description:
+        'Suas vendas aparecerão aqui assim que forem concluídas e registradas no sistema.',
+    },
+    ATIVA: {
+      icon: 'check_circle',
+      title: 'Nenhuma venda ativa',
+      description: 'Não há vendas com status "Ativa" no momento.',
+    },
+    CANCELADA: {
+      icon: 'block',
+      title: 'Nenhuma venda cancelada',
+      description: 'O histórico de vendas que foram canceladas aparecerá aqui.',
+    },
+    TRANSFERENCIA: {
+      icon: 'swap_horiz',
+      title: 'Sem vendas em transferência',
+      description: 'Nenhuma venda foi marcada como transferência de estoque.',
+    },
+  };
+
+  get emptyStateIcon(): string {
+    return this.emptyStateConfigs[this.selectedStatus]?.icon || 'receipt_long';
+  }
+
+  get emptyStateTitle(): string {
+    return (
+      this.emptyStateConfigs[this.selectedStatus]?.title ||
+      'Nenhuma venda encontrada'
+    );
+  }
+
+  get emptyStateDescription(): string {
+    return (
+      this.emptyStateConfigs[this.selectedStatus]?.description ||
+      'Suas vendas aparecerão aqui após o registro.'
+    );
+  }
 
   ngOnInit() {
     // Escuta mudança de loja no contexto global
