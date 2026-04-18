@@ -85,3 +85,75 @@
     transform: translate(-10px, -10px);
   }
 }
+
+// ===== PREMIUM FILTER BAR =====
+.premium-filter-bar {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0 24px 0;
+  padding: 0 16px;
+}
+
+.status-toggle-group {
+  border: none !important;
+  background-color: #f8fafc;
+  padding: 6px;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 8px;
+
+  ::ng-deep {
+    .mat-button-toggle {
+      border-radius: 40px !important;
+      border: none !important;
+      background-color: transparent;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: #64748b;
+
+      .mat-button-toggle-label-content {
+        line-height: normal !important;
+        padding: 8px 20px;
+      }
+
+      &:hover:not(.mat-button-toggle-checked) {
+        background-color: #f1f5f9;
+        color: #1e293b;
+      }
+
+      &.mat-button-toggle-checked {
+        background-color: #3b7ab8; // Primary Color
+        color: white;
+        box-shadow: 0 4px 10px rgba(59, 122, 184, 0.3);
+
+        mat-icon {
+          color: white !important;
+        }
+      }
+    }
+  }
+}
+
+.toggle-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    transition: color 0.3s ease;
+  }
+}
+
+.icon-disponivel {
+  color: rgb(45, 167, 101); // $success-color
+}
+
+.icon-vendido {
+  color: rgb(255, 133, 27); // $warning-color
+}
+

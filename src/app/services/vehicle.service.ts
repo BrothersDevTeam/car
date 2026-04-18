@@ -28,7 +28,12 @@ export class VehicleService {
   getPaginatedData(
     pageIndex: number,
     pageSize: number,
-    searchParams?: { search?: string; storeId?: string; onlyInStock?: boolean }
+    searchParams?: {
+      search?: string;
+      storeId?: string;
+      onlyInStock?: boolean;
+      status?: 'DISPONIVEL' | 'VENDIDO' | 'TODOS';
+    }
   ): Observable<PaginationResponse<Vehicle>> {
     const hasSearchParams =
       searchParams && Object.keys(searchParams).length > 0;
@@ -47,8 +52,15 @@ export class VehicleService {
       if (searchParams.storeId?.trim()) {
         url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
       }
-      if (searchParams.onlyInStock) {
-        url += `&exitDate=true`; // kaczmarzyk Null spec checks for existence of param
+
+      // Prioritize the new 'status' filter
+      if (searchParams.status === 'DISPONIVEL') {
+        url += `&exitDate=true`; // is null (Available)
+      } else if (searchParams.status === 'VENDIDO') {
+        url += `&exitDate=false`; // is not null (Sold)
+      } else if (searchParams.onlyInStock) {
+        // Fallback for backward compatibility
+        url += `&exitDate=true`;
       }
     }
 

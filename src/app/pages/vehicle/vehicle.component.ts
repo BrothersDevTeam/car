@@ -16,6 +16,7 @@ import { Subject, Subscription, catchError, debounceTime, of } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { VehicleFormComponent } from '@forms/vehicle/vehicle-form/vehicle-form.component';
 
@@ -42,6 +43,7 @@ import { ActionsService } from '@services/actions.service';
     FormsModule,
     MatIconModule,
     MatButtonModule,
+    MatButtonToggleModule,
   ],
   templateUrl: './vehicle.component.html',
   styleUrl: './vehicle.component.scss',
@@ -56,6 +58,7 @@ export class VehicleComponent {
   selectedVehicle: VehicleForm | null = null;
   searchValue: string = '';
   selectedStoreId: string | null = null;
+  selectedStatus: 'DISPONIVEL' | 'VENDIDO' | 'TODOS' = 'TODOS';
   paginationRequestConfig = {
     pageSize: 1000,
     pageIndex: 0,
@@ -204,15 +207,22 @@ export class VehicleComponent {
   loadVehicleList(pageIndex: number, pageSize: number, searchValue?: string) {
     this.vehicleListLoading.set(true);
 
-    let searchParams: { search?: string; storeId?: string } | undefined;
+    let searchParams: {
+      search?: string;
+      storeId?: string;
+      status?: 'DISPONIVEL' | 'VENDIDO' | 'TODOS';
+    } = {};
 
     if (searchValue && searchValue.trim()) {
-      searchParams = { search: searchValue.trim() };
+      searchParams.search = searchValue.trim();
     }
 
     if (this.selectedStoreId) {
-      searchParams ??= {};
       searchParams.storeId = this.selectedStoreId;
+    }
+
+    if (this.selectedStatus !== 'TODOS') {
+      searchParams.status = this.selectedStatus;
     }
 
     this.vehicleService
@@ -271,6 +281,15 @@ export class VehicleComponent {
   onSearch(event: Event) {
     this.searchValue = (event.target as HTMLInputElement).value;
     this.searchSubject.next(this.searchValue);
+  }
+
+  onStatusChange(status: any) {
+    this.selectedStatus = status;
+    this.loadVehicleList(
+      0,
+      this.paginationRequestConfig.pageSize,
+      this.searchValue
+    );
   }
 
   clearSearch() {
