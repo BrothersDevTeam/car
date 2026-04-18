@@ -184,7 +184,8 @@ export class VendasListComponent implements OnInit, OnDestroy {
         {
           search: this.searchValue,
           storeId: this.selectedStoreId,
-          status: this.selectedStatus !== 'TODOS' ? this.selectedStatus : undefined,
+          status:
+            this.selectedStatus !== 'TODOS' ? this.selectedStatus : undefined,
         }
       )
       .pipe(

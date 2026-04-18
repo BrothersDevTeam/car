@@ -56,15 +56,33 @@
 }
 
 @keyframes animloader {
-  0% { transform: translate(-10px, -10px); }
-  12% { transform: translate(-10px, 0px); }
-  25% { transform: translate(0px, 10px); }
-  37% { transform: translate(10px, 10px); }
-  50% { transform: translate(20px, 0px); }
-  62% { transform: translate(20px, -10px); }
-  75% { transform: translate(10px, -20px); }
-  87% { transform: translate(0px, -20px); }
-  100% { transform: translate(-10px, -10px); }
+  0% {
+    transform: translate(-10px, -10px);
+  }
+  12% {
+    transform: translate(-10px, 0px);
+  }
+  25% {
+    transform: translate(0px, 10px);
+  }
+  37% {
+    transform: translate(10px, 10px);
+  }
+  50% {
+    transform: translate(20px, 0px);
+  }
+  62% {
+    transform: translate(20px, -10px);
+  }
+  75% {
+    transform: translate(10px, -20px);
+  }
+  87% {
+    transform: translate(0px, -20px);
+  }
+  100% {
+    transform: translate(-10px, -10px);
+  }
 }
 
 // ===== PREMIUM FILTER BAR =====
@@ -131,9 +149,15 @@
   }
 }
 
-.icon-ativa { color: rgb(45, 167, 101); }
-.icon-cancelada { color: rgb(150, 9, 9); }
-.icon-transferencia { color: rgb(45, 101, 167); }
+.icon-ativa {
+  color: rgb(45, 167, 101);
+}
+.icon-cancelada {
+  color: rgb(150, 9, 9);
+}
+.icon-transferencia {
+  color: rgb(45, 101, 167);
+}
 
 // Estilos para as badges
 ::ng-deep {
