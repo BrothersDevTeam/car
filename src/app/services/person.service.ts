@@ -68,6 +68,7 @@ export class PersonService {
       relationshipTypes?: string[]; // Parâmetro para filtrar por tipos de relacionamento
       roleNames?: string[]; // NOVO: Parâmetro para filtrar por roles
       includeInactive?: boolean; // NOVO: Se true, retorna inativos
+      networkStoreId?: string; // NOVO: Parâmetro para filtrar pela rede da loja
     }
   ): Observable<PaginationResponse<Person>> {
     // Se houver parâmetros de busca, não usa cache
@@ -112,6 +113,12 @@ export class PersonService {
       // O storeId tem que ser concatenado independentemente de ser uma busca global ('search') ou em campo específico
       if (searchParams.storeId?.trim()) {
         url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
+      }
+
+      if (searchParams.networkStoreId?.trim()) {
+        url += `&networkStoreId=${encodeURIComponent(
+          searchParams.networkStoreId.trim()
+        )}`;
       }
 
       // Adiciona o filtro de relationshipTypes se fornecido

@@ -377,8 +377,12 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Carrega marcas do backend
     this.loadBrands();
 
-    // Carrega pessoas do backend
-    this.personService.getPaginatedData(0, 1000).subscribe({
+    // Carrega pessoas do backend (filtrando pela rede da loja)
+    this.personService
+      .getPaginatedData(0, 1000, {
+        networkStoreId: this.storeContextService.currentStoreId!,
+      })
+      .subscribe({
       next: (response) => {
         console.log('Pessoas carregadas:', response);
         if (response.page.totalElements > 0) {
