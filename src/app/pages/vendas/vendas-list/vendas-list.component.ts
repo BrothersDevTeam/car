@@ -19,6 +19,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
@@ -48,6 +49,7 @@ import { VendaStatus } from '@enums/venda-status';
     MatFormFieldModule,
     MatInputModule,
     MatPaginatorModule,
+    MatButtonToggleModule,
   ],
   providers: [DatePipe, CurrencyPipe],
   templateUrl: './vendas-list.component.html',
@@ -70,6 +72,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
   vendasListLoading = signal(false);
   searchValue: string = '';
   selectedStoreId: string | null = null;
+  selectedStatus: string = 'TODOS';
 
   paginationConfig = {
     pageSize: 10,
@@ -178,7 +181,11 @@ export class VendasListComponent implements OnInit, OnDestroy {
       .getPaginatedData(
         this.paginationConfig.pageIndex,
         this.paginationConfig.pageSize,
-        { search: this.searchValue, storeId: this.selectedStoreId }
+        {
+          search: this.searchValue,
+          storeId: this.selectedStoreId,
+          status: this.selectedStatus !== 'TODOS' ? this.selectedStatus : undefined,
+        }
       )
       .pipe(
         catchError((err) => {
@@ -198,6 +205,12 @@ export class VendasListComponent implements OnInit, OnDestroy {
   onSearch(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.searchSubject.next(value);
+  }
+
+  onStatusChange(status: string) {
+    this.selectedStatus = status;
+    this.paginationConfig.pageIndex = 0;
+    this.loadVendasList();
   }
 
   handlePageEvent(event: PageEvent) {

@@ -33,6 +33,39 @@
     </div>
   </app-content-header>
 
+  <div class="premium-filter-bar">
+    <mat-button-toggle-group
+      [(ngModel)]="selectedStatus"
+      (change)="onStatusChange($event.value)"
+      class="status-toggle-group"
+    >
+      <mat-button-toggle value="TODOS">
+        <div class="toggle-content">
+          <mat-icon>apps</mat-icon>
+          <span>Tudo</span>
+        </div>
+      </mat-button-toggle>
+      <mat-button-toggle value="ATIVA">
+        <div class="toggle-content">
+          <mat-icon class="icon-ativa">check_circle</mat-icon>
+          <span>Ativa</span>
+        </div>
+      </mat-button-toggle>
+      <mat-button-toggle value="CANCELADA">
+        <div class="toggle-content">
+          <mat-icon class="icon-cancelada">cancel</mat-icon>
+          <span>Cancelada</span>
+        </div>
+      </mat-button-toggle>
+      <mat-button-toggle value="TRANSFERENCIA">
+        <div class="toggle-content">
+          <mat-icon class="icon-transferencia">swap_horiz</mat-icon>
+          <span>Transferência</span>
+        </div>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
   @if (vendasPaginatedList?.page?.totalElements) {
     <app-generic-table
       [genericPaginatedList]="vendasPaginatedList"

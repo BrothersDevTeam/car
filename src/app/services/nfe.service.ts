@@ -27,7 +27,7 @@ export class NfeService {
   getPaginatedData(
     pageIndex: number,
     pageSize: number,
-    searchParams?: { search?: string; storeId?: string }
+    searchParams?: { search?: string; storeId?: string; nfeStatus?: string }
   ): Observable<PaginationResponse<Nfe>> {
     const hasSearchParams =
       searchParams &&
@@ -48,6 +48,9 @@ export class NfeService {
       }
       if (searchParams.storeId?.trim()) {
         url += `&storeId=${encodeURIComponent(searchParams.storeId.trim())}`;
+      }
+      if (searchParams.nfeStatus?.trim()) {
+        url += `&nfeStatus=${encodeURIComponent(searchParams.nfeStatus.trim())}`;
       }
     }
 

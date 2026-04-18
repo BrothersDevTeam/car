@@ -42,7 +42,7 @@ export class VendaService {
   getPaginatedData(
     pageIndex: number,
     pageSize: number,
-    searchParams?: { search?: string; storeId?: string }
+    searchParams?: { search?: string; storeId?: string; status?: string }
   ): Observable<PaginationResponse<VendaResponseDto>> {
     const hasSearchParams =
       searchParams && (searchParams.search?.trim() || searchParams.storeId);
@@ -56,6 +56,10 @@ export class VendaService {
 
     if (searchParams?.search?.trim()) {
       url += `&search=${encodeURIComponent(searchParams.search.trim())}`;
+    }
+
+    if (searchParams?.status?.trim()) {
+      url += `&vendaStatus=${encodeURIComponent(searchParams.status.trim())}`;
     }
 
     return this.http.get<PaginationResponse<VendaResponseDto>>(url).pipe(

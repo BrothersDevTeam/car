@@ -9,6 +9,7 @@ import { Component, inject, signal, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { DatePipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
@@ -43,6 +44,7 @@ import { ToastrService } from 'ngx-toastr';
     DatePipe,
     NgClass,
     FormsModule,
+    MatButtonToggleModule,
   ],
   templateUrl: './nfe.component.html',
   styleUrl: './nfe.component.scss',
@@ -58,6 +60,7 @@ export class NfeComponent {
   selectedRows: Nfe[] = [];
   searchValue: string = '';
   selectedStoreId: string | null = null;
+  selectedStatus: string = 'TODOS';
   paginationRequestConfig = {
     pageSize: 1000,
     pageIndex: 0,
@@ -77,6 +80,8 @@ export class NfeComponent {
         autorizado: { label: 'Autorizado', cssClass: 'badge-autorizado' },
         cancelado: { label: 'Cancelado', cssClass: 'badge-cancelado' },
         erro: { label: 'Erro', cssClass: 'badge-erro' },
+        denegado: { label: 'Denegada', cssClass: 'badge-cancelado' },
+        inutilizada: { label: 'Inutilizada', cssClass: 'badge-cancelado' },
       },
     },
     {
@@ -236,15 +241,22 @@ export class NfeComponent {
   loadNfeList(pageIndex: number, pageSize: number, searchValue?: string) {
     this.nfeListLoading.set(true);
 
-    let searchParams: { search?: string; storeId?: string } | undefined;
+    let searchParams: {
+      search?: string;
+      storeId?: string;
+      nfeStatus?: string;
+    } = {};
 
     if (searchValue && searchValue.trim()) {
-      searchParams = { search: searchValue.trim() };
+      searchParams.search = searchValue.trim();
     }
 
     if (this.selectedStoreId) {
-      searchParams ??= {};
       searchParams.storeId = this.selectedStoreId;
+    }
+
+    if (this.selectedStatus && this.selectedStatus !== 'TODOS') {
+      searchParams.nfeStatus = this.selectedStatus;
     }
 
     this.nfeService
@@ -295,6 +307,15 @@ export class NfeComponent {
   onSearch(event: Event) {
     this.searchValue = (event.target as HTMLInputElement).value;
     this.searchSubject.next(this.searchValue);
+  }
+
+  onStatusChange(status: string) {
+    this.selectedStatus = status;
+    this.loadNfeList(
+      0,
+      this.paginationRequestConfig.pageSize,
+      this.searchValue
+    );
   }
 
   clearSearch() {

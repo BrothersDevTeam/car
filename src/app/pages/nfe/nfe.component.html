@@ -49,6 +49,63 @@
     </button>
   </app-content-header>
 
+  <div class="premium-filter-bar">
+    <mat-button-toggle-group
+      [(ngModel)]="selectedStatus"
+      (change)="onStatusChange($event.value)"
+      class="status-toggle-group"
+    >
+      <mat-button-toggle value="TODOS">
+        <div class="toggle-content">
+          <mat-icon>apps</mat-icon>
+          <span>Tudo</span>
+        </div>
+      </mat-button-toggle>
+      <mat-button-toggle value="rascunho">
+        <div class="toggle-content">
+          <mat-icon>edit_note</mat-icon>
+          <span>Rascunho</span>
+        </div>
+      </mat-button-toggle>
+      <mat-button-toggle value="processando">
+        <div class="toggle-content">
+          <mat-icon class="icon-processando">sync</mat-icon>
+          <span>Processando</span>
+        </div>
+      </mat-button-toggle>
+      <mat-button-toggle value="autorizado">
+        <div class="toggle-content">
+          <mat-icon class="icon-autorizado">check_circle</mat-icon>
+          <span>Autorizada</span>
+        </div>
+      </mat-button-toggle>
+      <mat-button-toggle value="cancelado">
+        <div class="toggle-content">
+          <mat-icon class="icon-cancelado">cancel</mat-icon>
+          <span>Cancelada</span>
+        </div>
+      </mat-button-toggle>
+      <mat-button-toggle value="erro">
+        <div class="toggle-content">
+          <mat-icon class="icon-erro">error</mat-icon>
+          <span>Erro</span>
+        </div>
+      </mat-button-toggle>
+      <mat-button-toggle value="denegado">
+        <div class="toggle-content">
+          <mat-icon class="icon-denegado">gavel</mat-icon>
+          <span>Denegada</span>
+        </div>
+      </mat-button-toggle>
+      <mat-button-toggle value="inutilizada">
+        <div class="toggle-content">
+          <mat-icon class="icon-inutilizada">block</mat-icon>
+          <span>Inutilizada</span>
+        </div>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
   @if (nfePaginatedList?.page?.totalElements) {
     <app-generic-table
       [columns]="columns"
