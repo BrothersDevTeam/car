@@ -36,14 +36,18 @@ export class EmployeeService {
       // pois o backend já resolve quem é funcionário baseado nas Authorizations do usuário logado.
     }
 
-    return this.http.get<PaginationResponse<Person>>(this.apiUrl, { params }).pipe(
-      map(response => {
-        if (!searchParams?.includeInactive) {
-          response.content = response.content.filter(person => person.active);
-          response.page.totalElements = response.content.length;
-        }
-        return response;
-      })
-    );
+    return this.http
+      .get<PaginationResponse<Person>>(this.apiUrl, { params })
+      .pipe(
+        map((response) => {
+          if (!searchParams?.includeInactive) {
+            response.content = response.content.filter(
+              (person) => person.active
+            );
+            response.page.totalElements = response.content.length;
+          }
+          return response;
+        })
+      );
   }
 }

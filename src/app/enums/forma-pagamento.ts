@@ -11,5 +11,5 @@ export enum FormaPagamento {
   DOC = 'DOC',
   CARTAO = 'CARTAO',
   TROCA = 'TROCA',
-  OUTROS = 'OUTROS'
+  OUTROS = 'OUTROS',
 }

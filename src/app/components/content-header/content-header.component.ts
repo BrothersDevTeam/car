@@ -24,4 +24,3 @@ export class ContentHeaderComponent {
     this.onClick.emit();
   }
 }
-

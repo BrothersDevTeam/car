@@ -1,7 +1,7 @@
 <main>
   <app-content-header
     title="Dashboard"
-    btn_label="" 
+    btn_label=""
   ></app-content-header>
 
   @if (loading) {
@@ -13,7 +13,10 @@
       <!-- Sistema e Clientes -->
       <mat-card class="dashboard-card primary-card">
         <mat-card-header>
-          <div mat-card-avatar class="card-icon">
+          <div
+            mat-card-avatar
+            class="card-icon"
+          >
             <mat-icon>store</mat-icon>
           </div>
           <mat-card-title>Lojas Ativas</mat-card-title>
@@ -26,7 +29,10 @@
 
       <mat-card class="dashboard-card accent-card">
         <mat-card-header>
-          <div mat-card-avatar class="card-icon">
+          <div
+            mat-card-avatar
+            class="card-icon"
+          >
             <mat-icon>domain</mat-icon>
           </div>
           <mat-card-title>Total Filiais</mat-card-title>
@@ -39,7 +45,10 @@
 
       <mat-card class="dashboard-card success-card">
         <mat-card-header>
-          <div mat-card-avatar class="card-icon">
+          <div
+            mat-card-avatar
+            class="card-icon"
+          >
             <mat-icon>trending_up</mat-icon>
           </div>
           <mat-card-title>Novos Clientes</mat-card-title>
@@ -53,7 +62,10 @@
       <!-- Uso e Volume -->
       <mat-card class="dashboard-card info-card">
         <mat-card-header>
-          <div mat-card-avatar class="card-icon">
+          <div
+            mat-card-avatar
+            class="card-icon"
+          >
             <mat-icon>group</mat-icon>
           </div>
           <mat-card-title>Usuários Ativos</mat-card-title>
@@ -66,7 +78,10 @@
 
       <mat-card class="dashboard-card warning-card">
         <mat-card-header>
-          <div mat-card-avatar class="card-icon">
+          <div
+            mat-card-avatar
+            class="card-icon"
+          >
             <mat-icon>directions_car</mat-icon>
           </div>
           <mat-card-title>Estoque Global</mat-card-title>
@@ -79,7 +94,10 @@
 
       <mat-card class="dashboard-card purple-card">
         <mat-card-header>
-          <div mat-card-avatar class="card-icon">
+          <div
+            mat-card-avatar
+            class="card-icon"
+          >
             <mat-icon>receipt</mat-icon>
           </div>
           <mat-card-title>Volume NFe</mat-card-title>
@@ -94,8 +112,13 @@
     <div class="welcome-container">
       <mat-icon class="welcome-icon">home</mat-icon>
       <h2>Bem-vindo ao C.A.R. System!</h2>
-      <p>Sua área de Dashboard com indicadores personalizados estará disponível em breve.</p>
-      <p>Utilize o menu lateral para navegar pelas funcionalidades do sistema.</p>
+      <p>
+        Sua área de Dashboard com indicadores personalizados estará disponível
+        em breve.
+      </p>
+      <p>
+        Utilize o menu lateral para navegar pelas funcionalidades do sistema.
+      </p>
     </div>
   } @else {
     <div class="error-container">

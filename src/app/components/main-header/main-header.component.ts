@@ -50,7 +50,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
-    this.canReadStoreOthers = this.authService.hasAuthority(Authorizations.READ_STORE_OTHERS);
+    this.canReadStoreOthers = this.authService.hasAuthority(
+      Authorizations.READ_STORE_OTHERS
+    );
 
     // Escuta mudanças na loja globalmente selecionada
     this.storeContextService.currentStoreId$
@@ -123,6 +125,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     if (!cnpj) return '';
     const cleanCnpj = cnpj.replace(/\D/g, '');
     if (cleanCnpj.length !== 14) return cnpj;
-    return cleanCnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+    return cleanCnpj.replace(
+      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+      '$1.$2.$3/$4-$5'
+    );
   }
 }

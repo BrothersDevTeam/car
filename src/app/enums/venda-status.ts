@@ -8,5 +8,5 @@ export enum VendaStatus {
   /** Venda desfeita (veículo retorna ao estoque) */
   CANCELADA = 'CANCELADA',
   /** Venda realizada com transferência de veículo entre lojas */
-  TRANSFERENCIA = 'TRANSFERENCIA'
+  TRANSFERENCIA = 'TRANSFERENCIA',
 }

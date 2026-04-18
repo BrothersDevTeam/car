@@ -1,29 +1,29 @@
 .search-container {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 0px;
-    align-items: center;
-    flex-direction: row;
-    flex-wrap: wrap;
-    margin-right: auto;
-    flex: 1;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 0px;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-right: auto;
+  flex: 1;
 
-    ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-        display: none;
-    }
-    
-    ::ng-deep .mat-mdc-form-field-bottom-align {
-        display: none;
-    }
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  ::ng-deep .mat-mdc-form-field-bottom-align {
+    display: none;
+  }
 }
 
 .search-field {
-    flex: 0 1 550px;
-    min-width: 200px;
+  flex: 0 1 550px;
+  min-width: 200px;
 }
 
 .vendas-container {
-    display: none; // Pode ser removido do HTML depois, mas limpando aqui
+  display: none; // Pode ser removido do HTML depois, mas limpando aqui
 }
 
 .loader-div,
@@ -61,43 +61,61 @@
 }
 
 @keyframes animloader {
-  0% { transform: translate(-10px, -10px); }
-  12.5% { transform: translate(-10px, 0px); }
-  25% { transform: translate(0px, 10px); }
-  37.5% { transform: translate(10px, 10px); }
-  50% { transform: translate(20px, 0px); }
-  62.5% { transform: translate(20px, -10px); }
-  75% { transform: translate(10px, -20px); }
-  87.5% { transform: translate(0px, -20px); }
-  100% { transform: translate(-10px, -10px); }
+  0% {
+    transform: translate(-10px, -10px);
+  }
+  12.5% {
+    transform: translate(-10px, 0px);
+  }
+  25% {
+    transform: translate(0px, 10px);
+  }
+  37.5% {
+    transform: translate(10px, 10px);
+  }
+  50% {
+    transform: translate(20px, 0px);
+  }
+  62.5% {
+    transform: translate(20px, -10px);
+  }
+  75% {
+    transform: translate(10px, -20px);
+  }
+  87.5% {
+    transform: translate(0px, -20px);
+  }
+  100% {
+    transform: translate(-10px, -10px);
+  }
 }
 
 // Estilos para as badges (repetindo padrões do projeto ou importando globals se existir)
 ::ng-deep {
-    .badge-autorizado {
-        background-color: #e6f4ea;
-        color: #1e8e3e;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 500;
-    }
+  .badge-autorizado {
+    background-color: #e6f4ea;
+    color: #1e8e3e;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
 
-    .badge-cancelado {
-        background-color: #fce8e6;
-        color: #d93025;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 500;
-    }
+  .badge-cancelado {
+    background-color: #fce8e6;
+    color: #d93025;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
 
-    .badge-processando {
-        background-color: #fef7e0;
-        color: #f29900;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 500;
-    }
+  .badge-processando {
+    background-color: #fef7e0;
+    color: #f29900;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
 }

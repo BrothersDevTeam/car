@@ -31,8 +31,7 @@ export class VehicleService {
     searchParams?: { search?: string; storeId?: string; onlyInStock?: boolean }
   ): Observable<PaginationResponse<Vehicle>> {
     const hasSearchParams =
-      searchParams &&
-      Object.keys(searchParams).length > 0;
+      searchParams && Object.keys(searchParams).length > 0;
 
     // Only use cache if there are no search params
     if (this.cache && !hasSearchParams) {

@@ -52,13 +52,14 @@
       align-items: center;
       gap: 0.75rem;
 
-      .logo-image, .logo-placeholder {
+      .logo-image,
+      .logo-placeholder {
         width: 42px;
         height: 42px;
         padding: 0;
         border-radius: 6px;
       }
-      
+
       .logo-placeholder .placeholder-icon {
         font-size: 1.5rem;
         width: 1.5rem;
@@ -99,7 +100,7 @@
       margin-top: auto;
       border-top: none; // remove border like in screenshot
     }
-    
+
     .primary-actions {
       flex: 1;
       gap: 0.5rem;
@@ -129,7 +130,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        
+
         mat-icon {
           font-size: 20px;
           width: 20px;
@@ -238,7 +239,7 @@
     font-size: 1rem;
     width: 1rem;
     height: 1rem;
-}
+  }
 
   &.status-success {
     background: #d4edda;

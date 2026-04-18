@@ -29,7 +29,7 @@ export interface ParametroFiscal {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ParametroFiscalService {
   private readonly apiUrl: string = '/api/fiscal/parametros';

@@ -5,14 +5,29 @@
   fontIcon="store"
   (onClick)="onCreateStore()"
 >
-  <mat-button-toggle-group [value]="viewMode" (change)="changeViewMode($event.value)" class="view-mode-toggle" aria-label="Modo de Visualização" hideSingleSelectionIndicator>
-    <mat-button-toggle value="grid" matTooltip="Grade Detalhada">
+  <mat-button-toggle-group
+    [value]="viewMode"
+    (change)="changeViewMode($event.value)"
+    class="view-mode-toggle"
+    aria-label="Modo de Visualização"
+    hideSingleSelectionIndicator
+  >
+    <mat-button-toggle
+      value="grid"
+      matTooltip="Grade Detalhada"
+    >
       <mat-icon>grid_view</mat-icon>
     </mat-button-toggle>
-    <mat-button-toggle value="compact" matTooltip="Grade Simples">
+    <mat-button-toggle
+      value="compact"
+      matTooltip="Grade Simples"
+    >
       <mat-icon>grid_on</mat-icon>
     </mat-button-toggle>
-    <mat-button-toggle value="table" matTooltip="Lista/Tabela">
+    <mat-button-toggle
+      value="table"
+      matTooltip="Lista/Tabela"
+    >
       <mat-icon>view_list</mat-icon>
     </mat-button-toggle>
   </mat-button-toggle-group>
@@ -33,13 +48,29 @@
   } @else {
     @if (viewMode === 'table') {
       <div class="table-container mat-elevation-z2">
-        <table mat-table [dataSource]="stores" class="stores-table">
+        <table
+          mat-table
+          [dataSource]="stores"
+          class="stores-table"
+        >
           <ng-container matColumnDef="logo">
-            <th mat-header-cell *matHeaderCellDef> Logo </th>
-            <td mat-cell *matCellDef="let store">
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              Logo
+            </th>
+            <td
+              mat-cell
+              *matCellDef="let store"
+            >
               <div class="table-logo-placeholder">
                 @if (store.imageUrl) {
-                  <img [src]="store.imageUrl" [alt]="store.tradeName || store.name" class="table-logo-image"/>
+                  <img
+                    [src]="store.imageUrl"
+                    [alt]="store.tradeName || store.name"
+                    class="table-logo-image"
+                  />
                 } @else {
                   <mat-icon>storefont</mat-icon>
                 }
@@ -48,84 +79,180 @@
           </ng-container>
 
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef> Loja </th>
-            <td mat-cell *matCellDef="let store">
-              <div class="table-store-name">{{ store.tradeName || store.name }}</div>
-              <div class="table-store-legal" *ngIf="store.tradeName && store.tradeName !== store.name">{{ store.name }}</div>
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              Loja
+            </th>
+            <td
+              mat-cell
+              *matCellDef="let store"
+            >
+              <div class="table-store-name">
+                {{ store.tradeName || store.name }}
+              </div>
+              <div
+                class="table-store-legal"
+                *ngIf="store.tradeName && store.tradeName !== store.name"
+              >
+                {{ store.name }}
+              </div>
             </td>
           </ng-container>
 
           <ng-container matColumnDef="cnpj">
-            <th mat-header-cell *matHeaderCellDef> CNPJ </th>
-            <td mat-cell *matCellDef="let store"> {{ getFormattedCnpj(store.cnpj) }} </td>
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              CNPJ
+            </th>
+            <td
+              mat-cell
+              *matCellDef="let store"
+            >
+              {{ getFormattedCnpj(store.cnpj) }}
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef> Status </th>
-            <td mat-cell *matCellDef="let store">
-              <span class="table-badge" [ngStyle]="{'background-color': getStatusColor(store.storeStatus) + '20', 'color': getStatusColor(store.storeStatus)}">
-                <mat-icon [style.color]="getStatusColor(store.storeStatus)">{{ getStatusIcon(store.storeStatus) }}</mat-icon>
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              Status
+            </th>
+            <td
+              mat-cell
+              *matCellDef="let store"
+            >
+              <span
+                class="table-badge"
+                [ngStyle]="{
+                  'background-color': getStatusColor(store.storeStatus) + '20',
+                  color: getStatusColor(store.storeStatus),
+                }"
+              >
+                <mat-icon [style.color]="getStatusColor(store.storeStatus)">
+                  {{ getStatusIcon(store.storeStatus) }}
+                </mat-icon>
                 {{ getStatusLabel(store.storeStatus) }}
               </span>
             </td>
           </ng-container>
 
           <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef class="actions-header"> Ações </th>
-            <td mat-cell *matCellDef="let store" class="actions-cell">
-              <button mat-icon-button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{store: store}" aria-label="Ações da Loja" (click)="$event.stopPropagation()">
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+              class="actions-header"
+            >
+              Ações
+            </th>
+            <td
+              mat-cell
+              *matCellDef="let store"
+              class="actions-cell"
+            >
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="menu"
+                [matMenuTriggerData]="{ store: store }"
+                aria-label="Ações da Loja"
+                (click)="$event.stopPropagation()"
+              >
                 <mat-icon>more_vert</mat-icon>
               </button>
             </td>
           </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onSelectStore(row)" [class.active-store]="row.storeId === selectedStoreId" class="clickable-row"></tr>
+          <tr
+            mat-header-row
+            *matHeaderRowDef="displayedColumns"
+          ></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            (click)="onSelectStore(row)"
+            [class.active-store]="row.storeId === selectedStoreId"
+            class="clickable-row"
+          ></tr>
         </table>
 
         <!-- Table Menu Template -->
         <mat-menu #menu="matMenu">
-          <ng-template matMenuContent let-store="store">
-            <button mat-menu-item (click)="onEditStore(store)">
-              <mat-icon style="color: #007bff;">edit</mat-icon>
+          <ng-template
+            matMenuContent
+            let-store="store"
+          >
+            <button
+              mat-menu-item
+              (click)="onEditStore(store)"
+            >
+              <mat-icon style="color: #007bff">edit</mat-icon>
               <span>Editar</span>
             </button>
-            <button mat-menu-item (click)="onViewDetails(store)">
+            <button
+              mat-menu-item
+              (click)="onViewDetails(store)"
+            >
               <mat-icon>info</mat-icon>
               <span>Detalhes</span>
             </button>
-            <button mat-menu-item (click)="onUploadImage(store)">
-              <mat-icon style="color: #28a745;">add_photo_alternate</mat-icon>
+            <button
+              mat-menu-item
+              (click)="onUploadImage(store)"
+            >
+              <mat-icon style="color: #28a745">add_photo_alternate</mat-icon>
               <span>Alterar Logo</span>
             </button>
             <mat-divider></mat-divider>
-            <button mat-menu-item (click)="onManageAddress(store)">
+            <button
+              mat-menu-item
+              (click)="onManageAddress(store)"
+            >
               <mat-icon>location_on</mat-icon>
               <span>Endereços</span>
             </button>
-            <button mat-menu-item (click)="onManageOwner(store)">
-              <mat-icon style="color: #ffc107;">person_add</mat-icon>
+            <button
+              mat-menu-item
+              (click)="onManageOwner(store)"
+            >
+              <mat-icon style="color: #ffc107">person_add</mat-icon>
               <span>Proprietário</span>
             </button>
-            <button mat-menu-item (click)="onManageAuthorizations(store)">
+            <button
+              mat-menu-item
+              (click)="onManageAuthorizations(store)"
+            >
               <mat-icon>security</mat-icon>
               <span>Autorizações</span>
             </button>
             <mat-divider></mat-divider>
             @if (canManageFiscal) {
-              <button mat-menu-item (click)="onManageFiscal(store)">
+              <button
+                mat-menu-item
+                (click)="onManageFiscal(store)"
+              >
                 <mat-icon>receipt_long</mat-icon>
                 <span>Configuração Fiscal</span>
               </button>
             }
             @if (store.storeType === 'MATRIZ' && isCarAdmin) {
-              <button mat-menu-item (click)="onViewBranches(store)">
+              <button
+                mat-menu-item
+                (click)="onViewBranches(store)"
+              >
                 <mat-icon>store</mat-icon>
                 <span>Ver Filiais</span>
               </button>
             }
             @if (store.storeType === 'BRANCH') {
-              <button mat-menu-item (click)="onDeleteStore(store)">
+              <button
+                mat-menu-item
+                (click)="onDeleteStore(store)"
+              >
                 <mat-icon color="warn">delete</mat-icon>
                 <span>Excluir</span>
               </button>
@@ -134,7 +261,10 @@
         </mat-menu>
       </div>
     } @else {
-      <div class="stores-grid" [class.compact-grid]="viewMode === 'compact'">
+      <div
+        class="stores-grid"
+        [class.compact-grid]="viewMode === 'compact'"
+      >
         @for (store of stores; track store.storeId) {
           <app-store-card
             [store]="store"
@@ -159,14 +289,14 @@
             (uploadImage)="onUploadImage($event)"
             (viewDetails)="onViewDetails($event)"
           ></app-store-card>
-      } @empty {
-        <div class="empty-state">
-          <mat-icon class="empty-icon">store</mat-icon>
-          <h3>Nenhuma loja encontrada</h3>
-          <p>Comece cadastrando sua primeira loja</p>
-        </div>
-      }
-    </div>
+        } @empty {
+          <div class="empty-state">
+            <mat-icon class="empty-icon">store</mat-icon>
+            <h3>Nenhuma loja encontrada</h3>
+            <p>Comece cadastrando sua primeira loja</p>
+          </div>
+        }
+      </div>
+    }
   }
-}
 </div>

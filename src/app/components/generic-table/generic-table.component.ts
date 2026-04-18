@@ -30,7 +30,7 @@ import type { PaginationResponse } from '@interfaces/pagination';
     MatButtonModule,
     NgClass,
     NgIf,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
   ],
   templateUrl: './generic-table.component.html',
   styleUrl: './generic-table.component.scss',

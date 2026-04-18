@@ -21,7 +21,12 @@ import { StoreService } from '@services/store.service';
 import { AuthService } from '@services/auth/auth.service';
 import { StoreContextService } from '@services/store-context.service';
 import { Authorizations } from '../../enums/authorizations';
-import { StoreStatus, StoreStatusLabels, StoreStatusIcons, StoreStatusColors } from '../../enums/storeTypes';
+import {
+  StoreStatus,
+  StoreStatusLabels,
+  StoreStatusIcons,
+  StoreStatusColors,
+} from '../../enums/storeTypes';
 
 @Component({
   selector: 'app-store',
@@ -64,7 +69,11 @@ export class StoreComponent implements OnInit {
 
   ngOnInit(): void {
     const savedViewMode = localStorage.getItem('storeViewMode');
-    if (savedViewMode === 'grid' || savedViewMode === 'compact' || savedViewMode === 'table') {
+    if (
+      savedViewMode === 'grid' ||
+      savedViewMode === 'compact' ||
+      savedViewMode === 'table'
+    ) {
       this.viewMode = savedViewMode;
     }
 
@@ -88,7 +97,9 @@ export class StoreComponent implements OnInit {
     this.canManageFiscal =
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
       this.authService.hasAuthority(Authorizations.EDIT_STORE) ||
-      this.authService.hasAuthority(Authorizations.SYNC_FOCUSNFE as Authorizations);
+      this.authService.hasAuthority(
+        Authorizations.SYNC_FOCUSNFE as Authorizations
+      );
   }
 
   private loadStores(): void {
@@ -104,11 +115,15 @@ export class StoreComponent implements OnInit {
         const allFetchedStores = response.content;
         if (this.selectedStoreId) {
           this.stores = allFetchedStores.filter(
-            (store: any) => store.storeId === this.selectedStoreId || store.mainStoreId === this.selectedStoreId
+            (store: any) =>
+              store.storeId === this.selectedStoreId ||
+              store.mainStoreId === this.selectedStoreId
           );
         } else {
           if (this.isCarAdmin) {
-            this.stores = allFetchedStores.filter((store: any) => store.storeType === 'MATRIZ');
+            this.stores = allFetchedStores.filter(
+              (store: any) => store.storeType === 'MATRIZ'
+            );
           } else {
             this.stores = allFetchedStores;
           }
@@ -136,7 +151,7 @@ export class StoreComponent implements OnInit {
   }
 
   getStatusLabel(status: any): string {
-    return StoreStatusLabels[status as StoreStatus] || status as string;
+    return StoreStatusLabels[status as StoreStatus] || (status as string);
   }
 
   getStatusIcon(status: any): string {
@@ -151,7 +166,10 @@ export class StoreComponent implements OnInit {
     if (!cnpj) return '';
     const cleanCnpj = cnpj.replace(/\D/g, '');
     if (cleanCnpj.length !== 14) return cnpj;
-    return cleanCnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+    return cleanCnpj.replace(
+      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+      '$1.$2.$3/$4-$5'
+    );
   }
 
   onEditStore(store: Store): void {

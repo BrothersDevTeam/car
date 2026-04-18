@@ -14,7 +14,8 @@ export class VendaService {
   private cache: PaginationResponse<VendaResponseDto> | null = null;
 
   // Subject para notificar mudanças no cache
-  private cacheUpdated$ = new BehaviorSubject<PaginationResponse<VendaResponseDto> | null>(null);
+  private cacheUpdated$ =
+    new BehaviorSubject<PaginationResponse<VendaResponseDto> | null>(null);
 
   constructor(
     private http: HttpClient,
@@ -69,7 +70,9 @@ export class VendaService {
   }
 
   getVendaById(id: string): Observable<VendaResponseDto> {
-    return this.http.get<VendaResponseDto>(`${this.getBaseUrl()}/${id}`).pipe(first());
+    return this.http
+      .get<VendaResponseDto>(`${this.getBaseUrl()}/${id}`)
+      .pipe(first());
   }
 
   create(data: VendaRequestDto): Observable<VendaResponseDto> {
@@ -81,13 +84,18 @@ export class VendaService {
     );
   }
 
-  update(id: string, data: Partial<VendaRequestDto>): Observable<VendaResponseDto> {
-    return this.http.put<VendaResponseDto>(`${this.getBaseUrl()}/${id}`, data).pipe(
-      tap((response) => {
-        console.log('Venda atualizada com sucesso!', response);
-        this.clearCache();
-      })
-    );
+  update(
+    id: string,
+    data: Partial<VendaRequestDto>
+  ): Observable<VendaResponseDto> {
+    return this.http
+      .put<VendaResponseDto>(`${this.getBaseUrl()}/${id}`, data)
+      .pipe(
+        tap((response) => {
+          console.log('Venda atualizada com sucesso!', response);
+          this.clearCache();
+        })
+      );
   }
 
   cancelVenda(id: string): Observable<MessageResponse> {

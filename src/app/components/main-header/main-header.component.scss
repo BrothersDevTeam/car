@@ -21,7 +21,7 @@ mat-toolbar {
     border: 1.5px solid #94a3b8; // Darker slate-400 border, slightly thicker
     border-radius: 9999px; // Pill shape
     padding: 6px 16px 6px 8px; // Asymmetric padding to account for the icon on the left
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); // Stronger initial shadow
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); // Stronger initial shadow
     transition: all 0.2s ease;
     cursor: pointer;
 
@@ -32,12 +32,12 @@ mat-toolbar {
     }
 
     ::ng-deep .mat-mdc-select-value {
-      color: #334155; 
+      color: #334155;
     }
     ::ng-deep .mat-mdc-select-trigger {
-       height: auto;
-       display: flex;
-       align-items: center;
+      height: auto;
+      display: flex;
+      align-items: center;
     }
     ::ng-deep .mat-mdc-select-arrow-wrapper {
       transform: translateY(2px); // Align caret
@@ -51,7 +51,7 @@ mat-toolbar {
       display: flex;
       align-items: center;
       gap: 12px;
-      
+
       .store-trigger-icon {
         display: flex;
         align-items: center;
@@ -102,7 +102,9 @@ mat-toolbar {
   width: auto !important;
   font-family: 'Inter', Roboto, sans-serif;
   border-radius: 12px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 
   .mat-mdc-option {
@@ -118,7 +120,8 @@ mat-toolbar {
       border-bottom: none;
     }
 
-    &:hover, &.mat-mdc-option-active {
+    &:hover,
+    &.mat-mdc-option-active {
       background-color: #f8fafc;
     }
 
@@ -130,17 +133,17 @@ mat-toolbar {
     &.global-option {
       background-color: #f0fdf4; // Very light green/accent background
       border-bottom: 2px solid #e2e8f0; // Stronger divider after "Toda a Rede"
-      
+
       &:hover {
         background-color: #dcfce7;
       }
-      
+
       .option-title {
         color: #166534; // Deep green text
         font-weight: 700;
         font-size: 0.95rem;
       }
-      
+
       mat-icon {
         color: #16a34a; // Green icon
       }
@@ -219,7 +222,7 @@ mat-toolbar {
       .option-content-container {
         gap: 12px;
       }
-      
+
       .option-title {
         font-size: 0.85rem;
         white-space: normal;
@@ -234,7 +237,7 @@ mat-toolbar {
 ::ng-deep .cdk-overlay-pane:has(.header-store-select-panel) {
   right: 16px !important;
   left: auto !important;
-  
+
   @media (max-width: 768px) {
     right: 8px !important;
     max-width: calc(100vw - 16px) !important;

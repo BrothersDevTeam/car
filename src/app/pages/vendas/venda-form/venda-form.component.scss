@@ -1,118 +1,131 @@
 .form-container {
-    padding: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .venda-form {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .form-section {
-    border-radius: 8px;
-    
-    mat-card-header {
-        margin-bottom: 16px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 8px;
-        
-        mat-card-title {
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: #333;
-        }
+  border-radius: 8px;
 
-        &.header-with-action {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+  mat-card-header {
+    margin-bottom: 16px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+
+    mat-card-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #333;
     }
+
+    &.header-with-action {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
 }
 
 .grid-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 8px;
 }
 
-.col-12 { flex: 0 0 100%; }
-.col-8  { flex: 0 0 calc(66.66% - 16px); }
-.col-6  { flex: 0 0 calc(50% - 16px); }
-.col-4  { flex: 0 0 calc(33.33% - 16px); }
-.col-3  { flex: 0 0 calc(25% - 16px); }
+.col-12 {
+  flex: 0 0 100%;
+}
+.col-8 {
+  flex: 0 0 calc(66.66% - 16px);
+}
+.col-6 {
+  flex: 0 0 calc(50% - 16px);
+}
+.col-4 {
+  flex: 0 0 calc(33.33% - 16px);
+}
+.col-3 {
+  flex: 0 0 calc(25% - 16px);
+}
 
 mat-form-field {
-    width: 100%;
+  width: 100%;
 }
 
 .pagamentos-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .pagamento-item {
-    padding: 16px 0;
-    
-    .actions-cell {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-    }
+  padding: 16px 0;
+
+  .actions-cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
 }
 
 .avalistas-chips {
-    margin-top: 16px;
-    padding: 12px;
-    background: #f8f9fa;
-    border-radius: 4px;
-    min-height: 48px;
+  margin-top: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  min-height: 48px;
 
-    .empty-state {
-        color: #999;
-        font-style: italic;
-        margin: 0;
-        text-align: center;
-    }
+  .empty-state {
+    color: #999;
+    font-style: italic;
+    margin: 0;
+    text-align: center;
+  }
 }
 
 .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 16px;
-    padding: 16px 0 48px;
-    
-    button {
-        padding: 0 32px;
-        height: 48px;
-    }
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 16px 0 48px;
+
+  button {
+    padding: 0 32px;
+    height: 48px;
+  }
 }
 
 .loader-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 40vh;
-    gap: 16px;
-    color: #666;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 40vh;
+  gap: 16px;
+  color: #666;
 }
 
 // Responsividade
 @media (max-width: 768px) {
-    .col-3, .col-4, .col-6, .col-8 {
-        flex: 0 0 100%;
-    }
+  .col-3,
+  .col-4,
+  .col-6,
+  .col-8 {
+    flex: 0 0 100%;
+  }
 
-    .form-actions {
-        flex-direction: column;
-        
-        button {
-            width: 100%;
-        }
+  .form-actions {
+    flex-direction: column;
+
+    button {
+      width: 100%;
     }
+  }
 }

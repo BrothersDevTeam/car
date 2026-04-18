@@ -134,15 +134,21 @@ export class PersonComponent implements OnInit, OnDestroy {
       header: '',
       showCheckbox: (row: Person) => {
         const loggedUserRelationship = this.authService.getPersonRelationship();
-        
+
         // Proprietário não pode excluir outro proprietário (e consequentemente ele mesmo)
-        if (loggedUserRelationship === RelationshipTypes.PROPRIETARIO && row.relationship === RelationshipTypes.PROPRIETARIO) {
+        if (
+          loggedUserRelationship === RelationshipTypes.PROPRIETARIO &&
+          row.relationship === RelationshipTypes.PROPRIETARIO
+        ) {
           return false;
         }
 
         // Gerente não pode excluir outro gerente nem proprietário
-        if (loggedUserRelationship === RelationshipTypes.GERENTE && 
-           (row.relationship === RelationshipTypes.GERENTE || row.relationship === RelationshipTypes.PROPRIETARIO)) {
+        if (
+          loggedUserRelationship === RelationshipTypes.GERENTE &&
+          (row.relationship === RelationshipTypes.GERENTE ||
+            row.relationship === RelationshipTypes.PROPRIETARIO)
+        ) {
           return false;
         }
 
@@ -212,13 +218,19 @@ export class PersonComponent implements OnInit, OnDestroy {
         const loggedUserRelationship = this.authService.getPersonRelationship();
 
         // Proprietário não pode excluir outro proprietário (e consequentemente ele mesmo)
-        if (loggedUserRelationship === RelationshipTypes.PROPRIETARIO && row.relationship === RelationshipTypes.PROPRIETARIO) {
+        if (
+          loggedUserRelationship === RelationshipTypes.PROPRIETARIO &&
+          row.relationship === RelationshipTypes.PROPRIETARIO
+        ) {
           return false;
         }
 
         // Gerente não pode excluir outro gerente nem proprietário
-        if (loggedUserRelationship === RelationshipTypes.GERENTE && 
-           (row.relationship === RelationshipTypes.GERENTE || row.relationship === RelationshipTypes.PROPRIETARIO)) {
+        if (
+          loggedUserRelationship === RelationshipTypes.GERENTE &&
+          (row.relationship === RelationshipTypes.GERENTE ||
+            row.relationship === RelationshipTypes.PROPRIETARIO)
+        ) {
           return false;
         }
 

@@ -8,12 +8,12 @@
   margin-right: auto; // Empurra a busca para a esquerda
   flex: 1; // Ocupa o espaço livre deixando o botão na direita
 
-  // Subscript sizing dynamic can mess with center alignment if errors show, 
+  // Subscript sizing dynamic can mess with center alignment if errors show,
   // mas o padrão sem label longo funciona bem com align-items: center
   ::ng-deep .mat-mdc-form-field-subscript-wrapper {
     display: none; // Oculta o subscrito (espaço extra sob o input) para não desalinhar do botão.
   }
-  
+
   ::ng-deep .mat-mdc-form-field-bottom-align {
     display: none;
   }

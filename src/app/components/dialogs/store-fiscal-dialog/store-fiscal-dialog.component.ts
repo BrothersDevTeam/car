@@ -1,6 +1,15 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogModule,
+} from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 
@@ -14,7 +23,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // Services
-import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fiscal.service';
+import {
+  ParametroFiscalService,
+  ParametroFiscal,
+} from '@services/parametro-fiscal.service';
 import { FocusNfeService } from '@services/focus-nfe.service';
 import { Store } from '@interfaces/store';
 
@@ -31,10 +43,10 @@ import { Store } from '@interfaces/store';
     MatSelectModule,
     MatCheckboxModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
   ],
   templateUrl: './store-fiscal-dialog.component.html',
-  styleUrl: './store-fiscal-dialog.component.scss'
+  styleUrl: './store-fiscal-dialog.component.scss',
 })
 export class StoreFiscalDialogComponent implements OnInit {
   form: FormGroup;
@@ -47,7 +59,7 @@ export class StoreFiscalDialogComponent implements OnInit {
   regimes = [
     { value: 'SIMPLES_NACIONAL', label: 'Simples Nacional' },
     { value: 'LUCRO_PRESUMIDO', label: 'Lucro Presumido' },
-    { value: 'LUCRO_REAL', label: 'Lucro Real' }
+    { value: 'LUCRO_REAL', label: 'Lucro Real' },
   ];
 
   constructor(
@@ -68,7 +80,7 @@ export class StoreFiscalDialogComponent implements OnInit {
       parametroFiscalHabilitaNfce: [false],
       parametroFiscalSenhaCertificado: [''],
       parametroFiscalCertificadoBase64: [''],
-      parametroFiscalCadastradoFocusNfe: [{value: false, disabled: true}]
+      parametroFiscalCadastradoFocusNfe: [{ value: false, disabled: true }],
     });
   }
 
@@ -82,19 +94,21 @@ export class StoreFiscalDialogComponent implements OnInit {
 
   loadParametros(): void {
     this.loading = true;
-    this.parametroFiscalService.getByStoreId(this.data.store.storeId!).subscribe({
-      next: (config) => {
-        if (config && config.parametroFiscalRegimeTributario) {
-          this.hasExistingConfig = true;
-          this.form.patchValue(config);
-        }
-        this.loading = false;
-      },
-      error: (err) => {
-        // Se retornar 404/400 (nao existe), tudo bem, carregamos o form vazio
-        this.loading = false;
-      }
-    });
+    this.parametroFiscalService
+      .getByStoreId(this.data.store.storeId!)
+      .subscribe({
+        next: (config) => {
+          if (config && config.parametroFiscalRegimeTributario) {
+            this.hasExistingConfig = true;
+            this.form.patchValue(config);
+          }
+          this.loading = false;
+        },
+        error: (err) => {
+          // Se retornar 404/400 (nao existe), tudo bem, carregamos o form vazio
+          this.loading = false;
+        },
+      });
   }
 
   onFileSelected(event: any): void {
@@ -108,7 +122,7 @@ export class StoreFiscalDialogComponent implements OnInit {
           // Extrair apenas o Base64 sem o cabeçalho 'data:application/x-pkcs12;base64,'
           const base64String = reader.result.toString().split(',')[1];
           this.form.patchValue({
-            parametroFiscalCertificadoBase64: base64String
+            parametroFiscalCertificadoBase64: base64String,
           });
           this.form.markAsDirty();
         }
@@ -132,39 +146,55 @@ export class StoreFiscalDialogComponent implements OnInit {
 
     request.subscribe({
       next: (res) => {
-        this.snackBar.open('Parâmetros fiscais salvos com sucesso', 'Fechar', { duration: 3000 });
+        this.snackBar.open('Parâmetros fiscais salvos com sucesso', 'Fechar', {
+          duration: 3000,
+        });
         this.saving = false;
         this.hasExistingConfig = true;
         this.form.patchValue(res);
       },
       error: (err) => {
         console.error(err);
-        this.snackBar.open('Erro ao salvar configurações fiscais', 'Fechar', { duration: 4000 });
+        this.snackBar.open('Erro ao salvar configurações fiscais', 'Fechar', {
+          duration: 4000,
+        });
         this.saving = false;
-      }
+      },
     });
   }
 
   onSyncFocusNfe(): void {
     if (this.saving || this.loading || !this.hasExistingConfig) {
-      this.snackBar.open('Salve os parâmetros fiscais primeiro antes de sincronizar.', 'Fechar', { duration: 4000 });
+      this.snackBar.open(
+        'Salve os parâmetros fiscais primeiro antes de sincronizar.',
+        'Fechar',
+        { duration: 4000 }
+      );
       return;
     }
 
     this.syncing = true;
     this.focusNfeService.syncStore(this.data.store.storeId!).subscribe({
       next: (res) => {
-        this.snackBar.open('Integração com Focus NFe realizada com sucesso!', 'OK', { duration: 5000, panelClass: 'success-snackbar' });
+        this.snackBar.open(
+          'Integração com Focus NFe realizada com sucesso!',
+          'OK',
+          { duration: 5000, panelClass: 'success-snackbar' }
+        );
         this.syncing = false;
         this.form.patchValue({ parametroFiscalCadastradoFocusNfe: true });
         this.data.store = { ...this.data.store }; // Trigger a grid change se necessário
       },
       error: (err) => {
         console.error(err);
-        const errMsg = err.error?.message || 'Erro ao comunicar com a Receita / Focus NFe.';
-        this.snackBar.open(errMsg, 'Fechar', { duration: 5000, panelClass: 'error-snackbar' });
+        const errMsg =
+          err.error?.message || 'Erro ao comunicar com a Receita / Focus NFe.';
+        this.snackBar.open(errMsg, 'Fechar', {
+          duration: 5000,
+          panelClass: 'error-snackbar',
+        });
         this.syncing = false;
-      }
+      },
     });
   }
 }

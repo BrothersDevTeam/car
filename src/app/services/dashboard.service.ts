@@ -12,7 +12,7 @@ export interface AdminDashboardMetrics {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DashboardService {
   private apiUrl = '/api/dashboard';
@@ -24,6 +24,8 @@ export class DashboardService {
     if (storeId) {
       params = params.set('storeId', storeId);
     }
-    return this.http.get<AdminDashboardMetrics>(`${this.apiUrl}/admin`, { params });
+    return this.http.get<AdminDashboardMetrics>(`${this.apiUrl}/admin`, {
+      params,
+    });
   }
 }

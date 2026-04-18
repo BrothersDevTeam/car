@@ -20,7 +20,14 @@ import {
 @Component({
   selector: 'app-store-card',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatTooltipModule, MatMenuModule, MatDividerModule],
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
+    MatMenuModule,
+    MatDividerModule,
+  ],
   templateUrl: './store-card.component.html',
   styleUrl: './store-card.component.scss',
 })

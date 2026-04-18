@@ -1,8 +1,23 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, filter, finalize, Observable, switchMap, tap } from 'rxjs';
+import {
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  finalize,
+  Observable,
+  switchMap,
+  tap,
+} from 'rxjs';
 
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { VendaService } from '@services/venda.service';
@@ -47,10 +62,10 @@ import { VendaRequestDto } from '@interfaces/venda';
     MatCardModule,
     MatDividerModule,
     MatProgressSpinnerModule,
-    MatChipsModule
+    MatChipsModule,
   ],
   templateUrl: './venda-form.component.html',
-  styleUrls: ['./venda-form.component.scss']
+  styleUrls: ['./venda-form.component.scss'],
 })
 export class VendaFormComponent implements OnInit {
   isEdit = false;
@@ -83,16 +98,16 @@ export class VendaFormComponent implements OnInit {
       vehicleId: ['', Validators.required],
       vehicleDisplay: ['', Validators.required], // Campo apenas para o autocomplete
       buyerPersonId: ['', Validators.required],
-      buyerDisplay: ['', Validators.required],   // Campo apenas para o autocomplete
+      buyerDisplay: ['', Validators.required], // Campo apenas para o autocomplete
       sellerPersonId: [''],
-      sellerDisplay: [''],                      // Campo apenas para o autocomplete
+      sellerDisplay: [''], // Campo apenas para o autocomplete
       dataVenda: [new Date(), Validators.required],
       valor: [0, [Validators.required, Validators.min(0.01)]],
       valorFinal: [0, [Validators.required, Validators.min(0.01)]],
       observacao: [''],
       pagamentos: this.fb.array([]),
       avalistasIds: this.fb.array([]),
-      avalistaSearchControl: [''] // Controle auxiliar para busca
+      avalistaSearchControl: [''], // Controle auxiliar para busca
     });
   }
 
@@ -123,57 +138,77 @@ export class VendaFormComponent implements OnInit {
     const storeId = this.storeContextService.currentStoreId;
 
     // Busca de Veículos (Somente em estoque e da loja atual)
-    this.vendaForm.get('vehicleDisplay')?.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      filter(value => typeof value === 'string' && value.length >= 2),
-      switchMap(value => this.vehicleService.getPaginatedData(0, 50, { 
-        search: value, 
-        onlyInStock: true,
-        storeId: storeId || undefined
-      }))
-    ).subscribe(response => {
-      this.filteredVehicles = response.content;
-    });
+    this.vendaForm
+      .get('vehicleDisplay')
+      ?.valueChanges.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        filter((value) => typeof value === 'string' && value.length >= 2),
+        switchMap((value) =>
+          this.vehicleService.getPaginatedData(0, 50, {
+            search: value,
+            onlyInStock: true,
+            storeId: storeId || undefined,
+          })
+        )
+      )
+      .subscribe((response) => {
+        this.filteredVehicles = response.content;
+      });
 
     // Busca de Compradores
-    this.vendaForm.get('buyerDisplay')?.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      filter(value => typeof value === 'string' && value.length >= 2),
-      switchMap(value => this.personService.getPaginatedData(0, 50, { 
-        search: value,
-        storeId: storeId || undefined
-      }))
-    ).subscribe(response => {
-      this.filteredBuyers = response.content;
-    });
+    this.vendaForm
+      .get('buyerDisplay')
+      ?.valueChanges.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        filter((value) => typeof value === 'string' && value.length >= 2),
+        switchMap((value) =>
+          this.personService.getPaginatedData(0, 50, {
+            search: value,
+            storeId: storeId || undefined,
+          })
+        )
+      )
+      .subscribe((response) => {
+        this.filteredBuyers = response.content;
+      });
 
     // Busca de Vendedores
-    this.vendaForm.get('sellerDisplay')?.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      filter(value => typeof value === 'string' && value.length >= 2),
-      switchMap(value => this.personService.getPaginatedData(0, 50, { 
-        search: value,
-        storeId: storeId || undefined
-      }))
-    ).subscribe(response => {
-      this.filteredSellers = response.content;
-    });
+    this.vendaForm
+      .get('sellerDisplay')
+      ?.valueChanges.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        filter((value) => typeof value === 'string' && value.length >= 2),
+        switchMap((value) =>
+          this.personService.getPaginatedData(0, 50, {
+            search: value,
+            storeId: storeId || undefined,
+          })
+        )
+      )
+      .subscribe((response) => {
+        this.filteredSellers = response.content;
+      });
 
     // Busca de Avalistas
-    this.vendaForm.get('avalistaSearchControl')?.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      filter(value => typeof value === 'string' && value.length >= 2),
-      switchMap(value => this.personService.getPaginatedData(0, 50, { 
-        search: value,
-        storeId: storeId || undefined
-      }))
-    ).subscribe(response => {
-      this.filteredAvalistas = response.content;
-    });
+    this.vendaForm
+      .get('avalistaSearchControl')
+      ?.valueChanges.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        filter((value) => typeof value === 'string' && value.length >= 2),
+        switchMap((value) =>
+          this.personService.getPaginatedData(0, 50, {
+            search: value,
+            storeId: storeId || undefined,
+          })
+        )
+      )
+      .subscribe((response) => {
+        this.filteredAvalistas = response.content;
+      });
   }
 
   // Handlers de seleção do Autocomplete
@@ -182,21 +217,21 @@ export class VendaFormComponent implements OnInit {
       vehicleId: vehicle.vehicleId,
       vehicleDisplay: `${vehicle.brand} ${vehicle.model} (${vehicle.plate})`,
       valor: vehicle.valorVenda || 0,
-      valorFinal: vehicle.valorVenda || 0
+      valorFinal: vehicle.valorVenda || 0,
     });
   }
 
   onBuyerSelected(person: Person) {
     this.vendaForm.patchValue({
       buyerPersonId: person.personId,
-      buyerDisplay: person.name
+      buyerDisplay: person.name,
     });
   }
 
   onSellerSelected(person: Person) {
     this.vendaForm.patchValue({
       sellerPersonId: person.personId,
-      sellerDisplay: person.name
+      sellerDisplay: person.name,
     });
   }
 
@@ -206,7 +241,7 @@ export class VendaFormComponent implements OnInit {
       formaPagamento: ['PIX', Validators.required],
       valor: [0, [Validators.required, Validators.min(0.01)]],
       vencimento: [new Date()],
-      descricao: ['']
+      descricao: [''],
     });
     this.pagamentos.push(pagamentoForm);
   }
@@ -233,51 +268,56 @@ export class VendaFormComponent implements OnInit {
   private loadVenda() {
     if (!this.vendaId) return;
     this.loading.set(true);
-    this.vendaService.getVendaById(this.vendaId).pipe(
-      finalize(() => this.loading.set(false))
-    ).subscribe({
-      next: (venda) => {
-        this.vendaForm.patchValue({
-          vehicleId: venda.vehicleId,
-          buyerPersonId: venda.buyerPersonId,
-          sellerPersonId: venda.sellerPersonId,
-          dataVenda: new Date(venda.dataVenda),
-          valor: venda.valor,
-          valorFinal: venda.valorFinal,
-          observacao: venda.observacao
-        });
+    this.vendaService
+      .getVendaById(this.vendaId)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (venda) => {
+          this.vendaForm.patchValue({
+            vehicleId: venda.vehicleId,
+            buyerPersonId: venda.buyerPersonId,
+            sellerPersonId: venda.sellerPersonId,
+            dataVenda: new Date(venda.dataVenda),
+            valor: venda.valor,
+            valorFinal: venda.valorFinal,
+            observacao: venda.observacao,
+          });
 
-        // TODO: Popular displays e FormArrays em uma implementação real refinada
-        // Para simplificar agora, focamos na criação.
-      },
-      error: () => this.toastr.error('Erro ao carregar dados da venda')
-    });
+          // TODO: Popular displays e FormArrays em uma implementação real refinada
+          // Para simplificar agora, focamos na criação.
+        },
+        error: () => this.toastr.error('Erro ao carregar dados da venda'),
+      });
   }
 
   onSubmit() {
     if (this.vendaForm.invalid) {
-      this.toastr.warning('Por favor, preencha todos os campos obrigatórios corretamente.');
+      this.toastr.warning(
+        'Por favor, preencha todos os campos obrigatórios corretamente.'
+      );
       return;
     }
 
     this.isSubmitting.set(true);
     const formData: VendaRequestDto = this.vendaForm.value;
 
-    const request = this.isEdit 
-      ? this.vendaService.update(this.vendaId!, formData) 
+    const request = this.isEdit
+      ? this.vendaService.update(this.vendaId!, formData)
       : this.vendaService.create(formData);
 
-    request.pipe(
-      finalize(() => this.isSubmitting.set(false))
-    ).subscribe({
+    request.pipe(finalize(() => this.isSubmitting.set(false))).subscribe({
       next: () => {
-        this.toastr.success(`Venda ${this.isEdit ? 'atualizada' : 'registrada'} com sucesso!`);
+        this.toastr.success(
+          `Venda ${this.isEdit ? 'atualizada' : 'registrada'} com sucesso!`
+        );
         this.router.navigate(['/vendas']);
       },
       error: (err) => {
         console.error(err);
-        this.toastr.error('Erro ao salvar venda. Verifique os dados e tente novamente.');
-      }
+        this.toastr.error(
+          'Erro ao salvar venda. Verifique os dados e tente novamente.'
+        );
+      },
     });
   }
 

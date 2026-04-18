@@ -59,7 +59,7 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<EmployeeAuthorizationsDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: EmployeeAuthorizationsDialogData
-  ) { }
+  ) {}
 
   getTranslatedModule(moduleStr: string): string {
     const translations: Record<string, string> = {

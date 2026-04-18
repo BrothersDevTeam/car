@@ -1,9 +1,15 @@
-<div class="mat-elevation-z8 table-container" [class.loading-active]="loading">
+<div
+  class="mat-elevation-z8 table-container"
+  [class.loading-active]="loading"
+>
   <!-- Overlay de Carregamento -->
-  <div class="loading-overlay" *ngIf="loading">
+  <div
+    class="loading-overlay"
+    *ngIf="loading"
+  >
     <mat-spinner diameter="40"></mat-spinner>
   </div>
-  
+
   <table
     mat-table
     [dataSource]="tableDataSource"

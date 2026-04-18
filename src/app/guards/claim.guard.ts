@@ -25,8 +25,11 @@ export const claimGuard: CanActivateFn = (route, state) => {
   }
 
   // Se o usuário não tem a permissão, exibe alerta e redireciona para o dashboard
-  toastr.warning('Você não tem permissão para acessar esta funcionalidade.', 'Acesso Negado');
+  toastr.warning(
+    'Você não tem permissão para acessar esta funcionalidade.',
+    'Acesso Negado'
+  );
   router.navigate(['/dashboard']);
-  
+
   return false;
 };

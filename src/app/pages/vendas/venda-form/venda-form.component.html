@@ -1,5 +1,11 @@
-<app-content-header [title]="title" [subtitle]="subtitle">
-  <button mat-stroked-button (click)="goBack()">
+<app-content-header
+  [title]="title"
+  [subtitle]="subtitle"
+>
+  <button
+    mat-stroked-button
+    (click)="goBack()"
+  >
     <mat-icon>arrow_back</mat-icon>
     Voltar para lista
   </button>
@@ -12,43 +18,65 @@
       <span>Carregando dados da venda...</span>
     </div>
   } @else {
-    <form [formGroup]="vendaForm" (ngSubmit)="onSubmit()" class="venda-form">
-      
+    <form
+      [formGroup]="vendaForm"
+      (ngSubmit)="onSubmit()"
+      class="venda-form"
+    >
       <!-- SEÇÃO 1: VEÍCULO E CLIENTE -->
       <mat-card class="form-section">
         <mat-card-header>
           <mat-card-title>Veículo e Cliente</mat-card-title>
         </mat-card-header>
         <mat-card-content class="grid-row">
-          
           <!-- Veículo Autocomplete -->
-          <mat-form-field appearance="outline" class="col-6">
+          <mat-form-field
+            appearance="outline"
+            class="col-6"
+          >
             <mat-label>Veículo em estoque (Placa ou Modelo)</mat-label>
-            <input type="text"
-                   matInput
-                   formControlName="vehicleDisplay"
-                   [matAutocomplete]="autoVehicle">
-            <mat-autocomplete #autoVehicle="matAutocomplete" (optionSelected)="onVehicleSelected($event.option.value)">
+            <input
+              type="text"
+              matInput
+              formControlName="vehicleDisplay"
+              [matAutocomplete]="autoVehicle"
+            />
+            <mat-autocomplete
+              #autoVehicle="matAutocomplete"
+              (optionSelected)="onVehicleSelected($event.option.value)"
+            >
               @for (vehicle of filteredVehicles; track vehicle.vehicleId) {
                 <mat-option [value]="vehicle">
-                  {{ vehicle.brand }} {{ vehicle.model }} - <strong>{{ vehicle.plate }}</strong>
+                  {{ vehicle.brand }} {{ vehicle.model }} -
+                  <strong>{{ vehicle.plate }}</strong>
                 </mat-option>
               }
             </mat-autocomplete>
             <mat-icon matSuffix>directions_car</mat-icon>
-            @if (vendaForm.get('vehicleDisplay')?.invalid && vendaForm.get('vehicleDisplay')?.touched) {
+            @if (
+              vendaForm.get('vehicleDisplay')?.invalid &&
+              vendaForm.get('vehicleDisplay')?.touched
+            ) {
               <mat-error>Selecione um veículo válido do estoque</mat-error>
             }
           </mat-form-field>
 
           <!-- Comprador Autocomplete -->
-          <mat-form-field appearance="outline" class="col-6">
+          <mat-form-field
+            appearance="outline"
+            class="col-6"
+          >
             <mat-label>Comprador</mat-label>
-            <input type="text"
-                   matInput
-                   formControlName="buyerDisplay"
-                   [matAutocomplete]="autoBuyer">
-            <mat-autocomplete #autoBuyer="matAutocomplete" (optionSelected)="onBuyerSelected($event.option.value)">
+            <input
+              type="text"
+              matInput
+              formControlName="buyerDisplay"
+              [matAutocomplete]="autoBuyer"
+            />
+            <mat-autocomplete
+              #autoBuyer="matAutocomplete"
+              (optionSelected)="onBuyerSelected($event.option.value)"
+            >
               @for (person of filteredBuyers; track person.personId) {
                 <mat-option [value]="person">
                   {{ person.name }} ({{ person.relationship }})
@@ -59,13 +87,21 @@
           </mat-form-field>
 
           <!-- Vendedor Autocomplete -->
-          <mat-form-field appearance="outline" class="col-6">
+          <mat-form-field
+            appearance="outline"
+            class="col-6"
+          >
             <mat-label>Vendedor</mat-label>
-            <input type="text"
-                   matInput
-                   formControlName="sellerDisplay"
-                   [matAutocomplete]="autoSeller">
-            <mat-autocomplete #autoSeller="matAutocomplete" (optionSelected)="onSellerSelected($event.option.value)">
+            <input
+              type="text"
+              matInput
+              formControlName="sellerDisplay"
+              [matAutocomplete]="autoSeller"
+            />
+            <mat-autocomplete
+              #autoSeller="matAutocomplete"
+              (optionSelected)="onSellerSelected($event.option.value)"
+            >
               @for (person of filteredSellers; track person.personId) {
                 <mat-option [value]="person">
                   {{ person.name }}
@@ -75,13 +111,22 @@
             <mat-icon matSuffix>badge</mat-icon>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="col-6">
+          <mat-form-field
+            appearance="outline"
+            class="col-6"
+          >
             <mat-label>Data da Venda</mat-label>
-            <input matInput [matDatepicker]="picker" formControlName="dataVenda">
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="dataVenda"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
-
         </mat-card-content>
       </mat-card>
 
@@ -91,24 +136,45 @@
           <mat-card-title>Valores e Detalhes</mat-card-title>
         </mat-card-header>
         <mat-card-content class="grid-row">
-          
-          <mat-form-field appearance="outline" class="col-4">
+          <mat-form-field
+            appearance="outline"
+            class="col-4"
+          >
             <mat-label>Valor Tabela/Venda</mat-label>
-            <input matInput type="number" formControlName="valor" prefix="R$ ">
+            <input
+              matInput
+              type="number"
+              formControlName="valor"
+              prefix="R$ "
+            />
             <mat-icon matPrefix>attach_money</mat-icon>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="col-4">
+          <mat-form-field
+            appearance="outline"
+            class="col-4"
+          >
             <mat-label>Valor Final (Fechamento)</mat-label>
-            <input matInput type="number" formControlName="valorFinal">
+            <input
+              matInput
+              type="number"
+              formControlName="valorFinal"
+            />
             <mat-icon matPrefix>payments</mat-icon>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="col-12">
+          <mat-form-field
+            appearance="outline"
+            class="col-12"
+          >
             <mat-label>Observações</mat-label>
-            <textarea matInput rows="3" formControlName="observacao" placeholder="Ex: Detalhes da garantia, troca, etc..."></textarea>
+            <textarea
+              matInput
+              rows="3"
+              formControlName="observacao"
+              placeholder="Ex: Detalhes da garantia, troca, etc..."
+            ></textarea>
           </mat-form-field>
-
         </mat-card-content>
       </mat-card>
 
@@ -116,17 +182,31 @@
       <mat-card class="form-section">
         <mat-card-header class="header-with-action">
           <mat-card-title>Formas de Pagamento</mat-card-title>
-          <button type="button" mat-flat-button color="primary" (click)="addPagamento()">
-            <mat-icon>add</mat-icon> Adicionar Pagamento
+          <button
+            type="button"
+            mat-flat-button
+            color="primary"
+            (click)="addPagamento()"
+          >
+            <mat-icon>add</mat-icon>
+            Adicionar Pagamento
           </button>
         </mat-card-header>
-        
+
         <mat-card-content>
-          <div formArrayName="pagamentos" class="pagamentos-list">
+          <div
+            formArrayName="pagamentos"
+            class="pagamentos-list"
+          >
             @for (pag of pagamentos.controls; track $index) {
-              <div [formGroupName]="$index" class="pagamento-item grid-row">
-                
-                <mat-form-field appearance="outline" class="col-3">
+              <div
+                [formGroupName]="$index"
+                class="pagamento-item grid-row"
+              >
+                <mat-form-field
+                  appearance="outline"
+                  class="col-3"
+                >
                   <mat-label>Forma</mat-label>
                   <mat-select formControlName="formaPagamento">
                     <mat-option value="DINHEIRO">DINHEIRO</mat-option>
@@ -139,32 +219,66 @@
                   </mat-select>
                 </mat-form-field>
 
-                <mat-form-field appearance="outline" class="col-3">
+                <mat-form-field
+                  appearance="outline"
+                  class="col-3"
+                >
                   <mat-label>Valor</mat-label>
-                  <input matInput type="number" formControlName="valor">
+                  <input
+                    matInput
+                    type="number"
+                    formControlName="valor"
+                  />
                 </mat-form-field>
 
-                <mat-form-field appearance="outline" class="col-3">
+                <mat-form-field
+                  appearance="outline"
+                  class="col-3"
+                >
                   <mat-label>Vencimento</mat-label>
-                  <input matInput [matDatepicker]="vencPicker" formControlName="vencimento">
-                  <mat-datepicker-toggle matIconSuffix [for]="vencPicker"></mat-datepicker-toggle>
+                  <input
+                    matInput
+                    [matDatepicker]="vencPicker"
+                    formControlName="vencimento"
+                  />
+                  <mat-datepicker-toggle
+                    matIconSuffix
+                    [for]="vencPicker"
+                  ></mat-datepicker-toggle>
                   <mat-datepicker #vencPicker></mat-datepicker>
                 </mat-form-field>
 
                 <div class="col-3 actions-cell">
                   @if (pagamentos.length > 1) {
-                    <button type="button" mat-icon-button color="warn" (click)="removePagamento($index)" matTooltip="Remover este pagamento">
+                    <button
+                      type="button"
+                      mat-icon-button
+                      color="warn"
+                      (click)="removePagamento($index)"
+                      matTooltip="Remover este pagamento"
+                    >
                       <mat-icon>delete</mat-icon>
                     </button>
                   }
                 </div>
 
-                <mat-form-field appearance="outline" class="col-12" style="margin-top: -12px;">
+                <mat-form-field
+                  appearance="outline"
+                  class="col-12"
+                  style="margin-top: -12px"
+                >
                   <mat-label>Descrição / Detalhes do Pagamento</mat-label>
-                  <input matInput formControlName="descricao" placeholder="Ex: Banco, n° do cheque, comprovante...">
+                  <input
+                    matInput
+                    formControlName="descricao"
+                    placeholder="Ex: Banco, n° do cheque, comprovante..."
+                  />
                 </mat-form-field>
 
-                <mat-divider style="margin-bottom: 24px;" class="col-12"></mat-divider>
+                <mat-divider
+                  style="margin-bottom: 24px"
+                  class="col-12"
+                ></mat-divider>
               </div>
             }
           </div>
@@ -177,15 +291,25 @@
           <mat-card-title>Avalistas (Opcional)</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          
-          <mat-form-field appearance="outline" class="col-12">
+          <mat-form-field
+            appearance="outline"
+            class="col-12"
+          >
             <mat-label>Buscar Avalista para Adicionar</mat-label>
-            <input type="text"
-                   matInput
-                   formControlName="avalistaSearchControl"
-                   [matAutocomplete]="autoAvalista"
-                   #avalistaInput>
-            <mat-autocomplete #autoAvalista="matAutocomplete" (optionSelected)="addAvalistaDirectly($event.option.value); avalistaInput.value = ''">
+            <input
+              type="text"
+              matInput
+              formControlName="avalistaSearchControl"
+              [matAutocomplete]="autoAvalista"
+              #avalistaInput
+            />
+            <mat-autocomplete
+              #autoAvalista="matAutocomplete"
+              (optionSelected)="
+                addAvalistaDirectly($event.option.value);
+                avalistaInput.value = ''
+              "
+            >
               @for (person of filteredAvalistas; track person.personId) {
                 <mat-option [value]="person">
                   {{ person.name }}
@@ -200,10 +324,18 @@
               <p class="empty-state">Nenhum avalista adicionado.</p>
             } @else {
               <mat-chip-set>
-                @for (id of avalistasIds.controls; track id.value; let i = $index) {
+                @for (
+                  id of avalistasIds.controls;
+                  track id.value;
+                  let i = $index
+                ) {
                   <mat-chip-row (removed)="removeAvalista(i)">
-                    ID: {{ id.value | slice:0:8 }}... <!-- Simplificado p/ demo -->
-                    <button matChipRemove aria-label="Remover">
+                    ID: {{ id.value | slice: 0 : 8 }}...
+                    <!-- Simplificado p/ demo -->
+                    <button
+                      matChipRemove
+                      aria-label="Remover"
+                    >
                       <mat-icon>cancel</mat-icon>
                     </button>
                   </mat-chip-row>
@@ -211,21 +343,29 @@
               </mat-chip-set>
             }
           </div>
-
         </mat-card-content>
       </mat-card>
 
       <!-- AÇÕES FINAIS -->
       <div class="form-actions">
-        <button type="button" mat-button (click)="goBack()" [disabled]="isSubmitting()">
+        <button
+          type="button"
+          mat-button
+          (click)="goBack()"
+          [disabled]="isSubmitting()"
+        >
           Cancelar
         </button>
-        <button type="submit" mat-raised-button color="primary" [disabled]="vendaForm.invalid || isSubmitting()">
+        <button
+          type="submit"
+          mat-raised-button
+          color="primary"
+          [disabled]="vendaForm.invalid || isSubmitting()"
+        >
           <mat-icon>{{ isEdit ? 'save' : 'check' }}</mat-icon>
           {{ isEdit ? 'Salvar Alterações' : 'Concluir Registro de Venda' }}
         </button>
       </div>
-
     </form>
   }
 </main>

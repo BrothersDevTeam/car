@@ -115,50 +115,141 @@
         </button>
         <mat-menu #compactMenu="matMenu">
           @if (canEdit) {
-            <button mat-menu-item (click)="onEdit()"><mat-icon>edit</mat-icon><span>Editar</span></button>
+            <button
+              mat-menu-item
+              (click)="onEdit()"
+            >
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
           }
           @if (canUploadImage) {
-            <button mat-menu-item (click)="onUploadImage()"><mat-icon>add_photo_alternate</mat-icon><span>Logo</span></button>
+            <button
+              mat-menu-item
+              (click)="onUploadImage()"
+            >
+              <mat-icon>add_photo_alternate</mat-icon>
+              <span>Logo</span>
+            </button>
           }
           <mat-divider></mat-divider>
           @if (canManageAddress) {
-            <button mat-menu-item (click)="onManageAddress()"><mat-icon>location_on</mat-icon><span>Endereços</span></button>
+            <button
+              mat-menu-item
+              (click)="onManageAddress()"
+            >
+              <mat-icon>location_on</mat-icon>
+              <span>Endereços</span>
+            </button>
           }
           @if (canManageOwner) {
-            <button mat-menu-item (click)="onManageOwner()"><mat-icon>person_add</mat-icon><span>Proprietário</span></button>
+            <button
+              mat-menu-item
+              (click)="onManageOwner()"
+            >
+              <mat-icon>person_add</mat-icon>
+              <span>Proprietário</span>
+            </button>
           }
           @if (canManageAuthorizations) {
-            <button mat-menu-item (click)="onManageAuthorizations()"><mat-icon>security</mat-icon><span>Autorizações</span></button>
+            <button
+              mat-menu-item
+              (click)="onManageAuthorizations()"
+            >
+              <mat-icon>security</mat-icon>
+              <span>Autorizações</span>
+            </button>
           }
           <mat-divider></mat-divider>
           @if (canManageFiscal) {
-            <button mat-menu-item (click)="onManageFiscal()"><mat-icon>receipt_long</mat-icon><span>Configuração Fiscal</span></button>
+            <button
+              mat-menu-item
+              (click)="onManageFiscal()"
+            >
+              <mat-icon>receipt_long</mat-icon>
+              <span>Configuração Fiscal</span>
+            </button>
           }
           @if (canDelete) {
-            <button mat-menu-item (click)="onDelete()"><mat-icon color="warn">delete</mat-icon><span>Excluir</span></button>
+            <button
+              mat-menu-item
+              (click)="onDelete()"
+            >
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Excluir</span>
+            </button>
           }
         </mat-menu>
       } @else {
         @if (canEdit) {
-          <button mat-icon-button (click)="onEdit()" matTooltip="Editar loja" class="action-btn edit-btn"><mat-icon>edit</mat-icon></button>
+          <button
+            mat-icon-button
+            (click)="onEdit()"
+            matTooltip="Editar loja"
+            class="action-btn edit-btn"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
         }
         @if (canUploadImage) {
-          <button mat-icon-button (click)="onUploadImage()" matTooltip="Alterar logo" class="action-btn upload-btn"><mat-icon>add_photo_alternate</mat-icon></button>
+          <button
+            mat-icon-button
+            (click)="onUploadImage()"
+            matTooltip="Alterar logo"
+            class="action-btn upload-btn"
+          >
+            <mat-icon>add_photo_alternate</mat-icon>
+          </button>
         }
         @if (canManageAddress) {
-          <button mat-icon-button (click)="onManageAddress()" matTooltip="Endereços da loja" class="action-btn address-btn"><mat-icon>location_on</mat-icon></button>
+          <button
+            mat-icon-button
+            (click)="onManageAddress()"
+            matTooltip="Endereços da loja"
+            class="action-btn address-btn"
+          >
+            <mat-icon>location_on</mat-icon>
+          </button>
         }
         @if (canManageOwner) {
-          <button mat-icon-button (click)="onManageOwner()" matTooltip="Gerenciar proprietário" class="action-btn owner-btn"><mat-icon>person_add</mat-icon></button>
+          <button
+            mat-icon-button
+            (click)="onManageOwner()"
+            matTooltip="Gerenciar proprietário"
+            class="action-btn owner-btn"
+          >
+            <mat-icon>person_add</mat-icon>
+          </button>
         }
         @if (canManageAuthorizations) {
-          <button mat-icon-button (click)="onManageAuthorizations()" matTooltip="Gerenciar autorizações" class="action-btn auth-btn"><mat-icon>security</mat-icon></button>
+          <button
+            mat-icon-button
+            (click)="onManageAuthorizations()"
+            matTooltip="Gerenciar autorizações"
+            class="action-btn auth-btn"
+          >
+            <mat-icon>security</mat-icon>
+          </button>
         }
         @if (canManageFiscal) {
-          <button mat-icon-button (click)="onManageFiscal()" matTooltip="Configuração Fiscal (NFe)" class="action-btn fiscal-btn"><mat-icon>receipt_long</mat-icon></button>
+          <button
+            mat-icon-button
+            (click)="onManageFiscal()"
+            matTooltip="Configuração Fiscal (NFe)"
+            class="action-btn fiscal-btn"
+          >
+            <mat-icon>receipt_long</mat-icon>
+          </button>
         }
         @if (canDelete) {
-          <button mat-icon-button (click)="onDelete()" matTooltip="Excluir loja" class="action-btn delete-btn"><mat-icon>delete</mat-icon></button>
+          <button
+            mat-icon-button
+            (click)="onDelete()"
+            matTooltip="Excluir loja"
+            class="action-btn delete-btn"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
         }
       }
     </div>

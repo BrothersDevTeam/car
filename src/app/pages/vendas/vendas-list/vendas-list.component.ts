@@ -1,4 +1,11 @@
-import { Component, inject, signal, ViewChild, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  ViewChild,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -39,11 +46,11 @@ import { VendaStatus } from '@enums/venda-status';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatPaginatorModule
+    MatPaginatorModule,
   ],
   providers: [DatePipe, CurrencyPipe],
   templateUrl: './vendas-list.component.html',
-  styleUrl: './vendas-list.component.scss'
+  styleUrl: './vendas-list.component.scss',
 })
 export class VendasListComponent implements OnInit, OnDestroy {
   private vendaService = inject(VendaService);
@@ -65,61 +72,71 @@ export class VendasListComponent implements OnInit, OnDestroy {
 
   paginationConfig = {
     pageSize: 10,
-    pageIndex: 0
+    pageIndex: 0,
   };
 
   columns: ColumnConfig<VendaResponseDto>[] = [
     {
       key: 'numero',
       header: 'Nº Venda',
-      format: (val) => val ? `#${val}` : '—'
+      format: (val) => (val ? `#${val}` : '—'),
     },
     {
       key: 'dataVenda',
       header: 'Data',
-      format: (val) => this.datePipe.transform(val, 'dd/MM/yyyy') || '—'
+      format: (val) => this.datePipe.transform(val, 'dd/MM/yyyy') || '—',
     },
     {
       key: 'buyerName',
       header: 'Comprador',
-      format: (val) => val || '—'
+      format: (val) => val || '—',
     },
     {
       key: 'vehicleDescription',
       header: 'Veículo',
-      format: (val) => val || '—'
+      format: (val) => val || '—',
     },
     {
       key: 'valorFinal',
       header: 'Valor Total',
-      format: (val) => this.currencyPipe.transform(val, 'BRL', 'symbol', '1.2-2') || '—'
+      format: (val) =>
+        this.currencyPipe.transform(val, 'BRL', 'symbol', '1.2-2') || '—',
     },
     {
       key: 'vendaStatus',
       header: 'Status',
       badgeConfig: {
         [VendaStatus.ATIVA]: { label: 'Ativa', cssClass: 'badge-autorizado' },
-        [VendaStatus.CANCELADA]: { label: 'Cancelada', cssClass: 'badge-cancelado' },
-        [VendaStatus.TRANSFERENCIA]: { label: 'Transferência', cssClass: 'badge-processando' }
-      }
+        [VendaStatus.CANCELADA]: {
+          label: 'Cancelada',
+          cssClass: 'badge-cancelado',
+        },
+        [VendaStatus.TRANSFERENCIA]: {
+          label: 'Transferência',
+          cssClass: 'badge-processando',
+        },
+      },
     },
     {
       key: 'edit',
       header: '',
-      showEditIcon: (row) => this.authService.hasAuthority(Authorizations.EDIT_VENDA) && row.vendaStatus !== VendaStatus.CANCELADA
+      showEditIcon: (row) =>
+        this.authService.hasAuthority(Authorizations.EDIT_VENDA) &&
+        row.vendaStatus !== VendaStatus.CANCELADA,
     },
     {
       key: 'delete',
       header: '',
-      showDeleteIcon: (row) => this.authService.hasAuthority(Authorizations.CANCEL_VENDA) && row.vendaStatus !== VendaStatus.CANCELADA
-    }
+      showDeleteIcon: (row) =>
+        this.authService.hasAuthority(Authorizations.CANCEL_VENDA) &&
+        row.vendaStatus !== VendaStatus.CANCELADA,
+    },
   ];
-
 
   ngOnInit() {
     // Escuta mudança de loja no contexto global
     this.subscription.add(
-      this.storeContextService.currentStoreId$.subscribe(storeId => {
+      this.storeContextService.currentStoreId$.subscribe((storeId) => {
         if (this.selectedStoreId !== storeId) {
           this.selectedStoreId = storeId;
           this.loadVendasList();
@@ -129,14 +146,13 @@ export class VendasListComponent implements OnInit, OnDestroy {
 
     // Setup de busca com debounce
     this.subscription.add(
-      this.searchSubject.pipe(
-        debounceTime(400),
-        distinctUntilChanged()
-      ).subscribe(value => {
-        this.searchValue = value;
-        this.paginationConfig.pageIndex = 0;
-        this.loadVendasList();
-      })
+      this.searchSubject
+        .pipe(debounceTime(400), distinctUntilChanged())
+        .subscribe((value) => {
+          this.searchValue = value;
+          this.paginationConfig.pageIndex = 0;
+          this.loadVendasList();
+        })
     );
   }
 
@@ -148,23 +164,26 @@ export class VendasListComponent implements OnInit, OnDestroy {
     if (!this.selectedStoreId) return;
 
     this.vendasListLoading.set(true);
-    
-    this.vendaService.getPaginatedData(
-      this.paginationConfig.pageIndex,
-      this.paginationConfig.pageSize,
-      { search: this.searchValue }
-    ).pipe(
-      catchError(err => {
+
+    this.vendaService
+      .getPaginatedData(
+        this.paginationConfig.pageIndex,
+        this.paginationConfig.pageSize,
+        { search: this.searchValue }
+      )
+      .pipe(
+        catchError((err) => {
+          this.vendasListLoading.set(false);
+          this.toastr.error('Erro ao carregar lista de vendas');
+          return of(null);
+        })
+      )
+      .subscribe((response) => {
         this.vendasListLoading.set(false);
-        this.toastr.error('Erro ao carregar lista de vendas');
-        return of(null);
-      })
-    ).subscribe(response => {
-      this.vendasListLoading.set(false);
-      if (response) {
-        this.vendasPaginatedList = response;
-      }
-    });
+        if (response) {
+          this.vendasPaginatedList = response;
+        }
+      });
   }
 
   onSearch(event: Event) {
@@ -197,21 +216,20 @@ export class VendasListComponent implements OnInit, OnDestroy {
         title: 'Cancelar Venda',
         message: `Deseja realmente cancelar a venda <strong>#${venda.numero}</strong>? <br><br> <small>O veículo voltará ao estoque automaticamente.</small>`,
         confirmText: 'Sim, Cancelar',
-        cancelText: 'Não'
-      }
+        cancelText: 'Não',
+      },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.vendaService.cancelVenda(venda.vendaId).subscribe({
           next: () => {
             this.toastr.success('Venda cancelada com sucesso');
             this.loadVendasList();
           },
-          error: () => this.toastr.error('Erro ao cancelar venda')
+          error: () => this.toastr.error('Erro ao cancelar venda'),
         });
       }
     });
   }
 }
-

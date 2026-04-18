@@ -4,7 +4,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
-import { DashboardService, AdminDashboardMetrics } from '@services/dashboard.service';
+import {
+  DashboardService,
+  AdminDashboardMetrics,
+} from '@services/dashboard.service';
 import { AuthService } from '@services/auth/auth.service';
 import { StoreContextService } from '@services/store-context.service';
 import { Authorizations } from '../../enums/authorizations';
@@ -18,17 +21,17 @@ import { Subscription } from 'rxjs';
     MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    ContentHeaderComponent
+    ContentHeaderComponent,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private dashboardService = inject(DashboardService);
   private authService = inject(AuthService);
   private storeContextService = inject(StoreContextService);
   private subscriptions: Subscription[] = [];
-  
+
   metrics: AdminDashboardMetrics | null = null;
   loading = true;
   isAdmin = false;
@@ -59,7 +62,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       error: (err) => {
         console.error('Error loading dashboard metrics', err);
         this.loading = false;
-      }
+      },
     });
   }
 

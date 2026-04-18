@@ -57,12 +57,12 @@ export class SideNavComponent {
   ) {
     this.loggedUsername.set(
       this.authService.getPersonName() ||
-      this.authService.getUsername() ||
-      'Usuário'
+        this.authService.getUsername() ||
+        'Usuário'
     );
     this.userRole.set(
       this.authService.getPersonRelationship() ||
-      this.formatRole(this.authService.getRoles())
+        this.formatRole(this.authService.getRoles())
     );
 
     this.initializeMenuItems();
