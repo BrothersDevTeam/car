@@ -20,7 +20,7 @@
 }
 
 .search-field {
-  flex: 0 1 550px; // Cresce no máximo até 550px para dar mais amplitude à busca
+  flex: 1 1 auto;
   min-width: 200px;
 }
 
@@ -30,6 +30,12 @@
   justify-content: center;
   margin: 16px 0 16px 0;
   padding: 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none; // Firefox
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari
+  }
 }
 
 .status-toggle-group {
@@ -40,6 +46,9 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   display: flex;
   gap: 8px;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0; // Não deixa os botões esmagarem
 
   ::ng-deep {
     .mat-button-toggle {
@@ -143,33 +152,45 @@
 // Ajusta layout para telas menores (tablets e móveis)
 @media (max-width: 768px) {
   .search-container {
-    // Mantém o flex-wrap: wrap definido na linha 7 para permitir que os itens quebrem linha naturalmente
-    // sem forçar uma coluna vertical rígida que estica a altura do cabeçalho.
+    gap: 12px;
   }
 
-  .filter-section {
-    .filter-options {
-      flex-direction: column;
-      gap: 16px;
-    }
+  .premium-filter-bar {
+    justify-content: flex-start; // Começa da esquerda para permitir scroll
+  }
 
-    // Radio buttons em coluna em telas pequenas
-    mat-radio-group {
-      flex-direction: column;
+  .status-toggle-group {
+    justify-content: flex-start;
+  }
+
+  .toggle-content {
+    font-size: 0.85rem;
+    gap: 6px;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  ::ng-deep .mat-button-toggle-label-content {
+    padding: 6px 12px !important;
+  }
+
+  .sub-filter-section {
+    gap: 12px;
+    margin-bottom: 20px;
+
+    .employee-types {
+      width: 100%;
+      justify-content: center;
       gap: 12px;
-    }
-
-    // Sub-filtros sem margem esquerda em mobile
-    .sub-filter-options {
-      margin-left: 0;
-      padding-left: 12px;
-      flex-direction: column;
-      gap: 8px;
+      padding: 8px 12px;
     }
 
     .clear-filters-btn {
       width: 100%;
-      margin-left: 0;
     }
   }
 }

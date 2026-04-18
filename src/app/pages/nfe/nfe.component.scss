@@ -17,7 +17,7 @@
 }
 
 .search-field {
-  flex: 0 1 550px;
+  flex: 1 1 auto;
   min-width: 200px;
 }
 
@@ -91,6 +91,12 @@
   justify-content: center;
   margin: 16px 0 24px 0;
   padding: 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none; // Firefox
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari
+  }
 }
 
 .status-toggle-group {
@@ -101,8 +107,9 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   display: flex;
   gap: 8px;
-  flex-wrap: wrap; // Permite quebrar linha em telas pequenas se houver muitos botões
   justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0; // Não deixa os botões esmagarem
 
   ::ng-deep {
     .mat-button-toggle {
@@ -167,4 +174,34 @@
 }
 .icon-inutilizada {
   color: #777;
+}
+
+// ===== RESPONSIVIDADE =====
+@media (max-width: 768px) {
+  .search-container {
+    gap: 12px;
+  }
+
+  .premium-filter-bar {
+    justify-content: flex-start; // Começa da esquerda para permitir scroll
+  }
+
+  .status-toggle-group {
+    justify-content: flex-start;
+  }
+
+  .toggle-content {
+    font-size: 0.85rem;
+    gap: 6px;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  ::ng-deep .mat-button-toggle-label-content {
+    padding: 6px 12px !important;
+  }
 }
