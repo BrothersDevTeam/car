@@ -24,10 +24,6 @@
   min-width: 200px;
 }
 
-.search-type-field {
-  width: 160px; // Ligeiramente reduzido p/ flexibilidade
-}
-
 // ===== ESTILOS DA SEÇÃO DE FILTROS =====
 .filter-section {
   background-color: #ffffff;
@@ -201,14 +197,8 @@
 // Ajusta layout para telas menores (tablets e móveis)
 @media (max-width: 768px) {
   .search-container {
-    flex-direction: column;
-    align-items: stretch;
-
-    .search-field,
-    .search-type-field {
-      width: 100%;
-      min-width: 100%;
-    }
+    // Mantém o flex-wrap: wrap definido na linha 7 para permitir que os itens quebrem linha naturalmente
+    // sem forçar uma coluna vertical rígida que estica a altura do cabeçalho.
   }
 
   .filter-section {

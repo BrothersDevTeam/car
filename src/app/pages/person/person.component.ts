@@ -640,12 +640,7 @@ export class PersonComponent implements OnInit, OnDestroy {
     this.searchSubject.next(inputValue);
   }
 
-  onSearchTypeChange(type: 'name' | 'cpf' | 'cnpj' | 'email' | 'all') {
-    this.searchType = type;
 
-    // Perform search in all cases: if there is a value, it will filter, if not, it will just reload to correct state without filters.
-    this.performSearch();
-  }
 
   performSearch() {
     // Busca com os parâmetros atuais
