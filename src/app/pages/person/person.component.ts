@@ -9,6 +9,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { catchError, debounceTime, of, Subject, Subscription } from 'rxjs';
 import { RelationshipTypes } from '../../enums/relationshipTypes';
 import { Authorizations } from '../../enums/authorizations';
@@ -98,6 +99,7 @@ export class PersonComponent implements OnInit, OnDestroy {
   private searchSubject = new Subject<string>();
   private formDraftService = inject(FormDraftService);
   private storeContextService = inject(StoreContextService);
+  private route = inject(ActivatedRoute);
 
   personPaginatedList: PaginationResponse<Person> | null = null;
   selectedPerson: Person | null = null;
@@ -300,6 +302,34 @@ export class PersonComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    // Verifica se há um ID de edição vindo da rota (ex: redirecionamento de erro de endereço)
+    this.subscriptions.push(
+      this.route.queryParams.subscribe((params) => {
+        const editId = params['editId'];
+        if (editId) {
+          this.loadPersonForEdit(editId);
+        }
+      })
+    );
+  }
+
+  /**
+   * Busca os dados de uma pessoa pelo ID e abre o formulário de edição
+   */
+  private loadPersonForEdit(personId: string) {
+    this.clientListLoading.set(true);
+    this.personService.getById(personId).subscribe({
+      next: (person) => {
+        this.clientListLoading.set(false);
+        this.handleSelectedPerson(person); // Abre a visualização de Detalhes (Info)
+      },
+      error: (err) => {
+        this.clientListLoading.set(false);
+        this.toastr.error('Não foi possível carregar os dados para edição');
+        console.error('Erro ao carregar pessoa por ID (URL):', err);
+      },
+    });
   }
 
   ngOnDestroy() {

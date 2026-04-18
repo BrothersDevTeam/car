@@ -25,7 +25,8 @@
       "@forms/*": ["./src/app/forms/*"],
       "@info/*": ["./src/app/info/*"],
       "@enums/*": ["./src/app/enums/*"],
-      "@guards/*": ["./src/app/guards/*"]
+      "@guards/*": ["./src/app/guards/*"],
+      "@utils/*": ["./src/app/utils/*"]
     }
   },
   "angularCompilerOptions": {

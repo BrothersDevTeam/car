@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, Subscription, of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { extractErrorMessage, getErrorDetails } from '@utils/error-utils';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -238,9 +239,39 @@ export class VendasListComponent implements OnInit, OnDestroy {
           },
           error: (err) => {
             this.vendasListLoading.set(false);
-            this.toastr.error(err.error?.message || 'Erro ao gerar NFe');
+            const errorMessage = extractErrorMessage(err, 'Erro ao gerar NFe');
+            const details = getErrorDetails(err);
+
+            // Tratamento específico para falta de endereço
+            if (details && details['missingAddressPersonId']) {
+              this.handleMissingAddressError(details['missingAddressPersonId'], errorMessage);
+            } else {
+              this.toastr.error(errorMessage);
+            }
           },
         });
+      }
+    });
+  }
+
+  /**
+   * Abre um diálogo informativo quando falta o endereço do comprador
+   * e oferece um botão para ir direto ao cadastro.
+   */
+  private handleMissingAddressError(personId: string, message: string) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Endereço Ausente',
+        message: `${message}<br><br>Deseja ir para o cadastro desta pessoa para adicionar um endereço agora?`,
+        confirmText: 'Sim, ir para Cadastro',
+        cancelText: 'Agora não',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Navega para a tela de pessoas passando o ID para edição
+        this.router.navigate(['/person'], { queryParams: { editId: personId } });
       }
     });
   }
