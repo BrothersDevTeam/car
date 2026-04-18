@@ -283,15 +283,9 @@
  * atenção do usuário sobre qual item está focado
  */
 @keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  50% {
-    opacity: 0.6;
-    transform: translateX(-3px);
-  }
+  0% { opacity: 1; transform: translateX(0); }
+  50% { opacity: 0.6; transform: translateX(-3px); }
+  100% { opacity: 1; transform: translateX(0); }
 }
 
 /**
