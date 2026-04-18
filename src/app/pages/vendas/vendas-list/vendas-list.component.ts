@@ -125,6 +125,14 @@ export class VendasListComponent implements OnInit, OnDestroy {
         row.vendaStatus !== VendaStatus.CANCELADA,
     },
     {
+      key: 'nfe',
+      header: '',
+      showNfeIcon: (row) =>
+        this.authService.hasAuthority(Authorizations.EMITIR_NFE) &&
+        row.vendaStatus === VendaStatus.ATIVA &&
+        !row.nfeId,
+    },
+    {
       key: 'delete',
       header: '',
       showDeleteIcon: (row) =>
@@ -208,6 +216,33 @@ export class VendasListComponent implements OnInit, OnDestroy {
 
   handleEdit(venda: VendaResponseDto) {
     this.router.navigate(['/vendas/editar', venda.vendaId]);
+  }
+
+  handleEmitirNfe(venda: VendaResponseDto) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Gerar NFe',
+        message: `Deseja gerar o rascunho da NFe para a venda <strong>#${venda.numero}</strong>? <br><br> <small>Os dados do comprador e do veículo serão importados automaticamente.</small>`,
+        confirmText: 'Sim, Gerar',
+        cancelText: 'Não',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.vendasListLoading.set(true);
+        this.vendaService.gerarNfe(venda.vendaId).subscribe({
+          next: () => {
+            this.toastr.success('Rascunho da NFe gerado com sucesso! A emissão foi disparada.');
+            this.loadVendasList();
+          },
+          error: (err) => {
+            this.vendasListLoading.set(false);
+            this.toastr.error(err.error?.message || 'Erro ao gerar NFe');
+          },
+        });
+      }
+    });
   }
 
   handleDelete(venda: VendaResponseDto) {
