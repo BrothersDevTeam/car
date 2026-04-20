@@ -197,10 +197,9 @@ export class VendasListComponent implements OnInit, OnDestroy {
     // Escuta mudança de loja no contexto global
     this.subscription.add(
       this.storeContextService.currentStoreId$.subscribe((storeId) => {
-        if (this.selectedStoreId !== storeId) {
-          this.selectedStoreId = storeId;
-          this.loadVendasList();
-        }
+        this.selectedStoreId = storeId;
+        this.vendaService.clearCache(); // Limpa cache para garantir dados da nova loja/rede
+        this.loadVendasList();
       })
     );
 
@@ -221,8 +220,6 @@ export class VendasListComponent implements OnInit, OnDestroy {
   }
 
   loadVendasList() {
-    if (!this.selectedStoreId) return;
-
     this.vendasListLoading.set(true);
 
     this.vendaService
@@ -231,7 +228,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
         this.paginationConfig.pageSize,
         {
           search: this.searchValue,
-          storeId: this.selectedStoreId,
+          storeId: this.selectedStoreId ?? undefined,
           status:
             this.selectedStatus !== 'TODOS' ? this.selectedStatus : undefined,
         }
@@ -294,7 +291,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.vendasListLoading.set(true);
-        this.vendaService.gerarNfe(venda.vendaId).subscribe({
+        this.vendaService.gerarNfe(venda.vendaId, venda.storeId).subscribe({
           next: () => {
             this.toastr.success(
               'Rascunho da NFe gerado com sucesso! A emissão foi disparada.'
@@ -357,7 +354,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.vendaService.cancelVenda(venda.vendaId).subscribe({
+        this.vendaService.cancelVenda(venda.vendaId, venda.storeId).subscribe({
           next: () => {
             this.toastr.success('Venda cancelada com sucesso');
             this.loadVendasList();

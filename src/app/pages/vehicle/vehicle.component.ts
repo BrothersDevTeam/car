@@ -181,14 +181,13 @@ export class VehicleComponent {
     // Contexto Global de Loja
     this.subscription.add(
       this.storeContextService.currentStoreId$.subscribe((storeId) => {
-        if (this.selectedStoreId !== storeId) {
-          this.selectedStoreId = storeId;
-          this.loadVehicleList(
-            0,
-            this.paginationRequestConfig.pageSize,
-            this.searchValue
-          );
-        }
+        this.selectedStoreId = storeId;
+        this.vehicleService.clearCache(); // Limpa cache sempre que a loja mudar (Global ou Específica)
+        this.loadVehicleList(
+          0,
+          this.paginationRequestConfig.pageSize,
+          this.searchValue
+        );
       })
     );
   }
@@ -262,9 +261,7 @@ export class VehicleComponent {
       searchParams.search = searchValue.trim();
     }
 
-    if (this.selectedStoreId) {
-      searchParams.storeId = this.selectedStoreId;
-    }
+    searchParams.storeId = this.selectedStoreId ?? undefined;
 
     if (this.selectedStatus !== 'TODOS') {
       searchParams.status = this.selectedStatus;

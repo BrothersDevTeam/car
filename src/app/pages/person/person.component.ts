@@ -346,11 +346,9 @@ export class PersonComponent implements OnInit, OnDestroy {
     // Contexto Global de Loja
     this.subscriptions.push(
       this.storeContextService.currentStoreId$.subscribe((storeId) => {
-        // Ignora caso valor seja igual (previne triggers duplos na inicialização)
-        if (this.selectedStoreId !== storeId) {
-          this.selectedStoreId = storeId;
-          this.performSearch(); // Executa a busca baseada na nova loja global selecionada
-        }
+        this.selectedStoreId = storeId;
+        this.personService.clearCache(); // Limpa cache para garantir dados da nova loja/rede
+        this.performSearch(); // Executa a busca baseada na nova loja global selecionada
       })
     );
 
@@ -554,13 +552,11 @@ export class PersonComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Adiciona o filtro de loja se houver
-    if (this.selectedStoreId) {
-      if (!searchParams) {
-        searchParams = {};
-      }
-      searchParams.storeId = this.selectedStoreId;
+    // Adiciona o filtro de loja (se for null, o backend cuida da rede)
+    if (!searchParams) {
+      searchParams = {};
     }
+    searchParams.storeId = this.selectedStoreId ?? undefined;
 
     // Adiciona o filtro de relationship se houver filtros ativos
     const relationshipFilter = this.buildRelationshipTypesFilter();

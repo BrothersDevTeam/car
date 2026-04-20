@@ -17,22 +17,12 @@ export class VendaService {
   private cacheUpdated$ =
     new BehaviorSubject<PaginationResponse<VendaResponseDto> | null>(null);
 
+  private readonly apiUrl: string = '/api/vendas';
+
   constructor(
     private http: HttpClient,
     private storeContextService: StoreContextService
   ) {}
-
-  /**
-   * Obtém a URL base para as chamadas de venda, injetando o storeId atual.
-   * Lança erro se não houver um storeId definido no contexto.
-   */
-  private getBaseUrl(): string {
-    const storeId = this.storeContextService.currentStoreId;
-    if (!storeId) {
-      throw new Error('Store ID não definido no contexto da aplicação.');
-    }
-    return `/api/stores/${storeId}/vendas`;
-  }
 
   // Observable público para componentes se inscreverem
   get cacheUpdated(): Observable<PaginationResponse<VendaResponseDto> | null> {
@@ -44,15 +34,25 @@ export class VendaService {
     pageSize: number,
     searchParams?: { search?: string; storeId?: string; status?: string }
   ): Observable<PaginationResponse<VendaResponseDto>> {
-    const hasSearchParams =
-      searchParams && (searchParams.search?.trim() || searchParams.storeId);
+    // Se não houver storeId passado nos parâmetros, tenta pegar do contexto
+    const currentStoreId =
+      searchParams?.storeId || this.storeContextService.currentStoreId;
 
-    // Só usa cache se não houver busca ou filtro de loja ativo
+    const hasSearchParams =
+      searchParams && (searchParams.search?.trim() || searchParams.status);
+
+    // Só usa cache se não houver busca e se a loja solicitada for a mesma do contexto
+    // (A limpeza de cache é garantida pelo componente ao mudar de loja)
     if (this.cache && !hasSearchParams) {
       return of(this.cache);
     }
 
-    let url = `${this.getBaseUrl()}?page=${pageIndex}&size=${pageSize}`;
+    let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
+
+    // Injeta storeId se presente (se for null, o backend busca pela rede do usuário)
+    if (currentStoreId) {
+      url += `&storeId=${encodeURIComponent(currentStoreId)}`;
+    }
 
     if (searchParams?.search?.trim()) {
       url += `&search=${encodeURIComponent(searchParams.search.trim())}`;
@@ -75,48 +75,49 @@ export class VendaService {
   }
 
   getVendaById(id: string): Observable<VendaResponseDto> {
-    return this.http
-      .get<VendaResponseDto>(`${this.getBaseUrl()}/${id}`)
-      .pipe(first());
+    return this.http.get<VendaResponseDto>(`${this.apiUrl}/${id}`).pipe(first());
   }
 
-  gerarNfe(vendaId: string): Observable<VendaResponseDto> {
+  gerarNfe(vendaId: string, storeId: string): Observable<VendaResponseDto> {
     return this.http.post<VendaResponseDto>(
-      `${this.getBaseUrl()}/${vendaId}/gerar-nfe`,
+      `${this.apiUrl}/${vendaId}/gerar-nfe?storeId=${storeId}`,
       {}
     );
   }
 
   create(data: VendaRequestDto): Observable<VendaResponseDto> {
-    return this.http.post<VendaResponseDto>(`${this.getBaseUrl()}`, data).pipe(
-      tap((response) => {
-        console.log('Venda registrada com sucesso!', response);
-        this.clearCache();
-      })
-    );
+    const storeId = this.storeContextService.currentStoreId;
+    return this.http
+      .post<VendaResponseDto>(`${this.apiUrl}?storeId=${storeId}`, data)
+      .pipe(
+        tap((response) => {
+          console.log('Venda registrada com sucesso!', response);
+          this.clearCache();
+        })
+      );
   }
 
   update(
     id: string,
     data: Partial<VendaRequestDto>
   ): Observable<VendaResponseDto> {
-    return this.http
-      .put<VendaResponseDto>(`${this.getBaseUrl()}/${id}`, data)
-      .pipe(
-        tap((response) => {
-          console.log('Venda atualizada com sucesso!', response);
-          this.clearCache();
-        })
-      );
-  }
-
-  cancelVenda(id: string): Observable<MessageResponse> {
-    return this.http.delete<MessageResponse>(`${this.getBaseUrl()}/${id}`).pipe(
+    return this.http.put<VendaResponseDto>(`${this.apiUrl}/${id}`, data).pipe(
       tap((response) => {
-        console.log('Venda cancelada com sucesso!', response.message);
+        console.log('Venda atualizada com sucesso!', response);
         this.clearCache();
       })
     );
+  }
+
+  cancelVenda(vendaId: string, storeId: string): Observable<MessageResponse> {
+    return this.http
+      .delete<MessageResponse>(`${this.apiUrl}/${vendaId}?storeId=${storeId}`)
+      .pipe(
+        tap((response) => {
+          console.log('Venda cancelada com sucesso!', response.message);
+          this.clearCache();
+        })
+      );
   }
 
   public clearCache() {
