@@ -77,7 +77,7 @@ export class NfeComponent {
       header: 'Status',
       // Badge personalizada para cada status possível de NFe
       badgeConfig: {
-        rascunho: { label: 'Em digitação', cssClass: 'badge-rascunho' },
+        rascunho: { label: 'Em Digitação', cssClass: 'badge-rascunho' },
         processando: { label: 'Processando', cssClass: 'badge-processando' },
         autorizado: { label: 'Autorizado', cssClass: 'badge-autorizado' },
         cancelado: { label: 'Cancelado', cssClass: 'badge-cancelado' },
@@ -163,8 +163,9 @@ export class NfeComponent {
     },
     rascunho: {
       icon: 'edit_note',
-      title: 'Nenhum rascunho encontrado',
-      description: 'Você não possui Notas Fiscais em fase de digitação.',
+      title: 'Nenhuma NFe em Digitação',
+      description:
+        'Você não possui Notas Fiscais em fase de digitação no momento.',
     },
     processando: {
       icon: 'sync',
@@ -429,7 +430,7 @@ export class NfeComponent {
     // Impedir envio de NFes que não sejam rascunho ou com erro
     if (nfe.nfeStatus !== 'rascunho' && nfe.nfeStatus !== 'erro') {
       this.toastr.info(
-        'Apenas NFes em rascunho ou com erro de digitação podem ser reenviadas.'
+        'Apenas NFes Em Digitação ou com erro de digitação podem ser reenviadas.'
       );
       return;
     }
