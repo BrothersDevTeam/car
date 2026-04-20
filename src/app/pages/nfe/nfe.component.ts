@@ -242,14 +242,13 @@ export class NfeComponent {
     // Contexto Global de Loja
     this.subscription.add(
       this.storeContextService.currentStoreId$.subscribe((storeId) => {
-        if (this.selectedStoreId !== storeId) {
-          this.selectedStoreId = storeId;
-          this.loadNfeList(
-            0,
-            this.paginationRequestConfig.pageSize,
-            this.searchValue
-          );
-        }
+        this.selectedStoreId = storeId;
+        this.nfeService.clearCache(); // Limpa cache para garantir dados da nova loja/rede
+        this.loadNfeList(
+          0,
+          this.paginationRequestConfig.pageSize,
+          this.searchValue
+        );
       })
     );
   }
@@ -323,9 +322,7 @@ export class NfeComponent {
       searchParams.search = searchValue.trim();
     }
 
-    if (this.selectedStoreId) {
-      searchParams.storeId = this.selectedStoreId;
-    }
+    searchParams.storeId = this.selectedStoreId ?? undefined;
 
     if (this.selectedStatus && this.selectedStatus !== 'TODOS') {
       searchParams.nfeStatus = this.selectedStatus;

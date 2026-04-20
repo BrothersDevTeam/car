@@ -75,7 +75,9 @@ export class VendaService {
   }
 
   getVendaById(id: string): Observable<VendaResponseDto> {
-    return this.http.get<VendaResponseDto>(`${this.apiUrl}/${id}`).pipe(first());
+    return this.http
+      .get<VendaResponseDto>(`${this.apiUrl}/${id}`)
+      .pipe(first());
   }
 
   gerarNfe(vendaId: string, storeId: string): Observable<VendaResponseDto> {

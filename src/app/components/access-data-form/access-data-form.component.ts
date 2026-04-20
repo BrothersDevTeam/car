@@ -1,5 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormArray, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormArray,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { CommonModule } from '@angular/common';
 
@@ -67,7 +72,10 @@ interface AuthGroup {
       </div>
 
       <!-- Erros de validação de usuário/senha -->
-      <div class="validation-errors" *ngIf="submitted">
+      <div
+        class="validation-errors"
+        *ngIf="submitted"
+      >
         @if (form.errors?.['passwordMismatch']) {
           <div class="error-message">As senhas não coincidem</div>
         }
@@ -81,17 +89,24 @@ interface AuthGroup {
           </div>
         }
         @if (form.get('password')?.invalid) {
-            <div class="error-message">Senha é obrigatória (mínimo 6 caracteres)</div>
+          <div class="error-message">
+            Senha é obrigatória (mínimo 6 caracteres)
+          </div>
         }
       </div>
 
       <!-- SEÇÃO DE PERMISSÕES GRANULARES -->
       <div class="permissions-container">
         <h3 class="permissions-title">Permissões de Acesso</h3>
-        <p class="permissions-subtitle">Selecione as ações que este funcionário poderá realizar.</p>
+        <p class="permissions-subtitle">
+          Selecione as ações que este funcionário poderá realizar.
+        </p>
 
         <div class="groups-grid">
-          <div *ngFor="let group of authGroups" class="auth-group">
+          <div
+            *ngFor="let group of authGroups"
+            class="auth-group"
+          >
             <h4 class="group-title">{{ group.name }}</h4>
             <div class="permissions-list">
               <mat-checkbox
@@ -189,8 +204,8 @@ interface AuthGroup {
         }
 
         .groups-grid {
-           grid-template-columns: 1fr;
-           gap: 1.5rem;
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
         }
       }
     `,
@@ -208,7 +223,7 @@ export class AccessDataFormComponent implements OnInit {
         { key: Authorizations.CREATE_VENDA, label: 'Registrar venda' },
         { key: Authorizations.EDIT_VENDA, label: 'Editar venda' },
         { key: Authorizations.CANCEL_VENDA, label: 'Cancelar venda' },
-      ]
+      ],
     },
     {
       name: 'Veículos',
@@ -217,9 +232,12 @@ export class AccessDataFormComponent implements OnInit {
         { key: Authorizations.CREATE_VEHICLE, label: 'Cadastrar veículos' },
         { key: Authorizations.EDIT_VEHICLE, label: 'Editar veículos' },
         { key: Authorizations.DELETE_VEHICLE, label: 'Excluir veículos' },
-        { key: Authorizations.READ_VEHICLE_PURCHASE_PRICE, label: 'Ver preço de compra' },
+        {
+          key: Authorizations.READ_VEHICLE_PURCHASE_PRICE,
+          label: 'Ver preço de compra',
+        },
         { key: Authorizations.READ_VEHICLE_PROFIT, label: 'Ver lucro/margem' },
-      ]
+      ],
     },
     {
       name: 'Clientes e Pessoas',
@@ -228,7 +246,7 @@ export class AccessDataFormComponent implements OnInit {
         { key: Authorizations.CREATE_PERSON, label: 'Cadastrar pessoas' },
         { key: Authorizations.EDIT_PERSON, label: 'Editar pessoas' },
         { key: Authorizations.DELETE_PERSON, label: 'Excluir pessoas' },
-      ]
+      ],
     },
     {
       name: 'Notas Fiscais (NFe)',
@@ -237,7 +255,7 @@ export class AccessDataFormComponent implements OnInit {
         { key: Authorizations.CREATE_NFE, label: 'Gerar NFes' },
         { key: Authorizations.EMITIR_NFE, label: 'Emitir para a Focus' },
         { key: Authorizations.CANCEL_NFE, label: 'Cancelar NFes' },
-      ]
+      ],
     },
     {
       name: 'Configurações de Loja',
@@ -245,24 +263,32 @@ export class AccessDataFormComponent implements OnInit {
         { key: Authorizations.READ_STORE, label: 'Visualizar dados da loja' },
         { key: Authorizations.EDIT_STORE, label: 'Configurar loja/filiais' },
         { key: Authorizations.SYNC_FOCUSNFE, label: 'Sincronizar Focus NFe' },
-      ]
+      ],
     },
     {
       name: 'Usuários do Sistema',
       permissions: [
-        { key: Authorizations.READ_USER_OTHERS, label: 'Visualizar outros usuários' },
+        {
+          key: Authorizations.READ_USER_OTHERS,
+          label: 'Visualizar outros usuários',
+        },
         { key: Authorizations.CREATE_USER, label: 'Criar usuários' },
-        { key: Authorizations.EDIT_USER_OTHERS, label: 'Editar outros usuários' },
+        {
+          key: Authorizations.EDIT_USER_OTHERS,
+          label: 'Editar outros usuários',
+        },
         { key: Authorizations.DELETE_USER, label: 'Excluir usuários' },
-      ]
-    }
+      ],
+    },
   ];
 
   ngOnInit() {
     // Garante que o controlador de authorizations exista no form
     if (!this.form.get('authorizations')) {
       // Se não existir (por erro do pai), não quebra mas avisa
-      console.error('O form pai deve prover um FormArray chamado "authorizations"');
+      console.error(
+        'O form pai deve prover um FormArray chamado "authorizations"'
+      );
     }
   }
 
