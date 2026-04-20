@@ -15,6 +15,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ToastrService } from 'ngx-toastr';
 import { PersonService } from '@services/person.service';
 import { AuthService } from '@services/auth/auth.service';
@@ -33,7 +34,8 @@ import { AccessDataFormComponent } from '../access-data-form/access-data-form.co
     MatSelectModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    AccessDataFormComponent, // Added
+    MatCheckboxModule,
+    AccessDataFormComponent,
   ],
   templateUrl: './user-access-management.component.html',
   styleUrls: ['./user-access-management.component.scss'],
@@ -60,8 +62,8 @@ export class UserAccessManagementComponent implements OnInit {
       {
         username: ['', [Validators.required, Validators.minLength(3)]],
         password: ['', [Validators.required, Validators.minLength(6)]],
-        confirmPassword: ['', [Validators.required]], // Added
-        roleName: ['', Validators.required],
+        confirmPassword: ['', [Validators.required]],
+        authorizations: this.fb.array<string>([], Validators.required),
       },
       { validators: this.passwordMatchValidator }
     ); // Added validator
@@ -72,13 +74,9 @@ export class UserAccessManagementComponent implements OnInit {
   }
 
   private checkUserPermissions(): void {
-    const roles = this.authService.getRoles();
-
-    this.hasPermissionToCreateAccess = roles.some((role) =>
-      ['ROLE_MANAGER', 'ROLE_ADMIN', 'ROLE_OWNER', 'ROLE_CAR_ADMIN'].includes(
-        role
-      )
-    );
+    this.hasPermissionToCreateAccess =
+      this.authService.hasAuthority('create:user') ||
+      this.authService.hasAuthority('edit:store');
   }
 
   handleCreateAccessClick(): void {
@@ -138,8 +136,9 @@ export class UserAccessManagementComponent implements OnInit {
     this.isLoading = true;
     const formData = {
       ...this.userForm.value,
-      personId: this.personId, // DTO requires personId in body too
-      password: this.userForm.value.password, // Ensure password is correct
+      authorizations: (this.userForm.value.authorizations as string[]) || [],
+      personId: this.personId,
+      password: this.userForm.value.password,
     };
 
     console.log('Creating user for person:', this.personId, formData);

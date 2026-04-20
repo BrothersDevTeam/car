@@ -17,8 +17,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
   AbstractControl,
+  FormArray,
   FormBuilder,
   ReactiveFormsModule,
   ValidationErrors,
@@ -62,6 +64,7 @@ import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
     MatSelectModule,
     MatFormFieldModule,
     MatTooltipModule,
+    MatCheckboxModule,
   ],
   templateUrl: './natural-person-form.component.html',
   styleUrl: './natural-person-form.component.scss',
@@ -162,11 +165,9 @@ export class NaturalPersonFormComponent
    * - Todas as pessoas serão cadastradas como CLIENTE automaticamente
    */
   protected get canRegisterEmployee(): boolean {
-    const userRoles = this.authService.getRoles();
     return (
-      userRoles.includes('root:admin') ||
-      userRoles.includes('create:user') ||
-      userRoles.includes('edit:store')
+      this.authService.hasAuthority('create:user') ||
+      this.authService.hasAuthority('edit:store')
     );
   }
 
@@ -197,7 +198,7 @@ export class NaturalPersonFormComponent
     username: [''],
     password: [''],
     confirmPassword: [''],
-    roleName: [''],
+    authorizations: this.formBuilderService.array<string>([]),
   });
 
   /**
@@ -354,7 +355,7 @@ export class NaturalPersonFormComponent
             ...baseData,
             username: this.form.value.username || '',
             password: this.form.value.password || '',
-            roleName: this.form.value.roleName || '',
+            authorizations: (this.form.value.authorizations as string[]) || [],
           };
         } else {
           formValue = baseData;
@@ -806,22 +807,6 @@ export class NaturalPersonFormComponent
         this.loadAvailableDrafts();
       })
     );
-
-    this.subscriptions.add(
-      this.form.get('roleName')?.valueChanges.subscribe((role) => {
-        if (!role) return;
-
-        if (role === 'ROLE_MANAGER') {
-          this.form.get('relationship')?.setValue(RelationshipTypes.GERENTE);
-        } else if (role === 'ROLE_OWNER') {
-          this.form
-            .get('relationship')
-            ?.setValue(RelationshipTypes.PROPRIETARIO);
-        } else if (role === 'ROLE_SELLER' || role === 'ROLE_FINANCIAL') {
-          this.form.get('relationship')?.setValue(RelationshipTypes.VENDEDOR);
-        }
-      }) ?? new Subscription()
-    );
   }
 
   protected toggleEmployeeType(): void {
@@ -844,7 +829,7 @@ export class NaturalPersonFormComponent
     const usernameControl = this.form.get('username');
     const passwordControl = this.form.get('password');
     const confirmPasswordControl = this.form.get('confirmPassword');
-    const roleNameControl = this.form.get('roleName');
+    const authorizationsControl = this.form.get('authorizations') as FormArray;
 
     if (this.shouldShowUserFields) {
       usernameControl?.setValidators([
@@ -859,27 +844,27 @@ export class NaturalPersonFormComponent
         Validators.required,
         Validators.minLength(6),
       ]);
-      roleNameControl?.setValidators([Validators.required]);
+      authorizationsControl?.setValidators([Validators.required]);
 
       usernameControl?.updateValueAndValidity({ emitEvent: false });
       passwordControl?.updateValueAndValidity({ emitEvent: false });
       confirmPasswordControl?.updateValueAndValidity({ emitEvent: false });
-      roleNameControl?.updateValueAndValidity({ emitEvent: false });
+      authorizationsControl?.updateValueAndValidity({ emitEvent: false });
     } else {
       usernameControl?.clearValidators();
       passwordControl?.clearValidators();
       confirmPasswordControl?.clearValidators();
-      roleNameControl?.clearValidators();
+      authorizationsControl?.clearValidators();
 
       usernameControl?.setValue('', { emitEvent: false });
       passwordControl?.setValue('', { emitEvent: false });
       confirmPasswordControl?.setValue('', { emitEvent: false });
-      roleNameControl?.setValue('', { emitEvent: false });
+      authorizationsControl?.clear(); // Limpa o FormArray
 
       usernameControl?.updateValueAndValidity({ emitEvent: false });
       passwordControl?.updateValueAndValidity({ emitEvent: false });
       confirmPasswordControl?.updateValueAndValidity({ emitEvent: false });
-      roleNameControl?.updateValueAndValidity({ emitEvent: false });
+      authorizationsControl?.updateValueAndValidity({ emitEvent: false });
     }
   }
 
@@ -1053,7 +1038,7 @@ export class NaturalPersonFormComponent
         ...baseData,
         username: this.form.value.username || '',
         password: this.form.value.password || '',
-        roleName: this.form.value.roleName || '',
+        authorizations: (this.form.value.authorizations as string[]) || [],
       };
     } else {
       formValue = baseData;
