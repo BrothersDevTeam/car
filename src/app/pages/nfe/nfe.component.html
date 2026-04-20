@@ -236,8 +236,20 @@
             }
             @if (selectedNfe.nfeMensagemErro) {
               <div class="info-item full-width error-item">
-                <label>Mensagem de Erro</label>
-                <span>{{ selectedNfe.nfeMensagemErro }}</span>
+                <label>Erros Identificados</label>
+                <div class="error-list">
+                  @for (
+                    error of selectedNfe.nfeMensagemErro.split(';');
+                    track error
+                  ) {
+                    @if (error.trim()) {
+                      <div class="error-line">
+                        <mat-icon>chevron_right</mat-icon>
+                        <span>{{ error.trim() }}</span>
+                      </div>
+                    }
+                  }
+                </div>
               </div>
             }
           </div>

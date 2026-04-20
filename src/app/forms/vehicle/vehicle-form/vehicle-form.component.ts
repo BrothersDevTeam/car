@@ -383,24 +383,24 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
         networkStoreId: this.storeContextService.currentStoreId!,
       })
       .subscribe({
-      next: (response) => {
-        console.log('Pessoas carregadas:', response);
-        if (response.page.totalElements > 0) {
-          this.persons = response.content.map((person) => ({
-            id: person.personId,
-            name: person.name,
-          }));
-        }
-        this.personsLoaded = true;
-        // Tenta preencher o formulário se já tiver dataForm
-        this.tryFillFormOnEdit();
-      },
-      error: (error) => {
-        console.error('Erro ao carregar pessoas:', error);
-        this.toastrService.error('Erro ao carregar pessoas');
-        this.personsLoaded = true;
-      },
-    });
+        next: (response) => {
+          console.log('Pessoas carregadas:', response);
+          if (response.page.totalElements > 0) {
+            this.persons = response.content.map((person) => ({
+              id: person.personId,
+              name: person.name,
+            }));
+          }
+          this.personsLoaded = true;
+          // Tenta preencher o formulário se já tiver dataForm
+          this.tryFillFormOnEdit();
+        },
+        error: (error) => {
+          console.error('Erro ao carregar pessoas:', error);
+          this.toastrService.error('Erro ao carregar pessoas');
+          this.personsLoaded = true;
+        },
+      });
 
     // Carrega cores do backend
     this.loadColors();
