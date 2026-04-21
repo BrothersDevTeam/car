@@ -514,8 +514,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Para edição, busca a marca pelo nome
     // FIPE retorna nomes em maiúsculo ou formato específico, pode precisar de normalização de comparação
     const selectedBrand = this.brands.find(
-      (b) =>
-        b.name.toLowerCase() === (this.dataForm!.brand || '').toLowerCase()
+      (b) => b.name.toLowerCase() === (this.dataForm!.brand || '').toLowerCase()
     );
 
     // Para edição, busca a cor pelo nome

@@ -136,7 +136,9 @@ export class VendaFormComponent implements OnInit {
     const ctrl = this.vendaForm.get(field);
     if (!ctrl) return;
     const numericValue = this.parseBRLToNumber(ctrl.value.toString());
-    ctrl.setValue(numericValue === 0 ? '' : numericValue.toString(), { emitEvent: false });
+    ctrl.setValue(numericValue === 0 ? '' : numericValue.toString(), {
+      emitEvent: false,
+    });
   }
 
   /**
@@ -160,7 +162,10 @@ export class VendaFormComponent implements OnInit {
 
   /** Formata número como moeda BRL: 150000 → "150.000,00" */
   private formatBRL(value: number): string {
-    return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return value.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 
   ngOnInit() {
@@ -257,11 +262,14 @@ export class VendaFormComponent implements OnInit {
 
   // Handlers de seleção do Autocomplete
   onVehicleSelected(vehicle: Vehicle) {
-    const valorVenda = vehicle.valorVenda ? parseFloat(vehicle.valorVenda.toString().replace(',', '.')) : 0;
+    const valorVenda = vehicle.valorVenda
+      ? parseFloat(vehicle.valorVenda.toString().replace(',', '.'))
+      : 0;
     const valorFormatted = this.formatBRL(valorVenda);
     this.vendaForm.patchValue({
       vehicleId: vehicle.vehicleId,
-      vehicleDisplay: `${vehicle.brand || ''} ${vehicle.model || ''} (${vehicle.plate})`.trim(),
+      vehicleDisplay:
+        `${vehicle.brand || ''} ${vehicle.model || ''} (${vehicle.plate})`.trim(),
       valor: valorFormatted,
       valorFinal: valorFormatted,
     });

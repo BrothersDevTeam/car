@@ -2,7 +2,15 @@
 
 .table-container {
   overflow-x: auto;
-  position: relative; // Necessário para o overlay absoluto
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 12px;
+
+  /* Faz a tabela ocupar o espaço disponível da tela (ajustado para o layout) */
+  min-height: calc(100vh - 280px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .loading-overlay {
@@ -15,7 +23,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  z-index: 1000;
   backdrop-filter: blur(1px);
 }
 
@@ -26,6 +34,8 @@
 
 table {
   width: 100%;
+  border-collapse: separate; /* Ajuda a evitar cortes de bordas no overflow */
+  margin-bottom: auto; /* Empurra o paginador para o final se houver poucas linhas */
 }
 
 th[mat-header-cell],
@@ -44,43 +54,49 @@ mat-icon {
 }
 
 .delete-btn {
-  .delete-btn {
-    color: var(--status-cancelado-text);
-  }
+  color: var(--status-cancelado-text);
+}
 
-  .nfe-btn {
-    color: var(--primary-color);
-  }
+.nfe-btn {
+  color: var(--primary-color);
 }
 
 /* Estilo para o botão de edição */
 button[mat-icon-button] {
-  color: #3f51b5; /* Cor do ícone, ajuste conforme o tema */
+  color: #3f51b5;
 }
 
-/* Evitar que o clique no checkbox ou ícone acione o rowClick */
+/* Interação com Linhas */
 .row-clickable {
+  transition: background-color 0.2s ease;
   &:hover {
-    background-color: $hover-bg !important;
-  }
-
-  td.mat-column-select,
-  td.mat-column-edit,
-  td.mat-column-delete {
-    pointer-events: auto;
+    background-color: rgba(0, 0, 0, 0.03) !important;
   }
 
   &.selected-row {
-    background-color: rgba(33, 150, 243, 0.12) !important; // Light primary blue
-
+    background-color: rgba(33, 150, 243, 0.08) !important;
     &:hover {
-      background-color: rgba(33, 150, 243, 0.2) !important; // Darker on hover
+      background-color: rgba(33, 150, 243, 0.15) !important;
     }
   }
 }
 
+/* Forçar visualização de tooltips em células - CRÍTICO */
+tr.mat-row,
+td.mat-cell {
+  overflow: visible !important;
+  /* Removemos o context de empilhamento que mat-row as vezes cria */
+}
+
+td.mat-column-alert {
+  overflow: visible !important;
+  position: relative;
+  width: 50px !important;
+  text-align: center;
+}
+
 /* ==========================================
-   BADGES DE STATUS
+   BADGES DE STATUS (Otimizadas)
    ========================================== */
 .status-badge {
   display: inline-flex;
@@ -93,52 +109,180 @@ button[mat-icon-button] {
   text-transform: uppercase;
   white-space: nowrap;
 
-  // Rascunho / Em digitação → vermelho/alaranjado (atenção)
   &.badge-rascunho {
-    background-color: rgba(229, 57, 53, 0.12);
+    background-color: rgba(229, 57, 53, 0.1);
     color: #c62828;
-    border: 1px solid rgba(229, 57, 53, 0.3);
+    border: 1px solid rgba(229, 57, 53, 0.2);
   }
-
-  // Processando → azul (em andamento)
   &.badge-processando {
-    background-color: rgba(33, 150, 243, 0.12);
+    background-color: rgba(33, 150, 243, 0.1);
     color: #1565c0;
-    border: 1px solid rgba(33, 150, 243, 0.3);
+    border: 1px solid rgba(33, 150, 243, 0.2);
   }
-
-  // Autorizado → verde (sucesso)
   &.badge-autorizado {
-    background-color: rgba(56, 142, 60, 0.12);
+    background-color: rgba(56, 142, 60, 0.1);
     color: #1b5e20;
-    border: 1px solid rgba(56, 142, 60, 0.3);
+    border: 1px solid rgba(56, 142, 60, 0.2);
   }
-
-  // Cancelado → cinza (inativo)
   &.badge-cancelado {
-    background-color: rgba(117, 117, 117, 0.12);
+    background-color: rgba(117, 117, 117, 0.1);
     color: #424242;
-    border: 1px solid rgba(117, 117, 117, 0.3);
+    border: 1px solid rgba(117, 117, 117, 0.2);
   }
-
-  // Erro → vermelho forte (crítico)
   &.badge-erro {
-    background-color: rgba(183, 28, 28, 0.15);
+    background-color: rgba(183, 28, 28, 0.1);
     color: #b71c1c;
-    border: 1px solid rgba(183, 28, 28, 0.4);
+    border: 1px solid rgba(183, 28, 28, 0.2);
   }
-
-  // Disponível (Veículo) → Verde
   &.badge-disponivel {
-    background-color: rgba(56, 142, 60, 0.12);
+    background-color: rgba(56, 142, 60, 0.1);
     color: #1b5e20;
-    border: 1px solid rgba(56, 142, 60, 0.3);
+    border: 1px solid rgba(56, 142, 60, 0.2);
+  }
+  &.badge-vendido {
+    background-color: rgba(117, 117, 117, 0.1);
+    color: #424242;
+    border: 1px solid rgba(117, 117, 117, 0.2);
+  }
+}
+
+/* ==========================================
+   INDICADOR DE ALERTA E TOOLTIP PREMIUM (FINAL V3)
+   ========================================== */
+.alert-indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  z-index: 50; /* Z-index da célula baixo */
+  width: 40px;
+  height: 40px;
+
+  .alert-icon {
+    color: #e65100;
+    font-size: 24px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
-  // Vendido (Veículo) → Cinza neutro
-  &.badge-vendido {
-    background-color: rgba(117, 117, 117, 0.12);
-    color: #424242;
-    border: 1px solid rgba(117, 117, 117, 0.3);
+  .alert-tooltip {
+    display: none;
+    opacity: 0;
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-20px) translateX(0);
+    width: 340px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.35); /* Sombra mais pesada para destaque */
+    z-index: 99999 !important; /* Z-index máximo para o tooltip flutuante */
+    border: 1px solid #ffcc80;
+    pointer-events: none;
+    overflow: hidden;
   }
+
+  &:hover {
+    z-index: 1000; /* Eleva a célula no hover para o tooltip não ficar atrás da linha de baixo */
+    .alert-icon {
+      transform: scale(1.15);
+    }
+    .alert-tooltip {
+      display: block;
+      opacity: 1;
+      transform: translateY(-20px) translateX(10px);
+      transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+    }
+  }
+
+  /* Seta lateral */
+  .alert-tooltip::before {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 22px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: transparent #ffe0b2 transparent transparent;
+  }
+}
+
+.alert-tooltip-header {
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #ffcc80;
+
+  mat-icon {
+    color: #e65100;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+  span {
+    font-size: 11px;
+    font-weight: 800;
+    color: #bf360c;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+}
+
+.alert-tooltip-body {
+  padding: 12px 16px;
+  background: #ffffff;
+  .alert-tooltip-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+    mat-icon {
+      color: #ffa000;
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+      margin-top: 2px;
+    }
+    span {
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #37474f;
+      text-align: left;
+      font-weight: 500;
+    }
+  }
+}
+
+.pulse-warning {
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Estilo do Paginador (Garante que ele fique abaixo de tudo) */
+app-pagination {
+  z-index: 1;
+  position: relative;
+  background: white;
+  border-top: 1px solid #eee;
 }
