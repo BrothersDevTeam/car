@@ -58,6 +58,8 @@ export interface Nfe {
   // === Status e controle ===
   nfeStatus?: string; // 'rascunho', 'processando', 'autorizado', 'cancelado', 'erro'
   nfeChave?: string; // Chave de 44 dígitos da SEFAZ
+  nfeXmlUrl?: string; // URL do XML na FocusNFe
+  nfeDanfeUrl?: string; // URL do DANFE na FocusNFe
   nfeMensagemErro?: string; // Mensagem de erro da SEFAZ
 
   // === Partes da NFe ===

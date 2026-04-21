@@ -25,6 +25,8 @@ import { ContentHeaderComponent } from '@components/content-header/content-heade
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { EmptyStateComponent } from '@components/empty-state/empty-state.component';
+import { DrawerComponent } from '@components/drawer/drawer.component';
+import { VendaInfoComponent } from '@info/venda-info/venda-info.component';
 
 import { VendaService } from '@services/venda.service';
 import { StoreContextService } from '@services/store-context.service';
@@ -52,6 +54,8 @@ import { VendaStatus } from '@enums/venda-status';
     MatPaginatorModule,
     MatButtonToggleModule,
     EmptyStateComponent,
+    DrawerComponent,
+    VendaInfoComponent,
   ],
   providers: [DatePipe, CurrencyPipe],
   templateUrl: './vendas-list.component.html',
@@ -72,6 +76,8 @@ export class VendasListComponent implements OnInit, OnDestroy {
 
   vendasPaginatedList: PaginationResponse<VendaResponseDto> | null = null;
   vendasListLoading = signal(false);
+  openInfo = signal(false);
+  selectedVendaId = signal<string | null>(null);
   searchValue: string = '';
   selectedStoreId: string | null = null;
   selectedStatus: string = 'TODOS';
@@ -270,12 +276,22 @@ export class VendasListComponent implements OnInit, OnDestroy {
   }
 
   onRowClick(venda: VendaResponseDto) {
-    // No futuro abrir drawer de detalhes
-    console.log('Venda selecionada:', venda);
+    this.selectedVendaId.set(venda.vendaId);
+    this.openInfo.set(true);
+  }
+
+  handleCloseDrawer() {
+    this.openInfo.set(false);
+    this.selectedVendaId.set(null);
   }
 
   handleEdit(venda: VendaResponseDto) {
     this.router.navigate(['/vendas/editar', venda.vendaId]);
+  }
+
+  handleEditFromInfo(vendaId: string) {
+    this.handleCloseDrawer();
+    this.router.navigate(['/vendas/editar', vendaId]);
   }
 
   handleEmitirNfe(venda: VendaResponseDto) {

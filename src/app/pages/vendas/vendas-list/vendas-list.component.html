@@ -93,3 +93,14 @@
     }
   }
 </main>
+
+@if (openInfo()) {
+  <app-drawer (closeDrawer)="handleCloseDrawer()">
+    <app-venda-info
+      *ngIf="selectedVendaId()"
+      [vendaId]="selectedVendaId()!"
+      (close)="handleCloseDrawer()"
+      (edit)="handleEditFromInfo($event)"
+    ></app-venda-info>
+  </app-drawer>
+}

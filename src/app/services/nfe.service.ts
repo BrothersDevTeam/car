@@ -73,6 +73,10 @@ export class NfeService {
     return this.http.get<Nfe>(`${this.apiUrl}?nfeId=${id}`).pipe(first());
   }
 
+  getById(id: string): Observable<Nfe> {
+    return this.http.get<Nfe>(`${this.apiUrl}/${id}`).pipe(first());
+  }
+
   create(data: Nfe) {
     return this.http.post<string>(`${this.apiUrl}`, data).pipe(
       tap((response: string) => {
