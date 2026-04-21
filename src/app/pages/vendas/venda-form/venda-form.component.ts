@@ -1,6 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, LOCALE_ID } from '@angular/core';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
 import {
   FormArray,
   FormBuilder,
@@ -66,6 +68,10 @@ import { VendaRequestDto } from '@interfaces/venda';
   ],
   templateUrl: './venda-form.component.html',
   styleUrls: ['./venda-form.component.scss'],
+  providers: [
+    { provide: LOCALE_ID, useValue: 'pt-BR' },
+    { provide: MAT_DATE_LOCALE, useValue: 'pt-BR' },
+  ],
 })
 export class VendaFormComponent implements OnInit {
   isEdit = false;
@@ -94,6 +100,9 @@ export class VendaFormComponent implements OnInit {
     private storeContextService: StoreContextService,
     private toastr: ToastrService
   ) {
+    // Registra o locale pt-BR globalmente para o datepicker
+    registerLocaleData(localePt, 'pt-BR');
+
     this.vendaForm = this.fb.group({
       vehicleId: ['', Validators.required],
       vehicleDisplay: ['', Validators.required], // Campo apenas para o autocomplete
@@ -102,8 +111,8 @@ export class VendaFormComponent implements OnInit {
       sellerPersonId: [''],
       sellerDisplay: [''], // Campo apenas para o autocomplete
       dataVenda: [new Date(), Validators.required],
-      valor: [0, [Validators.required, Validators.min(0.01)]],
-      valorFinal: [0, [Validators.required, Validators.min(0.01)]],
+      valor: ['0,00', [Validators.required]],
+      valorFinal: ['0,00', [Validators.required]],
       observacao: [''],
       pagamentos: this.fb.array([]),
       avalistasIds: this.fb.array([]),
@@ -117,6 +126,41 @@ export class VendaFormComponent implements OnInit {
 
   get avalistasIds() {
     return this.vendaForm.get('avalistasIds') as FormArray;
+  }
+
+  /**
+   * Ao ganhar foco, converte a string formatada de volta para número puro
+   * para facilitar a edição pelo usuário (ex: "150.000,00" → "150000")
+   */
+  onValorFocus(field: 'valor' | 'valorFinal') {
+    const ctrl = this.vendaForm.get(field);
+    if (!ctrl) return;
+    const numericValue = this.parseBRLToNumber(ctrl.value.toString());
+    ctrl.setValue(numericValue === 0 ? '' : numericValue.toString(), { emitEvent: false });
+  }
+
+  /**
+   * Ao perder foco, formata o número como moeda pt-BR
+   * (ex: 150000 → "150.000,00")
+   */
+  onValorBlur(field: 'valor' | 'valorFinal') {
+    const ctrl = this.vendaForm.get(field);
+    if (!ctrl) return;
+    const numericValue = this.parseBRLToNumber(ctrl.value.toString());
+    ctrl.setValue(this.formatBRL(numericValue), { emitEvent: false });
+  }
+
+  /** Converte string BRL para número: "150.000,00" → 150000 */
+  private parseBRLToNumber(value: string): number {
+    if (!value) return 0;
+    // Remove pontos de milhar e substitui vírgula por ponto decimal
+    const clean = value.replace(/\./g, '').replace(',', '.');
+    return parseFloat(clean) || 0;
+  }
+
+  /** Formata número como moeda BRL: 150000 → "150.000,00" */
+  private formatBRL(value: number): string {
+    return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   ngOnInit() {
@@ -213,11 +257,13 @@ export class VendaFormComponent implements OnInit {
 
   // Handlers de seleção do Autocomplete
   onVehicleSelected(vehicle: Vehicle) {
+    const valorVenda = vehicle.valorVenda ? parseFloat(vehicle.valorVenda.toString().replace(',', '.')) : 0;
+    const valorFormatted = this.formatBRL(valorVenda);
     this.vendaForm.patchValue({
       vehicleId: vehicle.vehicleId,
-      vehicleDisplay: `${vehicle.brand} ${vehicle.model} (${vehicle.plate})`,
-      valor: vehicle.valorVenda || 0,
-      valorFinal: vehicle.valorVenda || 0,
+      vehicleDisplay: `${vehicle.brand || ''} ${vehicle.model || ''} (${vehicle.plate})`.trim(),
+      valor: valorFormatted,
+      valorFinal: valorFormatted,
     });
   }
 
@@ -299,7 +345,24 @@ export class VendaFormComponent implements OnInit {
     }
 
     this.isSubmitting.set(true);
-    const formData: VendaRequestDto = this.vendaForm.value;
+    const raw = this.vendaForm.value;
+
+    // Serializa a data como 'yyyy-MM-dd' puro para evitar problema de
+    // timezone com @PastOrPresent do backend (Date → ISO 8601 inclui offset)
+    const dataVendaFormatted = this.formatDateToISO(raw.dataVenda);
+
+    const formData: VendaRequestDto = {
+      ...raw,
+      dataVenda: dataVendaFormatted,
+      // Converte os valores formatados (string BRL) de volta para número
+      valor: this.parseBRLToNumber(raw.valor?.toString() || '0'),
+      valorFinal: this.parseBRLToNumber(raw.valorFinal?.toString() || '0'),
+      // Remove campos auxiliares de display que não fazem parte do DTO
+      vehicleDisplay: undefined,
+      buyerDisplay: undefined,
+      sellerDisplay: undefined,
+      avalistaSearchControl: undefined,
+    };
 
     const request = this.isEdit
       ? this.vendaService.update(this.vendaId!, formData)
@@ -314,11 +377,26 @@ export class VendaFormComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.toastr.error(
-          'Erro ao salvar venda. Verifique os dados e tente novamente.'
-        );
+        // Extrai mensagem específica do backend se disponível
+        const msg =
+          err?.error?.errorMessage ||
+          err?.error?.message ||
+          'Erro ao salvar venda. Verifique os dados e tente novamente.';
+        this.toastr.error(msg);
       },
     });
+  }
+
+  /**
+   * Formata um objeto Date para a string 'yyyy-MM-dd' sem timezone,
+   * compatível com java.time.LocalDate no backend.
+   */
+  private formatDateToISO(date: Date | string): string {
+    const d = date instanceof Date ? date : new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   goBack() {

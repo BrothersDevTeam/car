@@ -47,7 +47,7 @@
             >
               @for (vehicle of filteredVehicles; track vehicle.vehicleId) {
                 <mat-option [value]="vehicle">
-                  {{ vehicle.brand }} {{ vehicle.model }} -
+                  {{ vehicle.brand || '' }} {{ vehicle.model || '' }} -
                   <strong>{{ vehicle.plate }}</strong>
                 </mat-option>
               }
@@ -125,6 +125,7 @@
               matIconSuffix
               [for]="picker"
             ></mat-datepicker-toggle>
+            <!-- locale='pt-BR' garante exibição em dd/MM/yyyy -->
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
         </mat-card-content>
@@ -141,13 +142,15 @@
             class="col-4"
           >
             <mat-label>Valor Tabela/Venda</mat-label>
+            <span matTextPrefix>R$&nbsp;</span>
             <input
               matInput
-              type="number"
+              type="text"
               formControlName="valor"
-              prefix="R$ "
+              (blur)="onValorBlur('valor')"
+              (focus)="onValorFocus('valor')"
+              placeholder="0,00"
             />
-            <mat-icon matPrefix>attach_money</mat-icon>
           </mat-form-field>
 
           <mat-form-field
@@ -155,12 +158,15 @@
             class="col-4"
           >
             <mat-label>Valor Final (Fechamento)</mat-label>
+            <span matTextPrefix>R$&nbsp;</span>
             <input
               matInput
-              type="number"
+              type="text"
               formControlName="valorFinal"
+              (blur)="onValorBlur('valorFinal')"
+              (focus)="onValorFocus('valorFinal')"
+              placeholder="0,00"
             />
-            <mat-icon matPrefix>payments</mat-icon>
           </mat-form-field>
 
           <mat-form-field
