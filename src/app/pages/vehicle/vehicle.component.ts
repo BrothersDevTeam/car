@@ -10,6 +10,7 @@ import { DrawerComponent } from '@components/drawer/drawer.component';
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
+import { UnsavedChangesDialogComponent } from '@components/dialogs/unsaved-changes-dialog/unsaved-changes-dialog.component';
 import { StoreContextService } from '@services/store-context.service';
 import { Subject, Subscription, catchError, debounceTime, of } from 'rxjs';
 import { EmptyStateComponent } from '@components/empty-state/empty-state.component';
@@ -159,6 +160,7 @@ export class VehicleComponent {
   }
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(VehicleFormComponent) vehicleFormRef?: VehicleFormComponent;
 
   constructor(
     private vehicleService: VehicleService,
@@ -412,21 +414,30 @@ export class VehicleComponent {
   }
 
   openDialog() {
-    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Há mudanças não salvas',
-          message: 'Deseja fechar <strong>sem salvar</strong>?',
-          confirmText: 'Sim',
-          cancelText: 'Não',
-        },
-      }
-    );
+    const canSave = this.vehicleFormRef?.vehicleForm?.valid ?? false;
+
+    const dialogRef = this.dialog.open(UnsavedChangesDialogComponent, {
+      width: '450px',
+      disableClose: true,
+      data: {
+        canSave,
+        message: canSave
+          ? 'Deseja salvar as alterações do veículo antes de sair?'
+          : 'Há campos obrigatórios não preenchidos ou inválidos. Deseja descartar as alterações?',
+        hideDraftOption: true, // Veículos não possuem rascunhos locais
+      },
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
+      if (!result || result === 'cancel') return;
+
+      if (result === 'discard') {
         this.handleCloseDrawer();
+        return;
+      }
+
+      if (result === 'save' && canSave) {
+        this.vehicleFormRef?.onSubmit();
       }
     });
   }

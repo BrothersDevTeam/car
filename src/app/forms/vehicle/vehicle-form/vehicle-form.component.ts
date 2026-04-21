@@ -514,12 +514,13 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Para edição, busca a marca pelo nome
     // FIPE retorna nomes em maiúsculo ou formato específico, pode precisar de normalização de comparação
     const selectedBrand = this.brands.find(
-      (b) => b.name.toLowerCase() === this.dataForm!.brand.toLowerCase()
+      (b) =>
+        b.name.toLowerCase() === (this.dataForm!.brand || '').toLowerCase()
     );
 
     // Para edição, busca a cor pelo nome
     const selectedColor = this.colors.find(
-      (c) => c.name === this.dataForm!.color
+      (c) => c.name === (this.dataForm!.color || '')
     );
 
     // Para edição, busca o proprietário pelo ID
@@ -586,7 +587,9 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
           // Após carregar os modelos, busca o modelo selecionado
           const selectedModel = this.models.find(
-            (m) => m.name.toLowerCase() === this.dataForm!.model.toLowerCase()
+            (m) =>
+              m.name.toLowerCase() ===
+              (this.dataForm!.model || '').toLowerCase()
           );
 
           if (selectedModel) {
@@ -687,7 +690,11 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           },
           error: (error) => {
             console.error('Erro ao atualizar:', error);
-            this.toastrService.error('Erro ao atualizar veículo');
+            const msg = this.extractErrorMessage(
+              error,
+              'Erro ao atualizar veículo'
+            );
+            this.toastrService.error(msg);
           },
         });
     } else {
@@ -698,10 +705,26 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
         },
         error: (error) => {
           console.error('Erro ao cadastrar:', error);
-          this.toastrService.error('Erro ao cadastrar veículo');
+          const msg = this.extractErrorMessage(
+            error,
+            'Erro ao cadastrar veículo'
+          );
+          this.toastrService.error(msg);
         },
       });
     }
+  }
+
+  /**
+   * Extrai a mensagem de erro vinda do backend (ConflictException, etc.)
+   */
+  private extractErrorMessage(error: any, fallback: string): string {
+    return (
+      error?.error?.errorMessage || // ErrorRecordResponse do backend
+      error?.error?.message || // Outros formatos
+      error?.message || // Erro HTTP genérico
+      fallback
+    );
   }
 
   onDelete() {

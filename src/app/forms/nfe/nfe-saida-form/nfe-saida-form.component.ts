@@ -101,6 +101,10 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   @Output() formSubmitted = new EventEmitter<void>();
   @Output() formChanged = new EventEmitter<boolean>();
 
+  public get nfeForm(): FormGroup {
+    return this.form;
+  }
+
   protected form: FormGroup = this.formBuilderService.group({
     storeId: [''],
     vehicleId: ['', Validators.required],
@@ -287,7 +291,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   getVehicleDisplay(vehicle: Vehicle): string {
     const brand = vehicle.brand || '';
     const model = vehicle.model || '';
-    return `${vehicle.plate} - ${brand} ${model}`.trim();
+    return `${brand} ${model} (${vehicle.plate})`.trim();
   }
 
   getPersonDisplay(person: Person): string {

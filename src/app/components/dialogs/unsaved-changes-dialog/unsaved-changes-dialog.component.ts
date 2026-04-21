@@ -21,10 +21,11 @@ export interface UnsavedChangesDialogData {
   /** Mensagem customizada a ser exibida */
   message: string;
   /** Nome do rascunho atual, se houver (para edição) */
-  /** Nome do rascunho atual, se houver (para edição) */
   currentDraftName?: string;
   /** Nome sugerido para um NOVO rascunho */
   suggestedDraftName?: string;
+  /** Se true, o botão de Salvar Rascunho não será exibido */
+  hideDraftOption?: boolean;
 }
 
 /**
@@ -69,8 +70,8 @@ export interface UnsavedChangesDialogData {
       <mat-dialog-content>
         <p class="dialog-message">{{ data.message }}</p>
 
-        <!-- Informação adicional quando não pode salvar completo -->
-        @if (!data.canSave) {
+        <!-- Informação adicional quando não pode salvar completo e rascunho está disponível -->
+        @if (!data.canSave && !data.hideDraftOption) {
           <div class="info-box">
             <mat-icon class="info-icon">info</mat-icon>
             <p class="info-text">
@@ -96,15 +97,17 @@ export interface UnsavedChangesDialogData {
         }
 
         <!-- Botão Salvar Rascunho: salva localmente -->
-        <button
-          mat-stroked-button
-          color="primary"
-          (click)="onSaveDraft()"
-          class="draft-button"
-        >
-          <mat-icon>save_as</mat-icon>
-          Salvar Rascunho
-        </button>
+        @if (!data.hideDraftOption) {
+          <button
+            mat-stroked-button
+            color="primary"
+            (click)="onSaveDraft()"
+            class="draft-button"
+          >
+            <mat-icon>save_as</mat-icon>
+            Salvar Rascunho
+          </button>
+        }
 
         <!-- Botão Não Salvar: descarta mudanças -->
         <button

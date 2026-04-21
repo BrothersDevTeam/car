@@ -16,6 +16,7 @@ import { GenericTableComponent } from '@components/generic-table/generic-table.c
 import { StoreContextService } from '@services/store-context.service';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
+import { UnsavedChangesDialogComponent } from '@components/dialogs/unsaved-changes-dialog/unsaved-changes-dialog.component';
 import { EmptyStateComponent } from '@components/empty-state/empty-state.component';
 
 import { NfeSaidaFormComponent } from '../../forms/nfe/nfe-saida-form/nfe-saida-form.component';
@@ -225,6 +226,8 @@ export class NfeComponent {
   }
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(NfeEntradaFormComponent) entradaFormRef?: NfeEntradaFormComponent;
+  @ViewChild(NfeSaidaFormComponent) saidaFormRef?: NfeSaidaFormComponent;
 
   constructor(
     private nfeService: NfeService,
@@ -480,21 +483,40 @@ export class NfeComponent {
   }
 
   openDialog() {
-    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Há mudanças não salvas',
-          message: 'Deseja fechar <strong>sem salvar</strong>?',
-          confirmText: 'Sim',
-          cancelText: 'Não',
-        },
-      }
-    );
+    // Verifica qual formulário está ativo para checar a validade
+    const activeFormRef =
+      this.selectedTabIndex() === 0
+        ? this.entradaFormRef?.nfeForm
+        : this.saidaFormRef?.nfeForm;
+
+    const canSave = activeFormRef?.valid ?? false;
+
+    const dialogRef = this.dialog.open(UnsavedChangesDialogComponent, {
+      width: '450px',
+      disableClose: true,
+      data: {
+        canSave,
+        message: canSave
+          ? 'Deseja emitir esta NFe antes de sair?'
+          : 'Há campos obrigatórios não preenchidos ou inválidos. Deseja descartar?',
+        hideDraftOption: true, // NFes não possuem rascunhos locais neste módulo
+      },
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
+      if (!result || result === 'cancel') return;
+
+      if (result === 'discard') {
         this.handleCloseDrawer();
+        return;
+      }
+
+      if (result === 'save' && canSave) {
+        if (this.selectedTabIndex() === 0) {
+          this.entradaFormRef?.onSubmit();
+        } else {
+          this.saidaFormRef?.onSubmit();
+        }
       }
     });
   }
