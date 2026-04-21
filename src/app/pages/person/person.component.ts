@@ -721,8 +721,10 @@ export class PersonComponent implements OnInit, OnDestroy {
         data: {
           title: 'Confirmar Exclusão',
           message: `Tem certeza que deseja <strong>excluir</strong> ${person.name}?`,
-          confirmText: 'Sim',
+          confirmText: 'Sim, Excluir',
           cancelText: 'Não',
+          icon: 'delete_outline',
+          type: 'danger',
         },
       }
     );
@@ -766,8 +768,10 @@ export class PersonComponent implements OnInit, OnDestroy {
         data: {
           title: 'Excluir Selecionados',
           message: `Tem certeza que deseja <strong>excluir ${this.selectedPeople.length}</strong> pessoas selecionadas?`,
-          confirmText: 'Sim, excluir',
+          confirmText: 'Sim, Excluir',
           cancelText: 'Cancelar',
+          icon: 'delete_sweep',
+          type: 'danger',
         },
       }
     );

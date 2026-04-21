@@ -8,6 +8,8 @@ import {
   MatDialogRef,
   MatDialogTitle,
 } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
@@ -18,6 +20,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
     MatDialogActions,
     MatDialogClose,
     MatButtonModule,
+    MatIconModule,
+    CommonModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './confirm-dialog.component.html',
@@ -34,6 +38,8 @@ export class ConfirmDialogComponent {
       message: string;
       confirmText: string;
       cancelText: string;
+      icon?: string;
+      type?: 'primary' | 'danger' | 'warning' | 'success';
     },
     private sanitizer: DomSanitizer
   ) {

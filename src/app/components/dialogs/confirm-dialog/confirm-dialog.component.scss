@@ -1,11 +1,128 @@
-mat-dialog-actions {
+.confirm-dialog-container {
+  padding: 12px;
   display: flex;
-  justify-content: end;
-  margin-right: 16px;
-  margin-bottom: 16px;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 
-  .delete-btn {
-    color: white;
-    background-color: var(--danger-color);
+  .dialog-header {
+    margin-bottom: 16px;
+    margin-top: 8px;
+
+    .icon-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(var(--primary-rgb), 0.1);
+      color: var(--primary-color);
+
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+      }
+    }
   }
+
+  h2[mat-dialog-title] {
+    margin: 0 0 12px 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 0;
+  }
+
+  mat-dialog-content {
+    margin-bottom: 24px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 0 16px;
+    max-height: none;
+
+    strong {
+      color: var(--text-primary);
+    }
+  }
+
+  mat-dialog-actions {
+    width: 100%;
+    gap: 12px;
+    padding: 0;
+    margin: 0;
+
+    button {
+      flex: 1;
+      height: 44px;
+      border-radius: 8px;
+      font-weight: 500;
+      text-transform: none;
+      font-size: 0.95rem;
+    }
+
+    .cancel-btn {
+      color: var(--text-secondary);
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+      }
+    }
+
+    .confirm-btn {
+      background-color: var(--primary-color);
+      color: white;
+      box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.25);
+
+      &:hover {
+        filter: brightness(1.1);
+        box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.35);
+      }
+    }
+  }
+
+  // Variants
+  &.danger {
+    .icon-circle {
+      background-color: rgba(var(--danger-rgb), 0.1);
+      color: var(--danger-color);
+    }
+    .confirm-btn {
+      background-color: var(--danger-color);
+      box-shadow: 0 4px 12px rgba(var(--danger-rgb), 0.25);
+    }
+  }
+
+  &.warning {
+    .icon-circle {
+      background-color: rgba(255, 152, 0, 0.1);
+      color: #f57c00;
+    }
+    .confirm-btn {
+      background-color: #f57c00;
+      box-shadow: 0 4px 12px rgba(245, 124, 0, 0.25);
+    }
+  }
+
+  &.success {
+    .icon-circle {
+      background-color: rgba(76, 175, 80, 0.1);
+      color: #388e3c;
+    }
+    .confirm-btn {
+      background-color: #388e3c;
+      box-shadow: 0 4px 12px rgba(56, 142, 60, 0.25);
+    }
+  }
+}
+
+// Global dialog styling to ensure rounded corners
+:host {
+  display: block;
+}
+
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 16px !important;
+  overflow: hidden;
 }

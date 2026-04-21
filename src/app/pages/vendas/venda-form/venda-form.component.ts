@@ -25,6 +25,7 @@ import { ContentHeaderComponent } from '@components/content-header/content-heade
 import { VendaService } from '@services/venda.service';
 import { VehicleService } from '@services/vehicle.service';
 import { PersonService } from '@services/person.service';
+import { extractErrorMessage } from '@utils/error-utils';
 import { StoreContextService } from '@services/store-context.service';
 import { ToastrService } from 'ngx-toastr';
 
@@ -385,11 +386,10 @@ export class VendaFormComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        // Extrai mensagem específica do backend se disponível
-        const msg =
-          err?.error?.errorMessage ||
-          err?.error?.message ||
-          'Erro ao salvar venda. Verifique os dados e tente novamente.';
+        const msg = extractErrorMessage(
+          err,
+          'Erro ao salvar venda. Verifique os dados e tente novamente.'
+        );
         this.toastr.error(msg);
       },
     });

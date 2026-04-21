@@ -23,22 +23,27 @@ import {
 } from '@angular/forms';
 
 import { ToastrService } from 'ngx-toastr';
+import { Subscription, Observable, of } from 'rxjs';
 
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
+import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
+
+import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
+
+import { RelationshipTypes } from '@enums/relationshipTypes';
+
+import { CanComponentDeactivate } from '@guards/unsaved-changes.guard';
 
 import type { CreateLegalEntity, Person } from '@interfaces/person';
 
+import { extractErrorMessage } from '@utils/error-utils';
+import { removeEmptyPropertiesFromObject } from '@utils/removeEmptyPropertiesFromObject';
+
 import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
-import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
-import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
-import { removeEmptyPropertiesFromObject } from '../../../utils/removeEmptyPropertiesFromObject';
-import { Subscription, Observable, of } from 'rxjs';
-import { RelationshipTypes } from '../../../enums/relationshipTypes';
 import { FormDraftService } from '@services/form-draft.service';
 import { StoreContextService } from '@services/store-context.service';
-import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-legal-entity-form',
@@ -388,7 +393,11 @@ export class LegalEntityFormComponent
               },
               error: (error) => {
                 console.error('Erro ao atualizar:', error);
-                this.toastrService.error('Erro ao atualizar pessoa');
+                const msg = extractErrorMessage(
+                  error,
+                  'Erro ao atualizar pessoa'
+                );
+                this.toastrService.error(msg);
                 this.isSaving = false;
                 observer.next(false);
                 observer.complete();
@@ -409,7 +418,8 @@ export class LegalEntityFormComponent
             },
             error: (error) => {
               console.error('Erro ao criar:', error);
-              this.toastrService.error('Erro ao criar pessoa');
+              const msg = extractErrorMessage(error, 'Erro ao criar pessoa');
+              this.toastrService.error(msg);
               this.isSaving = false;
               observer.next(false);
               observer.complete();

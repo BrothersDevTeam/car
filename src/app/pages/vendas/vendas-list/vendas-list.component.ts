@@ -282,9 +282,11 @@ export class VendasListComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Gerar NFe',
-        message: `Deseja gerar o rascunho da NFe para a venda <strong>#${venda.numero}</strong>? <br><br> <small>Os dados do comprador e do veículo serão importados automaticamente.</small>`,
+        message: `Deseja gerar a <strong style="color: var(--primary-color)">NFe Em Digitação</strong> para a venda <strong>#${venda.numero}</strong>? <br><br> <small style="color: var(--text-secondary)">Os dados do comprador e do veículo serão importados automaticamente.</small>`,
         confirmText: 'Sim, Gerar',
         cancelText: 'Não',
+        icon: 'description',
+        type: 'primary',
       },
     });
 

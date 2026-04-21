@@ -37,6 +37,7 @@ import { Vehicle } from '@interfaces/vehicle';
 import { NfeService } from '@services/nfe.service';
 import { PersonService } from '@services/person.service';
 import { VehicleService } from '@services/vehicle.service';
+import { extractErrorMessage } from '@utils/error-utils';
 import { StoreContextService } from '@services/store-context.service';
 
 @Component({
@@ -228,10 +229,10 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
           this.toastrService.success('NFe atualizada com sucesso');
           this.formSubmitted.emit();
         },
-        error: () =>
-          this.toastrService.error(
-            'Erro inesperado! Tente novamente mais tarde'
-          ),
+        error: (error) => {
+          const msg = extractErrorMessage(error, 'Erro ao atualizar NFe');
+          this.toastrService.error(msg);
+        },
       });
     } else {
       // Criação
@@ -240,10 +241,10 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
           this.toastrService.success('NFe criada com sucesso');
           this.formSubmitted.emit();
         },
-        error: () =>
-          this.toastrService.error(
-            'Erro inesperado! Tente novamente mais tarde'
-          ),
+        error: (error) => {
+          const msg = extractErrorMessage(error, 'Erro ao criar NFe');
+          this.toastrService.error(msg);
+        },
       });
     }
   }
@@ -260,8 +261,10 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
           title: 'Confirmar Cancelamento',
           message:
             'Você tem certeza que deseja <strong>cancelar</strong> esta NFe?',
-          confirmText: 'Sim',
+          confirmText: 'Sim, Cancelar',
           cancelText: 'Não',
+          icon: 'cancel',
+          type: 'danger',
         },
       }
     );
@@ -280,8 +283,9 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
           this.toastrService.success('NFe cancelada com sucesso');
           this.formSubmitted.emit();
         },
-        error: () => {
-          this.toastrService.error('Erro ao cancelar NFe');
+        error: (error) => {
+          const msg = extractErrorMessage(error, 'Erro ao cancelar NFe');
+          this.toastrService.error(msg);
         },
       });
     }

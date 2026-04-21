@@ -49,6 +49,7 @@ import { StoreContextService } from '@services/store-context.service';
 import { removeEmptyPropertiesFromObject } from '../../../utils/removeEmptyPropertiesFromObject';
 import { AccessDataFormComponent } from '@components/access-data-form/access-data-form.component';
 import { RelationshipTypes } from '../../../enums/relationshipTypes';
+import { extractErrorMessage } from '@utils/error-utils';
 import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
 
 @Component({
@@ -390,7 +391,11 @@ export class NaturalPersonFormComponent
               },
               error: (error) => {
                 console.error('Erro ao atualizar:', error);
-                this.toastrService.error('Erro ao atualizar pessoa');
+                const msg = extractErrorMessage(
+                  error,
+                  'Erro ao atualizar pessoa'
+                );
+                this.toastrService.error(msg);
                 this.isSaving = false;
                 observer.next(false);
                 observer.complete();
@@ -427,7 +432,8 @@ export class NaturalPersonFormComponent
             },
             error: (error) => {
               console.error('Erro ao criar:', error);
-              this.toastrService.error('Erro ao criar pessoa');
+              const msg = extractErrorMessage(error, 'Erro ao criar pessoa');
+              this.toastrService.error(msg);
               this.isSaving = false;
               observer.next(false);
               observer.complete();

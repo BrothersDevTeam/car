@@ -46,6 +46,7 @@ import {
   CATEGORY_OPTIONS,
   VEHICLE_TYPE_OPTIONS,
 } from '@interfaces/vehicle';
+import { extractErrorMessage } from '@utils/error-utils';
 import { FuelTypes, FuelTypesLabels } from '../../../enums/fuelTypes';
 
 import { VehicleService } from '@services/vehicle.service';
@@ -689,10 +690,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           },
           error: (error) => {
             console.error('Erro ao atualizar:', error);
-            const msg = this.extractErrorMessage(
-              error,
-              'Erro ao atualizar veículo'
-            );
+            const msg = extractErrorMessage(error, 'Erro ao atualizar veículo');
             this.toastrService.error(msg);
           },
         });
@@ -704,26 +702,11 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
         },
         error: (error) => {
           console.error('Erro ao cadastrar:', error);
-          const msg = this.extractErrorMessage(
-            error,
-            'Erro ao cadastrar veículo'
-          );
+          const msg = extractErrorMessage(error, 'Erro ao cadastrar veículo');
           this.toastrService.error(msg);
         },
       });
     }
-  }
-
-  /**
-   * Extrai a mensagem de erro vinda do backend (ConflictException, etc.)
-   */
-  private extractErrorMessage(error: any, fallback: string): string {
-    return (
-      error?.error?.errorMessage || // ErrorRecordResponse do backend
-      error?.error?.message || // Outros formatos
-      error?.message || // Erro HTTP genérico
-      fallback
-    );
   }
 
   onDelete() {
@@ -738,8 +721,10 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           title: 'Confirmar Deleção',
           message:
             'Você tem certeza que deseja <strong>deletar</strong> este registro?',
-          confirmText: 'Sim',
+          confirmText: 'Sim, Deletar',
           cancelText: 'Não',
+          icon: 'delete_forever',
+          type: 'danger',
         },
       }
     );
