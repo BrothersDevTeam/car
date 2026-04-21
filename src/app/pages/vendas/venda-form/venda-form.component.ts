@@ -42,7 +42,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 
-import { Vehicle } from '@interfaces/vehicle';
+import { Vehicle, VehicleList } from '@interfaces/vehicle';
 import { Person } from '@interfaces/person';
 import { VendaRequestDto } from '@interfaces/venda';
 
@@ -86,7 +86,7 @@ export class VendaFormComponent implements OnInit {
   vendaForm: FormGroup;
 
   // Listas de Autocomplete
-  filteredVehicles: Vehicle[] = [];
+  filteredVehicles: VehicleList[] | Vehicle[] = [];
   filteredBuyers: Person[] = [];
   filteredSellers: Person[] = [];
   filteredAvalistas: Person[] = [];
@@ -262,7 +262,7 @@ export class VendaFormComponent implements OnInit {
   }
 
   // Handlers de seleção do Autocomplete
-  onVehicleSelected(vehicle: Vehicle) {
+  onVehicleSelected(vehicle: Vehicle | VehicleList) {
     const valorVenda = vehicle.valorVenda
       ? parseFloat(vehicle.valorVenda.toString().replace(',', '.'))
       : 0;

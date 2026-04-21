@@ -1,4 +1,11 @@
-import { Component, Input, OnInit, inject, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  inject,
+  Output,
+  EventEmitter,
+} from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -107,14 +114,22 @@ export class VendaInfoComponent implements OnInit {
   getStatusLabel(status: string | undefined): string {
     if (!status) return '—';
     switch (status.toUpperCase()) {
-      case 'ATIVA': return 'Ativa';
-      case 'CANCELADA': return 'Cancelada';
-      case 'TRANSFERENCIA': return 'Transferência';
-      case 'PROCESSANDO_AUTORIZACAO': return 'Processando';
-      case 'AUTORIZADO': return 'Autorizada';
-      case 'ERRO_AUTORIZACAO': return 'Erro na SEFAZ';
-      case 'RASCUNHO': return 'Em Digitação';
-      default: return status;
+      case 'ATIVA':
+        return 'Ativa';
+      case 'CANCELADA':
+        return 'Cancelada';
+      case 'TRANSFERENCIA':
+        return 'Transferência';
+      case 'PROCESSANDO_AUTORIZACAO':
+        return 'Processando';
+      case 'AUTORIZADO':
+        return 'Autorizada';
+      case 'ERRO_AUTORIZACAO':
+        return 'Erro na SEFAZ';
+      case 'RASCUNHO':
+        return 'Em Digitação';
+      default:
+        return status;
     }
   }
 

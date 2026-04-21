@@ -3,25 +3,25 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, first, Observable, of, tap } from 'rxjs';
 
 import { PaginationResponse } from '@interfaces/pagination';
-import { CreateVehicle, Vehicle } from '@interfaces/vehicle';
+import { CreateVehicle, Vehicle, VehicleList } from '@interfaces/vehicle';
 import { MessageResponse } from '@interfaces/message-response';
 
 @Injectable({
   providedIn: 'root',
 })
 export class VehicleService {
-  private cache: PaginationResponse<Vehicle> | null = null;
+  private cache: PaginationResponse<VehicleList> | null = null;
 
   // Subject para notificar mudanças no cache
   private cacheUpdated$ =
-    new BehaviorSubject<PaginationResponse<Vehicle> | null>(null);
+    new BehaviorSubject<PaginationResponse<VehicleList> | null>(null);
 
   private readonly apiUrl: string = '/api/vehicles';
 
   constructor(private http: HttpClient) {}
 
   // Observable público para componentes se inscreverem
-  get cacheUpdated(): Observable<PaginationResponse<Vehicle> | null> {
+  get cacheUpdated(): Observable<PaginationResponse<VehicleList> | null> {
     return this.cacheUpdated$.asObservable();
   }
 
@@ -34,7 +34,7 @@ export class VehicleService {
       onlyInStock?: boolean;
       status?: 'DISPONIVEL' | 'VENDIDO' | 'TODOS';
     }
-  ): Observable<PaginationResponse<Vehicle>> {
+  ): Observable<PaginationResponse<VehicleList>> {
     const hasSearchParams =
       searchParams && Object.keys(searchParams).length > 0;
 
@@ -64,7 +64,7 @@ export class VehicleService {
       }
     }
 
-    return this.http.get<PaginationResponse<Vehicle>>(url).pipe(
+    return this.http.get<PaginationResponse<VehicleList>>(url).pipe(
       first(),
       tap((response) => {
         // Only update general cache if it's not a search result
@@ -74,6 +74,10 @@ export class VehicleService {
         }
       })
     );
+  }
+
+  getById(id: string): Observable<Vehicle> {
+    return this.http.get<Vehicle>(`${this.apiUrl}/${id}`).pipe(first());
   }
 
   create(data: CreateVehicle) {

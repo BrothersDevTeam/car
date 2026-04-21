@@ -116,7 +116,8 @@
   }
 }
 
-.side-column, .main-column {
+.side-column,
+.main-column {
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -127,7 +128,9 @@
   border-radius: 16px;
   border: 1px solid #e2e8f0;
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 
   &:hover {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -184,17 +187,24 @@
     font-size: 15px;
     color: #334155;
 
-    &.bold { font-weight: 600; }
-    &.italic { font-style: italic; color: #64748b; }
-    &.code { 
-        font-family: 'Roboto Mono', monospace; 
-        font-size: 13px;
-        background: #f1f5f9;
-        padding: 4px 8px;
-        border-radius: 4px;
-        word-break: break-all;
+    &.bold {
+      font-weight: 600;
     }
-    &.small { font-size: 12px; }
+    &.italic {
+      font-style: italic;
+      color: #64748b;
+    }
+    &.code {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      background: #f1f5f9;
+      padding: 4px 8px;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+    &.small {
+      font-size: 12px;
+    }
   }
 }
 
@@ -205,10 +215,22 @@
   font-weight: 700;
   text-transform: uppercase;
 
-  &.status-success { background: #dcfce7; color: #166534; }
-  &.status-danger { background: #fee2e2; color: #991b1b; }
-  &.status-warning { background: #fef9c3; color: #854d0e; }
-  &.status-neutral { background: #f1f5f9; color: #475569; }
+  &.status-success {
+    background: #dcfce7;
+    color: #166534;
+  }
+  &.status-danger {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  &.status-warning {
+    background: #fef9c3;
+    color: #854d0e;
+  }
+  &.status-neutral {
+    background: #f1f5f9;
+    color: #475569;
+  }
 }
 
 .nfe-actions {
@@ -224,22 +246,22 @@
 }
 
 .nfe-error {
-    margin-top: 16px;
-    padding: 12px;
-    background: #fff1f2;
-    border-radius: 8px;
-    border: 1px solid #fda4af;
-    color: #9f1239;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 13px;
+  margin-top: 16px;
+  padding: 12px;
+  background: #fff1f2;
+  border-radius: 8px;
+  border: 1px solid #fda4af;
+  color: #9f1239;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
 
-    mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-    }
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
 }
 
 .payments-table {
@@ -282,12 +304,22 @@
     border-radius: 4px;
     text-transform: uppercase;
 
-    &.type-down { background: #ecfdf5; color: #059669; }
-    &.type-up { background: #eff6ff; color: #2563eb; }
+    &.type-down {
+      background: #ecfdf5;
+      color: #059669;
+    }
+    &.type-up {
+      background: #eff6ff;
+      color: #2563eb;
+    }
   }
 
-  .text-right { text-align: right; }
-  .bold { font-weight: 700; }
+  .text-right {
+    text-align: right;
+  }
+  .bold {
+    font-weight: 700;
+  }
 
   tfoot {
     td {
@@ -312,34 +344,36 @@
 }
 
 .audit-item {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #cbd5e1;
+  }
+
+  .audit-info {
     display: flex;
-    gap: 16px;
-    margin-bottom: 20px;
+    flex-direction: column;
 
-    &:last-child { margin-bottom: 0; }
-
-    mat-icon {
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
-        color: #cbd5e1;
+    .audit-text {
+      font-size: 14px;
+      color: #334155;
     }
 
-    .audit-info {
-        display: flex;
-        flex-direction: column;
-        
-        .audit-text {
-            font-size: 14px;
-            color: #334155;
-        }
-
-        .audit-date {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: 2px;
-        }
+    .audit-date {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 2px;
     }
+  }
 }
 
 // States
@@ -354,10 +388,10 @@
 
   &.loading {
     .spinner-box {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
     }
 
     .spinner {
@@ -400,9 +434,19 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.btn-edit:hover { color: #6366f1; background: #eef2ff; }
-.btn-close:hover { color: #f43f5e; background: #fff1f2; }
+.btn-edit:hover {
+  color: #6366f1;
+  background: #eef2ff;
+}
+.btn-close:hover {
+  color: #f43f5e;
+  background: #fff1f2;
+}

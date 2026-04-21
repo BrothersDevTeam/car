@@ -26,7 +26,7 @@ import { VehicleInfoComponent } from '@info/vehicle-info/vehicle-info.component'
 
 import type { ColumnConfig } from '@interfaces/genericTable';
 import type { PaginationResponse } from '@interfaces/pagination';
-import type { Vehicle, VehicleForm } from '@interfaces/vehicle';
+import type { Vehicle, VehicleForm, VehicleList } from '@interfaces/vehicle';
 
 import { VehicleService } from '@services/vehicle.service';
 import { ActionsService } from '@services/actions.service';
@@ -57,7 +57,7 @@ export class VehicleComponent {
   private cacheSubscription!: Subscription;
   private searchSubject = new Subject<string>();
 
-  vehiclePaginatedList: PaginationResponse<Vehicle> | null = null;
+  vehiclePaginatedList: PaginationResponse<VehicleList> | null = null;
   selectedVehicle: VehicleForm | null = null;
   searchValue: string = '';
   selectedStoreId: string | null = null;
@@ -66,7 +66,7 @@ export class VehicleComponent {
     pageSize: 1000,
     pageIndex: 0,
   };
-  columns: ColumnConfig<Vehicle>[] = [
+  columns: ColumnConfig<VehicleList>[] = [
     {
       key: 'plate',
       header: 'Placa',
@@ -276,17 +276,12 @@ export class VehicleComponent {
           this.vehicleListError.set(true);
           console.error('Erro ao carregar a lista de veículos:', err);
           this.toastr.error('Erro ao buscar dados da tabela de veículos');
-          return of(null as unknown as PaginationResponse<Vehicle>);
+          return of(null as unknown as PaginationResponse<VehicleList>);
         })
       )
       .subscribe((response) => {
         this.vehicleListLoading.set(false);
         if (response && response.content) {
-          // Mapear dados para injetar o status virtual
-          response.content = response.content.map((vehicle) => ({
-            ...vehicle,
-            status: vehicle.exitDate ? 'VENDIDO' : 'DISPONIVEL',
-          }));
           this.vehiclePaginatedList = response;
         }
       });
@@ -305,12 +300,20 @@ export class VehicleComponent {
     return form;
   }
 
-  handleSelectedVehicle(vehicle: Vehicle) {
-    this.selectedVehicle = this.vehicleToForm(vehicle);
-    this.openInfo.set(true);
+  handleSelectedVehicle(vehicle: VehicleList) {
+    this.vehicleService.getById(vehicle.vehicleId).subscribe({
+      next: (fullVehicle) => {
+        this.selectedVehicle = this.vehicleToForm(fullVehicle);
+        this.openInfo.set(true);
+      },
+      error: (err) => {
+        this.toastr.error('Erro ao carregar detalhes do veículo');
+        console.error(err);
+      },
+    });
   }
 
-  onRowClick(vehicle: Vehicle) {
+  onRowClick(vehicle: VehicleList) {
     this.handleSelectedVehicle(vehicle);
   }
 
@@ -349,7 +352,25 @@ export class VehicleComponent {
    * Quando vem da tabela (editClick), recebe Vehicle
    * Quando vem do vehicle-info (editEvent), recebe VehicleForm
    */
-  handleEdit(vehicle: Vehicle | VehicleForm) {
+  handleEdit(vehicle: VehicleList | Vehicle | VehicleForm) {
+    if (
+      'vehicleId' in vehicle &&
+      !('chassis' in vehicle) &&
+      !('buyerDisplay' in vehicle)
+    ) {
+      // É VehicleList (veio da tabela), precisa buscar o completo
+      this.vehicleService.getById(vehicle.vehicleId!).subscribe({
+        next: (fullVehicle) => {
+          this.selectedVehicle = this.vehicleToForm(fullVehicle);
+          this.openInfo.set(false);
+          this.openForm.set(true);
+        },
+        error: (err) =>
+          this.toastr.error('Erro ao carregar veículo para edição'),
+      });
+      return;
+    }
+
     // Se for Vehicle (tem propriedade owner do tipo Person), converte
     if (
       'owner' in vehicle &&
@@ -358,7 +379,7 @@ export class VehicleComponent {
     ) {
       this.selectedVehicle = this.vehicleToForm(vehicle as Vehicle);
     } else {
-      // Já é VehicleForm
+      // Já é VehicleForm ou já tem o formato correto
       this.selectedVehicle = vehicle as VehicleForm;
     }
 
@@ -377,7 +398,7 @@ export class VehicleComponent {
     this.actionsService.hasFormChanges.set(false);
   }
 
-  handleDelete(vehicle: Vehicle) {
+  handleDelete(vehicle: VehicleList) {
     const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
       ConfirmDialogComponent,
       {

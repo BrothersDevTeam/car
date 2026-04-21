@@ -32,7 +32,7 @@ import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.comp
 
 import type { NaturezaOperacao, Nfe } from '@interfaces/nfe';
 import type { Person } from '@interfaces/person';
-import { Vehicle } from '@interfaces/vehicle';
+import { Vehicle, VehicleList } from '@interfaces/vehicle';
 
 import { NfeService } from '@services/nfe.service';
 import { PersonService } from '@services/person.service';
@@ -57,7 +57,8 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   private subscriptions = new Subscription();
   submitted = false;
 
-  vehicles: Vehicle[] = [];
+  // Listas para os selects/autocompletes
+  vehicles: Vehicle[] | VehicleList[] = [];
   persons: Person[] = [];
   tiposNfeSaida: { value: NaturezaOperacao; label: string }[] = [
     {

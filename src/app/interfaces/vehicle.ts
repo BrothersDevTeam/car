@@ -5,15 +5,50 @@ import { VehicleType } from '../enums/vehicleType';
 import { Person } from './person';
 
 /**
- * Interface para Vehicle retornado do backend
+ * Interfaces de Resumo para otimização de payload (T-8)
+ */
+export interface PersonSummary {
+  personId: string;
+  name: string;
+  nickName?: string;
+  email?: string;
+  phone?: string;
+  relationship: string;
+  legalEntity: boolean;
+}
+
+export interface NfeSummary {
+  nfeId: string;
+  nfeNumero?: number;
+  nfeSerie?: string;
+  nfeNaturezaOperacao?: string;
+  nfeDataEmissao?: string;
+  nfeStatus?: string;
+  nfeChave?: string;
+  nfeXmlUrl?: string;
+  nfeDanfeUrl?: string;
+  nfeValorTotal?: string;
+}
+
+export interface VendaSummary {
+  vendaId: string;
+  numero?: number;
+  dataVenda?: string;
+  valorFinal?: number;
+  vendaStatus?: string;
+  buyerName?: string;
+}
+
+/**
+ * Interface para Vehicle retornado do backend (Completo)
  */
 export interface Vehicle {
   storeId?: string;
   vehicleId?: string;
   owner?: Person;
   plate: string;
-  brand: string; // String - nome da marca
-  model: string; // String - nome do modelo
+  brand: string;
+  model: string;
   vehicleYear: string;
   modelYear?: string;
   color: string;
@@ -36,6 +71,31 @@ export interface Vehicle {
   entryDate?: string;
   exitDate?: string;
   status?: string;
+  nfeHistory?: NfeSummary[];
+  salesHistory?: VendaSummary[];
+}
+
+/**
+ * Interface para listagem otimizada de veículos
+ */
+export interface VehicleList {
+  vehicleId: string;
+  storeId: string;
+  plate: string;
+  brand: string;
+  model: string;
+  vehicleYear: string;
+  modelYear?: string;
+  color: string;
+  km: string;
+  vehicleType: string;
+  valorVenda?: string;
+  entryDate?: string;
+  exitDate?: string;
+  status: string;
+  owner?: PersonSummary;
+  nfeHistory?: NfeSummary[];
+  salesHistory?: VendaSummary[];
 }
 
 export type CreateVehicle = Omit<Vehicle, 'vehicleId'>;
