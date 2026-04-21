@@ -169,4 +169,8 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
     const selectColumn = this.columns.find((col) => col.key === 'select');
     return selectColumn?.showCheckbox ? selectColumn.showCheckbox(row) : true;
   }
+
+  getAlertMessage(column: ColumnConfig<T>, row: T): string | null {
+    return column.alertConfig?.getMessage(row) ?? null;
+  }
 }

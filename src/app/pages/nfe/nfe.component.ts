@@ -87,6 +87,14 @@ export class NfeComponent {
       },
     },
     {
+      key: 'alert',
+      header: '',
+      alertConfig: {
+        getMessage: (row: Nfe) => row.nfeMensagemErro || null,
+        icon: 'warning_amber',
+      },
+    },
+    {
       key: 'cfop',
       header: 'CFOP',
     },
@@ -184,11 +192,6 @@ export class NfeComponent {
       title: 'Nenhuma NFe cancelada',
       description:
         'Notas fiscais canceladas ou estornadas aparecerão neste filtro.',
-    },
-    erro: {
-      icon: 'error',
-      title: 'Nenhum erro detectado',
-      description: 'Notas com falhas de validação ou rejeição aparecerão aqui.',
     },
     denegado: {
       icon: 'gavel',
@@ -427,10 +430,10 @@ export class NfeComponent {
 
     const nfe = this.selectedRows[0];
 
-    // Impedir envio de NFes que não sejam rascunho ou com erro
-    if (nfe.nfeStatus !== 'rascunho' && nfe.nfeStatus !== 'erro') {
+    // Impedir envio de NFes que não sejam rascunho
+    if (nfe.nfeStatus !== 'rascunho') {
       this.toastr.info(
-        'Apenas NFes Em Digitação ou com erro de digitação podem ser reenviadas.'
+        'Apenas NFes Em Digitação podem ser enviadas para a SEFAZ.'
       );
       return;
     }

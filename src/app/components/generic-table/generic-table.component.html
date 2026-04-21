@@ -102,6 +102,35 @@
               } @else {
                 <span>{{ badgeKey }}</span>
               }
+            } @else if (column.alertConfig) {
+              <!-- Indicador de alerta com tooltip rico (para coluna com alertConfig) -->
+              @let alertMsg = getAlertMessage(column, element);
+              @if (alertMsg) {
+                <div
+                  class="alert-indicator"
+                  (click)="$event.stopPropagation()"
+                >
+                  <mat-icon class="alert-icon pulse-warning">
+                    {{ column.alertConfig.icon || 'warning_amber' }}
+                  </mat-icon>
+                  <div class="alert-tooltip">
+                    <div class="alert-tooltip-header">
+                      <mat-icon>error_outline</mat-icon>
+                      <span>Erros encontrados</span>
+                    </div>
+                    <div class="alert-tooltip-body">
+                      @for (err of alertMsg.split(';'); track err) {
+                        @if (err.trim()) {
+                          <div class="alert-tooltip-line">
+                            <mat-icon>chevron_right</mat-icon>
+                            <span>{{ err.trim() }}</span>
+                          </div>
+                        }
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
             } @else {
               {{ formatValue(column, element) }}
             }
