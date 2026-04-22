@@ -12,7 +12,14 @@ import { ContentHeaderComponent } from '@components/content-header/content-heade
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { UnsavedChangesDialogComponent } from '@components/dialogs/unsaved-changes-dialog/unsaved-changes-dialog.component';
 import { StoreContextService } from '@services/store-context.service';
-import { Subject, Subscription, catchError, debounceTime, of } from 'rxjs';
+import {
+  Subject,
+  Subscription,
+  catchError,
+  debounceTime,
+  of,
+  Observable,
+} from 'rxjs';
 import { EmptyStateComponent } from '@components/empty-state/empty-state.component';
 
 import { FormsModule } from '@angular/forms';
@@ -30,6 +37,7 @@ import type { Vehicle, VehicleForm, VehicleList } from '@interfaces/vehicle';
 
 import { VehicleService } from '@services/vehicle.service';
 import { ActionsService } from '@services/actions.service';
+import { CanComponentDeactivate } from '@guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-vehicle',
@@ -52,7 +60,7 @@ import { ActionsService } from '@services/actions.service';
   templateUrl: './vehicle.component.html',
   styleUrl: './vehicle.component.scss',
 })
-export class VehicleComponent {
+export class VehicleComponent implements CanComponentDeactivate {
   readonly dialog = inject(MatDialog);
   private subscription: Subscription = new Subscription();
   private cacheSubscription!: Subscription;
@@ -176,9 +184,22 @@ export class VehicleComponent {
 
   ngOnInit() {
     this.subscription.add(
-      this.actionsService.sidebarClick$.subscribe(() => {
-        this.handleConfirmationCloseDrawer();
-      })
+      this.actionsService.sidebarClick$.subscribe(
+        (targetRoute: string | undefined) => {
+          // Se a gaveta estiver aberta...
+          if (this.openForm() || this.openInfo()) {
+            const currentRoute = '/vehicle';
+
+            // Se o clique foi em um menu que aponta para OUTRA rota,
+            // não fazemos nada aqui e deixamos o unsavedChangesGuard agir.
+            if (targetRoute && targetRoute !== currentRoute) {
+              return;
+            }
+
+            this.handleConfirmationCloseDrawer();
+          }
+        }
+      )
     );
 
     // Contexto Global de Loja
@@ -433,6 +454,47 @@ export class VehicleComponent {
         this.toastr.error('Erro ao deletar veículo');
       },
     });
+  }
+
+  // --- Implementação de CanComponentDeactivate ---
+
+  /**
+   * Verifica se o formulário de veículos tem mudanças não salvas
+   */
+  hasUnsavedChanges(): boolean {
+    // Se o formulário não estiver aberto, não há mudanças pendentes
+    if (!this.openForm()) {
+      return false;
+    }
+
+    // Delega a verificação para o componente de formulário
+    return this.vehicleFormRef?.hasUnsavedChanges() ?? false;
+  }
+
+  /**
+   * Verifica se o formulário pode ser salvo completamente
+   */
+  canSaveForm(): boolean {
+    return this.vehicleFormRef?.canSaveForm() ?? false;
+  }
+
+  /**
+   * Salva o formulário (completo ou rascunho)
+   */
+  saveForm(isDraft: boolean): Observable<boolean> {
+    if (!this.vehicleFormRef) {
+      return of(true);
+    }
+    return this.vehicleFormRef.saveForm(isDraft);
+  }
+
+  /**
+   * Salva um rascunho local
+   */
+  saveLocalDraft(silent?: boolean, name?: string): void {
+    if (this.vehicleFormRef) {
+      this.vehicleFormRef.saveLocalDraft(silent, name);
+    }
   }
 
   openDialog() {

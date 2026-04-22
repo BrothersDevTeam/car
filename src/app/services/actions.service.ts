@@ -1,14 +1,12 @@
 import { Injectable, signal } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ActionsService {
-  // BehaviorSubject para monitorar cliques no sidenav, agora carregando a rota alvo
-  private sidebarClickSubject = new BehaviorSubject<string | undefined>(
-    undefined
-  );
+  // Subject para monitorar cliques no sidenav, agora carregando a rota alvo
+  private sidebarClickSubject = new Subject<string | undefined>();
 
   // Observable para que outros componentes possam se inscrever
   sidebarClick$ = this.sidebarClickSubject.asObservable();
