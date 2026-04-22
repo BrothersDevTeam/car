@@ -69,34 +69,61 @@ export class SideNavComponent {
   }
 
   private initializeMenuItems() {
-    const baseMenu: MenuItem[] = [
-      {
+    const baseMenu: MenuItem[] = [];
+
+    // Lojas
+    if (this.authService.hasAuthority(Authorizations.READ_STORE) || 
+        this.authService.hasAuthority(Authorizations.READ_STORE_OTHERS) ||
+        this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+      baseMenu.push({
         icon: 'store',
         label: 'Lojas',
         route: '/store',
-      },
-      {
+      });
+    }
+
+    // Pessoas
+    if (this.authService.hasAuthority(Authorizations.READ_PERSON) || 
+        this.authService.hasAuthority(Authorizations.READ_PERSON_OTHERS) ||
+        this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+      baseMenu.push({
         icon: 'person',
         label: 'Pessoas',
         route: '/person',
-      },
-      {
+      });
+    }
+
+    // Veículos
+    if (this.authService.hasAuthority(Authorizations.READ_VEHICLE) ||
+        this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+      baseMenu.push({
         icon: 'directions_car',
         label: 'Veículos',
         route: '/vehicle',
-      },
-      {
+      });
+    }
+
+    // Vendas
+    if (this.authService.hasAuthority(Authorizations.READ_VENDA) ||
+        this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+      baseMenu.push({
         icon: 'sell',
         label: 'Vendas',
         route: '/vendas',
-      },
-      {
+      });
+    }
+
+    // Notas Fiscais
+    if (this.authService.hasAuthority(Authorizations.READ_NFE) ||
+        this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+      baseMenu.push({
         icon: 'description',
         label: 'Notas Fiscais',
         route: '/nfe',
-      },
-    ];
+      });
+    }
 
+    // Dashboard (exclusivo ROOT_ADMIN)
     if (this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
       baseMenu.unshift({
         icon: 'dashboard',

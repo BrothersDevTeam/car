@@ -115,7 +115,7 @@ const PRESET_GERENTE: string[] = [
 ];
 
 const PRESET_VENDEDOR: string[] = [
-  Authorizations.READ_STORE,
+  Authorizations.READ_STORE, Authorizations.READ_STORE_OTHERS,
   Authorizations.READ_USER, Authorizations.EDIT_USER,
   Authorizations.READ_PERSON, Authorizations.CREATE_PERSON, Authorizations.EDIT_PERSON,
   Authorizations.READ_VEHICLE,
@@ -221,6 +221,11 @@ export class StoreEmployeesDialogComponent implements OnInit {
     // Se a pessoa já está na lista (mas por algum motivo apareceu na busca), ignora
     if (this.employees.some(e => e.personId === person.personId)) {
       return;
+    }
+
+    // Se for CLIENTE, sugere VENDEDOR por padrão para o fluxo de promoção
+    if (person.relationship === RelationshipTypes.CLIENTE) {
+      person.relationship = RelationshipTypes.VENDEDOR;
     }
 
     // Adiciona a pessoa temporariamente à lista para permitir criar acesso
@@ -362,6 +367,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
     const payload = {
       username: form.value.username,
       password: form.value.password,
+      relationship: person.relationship,
       authorizations: form.value.authorizations as string[],
     };
 
@@ -421,6 +427,17 @@ export class StoreEmployeesDialogComponent implements OnInit {
 
   changeRelationship(person: Person, newType: RelationshipTypes): void {
     if (person.relationship === newType) return;
+
+    // Se a pessoa ainda não tem usuário (está no fluxo de promoção), apenas altera localmente
+    // e atualiza os presets do form se estiver aberto.
+    if (!person.hasUser) {
+      person.relationship = newType;
+      const form = this.createAccessForms.get(person.personId);
+      if (form) {
+        this.applyPreset(person, form);
+      }
+      return;
+    }
 
     this.updatingRelationshipFor = person.personId;
 
