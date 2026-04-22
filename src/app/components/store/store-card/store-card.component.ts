@@ -37,6 +37,8 @@ export class StoreCardComponent {
   @Input() canDelete = false;
   @Input() canViewBranches = false;
   @Input() canManageOwner = false;
+  @Input() canManageEmployees = false;
+  @Input() isRootAdmin = false;
   @Input() canUploadImage = true;
   @Input() canManageAuthorizations = false;
   @Input() canManageFiscal = false;
@@ -53,6 +55,7 @@ export class StoreCardComponent {
   @Output() delete = new EventEmitter<Store>();
   @Output() viewBranches = new EventEmitter<Store>();
   @Output() manageOwner = new EventEmitter<Store>();
+  @Output() manageEmployees = new EventEmitter<Store>();
   @Output() manageAuthorizations = new EventEmitter<Store>();
   @Output() manageFiscal = new EventEmitter<Store>();
 
@@ -132,6 +135,9 @@ export class StoreCardComponent {
   }
   onManageOwner(): void {
     this.manageOwner.emit(this.store);
+  }
+  onManageEmployees(): void {
+    this.manageEmployees.emit(this.store);
   }
   onManageAuthorizations(): void {
     this.manageAuthorizations.emit(this.store);

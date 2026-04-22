@@ -52,8 +52,10 @@ export class StoreComponent implements OnInit {
   loading = true;
   error = false;
   isCarAdmin = false;
-  canCreateStore = false; // Pode ser CAR_ADMIN ou ADMIN
+  canCreateStore = false;
   canManageFiscal = false;
+  canManageEmployees = false; // Pode gerenciar funcionários (create:user ou edit:store)
+  canManageOwnerOnly = false; // Só root:admin pode gerenciar proprietário
 
   viewMode: 'grid' | 'compact' | 'table' = 'grid';
   displayedColumns: string[] = ['logo', 'name', 'cnpj', 'status', 'actions'];
@@ -85,21 +87,27 @@ export class StoreComponent implements OnInit {
   }
 
   private checkUserRole(): void {
-    // Verifica se é administrador master (CAR_ADMIN)
     this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
 
-    // CAR_ADMIN cadastra matriz (root:admin), ADMIN cadastra filiais (edit:store)
     this.canCreateStore =
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
       this.authService.hasAuthority(Authorizations.EDIT_STORE);
 
-    // Pode gerenciar config fiscal quem pode editar a loja ou emitir nota localmente
     this.canManageFiscal =
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
       this.authService.hasAuthority(Authorizations.EDIT_STORE) ||
       this.authService.hasAuthority(
         Authorizations.SYNC_FOCUSNFE as Authorizations
       );
+
+    // Pode gerenciar funcionários quem tem: root:admin, edit:store ou create:user
+    this.canManageEmployees =
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
+      this.authService.hasAuthority(Authorizations.EDIT_STORE) ||
+      this.authService.hasAuthority(Authorizations.CREATE_USER);
+
+    // Somente root pode gerenciar proprietário
+    this.canManageOwnerOnly = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
   }
 
   private loadStores(): void {
@@ -211,7 +219,22 @@ export class StoreComponent implements OnInit {
   onManageAuthorizations(store: Store): void {
     this.dialog.open(StoreEmployeesDialogComponent, {
       width: '800px',
-      data: { store },
+      maxHeight: '90vh',
+      data: { store, isRootAdmin: this.isCarAdmin },
+    });
+  }
+
+  /**
+   * Abre o dialog de gerenciamento de funcionários (e proprietário para root).
+   * Comportamento contextual:
+   * - root:admin: vê proprietário + funcionários
+   * - create:user / edit:store: vê apenas funcionários
+   */
+  onManageEmployees(store: Store): void {
+    this.dialog.open(StoreEmployeesDialogComponent, {
+      width: '800px',
+      maxHeight: '90vh',
+      data: { store, isRootAdmin: this.isCarAdmin },
     });
   }
 

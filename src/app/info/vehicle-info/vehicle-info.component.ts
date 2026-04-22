@@ -13,14 +13,13 @@ import {
 } from '@angular/core';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
-import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
 import { VehicleForm } from '@interfaces/vehicle';
 import { VehicleService } from '@services/vehicle.service';
 import { PersonService } from '@services/person.service';
 import { Person } from '@interfaces/person';
 import { MatIconModule } from '@angular/material/icon';
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';

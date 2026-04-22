@@ -151,6 +151,15 @@
               <span>Proprietário</span>
             </button>
           }
+          @if (canManageEmployees) {
+            <button
+              mat-menu-item
+              (click)="onManageEmployees()"
+            >
+              <mat-icon>group</mat-icon>
+              <span>{{ isRootAdmin ? 'Proprietário e Funcionários' : 'Gerenciar Funcionários' }}</span>
+            </button>
+          }
           @if (canManageAuthorizations) {
             <button
               mat-menu-item
@@ -219,6 +228,16 @@
             class="action-btn owner-btn"
           >
             <mat-icon>person_add</mat-icon>
+          </button>
+        }
+        @if (canManageEmployees) {
+          <button
+            mat-icon-button
+            (click)="onManageEmployees()"
+            [matTooltip]="isRootAdmin ? 'Gerenciar Proprietário e Funcionários' : 'Gerenciar Funcionários'"
+            class="action-btn employees-btn"
+          >
+            <mat-icon>group</mat-icon>
           </button>
         }
         @if (canManageAuthorizations) {

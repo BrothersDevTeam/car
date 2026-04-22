@@ -9,6 +9,7 @@ import { PaginationResponse } from '@interfaces/pagination';
 })
 export class EmployeeService {
   private readonly apiUrl: string = '/api/persons/employees';
+  private readonly employeeApiUrl: string = '/api/employees';
 
   constructor(private http: HttpClient) {}
 
@@ -49,5 +50,44 @@ export class EmployeeService {
           return response;
         })
       );
+  }
+
+  /**
+   * Cria um usuário de acesso ao sistema para uma pessoa já cadastrada.
+   * Endpoint: POST /api/employees/{personId}/create-user
+   * Requer: 'edit:store' ou 'root:admin'
+   */
+  createUserForPerson(
+    personId: string,
+    data: { username: string; password: string; authorizations: string[] }
+  ): Observable<any> {
+    return this.http.post<any>(
+      `${this.employeeApiUrl}/${personId}/create-user`,
+      data
+    );
+  }
+
+  /**
+   * Desvincula o usuário de uma pessoa (revoga o acesso ao sistema).
+   * A pessoa continua no cadastro como CLIENTE.
+   * Endpoint: DELETE /api/employees/unlink-user/{userId}
+   * Requer: 'edit:store'
+   */
+  unlinkUser(userId: string): Observable<any> {
+    return this.http.delete<any>(
+      `${this.employeeApiUrl}/unlink-user/${userId}`
+    );
+  }
+
+  /**
+   * Altera o tipo de vínculo (relationship) de um funcionário.
+   * Endpoint: PUT /api/employees/{personId}/relationship?type=...
+   */
+  updateRelationship(personId: string, type: string): Observable<any> {
+    return this.http.put<any>(
+      `${this.employeeApiUrl}/${personId}/relationship`,
+      {},
+      { params: new HttpParams().set('type', type) }
+    );
   }
 }

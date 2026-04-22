@@ -51,6 +51,7 @@ import { AccessDataFormComponent } from '@components/access-data-form/access-dat
 import { RelationshipTypes } from '../../../enums/relationshipTypes';
 import { extractErrorMessage } from '@utils/error-utils';
 import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
+import { Authorizations } from '../../../enums/authorizations';
 
 @Component({
   selector: 'app-natural-person-form',
@@ -156,14 +157,6 @@ export class NaturalPersonFormComponent
    * Verifica se o usuário logado tem permissão para cadastrar funcionários
    *
    * @returns {boolean} true se o usuário tem ROLE_CAR_ADMIN ou ROLE_MANAGER
-   *
-   * @description
-   * Apenas usuários com as roles ROLE_CAR_ADMIN ou ROLE_MANAGER podem
-   * visualizar o checkbox e cadastrar funcionários no sistema.
-   *
-   * Para outros usuários (ROLE_SELLER, ROLE_FINANCIAL):
-   * - O checkbox não será exibido
-   * - Todas as pessoas serão cadastradas como CLIENTE automaticamente
    */
   protected get canRegisterEmployee(): boolean {
     return (
@@ -815,17 +808,50 @@ export class NaturalPersonFormComponent
     );
   }
 
-  protected toggleEmployeeType(): void {
-    this.isEmployee = !this.isEmployee;
+  protected onProfileChange(profile: RelationshipTypes): void {
+    this.form.get('relationship')?.setValue(profile);
+    this.form.markAsDirty();
 
-    if (this.isEmployee) {
-      this.form.get('relationship')?.setValue(RelationshipTypes.VENDEDOR);
-      console.log('[toggleEmployeeType] Alterado para VENDEDOR');
-    } else {
-      this.form.get('relationship')?.setValue(RelationshipTypes.CLIENTE);
-      console.log('[toggleEmployeeType] Alterado para CLIENTE');
+    // Se o perfil selecionado é um que permite acesso ao sistema, vamos preencher permissões padrão
+    if (profile === RelationshipTypes.GERENTE || profile === RelationshipTypes.VENDEDOR) {
+      setTimeout(() => {
+        this.applyDefaultAuthorizations(profile);
+      });
+    }
+  }
+
+  private applyDefaultAuthorizations(profile: RelationshipTypes): void {
+    const authArray = this.form.get('authorizations') as FormArray;
+    if (!authArray) return;
+
+    authArray.clear();
+
+    let defaults: string[] = [];
+
+    if (profile === RelationshipTypes.GERENTE) {
+      defaults = [
+        Authorizations.READ_STORE,
+        Authorizations.READ_USER, Authorizations.READ_USER_OTHERS, Authorizations.CREATE_USER, Authorizations.EDIT_USER, Authorizations.EDIT_USER_OTHERS, Authorizations.DELETE_USER,
+        Authorizations.READ_PERSON, Authorizations.READ_PERSON_OTHERS, Authorizations.CREATE_PERSON, Authorizations.EDIT_PERSON, Authorizations.DELETE_PERSON,
+        Authorizations.READ_VEHICLE, Authorizations.CREATE_VEHICLE, Authorizations.EDIT_VEHICLE, Authorizations.DELETE_VEHICLE, Authorizations.READ_VEHICLE_PURCHASE_PRICE, Authorizations.READ_VEHICLE_PROFIT,
+        Authorizations.READ_NFE, Authorizations.CREATE_NFE, Authorizations.EMITIR_NFE, Authorizations.CANCEL_NFE,
+        Authorizations.READ_VENDA, Authorizations.CREATE_VENDA, Authorizations.EDIT_VENDA, Authorizations.CANCEL_VENDA,
+        Authorizations.SYNC_FOCUSNFE
+      ];
+    } else if (profile === RelationshipTypes.VENDEDOR) {
+      defaults = [
+        Authorizations.READ_STORE,
+        Authorizations.READ_USER, Authorizations.EDIT_USER,
+        Authorizations.READ_PERSON, Authorizations.CREATE_PERSON, Authorizations.EDIT_PERSON,
+        Authorizations.READ_VEHICLE,
+        Authorizations.READ_VENDA, Authorizations.CREATE_VENDA
+      ];
     }
 
+    defaults.forEach(auth => {
+      authArray.push(this.formBuilderService.control(auth));
+    });
+    
     this.form.markAsDirty();
   }
 

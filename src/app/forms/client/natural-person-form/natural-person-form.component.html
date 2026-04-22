@@ -48,18 +48,19 @@
 
   <!-- Seção: Dados Pessoais -->
   <app-wrapper-card title="Dados pessoais">
-    <!-- Checkbox para alternar entre CLIENTE e FUNCIONARIO -->
     @if (canRegisterEmployee && !dataForm) {
-      <div class="checkbox-container">
-        <label class="checkbox-label">
-          <input
-            type="checkbox"
-            class="checkbox-input"
-            [checked]="isEmployee"
-            (change)="toggleEmployeeType()"
-          />
-          <span class="checkbox-text">Cadastrar como funcionário</span>
-        </label>
+      <div class="form-row">
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 1rem;">
+          <mat-label>Perfil de Cadastro</mat-label>
+          <mat-select
+            formControlName="relationship"
+            (selectionChange)="onProfileChange($event.value)"
+          >
+            <mat-option value="CLIENTE">Cliente Padrão</mat-option>
+            <mat-option value="VENDEDOR">Vendedor do Sistema</mat-option>
+            <mat-option value="GERENTE">Gerente da Loja</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
     }
 

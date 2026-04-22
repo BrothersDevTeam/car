@@ -17,6 +17,8 @@ import { HttpClient } from '@angular/common/http';
 import { Person } from '@interfaces/person';
 import { Store } from '@interfaces/store';
 import { MatDividerModule } from '@angular/material/divider';
+import { AuthService } from '@services/auth/auth.service';
+import { Authorizations } from '@enums/authorizations';
 
 export interface EmployeeAuthorizationsDialogData {
   person: Person;
@@ -57,6 +59,7 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private snackBar: MatSnackBar,
+    private authService: AuthService,
     public dialogRef: MatDialogRef<EmployeeAuthorizationsDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: EmployeeAuthorizationsDialogData
   ) {}
@@ -117,10 +120,19 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
       .get<Record<string, Authorization[]>>('/api/authorizations')
       .subscribe({
         next: (response) => {
-          this.modules = Object.keys(response).map((module) => ({
-            module,
-            authorizations: response[module],
-          }));
+          const isRoot = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+          const rootOnlyKeys = [Authorizations.ROOT_ADMIN];
+
+          this.modules = Object.keys(response).map((module) => {
+            let auths = response[module];
+            if (!isRoot) {
+               auths = auths.filter(a => !rootOnlyKeys.includes(a.key as Authorizations));
+            }
+            return {
+              module,
+              authorizations: auths,
+            };
+          }).filter(m => m.authorizations.length > 0);
           this.loading = false;
         },
         error: (err) => {
