@@ -23,6 +23,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatOptionModule } from '@angular/material/core';
@@ -30,9 +32,11 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCardModule } from '@angular/material/card';
 
 import { ToastrService } from 'ngx-toastr';
-import { distinctUntilChanged, Subscription } from 'rxjs';
+import { distinctUntilChanged, Subscription, of, Observable } from 'rxjs';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
@@ -56,10 +60,14 @@ import { DateInputComponent } from '@components/date-input/date-input.component'
 import { PersonService } from '@services/person.service';
 import { FipeService } from '@services/fipe.service';
 import { StoreContextService } from '@services/store-context.service';
+import { FormDraftService, FormDraft } from '@services/form-draft.service';
+import { ActionsService } from '@services/actions.service';
 
 @Component({
   selector: 'app-vehicle-form',
+  standalone: true,
   imports: [
+    CommonModule,
     PrimaryInputComponent,
     PrimarySelectComponent,
     ReactiveFormsModule,
@@ -76,6 +84,8 @@ import { StoreContextService } from '@services/store-context.service';
     NaturalPersonFormComponent,
     CurrencyInputComponent,
     DateInputComponent,
+    MatTooltipModule,
+    MatCardModule,
   ],
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',
@@ -83,6 +93,14 @@ import { StoreContextService } from '@services/store-context.service';
 export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   private subscriptions = new Subscription();
   submitted = false;
+  readonly FORM_TYPE = 'vehicle';
+
+  // Gestão de Rascunhos
+  availableDrafts: FormDraft[] = [];
+  selectedDraft: FormDraft | null = null;
+  private formDraftService = inject(FormDraftService);
+  private actionsService = inject(ActionsService);
+  private router = inject(Router);
 
   brands: { id: string; name: string }[] = [];
   models: { id: string; name: string }[] = [];
@@ -127,6 +145,8 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   selectModelDisabled = signal(true);
   selectYearDisabled = signal(true);
+
+  private initialFormValue: string = '';
 
   /**
    * Formulário com FormGroups aninhados para brand, model e color
@@ -188,6 +208,92 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     private personService: PersonService,
     private toastrService: ToastrService
   ) {}
+
+  hasUnsavedChanges(): boolean {
+    if (!this.initialFormValue) return false;
+    const currentValue = JSON.stringify(this.form.value);
+    return currentValue !== this.initialFormValue;
+  }
+
+  canSaveForm(): boolean {
+    const raw = this.form.value;
+    return !!(raw.plate || raw.brand?.name || raw.model?.name);
+  }
+
+  saveForm(isDraft: boolean): Observable<boolean> {
+    if (isDraft) {
+      this.saveLocalDraft();
+      return of(true);
+    }
+    this.onSubmit();
+    return of(true);
+  }
+
+  saveLocalDraft(silent: boolean = false, name?: string): void {
+    const draftName = name || `Veículo em ${new Date().toLocaleString()}`;
+
+    this.formDraftService.saveDraft(
+      this.FORM_TYPE,
+      this.form.value,
+      this.dataForm?.vehicleId || undefined,
+      draftName
+    );
+
+    this.initialFormValue = JSON.stringify(this.form.value);
+    this.actionsService.hasFormChanges.set(false);
+    this.form.markAsPristine();
+
+    if (!silent) {
+      this.toastrService.info('Rascunho salvo localmente');
+    }
+  }
+
+  private checkForDrafts() {
+    this.availableDrafts = this.formDraftService.getDraftsByType(
+      this.FORM_TYPE
+    );
+  }
+
+  handleDraftSelection(draft: FormDraft | null) {
+    if (!draft) {
+      this.selectedDraft = null;
+      this.form.reset({
+        origin: 'NACIONAL',
+        fuelTypes: [],
+      });
+      this.initialFormValue = JSON.stringify(this.form.value);
+      return;
+    }
+
+    this.selectedDraft = draft;
+    // Para veículos, o patchValue resolve a maioria, mas precisamos
+    // garantir que o estado de marca/modelo carregue corretamente
+    this.isFillingForm = true;
+    this.form.patchValue(draft.data);
+    this.isFillingForm = false;
+
+    // Recarregar cascatas baseadas no rascunho
+    if (draft.data.brand?.id) {
+      this.loadModels();
+    }
+    if (draft.data.model?.id) {
+      this.loadYears();
+    }
+
+    this.initialFormValue = JSON.stringify(this.form.value);
+    this.toastrService.success('Rascunho carregado com sucesso');
+    this.actionsService.hasFormChanges.set(false);
+  }
+
+  removeDraft(draft: FormDraft, event: MouseEvent) {
+    event.stopPropagation();
+    this.formDraftService.removeDraftById(draft.id);
+    this.checkForDrafts();
+
+    if (this.selectedDraft?.id === draft.id) {
+      this.selectedDraft = null;
+    }
+  }
 
   // Método auxiliar para mapear o tipo de veículo do formulário para o tipo da API FIPE
   private getFipeVehicleType(): string {
@@ -409,6 +515,12 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
     // Carrega cores do backend
     this.loadColors();
+
+    // Busca rascunhos disponíveis
+    this.checkForDrafts();
+
+    // Inicializa o valor inicial do formulário
+    this.initialFormValue = JSON.stringify(this.form.value);
 
     // Quando o tipo de veículo mudar, recarrega as marcas
     this.subscriptions.add(
@@ -690,6 +802,18 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
         .subscribe({
           next: () => {
             this.toastrService.success('Veículo atualizado com sucesso');
+
+            // Limpa rascunhos
+            if (this.selectedDraft) {
+              this.formDraftService.removeDraftById(this.selectedDraft.id);
+            }
+            this.formDraftService.removeDraft(
+              this.FORM_TYPE,
+              this.dataForm?.vehicleId
+            );
+
+            this.initialFormValue = JSON.stringify(this.form.value);
+            this.actionsService.hasFormChanges.set(false);
             this.formSubmitted.emit();
           },
           error: (error) => {
@@ -702,6 +826,14 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       this.vehicleService.create(payload).subscribe({
         next: () => {
           this.toastrService.success('Veículo cadastrado com sucesso');
+
+          // Limpa rascunhos
+          if (this.selectedDraft) {
+            this.formDraftService.removeDraftById(this.selectedDraft.id);
+          }
+
+          this.initialFormValue = JSON.stringify(this.form.value);
+          this.actionsService.hasFormChanges.set(false);
           this.formSubmitted.emit();
         },
         error: (error) => {

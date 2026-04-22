@@ -33,6 +33,7 @@ import { ActionsService } from '@services/actions.service';
 
 @Component({
   selector: 'app-vehicle',
+  standalone: true,
   imports: [
     ContentHeaderComponent,
     MatFormFieldModule,
@@ -445,7 +446,7 @@ export class VehicleComponent {
         message: canSave
           ? 'Deseja salvar as alterações do veículo antes de sair?'
           : 'Há campos obrigatórios não preenchidos ou inválidos. Deseja descartar as alterações?',
-        hideDraftOption: true, // Veículos não possuem rascunhos locais
+        hideDraftOption: false, // Habilitado rascunho para veículos
       },
     });
 
@@ -459,6 +460,13 @@ export class VehicleComponent {
 
       if (result === 'save' && canSave) {
         this.vehicleFormRef?.onSubmit();
+      }
+
+      // Se o resultado for uma string começando com 'draft:', salvamos como rascunho
+      if (typeof result === 'string' && result.startsWith('draft:')) {
+        const draftName = result.split(':')[1];
+        this.vehicleFormRef?.saveLocalDraft(true, draftName);
+        this.handleCloseDrawer();
       }
     });
   }
