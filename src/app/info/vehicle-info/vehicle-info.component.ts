@@ -20,14 +20,22 @@ import { VehicleService } from '@services/vehicle.service';
 import { PersonService } from '@services/person.service';
 import { Person } from '@interfaces/person';
 import { MatIconModule } from '@angular/material/icon';
+import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @Component({
   selector: 'app-vehicle-info',
+  standalone: true,
   imports: [
+    CommonModule,
     MatButtonModule,
     MatCardModule,
-    WrapperCardComponent,
     MatIconModule,
+    MatChipsModule,
+    MatDividerModule,
+    MatTabsModule,
   ],
   templateUrl: './vehicle-info.component.html',
   styleUrl: './vehicle-info.component.scss',

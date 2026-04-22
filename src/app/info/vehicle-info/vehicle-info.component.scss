@@ -1,143 +1,372 @@
-.card-container {
-  color: var(--text-color);
+.vehicle-info-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+  color: #333;
 
-  .card-title {
-    font-size: 24px;
-    font-weight: 500;
-    margin-bottom: 16px;
-  }
+  // HEADER
+  .info-header {
+    padding: 24px;
+    background: linear-gradient(to bottom, #f8f9fa, #ffffff);
 
-  .card-content {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+    .header-main {
+      display: flex;
+      align-items: center;
+      gap: 24px;
 
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    .first-info-card .label {
-      width: 120px;
+      @media (max-width: 600px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
     }
 
-    .second-info-card .label {
-      width: 140px;
+    // Badge da Placa (Estilo Mercosul)
+    .plate-badge {
+      display: flex;
+      flex-direction: column;
+      width: 160px;
+      height: 60px;
+      border: 3px solid #333;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
+
+      .plate-country {
+        background: #003399; // Azul Mercosul
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        text-align: center;
+        padding: 2px 0;
+        letter-spacing: 1px;
+      }
+
+      .plate-number {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+        color: #333;
+        font-family: 'Roboto Mono', monospace;
+      }
     }
 
-    .third-info-card .label {
-      width: 120px;
-    }
-  }
+    .vehicle-title {
+      h1 {
+        margin: 0;
+        font-size: 26px;
+        font-weight: 700;
+        color: #1a1a1a;
+      }
 
-  .card-row {
-    display: flex;
-    gap: 24px;
+      .badges-row {
+        margin-top: 8px;
 
-    .label {
-      font-size: medium;
-      font-weight: 500;
-    }
-  }
+        .chip-disponivel {
+          background-color: #e6f4ea !important;
+          color: #1e7e34 !important;
+          font-weight: 600;
+        }
 
-  .no-owner-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 16px;
-    text-align: center;
-    background-color: var(--surface-variant, #f5f5f5);
-    border-radius: 8px;
-    min-height: 150px;
+        .chip-vendido {
+          background-color: #fce8e6 !important;
+          color: #d93025 !important;
+          font-weight: 600;
+        }
 
-    .no-owner-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
-      color: var(--mdc-theme-text-disabled-on-background, #9e9e9e);
-      margin-bottom: 12px;
-    }
-
-    .no-owner-title {
-      font-size: 18px;
-      font-weight: 500;
-      color: var(--mdc-theme-text-primary-on-background, #424242);
-      margin: 8px 0;
-    }
-
-    .no-owner-message {
-      font-size: 14px;
-      color: var(--mdc-theme-text-secondary-on-background, #757575);
-      margin: 4px 0;
-      line-height: 1.5;
-    }
-
-    .no-owner-instruction {
-      font-size: 14px;
-      color: var(--mdc-theme-text-secondary-on-background, #757575);
-      margin-top: 12px;
-
-      strong {
-        color: var(--mdc-theme-primary, #3f51b5);
-        font-weight: 600;
+        .chip-year {
+          background-color: #f1f3f4 !important;
+          color: #5f6368 !important;
+        }
       }
     }
   }
 
-  .card-footer {
-    padding: 16px;
-    width: auto;
-    display: flex;
-    justify-content: center;
-    gap: 16px;
+  // CONTENT
+  .info-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
 
-    .btn {
-      width: 100%;
-    }
-  }
-}
+    .premium-tabs {
+      height: 100%;
 
-// Responsividade para smartphones
-@media (max-width: 600px) {
-  .card-container {
-    .no-owner-container {
-      padding: 20px 12px;
-      min-height: 120px;
-
-      .no-owner-icon {
-        font-size: 40px;
-        width: 40px;
-        height: 40px;
+      ::ng-deep {
+        .mat-mdc-tab-body-wrapper {
+          padding: 24px;
+        }
+        .mat-mdc-tab-header {
+          padding: 0 24px;
+        }
       }
+    }
 
-      .no-owner-title {
+    .tab-body {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    // SEÇÕES
+    .info-section {
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
         font-size: 16px;
+        font-weight: 600;
+        color: #5f6368;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    // CARDS DE VALORES
+    .value-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+
+      @media (max-width: 480px) {
+        grid-template-columns: 1fr;
       }
 
-      .no-owner-message,
-      .no-owner-instruction {
-        font-size: 13px;
+      .value-card {
+        padding: 20px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        transition: transform 0.2s;
+
+        &:hover {
+          transform: translateY(-2px);
+        }
+
+        .card-label {
+          font-size: 12px;
+          font-weight: 500;
+          opacity: 0.8;
+        }
+
+        .card-value {
+          font-size: 20px;
+          font-weight: 700;
+        }
+
+        &.buy {
+          background: #f8f9fa;
+          color: #3c4043;
+          border: 1px solid #dadce0;
+        }
+
+        &.sell {
+          background: #e8f0fe;
+          color: #1967d2;
+          border: 1px solid #d2e3fc;
+        }
       }
+    }
+
+    // GRID DE INFO
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 20px;
+
+      .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        label {
+          font-size: 12px;
+          color: #70757a;
+          font-weight: 500;
+        }
+
+        span {
+          font-size: 15px;
+          color: #202124;
+          font-weight: 500;
+
+          &.mono {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 13px;
+          }
+        }
+
+        &.full-width {
+          grid-column: 1 / -1;
+        }
+      }
+    }
+
+    // BOX DE OBSERVAÇÃO
+    .observation-box {
+      padding: 16px;
+      background: #fff8e1;
+      border-left: 4px solid #ffc107;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #5d4037;
+      line-height: 1.6;
+    }
+
+    // OWNER CARD
+    .owner-card {
+      border: 1px solid #dadce0;
+      border-radius: 12px;
+      overflow: hidden;
+
+      .owner-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: #f8f9fa;
+
+        .owner-avatar {
+          width: 48px;
+          height: 48px;
+          background: #e8eaed;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #5f6368;
+        }
+
+        .owner-name-info {
+          h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+          }
+          p {
+            margin: 0;
+            font-size: 14px;
+            color: #70757a;
+          }
+        }
+      }
+
+      .owner-details {
+        padding: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+
+        @media (max-width: 400px) {
+          grid-template-columns: 1fr;
+        }
+      }
+    }
+
+    // EMPTY STATE OWNER
+    .empty-state-owner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px;
+      text-align: center;
+      background: #fdfdfd;
+      border: 2px dashed #e0e0e0;
+      border-radius: 12px;
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        color: #bdbdbd;
+        margin-bottom: 16px;
+      }
+
+      p {
+        color: #757575;
+        margin-bottom: 24px;
+      }
+    }
+
+    // HISTÓRICO
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .history-item {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        gap: 16px;
+
+        .history-date {
+          font-weight: 600;
+          color: #5f6368;
+          min-width: 90px;
+        }
+
+        .history-desc {
+          flex: 1;
+          color: #202124;
+        }
+
+        .history-value {
+          font-weight: 700;
+          color: #1e7e34;
+        }
+      }
+    }
+  }
+
+  // ACTIONS FOOTER
+  .info-actions {
+    padding: 20px 24px;
+    background: #fff;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    @media (max-width: 480px) {
+      flex-direction: column-reverse;
+
+      button {
+        width: 100%;
+      }
+    }
+
+    button {
+      padding: 0 24px;
+      height: 44px;
+      font-weight: 600;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
   }
 }
 
-@media (max-width: 400px) {
-  .card-container {
-    .no-owner-container {
-      padding: 16px 8px;
-
-      .no-owner-icon {
-        font-size: 36px;
-        width: 36px;
-        height: 36px;
-      }
-
-      .no-owner-title {
-        font-size: 15px;
-      }
-
-      .no-owner-message,
-      .no-owner-instruction {
-        font-size: 12px;
-      }
-    }
-  }
+.chip-small {
+  font-size: 11px !important;
+  min-height: 24px !important;
+  background: #e8f0fe !important;
+  color: #1967d2 !important;
 }
