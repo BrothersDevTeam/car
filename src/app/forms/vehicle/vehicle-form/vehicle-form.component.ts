@@ -52,6 +52,7 @@ import { FuelTypes, FuelTypesLabels } from '../../../enums/fuelTypes';
 import { VehicleService } from '@services/vehicle.service';
 import { ColorService } from '@services/color.service';
 import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
+import { DateInputComponent } from '@components/date-input/date-input.component';
 import { PersonService } from '@services/person.service';
 import { FipeService } from '@services/fipe.service';
 import { StoreContextService } from '@services/store-context.service';
@@ -74,6 +75,7 @@ import { StoreContextService } from '@services/store-context.service';
     LegalEntityFormComponent,
     NaturalPersonFormComponent,
     CurrencyInputComponent,
+    DateInputComponent,
   ],
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',

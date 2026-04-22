@@ -2,8 +2,13 @@ import {
   ApplicationConfig,
   importProvidersFrom,
   provideZoneChangeDetection,
+  LOCALE_ID,
 } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
 import { provideRouter } from '@angular/router';
+
+registerLocaleData(localePt);
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {
   BrowserAnimationsModule,
@@ -60,5 +65,6 @@ export const appConfig: ApplicationConfig = {
     }),
     importProvidersFrom([BrowserAnimationsModule]),
     provideEnvironmentNgxMask(),
+    { provide: LOCALE_ID, useValue: 'pt-BR' },
   ],
 };

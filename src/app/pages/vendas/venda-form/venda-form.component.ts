@@ -1,8 +1,6 @@
-import { Component, OnInit, signal, LOCALE_ID } from '@angular/core';
-import { CommonModule, registerLocaleData } from '@angular/common';
-import localePt from '@angular/common/locales/pt';
+import { Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MAT_DATE_LOCALE } from '@angular/material/core';
 import {
   FormArray,
   FormBuilder,
@@ -27,6 +25,7 @@ import { VehicleService } from '@services/vehicle.service';
 import { PersonService } from '@services/person.service';
 import { extractErrorMessage } from '@utils/error-utils';
 import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
+import { DateInputComponent } from '@components/date-input/date-input.component';
 import { StoreContextService } from '@services/store-context.service';
 import { ToastrService } from 'ngx-toastr';
 
@@ -68,13 +67,10 @@ import { VendaRequestDto } from '@interfaces/venda';
     MatProgressSpinnerModule,
     MatChipsModule,
     CurrencyInputComponent,
+    DateInputComponent,
   ],
   templateUrl: './venda-form.component.html',
   styleUrls: ['./venda-form.component.scss'],
-  providers: [
-    { provide: LOCALE_ID, useValue: 'pt-BR' },
-    { provide: MAT_DATE_LOCALE, useValue: 'pt-BR' },
-  ],
 })
 export class VendaFormComponent implements OnInit {
   isEdit = false;
@@ -103,9 +99,6 @@ export class VendaFormComponent implements OnInit {
     private storeContextService: StoreContextService,
     private toastr: ToastrService
   ) {
-    // Registra o locale pt-BR globalmente para o datepicker
-    registerLocaleData(localePt, 'pt-BR');
-
     this.vendaForm = this.fb.group({
       vehicleId: ['', Validators.required],
       vehicleDisplay: ['', Validators.required], // Campo apenas para o autocomplete

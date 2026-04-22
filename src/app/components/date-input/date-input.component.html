@@ -1,0 +1,25 @@
+<mat-form-field
+  appearance="outline"
+  class="date-field"
+>
+  <mat-label>{{ label }}</mat-label>
+  <input
+    matInput
+    [matDatepicker]="picker"
+    [placeholder]="placeholder"
+    [value]="value()"
+    [readonly]="readonly"
+    [required]="required"
+    (dateChange)="onDateChange($event)"
+    (blur)="onBlur()"
+    autocomplete="off"
+  />
+  <mat-datepicker-toggle
+    matIconSuffix
+    [for]="picker"
+  >
+    <mat-icon matDatepickerToggleIcon>calendar_today</mat-icon>
+  </mat-datepicker-toggle>
+  <mat-datepicker #picker></mat-datepicker>
+  <mat-hint *ngIf="hint">{{ hint }}</mat-hint>
+</mat-form-field>

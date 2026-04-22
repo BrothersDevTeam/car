@@ -111,23 +111,12 @@
             <mat-icon matSuffix>badge</mat-icon>
           </mat-form-field>
 
-          <mat-form-field
-            appearance="outline"
+          <app-date-input
             class="col-6"
-          >
-            <mat-label>Data da Venda</mat-label>
-            <input
-              matInput
-              [matDatepicker]="picker"
-              formControlName="dataVenda"
-            />
-            <mat-datepicker-toggle
-              matIconSuffix
-              [for]="picker"
-            ></mat-datepicker-toggle>
-            <!-- locale='pt-BR' garante exibição em dd/MM/yyyy -->
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
+            label="Data da Venda"
+            formControlName="dataVenda"
+            [required]="true"
+          ></app-date-input>
         </mat-card-content>
       </mat-card>
 
