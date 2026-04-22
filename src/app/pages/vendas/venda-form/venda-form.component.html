@@ -137,37 +137,19 @@
           <mat-card-title>Valores e Detalhes</mat-card-title>
         </mat-card-header>
         <mat-card-content class="grid-row">
-          <mat-form-field
-            appearance="outline"
+          <app-currency-input
             class="col-4"
-          >
-            <mat-label>Valor Tabela/Venda</mat-label>
-            <span matTextPrefix>R$&nbsp;</span>
-            <input
-              matInput
-              type="text"
-              formControlName="valor"
-              (blur)="onValorBlur('valor')"
-              (focus)="onValorFocus('valor')"
-              placeholder="0,00"
-            />
-          </mat-form-field>
+            label="Valor Tabela/Venda"
+            formControlName="valor"
+            [required]="true"
+          ></app-currency-input>
 
-          <mat-form-field
-            appearance="outline"
+          <app-currency-input
             class="col-4"
-          >
-            <mat-label>Valor Final (Fechamento)</mat-label>
-            <span matTextPrefix>R$&nbsp;</span>
-            <input
-              matInput
-              type="text"
-              formControlName="valorFinal"
-              (blur)="onValorBlur('valorFinal')"
-              (focus)="onValorFocus('valorFinal')"
-              placeholder="0,00"
-            />
-          </mat-form-field>
+            label="Valor Final (Fechamento)"
+            formControlName="valorFinal"
+            [required]="true"
+          ></app-currency-input>
 
           <mat-form-field
             appearance="outline"

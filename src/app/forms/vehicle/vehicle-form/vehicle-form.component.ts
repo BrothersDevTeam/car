@@ -51,6 +51,7 @@ import { FuelTypes, FuelTypesLabels } from '../../../enums/fuelTypes';
 
 import { VehicleService } from '@services/vehicle.service';
 import { ColorService } from '@services/color.service';
+import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
 import { PersonService } from '@services/person.service';
 import { FipeService } from '@services/fipe.service';
 import { StoreContextService } from '@services/store-context.service';
@@ -72,6 +73,7 @@ import { StoreContextService } from '@services/store-context.service';
     MatTabsModule,
     LegalEntityFormComponent,
     NaturalPersonFormComponent,
+    CurrencyInputComponent,
   ],
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',
@@ -661,8 +663,8 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       features: formValues.features || '',
       origin: formValues.origin || 'NACIONAL',
       fuelTypes: this.mapFuelTypeToBackend(formValues.fuelTypes),
-      valorCompra: formValues.valorCompra || '',
-      valorVenda: formValues.valorVenda || '',
+      valorCompra: formValues.valorCompra?.toString() || '',
+      valorVenda: formValues.valorVenda?.toString() || '',
       observation: formValues.observation || '',
       entryDate: formValues.entryDate || '',
       exitDate: formValues.exitDate || '',

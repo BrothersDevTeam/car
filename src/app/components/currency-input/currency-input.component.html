@@ -1,0 +1,19 @@
+<mat-form-field
+  appearance="outline"
+  class="currency-field"
+>
+  <mat-label>{{ label }}</mat-label>
+  <span matTextPrefix>R$&nbsp;</span>
+  <input
+    matInput
+    type="text"
+    [placeholder]="placeholder"
+    [value]="displayValue()"
+    [readonly]="readonly"
+    [required]="required"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+    autocomplete="off"
+  />
+  <mat-hint *ngIf="hint">{{ hint }}</mat-hint>
+</mat-form-field>

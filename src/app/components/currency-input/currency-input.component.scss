@@ -1,0 +1,54 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.currency-field {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      background-color: transparent !important;
+      transition: all 0.2s ease;
+    }
+
+    // Estilo Premium: Borda mais suave e cor de foco personalizada
+    .mdc-notched-outline {
+      border-width: 1px;
+    }
+
+    .mat-mdc-form-field-focus {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--primary-color, #3f51b5) !important;
+        border-width: 2px !important;
+      }
+    }
+
+    // Estilo do Prefixo "R$"
+    .mat-mdc-form-field-text-prefix {
+      color: var(--mat-sys-on-surface-variant);
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      margin-right: 4px;
+      opacity: 0.8;
+    }
+
+    // Estilo do Input
+    input.mat-mdc-input-element {
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      color: var(--mat-sys-on-surface);
+      caret-color: var(--primary-color, #3f51b5);
+    }
+  }
+}
+
+// Micro-animação no hover
+.currency-field:hover {
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    background-color: rgba(0, 0, 0, 0.02) !important;
+  }
+}

@@ -26,6 +26,7 @@ import { VendaService } from '@services/venda.service';
 import { VehicleService } from '@services/vehicle.service';
 import { PersonService } from '@services/person.service';
 import { extractErrorMessage } from '@utils/error-utils';
+import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
 import { StoreContextService } from '@services/store-context.service';
 import { ToastrService } from 'ngx-toastr';
 
@@ -66,6 +67,7 @@ import { VendaRequestDto } from '@interfaces/venda';
     MatDividerModule,
     MatProgressSpinnerModule,
     MatChipsModule,
+    CurrencyInputComponent,
   ],
   templateUrl: './venda-form.component.html',
   styleUrls: ['./venda-form.component.scss'],
@@ -112,8 +114,8 @@ export class VendaFormComponent implements OnInit {
       sellerPersonId: [''],
       sellerDisplay: [''], // Campo apenas para o autocomplete
       dataVenda: [new Date(), Validators.required],
-      valor: ['0,00', [Validators.required]],
-      valorFinal: ['0,00', [Validators.required]],
+      valor: [0, [Validators.required, Validators.min(0.01)]],
+      valorFinal: [0, [Validators.required, Validators.min(0.01)]],
       observacao: [''],
       pagamentos: this.fb.array([]),
       avalistasIds: this.fb.array([]),
@@ -127,46 +129,6 @@ export class VendaFormComponent implements OnInit {
 
   get avalistasIds() {
     return this.vendaForm.get('avalistasIds') as FormArray;
-  }
-
-  /**
-   * Ao ganhar foco, converte a string formatada de volta para número puro
-   * para facilitar a edição pelo usuário (ex: "150.000,00" → "150000")
-   */
-  onValorFocus(field: 'valor' | 'valorFinal') {
-    const ctrl = this.vendaForm.get(field);
-    if (!ctrl) return;
-    const numericValue = this.parseBRLToNumber(ctrl.value.toString());
-    ctrl.setValue(numericValue === 0 ? '' : numericValue.toString(), {
-      emitEvent: false,
-    });
-  }
-
-  /**
-   * Ao perder foco, formata o número como moeda pt-BR
-   * (ex: 150000 → "150.000,00")
-   */
-  onValorBlur(field: 'valor' | 'valorFinal') {
-    const ctrl = this.vendaForm.get(field);
-    if (!ctrl) return;
-    const numericValue = this.parseBRLToNumber(ctrl.value.toString());
-    ctrl.setValue(this.formatBRL(numericValue), { emitEvent: false });
-  }
-
-  /** Converte string BRL para número: "150.000,00" → 150000 */
-  private parseBRLToNumber(value: string): number {
-    if (!value) return 0;
-    // Remove pontos de milhar e substitui vírgula por ponto decimal
-    const clean = value.replace(/\./g, '').replace(',', '.');
-    return parseFloat(clean) || 0;
-  }
-
-  /** Formata número como moeda BRL: 150000 → "150.000,00" */
-  private formatBRL(value: number): string {
-    return value.toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
   }
 
   ngOnInit() {
@@ -266,13 +228,13 @@ export class VendaFormComponent implements OnInit {
     const valorVenda = vehicle.valorVenda
       ? parseFloat(vehicle.valorVenda.toString().replace(',', '.'))
       : 0;
-    const valorFormatted = this.formatBRL(valorVenda);
+
     this.vendaForm.patchValue({
       vehicleId: vehicle.vehicleId,
       vehicleDisplay:
         `${vehicle.brand || ''} ${vehicle.model || ''} (${vehicle.plate})`.trim(),
-      valor: valorFormatted,
-      valorFinal: valorFormatted,
+      valor: valorVenda,
+      valorFinal: valorVenda,
     });
   }
 
@@ -364,8 +326,8 @@ export class VendaFormComponent implements OnInit {
       ...raw,
       dataVenda: dataVendaFormatted,
       // Converte os valores formatados (string BRL) de volta para número
-      valor: this.parseBRLToNumber(raw.valor?.toString() || '0'),
-      valorFinal: this.parseBRLToNumber(raw.valorFinal?.toString() || '0'),
+      valor: raw.valor || 0,
+      valorFinal: raw.valorFinal || 0,
       // Remove campos auxiliares de display que não fazem parte do DTO
       vehicleDisplay: undefined,
       buyerDisplay: undefined,
