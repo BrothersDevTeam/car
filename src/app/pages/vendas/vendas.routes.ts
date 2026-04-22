@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { Authorizations } from '@enums/authorizations';
 import { claimGuard } from '@guards/claim.guard';
+import { unsavedChangesGuard } from '@guards/unsaved-changes.guard';
 
 /**
  * Rotas internas do módulo de Vendas.
@@ -23,6 +24,7 @@ export const VENDAS_ROUTES: Routes = [
         (m) => m.VendaFormComponent
       ),
     canActivate: [claimGuard],
+    canDeactivate: [unsavedChangesGuard],
     data: { claim: Authorizations.CREATE_VENDA },
   },
   {
@@ -32,6 +34,7 @@ export const VENDAS_ROUTES: Routes = [
         (m) => m.VendaFormComponent
       ),
     canActivate: [claimGuard],
+    canDeactivate: [unsavedChangesGuard],
     data: { claim: Authorizations.EDIT_VENDA },
   },
 ];

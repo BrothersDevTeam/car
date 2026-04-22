@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -15,6 +15,8 @@ import {
   filter,
   finalize,
   Observable,
+  of,
+  Subscription,
   switchMap,
   tap,
 } from 'rxjs';
@@ -41,6 +43,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
+import { CanComponentDeactivate } from '@guards/unsaved-changes.guard';
+import { FormDraftService, FormDraft } from '@services/form-draft.service';
+import { ActionsService } from '@services/actions.service';
 
 import { Vehicle, VehicleList } from '@interfaces/vehicle';
 import { Person } from '@interfaces/person';
@@ -72,13 +77,23 @@ import { VendaRequestDto } from '@interfaces/venda';
   templateUrl: './venda-form.component.html',
   styleUrls: ['./venda-form.component.scss'],
 })
-export class VendaFormComponent implements OnInit {
+export class VendaFormComponent
+  implements OnInit, OnDestroy, CanComponentDeactivate
+{
   isEdit = false;
   vendaId: string | null = null;
   title = 'Nova Venda';
   subtitle = 'Registrar uma nova venda de veículo';
   loading = signal(false);
   isSubmitting = signal(false);
+  isSaving = false;
+
+  private initialFormValue: string = '';
+  private readonly FORM_TYPE = 'venda';
+  private subscriptions = new Subscription();
+
+  availableDrafts: FormDraft[] = [];
+  selectedDraft: FormDraft | null = null;
 
   // Formulário Reativo
   vendaForm: FormGroup;
@@ -97,7 +112,9 @@ export class VendaFormComponent implements OnInit {
     private vehicleService: VehicleService,
     private personService: PersonService,
     private storeContextService: StoreContextService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private formDraftService: FormDraftService,
+    private actionsService: ActionsService
   ) {
     this.vendaForm = this.fb.group({
       vehicleId: ['', Validators.required],
@@ -137,83 +154,108 @@ export class VendaFormComponent implements OnInit {
     }
 
     this.initAutocompletes();
+
+    // Carrega o valor inicial para detectar mudanças
+    setTimeout(() => {
+      this.initialFormValue = JSON.stringify(this.vendaForm.value);
+      this.checkForDrafts();
+    }, 500);
+
+    this.subscriptions.add(
+      this.vendaForm.valueChanges.subscribe(() => {
+        this.actionsService.hasFormChanges.set(this.hasUnsavedChanges());
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.actionsService.hasFormChanges.set(false);
+    this.subscriptions.unsubscribe();
   }
 
   private initAutocompletes() {
     const storeId = this.storeContextService.currentStoreId;
 
     // Busca de Veículos (Somente em estoque e da loja atual)
-    this.vendaForm
-      .get('vehicleDisplay')
-      ?.valueChanges.pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        filter((value) => typeof value === 'string' && value.length >= 2),
-        switchMap((value) =>
-          this.vehicleService.getPaginatedData(0, 50, {
-            search: value,
-            onlyInStock: true,
-            storeId: storeId || undefined,
-          })
+    this.subscriptions.add(
+      this.vendaForm
+        .get('vehicleDisplay')
+        ?.valueChanges.pipe(
+          debounceTime(300),
+          distinctUntilChanged(),
+          filter((value) => typeof value === 'string' && value.length >= 2),
+          switchMap((value) =>
+            this.vehicleService.getPaginatedData(0, 50, {
+              search: value,
+              onlyInStock: true,
+              storeId: storeId || undefined,
+            })
+          )
         )
-      )
-      .subscribe((response) => {
-        this.filteredVehicles = response.content;
-      });
+        .subscribe((response) => {
+          this.filteredVehicles = response.content;
+        })
+    );
 
     // Busca de Compradores
-    this.vendaForm
-      .get('buyerDisplay')
-      ?.valueChanges.pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        filter((value) => typeof value === 'string' && value.length >= 2),
-        switchMap((value) =>
-          this.personService.getPaginatedData(0, 50, {
-            search: value,
-            storeId: storeId || undefined,
-          })
+    this.subscriptions.add(
+      this.vendaForm
+        .get('buyerDisplay')
+        ?.valueChanges.pipe(
+          debounceTime(300),
+          distinctUntilChanged(),
+          filter((value) => typeof value === 'string' && value.length >= 2),
+          switchMap((value) =>
+            this.personService.getPaginatedData(0, 50, {
+              search: value,
+              storeId: storeId || undefined,
+            })
+          )
         )
-      )
-      .subscribe((response) => {
-        this.filteredBuyers = response.content;
-      });
+        .subscribe((response) => {
+          this.filteredBuyers = response.content;
+        })
+    );
 
     // Busca de Vendedores
-    this.vendaForm
-      .get('sellerDisplay')
-      ?.valueChanges.pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        filter((value) => typeof value === 'string' && value.length >= 2),
-        switchMap((value) =>
-          this.personService.getPaginatedData(0, 50, {
-            search: value,
-            storeId: storeId || undefined,
-          })
+    this.subscriptions.add(
+      this.vendaForm
+        .get('sellerDisplay')
+        ?.valueChanges.pipe(
+          debounceTime(300),
+          distinctUntilChanged(),
+          filter((value) => typeof value === 'string' && value.length >= 2),
+          switchMap((value) =>
+            this.personService.getPaginatedData(0, 50, {
+              search: value,
+              storeId: storeId || undefined,
+            })
+          )
         )
-      )
-      .subscribe((response) => {
-        this.filteredSellers = response.content;
-      });
+        .subscribe((response) => {
+          this.filteredSellers = response.content;
+        })
+    );
 
     // Busca de Avalistas
-    this.vendaForm
-      .get('avalistaSearchControl')
-      ?.valueChanges.pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        filter((value) => typeof value === 'string' && value.length >= 2),
-        switchMap((value) =>
-          this.personService.getPaginatedData(0, 50, {
-            search: value,
-            storeId: storeId || undefined,
-          })
+    this.subscriptions.add(
+      this.vendaForm
+        .get('avalistaSearchControl')
+        ?.valueChanges.pipe(
+          debounceTime(300),
+          distinctUntilChanged(),
+          filter((value) => typeof value === 'string' && value.length >= 2),
+          switchMap((value) =>
+            this.personService.getPaginatedData(0, 50, {
+              search: value,
+              storeId: storeId || undefined,
+            })
+          )
         )
-      )
-      .subscribe((response) => {
-        this.filteredAvalistas = response.content;
-      });
+        .subscribe((response) => {
+          this.filteredAvalistas = response.content;
+        })
+    );
   }
 
   // Handlers de seleção do Autocomplete
@@ -246,14 +288,17 @@ export class VendaFormComponent implements OnInit {
   }
 
   // Gestão de Pagamentos
-  addPagamento() {
-    const pagamentoForm = this.fb.group({
-      formaPagamento: ['PIX', Validators.required],
-      valor: [0, [Validators.required, Validators.min(0.01)]],
-      vencimento: [new Date()],
-      descricao: [''],
+  private createPagamentoFormGroup(data?: any): FormGroup {
+    return this.fb.group({
+      formaPagamento: [data?.formaPagamento || 'PIX', Validators.required],
+      valor: [data?.valor || 0, [Validators.required, Validators.min(0.01)]],
+      vencimento: [data?.vencimento ? new Date(data.vencimento) : new Date()],
+      descricao: [data?.descricao || ''],
     });
-    this.pagamentos.push(pagamentoForm);
+  }
+
+  addPagamento() {
+    this.pagamentos.push(this.createPagamentoFormGroup());
   }
 
   removePagamento(index: number) {
@@ -274,6 +319,122 @@ export class VendaFormComponent implements OnInit {
   removeAvalista(index: number) {
     this.avalistasIds.removeAt(index);
   }
+
+  // ===== Implementação de CanComponentDeactivate / Rascunhos =====
+
+  hasUnsavedChanges(): boolean {
+    if (this.isSaving) return false;
+
+    if (!this.initialFormValue) return false;
+
+    const currentValue = JSON.stringify(this.vendaForm.value);
+    const hasChanges = currentValue !== this.initialFormValue;
+
+    return hasChanges;
+  }
+
+  canSaveForm(): boolean {
+    // Para rascunho local, permitimos salvar se houver qualquer dado relevante
+    const raw = this.vendaForm.value;
+    return !!(raw.vehicleId || raw.buyerPersonId || raw.sellerPersonId);
+  }
+
+  saveForm(isDraft: boolean): Observable<boolean> {
+    if (isDraft) {
+      this.saveLocalDraft();
+      return of(true);
+    }
+    this.onSubmit();
+    return of(true);
+  }
+
+  saveLocalDraft(silent: boolean = false, name?: string): void {
+    this.isSaving = true;
+    const draftName = name || `Venda em ${new Date().toLocaleString()}`;
+
+    this.formDraftService.saveDraft(
+      this.FORM_TYPE,
+      this.vendaForm.value,
+      this.vendaId || undefined,
+      draftName
+    );
+
+    // Resetamos o estado de mudanças para permitir a navegação fluida
+    this.initialFormValue = JSON.stringify(this.vendaForm.value);
+    this.actionsService.hasFormChanges.set(false);
+    this.vendaForm.markAsPristine();
+
+    if (!silent) {
+      this.toastr.info('Rascunho salvo localmente');
+    }
+
+    this.isSaving = false;
+  }
+
+  private checkForDrafts() {
+    this.availableDrafts = this.formDraftService.getDraftsByType(
+      this.FORM_TYPE
+    );
+    console.log(
+      '[checkForDrafts] Rascunhos encontrados:',
+      this.availableDrafts
+    );
+  }
+
+  handleDraftSelection(draft: FormDraft | null) {
+    if (!draft) {
+      this.selectedDraft = null;
+      this.vendaForm.reset({
+        saleDate: new Date(),
+        items: [],
+        payments: [],
+      });
+      this.initialFormValue = JSON.stringify(this.vendaForm.value);
+      this.actionsService.hasFormChanges.set(false);
+      return;
+    }
+
+    this.selectedDraft = draft;
+    this.vendaForm.patchValue(draft.data);
+
+    // Se o rascunho tem pagamentos, reconstruímos o FormArray
+    if (draft.data.pagamentos && Array.isArray(draft.data.pagamentos)) {
+      const paymentsArray = this.vendaForm.get('pagamentos') as FormArray;
+      paymentsArray.clear();
+      draft.data.pagamentos.forEach((payment: any) => {
+        paymentsArray.push(this.createPagamentoFormGroup(payment));
+      });
+    }
+
+    // Se o rascunho tem avalistas, reconstruímos o FormArray
+    if (draft.data.avalistasIds && Array.isArray(draft.data.avalistasIds)) {
+      const avalistasArray = this.vendaForm.get('avalistasIds') as FormArray;
+      avalistasArray.clear();
+      draft.data.avalistasIds.forEach((id: string) => {
+        avalistasArray.push(this.fb.control(id));
+      });
+    }
+
+    this.initialFormValue = JSON.stringify(this.vendaForm.value);
+    this.toastr.success('Rascunho carregado com sucesso');
+    this.actionsService.hasFormChanges.set(false);
+  }
+
+  removeDraft(draft: FormDraft, event: MouseEvent) {
+    event.stopPropagation(); // Evita selecionar o rascunho ao clicar em excluir
+    this.formDraftService.removeDraftById(draft.id);
+    this.availableDrafts = this.formDraftService.getDraftsByType(
+      this.FORM_TYPE
+    );
+
+    if (this.selectedDraft?.id === draft.id) {
+      this.selectedDraft = null;
+    }
+
+    this.toastr.info('Rascunho excluído');
+  }
+
+  // =============================================================
 
   private loadVenda() {
     if (!this.vendaId) return;
@@ -308,6 +469,7 @@ export class VendaFormComponent implements OnInit {
       return;
     }
 
+    this.isSaving = true;
     this.isSubmitting.set(true);
     const raw = this.vendaForm.value;
 
@@ -337,6 +499,20 @@ export class VendaFormComponent implements OnInit {
         this.toastr.success(
           `Venda ${this.isEdit ? 'atualizada' : 'registrada'} com sucesso!`
         );
+
+        // Se havia um rascunho selecionado via seletor, removemos ele pelo ID específico
+        if (this.selectedDraft) {
+          this.formDraftService.removeDraftById(this.selectedDraft.id);
+        }
+
+        // Limpa rascunhos vinculados ao ID (fallback e edição)
+        this.formDraftService.removeDraft(
+          this.FORM_TYPE,
+          this.vendaId || undefined
+        );
+
+        this.initialFormValue = JSON.stringify(this.vendaForm.value);
+        this.actionsService.hasFormChanges.set(false);
         this.router.navigate(['/vendas']);
       },
       error: (err) => {
