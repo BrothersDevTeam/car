@@ -2,6 +2,64 @@
   [formGroup]="form"
   (keydown.enter)="onEnter($event)"
 >
+  <!-- Seção Premium de Rascunhos -->
+  @if (availableDrafts.length > 0 && !dataForm) {
+    <div class="drafts-section">
+      <mat-card class="draft-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>history</mat-icon>
+          <mat-card-title>Cadastros em andamento</mat-card-title>
+          <mat-card-subtitle>
+            Você possui rascunhos salvos para este perfil.
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="draft-selector-container">
+            <mat-form-field
+              appearance="outline"
+              class="draft-select-field"
+            >
+              <mat-label>Selecione um rascunho para continuar</mat-label>
+              <mat-select
+                [(value)]="selectedDraftId"
+                (selectionChange)="onDraftSelected($event)"
+              >
+                <mat-option [value]="null">
+                  -- Iniciar novo cadastro --
+                </mat-option>
+                @for (draft of availableDrafts; track draft.id) {
+                  <mat-option
+                    [value]="draft.id"
+                    class="draft-option-item"
+                  >
+                    <div class="draft-option-content">
+                      <div class="draft-info">
+                        <span class="draft-name">
+                          {{ draft.draftName || 'Sem nome' }}
+                        </span>
+                        <span class="draft-date">
+                          {{ formatDraftDate(draft.lastModified) }}
+                        </span>
+                      </div>
+                      <button
+                        mat-icon-button
+                        class="delete-draft-btn"
+                        (click)="deleteDraft(draft.id, $event)"
+                        matTooltip="Excluir rascunho"
+                      >
+                        <mat-icon>delete_outline</mat-icon>
+                      </button>
+                    </div>
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
   <!-- Seção: Dados da Empresa -->
   <app-wrapper-card title="Dados da empresa">
     <!-- 

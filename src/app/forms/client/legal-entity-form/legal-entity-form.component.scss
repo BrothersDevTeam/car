@@ -290,4 +290,166 @@ form {
       transition: none;
     }
   }
+
+  /**
+   * SEÇÃO PREMIUM DE RASCUNHOS
+   * 
+   * Estilos para o card de cadastros em andamento
+   */
+  .drafts-section {
+    margin-bottom: 32px;
+    animation: fadeIn 0.5s ease-out;
+
+    .draft-card {
+      border-radius: 16px;
+      border: 1px solid rgba(var(--primary-rgb), 0.08);
+      background: linear-gradient(
+        135deg,
+        rgba(var(--primary-rgb), 0.03) 0%,
+        rgba(var(--primary-rgb), 0.01) 100%
+      );
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+      overflow: hidden;
+
+      mat-card-header {
+        margin-bottom: 20px;
+        padding: 16px 16px 0;
+
+        mat-icon[mat-card-avatar] {
+          background-color: white;
+          color: var(--primary-color);
+          padding: 10px;
+          border-radius: 12px;
+          box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.15);
+          width: 24px;
+          height: 24px;
+          font-size: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        mat-card-title {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: var(--text-color);
+          letter-spacing: -0.02em;
+        }
+
+        mat-card-subtitle {
+          color: #64748b;
+          font-size: 0.85rem;
+        }
+      }
+
+      mat-card-content {
+        padding: 0 16px 16px;
+      }
+
+      .draft-selector-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .draft-select-field {
+          flex: 1;
+
+          ::v-deep .mat-mdc-form-field-subscript-wrapper {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /**
+   * AÇÕES DO FORMULÁRIO
+   */
+  .form-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+    width: 100%;
+
+    button {
+      flex: 1;
+      height: 48px;
+      font-size: 1rem;
+
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+      button {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Estilos globais para o painel de rascunhos (fora do escopo do componente)
+.draft-option-item {
+  height: 64px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .draft-option-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 16px;
+
+    .draft-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.4;
+
+      .draft-name {
+        font-weight: 600;
+        color: var(--text-color);
+        font-size: 0.95rem;
+      }
+
+      .draft-date {
+        font-size: 0.8rem;
+        color: #64748b;
+      }
+    }
+
+    .delete-draft-btn {
+      opacity: 0.6;
+      transition: all 0.2s ease;
+
+      &:hover {
+        opacity: 1;
+        background-color: rgba(220, 53, 69, 0.1);
+        transform: scale(1.1);
+      }
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: #dc3545;
+      }
+    }
+  }
 }

@@ -14,6 +14,10 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import {
   AbstractControl,
   FormBuilder,
@@ -21,6 +25,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 import { ToastrService } from 'ngx-toastr';
 import { Subscription, Observable, of } from 'rxjs';
@@ -42,7 +47,7 @@ import { removeEmptyPropertiesFromObject } from '@utils/removeEmptyPropertiesFro
 
 import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
-import { FormDraftService } from '@services/form-draft.service';
+import { FormDraftService, FormDraft } from '@services/form-draft.service';
 import { StoreContextService } from '@services/store-context.service';
 
 @Component({
@@ -55,6 +60,11 @@ import { StoreContextService } from '@services/store-context.service';
     MatIconModule,
     CnpjValidatorDirective,
     PrimarySelectComponent,
+    MatCardModule,
+    MatTooltipModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    CommonModule,
   ],
   templateUrl: './legal-entity-form.component.html',
   styleUrl: './legal-entity-form.component.scss',
@@ -96,8 +106,19 @@ export class LegalEntityFormComponent
   private readonly FORM_TYPE = 'pessoa-juridica';
 
   @Input() dataForm: Person | null = null;
+  @Input() draft: FormDraft | null | undefined = null;
   @Output() formSubmitted = new EventEmitter<void>();
   @Output() formChanged = new EventEmitter<boolean>();
+
+  /**
+   * Lista de rascunhos disponíveis para este tipo de formulário
+   */
+  protected availableDrafts: FormDraft[] = [];
+
+  /**
+   * ID do rascunho selecionado no combobox
+   */
+  protected selectedDraftId: string | null = null;
 
   /**
    * Formulário reativo para cadastro/edição de pessoa jurídica
@@ -199,7 +220,8 @@ export class LegalEntityFormComponent
       })
     );
 
-    this.checkForDrafts();
+    this.loadAvailableDrafts();
+    // this.checkForDrafts(); // Removido verificação automática pois agora é selecionável
 
     setTimeout(() => {
       this.captureInitialFormValue();
@@ -454,6 +476,9 @@ export class LegalEntityFormComponent
       draftName
     );
 
+    // Atualiza o ID do rascunho selecionado
+    this.selectedDraftId = draftId;
+
     if (!silent) {
       this.toastrService.info('Rascunho salvo localmente');
     }
@@ -471,49 +496,101 @@ export class LegalEntityFormComponent
   }
 
   /**
+   * Formata a data do rascunho para exibição
+   */
+  protected formatDraftDate(date: Date): string {
+    const now = new Date();
+    const diffMs = now.getTime() - new Date(date).getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) {
+      return 'agora mesmo';
+    } else if (diffMins < 60) {
+      return `há ${diffMins} min${diffMins > 1 ? 's' : ''}`;
+    } else if (diffHours < 24) {
+      return `há ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+    } else if (diffDays < 7) {
+      return `há ${diffDays} dia${diffDays > 1 ? 's' : ''}`;
+    } else {
+      return new Date(date).toLocaleDateString('pt-BR');
+    }
+  }
+
+  /**
+   * Carrega a lista de rascunhos disponíveis
+   */
+  private loadAvailableDrafts(): void {
+    this.availableDrafts = this.formDraftService.getDraftsByType(
+      this.FORM_TYPE
+    );
+  }
+
+  /**
+   * Manipulador do evento de seleção de rascunho no combobox
+   */
+  protected onDraftSelected(event: any): void {
+    const draftId = event.value;
+
+    if (!draftId) {
+      this.resetForm();
+      this.selectedDraftId = null;
+      return;
+    }
+
+    const draft = this.availableDrafts.find((d) => d.id === draftId);
+    if (!draft) return;
+
+    this.loadDraftData(draft);
+  }
+
+  /**
+   * Carrega os dados de um rascunho no formulário
+   */
+  private loadDraftData(draft: FormDraft): void {
+    if (!draft || !draft.data) return;
+
+    this.form.patchValue(draft.data);
+    this.toastrService.success('Rascunho carregado com sucesso');
+
+    setTimeout(() => {
+      this.captureInitialFormValue();
+      this.form.markAsDirty();
+      this.actionsService.hasFormChanges.set(true);
+      this.formChanged.emit(true);
+    }, 100);
+  }
+
+  /**
+   * Exclui um rascunho
+   */
+  protected deleteDraft(draftId: string, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+
+    const draft = this.availableDrafts.find((d) => d.id === draftId);
+    if (!draft) return;
+
+    this.formDraftService.removeDraftById(draft.id);
+    this.loadAvailableDrafts();
+
+    if (this.selectedDraftId === draftId) {
+      this.resetForm();
+      this.selectedDraftId = null;
+    }
+    this.toastrService.success('Rascunho excluído');
+  }
+
+  /**
    * Captura o valor inicial do formulário após carregar dados
    * Usado para detectar mudanças não salvas
    */
   private captureInitialFormValue(): void {
     this.initialFormValue = JSON.stringify(this.form.value);
     console.log('[captureInitialFormValue] Valor inicial capturado');
-  }
-
-  /**
-   * Verifica se existe rascunho salvo e pergunta se deseja carregar
-   */
-  private checkForDrafts(): void {
-    if (this.dataForm?.personId) {
-      return;
-    }
-
-    // Converte personId de string para number
-    const personId = this.dataForm?.personId
-      ? Number(this.dataForm.personId)
-      : undefined;
-
-    const draft = this.formDraftService.getDraft<any>(this.FORM_TYPE, personId);
-
-    if (draft) {
-      const loadDraft = confirm(
-        `Foi encontrado um rascunho salvo em ${draft.lastModified.toLocaleString()}.\n\nDeseja carregar este rascunho?`
-      );
-
-      if (loadDraft) {
-        this.form.patchValue(draft.data);
-        this.toastrService.success('Rascunho carregado com sucesso');
-        console.log('[checkForDrafts] Rascunho carregado:', draft);
-
-        setTimeout(() => {
-          this.captureInitialFormValue();
-          this.form.markAsPristine();
-          this.actionsService.hasFormChanges.set(false);
-        }, 500);
-      } else {
-        this.formDraftService.removeDraft(this.FORM_TYPE);
-        console.log('[checkForDrafts] Rascunho removido');
-      }
-    }
   }
 
   /**

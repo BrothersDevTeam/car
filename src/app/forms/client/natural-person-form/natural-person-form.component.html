@@ -2,48 +2,63 @@
   [formGroup]="form"
   (keydown.enter)="onEnter($event)"
 >
-  <!-- Combobox de Rascunhos -->
+  <!-- Seção Premium de Rascunhos -->
   @if (availableDrafts.length > 0 && !dataForm) {
-    <app-wrapper-card title="Cadastros em andamento">
-      <div class="drafts-section">
-        <mat-form-field
-          appearance="outline"
-          class="draft-select"
-        >
-          <mat-label>Selecione um cadastro para continuar</mat-label>
-          <mat-select
-            [(value)]="selectedDraftId"
-            (selectionChange)="onDraftSelected($event)"
-          >
-            <mat-option [value]="null">-- Iniciar novo cadastro --</mat-option>
-            @for (draft of availableDrafts; track draft.id) {
-              <mat-option [value]="draft.id">
-                <div class="draft-option">
-                  <span class="draft-name">
-                    {{ draft.draftName || 'Rascunho sem nome' }}
-                  </span>
-                  <span class="draft-date">
-                    {{ formatDraftDate(draft.lastModified) }}
-                  </span>
-                </div>
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+    <div class="drafts-section">
+      <mat-card class="draft-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>history</mat-icon>
+          <mat-card-title>Cadastros em andamento</mat-card-title>
+          <mat-card-subtitle>
+            Você possui rascunhos salvos para este perfil.
+          </mat-card-subtitle>
+        </mat-card-header>
 
-        @if (selectedDraftId) {
-          <button
-            mat-icon-button
-            color="warn"
-            class="delete-draft-btn"
-            (click)="deleteDraft(selectedDraftId)"
-            matTooltip="Excluir este rascunho"
-          >
-            <mat-icon>delete</mat-icon>
-          </button>
-        }
-      </div>
-    </app-wrapper-card>
+        <mat-card-content>
+          <div class="draft-selector-container">
+            <mat-form-field
+              appearance="outline"
+              class="draft-select-field"
+            >
+              <mat-label>Selecione um rascunho para continuar</mat-label>
+              <mat-select
+                [(value)]="selectedDraftId"
+                (selectionChange)="onDraftSelected($event)"
+              >
+                <mat-option [value]="null">
+                  -- Iniciar novo cadastro --
+                </mat-option>
+                @for (draft of availableDrafts; track draft.id) {
+                  <mat-option
+                    [value]="draft.id"
+                    class="draft-option-item"
+                  >
+                    <div class="draft-option-content">
+                      <div class="draft-info">
+                        <span class="draft-name">
+                          {{ draft.draftName || 'Sem nome' }}
+                        </span>
+                        <span class="draft-date">
+                          {{ formatDraftDate(draft.lastModified) }}
+                        </span>
+                      </div>
+                      <button
+                        mat-icon-button
+                        class="delete-draft-btn"
+                        (click)="deleteDraft(draft.id, $event)"
+                        matTooltip="Excluir rascunho"
+                      >
+                        <mat-icon>delete_outline</mat-icon>
+                      </button>
+                    </div>
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
   }
 
   <!-- Seção: Dados Pessoais -->

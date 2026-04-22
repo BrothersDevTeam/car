@@ -18,6 +18,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCardModule } from '@angular/material/card';
 import {
   AbstractControl,
   FormArray,
@@ -67,6 +68,7 @@ import { Authorizations } from '../../../enums/authorizations';
     MatFormFieldModule,
     MatTooltipModule,
     MatCheckboxModule,
+    MatCardModule,
   ],
   templateUrl: './natural-person-form.component.html',
   styleUrl: './natural-person-form.component.scss',
@@ -646,24 +648,19 @@ export class NaturalPersonFormComponent
   /**
    * Exclui um rascunho
    */
-  protected deleteDraft(draftId: string): void {
+  protected deleteDraft(draftId: string, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
     const draft = this.availableDrafts.find((d) => d.id === draftId);
     if (!draft) {
       return;
     }
 
-    const confirmed = confirm(
-      `Tem certeza que deseja excluir o rascunho "${
-        draft.draftName || 'sem nome'
-      }"?`
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
     // Remove do localStorage
     this.formDraftService.removeDraftById(draft.id);
+    this.loadAvailableDrafts();
 
     // Limpa o formulário se este era o rascunho selecionado
     if (this.selectedDraftId === draftId) {

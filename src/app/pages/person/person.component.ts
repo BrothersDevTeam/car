@@ -116,7 +116,6 @@ export class PersonComponent
   personPaginatedList: PaginationResponse<Person> | null = null;
   selectedPerson: Person | null = null;
   selectedDraft: FormDraft | null | undefined = undefined;
-  availableDrafts: FormDraft[] = [];
   searchValue: string = '';
   searchType: 'name' | 'cpf' | 'cnpj' | 'email' | 'all' = 'all';
   selectedStoreId: string | null = null;
@@ -366,29 +365,22 @@ export class PersonComponent
 
   ngOnInit() {
     this.subscriptions.push(
-      this.actionsService.sidebarClick$.subscribe((targetRoute) => {
-        // Se a gaveta estiver aberta...
-        if (this.openForm() || this.openInfo()) {
-          const currentRoute = '/person'; // Rota base deste componente
+      this.actionsService.sidebarClick$.subscribe(
+        (targetRoute: string | undefined) => {
+          // Se a gaveta estiver aberta...
+          if (this.openForm() || this.openInfo()) {
+            const currentRoute = '/person';
 
-          // Se o clique foi em um menu que aponta para OUTRA rota,
-          // não fazemos nada aqui e deixamos o unsavedChangesGuard agir.
-          // Se o clique foi no mesmo menu ou em área vazia (targetRoute null), tratamos localmente.
-          if (targetRoute && targetRoute !== currentRoute) {
-            return;
+            // Se o clique foi em um menu que aponta para OUTRA rota,
+            // não fazemos nada aqui e deixamos o unsavedChangesGuard agir.
+            if (targetRoute && targetRoute !== currentRoute) {
+              return;
+            }
+
+            this.handleConfirmationCloseDrawer();
           }
-
-          this.handleConfirmationCloseDrawer();
         }
-      })
-    );
-
-    // Carrega rascunhos iniciais e se inscreve para mudanças
-    this.loadDrafts();
-    this.subscriptions.push(
-      this.formDraftService.draftsChanges.subscribe(() => {
-        this.loadDrafts();
-      })
+      )
     );
 
     // Contexto Global de Loja
@@ -654,73 +646,6 @@ export class PersonComponent
     this.selectedPerson = null;
     this.selectedDraft = null;
     this.openForm.set(true);
-  }
-
-  @ViewChild('draftSelect') draftSelect?: MatSelect;
-
-  handleDraftSelection(draft: FormDraft) {
-    if (draft.formType === 'endereco') {
-      console.log('PersonComponent: Address draft selected', draft);
-      const data = draft.data as any;
-      if (data.personId) {
-        this.clientListLoading.set(true);
-        this.personService.getById(data.personId).subscribe({
-          next: (person) => {
-            console.log('PersonComponent: Person loaded', person);
-            this.clientListLoading.set(false);
-            this.pendingAddressDraftId = draft.id;
-            console.log(
-              'PersonComponent: pendingAddressDraftId set to',
-              this.pendingAddressDraftId
-            );
-            this.handleSelectedPerson(person);
-
-            // Explicitly reset the dropdown
-            setTimeout(() => {
-              if (this.draftSelect) this.draftSelect.value = null;
-              this.selectedDraft = null;
-            });
-          },
-          error: (err) => {
-            this.clientListLoading.set(false);
-            this.toastr.error('Erro ao carregar pessoa do rascunho');
-            console.error(err);
-            setTimeout(() => {
-              if (this.draftSelect) this.draftSelect.value = null;
-              this.selectedDraft = null;
-            });
-          },
-        });
-      } else {
-        setTimeout(() => {
-          if (this.draftSelect) this.draftSelect.value = null;
-          this.selectedDraft = null;
-        });
-      }
-      return;
-    }
-
-    this.selectedPerson = null;
-    this.selectedDraft = draft;
-    this.openForm.set(true);
-
-    // For Person drafts, wait for child component to sync before resetting
-    setTimeout(() => {
-      if (this.draftSelect) this.draftSelect.value = null;
-      // We don't reset 'selectedDraft' here because it might be bound to the form
-      // (though the form should ideally clone it).
-      // However, resetting the ViewChild value visually clears the dropdown.
-    }, 500);
-  }
-
-  private loadDrafts() {
-    const pfDrafts = this.formDraftService.getDraftsByType('pessoa-fisica');
-    const pjDrafts = this.formDraftService.getDraftsByType('pessoa-juridica');
-    const addressDrafts = this.formDraftService.getDraftsByType('endereco');
-
-    this.availableDrafts = [...pfDrafts, ...pjDrafts, ...addressDrafts]
-      .filter((d) => !d.entityId || d.entityId.toString().startsWith('new_'))
-      .sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
   }
 
   handlePageEvent(event: PageEvent) {
