@@ -813,7 +813,10 @@ export class NaturalPersonFormComponent
     this.form.markAsDirty();
 
     // Se o perfil selecionado é um que permite acesso ao sistema, vamos preencher permissões padrão
-    if (profile === RelationshipTypes.GERENTE || profile === RelationshipTypes.VENDEDOR) {
+    if (
+      profile === RelationshipTypes.GERENTE ||
+      profile === RelationshipTypes.VENDEDOR
+    ) {
       setTimeout(() => {
         this.applyDefaultAuthorizations(profile);
       });
@@ -831,27 +834,51 @@ export class NaturalPersonFormComponent
     if (profile === RelationshipTypes.GERENTE) {
       defaults = [
         Authorizations.READ_STORE,
-        Authorizations.READ_USER, Authorizations.READ_USER_OTHERS, Authorizations.CREATE_USER, Authorizations.EDIT_USER, Authorizations.EDIT_USER_OTHERS, Authorizations.DELETE_USER,
-        Authorizations.READ_PERSON, Authorizations.READ_PERSON_OTHERS, Authorizations.CREATE_PERSON, Authorizations.EDIT_PERSON, Authorizations.DELETE_PERSON,
-        Authorizations.READ_VEHICLE, Authorizations.CREATE_VEHICLE, Authorizations.EDIT_VEHICLE, Authorizations.DELETE_VEHICLE, Authorizations.READ_VEHICLE_PURCHASE_PRICE, Authorizations.READ_VEHICLE_PROFIT,
-        Authorizations.READ_NFE, Authorizations.CREATE_NFE, Authorizations.EMITIR_NFE, Authorizations.CANCEL_NFE,
-        Authorizations.READ_VENDA, Authorizations.CREATE_VENDA, Authorizations.EDIT_VENDA, Authorizations.CANCEL_VENDA,
-        Authorizations.SYNC_FOCUSNFE
+        Authorizations.READ_USER,
+        Authorizations.READ_USER_OTHERS,
+        Authorizations.CREATE_USER,
+        Authorizations.EDIT_USER,
+        Authorizations.EDIT_USER_OTHERS,
+        Authorizations.DELETE_USER,
+        Authorizations.READ_PERSON,
+        Authorizations.READ_PERSON_OTHERS,
+        Authorizations.CREATE_PERSON,
+        Authorizations.EDIT_PERSON,
+        Authorizations.DELETE_PERSON,
+        Authorizations.READ_VEHICLE,
+        Authorizations.CREATE_VEHICLE,
+        Authorizations.EDIT_VEHICLE,
+        Authorizations.DELETE_VEHICLE,
+        Authorizations.READ_VEHICLE_PURCHASE_PRICE,
+        Authorizations.READ_VEHICLE_PROFIT,
+        Authorizations.READ_NFE,
+        Authorizations.CREATE_NFE,
+        Authorizations.EMITIR_NFE,
+        Authorizations.CANCEL_NFE,
+        Authorizations.READ_VENDA,
+        Authorizations.CREATE_VENDA,
+        Authorizations.EDIT_VENDA,
+        Authorizations.CANCEL_VENDA,
+        Authorizations.SYNC_FOCUSNFE,
       ];
     } else if (profile === RelationshipTypes.VENDEDOR) {
       defaults = [
         Authorizations.READ_STORE,
-        Authorizations.READ_USER, Authorizations.EDIT_USER,
-        Authorizations.READ_PERSON, Authorizations.CREATE_PERSON, Authorizations.EDIT_PERSON,
+        Authorizations.READ_USER,
+        Authorizations.EDIT_USER,
+        Authorizations.READ_PERSON,
+        Authorizations.CREATE_PERSON,
+        Authorizations.EDIT_PERSON,
         Authorizations.READ_VEHICLE,
-        Authorizations.READ_VENDA, Authorizations.CREATE_VENDA
+        Authorizations.READ_VENDA,
+        Authorizations.CREATE_VENDA,
       ];
     }
 
-    defaults.forEach(auth => {
+    defaults.forEach((auth) => {
       authArray.push(this.formBuilderService.control(auth));
     });
-    
+
     this.form.markAsDirty();
   }
 

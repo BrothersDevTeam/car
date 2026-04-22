@@ -157,7 +157,13 @@
               (click)="onManageEmployees()"
             >
               <mat-icon>group</mat-icon>
-              <span>{{ isRootAdmin ? 'Proprietário e Funcionários' : 'Gerenciar Funcionários' }}</span>
+              <span>
+                {{
+                  isRootAdmin
+                    ? 'Proprietário e Funcionários'
+                    : 'Gerenciar Funcionários'
+                }}
+              </span>
             </button>
           }
           @if (canManageAuthorizations) {
@@ -234,7 +240,11 @@
           <button
             mat-icon-button
             (click)="onManageEmployees()"
-            [matTooltip]="isRootAdmin ? 'Gerenciar Proprietário e Funcionários' : 'Gerenciar Funcionários'"
+            [matTooltip]="
+              isRootAdmin
+                ? 'Gerenciar Proprietário e Funcionários'
+                : 'Gerenciar Funcionários'
+            "
             class="action-btn employees-btn"
           >
             <mat-icon>group</mat-icon>

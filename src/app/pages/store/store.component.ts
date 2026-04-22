@@ -107,7 +107,9 @@ export class StoreComponent implements OnInit {
       this.authService.hasAuthority(Authorizations.CREATE_USER);
 
     // Somente root pode gerenciar proprietário
-    this.canManageOwnerOnly = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+    this.canManageOwnerOnly = this.authService.hasAuthority(
+      Authorizations.ROOT_ADMIN
+    );
   }
 
   private loadStores(): void {

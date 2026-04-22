@@ -120,19 +120,25 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
       .get<Record<string, Authorization[]>>('/api/authorizations')
       .subscribe({
         next: (response) => {
-          const isRoot = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+          const isRoot = this.authService.hasAuthority(
+            Authorizations.ROOT_ADMIN
+          );
           const rootOnlyKeys = [Authorizations.ROOT_ADMIN];
 
-          this.modules = Object.keys(response).map((module) => {
-            let auths = response[module];
-            if (!isRoot) {
-               auths = auths.filter(a => !rootOnlyKeys.includes(a.key as Authorizations));
-            }
-            return {
-              module,
-              authorizations: auths,
-            };
-          }).filter(m => m.authorizations.length > 0);
+          this.modules = Object.keys(response)
+            .map((module) => {
+              let auths = response[module];
+              if (!isRoot) {
+                auths = auths.filter(
+                  (a) => !rootOnlyKeys.includes(a.key as Authorizations)
+                );
+              }
+              return {
+                module,
+                authorizations: auths,
+              };
+            })
+            .filter((m) => m.authorizations.length > 0);
           this.loading = false;
         },
         error: (err) => {

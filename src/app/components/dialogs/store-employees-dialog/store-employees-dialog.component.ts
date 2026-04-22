@@ -13,14 +13,26 @@ import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray, FormControl } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+  FormArray,
+  FormControl,
+} from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatMenuModule } from '@angular/material/menu';
 import { ToastrService } from 'ngx-toastr';
-import { debounceTime, distinctUntilChanged, switchMap, finalize } from 'rxjs/operators';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  finalize,
+} from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import { EmployeeService } from '@services/employee.service';
@@ -55,7 +67,10 @@ const AUTH_GROUPS = [
       { key: Authorizations.CREATE_VEHICLE, label: 'Cadastrar veículos' },
       { key: Authorizations.EDIT_VEHICLE, label: 'Editar veículos' },
       { key: Authorizations.DELETE_VEHICLE, label: 'Excluir veículos' },
-      { key: Authorizations.READ_VEHICLE_PURCHASE_PRICE, label: 'Ver preço de compra' },
+      {
+        key: Authorizations.READ_VEHICLE_PURCHASE_PRICE,
+        label: 'Ver preço de compra',
+      },
       { key: Authorizations.READ_VEHICLE_PROFIT, label: 'Ver lucro/margem' },
     ],
   },
@@ -63,7 +78,10 @@ const AUTH_GROUPS = [
     name: 'Clientes e Pessoas',
     permissions: [
       { key: Authorizations.READ_PERSON, label: 'Visualizar pessoas' },
-      { key: Authorizations.READ_PERSON_OTHERS, label: 'Visualizar pessoas da rede' },
+      {
+        key: Authorizations.READ_PERSON_OTHERS,
+        label: 'Visualizar pessoas da rede',
+      },
       { key: Authorizations.CREATE_PERSON, label: 'Cadastrar pessoas' },
       { key: Authorizations.EDIT_PERSON, label: 'Editar pessoas' },
       { key: Authorizations.DELETE_PERSON, label: 'Excluir pessoas' },
@@ -82,7 +100,10 @@ const AUTH_GROUPS = [
     name: 'Configurações de Loja',
     permissions: [
       { key: Authorizations.READ_STORE, label: 'Visualizar dados da loja' },
-      { key: Authorizations.READ_STORE_OTHERS, label: 'Visualizar dados da rede' },
+      {
+        key: Authorizations.READ_STORE_OTHERS,
+        label: 'Visualizar dados da rede',
+      },
       { key: Authorizations.EDIT_STORE, label: 'Configurar loja/filiais' },
       { key: Authorizations.SYNC_FOCUSNFE, label: 'Sincronizar Focus NFe' },
     ],
@@ -91,7 +112,10 @@ const AUTH_GROUPS = [
     name: 'Usuários do Sistema',
     permissions: [
       { key: Authorizations.READ_USER, label: 'Ver próprio perfil' },
-      { key: Authorizations.READ_USER_OTHERS, label: 'Visualizar outros usuários' },
+      {
+        key: Authorizations.READ_USER_OTHERS,
+        label: 'Visualizar outros usuários',
+      },
       { key: Authorizations.CREATE_USER, label: 'Criar usuários' },
       { key: Authorizations.EDIT_USER, label: 'Editar próprio perfil' },
       { key: Authorizations.EDIT_USER_OTHERS, label: 'Editar outros usuários' },
@@ -102,24 +126,47 @@ const AUTH_GROUPS = [
 
 // Presets de autorização por perfil
 const PRESET_GERENTE: string[] = [
-  Authorizations.READ_STORE, Authorizations.READ_STORE_OTHERS,
-  Authorizations.READ_USER, Authorizations.READ_USER_OTHERS, Authorizations.CREATE_USER,
-  Authorizations.EDIT_USER, Authorizations.EDIT_USER_OTHERS, Authorizations.DELETE_USER,
-  Authorizations.READ_PERSON, Authorizations.READ_PERSON_OTHERS, Authorizations.CREATE_PERSON,
-  Authorizations.EDIT_PERSON, Authorizations.DELETE_PERSON,
-  Authorizations.READ_VEHICLE, Authorizations.CREATE_VEHICLE, Authorizations.EDIT_VEHICLE,
-  Authorizations.DELETE_VEHICLE, Authorizations.READ_VEHICLE_PURCHASE_PRICE, Authorizations.READ_VEHICLE_PROFIT,
-  Authorizations.READ_NFE, Authorizations.CREATE_NFE, Authorizations.EMITIR_NFE, Authorizations.CANCEL_NFE,
-  Authorizations.READ_VENDA, Authorizations.CREATE_VENDA, Authorizations.EDIT_VENDA, Authorizations.CANCEL_VENDA,
+  Authorizations.READ_STORE,
+  Authorizations.READ_STORE_OTHERS,
+  Authorizations.READ_USER,
+  Authorizations.READ_USER_OTHERS,
+  Authorizations.CREATE_USER,
+  Authorizations.EDIT_USER,
+  Authorizations.EDIT_USER_OTHERS,
+  Authorizations.DELETE_USER,
+  Authorizations.READ_PERSON,
+  Authorizations.READ_PERSON_OTHERS,
+  Authorizations.CREATE_PERSON,
+  Authorizations.EDIT_PERSON,
+  Authorizations.DELETE_PERSON,
+  Authorizations.READ_VEHICLE,
+  Authorizations.CREATE_VEHICLE,
+  Authorizations.EDIT_VEHICLE,
+  Authorizations.DELETE_VEHICLE,
+  Authorizations.READ_VEHICLE_PURCHASE_PRICE,
+  Authorizations.READ_VEHICLE_PROFIT,
+  Authorizations.READ_NFE,
+  Authorizations.CREATE_NFE,
+  Authorizations.EMITIR_NFE,
+  Authorizations.CANCEL_NFE,
+  Authorizations.READ_VENDA,
+  Authorizations.CREATE_VENDA,
+  Authorizations.EDIT_VENDA,
+  Authorizations.CANCEL_VENDA,
   Authorizations.SYNC_FOCUSNFE,
 ];
 
 const PRESET_VENDEDOR: string[] = [
-  Authorizations.READ_STORE, Authorizations.READ_STORE_OTHERS,
-  Authorizations.READ_USER, Authorizations.EDIT_USER,
-  Authorizations.READ_PERSON, Authorizations.CREATE_PERSON, Authorizations.EDIT_PERSON,
+  Authorizations.READ_STORE,
+  Authorizations.READ_STORE_OTHERS,
+  Authorizations.READ_USER,
+  Authorizations.EDIT_USER,
+  Authorizations.READ_PERSON,
+  Authorizations.CREATE_PERSON,
+  Authorizations.EDIT_PERSON,
   Authorizations.READ_VEHICLE,
-  Authorizations.READ_VENDA, Authorizations.CREATE_VENDA,
+  Authorizations.READ_VENDA,
+  Authorizations.CREATE_VENDA,
 ];
 
 @Component({
@@ -153,7 +200,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
   // Formulário embutido para criar acesso (ativo quando expandindo um funcionário sem acesso)
   createAccessForms: Map<string, FormGroup> = new Map();
   creatingAccessFor: string | null = null; // personId com form expandido
-  savingAccessFor: string | null = null;   // personId sendo salvo
+  savingAccessFor: string | null = null; // personId sendo salvo
   revokingAccessFor: string | null = null; // personId com revogação em andamento
   updatingRelationshipFor: string | null = null; // personId mudando cargo
 
@@ -182,36 +229,40 @@ export class StoreEmployeesDialogComponent implements OnInit {
   }
 
   private setupPersonSearch(): void {
-    this.personSearchControl.valueChanges.pipe(
-      debounceTime(400),
-      distinctUntilChanged(),
-      switchMap(value => {
-        if (!value || value.length < 3) {
-          this.searchPeopleResults = [];
-          return of(null);
-        }
-        this.searchingPeople = true;
-        return this.personService.getPaginatedData(0, 10, {
-          search: value,
-          storeId: this.data.store.storeId,
-          includeInactive: true
-        }).pipe(
-          finalize(() => this.searchingPeople = false)
-        );
-      })
-    ).subscribe({
-      next: (response) => {
-        if (response) {
-          // Filtra pessoas que já estão na lista de funcionários
-          const employeeIds = new Set(this.employees.map(e => e.personId));
-          this.searchPeopleResults = response.content.filter(p => !employeeIds.has(p.personId));
-        }
-      },
-      error: (err) => {
-        console.error('Erro na busca de pessoas:', err);
-        this.toastr.error('Erro ao pesquisar pessoas.');
-      }
-    });
+    this.personSearchControl.valueChanges
+      .pipe(
+        debounceTime(400),
+        distinctUntilChanged(),
+        switchMap((value) => {
+          if (!value || value.length < 3) {
+            this.searchPeopleResults = [];
+            return of(null);
+          }
+          this.searchingPeople = true;
+          return this.personService
+            .getPaginatedData(0, 10, {
+              search: value,
+              storeId: this.data.store.storeId,
+              includeInactive: true,
+            })
+            .pipe(finalize(() => (this.searchingPeople = false)));
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (response) {
+            // Filtra pessoas que já estão na lista de funcionários
+            const employeeIds = new Set(this.employees.map((e) => e.personId));
+            this.searchPeopleResults = response.content.filter(
+              (p) => !employeeIds.has(p.personId)
+            );
+          }
+        },
+        error: (err) => {
+          console.error('Erro na busca de pessoas:', err);
+          this.toastr.error('Erro ao pesquisar pessoas.');
+        },
+      });
   }
 
   selectPersonToPromote(person: Person): void {
@@ -219,7 +270,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
     this.personSearchControl.setValue('', { emitEvent: false });
 
     // Se a pessoa já está na lista (mas por algum motivo apareceu na busca), ignora
-    if (this.employees.some(e => e.personId === person.personId)) {
+    if (this.employees.some((e) => e.personId === person.personId)) {
       return;
     }
 
@@ -240,9 +291,11 @@ export class StoreEmployeesDialogComponent implements OnInit {
   }
 
   get canManageAccess(): boolean {
-    return this.authService.hasAuthority(Authorizations.CREATE_USER) ||
+    return (
+      this.authService.hasAuthority(Authorizations.CREATE_USER) ||
       this.authService.hasAuthority(Authorizations.EDIT_STORE) ||
-      this.isRootAdmin;
+      this.isRootAdmin
+    );
   }
 
   loadEmployees(): void {
@@ -329,7 +382,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
       defaults = PRESET_VENDEDOR;
     }
 
-    defaults.forEach(auth => authArray.push(new FormControl(auth)));
+    defaults.forEach((auth) => authArray.push(new FormControl(auth)));
   }
 
   getForm(personId: string): FormGroup {
@@ -371,21 +424,25 @@ export class StoreEmployeesDialogComponent implements OnInit {
       authorizations: form.value.authorizations as string[],
     };
 
-    this.employeeService.createUserForPerson(person.personId, payload).subscribe({
-      next: () => {
-        this.toastr.success(`Acesso criado para ${person.name}!`);
-        this.savingAccessFor = null;
-        this.creatingAccessFor = null;
-        this.createAccessForms.delete(person.personId);
-        this.loadEmployees(); // Recarrega lista para atualizar hasUser
-      },
-      error: (err) => {
-        console.error('Erro ao criar acesso:', err);
-        const msg = err.error?.message || err.error || 'Erro ao criar acesso';
-        this.toastr.error(typeof msg === 'string' ? msg : 'Erro ao criar acesso');
-        this.savingAccessFor = null;
-      },
-    });
+    this.employeeService
+      .createUserForPerson(person.personId, payload)
+      .subscribe({
+        next: () => {
+          this.toastr.success(`Acesso criado para ${person.name}!`);
+          this.savingAccessFor = null;
+          this.creatingAccessFor = null;
+          this.createAccessForms.delete(person.personId);
+          this.loadEmployees(); // Recarrega lista para atualizar hasUser
+        },
+        error: (err) => {
+          console.error('Erro ao criar acesso:', err);
+          const msg = err.error?.message || err.error || 'Erro ao criar acesso';
+          this.toastr.error(
+            typeof msg === 'string' ? msg : 'Erro ao criar acesso'
+          );
+          this.savingAccessFor = null;
+        },
+      });
   }
 
   // ─────────────────────────────────────────
@@ -415,7 +472,9 @@ export class StoreEmployeesDialogComponent implements OnInit {
       error: (err) => {
         console.error('Erro ao revogar acesso:', err);
         const msg = err.error?.message || err.error || 'Erro ao revogar acesso';
-        this.toastr.error(typeof msg === 'string' ? msg : 'Erro ao revogar acesso');
+        this.toastr.error(
+          typeof msg === 'string' ? msg : 'Erro ao revogar acesso'
+        );
         this.revokingAccessFor = null;
       },
     });
@@ -441,19 +500,26 @@ export class StoreEmployeesDialogComponent implements OnInit {
 
     this.updatingRelationshipFor = person.personId;
 
-    this.employeeService.updateRelationship(person.personId, newType).subscribe({
-      next: () => {
-        this.toastr.success(`Cargo de ${person.name} alterado para ${this.getRelationshipLabel(newType)}`);
-        this.updatingRelationshipFor = null;
-        this.loadEmployees();
-      },
-      error: (err) => {
-        console.error('Erro ao alterar cargo:', err);
-        const msg = err.error?.message || err.error || 'Erro ao alterar cargo';
-        this.toastr.error(typeof msg === 'string' ? msg : 'Erro ao alterar cargo');
-        this.updatingRelationshipFor = null;
-      },
-    });
+    this.employeeService
+      .updateRelationship(person.personId, newType)
+      .subscribe({
+        next: () => {
+          this.toastr.success(
+            `Cargo de ${person.name} alterado para ${this.getRelationshipLabel(newType)}`
+          );
+          this.updatingRelationshipFor = null;
+          this.loadEmployees();
+        },
+        error: (err) => {
+          console.error('Erro ao alterar cargo:', err);
+          const msg =
+            err.error?.message || err.error || 'Erro ao alterar cargo';
+          this.toastr.error(
+            typeof msg === 'string' ? msg : 'Erro ao alterar cargo'
+          );
+          this.updatingRelationshipFor = null;
+        },
+      });
   }
 
   // ─────────────────────────────────────────

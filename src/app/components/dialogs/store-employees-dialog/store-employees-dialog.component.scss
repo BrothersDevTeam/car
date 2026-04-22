@@ -177,7 +177,7 @@
 
   &:hover:not(:disabled) {
     filter: brightness(0.95);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 
   &:disabled {
@@ -196,9 +196,18 @@
   }
 }
 
-.chip-manager { background: #dbeafe !important; color: #1d4ed8 !important; }
-.chip-seller  { background: #dcfce7 !important; color: #15803d !important; }
-.chip-owner   { background: #fef3c7 !important; color: #92400e !important; }
+.chip-manager {
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+}
+.chip-seller {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+}
+.chip-owner {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+}
 
 .access-chip {
   display: flex;
@@ -249,8 +258,14 @@
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .panel-title {
@@ -352,7 +367,7 @@
     background: #f1f5f9;
   }
 
-  input[type="checkbox"] {
+  input[type='checkbox'] {
     accent-color: #3f51b5;
     width: 14px;
     height: 14px;

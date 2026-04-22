@@ -72,9 +72,11 @@ export class SideNavComponent {
     const baseMenu: MenuItem[] = [];
 
     // Lojas
-    if (this.authService.hasAuthority(Authorizations.READ_STORE) || 
-        this.authService.hasAuthority(Authorizations.READ_STORE_OTHERS) ||
-        this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+    if (
+      this.authService.hasAuthority(Authorizations.READ_STORE) ||
+      this.authService.hasAuthority(Authorizations.READ_STORE_OTHERS) ||
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
+    ) {
       baseMenu.push({
         icon: 'store',
         label: 'Lojas',
@@ -83,9 +85,11 @@ export class SideNavComponent {
     }
 
     // Pessoas
-    if (this.authService.hasAuthority(Authorizations.READ_PERSON) || 
-        this.authService.hasAuthority(Authorizations.READ_PERSON_OTHERS) ||
-        this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+    if (
+      this.authService.hasAuthority(Authorizations.READ_PERSON) ||
+      this.authService.hasAuthority(Authorizations.READ_PERSON_OTHERS) ||
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
+    ) {
       baseMenu.push({
         icon: 'person',
         label: 'Pessoas',
@@ -94,8 +98,10 @@ export class SideNavComponent {
     }
 
     // Veículos
-    if (this.authService.hasAuthority(Authorizations.READ_VEHICLE) ||
-        this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+    if (
+      this.authService.hasAuthority(Authorizations.READ_VEHICLE) ||
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
+    ) {
       baseMenu.push({
         icon: 'directions_car',
         label: 'Veículos',
@@ -104,8 +110,10 @@ export class SideNavComponent {
     }
 
     // Vendas
-    if (this.authService.hasAuthority(Authorizations.READ_VENDA) ||
-        this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+    if (
+      this.authService.hasAuthority(Authorizations.READ_VENDA) ||
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
+    ) {
       baseMenu.push({
         icon: 'sell',
         label: 'Vendas',
@@ -114,8 +122,10 @@ export class SideNavComponent {
     }
 
     // Notas Fiscais
-    if (this.authService.hasAuthority(Authorizations.READ_NFE) ||
-        this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+    if (
+      this.authService.hasAuthority(Authorizations.READ_NFE) ||
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
+    ) {
       baseMenu.push({
         icon: 'description',
         label: 'Notas Fiscais',

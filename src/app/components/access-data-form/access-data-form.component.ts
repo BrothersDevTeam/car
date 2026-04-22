@@ -215,7 +215,7 @@ interface AuthGroup {
 export class AccessDataFormComponent implements OnInit {
   @Input({ required: true }) form!: FormGroup;
   @Input() submitted = false;
-  
+
   private authService = inject(AuthService);
 
   authGroups: AuthGroup[] = [
@@ -264,7 +264,10 @@ export class AccessDataFormComponent implements OnInit {
       name: 'Configurações de Loja',
       permissions: [
         { key: Authorizations.READ_STORE, label: 'Visualizar dados da loja' },
-        { key: Authorizations.READ_STORE_OTHERS, label: 'Visualizar dados da rede (Filiais)' },
+        {
+          key: Authorizations.READ_STORE_OTHERS,
+          label: 'Visualizar dados da rede (Filiais)',
+        },
         { key: Authorizations.EDIT_STORE, label: 'Configurar loja/filiais' },
         { key: Authorizations.SYNC_FOCUSNFE, label: 'Sincronizar Focus NFe' },
       ],
@@ -299,15 +302,19 @@ export class AccessDataFormComponent implements OnInit {
         'O form pai deve prover um FormArray chamado "authorizations"'
       );
     }
-    
+
     // Filtra as permissões exclusivas de root se o usuário não for root
     if (!this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
       const rootOnlyKeys = [Authorizations.ROOT_ADMIN];
-      
-      this.authGroups = this.authGroups.map(group => ({
-        ...group,
-        permissions: group.permissions.filter(p => !rootOnlyKeys.includes(p.key as Authorizations))
-      })).filter(group => group.permissions.length > 0);
+
+      this.authGroups = this.authGroups
+        .map((group) => ({
+          ...group,
+          permissions: group.permissions.filter(
+            (p) => !rootOnlyKeys.includes(p.key as Authorizations)
+          ),
+        }))
+        .filter((group) => group.permissions.length > 0);
     }
   }
 
