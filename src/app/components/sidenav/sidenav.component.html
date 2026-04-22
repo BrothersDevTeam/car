@@ -30,7 +30,7 @@
           <mat-list-item
             class="menu-item"
             [class.selected-menu-item]="isRouteActive(item.route!)"
-            (click)="onMenuItemClick(item.route!)"
+            (click)="onMenuItemClick(item.route!, $event)"
           >
             <mat-icon
               [fontSet]="
@@ -82,7 +82,7 @@
                   <mat-list-item
                     class="menu-item"
                     [class.selected-menu-item]="isRouteActive(subItem.route!)"
-                    (click)="onMenuItemClick(subItem.route!)"
+                    (click)="onMenuItemClick(subItem.route!, $event)"
                   >
                     <mat-icon
                       [fontSet]="

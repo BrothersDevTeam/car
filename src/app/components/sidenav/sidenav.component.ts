@@ -177,12 +177,17 @@ export class SideNavComponent {
     return roles[0].replace('ROLE_', '');
   }
 
-  onMenuItemClick(route?: string) {
+  onMenuItemClick(route?: string, event?: MouseEvent) {
+    if (event) {
+      event.stopPropagation();
+    }
+
     if (window.innerWidth <= 599) {
       this.toggleSidebar.emit();
     }
 
-    if (this.actionsService.hasFormChanges()) return;
+    // Emitimos o clique com a rota alvo
+    this.actionsService.emitSidebarClick(route);
 
     if (route) {
       this.router.navigate([route]);

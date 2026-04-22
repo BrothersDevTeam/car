@@ -9,10 +9,19 @@ import {
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
-import { catchError, debounceTime, of, Subject, Subscription } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import {
+  catchError,
+  debounceTime,
+  Observable,
+  of,
+  Subject,
+  Subscription,
+  filter,
+} from 'rxjs';
 import { RelationshipTypes } from '../../enums/relationshipTypes';
 import { Authorizations } from '../../enums/authorizations';
+import { CanComponentDeactivate } from '@guards/unsaved-changes.guard';
 
 import { FormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -94,7 +103,9 @@ interface EmployeeSubFilters {
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss',
 })
-export class PersonComponent implements OnInit, OnDestroy {
+export class PersonComponent
+  implements OnInit, OnDestroy, CanComponentDeactivate
+{
   readonly dialog = inject(MatDialog);
   private subscriptions: Subscription[] = [];
   private searchSubject = new Subject<string>();
@@ -299,6 +310,31 @@ export class PersonComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  // Implementação CanComponentDeactivate
+  hasUnsavedChanges(): boolean {
+    return this.actionsService.hasFormChanges();
+  }
+
+  canSaveForm(): boolean {
+    const form = this.getActiveFormComponent();
+    return form ? (form as any).canSaveForm() : false;
+  }
+
+  saveForm(isDraft: boolean): Observable<boolean> {
+    const form = this.getActiveFormComponent();
+    if (form) {
+      return (form as any).saveForm(isDraft);
+    }
+    return of(true);
+  }
+
+  saveLocalDraft(silent: boolean = false, name?: string): void {
+    const form = this.getActiveFormComponent();
+    if (form) {
+      (form as any).saveLocalDraft(silent, name);
+    }
+  }
+
   /**
    * Referências aos componentes de formulário para acessar os métodos
    * da interface CanComponentDeactivate
@@ -330,8 +366,20 @@ export class PersonComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscriptions.push(
-      this.actionsService.sidebarClick$.subscribe(() => {
-        this.handleConfirmationCloseDrawer();
+      this.actionsService.sidebarClick$.subscribe((targetRoute) => {
+        // Se a gaveta estiver aberta...
+        if (this.openForm() || this.openInfo()) {
+          const currentRoute = '/person'; // Rota base deste componente
+
+          // Se o clique foi em um menu que aponta para OUTRA rota,
+          // não fazemos nada aqui e deixamos o unsavedChangesGuard agir.
+          // Se o clique foi no mesmo menu ou em área vazia (targetRoute null), tratamos localmente.
+          if (targetRoute && targetRoute !== currentRoute) {
+            return;
+          }
+
+          this.handleConfirmationCloseDrawer();
+        }
       })
     );
 

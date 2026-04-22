@@ -31,29 +31,15 @@ export interface CanComponentDeactivate {
 
   /**
    * Salva um rascunho local do formulário no localStorage
+   * @param silent Se true, não exibe toast de sucesso
+   * @param name Nome opcional para o rascunho
    */
-  saveLocalDraft(): void;
+  saveLocalDraft(silent?: boolean, name?: string): void;
 }
 
 /**
  * Guard funcional moderno (Angular 15+) que verifica se há mudanças
  * não salvas antes de sair de um componente.
- *
- * Quando há mudanças, abre um diálogo perguntando ao usuário:
- * - "Salvar" - salva as alterações (se possível) e sai
- * - "Salvar rascunho" - salva localmente e sai (se não puder salvar completo)
- * - "Não salvar" - descarta mudanças e sai
- * - "Cancelar" - permanece no componente
- *
- * @example
- * ```typescript
- * // No arquivo de rotas
- * {
- *   path: 'pessoa/novo',
- *   component: PessoaFormComponent,
- *   canDeactivate: [unsavedChangesGuard]
- * }
- * ```
  */
 export const unsavedChangesGuard: CanDeactivateFn<CanComponentDeactivate> = (
   component: CanComponentDeactivate
@@ -83,7 +69,7 @@ export const unsavedChangesGuard: CanDeactivateFn<CanComponentDeactivate> = (
 
   // Retorna um Observable que será resolvido com base na escolha do usuário
   return dialogRef.afterClosed().pipe(
-    map((result: 'save' | 'draft' | 'discard' | 'cancel' | undefined) => {
+    map((result: string | undefined) => {
       // Se o usuário cancelou ou fechou o diálogo, permanece no componente
       if (!result || result === 'cancel') {
         return false;
@@ -96,16 +82,18 @@ export const unsavedChangesGuard: CanDeactivateFn<CanComponentDeactivate> = (
 
       // Se escolheu salvar completo
       if (result === 'save' && canSave) {
-        // Salva o formulário de forma síncrona
-        // Nota: Em uma aplicação real, pode ser necessário aguardar
-        // a conclusão do salvamento antes de navegar
         component.saveForm(false).subscribe();
         return true;
       }
 
-      // Se escolheu salvar rascunho
-      if (result === 'draft') {
-        component.saveLocalDraft();
+      // Se escolheu salvar rascunho (pode ser 'draft' ou 'draft:Nome do Rascunho')
+      if (result === 'draft' || result.startsWith('draft:')) {
+        const draftName = result.startsWith('draft:')
+          ? result.substring(6)
+          : undefined;
+
+        // Chamada compatível: primeiro silent (false), depois o nome
+        component.saveLocalDraft(false, draftName);
         return true;
       }
 
