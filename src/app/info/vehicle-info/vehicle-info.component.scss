@@ -316,6 +316,33 @@
         border-radius: 8px;
         gap: 16px;
 
+        .history-icon-col {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          background: #f1f3f4;
+          border-radius: 50%;
+          color: #5f6368;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+
+        &.history-buy {
+          background: #fdfdfd;
+          border-left: 4px solid #5f6368;
+
+          .history-icon-col {
+            background: #f1f3f4;
+            color: #5f6368;
+          }
+        }
+
         .history-date {
           font-weight: 600;
           color: #5f6368;
@@ -330,6 +357,10 @@
         .history-value {
           font-weight: 700;
           color: #1e7e34;
+
+          &.val-negativo {
+            color: #5f6368;
+          }
         }
       }
     }
@@ -369,4 +400,20 @@
   min-height: 24px !important;
   background: #e8f0fe !important;
   color: #1967d2 !important;
+
+  &.chip-comprador {
+    background: #e6f4ea !important;
+    color: #1e7e34 !important;
+  }
+}
+
+.buyer-mode {
+  border-color: #d2e3fc !important;
+  .owner-header {
+    background: #e8f0fe !important;
+  }
+  .buyer-icon {
+    background: #d2e3fc !important;
+    color: #1967d2 !important;
+  }
 }

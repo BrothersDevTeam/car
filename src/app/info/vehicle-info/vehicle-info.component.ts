@@ -53,22 +53,107 @@ export class VehicleInfoComponent implements OnChanges {
     private vehicleService: VehicleService,
     private personService: PersonService
   ) {}
-
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['vehicle'] && this.vehicle?.owner) {
-      // Busca o proprietário quando o veículo mudar
-      this.personService.getById(this.vehicle.owner).subscribe({
-        next: (person) => {
-          this.proprietario = person;
-        },
-        error: (error) => {
-          console.error('Erro ao carregar proprietário:', error);
-          this.proprietario = null;
-        },
-      });
-    } else {
-      this.proprietario = null;
+    if (changes['vehicle']) {
+      // Se vendido, tentamos carregar os detalhes do comprador da venda
+      if (
+        this.vehicle?.status === 'VENDIDO' &&
+        this.vehicle.salesHistory?.[0]?.buyerName
+      ) {
+        // Opcional: Poderíamos buscar o Person completo do comprador aqui se necessário
+        // Por enquanto vamos usar os dados do histórico para exibição rápida
+      }
+
+      if (this.vehicle?.owner) {
+        // Busca o proprietário quando o veículo mudar
+        this.personService.getById(this.vehicle.owner).subscribe({
+          next: (person) => {
+            this.proprietario = person;
+          },
+          error: (error) => {
+            console.error('Erro ao carregar proprietário:', error);
+            this.proprietario = null;
+          },
+        });
+      } else {
+        this.proprietario = null;
+      }
     }
+  }
+
+  get valorCompraEfetivo(): number {
+    if (this.vehicle.valorCompra && parseFloat(this.vehicle.valorCompra) > 0) {
+      return parseFloat(this.vehicle.valorCompra);
+    }
+    return this.vehicle.purchaseHistory?.[0]?.valorCompra || 0;
+  }
+
+  get valorVendaEfetivo(): number {
+    // Se está vendido, prioriza o valor da venda finalizada
+    if (
+      this.vehicle.status === 'VENDIDO' &&
+      this.vehicle.salesHistory?.[0]?.valorFinal
+    ) {
+      return this.vehicle.salesHistory[0].valorFinal;
+    }
+    return this.vehicle.valorVenda ? parseFloat(this.vehicle.valorVenda) : 0;
+  }
+
+  get dataEntradaEfetiva(): string | undefined {
+    return (
+      this.vehicle.entryDate || this.vehicle.purchaseHistory?.[0]?.dataCompra
+    );
+  }
+
+  get isVendaEfetiva(): boolean {
+    return (
+      this.vehicle.status === 'VENDIDO' &&
+      !!this.vehicle.salesHistory?.[0]?.valorFinal
+    );
+  }
+
+  get isCompraEfetiva(): boolean {
+    return (
+      !!this.vehicle.purchaseHistory?.[0]?.valorCompra &&
+      (!this.vehicle.valorCompra || parseFloat(this.vehicle.valorCompra) === 0)
+    );
+  }
+
+  get historyTimeline(): any[] {
+    const timeline: any[] = [];
+
+    // Adiciona compras
+    if (this.vehicle.purchaseHistory) {
+      this.vehicle.purchaseHistory.forEach((c) => {
+        timeline.push({
+          date: c.dataCompra,
+          description: `Comprado de ${c.supplierName || 'Fornecedor'}`,
+          value: c.valorCompra,
+          type: 'COMPRA',
+          icon: 'input',
+        });
+      });
+    }
+
+    // Adiciona vendas
+    if (this.vehicle.salesHistory) {
+      this.vehicle.salesHistory.forEach((v) => {
+        timeline.push({
+          date: v.dataVenda,
+          description: `Vendido para ${v.buyerName || 'Cliente'}`,
+          value: v.valorFinal,
+          type: 'VENDA',
+          icon: 'output',
+        });
+      });
+    }
+
+    // Ordena por data (mais recente primeiro)
+    return timeline.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
   }
 
   onEdit() {

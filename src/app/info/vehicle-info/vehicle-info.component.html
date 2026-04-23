@@ -40,15 +40,31 @@
             </h2>
             <div class="value-cards">
               <div class="value-card buy">
-                <span class="card-label">Valor de Compra</span>
+                <span class="card-label">
+                  Valor de Compra
+                  <small
+                    *ngIf="isCompraEfetiva"
+                    style="font-size: 10px; opacity: 0.7"
+                  >
+                    (Efetivo)
+                  </small>
+                </span>
                 <span class="card-value">
-                  {{ vehicle.valorCompra || 0 | currency: 'BRL' }}
+                  {{ valorCompraEfetivo | currency: 'BRL' }}
                 </span>
               </div>
               <div class="value-card sell">
-                <span class="card-label">Valor de Venda</span>
+                <span class="card-label">
+                  Valor de Venda
+                  <small
+                    *ngIf="isVendaEfetiva"
+                    style="font-size: 10px; opacity: 0.7"
+                  >
+                    (Real)
+                  </small>
+                </span>
                 <span class="card-value">
-                  {{ vehicle.valorVenda || 0 | currency: 'BRL' }}
+                  {{ valorVendaEfetivo | currency: 'BRL' }}
                 </span>
               </div>
             </div>
@@ -102,7 +118,7 @@
               <div class="info-item">
                 <label>Data de Entrada</label>
                 <span>
-                  {{ (vehicle.entryDate | date: 'dd/MM/yyyy') || '-' }}
+                  {{ (dataEntradaEfetiva | date: 'dd/MM/yyyy') || '-' }}
                 </span>
               </div>
               <div class="info-item">
@@ -137,10 +153,50 @@
         </div>
       </mat-tab>
 
-      <!-- ABA: PROPRIETÁRIO -->
-      <mat-tab label="Proprietário">
+      <!-- ABA: PROPRIETÁRIO / COMPRADOR -->
+      <mat-tab
+        [label]="vehicle.status === 'VENDIDO' ? 'Comprador' : 'Proprietário'"
+      >
         <div class="tab-body">
-          @if (proprietario) {
+          @if (vehicle.status === 'VENDIDO' && vehicle.salesHistory?.[0]) {
+            <!-- Mostra o comprador se o veículo estiver vendido -->
+            <div class="owner-card buyer-mode">
+              <div class="owner-header">
+                <div class="owner-avatar buyer-icon">
+                  <mat-icon>shopping_cart_checkout</mat-icon>
+                </div>
+                <div class="owner-name-info">
+                  <h3>{{ vehicle.salesHistory![0].buyerName }}</h3>
+                  <p>Comprador desta venda</p>
+                </div>
+              </div>
+              <mat-divider></mat-divider>
+              <div class="owner-details">
+                <div class="info-item">
+                  <label>Data da Venda</label>
+                  <span>
+                    {{
+                      vehicle.salesHistory![0].dataVenda | date: 'dd/MM/yyyy'
+                    }}
+                  </span>
+                </div>
+                <div class="info-item">
+                  <label>Valor Final</label>
+                  <span>
+                    {{ vehicle.salesHistory![0].valorFinal | currency: 'BRL' }}
+                  </span>
+                </div>
+                <div class="info-item">
+                  <label>Vínculo</label>
+                  <span>
+                    <mat-chip class="chip-small chip-comprador">
+                      COMPRADOR
+                    </mat-chip>
+                  </span>
+                </div>
+              </div>
+            </div>
+          } @else if (proprietario) {
             <div class="owner-card">
               <div class="owner-header">
                 <div class="owner-avatar">
@@ -189,21 +245,30 @@
         </div>
       </mat-tab>
 
-      <!-- ABA: HISTÓRICO (Opcional) -->
-      @if (vehicle.salesHistory && vehicle.salesHistory.length > 0) {
+      <!-- ABA: HISTÓRICO UNIFICADO -->
+      @if (historyTimeline.length > 0) {
         <mat-tab label="Histórico">
           <div class="tab-body">
             <div class="history-list">
-              @for (sale of vehicle.salesHistory; track sale.vendaId) {
-                <div class="history-item">
+              @for (item of historyTimeline; track item.date + item.type) {
+                <div
+                  class="history-item"
+                  [class.history-buy]="item.type === 'COMPRA'"
+                >
+                  <div class="history-icon-col">
+                    <mat-icon>{{ item.icon }}</mat-icon>
+                  </div>
                   <div class="history-date">
-                    {{ sale.dataVenda | date: 'dd/MM/yyyy' }}
+                    {{ item.date | date: 'dd/MM/yyyy' }}
                   </div>
                   <div class="history-desc">
-                    Vendido para {{ sale.buyerName }}
+                    {{ item.description }}
                   </div>
-                  <div class="history-value">
-                    {{ sale.valorFinal | currency: 'BRL' }}
+                  <div
+                    class="history-value"
+                    [class.val-negativo]="item.type === 'COMPRA'"
+                  >
+                    {{ item.value | currency: 'BRL' }}
                   </div>
                 </div>
               }
