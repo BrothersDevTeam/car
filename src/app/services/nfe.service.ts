@@ -114,6 +114,12 @@ export class NfeService {
     );
   }
 
+  generatePurchaseNfe(vehicleId: string): Observable<any> {
+    return this.http
+      .post<any>(`/api/vehicles/${vehicleId}/gerar-rascunho-compra`, {})
+      .pipe(tap(() => this.clearCache()));
+  }
+
   public clearCache() {
     this.cache = null;
     this.cacheUpdated$.next(null);

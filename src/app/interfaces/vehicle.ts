@@ -22,6 +22,7 @@ export interface NfeSummary {
   nfeNumero?: number;
   nfeSerie?: string;
   nfeNaturezaOperacao?: string;
+  nfeTipoDocumento?: string;
   nfeDataEmissao?: string;
   nfeStatus?: string;
   nfeChave?: string;
@@ -103,6 +104,14 @@ export interface VehicleList {
   entryDate?: string;
   exitDate?: string;
   status: string;
+  chassis?: string;
+  renavam?: string;
+  species?: string;
+  category?: string;
+  fuelTypes?: string[];
+  supplierId?: string;
+  valorCompra?: string;
+  dataCompra?: string;
   owner?: PersonSummary;
   nfeHistory?: NfeSummary[];
   salesHistory?: VendaSummary[];

@@ -4,6 +4,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ToastrService } from 'ngx-toastr';
 
 import { DrawerComponent } from '@components/drawer/drawer.component';
@@ -30,6 +31,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { VehicleFormComponent } from '@forms/vehicle/vehicle-form/vehicle-form.component';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { NfeService } from '@services/nfe.service';
 
 import { VehicleInfoComponent } from '@info/vehicle-info/vehicle-info.component';
 
@@ -58,12 +60,15 @@ import { CanComponentDeactivate } from '@guards/unsaved-changes.guard';
     EmptyStateComponent,
     FormsModule,
     MatIconModule,
+    MatSnackBarModule,
   ],
   templateUrl: './vehicle.component.html',
   styleUrl: './vehicle.component.scss',
 })
 export class VehicleComponent implements CanComponentDeactivate {
   readonly dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
+  private nfeService = inject(NfeService);
   private subscription: Subscription = new Subscription();
   private cacheSubscription!: Subscription;
   private searchSubject = new Subject<string>();
@@ -111,18 +116,30 @@ export class VehicleComponent implements CanComponentDeactivate {
       },
     },
     {
-      key: 'nfeEntrada',
-      header: 'NFe Compra',
-      badgeConfig: {
-        PENDENTE: { label: 'Pendente', cssClass: 'badge-pendente' },
-        EMITIDA: { label: 'Emitida', cssClass: 'badge-emitida' },
-      },
-      format: (value, row) => {
-        const hasEntryNfe = row.nfeHistory?.some(
-          (nfe) => nfe.nfeStatus === 'autorizado'
-        );
-        return hasEntryNfe ? 'EMITIDA' : 'PENDENTE';
-      },
+      key: 'nfes',
+      header: 'NFes',
+      actions: [
+        {
+          label: 'NFe de Entrada',
+          icon: 'input',
+          color: 'primary',
+          action: (row) => this.viewNfe(row, '0'),
+          hidden: (row) =>
+            !row.nfeHistory?.find(
+              (n) => n.nfeTipoDocumento === '0' && n.nfeStatus === 'autorizado'
+            ),
+        },
+        {
+          label: 'NFe de Saída',
+          icon: 'output',
+          color: 'accent',
+          action: (row) => this.viewNfe(row, '1'),
+          hidden: (row) =>
+            !row.nfeHistory?.find(
+              (n) => n.nfeTipoDocumento === '1' && n.nfeStatus === 'autorizado'
+            ),
+        },
+      ],
     },
     {
       key: 'acoes_nfe',
@@ -132,11 +149,21 @@ export class VehicleComponent implements CanComponentDeactivate {
           label: 'Emitir NFe de Compra',
           icon: 'receipt_long',
           color: 'primary',
-          action: (row) => this.gerarNfeCompra(row.vehicleId),
+          action: (row) => this.gerarNfeCompra(row),
           hidden: (row) =>
-            !!row.nfeHistory?.some((nfe) => nfe.nfeStatus === 'autorizado'),
+            !!row.nfeHistory?.some(
+              (nfe) =>
+                nfe.nfeTipoDocumento === '0' && nfe.nfeStatus === 'autorizado'
+            ),
         },
       ],
+      alertConfig: {
+        getMessage: (row) => {
+          const errors = this.getVehicleNfeValidationErrors(row);
+          return errors.length > 0 ? errors.join('; ') : null;
+        },
+        icon: 'error_outline',
+      },
     },
     {
       key: 'edit',
@@ -491,22 +518,41 @@ export class VehicleComponent implements CanComponentDeactivate {
   /**
    * Chama o backend para gerar o rascunho da NFe de compra.
    */
-  gerarNfeCompra(vehicleId: string) {
+  viewNfe(row: any, tipo: string) {
+    const nfe = row.nfeHistory?.find(
+      (n: any) => n.nfeTipoDocumento === tipo && n.nfeStatus === 'autorizado'
+    );
+    if (nfe && nfe.nfeDanfeUrl) {
+      window.open(nfe.nfeDanfeUrl, '_blank');
+    } else {
+      this.toastr.warning('DANFE ainda não disponível para esta nota.');
+    }
+  }
+
+  gerarNfeCompra(vehicle: VehicleList) {
+    const errors = this.getVehicleNfeValidationErrors(vehicle);
+
+    if (errors.length > 0) {
+      this.snackBar.open(
+        'Resolva as pendências antes de gerar a NFe de Entrada. Verifique o ícone de alerta (!).',
+        'OK',
+        { duration: 5000, panelClass: ['warn-snackbar'] }
+      );
+      return;
+    }
+
     this.toastr.info('Gerando rascunho de NFe de compra...');
-    this.http
-      .post<any>(`/api/vehicles/${vehicleId}/gerar-rascunho-compra`, {})
-      .subscribe({
-        next: (response) => {
-          this.toastr.success('Rascunho de NFe gerado com sucesso!');
-          // Redireciona para a página de NFes (onde o rascunho aparecerá no topo)
-          this.router.navigate(['/nfe']);
-        },
-        error: (err) => {
-          console.error('Erro ao gerar NFe:', err);
-          const msg = err.error?.message || 'Erro ao gerar rascunho de NFe';
-          this.toastr.error(msg);
-        },
-      });
+    this.nfeService.generatePurchaseNfe(vehicle.vehicleId).subscribe({
+      next: (response: any) => {
+        this.toastr.success('Rascunho de NFe gerado com sucesso!');
+        this.router.navigate(['/nfe']);
+      },
+      error: (err: any) => {
+        console.error('Erro ao gerar NFe:', err);
+        const msg = err.error?.message || 'Erro ao gerar rascunho de NFe';
+        this.toastr.error(msg);
+      },
+    });
   }
 
   // --- Implementação de CanComponentDeactivate ---
@@ -568,5 +614,40 @@ export class VehicleComponent implements CanComponentDeactivate {
         this.handleCloseDrawer();
       }
     });
+  }
+
+  /**
+   * Verifica campos obrigatórios para emissão de NFe e retorna lista de pendências.
+   */
+  getVehicleNfeValidationErrors(vehicle: VehicleList): string[] {
+    const errors: string[] = [];
+
+    // Dados Básicos do Veículo
+    if (!vehicle.brand) errors.push('Marca');
+    if (!vehicle.model) errors.push('Modelo');
+    if (!vehicle.vehicleYear) errors.push('Ano Fabr.');
+    if (!vehicle.modelYear) errors.push('Ano Mod.');
+    if (!vehicle.color) errors.push('Cor');
+    if (!vehicle.chassis) errors.push('Chassi');
+    if (!vehicle.renavam) errors.push('Renavam');
+    if (!vehicle.vehicleType) errors.push('Tipo');
+    if (!vehicle.species) errors.push('Espécie');
+    if (!vehicle.category) errors.push('Categoria');
+    if (!vehicle.fuelTypes || vehicle.fuelTypes.length === 0)
+      errors.push('Combustível');
+
+    // Dados de Compra (necessários para NFe de Entrada)
+    // Só valida se não tiver NFe de entrada autorizada
+    const temNfeEntrada = vehicle.nfeHistory?.some(
+      (n) => n.nfeTipoDocumento === '0' && n.nfeStatus === 'autorizado'
+    );
+    if (!temNfeEntrada) {
+      if (!vehicle.supplierId) errors.push('Fornecedor');
+      if (!vehicle.valorCompra || vehicle.valorCompra === '0')
+        errors.push('Valor Compra');
+      if (!vehicle.dataCompra) errors.push('Data Compra');
+    }
+
+    return errors;
   }
 }
