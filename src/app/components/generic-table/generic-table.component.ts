@@ -3,6 +3,7 @@ import { PageEvent } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   Component,
   EventEmitter,
@@ -31,6 +32,7 @@ import type { PaginationResponse } from '@interfaces/pagination';
     NgClass,
     NgIf,
     MatProgressSpinnerModule,
+    MatTooltipModule,
   ],
   templateUrl: './generic-table.component.html',
   styleUrl: './generic-table.component.scss',

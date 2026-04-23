@@ -52,6 +52,8 @@ export class DateInputComponent implements ControlValueAccessor {
   @Input() required: boolean = false;
   @Input() readonly: boolean = false;
   @Input() hint: string = '';
+  @Input() error: boolean = false;
+  @Input() inputName: string = '';
 
   // Valor interno (Date ou null)
   value = signal<Date | null>(null);

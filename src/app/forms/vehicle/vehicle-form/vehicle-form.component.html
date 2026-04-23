@@ -65,8 +65,22 @@
       </div>
     }
 
-    <mat-tab-group>
-      <mat-tab label="Veículo">
+    <mat-tab-group
+      [selectedIndex]="selectedTabIndex()"
+      (selectedIndexChange)="selectedTabIndex.set($event)"
+      animationDuration="500ms"
+    >
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon
+            *ngIf="submitted && !!form.get('plate')?.invalid"
+            color="warn"
+            style="margin-right: 8px"
+          >
+            error
+          </mat-icon>
+          Veículo
+        </ng-template>
         <app-wrapper-card>
           <div class="radio-button-wrapper-container">
             <label class="radio-button-label">Origem:</label>
@@ -106,8 +120,10 @@
             type="text"
             mask="AAA-AAAA"
             [error]="
-              form.get('plate')?.invalid &&
-              (form.get('plate')?.touched || submitted)
+              !!(
+                form.get('plate')?.invalid &&
+                (form.get('plate')?.touched || submitted)
+              )
             "
           />
           <div class="custom-selects-container">
@@ -131,6 +147,7 @@
               placeholder="Selecione uma marca"
               matTooltip="Selecione a marca do veículo"
               (itemChanged)="loadBrands()"
+              [error]="false"
             ></app-custom-select>
           </div>
           <div class="custom-selects-container">
@@ -150,6 +167,7 @@
               [selectedBrand]="brandControl.value"
               matTooltip="Selecione o modelo do veículo"
               (itemChanged)="loadModels()"
+              [error]="false"
             ></app-custom-select>
           </div>
           <div class="custom-selects-container">
@@ -186,6 +204,7 @@
               placeholder="Selecione uma cor"
               matTooltip="Selecione a cor do veículo"
               (itemChanged)="loadColors()"
+              [error]="false"
             ></app-custom-select>
           </div>
           <app-primary-select
@@ -205,6 +224,7 @@
             type="text"
             placeholder="0000"
             mask="0000"
+            [error]="false"
           />
           <app-primary-input
             formControlName="modelYear"
@@ -213,6 +233,7 @@
             type="text"
             placeholder="0000"
             mask="0000"
+            [error]="false"
           />
           <app-primary-input
             formControlName="chassis"
@@ -289,7 +310,8 @@
         </app-wrapper-card>
       </mat-tab>
 
-      <mat-tab label="Dados Gerais">
+      <mat-tab>
+        <ng-template mat-tab-label>Dados Gerais</ng-template>
         <app-wrapper-card>
           <h3>Informações de Aquisição</h3>
           <div class="custom-selects-container">
@@ -308,11 +330,15 @@
           <app-date-input
             formControlName="dataCompra"
             label="Data da Compra"
+            inputName="dataCompra"
+            [error]="false"
           ></app-date-input>
 
           <app-currency-input
             formControlName="valorCompra"
             label="Valor de Compra"
+            inputName="valorCompra"
+            [error]="false"
           ></app-currency-input>
 
           <app-currency-input

@@ -302,6 +302,24 @@
     background-color: white;
     display: inline-block;
   }
+
+  &.error {
+    .dropdown-button {
+      border: 1px solid var(--danger-color);
+      background-color: rgba(239, 83, 80, 0.05);
+    }
+
+    .label {
+      color: var(--danger-color);
+    }
+  }
+
+  .error-message {
+    color: var(--danger-color);
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: 500;
+  }
 }
 
 // Responsividade

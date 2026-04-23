@@ -107,6 +107,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   years: { id: string; name: string }[] = []; // FIPE Years
   colors: { id: string; name: string }[] = [];
   persons: { id: string; name: string }[] = [];
+  selectedTabIndex = signal(0);
 
   // Flags para controlar o drawer de person
   openPersonForm = signal(false);
@@ -761,7 +762,26 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.toastrService.warning('Preencha todos os campos obrigatórios');
+
+      // Identifica quais campos estão inválidos para dar um feedback melhor
+      const invalidFields: string[] = [];
+      const controls = this.form.controls;
+
+      if (controls['plate'].invalid) invalidFields.push('Placa');
+
+      this.toastrService.warning(
+        `Campos obrigatórios pendentes: ${invalidFields.join(', ')}`
+      );
+
+      // Se houver erro na aba "Veículo", volta para ela (índice 0)
+      const hasVehicleErrors = controls['plate'].invalid;
+
+      if (hasVehicleErrors) {
+        this.selectedTabIndex.set(0);
+      } else {
+        this.selectedTabIndex.set(1); // Vai para "Dados Gerais" se o erro for lá
+      }
+
       return;
     }
 

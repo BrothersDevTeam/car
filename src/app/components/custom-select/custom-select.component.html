@@ -1,6 +1,7 @@
 <div
   class="custom-dropdown"
   [class.disabled]="disabled"
+  [class.error]="error"
 >
   <span class="label">
     {{ label }}
@@ -99,4 +100,7 @@
       add_box
     </mat-icon>
   </div>
+  @if (error) {
+    <span class="error-message">Campo obrigatório</span>
+  }
 </div>

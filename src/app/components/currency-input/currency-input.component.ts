@@ -37,6 +37,8 @@ export class CurrencyInputComponent implements ControlValueAccessor {
   @Input() required: boolean = false;
   @Input() readonly: boolean = false;
   @Input() hint: string = '';
+  @Input() error: boolean = false;
+  @Input() inputName: string = '';
 
   // Valor interno exibido no input (formatado como string BRL)
   displayValue = signal<string>('');
