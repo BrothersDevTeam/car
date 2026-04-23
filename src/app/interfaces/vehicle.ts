@@ -110,6 +110,7 @@ export interface VehicleList {
   category?: string;
   fuelTypes?: string[];
   supplierId?: string;
+  hasSupplierAddress?: boolean;
   valorCompra?: string;
   dataCompra?: string;
   owner?: PersonSummary;

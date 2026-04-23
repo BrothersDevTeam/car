@@ -125,9 +125,7 @@ export class VehicleComponent implements CanComponentDeactivate {
           color: 'primary',
           action: (row) => this.viewNfe(row, '0'),
           hidden: (row) =>
-            !row.nfeHistory?.find(
-              (n) => n.nfeTipoDocumento === '0' && n.nfeStatus === 'autorizado'
-            ),
+            !row.nfeHistory?.some((n) => n.nfeTipoDocumento === '0'),
         },
         {
           label: 'NFe de Saída',
@@ -135,9 +133,7 @@ export class VehicleComponent implements CanComponentDeactivate {
           color: 'accent',
           action: (row) => this.viewNfe(row, '1'),
           hidden: (row) =>
-            !row.nfeHistory?.find(
-              (n) => n.nfeTipoDocumento === '1' && n.nfeStatus === 'autorizado'
-            ),
+            !row.nfeHistory?.some((n) => n.nfeTipoDocumento === '1'),
         },
       ],
     },
@@ -151,10 +147,7 @@ export class VehicleComponent implements CanComponentDeactivate {
           color: 'primary',
           action: (row) => this.gerarNfeCompra(row),
           hidden: (row) =>
-            !!row.nfeHistory?.some(
-              (nfe) =>
-                nfe.nfeTipoDocumento === '0' && nfe.nfeStatus === 'autorizado'
-            ),
+            !!row.nfeHistory?.some((nfe) => nfe.nfeTipoDocumento === '0'),
         },
       ],
       alertConfig: {
@@ -519,13 +512,17 @@ export class VehicleComponent implements CanComponentDeactivate {
    * Chama o backend para gerar o rascunho da NFe de compra.
    */
   viewNfe(row: any, tipo: string) {
-    const nfe = row.nfeHistory?.find(
-      (n: any) => n.nfeTipoDocumento === tipo && n.nfeStatus === 'autorizado'
-    );
+    const nfe = row.nfeHistory?.find((n: any) => n.nfeTipoDocumento === tipo);
     if (nfe && nfe.nfeDanfeUrl) {
       window.open(nfe.nfeDanfeUrl, '_blank');
+    } else if (nfe) {
+      this.toastr.info(
+        'DANFE não disponível. A NFe está em rascunho ou processamento. Redirecionando para a lista de NFes...',
+        'Info'
+      );
+      this.router.navigate(['/nfe']);
     } else {
-      this.toastr.warning('DANFE ainda não disponível para esta nota.');
+      this.toastr.warning('NFe não encontrada.');
     }
   }
 
@@ -549,8 +546,12 @@ export class VehicleComponent implements CanComponentDeactivate {
       },
       error: (err: any) => {
         console.error('Erro ao gerar NFe:', err);
-        const msg = err.error?.message || 'Erro ao gerar rascunho de NFe';
-        this.toastr.error(msg);
+        // Tenta extrair a mensagem detalhada da API (errorMessage ou message)
+        const msg =
+          err.error?.errorMessage ||
+          err.error?.message ||
+          'Erro ao gerar rascunho de NFe';
+        this.toastr.error(msg, 'Erro ao gerar rascunho de NFe');
       },
     });
   }
@@ -643,6 +644,9 @@ export class VehicleComponent implements CanComponentDeactivate {
     );
     if (!temNfeEntrada) {
       if (!vehicle.supplierId) errors.push('Fornecedor');
+      else if (vehicle.hasSupplierAddress === false)
+        errors.push('Endereço do Fornecedor');
+
       if (!vehicle.valorCompra || vehicle.valorCompra === '0')
         errors.push('Valor Compra');
       if (!vehicle.dataCompra) errors.push('Data Compra');
