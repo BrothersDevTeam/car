@@ -31,7 +31,8 @@ import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confi
 import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
-import type { Nfe, NaturezaOperacao } from '@interfaces/nfe';
+import { NaturezaOperacao } from '@interfaces/nfe';
+import type { Nfe } from '@interfaces/nfe';
 import type { Person } from '@interfaces/person';
 import { Vehicle, VehicleList } from '@interfaces/vehicle';
 
@@ -63,19 +64,19 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   persons: Person[] = [];
   tiposNfeEntrada: { value: NaturezaOperacao; label: string }[] = [
     {
-      value: 'COMPRA DE VEICULO USADO' as NaturezaOperacao,
+      value: NaturezaOperacao.COMPRA_VEICULO_USADO,
       label: 'Compra de Veículo Usado',
     },
     {
-      value: 'ENTRADA EM CONSIGNAÇÃO' as NaturezaOperacao,
+      value: NaturezaOperacao.ENTRADA_CONSIGNACAO,
       label: 'Entrada em Consignação',
     },
     {
-      value: 'ENTRADA COMPRA DEFINITIVA' as NaturezaOperacao,
-      label: 'Entrada Compra Definitiva',
+      value: NaturezaOperacao.ENTRADA_COMPRA_DEFINITIVA,
+      label: 'Entrada Compra Definida',
     },
     {
-      value: 'DEVOLUÇÃO DE VENDA' as NaturezaOperacao,
+      value: NaturezaOperacao.DEVOLUCAO_VENDA,
       label: 'Devolução de Venda',
     },
   ];

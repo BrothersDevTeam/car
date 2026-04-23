@@ -28,6 +28,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { VehicleFormComponent } from '@forms/vehicle/vehicle-form/vehicle-form.component';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 import { VehicleInfoComponent } from '@info/vehicle-info/vehicle-info.component';
 
@@ -109,6 +111,34 @@ export class VehicleComponent implements CanComponentDeactivate {
       },
     },
     {
+      key: 'nfeEntrada',
+      header: 'NFe Compra',
+      badgeConfig: {
+        PENDENTE: { label: 'Pendente', cssClass: 'badge-pendente' },
+        EMITIDA: { label: 'Emitida', cssClass: 'badge-emitida' },
+      },
+      format: (value, row) => {
+        const hasEntryNfe = row.nfeHistory?.some(
+          (nfe) => nfe.nfeStatus === 'autorizado'
+        );
+        return hasEntryNfe ? 'EMITIDA' : 'PENDENTE';
+      },
+    },
+    {
+      key: 'acoes_nfe',
+      header: 'Ações NFe',
+      actions: [
+        {
+          label: 'Emitir NFe de Compra',
+          icon: 'receipt_long',
+          color: 'primary',
+          action: (row) => this.gerarNfeCompra(row.vehicleId),
+          hidden: (row) =>
+            !!row.nfeHistory?.some((nfe) => nfe.nfeStatus === 'autorizado'),
+        },
+      ],
+    },
+    {
       key: 'edit',
       header: '',
       showEditIcon: (row) => true,
@@ -175,7 +205,9 @@ export class VehicleComponent implements CanComponentDeactivate {
     private vehicleService: VehicleService,
     private toastr: ToastrService,
     private actionsService: ActionsService,
-    private storeContextService: StoreContextService
+    private storeContextService: StoreContextService,
+    private http: HttpClient,
+    private router: Router
   ) {
     // Inscrever-se nas mudanças do cache
     this.setupCacheSubscription();
@@ -456,31 +488,40 @@ export class VehicleComponent implements CanComponentDeactivate {
     });
   }
 
+  /**
+   * Chama o backend para gerar o rascunho da NFe de compra.
+   */
+  gerarNfeCompra(vehicleId: string) {
+    this.toastr.info('Gerando rascunho de NFe de compra...');
+    this.http
+      .post<any>(`/api/vehicles/${vehicleId}/gerar-rascunho-compra`, {})
+      .subscribe({
+        next: (response) => {
+          this.toastr.success('Rascunho de NFe gerado com sucesso!');
+          // Redireciona para a página de NFes (onde o rascunho aparecerá no topo)
+          this.router.navigate(['/nfe']);
+        },
+        error: (err) => {
+          console.error('Erro ao gerar NFe:', err);
+          const msg = err.error?.message || 'Erro ao gerar rascunho de NFe';
+          this.toastr.error(msg);
+        },
+      });
+  }
+
   // --- Implementação de CanComponentDeactivate ---
 
-  /**
-   * Verifica se o formulário de veículos tem mudanças não salvas
-   */
   hasUnsavedChanges(): boolean {
-    // Se o formulário não estiver aberto, não há mudanças pendentes
     if (!this.openForm()) {
       return false;
     }
-
-    // Delega a verificação para o componente de formulário
     return this.vehicleFormRef?.hasUnsavedChanges() ?? false;
   }
 
-  /**
-   * Verifica se o formulário pode ser salvo completamente
-   */
   canSaveForm(): boolean {
     return this.vehicleFormRef?.canSaveForm() ?? false;
   }
 
-  /**
-   * Salva o formulário (completo ou rascunho)
-   */
   saveForm(isDraft: boolean): Observable<boolean> {
     if (!this.vehicleFormRef) {
       return of(true);
@@ -488,9 +529,6 @@ export class VehicleComponent implements CanComponentDeactivate {
     return this.vehicleFormRef.saveForm(isDraft);
   }
 
-  /**
-   * Salva um rascunho local
-   */
   saveLocalDraft(silent?: boolean, name?: string): void {
     if (this.vehicleFormRef) {
       this.vehicleFormRef.saveLocalDraft(silent, name);
@@ -508,7 +546,7 @@ export class VehicleComponent implements CanComponentDeactivate {
         message: canSave
           ? 'Deseja salvar as alterações do veículo antes de sair?'
           : 'Há campos obrigatórios não preenchidos ou inválidos. Deseja descartar as alterações?',
-        hideDraftOption: false, // Habilitado rascunho para veículos
+        hideDraftOption: false,
       },
     });
 
@@ -524,7 +562,6 @@ export class VehicleComponent implements CanComponentDeactivate {
         this.vehicleFormRef?.onSubmit();
       }
 
-      // Se o resultado for uma string começando com 'draft:', salvamos como rascunho
       if (typeof result === 'string' && result.startsWith('draft:')) {
         const draftName = result.split(':')[1];
         this.vehicleFormRef?.saveLocalDraft(true, draftName);

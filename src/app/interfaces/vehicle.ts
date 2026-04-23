@@ -73,6 +73,8 @@ export interface Vehicle {
   fuelTypes: FuelTypes[];
   origin?: string;
   valorCompra?: string;
+  supplierId?: string;
+  dataCompra?: string;
   valorVenda?: string;
   observation?: string;
   entryDate?: string;
@@ -113,7 +115,9 @@ export type CreateVehicle = Omit<Vehicle, 'vehicleId'>;
  * Converte owner de Person para string (ID)
  */
 export type VehicleForm = Omit<Vehicle, 'owner'> & {
-  owner?: string; // ID da pessoa (opcional)
+  owner?: string;
+  supplierId?: string;
+  dataCompra?: string;
 };
 
 /**

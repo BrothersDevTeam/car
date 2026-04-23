@@ -24,4 +24,12 @@ export interface ColumnConfig<T> {
   badgeConfig?: { [key: string]: BadgeConfig };
   // Configuração para exibir um indicador de alerta com tooltip se houver erro
   alertConfig?: AlertConfig<T>;
+  // Ações customizadas para a coluna
+  actions?: {
+    label: string;
+    icon: string;
+    color?: string;
+    action: (row: T) => void;
+    hidden?: (row: T) => boolean;
+  }[];
 }

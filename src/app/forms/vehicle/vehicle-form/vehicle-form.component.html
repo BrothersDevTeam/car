@@ -291,6 +291,25 @@
 
       <mat-tab label="Dados Gerais">
         <app-wrapper-card>
+          <h3>Informações de Aquisição</h3>
+          <div class="custom-selects-container">
+            <app-custom-select
+              listType="person"
+              [label]="'Fornecedor (Comprado de)'"
+              [options]="persons"
+              [control]="supplierControl"
+              placeholder="Selecione o fornecedor"
+              matTooltip="Selecione a pessoa de quem o veículo foi adquirido"
+              (onCreateNew)="onCreateNewPerson()"
+              (onEdit)="onEditPerson($event)"
+            ></app-custom-select>
+          </div>
+
+          <app-date-input
+            formControlName="dataCompra"
+            label="Data da Compra"
+          ></app-date-input>
+
           <app-currency-input
             formControlName="valorCompra"
             label="Valor de Compra"

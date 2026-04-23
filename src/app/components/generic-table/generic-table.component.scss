@@ -54,7 +54,23 @@ mat-icon {
 }
 
 .delete-btn {
-  color: var(--status-cancelado-text);
+  color: #f44336;
+}
+
+.column-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  button {
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+
+    mat-icon {
+      font-size: 20px;
+    }
+  }
 }
 
 .nfe-btn {

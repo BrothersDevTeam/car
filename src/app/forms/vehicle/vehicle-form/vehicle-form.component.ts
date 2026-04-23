@@ -157,6 +157,10 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       id: [''],
       name: [''],
     }),
+    supplier: this.formBuilderService.group({
+      id: [''],
+      name: [''],
+    }),
     plate: ['', Validators.required],
     brand: this.formBuilderService.group({
       id: [''],
@@ -191,6 +195,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     fuelTypes: [[]], // Array de FuelTypes
     origin: ['NACIONAL'],
     valorCompra: [''],
+    dataCompra: [''],
     valorVenda: [''],
     observation: [''],
     entryDate: [''],
@@ -644,12 +649,20 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       ? this.persons.find((p) => p.id === this.dataForm!.owner)
       : null;
 
+    // Para edição, busca o fornecedor pelo ID
+    const selectedSupplier = this.dataForm!.supplierId
+      ? this.persons.find((p) => p.id === this.dataForm!.supplierId)
+      : null;
+
     // Preenche o formulário com os dados do veículo
     this.isFillingForm = true;
     this.form.patchValue({
       plate: this.dataForm!.plate || '',
       owner: selectedOwner
         ? { id: selectedOwner.id, name: selectedOwner.name }
+        : { id: '', name: '' },
+      supplier: selectedSupplier
+        ? { id: selectedSupplier.id, name: selectedSupplier.name }
         : { id: '', name: '' },
       brand: selectedBrand
         ? { id: selectedBrand.id, name: selectedBrand.name }
@@ -674,6 +687,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       fuelTypes: this.dataForm!.fuelTypes || [], // Tipos de combustível
       origin: this.dataForm!.origin || 'NACIONAL',
       valorCompra: this.dataForm!.valorCompra || '',
+      dataCompra: this.dataForm!.dataCompra || '',
       valorVenda: this.dataForm!.valorVenda || '',
       observation: this.dataForm!.observation || '',
       entryDate: this.dataForm!.entryDate
@@ -778,6 +792,8 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       origin: formValues.origin || 'NACIONAL',
       fuelTypes: this.mapFuelTypeToBackend(formValues.fuelTypes),
       valorCompra: formValues.valorCompra?.toString() || '',
+      supplierId: formValues.supplier?.id || null,
+      dataCompra: formValues.dataCompra || '',
       valorVenda: formValues.valorVenda?.toString() || '',
       observation: formValues.observation || '',
       entryDate: formValues.entryDate || '',
@@ -908,6 +924,10 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   get ownerControl(): FormGroup {
     return this.form.get('owner') as FormGroup;
+  }
+
+  get supplierControl(): FormGroup {
+    return this.form.get('supplier') as FormGroup;
   }
 
   /**

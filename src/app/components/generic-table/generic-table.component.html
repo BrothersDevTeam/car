@@ -88,8 +88,24 @@
             column.key !== 'edit' &&
             column.key !== 'delete'
           ) {
-            <!-- Badge personalizada quando badgeConfig está definido -->
-            @if (column.badgeConfig) {
+            <!-- Ações dinâmicas da coluna -->
+            @if (column.actions) {
+              <div class="column-actions">
+                @for (action of column.actions; track action) {
+                  @if (!action.hidden || !action.hidden(element)) {
+                    <button
+                      mat-icon-button
+                      [color]="action.color || 'primary'"
+                      [title]="action.label"
+                      (click)="$event.stopPropagation(); action.action(element)"
+                    >
+                      <mat-icon>{{ action.icon }}</mat-icon>
+                    </button>
+                  }
+                }
+              </div>
+            } @else if (column.badgeConfig) {
+              <!-- Badge personalizada quando badgeConfig está definido -->
               @let badgeKey = getNestedValue(element, column.key);
               @let badge = column.badgeConfig[badgeKey];
               @if (badge) {
@@ -132,7 +148,7 @@
                 </div>
               }
             } @else {
-              {{ formatValue(column, element) }}
+              <span [innerHTML]="formatValue(column, element)"></span>
             }
           }
         </td>
