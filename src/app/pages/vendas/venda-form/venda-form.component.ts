@@ -103,6 +103,7 @@ export class VendaFormComponent
   filteredBuyers: Person[] = [];
   filteredSellers: Person[] = [];
   filteredAvalistas: Person[] = [];
+  selectedAvalistas: Person[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -312,12 +313,13 @@ export class VendaFormComponent
       return;
     }
     this.avalistasIds.push(this.fb.control(person.personId));
-    // Podemos manter uma lista local para exibição dos nomes se necessário
+    this.selectedAvalistas.push(person);
     this.toastr.success(`Avalista ${person.name} adicionado`);
   }
 
   removeAvalista(index: number) {
     this.avalistasIds.removeAt(index);
+    this.selectedAvalistas.splice(index, 1);
   }
 
   // ===== Implementação de CanComponentDeactivate / Rascunhos =====
@@ -352,9 +354,14 @@ export class VendaFormComponent
     this.isSaving = true;
     const draftName = name || `Venda em ${new Date().toLocaleString()}`;
 
+    const draftData = {
+      ...this.vendaForm.value,
+      avalistasDetails: this.selectedAvalistas,
+    };
+
     this.formDraftService.saveDraft(
       this.FORM_TYPE,
-      this.vendaForm.value,
+      draftData,
       this.vendaId || undefined,
       draftName
     );
@@ -410,10 +417,27 @@ export class VendaFormComponent
     if (draft.data.avalistasIds && Array.isArray(draft.data.avalistasIds)) {
       const avalistasArray = this.vendaForm.get('avalistasIds') as FormArray;
       avalistasArray.clear();
-      draft.data.avalistasIds.forEach((id: string) => {
+      this.selectedAvalistas = [];
+
+      draft.data.avalistasIds.forEach((id: string, index: number) => {
         avalistasArray.push(this.fb.control(id));
+
+        // Se temos os detalhes salvos, restauramos
+        if (draft.data.avalistasDetails && draft.data.avalistasDetails[index]) {
+          this.selectedAvalistas.push(draft.data.avalistasDetails[index]);
+        } else {
+          // Fallback caso não tenha detalhes (rascunhos antigos)
+          this.selectedAvalistas.push({
+            personId: id,
+            name: `ID: ${id.slice(0, 8)}...`,
+          } as any);
+        }
       });
     }
+
+    this.vendaForm
+      .get('avalistaSearchControl')
+      ?.setValue('', { emitEvent: false });
 
     this.initialFormValue = JSON.stringify(this.vendaForm.value);
     this.toastr.success('Rascunho carregado com sucesso');

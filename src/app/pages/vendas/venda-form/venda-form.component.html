@@ -339,7 +339,7 @@
               #autoAvalista="matAutocomplete"
               (optionSelected)="
                 addAvalistaDirectly($event.option.value);
-                avalistaInput.value = ''
+                vendaForm.get('avalistaSearchControl')?.setValue('')
               "
             >
               @for (person of filteredAvalistas; track person.personId) {
@@ -357,13 +357,12 @@
             } @else {
               <mat-chip-set>
                 @for (
-                  id of avalistasIds.controls;
-                  track id.value;
+                  person of selectedAvalistas;
+                  track person.personId;
                   let i = $index
                 ) {
                   <mat-chip-row (removed)="removeAvalista(i)">
-                    ID: {{ id.value | slice: 0 : 8 }}...
-                    <!-- Simplificado p/ demo -->
+                    {{ person.name }}
                     <button
                       matChipRemove
                       aria-label="Remover"
