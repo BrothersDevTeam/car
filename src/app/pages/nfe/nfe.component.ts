@@ -88,6 +88,11 @@ export class NfeComponent {
       },
     },
     {
+      key: 'productIdentifier',
+      header: 'Ident. do Produto',
+      format: (val, row) => row.vehicle?.plate || '—',
+    },
+    {
       key: 'alert',
       header: '',
       alertConfig: {
@@ -355,6 +360,7 @@ export class NfeComponent {
               ...nfe,
               // Mapeie os dados conforme necessário para a tabela
               cfop: nfe.nfeItens[0]?.itemCfop || 'Não informado',
+              productIdentifier: nfe.vehicle?.plate || '—',
             })),
           };
         }

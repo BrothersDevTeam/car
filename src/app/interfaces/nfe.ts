@@ -45,6 +45,7 @@ export interface Nfe {
   nfeNaturezaOperacao: NaturezaOperacao;
   nfeItens: nfeItem[];
   vehicleId?: string; // ID do veículo do primeiro item
+  vehicle?: any; // Dados resumidos do veículo vinculado
 
   // === Numeração ===
   nfeNumero?: number;
