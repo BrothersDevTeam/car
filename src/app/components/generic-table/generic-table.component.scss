@@ -57,18 +57,32 @@ mat-icon {
   color: #f44336;
 }
 
+.cell-content-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .column-actions {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   align-items: center;
 
   button {
     width: 36px;
     height: 36px;
-    line-height: 36px;
+    display: flex; /* Centralização moderna */
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 
     mat-icon {
       font-size: 20px;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   }
 }
@@ -85,8 +99,11 @@ button[mat-icon-button] {
 /* Interação com Linhas */
 .row-clickable {
   transition: background-color 0.2s ease;
+  position: relative; /* Base para o z-index funcionar */
+
   &:hover {
     background-color: rgba(0, 0, 0, 0.03) !important;
+    z-index: 100 !important; /* Eleva a linha toda para o tooltip aparecer por cima das outras */
   }
 
   &.selected-row {
@@ -101,14 +118,13 @@ button[mat-icon-button] {
 tr.mat-row,
 td.mat-cell {
   overflow: visible !important;
-  /* Removemos o context de empilhamento que mat-row as vezes cria */
+  position: relative; /* Necessário para posicionar o tooltip */
 }
 
-td.mat-column-alert {
+/* Garante que o conteúdo da célula não corte o tooltip */
+.mat-mdc-cell,
+.mat-mdc-header-cell {
   overflow: visible !important;
-  position: relative;
-  width: 50px !important;
-  text-align: center;
 }
 
 /* ==========================================
@@ -167,61 +183,64 @@ td.mat-column-alert {
    ========================================== */
 .alert-indicator {
   position: relative;
-  display: inline-flex;
+  display: flex; /* Mudado de inline-flex para flex */
   align-items: center;
   justify-content: center;
   cursor: help;
-  z-index: 50; /* Z-index da célula baixo */
-  width: 40px;
-  height: 40px;
+  width: 36px; /* Ajustado para 36px para casar com os botões */
+  height: 36px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  pointer-events: auto !important;
 
   .alert-icon {
     color: #e65100;
-    font-size: 24px;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &:hover {
+    background-color: rgba(230, 81, 0, 0.08);
+    z-index: 999999 !important;
+
+    .alert-icon {
+      transform: scale(1.1);
+    }
+    .alert-tooltip {
+      display: block !important;
+      opacity: 1 !important;
+      transform: translateY(10px) !important;
+    }
   }
 
   .alert-tooltip {
     display: none;
     opacity: 0;
     position: absolute;
-    top: 50%;
-    left: 100%;
-    transform: translateY(-20px) translateX(0);
-    width: 340px;
+    top: 100%; /* Abre PARA BAIXO */
+    right: 0; /* Alinha à direita do ícone, expandindo para a esquerda */
+    width: 280px;
     background: #ffffff;
     border-radius: 12px;
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.35); /* Sombra mais pesada para destaque */
-    z-index: 99999 !important; /* Z-index máximo para o tooltip flutuante */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 999999 !important; /* Z-index estratosférico */
     border: 1px solid #ffcc80;
     pointer-events: none;
-    overflow: hidden;
   }
 
-  &:hover {
-    z-index: 1000; /* Eleva a célula no hover para o tooltip não ficar atrás da linha de baixo */
-    .alert-icon {
-      transform: scale(1.15);
-    }
-    .alert-tooltip {
-      display: block;
-      opacity: 1;
-      transform: translateY(-20px) translateX(10px);
-      transition:
-        opacity 0.3s ease,
-        transform 0.3s ease;
-    }
-  }
-
-  /* Seta lateral */
+  /* Seta lateral ajustada para ficar no TOPO do tooltip */
   .alert-tooltip::before {
     content: '';
     position: absolute;
-    right: 100%;
-    top: 22px;
+    bottom: 100%;
+    right: 12px;
     border-width: 8px;
     border-style: solid;
-    border-color: transparent #ffe0b2 transparent transparent;
+    border-color: transparent transparent #ffe0b2 transparent;
   }
 }
 

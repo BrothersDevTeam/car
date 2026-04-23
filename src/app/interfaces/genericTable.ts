@@ -31,5 +31,6 @@ export interface ColumnConfig<T> {
     color?: string;
     action: (row: T) => void;
     hidden?: (row: T) => boolean;
+    disabled?: (row: T) => boolean;
   }[];
 }
