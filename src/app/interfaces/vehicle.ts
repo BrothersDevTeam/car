@@ -39,6 +39,13 @@ export interface VendaSummary {
   buyerName?: string;
 }
 
+export interface CompraSummary {
+  compraId: string;
+  dataCompra?: string;
+  valorCompra?: number;
+  supplierName?: string;
+}
+
 /**
  * Interface para Vehicle retornado do backend (Completo)
  */
@@ -73,6 +80,7 @@ export interface Vehicle {
   status?: string;
   nfeHistory?: NfeSummary[];
   salesHistory?: VendaSummary[];
+  purchaseHistory?: CompraSummary[];
 }
 
 /**
