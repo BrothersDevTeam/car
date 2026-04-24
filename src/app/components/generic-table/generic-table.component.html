@@ -10,181 +10,183 @@
     <mat-spinner diameter="40"></mat-spinner>
   </div>
 
-  <table
-    mat-table
-    [dataSource]="tableDataSource"
-  >
-    <!-- Colunas dinâmicas -->
-    @for (column of columns; track column) {
-      <ng-container [matColumnDef]="column.key">
-        <th
-          mat-header-cell
-          *matHeaderCellDef
-        >
-          <!-- Checkbox no cabeçalho para a coluna 'select' -->
-          @if (column.key === 'select' && hasSelectColumn) {
-            <mat-checkbox
-              (change)="toggleAllRows()"
-              [checked]="isAllSelected()"
-              [indeterminate]="isSomeSelected() && !isAllSelected()"
-              color="primary"
-            ></mat-checkbox>
-          }
-          <!-- Cabeçalho normal para outras colunas -->
-          @if (column.key !== 'select') {
-            {{ column.header }}
-          }
-        </th>
-        <td
-          mat-cell
-          *matCellDef="let element"
-          class="nowrap"
-        >
-          <div
-            class="cell-content-wrapper"
+  <div class="table-responsive">
+    <table
+      mat-table
+      [dataSource]="tableDataSource"
+    >
+      <!-- Colunas dinâmicas -->
+      @for (column of columns; track column) {
+        <ng-container [matColumnDef]="column.key">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
           >
-            <!-- Checkbox para a coluna 'select' -->
-            @if (column.key === 'select' && shouldShowCheckbox(element)) {
+            <!-- Checkbox no cabeçalho para a coluna 'select' -->
+            @if (column.key === 'select' && hasSelectColumn) {
               <mat-checkbox
-                (change)="toggleRow(element)"
-                [checked]="isSelected(element)"
-                (click)="$event.stopPropagation()"
+                (change)="toggleAllRows()"
+                [checked]="isAllSelected()"
+                [indeterminate]="isSomeSelected() && !isAllSelected()"
                 color="primary"
               ></mat-checkbox>
             }
-
-            <!-- Indicador de alerta com tooltip rico (Renderiza se houver alertConfig) -->
-            @if (column.alertConfig) {
-              @let alertMsg = getAlertMessage(column, element);
-              @if (alertMsg) {
-                <div
-                  class="alert-indicator"
+            <!-- Cabeçalho normal para outras colunas -->
+            @if (column.key !== 'select') {
+              {{ column.header }}
+            }
+          </th>
+          <td
+            mat-cell
+            *matCellDef="let element"
+            class="nowrap"
+          >
+            <div class="cell-content-wrapper">
+              <!-- Checkbox para a coluna 'select' -->
+              @if (column.key === 'select' && shouldShowCheckbox(element)) {
+                <mat-checkbox
+                  (change)="toggleRow(element)"
+                  [checked]="isSelected(element)"
                   (click)="$event.stopPropagation()"
-                >
-                  <mat-icon class="alert-icon pulse-warning">
-                    {{ column.alertConfig.icon || 'warning_amber' }}
-                  </mat-icon>
-                  <div class="alert-tooltip">
-                    <div class="alert-tooltip-header">
-                      <mat-icon>error_outline</mat-icon>
-                      <span>Pendências para NFe de Entrada</span>
-                    </div>
-                    <div class="alert-tooltip-body">
-                      @for (err of alertMsg.split(';'); track err) {
-                        @if (err.trim()) {
-                          <div class="alert-tooltip-line">
-                            <mat-icon>chevron_right</mat-icon>
-                            <span>{{ err.trim() }}</span>
-                          </div>
+                  color="primary"
+                ></mat-checkbox>
+              }
+
+              <!-- Indicador de alerta com tooltip rico (Renderiza se houver alertConfig) -->
+              @if (column.alertConfig) {
+                @let alertMsg = getAlertMessage(column, element);
+                @if (alertMsg) {
+                  <div
+                    class="alert-indicator"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <mat-icon class="alert-icon pulse-warning">
+                      {{ column.alertConfig.icon || 'warning_amber' }}
+                    </mat-icon>
+                    <div class="alert-tooltip">
+                      <div class="alert-tooltip-header">
+                        <mat-icon>error_outline</mat-icon>
+                        <span>Pendências para NFe de Entrada</span>
+                      </div>
+                      <div class="alert-tooltip-body">
+                        @for (err of alertMsg.split(';'); track err) {
+                          @if (err.trim()) {
+                            <div class="alert-tooltip-line">
+                              <mat-icon>chevron_right</mat-icon>
+                              <span>{{ err.trim() }}</span>
+                            </div>
+                          }
                         }
-                      }
+                      </div>
                     </div>
                   </div>
-                </div>
-              }
-            }
-
-            <!-- Dados normais para outras colunas -->
-            @if (
-              column.key !== 'select' &&
-              column.key !== 'edit' &&
-              column.key !== 'delete'
-            ) {
-              <!-- Ações dinâmicas da coluna -->
-              @if (column.actions) {
-                <div class="column-actions">
-                  @for (action of column.actions; track action) {
-                    @if (!action.hidden || !action.hidden(element)) {
-                      <button
-                        mat-icon-button
-                        [color]="action.color || 'primary'"
-                        [matTooltip]="
-                          action.disabled && action.disabled(element)
-                            ? 'Complete as pendências para habilitar'
-                            : action.label
-                        "
-                        [disabled]="action.disabled && action.disabled(element)"
-                        (click)="
-                          $event.stopPropagation(); action.action(element)
-                        "
-                      >
-                        <mat-icon>{{ action.icon }}</mat-icon>
-                      </button>
-                    }
-                  }
-                </div>
-              } @else if (column.badgeConfig) {
-                <!-- Badge personalizada quando badgeConfig está definido -->
-                @let badgeKey = getNestedValue(element, column.key);
-                @let badge = column.badgeConfig[badgeKey];
-                @if (badge) {
-                  <span
-                    class="status-badge"
-                    [ngClass]="badge.cssClass"
-                  >
-                    {{ badge.label }}
-                  </span>
-                } @else {
-                  <span>{{ badgeKey }}</span>
                 }
-              } @else {
-                <span [innerHTML]="formatValue(column, element)"></span>
               }
-            }
-          </div>
 
-          <!-- Ícone de edição para a coluna 'edit' -->
-          @if (column.key === 'edit' && shouldShowEditIcon(element)) {
-            <button
-              mat-icon-button
-              (click)="$event.stopPropagation(); onEditClick(element)"
-              aria-label="Editar"
-            >
-              <mat-icon>edit</mat-icon>
-            </button>
-          }
-          <!-- Ícone de deleção para a coluna 'delete' -->
-          @if (column.key === 'delete' && shouldShowDeleteIcon(element)) {
-            <button
-              mat-icon-button
-              (click)="$event.stopPropagation(); onDeleteClick(element)"
-              aria-label="Deletar"
-              class="delete-btn"
-            >
-              <mat-icon>delete</mat-icon>
-            </button>
-          }
-          <!-- Ícone de NFe para a coluna 'nfe' -->
-          @if (column.key === 'nfe' && shouldShowNfeIcon(element)) {
-            <button
-              mat-icon-button
-              (click)="$event.stopPropagation(); onNfeClick(element)"
-              aria-label="Emitir NFe"
-              class="nfe-btn"
-              title="Emitir NFe"
-            >
-              <mat-icon>receipt</mat-icon>
-            </button>
-          }
-        </td>
-      </ng-container>
-    }
+              <!-- Dados normais para outras colunas -->
+              @if (
+                column.key !== 'select' &&
+                column.key !== 'edit' &&
+                column.key !== 'delete'
+              ) {
+                <!-- Ações dinâmicas da coluna -->
+                @if (column.actions) {
+                  <div class="column-actions">
+                    @for (action of column.actions; track action) {
+                      @if (!action.hidden || !action.hidden(element)) {
+                        <button
+                          mat-icon-button
+                          [color]="action.color || 'primary'"
+                          [matTooltip]="
+                            action.disabled && action.disabled(element)
+                              ? 'Complete as pendências para habilitar'
+                              : action.label
+                          "
+                          [disabled]="
+                            action.disabled && action.disabled(element)
+                          "
+                          (click)="
+                            $event.stopPropagation(); action.action(element)
+                          "
+                        >
+                          <mat-icon>{{ action.icon }}</mat-icon>
+                        </button>
+                      }
+                    }
+                  </div>
+                } @else if (column.badgeConfig) {
+                  <!-- Badge personalizada quando badgeConfig está definido -->
+                  @let badgeKey = getNestedValue(element, column.key);
+                  @let badge = column.badgeConfig[badgeKey];
+                  @if (badge) {
+                    <span
+                      class="status-badge"
+                      [ngClass]="badge.cssClass"
+                    >
+                      {{ badge.label }}
+                    </span>
+                  } @else {
+                    <span>{{ badgeKey }}</span>
+                  }
+                } @else {
+                  <span [innerHTML]="formatValue(column, element)"></span>
+                }
+              }
 
-    <!-- Definição das linhas -->
-    <tr
-      mat-header-row
-      *matHeaderRowDef="displayedColumns"
-    ></tr>
-    <tr
-      mat-row
-      *matRowDef="let row; columns: displayedColumns; let i = index"
-      (click)="onRowClick(row)"
-      class="row-clickable"
-      [class.even-row]="i % 2 === 0"
-      [class.odd-row]="i % 2 !== 0"
-      [class.selected-row]="isSelected(row)"
-    ></tr>
-  </table>
+              <!-- Ícone de edição para a coluna 'edit' -->
+              @if (column.key === 'edit' && shouldShowEditIcon(element)) {
+                <button
+                  mat-icon-button
+                  (click)="$event.stopPropagation(); onEditClick(element)"
+                  aria-label="Editar"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+              }
+              <!-- Ícone de deleção para a coluna 'delete' -->
+              @if (column.key === 'delete' && shouldShowDeleteIcon(element)) {
+                <button
+                  mat-icon-button
+                  (click)="$event.stopPropagation(); onDeleteClick(element)"
+                  aria-label="Deletar"
+                  class="delete-btn"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
+              <!-- Ícone de NFe para a coluna 'nfe' -->
+              @if (column.key === 'nfe' && shouldShowNfeIcon(element)) {
+                <button
+                  mat-icon-button
+                  (click)="$event.stopPropagation(); onNfeClick(element)"
+                  aria-label="Emitir NFe"
+                  class="nfe-btn"
+                  title="Emitir NFe"
+                >
+                  <mat-icon>receipt</mat-icon>
+                </button>
+              }
+            </div>
+          </td>
+        </ng-container>
+      }
+
+      <!-- Definição das linhas -->
+      <tr
+        mat-header-row
+        *matHeaderRowDef="displayedColumns"
+      ></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns; let i = index"
+        (click)="onRowClick(row)"
+        class="row-clickable"
+        [class.even-row]="i % 2 === 0"
+        [class.odd-row]="i % 2 !== 0"
+        [class.selected-row]="isSelected(row)"
+      ></tr>
+    </table>
+  </div>
   <app-pagination
     [totalElement]="totalElements"
     [pageSizeOptions]="pageSizeOptions"

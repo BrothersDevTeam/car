@@ -1,16 +1,37 @@
 @use 'abstracts/variables' as *;
 
 .table-container {
-  overflow-x: auto;
+  overflow: visible !important;
   position: relative;
   background-color: #ffffff;
   border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
 
-  /* Faz a tabela ocupar o espaço disponível da tela (ajustado para o layout) */
   min-height: calc(100vh - 280px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+/* CONTAINER DE SCROLL */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  flex-grow: 1;
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+    &:hover {
+      background: #94a3b8;
+    }
+  }
 }
 
 .loading-overlay {
@@ -19,308 +40,334 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(1px);
+  backdrop-filter: blur(2px);
+  border-radius: 12px;
 }
 
 .loading-active table {
-  opacity: 0.5;
+  opacity: 0.3;
   pointer-events: none;
 }
 
 table {
   width: 100%;
-  border-collapse: separate; /* Ajuda a evitar cortes de bordas no overflow */
-  margin-bottom: auto; /* Empurra o paginador para o final se houver poucas linhas */
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: auto;
+  overflow: visible !important;
 }
 
-th[mat-header-cell],
-td[mat-cell] {
-  text-align: left;
+/* Estilização do Cabeçalho */
+th[mat-header-cell] {
+  background-color: #f1f5f9;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   padding: 12px 16px;
+  border-bottom: 2px solid #cbd5e1;
+  white-space: nowrap;
+  text-align: left;
+
+  &:first-child {
+    border-top-left-radius: 12px;
+  }
+  &:last-child {
+    border-top-right-radius: 12px;
+  }
 
   &.mat-column-edit,
   &.mat-column-select,
-  &.mat-column-delete {
-    width: 48px;
-    padding: 0px 8px;
-    text-align: left;
+  &.mat-column-delete,
+  &.mat-column-nfe,
+  &.mat-column-nfeHistory,
+  &.mat-column-actions,
+  &.mat-column-nfeActions {
+    text-align: center !important;
   }
 }
 
-mat-icon {
-  font-size: 20px;
+/* Estilização das Células */
+td[mat-cell] {
+  padding: 8px 16px;
+  font-size: 13px;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+  font-weight: 500;
+  overflow: visible !important;
+
+  &.mat-column-edit,
+  &.mat-column-select,
+  &.mat-column-delete,
+  &.mat-column-nfe,
+  &.mat-column-nfeHistory,
+  &.mat-column-actions,
+  &.mat-column-nfeActions {
+    padding: 4px 0;
+    width: 60px;
+
+    .cell-content-wrapper {
+      width: 100%;
+      justify-content: center !important;
+    }
+  }
 }
 
-.delete-btn {
-  color: #f44336;
+/* Interação com Linhas */
+.row-clickable {
+  cursor: pointer;
+  background-color: #ffffff;
+  position: relative;
+  z-index: 1;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: #e2e8f0 !important;
+    z-index: 100 !important;
+  }
+
+  &.selected-row {
+    background-color: #cbd5e1 !important;
+    td {
+      color: #000000;
+      font-weight: 600;
+    }
+  }
 }
 
+.even-row {
+  background-color: #ffffff;
+}
+.odd-row {
+  background-color: #f8fafc;
+}
+
+/* Conteúdo da Célula */
 .cell-content-wrapper {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 8px;
+  min-height: 32px;
+  width: 100%;
+  overflow: visible !important;
 }
 
+/* Ícones e Botões */
 .column-actions {
   display: flex;
-  gap: 2px;
+  gap: 4px;
   align-items: center;
+  justify-content: center;
 
   button {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
 
     mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin: 0;
     }
   }
 }
 
-.nfe-btn {
-  color: var(--primary-color);
-}
-
-/* Estilo para o botão de edição */
 button[mat-icon-button] {
-  color: #3f51b5;
-}
-
-/* Interação com Linhas */
-.row-clickable {
-  transition: background-color 0.2s ease;
-  position: relative; /* Base para o z-index funcionar */
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.03) !important;
-    z-index: 100 !important; /* Eleva a linha toda para o tooltip aparecer por cima das outras */
-  }
-
-  &.selected-row {
-    background-color: rgba(33, 150, 243, 0.08) !important;
-    &:hover {
-      background-color: rgba(33, 150, 243, 0.15) !important;
-    }
-  }
-}
-
-/* Forçar visualização de tooltips em células - CRÍTICO */
-tr.mat-row,
-td.mat-cell {
-  overflow: visible !important;
-  position: relative; /* Necessário para posicionar o tooltip */
-}
-
-/* Garante que o conteúdo da célula não corte o tooltip */
-.mat-mdc-cell,
-.mat-mdc-header-cell {
-  overflow: visible !important;
-}
-
-/* ==========================================
-   BADGES DE STATUS (Otimizadas)
-   ========================================== */
-.status-badge {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
   display: inline-flex;
   align-items: center;
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  white-space: nowrap;
+  justify-content: center;
+  padding: 0;
 
-  &.badge-rascunho {
-    background-color: rgba(229, 57, 53, 0.1);
-    color: #c62828;
-    border: 1px solid rgba(229, 57, 53, 0.2);
-  }
-  &.badge-processando {
-    background-color: rgba(33, 150, 243, 0.1);
-    color: #1565c0;
-    border: 1px solid rgba(33, 150, 243, 0.2);
-  }
-  &.badge-autorizado {
-    background-color: rgba(56, 142, 60, 0.1);
-    color: #1b5e20;
-    border: 1px solid rgba(56, 142, 60, 0.2);
-  }
-  &.badge-cancelado {
-    background-color: rgba(117, 117, 117, 0.1);
-    color: #424242;
-    border: 1px solid rgba(117, 117, 117, 0.2);
-  }
-  &.badge-erro {
-    background-color: rgba(183, 28, 28, 0.1);
-    color: #b71c1c;
-    border: 1px solid rgba(183, 28, 28, 0.2);
-  }
-  &.badge-disponivel {
-    background-color: rgba(56, 142, 60, 0.1);
-    color: #1b5e20;
-    border: 1px solid rgba(56, 142, 60, 0.2);
-  }
-  &.badge-vendido {
-    background-color: rgba(117, 117, 117, 0.1);
-    color: #424242;
-    border: 1px solid rgba(117, 117, 117, 0.2);
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    margin: 0;
   }
 }
 
-/* ==========================================
-   INDICADOR DE ALERTA E TOOLTIP PREMIUM (FINAL V3)
-   ========================================== */
+.delete-btn {
+  color: #dc2626;
+}
+.nfe-btn {
+  color: #2563eb;
+}
+
+/* Alertas e Tooltips - CENTRALIZAÇÃO ABSOLUTA */
 .alert-indicator {
   position: relative;
   display: flex; /* Mudado de inline-flex para flex */
   align-items: center;
   justify-content: center;
   cursor: help;
-  width: 36px; /* Ajustado para 36px para casar com os botões */
-  height: 36px;
-  border-radius: 50%;
-  transition: background-color 0.2s;
-  pointer-events: auto !important;
+  width: 30px; /* Reduzido levemente para melhor encaixe */
+  height: 30px;
+  border-radius: 6px;
+  background-color: #fff7ed;
+  border: 1px solid #ffedd5;
+  z-index: 10;
+  padding: 0 !important;
 
   .alert-icon {
-    color: #e65100;
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    color: #f97316;
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    line-height: 18px !important; /* FORÇA O ALINHAMENTO VERTICAL */
+    margin: 0 !important;
+    padding: 0 !important;
     display: flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
   }
 
   &:hover {
-    background-color: rgba(230, 81, 0, 0.08);
-    z-index: 999999 !important;
-
-    .alert-icon {
-      transform: scale(1.1);
-    }
+    z-index: 1000;
+    background-color: #ffedd5;
     .alert-tooltip {
       display: block !important;
       opacity: 1 !important;
-      transform: translateY(10px) !important;
+      visibility: visible !important;
+      transform: translateX(-50%) translateY(0) scale(1);
     }
   }
 
   .alert-tooltip {
     display: none;
+    visibility: hidden;
     opacity: 0;
     position: absolute;
-    top: 100%; /* Abre PARA BAIXO */
-    right: 0; /* Alinha à direita do ícone, expandindo para a esquerda */
-    width: 280px;
+    top: 34px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px) scale(0.95);
+    width: 260px;
     background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    z-index: 999999 !important; /* Z-index estratosférico */
-    border: 1px solid #ffcc80;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    border: 1px solid #fed7aa;
     pointer-events: none;
-  }
-
-  /* Seta lateral ajustada para ficar no TOPO do tooltip */
-  .alert-tooltip::before {
-    content: '';
-    position: absolute;
-    bottom: 100%;
-    right: 12px;
-    border-width: 8px;
-    border-style: solid;
-    border-color: transparent transparent #ffe0b2 transparent;
+    transition: all 0.2s ease;
   }
 }
 
 .alert-tooltip-header {
-  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-  padding: 10px 14px;
+  padding: 8px 12px;
+  background: #fff7ed;
+  border-bottom: 1px solid #fed7aa;
+  border-radius: 10px 10px 0 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid #ffcc80;
-
+  gap: 6px;
   mat-icon {
-    color: #e65100;
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+    color: #ea580c;
+    font-size: 16px;
+    margin: 0;
   }
   span {
-    font-size: 11px;
+    color: #9a3412;
     font-weight: 800;
-    color: #bf360c;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
+    font-size: 10px;
   }
 }
 
 .alert-tooltip-body {
-  padding: 12px 16px;
-  background: #ffffff;
+  padding: 10px;
+  background: white;
+  border-radius: 0 0 10px 10px;
   .alert-tooltip-line {
     display: flex;
-    align-items: flex-start;
     gap: 8px;
-    margin-bottom: 8px;
-    &:last-child {
-      margin-bottom: 0;
-    }
+    margin-bottom: 4px;
     mat-icon {
-      color: #ffa000;
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
-      margin-top: 2px;
+      color: #f97316;
+      font-size: 12px;
+      margin: 0;
     }
     span {
-      font-size: 12.5px;
-      line-height: 1.5;
-      color: #37474f;
-      text-align: left;
+      font-size: 11.5px;
+      color: #475569;
       font-weight: 500;
     }
   }
 }
 
-.pulse-warning {
-  animation: pulse-ring 2s infinite;
+/* Badges de Status Modernas */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &.badge-rascunho {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+  }
+  &.badge-processando {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+  }
+  &.badge-autorizado {
+    background-color: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+  }
+  &.badge-cancelado {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+  }
+  &.badge-erro {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+  &.badge-disponivel {
+    background-color: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+  &.badge-vendido {
+    background-color: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
 }
 
-@keyframes pulse-ring {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.08);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* Estilo do Paginador (Garante que ele fique abaixo de tudo) */
+/* Paginador */
 app-pagination {
-  z-index: 1;
-  position: relative;
-  background: white;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 2px 8px;
+  border-radius: 0 0 12px 12px;
+}
+
+/* VISIBILIDADE GLOBAL */
+.mat-mdc-cell,
+.mat-mdc-header-cell,
+.mat-mdc-row {
+  overflow: visible !important;
 }
