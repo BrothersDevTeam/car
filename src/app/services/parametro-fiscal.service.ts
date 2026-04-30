@@ -11,6 +11,7 @@ export interface ParametroFiscal {
 
   // Obrigatórios
   parametroFiscalRegimeTributario: string;
+  parametroFiscalInscricaoEstadual?: string;
   parametroFiscalCalculoAutomaticoImpostos: boolean;
 
   // Opcionais comuns

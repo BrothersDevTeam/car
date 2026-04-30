@@ -12,8 +12,6 @@ export interface Store {
   storeStatus: StoreStatus;
   imageUrl?: string;
   owner?: string | any;
-  inscricaoEstadual?: string;
-  regimeTributario?: string;
   createdAt?: string;
   updatedAt?: string;
   createdBy?: string;

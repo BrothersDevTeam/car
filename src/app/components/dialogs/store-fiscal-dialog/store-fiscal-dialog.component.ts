@@ -58,6 +58,7 @@ export class StoreFiscalDialogComponent implements OnInit {
 
   regimes = [
     { value: 'SIMPLES_NACIONAL', label: 'Simples Nacional' },
+    { value: 'SIMPLES_NACIONAL_EXCESSO_SUBLIMITE', label: 'Simples Nac. - Excesso Sublimite' },
     { value: 'LUCRO_PRESUMIDO', label: 'Lucro Presumido' },
     { value: 'LUCRO_REAL', label: 'Lucro Real' },
   ];
@@ -73,6 +74,7 @@ export class StoreFiscalDialogComponent implements OnInit {
     this.form = this.fb.group({
       parametroFiscalId: [null],
       parametroFiscalRegimeTributario: ['', Validators.required],
+      parametroFiscalInscricaoEstadual: ['', [Validators.required, Validators.maxLength(20)]],
       parametroFiscalCalculoAutomaticoImpostos: [true, Validators.required],
       parametroFiscalUtilizarCreditoIcms: [false],
       parametroFiscalUtilizarCreditoPisCofins: [false],
@@ -97,9 +99,15 @@ export class StoreFiscalDialogComponent implements OnInit {
     this.parametroFiscalService
       .getByStoreId(this.data.store.storeId!)
       .subscribe({
-        next: (config) => {
-          if (config && config.parametroFiscalRegimeTributario) {
+        next: (config: any) => {
+          if (config && config.parametroFiscalId) {
             this.hasExistingConfig = true;
+            
+            // Mapeia a propriedade do backend (model) para a esperada pelo frontend/form (DTO)
+            if (config.parametroFiscalRegime && !config.parametroFiscalRegimeTributario) {
+              config.parametroFiscalRegimeTributario = config.parametroFiscalRegime;
+            }
+            
             this.form.patchValue(config);
           }
           this.loading = false;
