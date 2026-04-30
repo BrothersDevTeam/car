@@ -7,6 +7,7 @@ import { FormaPagamento } from '../enums/forma-pagamento';
 export interface VendaModel {
   vendaId: string;
   storeId: string;
+  storeName?: string;
   vehicleId: string;
   buyerPersonId: string;
   sellerPersonId?: string;
@@ -84,6 +85,7 @@ export interface VendaPagamentoDto {
 export interface VendaResponseDto {
   vendaId: string;
   storeId: string;
+  storeName?: string;
   vehicleId: string;
   buyerPersonId: string;
   sellerPersonId?: string;

@@ -8,11 +8,11 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ToastrService } from 'ngx-toastr';
 
 import { DrawerComponent } from '@components/drawer/drawer.component';
+import { StoreContextService } from '@services/store-context.service';
 import { GenericTableComponent } from '@components/generic-table/generic-table.component';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { UnsavedChangesDialogComponent } from '@components/dialogs/unsaved-changes-dialog/unsaved-changes-dialog.component';
-import { StoreContextService } from '@services/store-context.service';
 import {
   Subject,
   Subscription,
@@ -83,6 +83,11 @@ export class VehicleComponent implements CanComponentDeactivate {
     pageIndex: 0,
   };
   columns: ColumnConfig<VehicleList>[] = [
+    {
+      key: 'storeName',
+      header: 'Loja',
+      hidden: () => !!this.selectedStoreId,
+    },
     {
       key: 'plate',
       header: 'Placa',
@@ -392,6 +397,7 @@ export class VehicleComponent implements CanComponentDeactivate {
   }
 
   handleOpenForm() {
+    if (!this.storeContextService.validateStoreSelection()) return;
     this.openForm.set(true);
   }
 
@@ -427,6 +433,8 @@ export class VehicleComponent implements CanComponentDeactivate {
    * Quando vem do vehicle-info (editEvent), recebe VehicleForm
    */
   handleEdit(vehicle: VehicleList | Vehicle | VehicleForm) {
+    if (!this.storeContextService.validateStoreSelection()) return;
+
     if (
       'vehicleId' in vehicle &&
       !('chassis' in vehicle) &&
@@ -473,6 +481,8 @@ export class VehicleComponent implements CanComponentDeactivate {
   }
 
   handleDelete(vehicle: VehicleList) {
+    if (!this.storeContextService.validateStoreSelection()) return;
+
     const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
       ConfirmDialogComponent,
       {
@@ -527,6 +537,8 @@ export class VehicleComponent implements CanComponentDeactivate {
   }
 
   gerarNfeCompra(vehicle: VehicleList) {
+    if (!this.storeContextService.validateStoreSelection()) return;
+
     const errors = this.getVehicleNfeValidationErrors(vehicle);
 
     if (errors.length > 0) {

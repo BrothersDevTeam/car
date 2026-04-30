@@ -74,6 +74,11 @@ export class NfeComponent {
       header: 'Nº NFe',
     },
     {
+      key: 'storeName',
+      header: 'Loja',
+      hidden: () => !!this.selectedStoreId,
+    },
+    {
       key: 'nfeStatus',
       header: 'Status',
       // Badge personalizada para cada status possível de NFe
@@ -377,6 +382,7 @@ export class NfeComponent {
   }
 
   handleOpenForm() {
+    if (!this.storeContextService.validateStoreSelection()) return;
     this.selectedNfe = null;
     this.openForm.set(true);
     this.selectedTabIndex.set(0); // Inicia na aba de entrada
@@ -409,6 +415,7 @@ export class NfeComponent {
   }
 
   handleEdit(nfe: Nfe) {
+    if (!this.storeContextService.validateStoreSelection()) return;
     if (nfe) {
       this.selectedNfe = nfe;
 
@@ -425,6 +432,7 @@ export class NfeComponent {
   }
 
   onEnviarNfe() {
+    if (!this.storeContextService.validateStoreSelection()) return;
     if (!this.selectedRows || this.selectedRows.length === 0) {
       this.toastr.warning('Por favor, selecione ao menos uma NFe para enviar.');
       return;

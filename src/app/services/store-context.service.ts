@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthService } from './auth/auth.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +12,10 @@ export class StoreContextService {
   // Guarda o storeId atual. Inicializa com a loja padrão do usuário vinda do token.
   private readonly storeIdSubject = new BehaviorSubject<string | null>(null);
 
-  constructor(private readonly authService: AuthService) {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly toastr: ToastrService
+  ) {
     const savedStoreId = localStorage.getItem(this.STORE_KEY);
     const defaultStoreId = this.authService.getStoreId();
 
@@ -68,5 +72,20 @@ export class StoreContextService {
       localStorage.removeItem(this.STORE_KEY);
       this.storeIdSubject.next(null);
     }
+  }
+
+  /**
+   * Valida se existe uma loja selecionada no momento.
+   * Se não houver (Toda a Rede), exibe um aviso e retorna false.
+   */
+  validateStoreSelection(): boolean {
+    if (!this.currentStoreId) {
+      this.toastr.warning(
+        'Por favor, selecione uma loja específica no topo da página para realizar esta ação.',
+        'Loja Não Selecionada'
+      );
+      return false;
+    }
+    return true;
   }
 }

@@ -219,6 +219,11 @@ export class PersonComponent
       },
     },
     {
+      key: 'storeName',
+      header: 'Loja',
+      hidden: () => !!this.selectedStoreId,
+    },
+    {
       key: 'name',
       header: 'Nome',
       format: (value: any, row: Person) => {
@@ -643,6 +648,7 @@ export class PersonComponent
   }
 
   handleOpenForm() {
+    if (!this.storeContextService.validateStoreSelection()) return;
     this.selectedPerson = null;
     this.selectedDraft = null;
     this.openForm.set(true);
@@ -678,12 +684,14 @@ export class PersonComponent
   }
 
   handleEdit(person?: Person) {
+    if (!this.storeContextService.validateStoreSelection()) return;
     if (person) this.selectedPerson = person;
     this.openInfo.set(false);
     this.openForm.set(true);
   }
 
   handleDelete(person: Person) {
+    if (!this.storeContextService.validateStoreSelection()) return;
     this.openDeleteDialog(person);
   }
 
@@ -733,6 +741,7 @@ export class PersonComponent
   }
 
   deleteSelectedPeople() {
+    if (!this.storeContextService.validateStoreSelection()) return;
     if (this.selectedPeople.length === 0) return;
 
     const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(

@@ -94,6 +94,11 @@ export class VendasListComponent implements OnInit, OnDestroy {
       format: (val) => (val ? `#${val}` : '—'),
     },
     {
+      key: 'storeName',
+      header: 'Loja',
+      hidden: () => !!this.selectedStoreId,
+    },
+    {
       key: 'dataVenda',
       header: 'Data',
       format: (val) => this.datePipe.transform(val, 'dd/MM/yyyy') || '—',
@@ -272,6 +277,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
   }
 
   goToNewVenda() {
+    if (!this.storeContextService.validateStoreSelection()) return;
     this.router.navigate(['/vendas/nova']);
   }
 
@@ -286,6 +292,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
   }
 
   handleEdit(venda: VendaResponseDto) {
+    if (!this.storeContextService.validateStoreSelection()) return;
     this.router.navigate(['/vendas/editar', venda.vendaId]);
   }
 
@@ -295,6 +302,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
   }
 
   handleEmitirNfe(venda: VendaResponseDto) {
+    if (!this.storeContextService.validateStoreSelection()) return;
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Gerar NFe',
@@ -361,6 +369,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
   }
 
   handleDelete(venda: VendaResponseDto) {
+    if (!this.storeContextService.validateStoreSelection()) return;
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Cancelar Venda',

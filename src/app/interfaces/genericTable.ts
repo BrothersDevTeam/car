@@ -24,6 +24,8 @@ export interface ColumnConfig<T> {
   badgeConfig?: { [key: string]: BadgeConfig };
   // Configuração para exibir um indicador de alerta com tooltip se houver erro
   alertConfig?: AlertConfig<T>;
+  // Função para esconder a coluna dinamicamente
+  hidden?: () => boolean;
   // Ações customizadas para a coluna
   actions?: {
     label: string;

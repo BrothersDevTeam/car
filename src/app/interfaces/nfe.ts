@@ -40,6 +40,7 @@ export interface NfeDestinatario {
 export interface Nfe {
   nfeId?: string;
   storeId: string; // Emitente (ID da loja)
+  storeName?: string;
   personId: string; // Destinatário (ID da pessoa)
   nfeTipoDocumento: string; // '0' entrada, '1' saída
   nfeNaturezaOperacao: NaturezaOperacao;

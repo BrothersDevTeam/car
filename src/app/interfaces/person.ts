@@ -18,6 +18,7 @@ export interface User {
 export interface Person {
   personId: string;
   storeId: string;
+  storeName?: string;
   name: string;
   nickName?: string;
   email?: string;

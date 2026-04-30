@@ -92,6 +92,7 @@ export interface Vehicle {
 export interface VehicleList {
   vehicleId: string;
   storeId: string;
+  storeName?: string;
   plate: string;
   brand: string;
   model: string;

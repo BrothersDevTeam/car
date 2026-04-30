@@ -71,7 +71,9 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
   }
 
   get displayedColumns(): string[] {
-    return this.columns.map((col) => col.key);
+    return this.columns
+      .filter((col) => !col.hidden || !col.hidden())
+      .map((col) => col.key);
   }
 
   onRowClick(row: T) {
