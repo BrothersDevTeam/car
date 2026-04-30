@@ -47,6 +47,7 @@ export interface Nfe {
   nfeItens: nfeItem[];
   vehicleId?: string; // ID do veículo do primeiro item
   vehicle?: any; // Dados resumidos do veículo vinculado
+  nfeCalcularImpostosAutomaticamente?: boolean; // Override de cálculo automático para esta NFe
 
   // === Numeração ===
   nfeNumero?: number;

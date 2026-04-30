@@ -59,6 +59,126 @@
         (form.get('personId')?.touched || submitted)
       "
     />
+
+    <h3 class="section-title">Cálculo de Impostos da NFe</h3>
+    <mat-radio-group
+      color="primary"
+      formControlName="nfeCalcularImpostosAutomaticamente"
+      class="radio-button-group"
+    >
+      <mat-radio-button class="radio-button" [value]="null">
+        Padrão da Loja
+      </mat-radio-button>
+      <mat-radio-button class="radio-button" [value]="true">
+        Calcular Automaticamente
+      </mat-radio-button>
+      <mat-radio-button class="radio-button" [value]="false">
+        Preencher Manualmente
+      </mat-radio-button>
+    </mat-radio-group>
+
+    @if (form.get('nfeCalcularImpostosAutomaticamente')?.value === false || (form.get('nfeCalcularImpostosAutomaticamente')?.value === null && parametroFiscal && !parametroFiscal.parametroFiscalCalculoAutomaticoImpostos)) {
+      <div class="tributacao-manual-container">
+        <mat-expansion-panel class="mat-elevation-z0 premium-expansion">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>calculate</mat-icon>
+              Tributação Manual
+            </mat-panel-title>
+            <mat-panel-description>
+              Configurar impostos manualmente para esta nota
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="manual-tax-grid">
+            <!-- NCM e CFOP -->
+            <div class="tax-row">
+              <mat-form-field appearance="outline">
+                <mat-label>NCM</mat-label>
+                <input matInput formControlName="itemCodigoNcm" placeholder="Ex: 87032310">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>CFOP</mat-label>
+                <input matInput formControlName="itemCfop" placeholder="Ex: 1102">
+              </mat-form-field>
+            </div>
+
+            <!-- ICMS -->
+            <h4 class="sub-section-title">ICMS</h4>
+            <div class="tax-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Origem</mat-label>
+                <input matInput formControlName="icmsOrigem">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>CST/CSOSN</mat-label>
+                <input matInput formControlName="icmsSituacaoTributaria">
+              </mat-form-field>
+            </div>
+            <div class="tax-row three-cols">
+              <mat-form-field appearance="outline">
+                <mat-label>Base de Cálculo</mat-label>
+                <input matInput formControlName="icmsValorBaseCalculo">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Alíquota %</mat-label>
+                <input matInput formControlName="icmsAliquota">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Valor ICMS</mat-label>
+                <input matInput formControlName="icmsValor">
+              </mat-form-field>
+            </div>
+
+            <!-- PIS -->
+            <h4 class="sub-section-title">PIS</h4>
+            <div class="tax-row">
+              <mat-form-field appearance="outline">
+                <mat-label>CST PIS</mat-label>
+                <input matInput formControlName="pisSituacaoTributaria">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Base de Cálculo</mat-label>
+                <input matInput formControlName="pisValorBaseCalculo">
+              </mat-form-field>
+            </div>
+            <div class="tax-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Alíquota %</mat-label>
+                <input matInput formControlName="pisAliquota">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Valor PIS</mat-label>
+                <input matInput formControlName="pisValor">
+              </mat-form-field>
+            </div>
+
+            <!-- COFINS -->
+            <h4 class="sub-section-title">COFINS</h4>
+            <div class="tax-row">
+              <mat-form-field appearance="outline">
+                <mat-label>CST COFINS</mat-label>
+                <input matInput formControlName="cofinsSituacaoTributaria">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Base de Cálculo</mat-label>
+                <input matInput formControlName="cofinsValorBaseCalculo">
+              </mat-form-field>
+            </div>
+            <div class="tax-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Alíquota %</mat-label>
+                <input matInput formControlName="cofinsAliquota">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Valor COFINS</mat-label>
+                <input matInput formControlName="cofinsValor">
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </div>
+    }
   </app-wrapper-card>
 
   <button

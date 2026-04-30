@@ -59,4 +59,60 @@ form {
     font-size: 1rem;
     font-weight: 600;
   }
+
+  .tributacao-manual-container {
+    margin-top: 2rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+
+    .premium-expansion {
+      background: var(--surface-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px !important;
+
+      mat-panel-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      mat-panel-description {
+        font-size: 0.85rem;
+      }
+    }
+
+    .sub-section-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 1.5rem 0 0.75rem 0;
+      border-bottom: 1px dashed var(--border-color);
+      padding-bottom: 0.25rem;
+    }
+
+    .manual-tax-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 1rem 0;
+
+      .tax-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+
+        &.three-cols {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        mat-form-field {
+          width: 100%;
+        }
+      }
+    }
+  }
 }
