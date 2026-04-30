@@ -1,99 +1,123 @@
-<form
-  [formGroup]="form"
-  (keydown.enter)="onEnter($event)"
->
-  @if (dataForm?.nfeNumero) {
-    <div class="title-trash">
-      <h2>NFe Nº: {{ dataForm!.nfeNumero }}</h2>
-    </div>
-  }
-
-  <app-wrapper-card>
-    <h3 class="section-title">Natureza da Operação*</h3>
-    <mat-radio-group
-      color="primary"
-      formControlName="nfeNaturezaOperacao"
-      aria-label="Selecione o tipo de entrada"
-      class="radio-button-group"
-    >
-      @for (tipo of tiposNfeEntrada; track tipo.value) {
-        <mat-radio-button
-          class="radio-button"
-          [value]="tipo.value"
-        >
-          {{ tipo.label }}
-        </mat-radio-button>
-      }
-    </mat-radio-group>
-    @if (
-      form.get('nfeNaturezaOperacao')?.invalid &&
-      (form.get('nfeNaturezaOperacao')?.touched || submitted)
-    ) {
-      <div class="error-message">Selecione o tipo de operação.</div>
+<form [formGroup]="form" (keydown.enter)="onEnter($event)">
+  <div class="title-trash">
+    <h2>NFe de Entrada</h2>
+    @if (dataForm?.nfeId) {
+      <button mat-icon-button color="warn" (click)="onDelete()" type="button" matTooltip="Cancelar NFe">
+        <mat-icon>delete</mat-icon>
+      </button>
     }
+  </div>
 
-    <h3 class="section-title">Informações do Veículo*</h3>
+  <div class="section-title">Informações Gerais</div>
+  <div class="tax-row">
     <app-primary-select
-      formControlName="vehicleId"
-      label="Veículo*"
-      [options]="vehicles"
-      optionValue="vehicleId"
-      [optionLabel]="getVehicleDisplay.bind(this)"
-      placeholder="Selecione o veículo"
-      [error]="
-        form.get('vehicleId')?.invalid &&
-        (form.get('vehicleId')?.touched || submitted)
-      "
-    />
-
-    <h3 class="section-title">Fornecedor/Consignante*</h3>
-    <app-primary-select
-      formControlName="personId"
-      label="Fornecedor/Consignante*"
+      [label]="'Remetente*'"
       [options]="persons"
-      optionValue="personId"
-      [optionLabel]="getPersonDisplay.bind(this)"
-      placeholder="Selecione o fornecedor"
-      [error]="
-        form.get('personId')?.invalid &&
-        (form.get('personId')?.touched || submitted)
-      "
-    />
+      formControlName="personId"
+      [optionLabel]="getPersonDisplay"
+      placeholder="Selecione o Fornecedor/Cliente"
+    ></app-primary-select>
 
-    <div class="m-b-24">
-      <mat-checkbox color="primary" formControlName="nfePreenchimentoManualImpostos">
-        Preenchimento manual de Impostos
-      </mat-checkbox>
-    </div>
+    <app-primary-select
+      [label]="'Natureza da Operação*'"
+      [options]="tiposNfeEntrada"
+      formControlName="nfeNaturezaOperacao"
+      placeholder="Selecione a Natureza"
+    ></app-primary-select>
+  </div>
 
-    @if (form.get('nfePreenchimentoManualImpostos')?.value) {
-      <div class="tributacao-manual-container">
-        <mat-expansion-panel class="mat-elevation-z0 premium-expansion">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <mat-icon>calculate</mat-icon>
-              Tributação Manual
-            </mat-panel-title>
-            <mat-panel-description>
-              Configurar impostos manualmente para esta nota
-            </mat-panel-description>
-          </mat-expansion-panel-header>
+  <div class="section-title">Itens da NFe</div>
+  
+  <div class="radio-button-group horizontal m-b-16">
+    <mat-radio-group formControlName="itemTipo">
+      <mat-radio-button value="veiculo" color="primary">Veículo para Estoque</mat-radio-button>
+      <mat-radio-button value="produto" color="primary">Produto Diverso</mat-radio-button>
+    </mat-radio-group>
+  </div>
 
+  <div formArrayName="nfeItens">
+    @for (itemGroup of itens.controls; track $index) {
+      <div [formGroupName]="$index" class="manual-product-fields">
+        <div class="title-trash" style="margin-bottom: 0.5rem;">
+          <span class="sub-section-title">Item {{ $index + 1 }}</span>
+          @if (form.get('itemTipo')?.value === 'produto' && itens.length > 1) {
+            <button mat-icon-button color="warn" (click)="removeItem($index)" type="button">
+              <mat-icon>remove_circle_outline</mat-icon>
+            </button>
+          }
+        </div>
+
+        @if (form.get('itemTipo')?.value === 'veiculo') {
+          <app-primary-select
+            [label]="'Veículo*'"
+            [options]="vehicles"
+            formControlName="vehicleId"
+            [optionLabel]="getVehicleDisplay"
+            placeholder="Selecione o Veículo"
+          ></app-primary-select>
+        } @else {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descrição do Produto*</mat-label>
+            <input matInput formControlName="itemDescricao" placeholder="Ex: Peça de Reposição">
+          </mat-form-field>
+
+          <div class="tax-row three-cols">
+            <mat-form-field appearance="outline">
+              <mat-label>Código</mat-label>
+              <input matInput formControlName="itemCodigoProduto" placeholder="Opcional">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Unidade</mat-label>
+              <input matInput formControlName="itemUnidadeComercial">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Quantidade*</mat-label>
+              <input matInput type="number" formControlName="itemQuantidadeComercial">
+            </mat-form-field>
+          </div>
+
+          <div class="tax-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Valor Unitário (R$)*</mat-label>
+              <input matInput type="number" formControlName="itemValorUnitarioComercial">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Valor Total (R$)</mat-label>
+              <input matInput formControlName="itemValorBruto" readonly>
+            </mat-form-field>
+          </div>
+
+          <div class="tax-row">
+            <mat-form-field appearance="outline">
+              <mat-label>NCM*</mat-label>
+              <input matInput formControlName="itemCodigoNcm" placeholder="Ex: 87032310">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>CFOP*</mat-label>
+              <input matInput formControlName="itemCfop" placeholder="Ex: 1102">
+            </mat-form-field>
+          </div>
+        }
+
+        <!-- Tributação Manual por Item -->
+        @if (form.get('nfePreenchimentoManualImpostos')?.value) {
           <div class="manual-tax-grid">
-            <!-- NCM e CFOP -->
-            <div class="tax-row">
-              <mat-form-field appearance="outline">
-                <mat-label>NCM</mat-label>
-                <input matInput formControlName="itemCodigoNcm" placeholder="Ex: 87032310">
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>CFOP</mat-label>
-                <input matInput formControlName="itemCfop" placeholder="Ex: 1102">
-              </mat-form-field>
-            </div>
+            <div class="sub-section-title">Tributação Manual - Item {{ $index + 1 }}</div>
+            
+            @if (form.get('itemTipo')?.value === 'veiculo') {
+              <div class="tax-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>NCM</mat-label>
+                  <input matInput formControlName="itemCodigoNcm" placeholder="Ex: 87032310">
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>CFOP</mat-label>
+                  <input matInput formControlName="itemCfop" placeholder="Ex: 1102">
+                </mat-form-field>
+              </div>
+            }
 
-            <!-- ICMS -->
-            <h4 class="sub-section-title">ICMS</h4>
+            <div class="sub-section-title">ICMS</div>
             <div class="tax-row">
               <mat-form-field appearance="outline">
                 <mat-label>Origem</mat-label>
@@ -106,11 +130,11 @@
             </div>
             <div class="tax-row three-cols">
               <mat-form-field appearance="outline">
-                <mat-label>Base de Cálculo</mat-label>
+                <mat-label>Base Calc. ICMS</mat-label>
                 <input matInput formControlName="icmsValorBaseCalculo">
               </mat-form-field>
               <mat-form-field appearance="outline">
-                <mat-label>Alíquota %</mat-label>
+                <mat-label>Alíquota ICMS (%)</mat-label>
                 <input matInput formControlName="icmsAliquota">
               </mat-form-field>
               <mat-form-field appearance="outline">
@@ -119,77 +143,43 @@
               </mat-form-field>
             </div>
 
-            <!-- PIS -->
-            <h4 class="sub-section-title">PIS</h4>
+            <div class="sub-section-title">PIS / COFINS</div>
             <div class="tax-row">
               <mat-form-field appearance="outline">
                 <mat-label>CST PIS</mat-label>
                 <input matInput formControlName="pisSituacaoTributaria">
               </mat-form-field>
               <mat-form-field appearance="outline">
-                <mat-label>Base de Cálculo</mat-label>
-                <input matInput formControlName="pisValorBaseCalculo">
-              </mat-form-field>
-            </div>
-            <div class="tax-row">
-              <mat-form-field appearance="outline">
-                <mat-label>Alíquota %</mat-label>
-                <input matInput formControlName="pisAliquota">
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Valor PIS</mat-label>
-                <input matInput formControlName="pisValor">
-              </mat-form-field>
-            </div>
-
-            <!-- COFINS -->
-            <h4 class="sub-section-title">COFINS</h4>
-            <div class="tax-row">
-              <mat-form-field appearance="outline">
                 <mat-label>CST COFINS</mat-label>
                 <input matInput formControlName="cofinsSituacaoTributaria">
               </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Base de Cálculo</mat-label>
-                <input matInput formControlName="cofinsValorBaseCalculo">
-              </mat-form-field>
-            </div>
-            <div class="tax-row">
-              <mat-form-field appearance="outline">
-                <mat-label>Alíquota %</mat-label>
-                <input matInput formControlName="cofinsAliquota">
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Valor COFINS</mat-label>
-                <input matInput formControlName="cofinsValor">
-              </mat-form-field>
             </div>
           </div>
-        </mat-expansion-panel>
+        }
       </div>
     }
-  </app-wrapper-card>
+  </div>
 
-  <button
-    mat-raised-button
-    type="button"
-    class="submit-btn"
-    color="primary"
-    (click)="onSubmit()"
-    #submitButton
-  >
-    {{ dataForm?.nfeId ? 'Atualizar NFe' : 'Criar NFe' }}
-  </button>
-
-  @if (dataForm?.nfeNumero && dataForm?.nfeStatus === 'Em digitacao') {
-    <button
-      mat-raised-button
-      type="button"
-      class="delete-btn"
-      color="warn"
-      (click)="onDelete()"
-    >
-      Cancelar NFe
+  @if (form.get('itemTipo')?.value === 'produto') {
+    <button mat-stroked-button color="primary" type="button" (click)="addItem()" class="m-b-16">
+      <mat-icon>add</mat-icon> Adicionar Outro Produto
     </button>
   }
+
+  <div class="tributacao-manual-container">
+    <mat-checkbox formControlName="nfePreenchimentoManualImpostos" color="primary">
+      Preenchimento manual de Impostos
+    </mat-checkbox>
+  </div>
+
+  <button
+    #submitButton
+    mat-flat-button
+    color="primary"
+    class="submit-btn"
+    (click)="onSubmit()"
+    [disabled]="form.invalid"
+  >
+    {{ dataForm?.nfeId ? 'Atualizar NFe' : 'Emitir NFe' }}
+  </button>
 </form>

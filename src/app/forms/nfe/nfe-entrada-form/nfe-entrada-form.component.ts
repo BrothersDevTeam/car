@@ -8,11 +8,11 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  signal,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import {
+  FormArray,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
@@ -24,6 +24,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
@@ -32,8 +35,7 @@ import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confi
 import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
-import { NaturezaOperacao } from '@interfaces/nfe';
-import type { Nfe } from '@interfaces/nfe';
+import type { NaturezaOperacao, Nfe } from '@interfaces/nfe';
 import type { Person } from '@interfaces/person';
 import { Vehicle, VehicleList } from '@interfaces/vehicle';
 
@@ -43,9 +45,6 @@ import { VehicleService } from '@services/vehicle.service';
 import { extractErrorMessage } from '@utils/error-utils';
 import { StoreContextService } from '@services/store-context.service';
 import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fiscal.service';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
   selector: 'app-nfe-entrada-form',
@@ -73,20 +72,24 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   persons: Person[] = [];
   tiposNfeEntrada: { value: NaturezaOperacao; label: string }[] = [
     {
-      value: NaturezaOperacao.COMPRA_VEICULO_USADO,
-      label: 'Compra de Veículo Usado',
+      value: 'ENTRADA DE VEICULO USADO' as NaturezaOperacao,
+      label: 'Entrada de Veículo Usado',
     },
     {
-      value: NaturezaOperacao.ENTRADA_CONSIGNACAO,
+      value: 'ENTRADA EM CONSIGNAÇÃO' as NaturezaOperacao,
       label: 'Entrada em Consignação',
     },
     {
-      value: NaturezaOperacao.ENTRADA_COMPRA_DEFINITIVA,
-      label: 'Entrada Compra Definida',
+      value: 'COMPRA DE VEICULO PARA ESTOQUE' as NaturezaOperacao,
+      label: 'Compra de Veículo para Estoque',
     },
     {
-      value: NaturezaOperacao.DEVOLUCAO_VENDA,
+      value: 'DEVOLUÇÃO DE VENDA' as NaturezaOperacao,
       label: 'Devolução de Venda',
+    },
+    {
+      value: 'ENTRADA PARA CONTRATO EM COMISSÃO' as NaturezaOperacao,
+      label: 'Entrada para Contrato em Comissão',
     },
   ];
 
@@ -116,33 +119,20 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   protected form: FormGroup = this.formBuilderService.group({
     storeId: [''],
-    vehicleId: ['', Validators.required],
     personId: ['', Validators.required],
     nfeNaturezaOperacao: ['', Validators.required],
     nfePreenchimentoManualImpostos: [false],
-
-    // Campos para tributação manual (ICMS, PIS, COFINS) do item 1
-    itemCodigoNcm: [''],
-    itemCfop: [''],
-    icmsOrigem: ['0'],
-    icmsSituacaoTributaria: [''],
-    icmsValorBaseCalculo: [''],
-    icmsAliquota: [''],
-    icmsValor: [''],
-    pisSituacaoTributaria: [''],
-    pisValorBaseCalculo: [''],
-    pisAliquota: [''],
-    pisValor: [''],
-    cofinsSituacaoTributaria: [''],
-    cofinsValorBaseCalculo: [''],
-    cofinsAliquota: [''],
-    cofinsValor: [''],
+    itemTipo: ['veiculo'], // 'veiculo' ou 'produto'
+    nfeItens: this.formBuilderService.array([]),
   });
 
   constructor() {}
 
-  ngOnInit() {
-    // Observar mudanças no formulário
+  ngOnInit(): void {
+    if (!this.dataForm) {
+      this.addItem();
+    }
+
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
         const isDirty = this.form.dirty;
@@ -150,7 +140,6 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       })
     );
 
-    // Contexto Global de Loja - Carrega dados iniciais e reage a mudanças
     this.subscriptions.add(
       this.storeContextService.currentStoreId$.subscribe((storeId) => {
         if (storeId) {
@@ -159,6 +148,74 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
         }
       })
     );
+    
+    this.subscriptions.add(
+      this.form.get('itemTipo')?.valueChanges.subscribe(() => {
+        this.itens.clear();
+        this.addItem();
+      })
+    );
+  }
+
+  get itens(): FormArray {
+    return this.form.get('nfeItens') as FormArray;
+  }
+
+  createItem(data: any = {}): FormGroup {
+    const isVeiculo = this.form?.get('itemTipo')?.value === 'veiculo';
+    
+    const group = this.formBuilderService.group({
+      vehicleId: [data.vehicleId || '', isVeiculo ? [Validators.required] : []],
+      itemDescricao: [data.itemDescricao || '', !isVeiculo ? [Validators.required] : []],
+      itemCodigoProduto: [data.itemCodigoProduto || ''],
+      itemUnidadeComercial: [data.itemUnidadeComercial || 'UN'],
+      itemQuantidadeComercial: [data.itemQuantidadeComercial || 1, [Validators.required]],
+      itemValorUnitarioComercial: [data.itemValorUnitarioComercial || '', [Validators.required]],
+      itemValorBruto: [{ value: data.itemValorBruto || '', disabled: true }],
+      
+      // Campos fiscais
+      itemCodigoNcm: [data.itemCodigoNcm || ''],
+      itemCfop: [data.itemCfop || ''],
+      icmsOrigem: [data.icmsOrigem || '0'],
+      icmsSituacaoTributaria: [data.icmsSituacaoTributaria || ''],
+      icmsValorBaseCalculo: [data.icmsValorBaseCalculo || ''],
+      icmsAliquota: [data.icmsAliquota || ''],
+      icmsValor: [data.icmsValor || ''],
+      pisSituacaoTributaria: [data.pisSituacaoTributaria || ''],
+      pisValorBaseCalculo: [data.pisValorBaseCalculo || ''],
+      pisAliquota: [data.pisAliquota || ''],
+      pisValor: [data.pisValor || ''],
+      cofinsSituacaoTributaria: [data.cofinsSituacaoTributaria || ''],
+      cofinsValorBaseCalculo: [data.cofinsValorBaseCalculo || ''],
+      cofinsAliquota: [data.cofinsAliquota || ''],
+      cofinsValor: [data.cofinsValor || ''],
+    });
+
+    this.subscriptions.add(
+      group.valueChanges.subscribe(vals => {
+        const qtd = Number(vals.itemQuantidadeComercial || 0);
+        const unit = Number(vals.itemValorUnitarioComercial || 0);
+        const total = (qtd * unit).toFixed(2);
+        if (group.get('itemValorBruto')?.value !== total) {
+          group.get('itemValorBruto')?.setValue(total, { emitEvent: false });
+        }
+      })
+    );
+
+    return group;
+  }
+
+  addItem(): void {
+    if (this.form.get('itemTipo')?.value === 'veiculo' && this.itens.length >= 1) {
+      return;
+    }
+    this.itens.push(this.createItem());
+  }
+
+  removeItem(index: number): void {
+    if (this.itens.length > 1) {
+      this.itens.removeAt(index);
+    }
   }
 
   private loadParametrosFiscais(storeId: string) {
@@ -174,13 +231,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  /**
-   * Carrega veículos e pessoas filtrados pela loja atual.
-   * Chamado no OnInit e sempre que a loja global mudar.
-   */
   private loadInitialData(storeId: string) {
-    // Carrega veículos e pessoas em paralelo; após ambos terminarem,
-    // faz o patchValue caso já exista um dataForm (modo edição)
     this.vehicleService
       .getPaginatedData(0, 1000, { storeId })
       .subscribe((response) => {
@@ -202,14 +253,10 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
-      // Tenta preencher o form imediatamente;
-      // se as listas ainda não carregaram, tryPatchForm
-      // será chamado novamente quando elas chegarem.
       this.tryPatchForm();
     }
   }
 
-  /** Aplica patchValue apenas quando veículos e pessoas já estão carregados */
   private tryPatchForm() {
     if (
       !this.dataForm ||
@@ -218,37 +265,41 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     ) {
       return;
     }
-    const firstItem = this.dataForm.nfeItens?.[0] || {};
-    const manualTaxes = this.getManualTaxes(firstItem);
+
+    this.itens.clear();
+    if (this.dataForm.nfeItens && this.dataForm.nfeItens.length > 0) {
+      this.dataForm.nfeItens.forEach(item => {
+        const icms = (item.itemIcms || {}) as any;
+        const pis = (item.itemPis || {}) as any;
+        const cofins = (item.itemCofins || {}) as any;
+
+        this.itens.push(this.createItem({
+          ...item,
+          icmsOrigem: icms.icmsOrigem,
+          icmsSituacaoTributaria: icms.icmsSituacaoTributaria,
+          icmsValorBaseCalculo: icms.icmsValorBaseCalculo,
+          icmsAliquota: icms.icmsAliquota,
+          icmsValor: icms.icmsValor,
+          pisSituacaoTributaria: pis.pisSituacaoTributaria,
+          pisValorBaseCalculo: pis.pisValorBaseCalculo,
+          pisAliquota: pis.pisAliquota,
+          pisValor: pis.pisValor,
+          cofinsSituacaoTributaria: cofins.cofinsSituacaoTributaria,
+          cofinsValorBaseCalculo: cofins.cofinsValorBaseCalculo,
+          cofinsAliquota: cofins.cofinsAliquota,
+          cofinsValor: cofins.cofinsValor
+        }));
+      });
+    } else {
+      this.addItem();
+    }
 
     this.form.patchValue({
-      vehicleId: this.dataForm.vehicleId || '',
+      itemTipo: this.dataForm.vehicleId ? 'veiculo' : 'produto',
       personId: this.dataForm.personId || '',
       nfeNaturezaOperacao: this.dataForm.nfeNaturezaOperacao || '',
       nfePreenchimentoManualImpostos: this.dataForm.nfeCalcularImpostosAutomaticamente === false,
-      ...manualTaxes
     });
-  }
-
-  private getManualTaxes(item: any): any {
-    if (!item) return {};
-    return {
-      itemCodigoNcm: item.itemCodigoNcm || '',
-      itemCfop: item.itemCfop || '',
-      icmsOrigem: item.itemIcms?.icmsOrigem || '0',
-      icmsSituacaoTributaria: item.itemIcms?.icmsSituacaoTributaria || '',
-      icmsValorBaseCalculo: item.itemIcms?.icmsValorBaseCalculo || '',
-      icmsAliquota: item.itemIcms?.icmsAliquota || '',
-      icmsValor: item.itemIcms?.icmsValor || '',
-      pisSituacaoTributaria: item.itemPis?.pisSituacaoTributaria || '',
-      pisValorBaseCalculo: item.itemPis?.pisValorBaseCalculo || '',
-      pisAliquota: item.itemPis?.pisAliquota || '',
-      pisValor: item.itemPis?.pisValor || '',
-      cofinsSituacaoTributaria: item.itemCofins?.cofinsSituacaoTributaria || '',
-      cofinsValorBaseCalculo: item.itemCofins?.cofinsValorBaseCalculo || '',
-      cofinsAliquota: item.itemCofins?.cofinsAliquota || '',
-      cofinsValor: item.itemCofins?.cofinsValor || '',
-    };
   }
 
   onEnter(event: Event): void {
@@ -275,44 +326,50 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    const firstItem = this.dataForm?.nfeItens?.[0] || {};
+    const nfeItens = this.itens.getRawValue().map(item => {
+      return {
+        vehicleId: this.form.value.itemTipo === 'veiculo' ? item.vehicleId : undefined,
+        itemDescricao: this.form.value.itemTipo === 'produto' ? item.itemDescricao : undefined,
+        itemQuantidadeComercial: this.form.value.itemTipo === 'produto' ? String(item.itemQuantidadeComercial) : '1',
+        itemUnidadeComercial: this.form.value.itemTipo === 'produto' ? item.itemUnidadeComercial : 'UN',
+        itemValorUnitarioComercial: this.form.value.itemTipo === 'produto' ? String(item.itemValorUnitarioComercial) : undefined,
+        itemValorBruto: this.form.value.itemTipo === 'produto' ? String(item.itemValorBruto) : undefined,
+        itemCodigoProduto: this.form.value.itemTipo === 'produto' ? item.itemCodigoProduto : undefined,
+        itemCodigoNcm: item.itemCodigoNcm || undefined,
+        itemCfop: item.itemCfop || undefined,
+        itemIcms: {
+          icmsOrigem: item.icmsOrigem,
+          icmsSituacaoTributaria: item.icmsSituacaoTributaria,
+          icmsValorBaseCalculo: item.icmsValorBaseCalculo,
+          icmsAliquota: item.icmsAliquota,
+          icmsValor: item.icmsValor,
+          icmsModalidadeBaseCalculo: '3',
+        } as any,
+        itemPis: {
+          pisSituacaoTributaria: item.pisSituacaoTributaria,
+          pisValorBaseCalculo: item.pisValorBaseCalculo,
+          pisAliquota: item.pisAliquota,
+          pisValor: item.pisValor,
+        } as any,
+        itemCofins: {
+          cofinsSituacaoTributaria: item.cofinsSituacaoTributaria,
+          cofinsValorBaseCalculo: item.cofinsValorBaseCalculo,
+          cofinsAliquota: item.cofinsAliquota,
+          cofinsValor: item.cofinsValor,
+        } as any,
+      } as any;
+    });
 
     const formValues: Nfe = {
       storeId: this.storeContextService.currentStoreId!,
-      nfeItens: [{ 
-        ...firstItem,
-        vehicleId: this.form.value.vehicleId,
-        itemCodigoNcm: this.form.value.itemCodigoNcm,
-        itemCfop: this.form.value.itemCfop,
-        itemIcms: {
-          icmsOrigem: this.form.value.icmsOrigem,
-          icmsSituacaoTributaria: this.form.value.icmsSituacaoTributaria,
-          icmsValorBaseCalculo: this.form.value.icmsValorBaseCalculo,
-          icmsAliquota: this.form.value.icmsAliquota,
-          icmsValor: this.form.value.icmsValor,
-          icmsModalidadeBaseCalculo: '3', // Padrão
-        } as any,
-        itemPis: {
-          pisSituacaoTributaria: this.form.value.pisSituacaoTributaria,
-          pisValorBaseCalculo: this.form.value.pisValorBaseCalculo,
-          pisAliquota: this.form.value.pisAliquota,
-          pisValor: this.form.value.pisValor,
-        } as any,
-        itemCofins: {
-          cofinsSituacaoTributaria: this.form.value.cofinsSituacaoTributaria,
-          cofinsValorBaseCalculo: this.form.value.cofinsValorBaseCalculo,
-          cofinsAliquota: this.form.value.cofinsAliquota,
-          cofinsValor: this.form.value.cofinsValor,
-        } as any,
-      }],
+      nfeItens: nfeItens,
       personId: this.form.value.personId,
-      nfeTipoDocumento: '0',
+      nfeTipoDocumento: '0', // Entrada
       nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
       nfeCalcularImpostosAutomaticamente: !this.form.value.nfePreenchimentoManualImpostos,
     };
 
     if (this.dataForm?.nfeId) {
-      // Edição
       this.nfeService.update({ ...this.dataForm, ...formValues }).subscribe({
         next: () => {
           this.toastrService.success('NFe atualizada com sucesso');
@@ -324,7 +381,6 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
         },
       });
     } else {
-      // Criação
       this.nfeService.create(formValues).subscribe({
         next: () => {
           this.toastrService.success('NFe criada com sucesso');
@@ -380,7 +436,6 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  // Helpers para exibição nos selects
   getVehicleDisplay(vehicle: Vehicle): string {
     const brand = vehicle.brand || '';
     const model = vehicle.model || '';
