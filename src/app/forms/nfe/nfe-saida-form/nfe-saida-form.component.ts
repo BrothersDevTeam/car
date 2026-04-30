@@ -8,9 +8,11 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  signal,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
+import { MatTabsModule } from '@angular/material/tabs';
 import {
   FormArray,
   FormBuilder,
@@ -30,9 +32,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
+import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
+import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
+import { DrawerComponent } from '@components/drawer/drawer.component';
+import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
+import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
 import type { NaturezaOperacao, Nfe } from '@interfaces/nfe';
@@ -51,14 +58,19 @@ import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fis
   imports: [
     PrimarySelectComponent,
     ReactiveFormsModule,
-    WrapperCardComponent,
     MatButtonModule,
+    CurrencyInputComponent,
+    MatTabsModule,
     MatIconModule,
     MatRadioModule,
     MatCheckboxModule,
     MatExpansionModule,
     MatInputModule,
     MatFormFieldModule,
+    CustomSelectComponent,
+    DrawerComponent,
+    NaturalPersonFormComponent,
+    LegalEntityFormComponent,
   ],
   templateUrl: './nfe-saida-form.component.html',
   styleUrl: './nfe-saida-form.component.scss',
@@ -68,8 +80,14 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   submitted = false;
 
   // Listas para os selects/autocompletes
-  vehicles: Vehicle[] | VehicleList[] = [];
-  persons: Person[] = [];
+  // Listas para os selects formatadas para o CustomSelect
+  vehicles: { id: string; name: string }[] = [];
+  persons: { id: string; name: string }[] = [];
+  
+  // Sinais para controlar os drawers
+  openPersonForm = signal(false);
+  selectedPersonToEdit = signal<Person | null>(null);
+  openVehicleForm = signal(false); // No futuro podemos abrir o form de veículo aqui também
   tiposNfeSaida: { value: NaturezaOperacao; label: string }[] = [
     {
       value: 'VENDA DE VEICULO USADO' as NaturezaOperacao,
@@ -128,7 +146,10 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   protected form: FormGroup = this.formBuilderService.group({
     storeId: [''],
-    personId: ['', Validators.required],
+    person: this.formBuilderService.group({
+      id: ['', Validators.required],
+      name: [''],
+    }),
     nfeNaturezaOperacao: ['', Validators.required],
     nfePreenchimentoManualImpostos: [false],
     itemTipo: ['veiculo'], // 'veiculo' ou 'produto'
@@ -178,7 +199,10 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     const isVeiculo = this.form?.get('itemTipo')?.value === 'veiculo';
     
     const group = this.formBuilderService.group({
-      vehicleId: [data.vehicleId || '', isVeiculo ? [Validators.required] : []],
+      vehicle: this.formBuilderService.group({
+        id: [data.vehicleId || '', isVeiculo ? [Validators.required] : []],
+        name: [data.vehicleName || ''],
+      }),
       itemDescricao: [data.itemDescricao || '', !isVeiculo ? [Validators.required] : []],
       itemCodigoProduto: [data.itemCodigoProduto || ''],
       itemUnidadeComercial: [data.itemUnidadeComercial || 'UN'],
@@ -248,16 +272,63 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     this.vehicleService
       .getPaginatedData(0, 1000, { storeId })
       .subscribe((response) => {
-        this.vehicles = response.content || [];
+        this.vehicles = (response.content || []).map(v => ({
+          id: v.vehicleId,
+          name: this.getVehicleDisplay(v as Vehicle)
+        }));
         this.tryPatchForm();
       });
 
     this.personService
       .getPaginatedData(0, 1000, { storeId })
       .subscribe((response) => {
-        this.persons = response.content || [];
+        this.persons = (response.content || []).map(p => ({
+          id: p.personId,
+          name: this.getPersonDisplay(p)
+        }));
         this.tryPatchForm();
       });
+  }
+
+  // Métodos para o Drawer de Person (chamados pelo CustomSelect)
+  onCreateNewPerson() {
+    this.selectedPersonToEdit.set(null);
+    this.openPersonForm.set(true);
+  }
+
+  onEditPerson(id: string) {
+    this.personService.getById(id).subscribe(person => {
+      this.selectedPersonToEdit.set(person);
+      this.openPersonForm.set(true);
+    });
+  }
+
+  handleClosePersonDrawer() {
+    this.openPersonForm.set(false);
+    this.selectedPersonToEdit.set(null);
+  }
+
+  onPersonFormSubmitted() {
+    this.handleClosePersonDrawer();
+    if (this.storeContextService.currentStoreId) {
+      this.loadInitialData(this.storeContextService.currentStoreId);
+    }
+  }
+
+  onVehicleSelectedForItem(option: any, index: number) {
+    if (!option || !option.id) return;
+
+    this.vehicleService.getById(option.id).subscribe(vehicle => {
+      const itemGroup = this.itens.at(index) as FormGroup;
+      const valor = vehicle.valorVenda 
+        ? parseFloat(vehicle.valorVenda.toString().replace(',', '.')) 
+        : 0;
+      
+      itemGroup.patchValue({
+        itemValorUnitarioComercial: valor,
+        itemValorBruto: valor.toFixed(2)
+      });
+    });
   }
 
   ngOnDestroy() {
@@ -309,7 +380,10 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
 
     this.form.patchValue({
       itemTipo: this.dataForm.vehicleId ? 'veiculo' : 'produto',
-      personId: this.dataForm.personId || '',
+      person: {
+        id: this.dataForm.personId || '',
+        name: this.persons.find(p => p.id === this.dataForm!.personId)?.name || ''
+      },
       nfeNaturezaOperacao: this.dataForm.nfeNaturezaOperacao || '',
       nfePreenchimentoManualImpostos: this.dataForm.nfeCalcularImpostosAutomaticamente === false,
     });
@@ -341,7 +415,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
 
     const nfeItens = this.itens.getRawValue().map(item => {
       return {
-        vehicleId: this.form.value.itemTipo === 'veiculo' ? item.vehicleId : undefined,
+        vehicleId: this.form.value.itemTipo === 'veiculo' ? item.vehicle?.id : undefined,
         itemDescricao: this.form.value.itemTipo === 'produto' ? item.itemDescricao : undefined,
         itemQuantidadeComercial: this.form.value.itemTipo === 'produto' ? String(item.itemQuantidadeComercial) : '1',
         itemUnidadeComercial: this.form.value.itemTipo === 'produto' ? item.itemUnidadeComercial : 'UN',
@@ -376,7 +450,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     const formValues: Nfe = {
       storeId: this.storeContextService.currentStoreId!,
       nfeItens: nfeItens,
-      personId: this.form.value.personId,
+      personId: this.form.value.person?.id,
       nfeTipoDocumento: '1', // Saída
       nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
       nfeCalcularImpostosAutomaticamente: !this.form.value.nfePreenchimentoManualImpostos,

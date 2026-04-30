@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, Output, signal, SimpleChanges, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -30,8 +30,14 @@ import { CurrencyInputComponent } from '@components/currency-input/currency-inpu
 import { DateInputComponent } from '@components/date-input/date-input.component';
 import { StoreContextService } from '@services/store-context.service';
 import { ToastrService } from 'ngx-toastr';
+import { MatTabsModule } from '@angular/material/tabs';
+import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
+import { DrawerComponent } from '@components/drawer/drawer.component';
+import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
+import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
 
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -43,6 +49,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { CanComponentDeactivate } from '@guards/unsaved-changes.guard';
 import { FormDraftService, FormDraft } from '@services/form-draft.service';
 import { ActionsService } from '@services/actions.service';
@@ -60,6 +67,8 @@ import { VendaRequestDto } from '@interfaces/venda';
     ReactiveFormsModule,
     ContentHeaderComponent,
     MatButtonModule,
+    MatExpansionModule,
+    MatTabsModule,
     MatIconModule,
     MatInputModule,
     MatFormFieldModule,
@@ -73,6 +82,10 @@ import { VendaRequestDto } from '@interfaces/venda';
     MatChipsModule,
     CurrencyInputComponent,
     DateInputComponent,
+    CustomSelectComponent,
+    DrawerComponent,
+    NaturalPersonFormComponent,
+    LegalEntityFormComponent,
   ],
   templateUrl: './venda-form.component.html',
   styleUrls: ['./venda-form.component.scss'],
@@ -98,12 +111,16 @@ export class VendaFormComponent
   // Formulário Reativo
   vendaForm: FormGroup;
 
-  // Listas de Autocomplete
-  filteredVehicles: VehicleList[] | Vehicle[] = [];
-  filteredBuyers: Person[] = [];
-  filteredSellers: Person[] = [];
-  filteredAvalistas: Person[] = [];
+  // Listas formatadas para o CustomSelect
+  vehicles: { id: string; name: string }[] = [];
+  buyers: { id: string; name: string }[] = [];
+  sellers: { id: string; name: string }[] = [];
+  avalistasOptions: { id: string; name: string }[] = [];
   selectedAvalistas: Person[] = [];
+  
+  // Sinais para controlar os drawers
+  openPersonForm = signal(false);
+  selectedPersonToEdit = signal<Person | null>(null);
 
   constructor(
     private fb: FormBuilder,
@@ -118,12 +135,18 @@ export class VendaFormComponent
     private actionsService: ActionsService
   ) {
     this.vendaForm = this.fb.group({
-      vehicleId: ['', Validators.required],
-      vehicleDisplay: ['', Validators.required], // Campo apenas para o autocomplete
-      buyerPersonId: ['', Validators.required],
-      buyerDisplay: ['', Validators.required], // Campo apenas para o autocomplete
-      sellerPersonId: [''],
-      sellerDisplay: [''], // Campo apenas para o autocomplete
+      vehicle: this.fb.group({
+        id: ['', Validators.required],
+        name: [''],
+      }),
+      buyer: this.fb.group({
+        id: ['', Validators.required],
+        name: [''],
+      }),
+      seller: this.fb.group({
+        id: [''],
+        name: [''],
+      }),
       dataVenda: [new Date(), Validators.required],
       valor: [0, [Validators.required, Validators.min(0.01)]],
       valorFinal: [0, [Validators.required, Validators.min(0.01)]],
@@ -154,7 +177,7 @@ export class VendaFormComponent
       this.addPagamento();
     }
 
-    this.initAutocompletes();
+    this.loadInitialData();
 
     // Carrega o valor inicial para detectar mudanças
     setTimeout(() => {
@@ -174,117 +197,67 @@ export class VendaFormComponent
     this.subscriptions.unsubscribe();
   }
 
-  private initAutocompletes() {
+  private loadInitialData() {
     const storeId = this.storeContextService.currentStoreId;
+    if (!storeId) return;
 
-    // Busca de Veículos (Somente em estoque e da loja atual)
-    this.subscriptions.add(
-      this.vendaForm
-        .get('vehicleDisplay')
-        ?.valueChanges.pipe(
-          debounceTime(300),
-          distinctUntilChanged(),
-          filter((value) => typeof value === 'string' && value.length >= 2),
-          switchMap((value) =>
-            this.vehicleService.getPaginatedData(0, 50, {
-              search: value,
-              onlyInStock: true,
-              storeId: storeId || undefined,
-            })
-          )
-        )
-        .subscribe((response) => {
-          this.filteredVehicles = response.content;
-        })
-    );
+    // Carrega Veículos em Estoque
+    this.vehicleService
+      .getPaginatedData(0, 1000, { storeId, onlyInStock: true })
+      .subscribe((response) => {
+        this.vehicles = (response.content || []).map(v => ({
+          id: v.vehicleId,
+          name: `${v.brand} ${v.model} (${v.plate})`
+        }));
+      });
 
-    // Busca de Compradores
-    this.subscriptions.add(
-      this.vendaForm
-        .get('buyerDisplay')
-        ?.valueChanges.pipe(
-          debounceTime(300),
-          distinctUntilChanged(),
-          filter((value) => typeof value === 'string' && value.length >= 2),
-          switchMap((value) =>
-            this.personService.getPaginatedData(0, 50, {
-              search: value,
-              storeId: storeId || undefined,
-            })
-          )
-        )
-        .subscribe((response) => {
-          this.filteredBuyers = response.content;
-        })
-    );
-
-    // Busca de Vendedores
-    this.subscriptions.add(
-      this.vendaForm
-        .get('sellerDisplay')
-        ?.valueChanges.pipe(
-          debounceTime(300),
-          distinctUntilChanged(),
-          filter((value) => typeof value === 'string' && value.length >= 2),
-          switchMap((value) =>
-            this.personService.getPaginatedData(0, 50, {
-              search: value,
-              storeId: storeId || undefined,
-            })
-          )
-        )
-        .subscribe((response) => {
-          this.filteredSellers = response.content;
-        })
-    );
-
-    // Busca de Avalistas
-    this.subscriptions.add(
-      this.vendaForm
-        .get('avalistaSearchControl')
-        ?.valueChanges.pipe(
-          debounceTime(300),
-          distinctUntilChanged(),
-          filter((value) => typeof value === 'string' && value.length >= 2),
-          switchMap((value) =>
-            this.personService.getPaginatedData(0, 50, {
-              search: value,
-              storeId: storeId || undefined,
-            })
-          )
-        )
-        .subscribe((response) => {
-          this.filteredAvalistas = response.content;
-        })
-    );
+    // Carrega Pessoas (Compradores/Vendedores/Avalistas)
+    this.personService
+      .getPaginatedData(0, 1000, { storeId })
+      .subscribe((response) => {
+        const mapped = (response.content || []).map(p => ({
+          id: p.personId,
+          name: p.cpf ? `${p.name} - CPF: ${p.cpf}` : `${p.name} - CNPJ: ${p.cnpj}`
+        }));
+        this.buyers = [...mapped];
+        this.sellers = [...mapped];
+        this.avalistasOptions = [...mapped];
+      });
   }
 
-  // Handlers de seleção do Autocomplete
-  onVehicleSelected(vehicle: Vehicle | VehicleList) {
-    const valorVenda = vehicle.valorVenda
-      ? parseFloat(vehicle.valorVenda.toString().replace(',', '.'))
-      : 0;
+  // Métodos para o Drawer de Person
+  onCreateNewPerson() {
+    this.selectedPersonToEdit.set(null);
+    this.openPersonForm.set(true);
+  }
 
-    this.vendaForm.patchValue({
-      vehicleId: vehicle.vehicleId,
-      vehicleDisplay:
-        `${vehicle.brand || ''} ${vehicle.model || ''} (${vehicle.plate})`.trim(),
-      valor: valorVenda,
-      valorFinal: valorVenda,
+  onEditPerson(id: string) {
+    this.personService.getById(id).subscribe(person => {
+      this.selectedPersonToEdit.set(person);
+      this.openPersonForm.set(true);
     });
   }
 
-  onBuyerSelected(person: Person) {
-    this.vendaForm.patchValue({
-      buyerPersonId: person.personId,
-      buyerDisplay: person.name,
-    });
+  handleClosePersonDrawer() {
+    this.openPersonForm.set(false);
+    this.selectedPersonToEdit.set(null);
   }
 
-  onSellerSelected(person: Person) {
-    this.vendaForm.patchValue({
-      sellerPersonId: person.personId,
-      sellerDisplay: person.name,
+  onPersonFormSubmitted() {
+    this.handleClosePersonDrawer();
+    this.loadInitialData();
+  }
+
+  onVehicleSelected(option: { id: string; name: string }) {
+    this.vehicleService.getById(option.id).subscribe(vehicle => {
+      const valorVenda = vehicle.valorVenda
+        ? parseFloat(vehicle.valorVenda.toString().replace(',', '.'))
+        : 0;
+
+      this.vendaForm.patchValue({
+        valor: valorVenda,
+        valorFinal: valorVenda,
+      });
     });
   }
 
@@ -307,14 +280,17 @@ export class VendaFormComponent
   }
 
   // Gestão de Avalistas
-  addAvalistaDirectly(person: Person) {
-    if (this.avalistasIds.value.includes(person.personId)) {
+  addAvalistaDirectly(option: any) {
+    if (!option || !option.id) return;
+    
+    if (this.avalistasIds.value.includes(option.id)) {
       this.toastr.warning('Avalista já adicionado');
       return;
     }
-    this.avalistasIds.push(this.fb.control(person.personId));
-    this.selectedAvalistas.push(person);
-    this.toastr.success(`Avalista ${person.name} adicionado`);
+    this.avalistasIds.push(this.fb.control(option.id));
+    // Criamos um objeto parcial de Person para manter a exibição no chip-set
+    this.selectedAvalistas.push({ personId: option.id, name: option.name } as any);
+    this.toastr.success(`Avalista ${option.name} adicionado`);
   }
 
   removeAvalista(index: number) {
@@ -338,7 +314,7 @@ export class VendaFormComponent
   canSaveForm(): boolean {
     // Para rascunho local, permitimos salvar se houver qualquer dado relevante
     const raw = this.vendaForm.value;
-    return !!(raw.vehicleId || raw.buyerPersonId || raw.sellerPersonId);
+    return !!(raw.vehicle?.id || raw.buyer?.id || raw.seller?.id);
   }
 
   saveForm(isDraft: boolean): Observable<boolean> {
@@ -469,17 +445,16 @@ export class VendaFormComponent
       .subscribe({
         next: (venda) => {
           this.vendaForm.patchValue({
-            vehicleId: venda.vehicleId,
-            buyerPersonId: venda.buyerPersonId,
-            sellerPersonId: venda.sellerPersonId,
+            vehicle: { id: venda.vehicleId, name: '' },
+            buyer: { id: venda.buyerPersonId, name: '' },
+            seller: { id: venda.sellerPersonId, name: '' },
             dataVenda: new Date(venda.dataVenda),
             valor: venda.valor,
             valorFinal: venda.valorFinal,
             observacao: venda.observacao,
           });
 
-          // TODO: Popular displays e FormArrays em uma implementação real refinada
-          // Para simplificar agora, focamos na criação.
+          // O CustomSelect carregará os nomes baseando-se nos IDs carregados
         },
         error: () => this.toastr.error('Erro ao carregar dados da venda'),
       });
@@ -503,14 +478,17 @@ export class VendaFormComponent
 
     const formData: VendaRequestDto = {
       ...raw,
+      vehicleId: raw.vehicle?.id,
+      buyerPersonId: raw.buyer?.id,
+      sellerPersonId: raw.seller?.id,
       dataVenda: dataVendaFormatted,
       // Converte os valores formatados (string BRL) de volta para número
       valor: raw.valor || 0,
       valorFinal: raw.valorFinal || 0,
-      // Remove campos auxiliares de display que não fazem parte do DTO
-      vehicleDisplay: undefined,
-      buyerDisplay: undefined,
-      sellerDisplay: undefined,
+      // Remove campos auxiliares
+      vehicle: undefined,
+      buyer: undefined,
+      seller: undefined,
       avalistaSearchControl: undefined,
     };
 

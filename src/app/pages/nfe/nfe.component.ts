@@ -363,8 +363,8 @@ export class NfeComponent {
             ...response,
             content: response.content.map((nfe) => ({
               ...nfe,
-              // Mapeie os dados conforme necessário para a tabela
-              cfop: nfe.nfeItens[0]?.itemCfop || 'Não informado',
+              // Mapeie os dados conforme necessário para a tabela com segurança
+              cfop: nfe.nfeItens?.[0]?.itemCfop || 'Não informado',
               productIdentifier: nfe.vehicle?.plate || '—',
             })),
           };

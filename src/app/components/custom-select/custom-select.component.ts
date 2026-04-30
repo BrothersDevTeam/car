@@ -33,6 +33,7 @@ import { BrandService } from '@services/brand.service';
 import { ModelService } from '@services/model.service';
 import { ColorService } from '@services/color.service';
 import { PersonService } from '@services/person.service';
+import { VehicleService } from '@services/vehicle.service';
 
 @Component({
   selector: 'app-custom-select',
@@ -44,7 +45,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
   @Input() label: string = 'Selecione uma opção';
   @Input() options: { id: string; name: string }[] = [];
   @Input() control!: FormControl | FormGroup;
-  @Input() listType!: 'brand' | 'model' | 'color' | 'person';
+  @Input() listType!: 'brand' | 'model' | 'color' | 'person' | 'vehicle';
   @Input() selectedBrand: { id: string; name: string } = { id: '', name: '' };
   @Input() matTooltip: string = '';
   @Input() placeholder: string = '';
@@ -70,6 +71,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
     private modelService: ModelService,
     private colorService: ColorService,
     private personService: PersonService,
+    private vehicleService: VehicleService,
     private toastrService: ToastrService,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef
@@ -81,6 +83,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       model: this.modelService,
       color: this.colorService,
       person: this.personService,
+      vehicle: this.vehicleService,
     };
 
     if (this.control) {
@@ -249,6 +252,17 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       successDeleteMessage: 'Cor deletada com sucesso!',
       errorMessage: 'Erro ao adicionar cor. Tente novamente.',
     },
+    vehicle: {
+      create: 'Adicionar novo veículo',
+      update: 'Editar veículo',
+      delete: 'Deletar veículo',
+      message: 'Digite a placa do veículo',
+      deleteMessage: 'Você tem certeza que deseja deletar este veículo?',
+      successCreateMessage: 'Veículo adicionado com sucesso!',
+      successUpdateMessage: 'Veículo editado com sucesso!',
+      successDeleteMessage: 'Veículo deletado com sucesso!',
+      errorMessage: 'Erro ao adicionar veículo. Tente novamente.',
+    },
   };
 
   /**
@@ -262,8 +276,8 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    // Para person, emite evento para o componente pai abrir o drawer
-    if (this.listType === 'person') {
+    // Para person e vehicle, emite evento para o componente pai abrir o drawer/página
+    if (this.listType === 'person' || this.listType === 'vehicle') {
       this.onCreateNew.emit();
       this.closeDropdown();
       return;
@@ -294,8 +308,8 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    // Para person, emite evento para o componente pai abrir o drawer
-    if (this.listType === 'person') {
+    // Para person e vehicle, emite evento para o componente pai abrir o drawer/página
+    if (this.listType === 'person' || this.listType === 'vehicle') {
       this.onEdit.emit(option.id);
       this.closeDropdown();
       return;

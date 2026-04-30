@@ -10,13 +10,15 @@
 
   <div class="section-title">Informações Gerais</div>
   <div class="tax-row">
-    <app-primary-select
+    <app-custom-select
+      listType="person"
       [label]="'Destinatário*'"
       [options]="persons"
-      formControlName="personId"
-      [optionLabel]="getPersonDisplay"
+      [control]="$any(form.get('person'))"
       placeholder="Selecione o Cliente"
-    ></app-primary-select>
+      (onCreateNew)="onCreateNewPerson()"
+      (onEdit)="onEditPerson($event)"
+    ></app-custom-select>
 
     <app-primary-select
       [label]="'Natureza da Operação*'"
@@ -28,7 +30,7 @@
 
   <div class="section-title">Itens da NFe</div>
   
-  <div class="radio-button-group horizontal m-b-16">
+  <div class="radio-button-group m-b-16">
     <mat-radio-group formControlName="itemTipo">
       <mat-radio-button value="veiculo" color="primary">Veículo do Estoque</mat-radio-button>
       <mat-radio-button value="produto" color="primary">Produto Diverso</mat-radio-button>
@@ -38,23 +40,37 @@
   <div formArrayName="nfeItens">
     @for (itemGroup of itens.controls; track $index) {
       <div [formGroupName]="$index" class="manual-product-fields">
-        <div class="title-trash" style="margin-bottom: 0.5rem;">
+        <div class="item-header">
           <span class="sub-section-title">Item {{ $index + 1 }}</span>
           @if (form.get('itemTipo')?.value === 'produto' && itens.length > 1) {
-            <button mat-icon-button color="warn" (click)="removeItem($index)" type="button">
+            <button mat-icon-button color="warn" (click)="removeItem($index)" type="button" matTooltip="Remover este item">
               <mat-icon>remove_circle_outline</mat-icon>
             </button>
           }
         </div>
 
         @if (form.get('itemTipo')?.value === 'veiculo') {
-          <app-primary-select
+          <app-custom-select
+            listType="vehicle"
             [label]="'Veículo*'"
             [options]="vehicles"
-            formControlName="vehicleId"
-            [optionLabel]="getVehicleDisplay"
+            [control]="$any(itemGroup.get('vehicle'))"
             placeholder="Selecione o Veículo"
-          ></app-primary-select>
+            (itemChanged)="onVehicleSelectedForItem($event, $index)"
+          ></app-custom-select>
+
+          <div class="tax-row">
+            <app-currency-input
+              label="Valor de Venda (R$)*"
+              formControlName="itemValorUnitarioComercial"
+              [required]="true"
+            ></app-currency-input>
+            <app-currency-input
+              label="Valor Total (R$)"
+              formControlName="itemValorBruto"
+              [readonly]="true"
+            ></app-currency-input>
+          </div>
         } @else {
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Descrição do Produto*</mat-label>
@@ -77,14 +93,16 @@
           </div>
 
           <div class="tax-row">
-            <mat-form-field appearance="outline">
-              <mat-label>Valor Unitário (R$)*</mat-label>
-              <input matInput type="number" formControlName="itemValorUnitarioComercial">
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Valor Total (R$)</mat-label>
-              <input matInput formControlName="itemValorBruto" readonly>
-            </mat-form-field>
+            <app-currency-input
+              label="Valor Unitário (R$)*"
+              formControlName="itemValorUnitarioComercial"
+              [required]="true"
+            ></app-currency-input>
+            <app-currency-input
+              label="Valor Total (R$)"
+              formControlName="itemValorBruto"
+              [readonly]="true"
+            ></app-currency-input>
           </div>
 
           <div class="tax-row">
@@ -102,7 +120,7 @@
         <!-- Tributação Manual por Item -->
         @if (form.get('nfePreenchimentoManualImpostos')?.value) {
           <div class="manual-tax-grid">
-            <div class="sub-section-title">Tributação Manual - Item {{ $index + 1 }}</div>
+            <div class="tax-section-title">Tributação Manual</div>
             
             @if (form.get('itemTipo')?.value === 'veiculo') {
               <div class="tax-row">
@@ -117,7 +135,7 @@
               </div>
             }
 
-            <div class="sub-section-title">ICMS</div>
+            <div class="tax-section-title">ICMS</div>
             <div class="tax-row">
               <mat-form-field appearance="outline">
                 <mat-label>Origem</mat-label>
@@ -129,21 +147,21 @@
               </mat-form-field>
             </div>
             <div class="tax-row three-cols">
-              <mat-form-field appearance="outline">
-                <mat-label>Base Calc. ICMS</mat-label>
-                <input matInput formControlName="icmsValorBaseCalculo">
-              </mat-form-field>
+              <app-currency-input
+                label="Base Calc. ICMS"
+                formControlName="icmsValorBaseCalculo"
+              ></app-currency-input>
               <mat-form-field appearance="outline">
                 <mat-label>Alíquota ICMS (%)</mat-label>
                 <input matInput formControlName="icmsAliquota">
               </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Valor ICMS</mat-label>
-                <input matInput formControlName="icmsValor">
-              </mat-form-field>
+              <app-currency-input
+                label="Valor ICMS"
+                formControlName="icmsValor"
+              ></app-currency-input>
             </div>
 
-            <div class="sub-section-title">PIS / COFINS</div>
+            <div class="tax-section-title">PIS / COFINS</div>
             <div class="tax-row">
               <mat-form-field appearance="outline">
                 <mat-label>CST PIS</mat-label>
@@ -154,6 +172,36 @@
                 <input matInput formControlName="cofinsSituacaoTributaria">
               </mat-form-field>
             </div>
+
+            <div class="tax-row three-cols">
+              <app-currency-input
+                label="Base Calc. PIS"
+                formControlName="pisValorBaseCalculo"
+              ></app-currency-input>
+              <mat-form-field appearance="outline">
+                <mat-label>Alíquota PIS (%)</mat-label>
+                <input matInput formControlName="pisAliquota">
+              </mat-form-field>
+              <app-currency-input
+                label="Valor PIS"
+                formControlName="pisValor"
+              ></app-currency-input>
+            </div>
+
+            <div class="tax-row three-cols">
+              <app-currency-input
+                label="Base Calc. COFINS"
+                formControlName="cofinsValorBaseCalculo"
+              ></app-currency-input>
+              <mat-form-field appearance="outline">
+                <mat-label>Alíquota COFINS (%)</mat-label>
+                <input matInput formControlName="cofinsAliquota">
+              </mat-form-field>
+              <app-currency-input
+                label="Valor COFINS"
+                formControlName="cofinsValor"
+              ></app-currency-input>
+            </div>
           </div>
         }
       </div>
@@ -161,7 +209,7 @@
   </div>
 
   @if (form.get('itemTipo')?.value === 'produto') {
-    <button mat-stroked-button color="primary" type="button" (click)="addItem()" class="m-b-16">
+    <button mat-button color="primary" type="button" (click)="addItem()" class="add-item-btn m-b-16">
       <mat-icon>add</mat-icon> Adicionar Outro Produto
     </button>
   }
@@ -180,6 +228,37 @@
     (click)="onSubmit()"
     [disabled]="form.invalid"
   >
+    <mat-icon>{{ dataForm?.nfeId ? 'save' : 'send' }}</mat-icon>
     {{ dataForm?.nfeId ? 'Atualizar NFe' : 'Emitir NFe' }}
   </button>
 </form>
+
+<!-- Drawer para criar/editar pessoa -->
+@if (openPersonForm()) {
+  <app-drawer (closeDrawer)="handleClosePersonDrawer()">
+    <mat-tab-group [selectedIndex]="selectedPersonToEdit()?.legalEntity ? 1 : 0">
+      <mat-tab
+        label="Pessoa Física"
+        [disabled]="selectedPersonToEdit() && selectedPersonToEdit()!.legalEntity"
+      >
+        <app-natural-person-form
+          [dataForm]="
+            !selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null
+          "
+          (formSubmitted)="onPersonFormSubmitted()"
+        />
+      </mat-tab>
+      <mat-tab
+        label="Pessoa Jurídica"
+        [disabled]="selectedPersonToEdit() && !selectedPersonToEdit()!.legalEntity"
+      >
+        <app-legal-entity-form
+          [dataForm]="
+            selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null
+          "
+          (formSubmitted)="onPersonFormSubmitted()"
+        />
+      </mat-tab>
+    </mat-tab-group>
+  </app-drawer>
+}
