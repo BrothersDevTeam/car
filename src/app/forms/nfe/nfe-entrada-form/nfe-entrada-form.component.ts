@@ -23,6 +23,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
@@ -55,6 +56,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatButtonModule,
     MatIconModule,
     MatRadioModule,
+    MatCheckboxModule,
     MatExpansionModule,
     MatInputModule,
     MatFormFieldModule,
@@ -117,7 +119,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     vehicleId: ['', Validators.required],
     personId: ['', Validators.required],
     nfeNaturezaOperacao: ['', Validators.required],
-    nfeCalcularImpostosAutomaticamente: [null], // novo: null significa "usar padrão da loja"
+    nfePreenchimentoManualImpostos: [false],
 
     // Campos para tributação manual (ICMS, PIS, COFINS) do item 1
     itemCodigoNcm: [''],
@@ -223,7 +225,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       vehicleId: this.dataForm.vehicleId || '',
       personId: this.dataForm.personId || '',
       nfeNaturezaOperacao: this.dataForm.nfeNaturezaOperacao || '',
-      nfeCalcularImpostosAutomaticamente: this.dataForm.nfeCalcularImpostosAutomaticamente ?? null,
+      nfePreenchimentoManualImpostos: this.dataForm.nfeCalcularImpostosAutomaticamente === false,
       ...manualTaxes
     });
   }
@@ -306,7 +308,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       personId: this.form.value.personId,
       nfeTipoDocumento: '0',
       nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
-      nfeCalcularImpostosAutomaticamente: this.form.value.nfeCalcularImpostosAutomaticamente,
+      nfeCalcularImpostosAutomaticamente: !this.form.value.nfePreenchimentoManualImpostos,
     };
 
     if (this.dataForm?.nfeId) {
