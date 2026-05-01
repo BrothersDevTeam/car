@@ -54,6 +54,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
   @Output() onCreateNew = new EventEmitter<void>();
   @Output() onEdit = new EventEmitter<string>(); // Emite o ID da pessoa a editar
   @Output() itemChanged = new EventEmitter<void>(); // Notifica que um item foi criado/editado/deletado
+  @Output() optionSelected = new EventEmitter<any>();
   @Input() error: boolean = false;
 
   selectedOption: { id: string; name: string } | null = null;
@@ -183,6 +184,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       name: option.name,
     });
 
+    this.optionSelected.emit(option);
     this.isOpen = false;
   }
 

@@ -84,7 +84,7 @@
             [options]="vehicles"
             [control]="$any(itemGroup.get('vehicle'))"
             placeholder="Selecione o Veículo"
-            (itemChanged)="onVehicleSelectedForItem($event, $index)"
+            (optionSelected)="onVehicleSelectedForItem($event, $index)"
           ></app-custom-select>
 
           <div class="tax-row">
