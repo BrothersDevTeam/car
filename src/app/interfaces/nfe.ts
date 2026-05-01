@@ -46,6 +46,8 @@ export interface Nfe {
   nfeNaturezaOperacao: NaturezaOperacao;
   nfeItens: nfeItem[];
   vehicleId?: string; // ID do veículo do primeiro item
+  productIdentifier?: string;
+  cfop?: string;
   vehicle?: any; // Dados resumidos do veículo vinculado
   nfeCalcularImpostosAutomaticamente?: boolean; // Override de cálculo automático para esta NFe
 

@@ -95,7 +95,6 @@ export class NfeComponent {
     {
       key: 'productIdentifier',
       header: 'Ident. do Produto',
-      format: (val, row) => row.vehicle?.plate || '—',
     },
     {
       key: 'alert',
@@ -363,9 +362,9 @@ export class NfeComponent {
             ...response,
             content: response.content.map((nfe) => ({
               ...nfe,
-              // Mapeie os dados conforme necessário para a tabela com segurança
-              cfop: nfe.nfeItens?.[0]?.itemCfop || 'Não informado',
-              productIdentifier: nfe.vehicle?.plate || '—',
+              // Usa os campos já planificados pelo backend para performance e consistência
+              cfop: nfe.cfop || '—',
+              productIdentifier: nfe.productIdentifier || '—',
             })),
           };
         }

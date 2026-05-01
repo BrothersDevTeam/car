@@ -58,6 +58,8 @@
                 @if (alertMsg) {
                   <div
                     class="alert-indicator"
+                    [class.tooltip-up]="tooltipDirection() === 'up'"
+                    (mouseenter)="updateTooltipDirection($event)"
                     (click)="$event.stopPropagation()"
                   >
                     <mat-icon class="alert-icon pulse-warning">

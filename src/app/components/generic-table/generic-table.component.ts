@@ -11,6 +11,7 @@ import {
   OnChanges,
   OnInit,
   Output,
+  signal,
   SimpleChanges,
 } from '@angular/core';
 import { NgClass, NgIf } from '@angular/common';
@@ -43,6 +44,7 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
   @Input() totalElements: number = 0;
   @Input() pageSizeOptions: number[] = [5, 10, 25, 100];
   @Input() loading: boolean = false;
+  tooltipDirection = signal<'down' | 'up'>('down');
 
   @Output() rowClick = new EventEmitter<T>();
   @Output() pageEvent = new EventEmitter<PageEvent>();
@@ -176,5 +178,12 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
 
   getAlertMessage(column: ColumnConfig<T>, row: T): string | null {
     return column.alertConfig?.getMessage(row) ?? null;
+  }
+
+  updateTooltipDirection(event: MouseEvent) {
+    const y = event.clientY;
+    const windowHeight = window.innerHeight;
+    // Se estiver abaixo de 60% da tela, abre para cima
+    this.tooltipDirection.set(y > windowHeight * 0.6 ? 'up' : 'down');
   }
 }

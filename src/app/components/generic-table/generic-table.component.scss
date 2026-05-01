@@ -266,6 +266,21 @@ button[mat-icon-button] {
     pointer-events: none;
     transition: all 0.2s ease;
   }
+
+  &.tooltip-up {
+    .alert-tooltip {
+      top: auto;
+      bottom: 34px;
+      transform: translateX(-50%) translateY(10px) scale(0.95);
+      box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    &:hover {
+      .alert-tooltip {
+        transform: translateX(-50%) translateY(0) scale(1);
+      }
+    }
+  }
 }
 
 .alert-tooltip-header {
