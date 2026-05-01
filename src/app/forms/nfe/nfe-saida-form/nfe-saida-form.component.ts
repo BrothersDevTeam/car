@@ -51,7 +51,10 @@ import { PersonService } from '@services/person.service';
 import { VehicleService } from '@services/vehicle.service';
 import { extractErrorMessage } from '@utils/error-utils';
 import { StoreContextService } from '@services/store-context.service';
-import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fiscal.service';
+import {
+  ParametroFiscalService,
+  ParametroFiscal,
+} from '@services/parametro-fiscal.service';
 
 @Component({
   selector: 'app-nfe-saida-form',
@@ -83,7 +86,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   // Listas para os selects formatadas para o CustomSelect
   vehicles: { id: string; name: string }[] = [];
   persons: { id: string; name: string }[] = [];
-  
+
   // Sinais para controlar os drawers
   openPersonForm = signal(false);
   selectedPersonToEdit = signal<Person | null>(null);
@@ -181,7 +184,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
         }
       })
     );
-    
+
     // Observar mudanças no itemTipo para ajustar a lista
     this.subscriptions.add(
       this.form.get('itemTipo')?.valueChanges.subscribe(() => {
@@ -197,19 +200,28 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   createItem(data: any = {}): FormGroup {
     const isVeiculo = this.form?.get('itemTipo')?.value === 'veiculo';
-    
+
     const group = this.formBuilderService.group({
       vehicle: this.formBuilderService.group({
         id: [data.vehicleId || '', isVeiculo ? [Validators.required] : []],
         name: [data.vehicleName || ''],
       }),
-      itemDescricao: [data.itemDescricao || '', !isVeiculo ? [Validators.required] : []],
+      itemDescricao: [
+        data.itemDescricao || '',
+        !isVeiculo ? [Validators.required] : [],
+      ],
       itemCodigoProduto: [data.itemCodigoProduto || ''],
       itemUnidadeComercial: [data.itemUnidadeComercial || 'UN'],
-      itemQuantidadeComercial: [data.itemQuantidadeComercial || 1, [Validators.required]],
-      itemValorUnitarioComercial: [data.itemValorUnitarioComercial || '', [Validators.required]],
+      itemQuantidadeComercial: [
+        data.itemQuantidadeComercial || 1,
+        [Validators.required],
+      ],
+      itemValorUnitarioComercial: [
+        data.itemValorUnitarioComercial || '',
+        [Validators.required],
+      ],
       itemValorBruto: [{ value: data.itemValorBruto || '', disabled: true }],
-      
+
       // Campos fiscais
       itemCodigoNcm: [data.itemCodigoNcm || ''],
       itemCfop: [data.itemCfop || ''],
@@ -229,7 +241,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     this.subscriptions.add(
-      group.valueChanges.subscribe(vals => {
+      group.valueChanges.subscribe((vals) => {
         const qtd = Number(vals.itemQuantidadeComercial || 0);
         const unit = Number(vals.itemValorUnitarioComercial || 0);
         const total = (qtd * unit).toFixed(2);
@@ -243,7 +255,10 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   addItem(): void {
-    if (this.form.get('itemTipo')?.value === 'veiculo' && this.itens.length >= 1) {
+    if (
+      this.form.get('itemTipo')?.value === 'veiculo' &&
+      this.itens.length >= 1
+    ) {
       return;
     }
     this.itens.push(this.createItem());
@@ -272,9 +287,9 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     this.vehicleService
       .getPaginatedData(0, 1000, { storeId })
       .subscribe((response) => {
-        this.vehicles = (response.content || []).map(v => ({
+        this.vehicles = (response.content || []).map((v) => ({
           id: v.vehicleId,
-          name: this.getVehicleDisplay(v as Vehicle)
+          name: this.getVehicleDisplay(v as Vehicle),
         }));
         this.tryPatchForm();
       });
@@ -282,9 +297,9 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     this.personService
       .getPaginatedData(0, 1000, { storeId })
       .subscribe((response) => {
-        this.persons = (response.content || []).map(p => ({
+        this.persons = (response.content || []).map((p) => ({
           id: p.personId,
-          name: this.getPersonDisplay(p)
+          name: this.getPersonDisplay(p),
         }));
         this.tryPatchForm();
       });
@@ -297,7 +312,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onEditPerson(id: string) {
-    this.personService.getById(id).subscribe(person => {
+    this.personService.getById(id).subscribe((person) => {
       this.selectedPersonToEdit.set(person);
       this.openPersonForm.set(true);
     });
@@ -318,15 +333,15 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   onVehicleSelectedForItem(option: any, index: number) {
     if (!option || !option.id) return;
 
-    this.vehicleService.getById(option.id).subscribe(vehicle => {
+    this.vehicleService.getById(option.id).subscribe((vehicle) => {
       const itemGroup = this.itens.at(index) as FormGroup;
-      const valor = vehicle.valorVenda 
-        ? parseFloat(vehicle.valorVenda.toString().replace(',', '.')) 
+      const valor = vehicle.valorVenda
+        ? parseFloat(vehicle.valorVenda.toString().replace(',', '.'))
         : 0;
-      
+
       itemGroup.patchValue({
         itemValorUnitarioComercial: valor,
-        itemValorBruto: valor.toFixed(2)
+        itemValorBruto: valor.toFixed(2),
       });
     });
   }
@@ -352,27 +367,29 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
 
     this.itens.clear();
     if (this.dataForm.nfeItens && this.dataForm.nfeItens.length > 0) {
-      this.dataForm.nfeItens.forEach(item => {
+      this.dataForm.nfeItens.forEach((item) => {
         const icms = (item.itemIcms || {}) as any;
         const pis = (item.itemPis || {}) as any;
         const cofins = (item.itemCofins || {}) as any;
 
-        this.itens.push(this.createItem({
-          ...item,
-          icmsOrigem: icms.icmsOrigem,
-          icmsSituacaoTributaria: icms.icmsSituacaoTributaria,
-          icmsValorBaseCalculo: icms.icmsValorBaseCalculo,
-          icmsAliquota: icms.icmsAliquota,
-          icmsValor: icms.icmsValor,
-          pisSituacaoTributaria: pis.pisSituacaoTributaria,
-          pisValorBaseCalculo: pis.pisValorBaseCalculo,
-          pisAliquota: pis.pisAliquota,
-          pisValor: pis.pisValor,
-          cofinsSituacaoTributaria: cofins.cofinsSituacaoTributaria,
-          cofinsValorBaseCalculo: cofins.cofinsValorBaseCalculo,
-          cofinsAliquota: cofins.cofinsAliquota,
-          cofinsValor: cofins.cofinsValor
-        }));
+        this.itens.push(
+          this.createItem({
+            ...item,
+            icmsOrigem: icms.icmsOrigem,
+            icmsSituacaoTributaria: icms.icmsSituacaoTributaria,
+            icmsValorBaseCalculo: icms.icmsValorBaseCalculo,
+            icmsAliquota: icms.icmsAliquota,
+            icmsValor: icms.icmsValor,
+            pisSituacaoTributaria: pis.pisSituacaoTributaria,
+            pisValorBaseCalculo: pis.pisValorBaseCalculo,
+            pisAliquota: pis.pisAliquota,
+            pisValor: pis.pisValor,
+            cofinsSituacaoTributaria: cofins.cofinsSituacaoTributaria,
+            cofinsValorBaseCalculo: cofins.cofinsValorBaseCalculo,
+            cofinsAliquota: cofins.cofinsAliquota,
+            cofinsValor: cofins.cofinsValor,
+          })
+        );
       });
     } else {
       this.addItem();
@@ -382,10 +399,13 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
       itemTipo: this.dataForm.vehicleId ? 'veiculo' : 'produto',
       person: {
         id: this.dataForm.personId || '',
-        name: this.persons.find(p => p.id === this.dataForm!.personId)?.name || ''
+        name:
+          this.persons.find((p) => p.id === this.dataForm!.personId)?.name ||
+          '',
       },
       nfeNaturezaOperacao: this.dataForm.nfeNaturezaOperacao || '',
-      nfePreenchimentoManualImpostos: this.dataForm.nfeCalcularImpostosAutomaticamente === false,
+      nfePreenchimentoManualImpostos:
+        this.dataForm.nfeCalcularImpostosAutomaticamente === false,
     });
   }
 
@@ -413,15 +433,34 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    const nfeItens = this.itens.getRawValue().map(item => {
+    const nfeItens = this.itens.getRawValue().map((item) => {
       return {
-        vehicleId: this.form.value.itemTipo === 'veiculo' ? item.vehicle?.id : undefined,
-        itemDescricao: this.form.value.itemTipo === 'produto' ? item.itemDescricao : undefined,
-        itemQuantidadeComercial: this.form.value.itemTipo === 'produto' ? String(item.itemQuantidadeComercial) : '1',
-        itemUnidadeComercial: this.form.value.itemTipo === 'produto' ? item.itemUnidadeComercial : 'UN',
-        itemValorUnitarioComercial: this.form.value.itemTipo === 'produto' ? String(item.itemValorUnitarioComercial) : undefined,
-        itemValorBruto: this.form.value.itemTipo === 'produto' ? String(item.itemValorBruto) : undefined,
-        itemCodigoProduto: this.form.value.itemTipo === 'produto' ? item.itemCodigoProduto : undefined,
+        vehicleId:
+          this.form.value.itemTipo === 'veiculo' ? item.vehicle?.id : undefined,
+        itemDescricao:
+          this.form.value.itemTipo === 'produto'
+            ? item.itemDescricao
+            : undefined,
+        itemQuantidadeComercial:
+          this.form.value.itemTipo === 'produto'
+            ? String(item.itemQuantidadeComercial)
+            : '1',
+        itemUnidadeComercial:
+          this.form.value.itemTipo === 'produto'
+            ? item.itemUnidadeComercial
+            : 'UN',
+        itemValorUnitarioComercial:
+          this.form.value.itemTipo === 'produto'
+            ? String(item.itemValorUnitarioComercial)
+            : undefined,
+        itemValorBruto:
+          this.form.value.itemTipo === 'produto'
+            ? String(item.itemValorBruto)
+            : undefined,
+        itemCodigoProduto:
+          this.form.value.itemTipo === 'produto'
+            ? item.itemCodigoProduto
+            : undefined,
         itemCodigoNcm: item.itemCodigoNcm || undefined,
         itemCfop: item.itemCfop || undefined,
         itemIcms: {
@@ -453,7 +492,8 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
       personId: this.form.value.person?.id,
       nfeTipoDocumento: '1', // Saída
       nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
-      nfeCalcularImpostosAutomaticamente: !this.form.value.nfePreenchimentoManualImpostos,
+      nfeCalcularImpostosAutomaticamente:
+        !this.form.value.nfePreenchimentoManualImpostos,
     };
 
     if (this.dataForm?.nfeId) {

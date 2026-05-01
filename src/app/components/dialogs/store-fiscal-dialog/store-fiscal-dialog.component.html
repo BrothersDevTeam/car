@@ -33,22 +33,40 @@
       </div>
 
       <div class="form-row">
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
           <mat-label>Regime Tributário</mat-label>
           <mat-select formControlName="parametroFiscalRegimeTributario">
             @for (regime of regimes; track regime.value) {
               <mat-option [value]="regime.value">{{ regime.label }}</mat-option>
             }
           </mat-select>
-          @if (form.controls['parametroFiscalRegimeTributario'].hasError('required')) {
+          @if (
+            form.controls['parametroFiscalRegimeTributario'].hasError(
+              'required'
+            )
+          ) {
             <mat-error>Regime Tributário é obrigatório</mat-error>
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
           <mat-label>Inscrição Estadual</mat-label>
-          <input matInput formControlName="parametroFiscalInscricaoEstadual" placeholder="Ex: 123456789">
-          @if (form.controls['parametroFiscalInscricaoEstadual'].hasError('required')) {
+          <input
+            matInput
+            formControlName="parametroFiscalInscricaoEstadual"
+            placeholder="Ex: 123456789"
+          />
+          @if (
+            form.controls['parametroFiscalInscricaoEstadual'].hasError(
+              'required'
+            )
+          ) {
             <mat-error>Inscrição Estadual é obrigatória</mat-error>
           }
         </mat-form-field>

@@ -89,7 +89,6 @@
           <mat-card-title>Veículo e Cliente</mat-card-title>
         </mat-card-header>
         <mat-card-content class="grid-row">
-          
           <div class="col-6">
             <app-custom-select
               listType="vehicle"
@@ -277,7 +276,6 @@
           <mat-card-title>Avalistas (Opcional)</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          
           <div class="col-12">
             <app-custom-select
               listType="person"
@@ -285,7 +283,12 @@
               [options]="avalistasOptions"
               [control]="$any(vendaForm.get('avalistaSearchControl'))"
               placeholder="Pesquise pelo nome do avalista"
-              (itemChanged)="addAvalistaDirectly($any(vendaForm.get('avalistaSearchControl')?.value)); vendaForm.get('avalistaSearchControl')?.reset()"
+              (itemChanged)="
+                addAvalistaDirectly(
+                  $any(vendaForm.get('avalistaSearchControl')?.value)
+                );
+                vendaForm.get('avalistaSearchControl')?.reset()
+              "
             ></app-custom-select>
           </div>
 
@@ -356,10 +359,14 @@
 <!-- Drawer para criar/editar pessoa -->
 @if (openPersonForm()) {
   <app-drawer (closeDrawer)="handleClosePersonDrawer()">
-    <mat-tab-group [selectedIndex]="selectedPersonToEdit()?.legalEntity ? 1 : 0">
+    <mat-tab-group
+      [selectedIndex]="selectedPersonToEdit()?.legalEntity ? 1 : 0"
+    >
       <mat-tab
         label="Pessoa Física"
-        [disabled]="selectedPersonToEdit() && selectedPersonToEdit()!.legalEntity"
+        [disabled]="
+          selectedPersonToEdit() && selectedPersonToEdit()!.legalEntity
+        "
       >
         <app-natural-person-form
           [dataForm]="
@@ -370,7 +377,9 @@
       </mat-tab>
       <mat-tab
         label="Pessoa Jurídica"
-        [disabled]="selectedPersonToEdit() && !selectedPersonToEdit()!.legalEntity"
+        [disabled]="
+          selectedPersonToEdit() && !selectedPersonToEdit()!.legalEntity
+        "
       >
         <app-legal-entity-form
           [dataForm]="

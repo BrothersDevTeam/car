@@ -59,7 +59,7 @@ form {
       &.mat-mdc-radio-checked {
         background: var(--primary-color);
         color: white;
-        
+
         ::ng-deep .mdc-label {
           color: white !important;
         }
@@ -80,8 +80,12 @@ form {
     border-radius: 16px;
     margin-bottom: 2rem;
     border: 1px solid var(--border-color);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.05),
+      0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
 
     &:hover {
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
@@ -92,7 +96,7 @@ form {
       justify-content: space-between;
       align-items: center;
       margin-bottom: 0.5rem;
-      
+
       .sub-section-title {
         font-size: 1rem;
         font-weight: 700;
@@ -142,7 +146,7 @@ form {
         letter-spacing: 1px;
         margin-bottom: 0.5rem;
         margin-top: 0.5rem;
-        
+
         &:not(:first-child) {
           margin-top: 1.5rem;
         }
@@ -156,7 +160,7 @@ form {
     border-radius: 12px;
     background: rgba(var(--primary-rgb), 0.05);
     border: 1px solid rgba(var(--primary-rgb), 0.1);
-    
+
     mat-checkbox {
       font-weight: 600;
       color: var(--primary-color);

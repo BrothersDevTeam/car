@@ -1,4 +1,12 @@
-import { Component, OnDestroy, OnInit, Output, signal, SimpleChanges, ViewChild } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  Output,
+  signal,
+  SimpleChanges,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -117,7 +125,7 @@ export class VendaFormComponent
   sellers: { id: string; name: string }[] = [];
   avalistasOptions: { id: string; name: string }[] = [];
   selectedAvalistas: Person[] = [];
-  
+
   // Sinais para controlar os drawers
   openPersonForm = signal(false);
   selectedPersonToEdit = signal<Person | null>(null);
@@ -205,9 +213,9 @@ export class VendaFormComponent
     this.vehicleService
       .getPaginatedData(0, 1000, { storeId, onlyInStock: true })
       .subscribe((response) => {
-        this.vehicles = (response.content || []).map(v => ({
+        this.vehicles = (response.content || []).map((v) => ({
           id: v.vehicleId,
-          name: `${v.brand} ${v.model} (${v.plate})`
+          name: `${v.brand} ${v.model} (${v.plate})`,
         }));
       });
 
@@ -215,9 +223,11 @@ export class VendaFormComponent
     this.personService
       .getPaginatedData(0, 1000, { storeId })
       .subscribe((response) => {
-        const mapped = (response.content || []).map(p => ({
+        const mapped = (response.content || []).map((p) => ({
           id: p.personId,
-          name: p.cpf ? `${p.name} - CPF: ${p.cpf}` : `${p.name} - CNPJ: ${p.cnpj}`
+          name: p.cpf
+            ? `${p.name} - CPF: ${p.cpf}`
+            : `${p.name} - CNPJ: ${p.cnpj}`,
         }));
         this.buyers = [...mapped];
         this.sellers = [...mapped];
@@ -232,7 +242,7 @@ export class VendaFormComponent
   }
 
   onEditPerson(id: string) {
-    this.personService.getById(id).subscribe(person => {
+    this.personService.getById(id).subscribe((person) => {
       this.selectedPersonToEdit.set(person);
       this.openPersonForm.set(true);
     });
@@ -249,7 +259,7 @@ export class VendaFormComponent
   }
 
   onVehicleSelected(option: { id: string; name: string }) {
-    this.vehicleService.getById(option.id).subscribe(vehicle => {
+    this.vehicleService.getById(option.id).subscribe((vehicle) => {
       const valorVenda = vehicle.valorVenda
         ? parseFloat(vehicle.valorVenda.toString().replace(',', '.'))
         : 0;
@@ -282,14 +292,17 @@ export class VendaFormComponent
   // Gestão de Avalistas
   addAvalistaDirectly(option: any) {
     if (!option || !option.id) return;
-    
+
     if (this.avalistasIds.value.includes(option.id)) {
       this.toastr.warning('Avalista já adicionado');
       return;
     }
     this.avalistasIds.push(this.fb.control(option.id));
     // Criamos um objeto parcial de Person para manter a exibição no chip-set
-    this.selectedAvalistas.push({ personId: option.id, name: option.name } as any);
+    this.selectedAvalistas.push({
+      personId: option.id,
+      name: option.name,
+    } as any);
     this.toastr.success(`Avalista ${option.name} adicionado`);
   }
 
