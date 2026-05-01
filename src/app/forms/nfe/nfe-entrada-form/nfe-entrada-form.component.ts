@@ -13,13 +13,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
-import {
-  FormArray,
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -51,10 +45,7 @@ import { PersonService } from '@services/person.service';
 import { VehicleService } from '@services/vehicle.service';
 import { extractErrorMessage } from '@utils/error-utils';
 import { StoreContextService } from '@services/store-context.service';
-import {
-  ParametroFiscalService,
-  ParametroFiscal,
-} from '@services/parametro-fiscal.service';
+import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fiscal.service';
 
 @Component({
   selector: 'app-nfe-entrada-form',
@@ -161,7 +152,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       this.form.valueChanges.subscribe(() => {
         const isDirty = this.form.dirty;
         this.formChanged.emit(isDirty);
-      })
+      }),
     );
 
     this.subscriptions.add(
@@ -170,14 +161,14 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
           this.loadInitialData(storeId);
           this.loadParametrosFiscais(storeId);
         }
-      })
+      }),
     );
 
     this.subscriptions.add(
       this.form.get('itemTipo')?.valueChanges.subscribe(() => {
         this.itens.clear();
         this.addItem();
-      })
+      }),
     );
   }
 
@@ -193,20 +184,11 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
         id: [data.vehicleId || '', isVeiculo ? [Validators.required] : []],
         name: [data.vehicleName || ''],
       }),
-      itemDescricao: [
-        data.itemDescricao || '',
-        !isVeiculo ? [Validators.required] : [],
-      ],
+      itemDescricao: [data.itemDescricao || '', !isVeiculo ? [Validators.required] : []],
       itemCodigoProduto: [data.itemCodigoProduto || ''],
       itemUnidadeComercial: [data.itemUnidadeComercial || 'UN'],
-      itemQuantidadeComercial: [
-        data.itemQuantidadeComercial || 1,
-        [Validators.required],
-      ],
-      itemValorUnitarioComercial: [
-        data.itemValorUnitarioComercial || '',
-        [Validators.required],
-      ],
+      itemQuantidadeComercial: [data.itemQuantidadeComercial || 1, [Validators.required]],
+      itemValorUnitarioComercial: [data.itemValorUnitarioComercial || '', [Validators.required]],
       itemValorBruto: [{ value: data.itemValorBruto || '', disabled: true }],
 
       // Campos fiscais
@@ -235,17 +217,14 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
         if (group.get('itemValorBruto')?.value !== total) {
           group.get('itemValorBruto')?.setValue(total, { emitEvent: false });
         }
-      })
+      }),
     );
 
     return group;
   }
 
   addItem(): void {
-    if (
-      this.form.get('itemTipo')?.value === 'veiculo' &&
-      this.itens.length >= 1
-    ) {
+    if (this.form.get('itemTipo')?.value === 'veiculo' && this.itens.length >= 1) {
       return;
     }
     this.itens.push(this.createItem());
@@ -271,25 +250,21 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private loadInitialData(storeId: string) {
-    this.vehicleService
-      .getPaginatedData(0, 1000, { storeId })
-      .subscribe((response) => {
-        this.vehicles = (response.content || []).map((v) => ({
-          id: v.vehicleId,
-          name: this.getVehicleDisplay(v as Vehicle),
-        }));
-        this.tryPatchForm();
-      });
+    this.vehicleService.getPaginatedData(0, 1000, { storeId }).subscribe((response) => {
+      this.vehicles = (response.content || []).map((v) => ({
+        id: v.vehicleId,
+        name: this.getVehicleDisplay(v as Vehicle),
+      }));
+      this.tryPatchForm();
+    });
 
-    this.personService
-      .getPaginatedData(0, 1000, { storeId })
-      .subscribe((response) => {
-        this.persons = (response.content || []).map((p) => ({
-          id: p.personId,
-          name: this.getPersonDisplay(p),
-        }));
-        this.tryPatchForm();
-      });
+    this.personService.getPaginatedData(0, 1000, { storeId }).subscribe((response) => {
+      this.persons = (response.content || []).map((p) => ({
+        id: p.personId,
+        name: this.getPersonDisplay(p),
+      }));
+      this.tryPatchForm();
+    });
   }
 
   // Métodos para o Drawer de Person (chamados pelo CustomSelect)
@@ -322,7 +297,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
     this.vehicleService.getById(option.id).subscribe((vehicle) => {
       const itemGroup = this.itens.at(index) as FormGroup;
-      
+
       // Helper para parsing robusto
       const parse = (v: any) => {
         if (!v) return 0;
@@ -361,11 +336,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private tryPatchForm() {
-    if (
-      !this.dataForm ||
-      this.vehicles.length === 0 ||
-      this.persons.length === 0
-    ) {
+    if (!this.dataForm || this.vehicles.length === 0 || this.persons.length === 0) {
       return;
     }
 
@@ -400,7 +371,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
             cofinsValorBaseCalculo: cofins.cofinsValorBaseCalculo,
             cofinsAliquota: cofins.cofinsAliquota,
             cofinsValor: cofins.cofinsValor,
-          })
+          }),
         );
       });
     } else {
@@ -410,13 +381,10 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     this.form.patchValue({
       person: {
         id: this.dataForm.personId || '',
-        name:
-          this.persons.find((p) => p.id === this.dataForm!.personId)?.name ||
-          '',
+        name: this.persons.find((p) => p.id === this.dataForm!.personId)?.name || '',
       },
       nfeNaturezaOperacao: this.dataForm.nfeNaturezaOperacao || '',
-      nfePreenchimentoManualImpostos:
-        this.dataForm.nfeCalcularImpostosAutomaticamente === false,
+      nfePreenchimentoManualImpostos: this.dataForm.nfeCalcularImpostosAutomaticamente === false,
     });
   }
 
@@ -424,10 +392,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     if (event instanceof KeyboardEvent) {
       event.preventDefault();
 
-      if (
-        this.form.valid &&
-        document.activeElement === this.submitButton.nativeElement
-      ) {
+      if (this.form.valid && document.activeElement === this.submitButton.nativeElement) {
         this.onSubmit();
       }
 
@@ -446,7 +411,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
     const nfeItens = this.itens.getRawValue().map((item) => {
       const isVeiculo = this.form.value.itemTipo === 'veiculo';
-      
+
       return {
         vehicleId: isVeiculo ? item.vehicle?.id : undefined,
         itemDescricao: isVeiculo ? item.vehicle?.name : item.itemDescricao,
@@ -487,8 +452,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       personId: this.form.value.person?.id,
       nfeTipoDocumento: '0', // Entrada
       nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
-      nfeCalcularImpostosAutomaticamente:
-        !this.form.value.nfePreenchimentoManualImpostos,
+      nfeCalcularImpostosAutomaticamente: !this.form.value.nfePreenchimentoManualImpostos,
     };
 
     if (this.dataForm?.nfeId) {
@@ -521,20 +485,16 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   openDialog() {
-    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Confirmar Cancelamento',
-          message:
-            'Você tem certeza que deseja <strong>cancelar</strong> esta NFe?',
-          confirmText: 'Sim, Cancelar',
-          cancelText: 'Não',
-          icon: 'cancel',
-          type: 'danger',
-        },
-      }
-    );
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Confirmar Cancelamento',
+        message: 'Você tem certeza que deseja <strong>cancelar</strong> esta NFe?',
+        confirmText: 'Sim, Cancelar',
+        cancelText: 'Não',
+        icon: 'cancel',
+        type: 'danger',
+      },
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
@@ -565,8 +525,6 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getPersonDisplay(person: Person): string {
-    return person.cpf
-      ? `${person.name} - CPF: ${person.cpf}`
-      : `${person.name} - CNPJ: ${person.cnpj}`;
+    return person.cpf ? `${person.name} - CPF: ${person.cpf}` : `${person.name} - CNPJ: ${person.cnpj}`;
   }
 }

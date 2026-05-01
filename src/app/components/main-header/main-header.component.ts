@@ -1,12 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  OnInit,
-  OnDestroy,
-  Output,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, EventEmitter, OnInit, OnDestroy, Output, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -22,13 +14,7 @@ import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-main-header',
-  imports: [
-    MatToolbarModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSelectModule,
-    FormsModule,
-  ],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatSelectModule, FormsModule],
   templateUrl: './main-header.component.html',
   styleUrl: './main-header.component.scss',
 })
@@ -50,23 +36,19 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
-    this.canReadStoreOthers = this.authService.hasAuthority(
-      Authorizations.READ_STORE_OTHERS
-    );
+    this.canReadStoreOthers = this.authService.hasAuthority(Authorizations.READ_STORE_OTHERS);
 
     // Escuta mudanças na loja globalmente selecionada
-    this.storeContextService.currentStoreId$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((storeId) => {
-        // Configura o ID inicial pelo contexto global (usando 'ALL' em vez de null para o html renderizar)
-        this.selectedStoreId = storeId ?? 'ALL';
+    this.storeContextService.currentStoreId$.pipe(takeUntil(this.destroy$)).subscribe((storeId) => {
+      // Configura o ID inicial pelo contexto global (usando 'ALL' em vez de null para o html renderizar)
+      this.selectedStoreId = storeId ?? 'ALL';
 
-        if (this.isCarAdmin || this.canReadStoreOthers) {
-          this.loadAllStores();
-        } else {
-          this.loadCurrentStoreName();
-        }
-      });
+      if (this.isCarAdmin || this.canReadStoreOthers) {
+        this.loadAllStores();
+      } else {
+        this.loadCurrentStoreName();
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -104,8 +86,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   }
 
   onStoreChange() {
-    const storeToEmit =
-      this.selectedStoreId === 'ALL' ? null : this.selectedStoreId;
+    const storeToEmit = this.selectedStoreId === 'ALL' ? null : this.selectedStoreId;
     this.storeContextService.setStoreId(storeToEmit);
   }
 
@@ -125,9 +106,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     if (!cnpj) return '';
     const cleanCnpj = cnpj.replace(/\D/g, '');
     if (cleanCnpj.length !== 14) return cnpj;
-    return cleanCnpj.replace(
-      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
-      '$1.$2.$3/$4-$5'
-    );
+    return cleanCnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
   }
 }

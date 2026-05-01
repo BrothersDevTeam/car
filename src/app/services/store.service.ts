@@ -1,11 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import {
-  Store,
-  StorePageResponse,
-  StoreSearchFilters,
-} from '@interfaces/store';
+import { Store, StorePageResponse, StoreSearchFilters } from '@interfaces/store';
 
 @Injectable({
   providedIn: 'root',
@@ -20,20 +16,14 @@ export class StoreService {
 
     if (filters) {
       if (filters.name) params = params.set('name', filters.name);
-      if (filters.tradeName)
-        params = params.set('tradeName', filters.tradeName);
+      if (filters.tradeName) params = params.set('tradeName', filters.tradeName);
       if (filters.cnpj) params = params.set('cnpj', filters.cnpj);
       if (filters.email) params = params.set('email', filters.email);
-      if (filters.storeType)
-        params = params.set('storeType', filters.storeType);
-      if (filters.storeStatus)
-        params = params.set('storeStatus', filters.storeStatus);
-      if (filters.mainStoreId)
-        params = params.set('mainStoreId', filters.mainStoreId);
-      if (filters.page !== undefined)
-        params = params.set('page', filters.page.toString());
-      if (filters.size !== undefined)
-        params = params.set('size', filters.size.toString());
+      if (filters.storeType) params = params.set('storeType', filters.storeType);
+      if (filters.storeStatus) params = params.set('storeStatus', filters.storeStatus);
+      if (filters.mainStoreId) params = params.set('mainStoreId', filters.mainStoreId);
+      if (filters.page !== undefined) params = params.set('page', filters.page.toString());
+      if (filters.size !== undefined) params = params.set('size', filters.size.toString());
       if (filters.sort) params = params.set('sort', filters.sort);
     }
 
@@ -45,12 +35,9 @@ export class StoreService {
 
     if (filters) {
       if (filters.name) params = params.set('name', filters.name);
-      if (filters.storeStatus)
-        params = params.set('storeStatus', filters.storeStatus);
-      if (filters.page !== undefined)
-        params = params.set('page', filters.page.toString());
-      if (filters.size !== undefined)
-        params = params.set('size', filters.size.toString());
+      if (filters.storeStatus) params = params.set('storeStatus', filters.storeStatus);
+      if (filters.page !== undefined) params = params.set('page', filters.page.toString());
+      if (filters.size !== undefined) params = params.set('size', filters.size.toString());
     }
 
     return this.http.get<StorePageResponse>(`${this.apiUrl}/branches`, {

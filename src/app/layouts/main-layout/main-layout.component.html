@@ -1,16 +1,8 @@
 <app-main-header (collapsedEvent)="toggleSidebar()" />
 <!-- Escutando o evento -->
 <mat-sidenav-container>
-  <mat-sidenav
-    [class.smallscreen]="isSmallScreen()"
-    [class.collapsed]="collapsed()"
-    [opened]="true"
-    mode="side"
-  >
-    <app-sidenav
-      [collapsed]="collapsed()"
-      (toggleSidebar)="toggleSidebar()"
-    />
+  <mat-sidenav [class.smallscreen]="isSmallScreen()" [class.collapsed]="collapsed()" [opened]="true" mode="side">
+    <app-sidenav [collapsed]="collapsed()" (toggleSidebar)="toggleSidebar()" />
   </mat-sidenav>
   <mat-sidenav-content
     class="sidenav-content"

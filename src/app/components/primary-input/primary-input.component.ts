@@ -1,13 +1,6 @@
 import { NgxMaskDirective } from 'ngx-mask';
 import { FormsModule } from '@angular/forms';
-import {
-  Component,
-  forwardRef,
-  Input,
-  Output,
-  EventEmitter,
-  ChangeDetectorRef,
-} from '@angular/core';
+import { Component, forwardRef, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 
@@ -15,14 +8,7 @@ import { MatIcon } from '@angular/material/icon';
  * Tipos de input permitidos pelo componente
  * Define os tipos HTML5 válidos para o elemento input
  */
-type InputTypes =
-  | 'text'
-  | 'email'
-  | 'password'
-  | 'number'
-  | 'tel'
-  | 'date'
-  | 'datetime-local';
+type InputTypes = 'text' | 'email' | 'password' | 'number' | 'tel' | 'date' | 'datetime-local';
 
 /**
  * Componente de Input Reutilizável com suporte a maiúsculas automáticas

@@ -1,17 +1,8 @@
-<form
-  [formGroup]="form"
-  (keydown.enter)="onEnter($event)"
->
+<form [formGroup]="form" (keydown.enter)="onEnter($event)">
   <div class="title-trash">
     <h2>NFe de Saída</h2>
     @if (dataForm?.nfeId) {
-      <button
-        mat-icon-button
-        color="warn"
-        (click)="onDelete()"
-        type="button"
-        matTooltip="Cancelar NFe"
-      >
+      <button mat-icon-button color="warn" (click)="onDelete()" type="button" matTooltip="Cancelar NFe">
         <mat-icon>delete</mat-icon>
       </button>
     }
@@ -41,27 +32,14 @@
 
   <div class="radio-button-group m-b-16">
     <mat-radio-group formControlName="itemTipo">
-      <mat-radio-button
-        value="veiculo"
-        color="primary"
-      >
-        Veículo do Estoque
-      </mat-radio-button>
-      <mat-radio-button
-        value="produto"
-        color="primary"
-      >
-        Produto Diverso
-      </mat-radio-button>
+      <mat-radio-button value="veiculo" color="primary">Veículo do Estoque</mat-radio-button>
+      <mat-radio-button value="produto" color="primary">Produto Diverso</mat-radio-button>
     </mat-radio-group>
   </div>
 
   <div formArrayName="nfeItens">
     @for (itemGroup of itens.controls; track $index) {
-      <div
-        [formGroupName]="$index"
-        class="manual-product-fields"
-      >
+      <div [formGroupName]="$index" class="manual-product-fields">
         <div class="item-header">
           <span class="sub-section-title">Item {{ $index + 1 }}</span>
           @if (form.get('itemTipo')?.value === 'produto' && itens.length > 1) {
@@ -100,41 +78,23 @@
             ></app-currency-input>
           </div>
         } @else {
-          <mat-form-field
-            appearance="outline"
-            class="full-width"
-          >
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Descrição do Produto*</mat-label>
-            <input
-              matInput
-              formControlName="itemDescricao"
-              placeholder="Ex: Kit de Revisão"
-            />
+            <input matInput formControlName="itemDescricao" placeholder="Ex: Kit de Revisão" />
           </mat-form-field>
 
           <div class="tax-row three-cols">
             <mat-form-field appearance="outline">
               <mat-label>Código</mat-label>
-              <input
-                matInput
-                formControlName="itemCodigoProduto"
-                placeholder="Opcional"
-              />
+              <input matInput formControlName="itemCodigoProduto" placeholder="Opcional" />
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Unidade</mat-label>
-              <input
-                matInput
-                formControlName="itemUnidadeComercial"
-              />
+              <input matInput formControlName="itemUnidadeComercial" />
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Quantidade*</mat-label>
-              <input
-                matInput
-                type="number"
-                formControlName="itemQuantidadeComercial"
-              />
+              <input matInput type="number" formControlName="itemQuantidadeComercial" />
             </mat-form-field>
           </div>
 
@@ -154,19 +114,11 @@
           <div class="tax-row">
             <mat-form-field appearance="outline">
               <mat-label>NCM*</mat-label>
-              <input
-                matInput
-                formControlName="itemCodigoNcm"
-                placeholder="Ex: 87032310"
-              />
+              <input matInput formControlName="itemCodigoNcm" placeholder="Ex: 87032310" />
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>CFOP*</mat-label>
-              <input
-                matInput
-                formControlName="itemCfop"
-                placeholder="Ex: 5102"
-              />
+              <input matInput formControlName="itemCfop" placeholder="Ex: 5102" />
             </mat-form-field>
           </div>
         }
@@ -180,19 +132,11 @@
               <div class="tax-row">
                 <mat-form-field appearance="outline">
                   <mat-label>NCM</mat-label>
-                  <input
-                    matInput
-                    formControlName="itemCodigoNcm"
-                    placeholder="Ex: 87032310"
-                  />
+                  <input matInput formControlName="itemCodigoNcm" placeholder="Ex: 87032310" />
                 </mat-form-field>
                 <mat-form-field appearance="outline">
                   <mat-label>CFOP</mat-label>
-                  <input
-                    matInput
-                    formControlName="itemCfop"
-                    placeholder="Ex: 5102"
-                  />
+                  <input matInput formControlName="itemCfop" placeholder="Ex: 5102" />
                 </mat-form-field>
               </div>
             }
@@ -201,71 +145,41 @@
             <div class="tax-row">
               <mat-form-field appearance="outline">
                 <mat-label>Origem</mat-label>
-                <input
-                  matInput
-                  formControlName="icmsOrigem"
-                />
+                <input matInput formControlName="icmsOrigem" />
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>CST/CSOSN</mat-label>
-                <input
-                  matInput
-                  formControlName="icmsSituacaoTributaria"
-                />
+                <input matInput formControlName="icmsSituacaoTributaria" />
               </mat-form-field>
             </div>
             <div class="tax-row three-cols">
-              <app-currency-input
-                label="Base Calc. ICMS"
-                formControlName="icmsValorBaseCalculo"
-              ></app-currency-input>
+              <app-currency-input label="Base Calc. ICMS" formControlName="icmsValorBaseCalculo"></app-currency-input>
               <mat-form-field appearance="outline">
                 <mat-label>Alíquota ICMS (%)</mat-label>
-                <input
-                  matInput
-                  formControlName="icmsAliquota"
-                />
+                <input matInput formControlName="icmsAliquota" />
               </mat-form-field>
-              <app-currency-input
-                label="Valor ICMS"
-                formControlName="icmsValor"
-              ></app-currency-input>
+              <app-currency-input label="Valor ICMS" formControlName="icmsValor"></app-currency-input>
             </div>
 
             <div class="tax-section-title">PIS / COFINS</div>
             <div class="tax-row">
               <mat-form-field appearance="outline">
                 <mat-label>CST PIS</mat-label>
-                <input
-                  matInput
-                  formControlName="pisSituacaoTributaria"
-                />
+                <input matInput formControlName="pisSituacaoTributaria" />
               </mat-form-field>
               <mat-form-field appearance="outline">
                 <mat-label>CST COFINS</mat-label>
-                <input
-                  matInput
-                  formControlName="cofinsSituacaoTributaria"
-                />
+                <input matInput formControlName="cofinsSituacaoTributaria" />
               </mat-form-field>
             </div>
 
             <div class="tax-row three-cols">
-              <app-currency-input
-                label="Base Calc. PIS"
-                formControlName="pisValorBaseCalculo"
-              ></app-currency-input>
+              <app-currency-input label="Base Calc. PIS" formControlName="pisValorBaseCalculo"></app-currency-input>
               <mat-form-field appearance="outline">
                 <mat-label>Alíquota PIS (%)</mat-label>
-                <input
-                  matInput
-                  formControlName="pisAliquota"
-                />
+                <input matInput formControlName="pisAliquota" />
               </mat-form-field>
-              <app-currency-input
-                label="Valor PIS"
-                formControlName="pisValor"
-              ></app-currency-input>
+              <app-currency-input label="Valor PIS" formControlName="pisValor"></app-currency-input>
             </div>
 
             <div class="tax-row three-cols">
@@ -275,15 +189,9 @@
               ></app-currency-input>
               <mat-form-field appearance="outline">
                 <mat-label>Alíquota COFINS (%)</mat-label>
-                <input
-                  matInput
-                  formControlName="cofinsAliquota"
-                />
+                <input matInput formControlName="cofinsAliquota" />
               </mat-form-field>
-              <app-currency-input
-                label="Valor COFINS"
-                formControlName="cofinsValor"
-              ></app-currency-input>
+              <app-currency-input label="Valor COFINS" formControlName="cofinsValor"></app-currency-input>
             </div>
           </div>
         }
@@ -292,23 +200,14 @@
   </div>
 
   @if (form.get('itemTipo')?.value === 'produto') {
-    <button
-      mat-button
-      color="primary"
-      type="button"
-      (click)="addItem()"
-      class="add-item-btn m-b-16"
-    >
+    <button mat-button color="primary" type="button" (click)="addItem()" class="add-item-btn m-b-16">
       <mat-icon>add</mat-icon>
       Adicionar Outro Produto
     </button>
   }
 
   <div class="tributacao-manual-container">
-    <mat-checkbox
-      formControlName="nfePreenchimentoManualImpostos"
-      color="primary"
-    >
+    <mat-checkbox formControlName="nfePreenchimentoManualImpostos" color="primary">
       Preenchimento manual de Impostos
     </mat-checkbox>
   </div>
@@ -329,32 +228,16 @@
 <!-- Drawer para criar/editar pessoa -->
 @if (openPersonForm()) {
   <app-drawer (closeDrawer)="handleClosePersonDrawer()">
-    <mat-tab-group
-      [selectedIndex]="selectedPersonToEdit()?.legalEntity ? 1 : 0"
-    >
-      <mat-tab
-        label="Pessoa Física"
-        [disabled]="
-          selectedPersonToEdit() && selectedPersonToEdit()!.legalEntity
-        "
-      >
+    <mat-tab-group [selectedIndex]="selectedPersonToEdit()?.legalEntity ? 1 : 0">
+      <mat-tab label="Pessoa Física" [disabled]="selectedPersonToEdit() && selectedPersonToEdit()!.legalEntity">
         <app-natural-person-form
-          [dataForm]="
-            !selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null
-          "
+          [dataForm]="!selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null"
           (formSubmitted)="onPersonFormSubmitted()"
         />
       </mat-tab>
-      <mat-tab
-        label="Pessoa Jurídica"
-        [disabled]="
-          selectedPersonToEdit() && !selectedPersonToEdit()!.legalEntity
-        "
-      >
+      <mat-tab label="Pessoa Jurídica" [disabled]="selectedPersonToEdit() && !selectedPersonToEdit()!.legalEntity">
         <app-legal-entity-form
-          [dataForm]="
-            selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null
-          "
+          [dataForm]="selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null"
           (formSubmitted)="onPersonFormSubmitted()"
         />
       </mat-tab>

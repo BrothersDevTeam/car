@@ -4,10 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
-import {
-  DashboardService,
-  AdminDashboardMetrics,
-} from '@services/dashboard.service';
+import { DashboardService, AdminDashboardMetrics } from '@services/dashboard.service';
 import { AuthService } from '@services/auth/auth.service';
 import { StoreContextService } from '@services/store-context.service';
 import { Authorizations } from '../../enums/authorizations';
@@ -16,13 +13,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    ContentHeaderComponent,
-  ],
+  imports: [CommonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule, ContentHeaderComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -45,7 +36,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.storeContextService.currentStoreId$.subscribe((storeId) => {
           this.selectedStoreId = storeId;
           this.loadMetrics();
-        })
+        }),
       );
     } else {
       this.loading = false;

@@ -35,12 +35,7 @@
 
       <ng-content>
         @if (type === 'password') {
-          <button
-            type="button"
-            class="toggle-password"
-            (click)="togglePasswordVisibility()"
-            tabindex="-1"
-          >
+          <button type="button" class="toggle-password" (click)="togglePasswordVisibility()" tabindex="-1">
             <mat-icon>
               {{ showPassword ? 'visibility_off' : 'visibility' }}
             </mat-icon>

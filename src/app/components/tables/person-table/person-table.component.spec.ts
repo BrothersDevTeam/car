@@ -14,13 +14,7 @@ describe('TableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        MatTableModule,
-        MatPaginatorModule,
-        MatSortModule,
-        PersonTableComponent,
-        BrowserAnimationsModule,
-      ],
+      imports: [MatTableModule, MatPaginatorModule, MatSortModule, PersonTableComponent, BrowserAnimationsModule],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PersonTableComponent);

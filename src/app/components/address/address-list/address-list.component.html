@@ -4,10 +4,7 @@
     <div class="header-title">
       <mat-icon>location_on</mat-icon>
       <h3>Endereços</h3>
-      <span
-        class="count-badge"
-        *ngIf="addressCount > 0"
-      >
+      <span class="count-badge" *ngIf="addressCount > 0">
         {{ addressCount }}
       </span>
     </div>
@@ -25,44 +22,26 @@
         panelClass="header-draft-panel"
       >
         <mat-option [value]="null">Selecione o rascunho</mat-option>
-        <mat-option
-          *ngFor="let draft of availableDrafts"
-          [value]="draft"
-          class="draft-option-item"
-        >
+        <mat-option *ngFor="let draft of availableDrafts" [value]="draft" class="draft-option-item">
           <span class="draft-text">
             {{ draft.draftName || 'Sem nome' }} -
             {{ draft.lastModified | date: 'dd/MM HH:mm' }}
           </span>
-          <button
-            mat-icon-button
-            (click)="removeDraft(draft, $event)"
-            matTooltip="Excluir rascunho"
-          >
+          <button mat-icon-button (click)="removeDraft(draft, $event)" matTooltip="Excluir rascunho">
             <mat-icon color="warn">delete</mat-icon>
           </button>
         </mat-option>
       </mat-select>
     </mat-form-field>
 
-    <button
-      mat-raised-button
-      color="primary"
-      *ngIf="canAdd && !showForm"
-      (click)="onAddNew()"
-      class="btn-add"
-    >
+    <button mat-raised-button color="primary" *ngIf="canAdd && !showForm" (click)="onAddNew()" class="btn-add">
       <mat-icon>add</mat-icon>
       Adicionar Endereço
     </button>
   </div>
 
   <!-- Formulário (quando visível) -->
-  <div
-    class="form-container"
-    *ngIf="showForm"
-    #formContainer
-  >
+  <div class="form-container" *ngIf="showForm" #formContainer>
     <app-address-form
       [ownerId]="ownerId"
       [ownerType]="ownerType"
@@ -74,19 +53,13 @@
   </div>
 
   <!-- Loading -->
-  <div
-    class="loading-container"
-    *ngIf="loading"
-  >
+  <div class="loading-container" *ngIf="loading">
     <mat-icon class="spinner">hourglass_empty</mat-icon>
     <p>Carregando endereços...</p>
   </div>
 
   <!-- Lista de Endereços -->
-  <div
-    class="addresses-grid"
-    *ngIf="!loading && !showForm && addresses.length > 0"
-  >
+  <div class="addresses-grid" *ngIf="!loading && !showForm && addresses.length > 0">
     <app-address-card
       *ngFor="let address of addresses"
       [address]="address"
@@ -100,33 +73,19 @@
   </div>
 
   <!-- Empty State -->
-  <div
-    class="empty-state"
-    *ngIf="!loading && !showForm && addresses.length === 0"
-  >
+  <div class="empty-state" *ngIf="!loading && !showForm && addresses.length === 0">
     <mat-icon>location_off</mat-icon>
     <h4>Nenhum endereço cadastrado</h4>
     <p>Adicione um endereço para esta pessoa</p>
-    <button
-      mat-raised-button
-      color="primary"
-      *ngIf="canAdd"
-      (click)="onAddNew()"
-    >
+    <button mat-raised-button color="primary" *ngIf="canAdd" (click)="onAddNew()">
       <mat-icon>add</mat-icon>
       Adicionar Primeiro Endereço
     </button>
   </div>
 
   <!-- Info sobre endereço principal -->
-  <div
-    class="info-message"
-    *ngIf="!loading && addresses.length > 0 && !hasMainAddress"
-  >
+  <div class="info-message" *ngIf="!loading && addresses.length > 0 && !hasMainAddress">
     <mat-icon>info</mat-icon>
-    <span>
-      Nenhum endereço está marcado como principal. Considere definir um endereço
-      principal.
-    </span>
+    <span>Nenhum endereço está marcado como principal. Considere definir um endereço principal.</span>
   </div>
 </div>

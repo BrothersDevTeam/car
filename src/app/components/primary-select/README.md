@@ -2,9 +2,8 @@
 
 ## 📋 Visão Geral
 
-O componente `primary-select` agora possui **navegação completa por teclado**,
-permitindo que os usuários naveguem e selecionem opções usando apenas o teclado,
-sem necessidade do mouse.
+O componente `primary-select` agora possui **navegação completa por teclado**, permitindo que os usuários naveguem e
+selecionem opções usando apenas o teclado, sem necessidade do mouse.
 
 ## ⌨️ Atalhos de Teclado
 
@@ -60,11 +59,7 @@ Quando uma opção está focada E selecionada:
 ### Modo Seleção Única (Single Select)
 
 ```html
-<app-primary-select
-  formControlName="estado"
-  label="Estado"
-  [options]="estadosOptions"
-/>
+<app-primary-select formControlName="estado" label="Estado" [options]="estadosOptions" />
 ```
 
 **Comportamento:**
@@ -76,12 +71,7 @@ Quando uma opção está focada E selecionada:
 ### Modo Seleção Múltipla (Multiple Select)
 
 ```html
-<app-primary-select
-  formControlName="relationshipTypes"
-  label="Tipo"
-  [allowMultiple]="true"
-  [options]="tiposOptions"
-/>
+<app-primary-select formControlName="relationshipTypes" label="Tipo" [allowMultiple]="true" [options]="tiposOptions" />
 ```
 
 **Comportamento:**
@@ -176,8 +166,7 @@ O componente segue as diretrizes de acessibilidade:
 
 ### O foco do teclado não está funcionando
 
-**Solução:** Verifique se o componente tem `tabindex="0"` no container
-principal.
+**Solução:** Verifique se o componente tem `tabindex="0"` no container principal.
 
 ### As setas não navegam
 
@@ -185,20 +174,17 @@ principal.
 
 ### O scroll não acompanha a opção focada
 
-**Solução:** A função `scrollToFocusedOption()` deve ser chamada
-automaticamente. Verifique o console por erros.
+**Solução:** A função `scrollToFocusedOption()` deve ser chamada automaticamente. Verifique o console por erros.
 
 ### ESC fecha o drawer/dialog pai
 
-**Solução:** ✅ **Já corrigido!** O componente usa `event.stopPropagation()` em
-todos os eventos de teclado para prevenir que eles afetem componentes pais
-(drawers, dialogs, etc).
+**Solução:** ✅ **Já corrigido!** O componente usa `event.stopPropagation()` em todos os eventos de teclado para
+prevenir que eles afetem componentes pais (drawers, dialogs, etc).
 
 ### Conflito com outras teclas
 
-**Solução:** O componente usa `event.preventDefault()` e
-`event.stopPropagation()` para evitar conflitos. Se houver problemas, verifique
-outros event listeners na página.
+**Solução:** O componente usa `event.preventDefault()` e `event.stopPropagation()` para evitar conflitos. Se houver
+problemas, verifique outros event listeners na página.
 
 ## 📚 Referências
 

@@ -21,15 +21,13 @@ export class ColorService {
       return of(this.cache);
     }
     // Busca todos os registros (size=1000)
-    return this.http
-      .get<PaginationResponse<Color>>(`${this.apiUrl}?size=1000`)
-      .pipe(
-        first(),
-        tap((response) => {
-          console.log('Colors fetched:', response);
-          this.cache = response;
-        })
-      );
+    return this.http.get<PaginationResponse<Color>>(`${this.apiUrl}?size=1000`).pipe(
+      first(),
+      tap((response) => {
+        console.log('Colors fetched:', response);
+        this.cache = response;
+      }),
+    );
   }
 
   create(data: CreateColor) {
@@ -39,7 +37,7 @@ export class ColorService {
         this.clearCache();
         // Recarrega o cache
         this.getColors().subscribe();
-      })
+      }),
     );
   }
 
@@ -50,7 +48,7 @@ export class ColorService {
         this.clearCache();
         // Recarrega o cache
         this.getColors().subscribe();
-      })
+      }),
     );
   }
 
@@ -59,7 +57,7 @@ export class ColorService {
       tap(() => {
         console.log('Cor deletada com sucesso!');
         this.clearCache();
-      })
+      }),
     );
   }
 

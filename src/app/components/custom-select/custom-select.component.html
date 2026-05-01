@@ -1,17 +1,10 @@
-<div
-  class="custom-dropdown"
-  [class.disabled]="disabled"
-  [class.error]="error"
->
+<div class="custom-dropdown" [class.disabled]="disabled" [class.error]="error">
   <span class="label">
     {{ label }}
   </span>
 
   <div class="dropdown-container">
-    <button
-      class="dropdown-button"
-      (click)="toggleDropdown()"
-    >
+    <button class="dropdown-button" (click)="toggleDropdown()">
       {{ selectedOption?.name || placeholder }}
       <span class="dropdown-arrow"></span>
       <span class="vertical-bar"></span>
@@ -25,10 +18,7 @@
       (mouseleave)="onMouseLeaveDropdown($event)"
     >
       <!-- Campo de busca -->
-      <div
-        class="search-container"
-        (click)="$event.stopPropagation()"
-      >
+      <div class="search-container" (click)="$event.stopPropagation()">
         <mat-icon class="search-icon">search</mat-icon>
         <div class="input-wrapper">
           <input
@@ -43,13 +33,7 @@
           />
         </div>
         @if (searchTerm) {
-          <mat-icon
-            class="clear-icon"
-            (click)="clearSearch()"
-            aria-label="Limpar busca"
-            role="button"
-            tabindex="0"
-          >
+          <mat-icon class="clear-icon" (click)="clearSearch()" aria-label="Limpar busca" role="button" tabindex="0">
             close
           </mat-icon>
         }
@@ -62,16 +46,8 @@
             <li (click)="selectOption(option)">
               <span>{{ option.name }}</span>
               <div class="select_list_buttons">
-                <button
-                  class="edit-button"
-                  (click)="editItem(option, $event)"
-                >
-                  ✏️
-                </button>
-                <button
-                  class="delete-button"
-                  (click)="deleteItem(option, $event)"
-                >
+                <button class="edit-button" (click)="editItem(option, $event)">✏️</button>
+                <button class="delete-button" (click)="deleteItem(option, $event)">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
@@ -93,12 +69,7 @@
       }
     </div>
 
-    <mat-icon
-      [matTooltip]="matTooltip"
-      (click)="createNewItem()"
-    >
-      add_box
-    </mat-icon>
+    <mat-icon [matTooltip]="matTooltip" (click)="createNewItem()">add_box</mat-icon>
   </div>
   @if (error) {
     <span class="error-message">Campo obrigatório</span>

@@ -1,27 +1,15 @@
-<div
-  class="mat-elevation-z8 table-container"
-  [class.loading-active]="loading"
->
+<div class="mat-elevation-z8 table-container" [class.loading-active]="loading">
   <!-- Overlay de Carregamento -->
-  <div
-    class="loading-overlay"
-    *ngIf="loading"
-  >
+  <div class="loading-overlay" *ngIf="loading">
     <mat-spinner diameter="40"></mat-spinner>
   </div>
 
   <div class="table-responsive">
-    <table
-      mat-table
-      [dataSource]="tableDataSource"
-    >
+    <table mat-table [dataSource]="tableDataSource">
       <!-- Colunas dinâmicas -->
       @for (column of columns; track column) {
         <ng-container [matColumnDef]="column.key">
-          <th
-            mat-header-cell
-            *matHeaderCellDef
-          >
+          <th mat-header-cell *matHeaderCellDef>
             <!-- Checkbox no cabeçalho para a coluna 'select' -->
             @if (column.key === 'select' && hasSelectColumn) {
               <mat-checkbox
@@ -36,11 +24,7 @@
               {{ column.header }}
             }
           </th>
-          <td
-            mat-cell
-            *matCellDef="let element"
-            class="nowrap"
-          >
+          <td mat-cell *matCellDef="let element" class="nowrap">
             <div class="cell-content-wrapper">
               <!-- Checkbox para a coluna 'select' -->
               @if (column.key === 'select' && shouldShowCheckbox(element)) {
@@ -86,11 +70,7 @@
               }
 
               <!-- Dados normais para outras colunas -->
-              @if (
-                column.key !== 'select' &&
-                column.key !== 'edit' &&
-                column.key !== 'delete'
-              ) {
+              @if (column.key !== 'select' && column.key !== 'edit' && column.key !== 'delete') {
                 <!-- Ações dinâmicas da coluna -->
                 @if (column.actions) {
                   <div class="column-actions">
@@ -104,12 +84,8 @@
                               ? 'Complete as pendências para habilitar'
                               : action.label
                           "
-                          [disabled]="
-                            action.disabled && action.disabled(element)
-                          "
-                          (click)="
-                            $event.stopPropagation(); action.action(element)
-                          "
+                          [disabled]="action.disabled && action.disabled(element)"
+                          (click)="$event.stopPropagation(); action.action(element)"
                         >
                           <mat-icon>{{ action.icon }}</mat-icon>
                         </button>
@@ -121,10 +97,7 @@
                   @let badgeKey = getNestedValue(element, column.key);
                   @let badge = column.badgeConfig[badgeKey];
                   @if (badge) {
-                    <span
-                      class="status-badge"
-                      [ngClass]="badge.cssClass"
-                    >
+                    <span class="status-badge" [ngClass]="badge.cssClass">
                       {{ badge.label }}
                     </span>
                   } @else {
@@ -137,11 +110,7 @@
 
               <!-- Ícone de edição para a coluna 'edit' -->
               @if (column.key === 'edit' && shouldShowEditIcon(element)) {
-                <button
-                  mat-icon-button
-                  (click)="$event.stopPropagation(); onEditClick(element)"
-                  aria-label="Editar"
-                >
+                <button mat-icon-button (click)="$event.stopPropagation(); onEditClick(element)" aria-label="Editar">
                   <mat-icon>edit</mat-icon>
                 </button>
               }
@@ -174,10 +143,7 @@
       }
 
       <!-- Definição das linhas -->
-      <tr
-        mat-header-row
-        *matHeaderRowDef="displayedColumns"
-      ></tr>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr
         mat-row
         *matRowDef="let row; columns: displayedColumns; let i = index"

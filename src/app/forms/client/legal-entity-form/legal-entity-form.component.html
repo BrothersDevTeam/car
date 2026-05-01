@@ -1,7 +1,4 @@
-<form
-  [formGroup]="form"
-  (keydown.enter)="onEnter($event)"
->
+<form [formGroup]="form" (keydown.enter)="onEnter($event)">
   <!-- Seção Premium de Rascunhos -->
   @if (availableDrafts.length > 0 && !dataForm) {
     <div class="drafts-section">
@@ -9,30 +6,17 @@
         <mat-card-header>
           <mat-icon mat-card-avatar>history</mat-icon>
           <mat-card-title>Cadastros em andamento</mat-card-title>
-          <mat-card-subtitle>
-            Você possui rascunhos salvos para este perfil.
-          </mat-card-subtitle>
+          <mat-card-subtitle>Você possui rascunhos salvos para este perfil.</mat-card-subtitle>
         </mat-card-header>
 
         <mat-card-content>
           <div class="draft-selector-container">
-            <mat-form-field
-              appearance="outline"
-              class="draft-select-field"
-            >
+            <mat-form-field appearance="outline" class="draft-select-field">
               <mat-label>Selecione um rascunho para continuar</mat-label>
-              <mat-select
-                [(value)]="selectedDraftId"
-                (selectionChange)="onDraftSelected($event)"
-              >
-                <mat-option [value]="null">
-                  -- Iniciar novo cadastro --
-                </mat-option>
+              <mat-select [(value)]="selectedDraftId" (selectionChange)="onDraftSelected($event)">
+                <mat-option [value]="null">-- Iniciar novo cadastro --</mat-option>
                 @for (draft of availableDrafts; track draft.id) {
-                  <mat-option
-                    [value]="draft.id"
-                    class="draft-option-item"
-                  >
+                  <mat-option [value]="draft.id" class="draft-option-item">
                     <div class="draft-option-content">
                       <div class="draft-info">
                         <span class="draft-name">
@@ -72,9 +56,7 @@
         label="Nome da Empresa (Razão Social) *"
         inputName="name"
         type="text"
-        [error]="
-          form.get('name')?.invalid && (form.get('name')?.touched || submitted)
-        "
+        [error]="form.get('name')?.invalid && (form.get('name')?.touched || submitted)"
       />
 
       <app-primary-select
@@ -89,9 +71,7 @@
 
     <!-- Mensagem de erro para relationshipTypes -->
     @if (submitted && form.get('relationshipTypes')?.invalid) {
-      <div class="error-message">
-        Selecione pelo menos um tipo de relacionamento
-      </div>
+      <div class="error-message">Selecione pelo menos um tipo de relacionamento</div>
     }
 
     <!-- 
@@ -107,9 +87,7 @@
         placeholder="00.000.000/0000-00"
         mask="00.000.000/0000-00"
         appCnpjValidator
-        [error]="
-          form.get('cnpj')?.invalid && (form.get('cnpj')?.touched || submitted)
-        "
+        [error]="form.get('cnpj')?.invalid && (form.get('cnpj')?.touched || submitted)"
       />
 
       <app-primary-input
@@ -154,10 +132,7 @@
         inputName="email"
         type="email"
         placeholder="exemplo@empresa.com"
-        [error]="
-          form.get('email')?.invalid &&
-          (form.get('email')?.touched || submitted)
-        "
+        [error]="form.get('email')?.invalid && (form.get('email')?.touched || submitted)"
       />
 
       <app-primary-input
@@ -189,10 +164,7 @@
           type="text"
           [uppercase]="false"
           placeholder="Digite o nome de usuário"
-          [error]="
-            form.get('username')?.invalid &&
-            (form.get('username')?.touched || submitted)
-          "
+          [error]="form.get('username')?.invalid && (form.get('username')?.touched || submitted)"
         />
 
         <app-primary-select
@@ -221,10 +193,7 @@
           type="password"
           [uppercase]="false"
           placeholder="Mínimo 6 caracteres"
-          [error]="
-            form.get('password')?.invalid &&
-            (form.get('password')?.touched || submitted)
-          "
+          [error]="form.get('password')?.invalid && (form.get('password')?.touched || submitted)"
         />
 
         <app-primary-input
@@ -235,8 +204,7 @@
           [uppercase]="false"
           placeholder="Digite a senha novamente"
           [error]="
-            (form.get('confirmPassword')?.invalid ||
-              form.errors?.['passwordMismatch']) &&
+            (form.get('confirmPassword')?.invalid || form.errors?.['passwordMismatch']) &&
             (form.get('confirmPassword')?.touched || submitted)
           "
         />
@@ -249,25 +217,15 @@
 
       <!-- Mensagens de erro consolidadas -->
       @if (submitted && form.get('username')?.invalid) {
-        <div class="error-message">
-          Nome de usuário é obrigatório (mínimo 3 caracteres)
-        </div>
+        <div class="error-message">Nome de usuário é obrigatório (mínimo 3 caracteres)</div>
       }
 
       @if (submitted && form.get('password')?.invalid) {
-        <div class="error-message">
-          Senha é obrigatória (mínimo 6 caracteres)
-        </div>
+        <div class="error-message">Senha é obrigatória (mínimo 6 caracteres)</div>
       }
 
-      @if (
-        submitted &&
-        form.get('confirmPassword')?.invalid &&
-        !form.errors?.['passwordMismatch']
-      ) {
-        <div class="error-message">
-          Confirmação de senha é obrigatória (mínimo 6 caracteres)
-        </div>
+      @if (submitted && form.get('confirmPassword')?.invalid && !form.errors?.['passwordMismatch']) {
+        <div class="error-message">Confirmação de senha é obrigatória (mínimo 6 caracteres)</div>
       }
 
       @if (submitted && form.get('roleName')?.invalid) {
@@ -374,14 +332,6 @@
       </button>
     }
 
-    <button
-      mat-raised-button
-      type="button"
-      class="submit-btn"
-      (click)="onSubmit()"
-      #submitButton
-    >
-      Salvar
-    </button>
+    <button mat-raised-button type="button" class="submit-btn" (click)="onSubmit()" #submitButton>Salvar</button>
   </div>
 </form>

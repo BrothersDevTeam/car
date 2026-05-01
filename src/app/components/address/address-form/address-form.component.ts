@@ -10,12 +10,7 @@ import {
   ElementRef,
   inject,
 } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -41,18 +36,8 @@ import {
 } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 
-import {
-  Address,
-  CreateAddress,
-  UpdateAddress,
-  ViaCepResponse,
-} from '@interfaces/address';
-import {
-  AddressType,
-  getAddressTypeOptions,
-  BRAZILIAN_STATES,
-  BrazilianState,
-} from '../../../enums/addressTypes';
+import { Address, CreateAddress, UpdateAddress, ViaCepResponse } from '@interfaces/address';
+import { AddressType, getAddressTypeOptions, BRAZILIAN_STATES, BrazilianState } from '../../../enums/addressTypes';
 
 @Component({
   selector: 'app-address-form',
@@ -72,9 +57,7 @@ import {
   templateUrl: './address-form.component.html',
   styleUrl: './address-form.component.scss',
 })
-export class AddressFormComponent
-  implements OnInit, OnChanges, CanComponentDeactivate
-{
+export class AddressFormComponent implements OnInit, OnChanges, CanComponentDeactivate {
   @Input() ownerId!: string;
   @Input() ownerType: 'person' | 'store' = 'person';
   @Input() address: Address | null = null;
@@ -114,13 +97,7 @@ export class AddressFormComponent
    * Define os campos obrigatórios do formulário
    * Usado para verificar se pode salvar completo
    */
-  private readonly REQUIRED_FIELDS = [
-    'cep',
-    'street',
-    'neighborhood',
-    'city',
-    'state',
-  ];
+  private readonly REQUIRED_FIELDS = ['cep', 'street', 'neighborhood', 'city', 'state'];
 
   /**
    * Tipo do formulário para identificação no localStorage
@@ -145,23 +122,17 @@ export class AddressFormComponent
     private cepService: CepService,
     private toastr: ToastrService,
     private formDraftService: FormDraftService,
-    private actionsService: ActionsService
+    private actionsService: ActionsService,
   ) {
     this.form = this.fb.group({
       addressType: [AddressType.RESIDENCIAL, Validators.required],
-      cep: [
-        '',
-        [Validators.required, Validators.minLength(8), Validators.maxLength(9)],
-      ],
+      cep: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(9)]],
       street: ['', [Validators.required, Validators.maxLength(100)]],
       number: ['', Validators.maxLength(10)],
       complement: ['', Validators.maxLength(100)],
       neighborhood: ['', [Validators.required, Validators.maxLength(100)]],
       city: ['', [Validators.required, Validators.maxLength(100)]],
-      state: [
-        '',
-        [Validators.required, Validators.minLength(2), Validators.maxLength(2)],
-      ],
+      state: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
       country: ['Brasil'],
       mainAddress: [false],
       active: [true, Validators.required],
@@ -181,9 +152,7 @@ export class AddressFormComponent
       request$.subscribe({
         next: (addresses) => {
           if (!addresses || addresses.length === 0) {
-            console.log(
-              '🏁 Primeiro endereço identificado! Marcando como principal.'
-            );
+            console.log('🏁 Primeiro endereço identificado! Marcando como principal.');
             this.form.patchValue({ mainAddress: true });
           }
         },
@@ -204,14 +173,14 @@ export class AddressFormComponent
         const isDirty = this.form.dirty;
         this.actionsService.hasFormChanges.set(isDirty);
         this.formChanged.emit(isDirty);
-      })
+      }),
     );
 
     // Inscreve para atualizar lista quando rascunhos mudarem
     this.subscriptions.add(
       this.formDraftService.draftsChanges.subscribe(() => {
         this.loadAvailableDrafts();
-      })
+      }),
     );
 
     // Captura valor inicial após tudo estar carregado
@@ -416,30 +385,28 @@ export class AddressFormComponent
           active: formValue.active ?? true,
         };
 
-        this.addressService
-          .update(this.address!.addressId!, updateData)
-          .subscribe({
-            next: () => {
-              this.toastr.success('Endereço atualizado com sucesso');
+        this.addressService.update(this.address!.addressId!, updateData).subscribe({
+          next: () => {
+            this.toastr.success('Endereço atualizado com sucesso');
 
-              // Remove rascunho se houver
-              const entityId = `addr_${this.address!.addressId}`;
-              this.formDraftService.removeDraft(this.FORM_TYPE, entityId);
+            // Remove rascunho se houver
+            const entityId = `addr_${this.address!.addressId}`;
+            this.formDraftService.removeDraft(this.FORM_TYPE, entityId);
 
-              this.isSaving = false;
-              this.formSubmitted.emit();
-              this.resetForm();
-              observer.next(true);
-              observer.complete();
-            },
-            error: (err) => {
-              console.error('Erro ao atualizar:', err);
-              this.toastr.error('Erro ao atualizar endereço');
-              this.isSaving = false;
-              observer.next(false);
-              observer.complete();
-            },
-          });
+            this.isSaving = false;
+            this.formSubmitted.emit();
+            this.resetForm();
+            observer.next(true);
+            observer.complete();
+          },
+          error: (err) => {
+            console.error('Erro ao atualizar:', err);
+            this.toastr.error('Erro ao atualizar endereço');
+            this.isSaving = false;
+            observer.next(false);
+            observer.complete();
+          },
+        });
       } else {
         const newAddress: CreateAddress = {
           personId: this.ownerType === 'person' ? this.ownerId : undefined,
@@ -493,13 +460,11 @@ export class AddressFormComponent
     silent: boolean = false,
     draftName?: string,
     existingDraftId?: string,
-    closeAfterSave: boolean = true
+    closeAfterSave: boolean = true,
   ): void {
     const addressId = this.address?.addressId;
 
-    let effectiveEntityId: string | number | undefined = addressId
-      ? `addr_${addressId}`
-      : undefined;
+    let effectiveEntityId: string | number | undefined = addressId ? `addr_${addressId}` : undefined;
 
     if (!effectiveEntityId && existingDraftId) {
       const prefix = `${this.FORM_TYPE}_`;
@@ -519,7 +484,7 @@ export class AddressFormComponent
       this.FORM_TYPE,
       draftData,
       effectiveEntityId,
-      draftName || `Endereço ${this.form.value.street || ''}`
+      draftName || `Endereço ${this.form.value.street || ''}`,
     );
 
     // SEMPRE atualiza o ID do rascunho selecionado
@@ -547,15 +512,13 @@ export class AddressFormComponent
   openSaveDraftDialog() {
     // Se já tem um rascunho selecionado, atualiza direto SEM fechar
     if (this.selectedDraftId) {
-      const currentDraft = this.availableDrafts.find(
-        (d) => d.id === this.selectedDraftId
-      );
+      const currentDraft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);
       if (currentDraft) {
         this.saveLocalDraft(
           false,
           currentDraft.draftName,
           this.selectedDraftId,
-          false // NÃO fechar o formulário
+          false, // NÃO fechar o formulário
         );
         return;
       }
@@ -563,8 +526,7 @@ export class AddressFormComponent
 
     // Se é novo, abre diálogo para nomear
     const suggestedName =
-      (this.form.value.street || '') +
-        (this.form.value.number ? ', ' + this.form.value.number : '') ||
+      (this.form.value.street || '') + (this.form.value.number ? ', ' + this.form.value.number : '') ||
       `Endereço ${new Date().toLocaleString()}`;
 
     const dialogRef = this.dialog.open(SaveDraftDialogComponent, {
@@ -585,9 +547,7 @@ export class AddressFormComponent
    * Carrega a lista de rascunhos disponíveis
    */
   private loadAvailableDrafts(): void {
-    this.availableDrafts = this.formDraftService.getDraftsByType(
-      this.FORM_TYPE
-    );
+    this.availableDrafts = this.formDraftService.getDraftsByType(this.FORM_TYPE);
 
     // Filtra rascunhos relacionados à pessoa atual
     this.availableDrafts = this.availableDrafts.filter((d) => {
@@ -643,9 +603,7 @@ export class AddressFormComponent
     const draft = this.availableDrafts.find((d) => d.id === draftId);
     if (!draft) return;
 
-    const confirmed = confirm(
-      `Excluir rascunho "${draft.draftName || 'sem nome'}"?`
-    );
+    const confirmed = confirm(`Excluir rascunho "${draft.draftName || 'sem nome'}"?`);
     if (!confirmed) return;
 
     this.formDraftService.removeDraftById(draft.id);
@@ -683,17 +641,14 @@ export class AddressFormComponent
 
   onCancel() {
     if (this.hasUnsavedChanges()) {
-      const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
-        ConfirmDialogComponent,
-        {
-          data: {
-            title: 'Descartar Alterações',
-            message: 'Existem alterações não salvas. Deseja descartá-las?',
-            confirmText: 'Descartar',
-            cancelText: 'Continuar Editando',
-          },
-        }
-      );
+      const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(ConfirmDialogComponent, {
+        data: {
+          title: 'Descartar Alterações',
+          message: 'Existem alterações não salvas. Deseja descartá-las?',
+          confirmText: 'Descartar',
+          cancelText: 'Continuar Editando',
+        },
+      });
 
       dialogRef.afterClosed().subscribe((result) => {
         if (result) {

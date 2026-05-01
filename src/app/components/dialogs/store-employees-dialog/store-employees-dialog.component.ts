@@ -1,11 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  MAT_DIALOG_DATA,
-  MatDialog,
-  MatDialogModule,
-  MatDialogRef,
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -13,26 +8,14 @@ import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-  FormArray,
-  FormControl,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray, FormControl } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatMenuModule } from '@angular/material/menu';
 import { ToastrService } from 'ngx-toastr';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  switchMap,
-  finalize,
-} from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import { EmployeeService } from '@services/employee.service';
@@ -220,7 +203,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
     private fb: FormBuilder,
     private toastr: ToastrService,
     public dialogRef: MatDialogRef<StoreEmployeesDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: StoreEmployeesDialogData
+    @Inject(MAT_DIALOG_DATA) public data: StoreEmployeesDialogData,
   ) {}
 
   ngOnInit(): void {
@@ -246,16 +229,14 @@ export class StoreEmployeesDialogComponent implements OnInit {
               includeInactive: true,
             })
             .pipe(finalize(() => (this.searchingPeople = false)));
-        })
+        }),
       )
       .subscribe({
         next: (response) => {
           if (response) {
             // Filtra pessoas que já estão na lista de funcionários
             const employeeIds = new Set(this.employees.map((e) => e.personId));
-            this.searchPeopleResults = response.content.filter(
-              (p) => !employeeIds.has(p.personId)
-            );
+            this.searchPeopleResults = response.content.filter((p) => !employeeIds.has(p.personId));
           }
         },
         error: (err) => {
@@ -350,7 +331,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
         confirmPassword: ['', [Validators.required]],
         authorizations: this.fb.array<string>([]),
       },
-      { validators: this.passwordMatchValidator }
+      { validators: this.passwordMatchValidator },
     );
 
     this.createAccessForms.set(id, form);
@@ -424,25 +405,21 @@ export class StoreEmployeesDialogComponent implements OnInit {
       authorizations: form.value.authorizations as string[],
     };
 
-    this.employeeService
-      .createUserForPerson(person.personId, payload)
-      .subscribe({
-        next: () => {
-          this.toastr.success(`Acesso criado para ${person.name}!`);
-          this.savingAccessFor = null;
-          this.creatingAccessFor = null;
-          this.createAccessForms.delete(person.personId);
-          this.loadEmployees(); // Recarrega lista para atualizar hasUser
-        },
-        error: (err) => {
-          console.error('Erro ao criar acesso:', err);
-          const msg = err.error?.message || err.error || 'Erro ao criar acesso';
-          this.toastr.error(
-            typeof msg === 'string' ? msg : 'Erro ao criar acesso'
-          );
-          this.savingAccessFor = null;
-        },
-      });
+    this.employeeService.createUserForPerson(person.personId, payload).subscribe({
+      next: () => {
+        this.toastr.success(`Acesso criado para ${person.name}!`);
+        this.savingAccessFor = null;
+        this.creatingAccessFor = null;
+        this.createAccessForms.delete(person.personId);
+        this.loadEmployees(); // Recarrega lista para atualizar hasUser
+      },
+      error: (err) => {
+        console.error('Erro ao criar acesso:', err);
+        const msg = err.error?.message || err.error || 'Erro ao criar acesso';
+        this.toastr.error(typeof msg === 'string' ? msg : 'Erro ao criar acesso');
+        this.savingAccessFor = null;
+      },
+    });
   }
 
   // ─────────────────────────────────────────
@@ -457,7 +434,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
 
     const userId = person.user?.userId ?? person.userId!;
     const confirmed = confirm(
-      `Tem certeza que deseja remover o acesso ao sistema de "${person.name}"?\n\nA pessoa continuará cadastrada, mas não poderá mais fazer login.`
+      `Tem certeza que deseja remover o acesso ao sistema de "${person.name}"?\n\nA pessoa continuará cadastrada, mas não poderá mais fazer login.`,
     );
     if (!confirmed) return;
 
@@ -472,9 +449,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
       error: (err) => {
         console.error('Erro ao revogar acesso:', err);
         const msg = err.error?.message || err.error || 'Erro ao revogar acesso';
-        this.toastr.error(
-          typeof msg === 'string' ? msg : 'Erro ao revogar acesso'
-        );
+        this.toastr.error(typeof msg === 'string' ? msg : 'Erro ao revogar acesso');
         this.revokingAccessFor = null;
       },
     });
@@ -500,26 +475,19 @@ export class StoreEmployeesDialogComponent implements OnInit {
 
     this.updatingRelationshipFor = person.personId;
 
-    this.employeeService
-      .updateRelationship(person.personId, newType)
-      .subscribe({
-        next: () => {
-          this.toastr.success(
-            `Cargo de ${person.name} alterado para ${this.getRelationshipLabel(newType)}`
-          );
-          this.updatingRelationshipFor = null;
-          this.loadEmployees();
-        },
-        error: (err) => {
-          console.error('Erro ao alterar cargo:', err);
-          const msg =
-            err.error?.message || err.error || 'Erro ao alterar cargo';
-          this.toastr.error(
-            typeof msg === 'string' ? msg : 'Erro ao alterar cargo'
-          );
-          this.updatingRelationshipFor = null;
-        },
-      });
+    this.employeeService.updateRelationship(person.personId, newType).subscribe({
+      next: () => {
+        this.toastr.success(`Cargo de ${person.name} alterado para ${this.getRelationshipLabel(newType)}`);
+        this.updatingRelationshipFor = null;
+        this.loadEmployees();
+      },
+      error: (err) => {
+        console.error('Erro ao alterar cargo:', err);
+        const msg = err.error?.message || err.error || 'Erro ao alterar cargo';
+        this.toastr.error(typeof msg === 'string' ? msg : 'Erro ao alterar cargo');
+        this.updatingRelationshipFor = null;
+      },
+    });
   }
 
   // ─────────────────────────────────────────

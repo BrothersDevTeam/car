@@ -1,8 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
 import { AddressService } from './address.service';
 import { Address, CreateAddress, UpdateAddress } from '@interfaces/address';
@@ -303,7 +300,7 @@ describe('AddressService', () => {
           req.params.get('size') === '10' &&
           req.params.get('addressType') === 'RESIDENCIAL' &&
           req.params.get('state') === 'SP' &&
-          req.params.get('city') === 'São Paulo'
+          req.params.get('city') === 'São Paulo',
       );
       expect(req.request.method).toBe('GET');
       req.flush(mockResponse);

@@ -1,11 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -52,7 +47,7 @@ export class BrandFormDialogComponent implements OnInit {
     private fb: FormBuilder,
     private storeContextService: StoreContextService,
     public dialogRef: MatDialogRef<BrandFormDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: BrandFormDialogData
+    @Inject(MAT_DIALOG_DATA) public data: BrandFormDialogData,
   ) {}
 
   ngOnInit(): void {
@@ -67,21 +62,12 @@ export class BrandFormDialogComponent implements OnInit {
 
   private initForm(): void {
     this.brandForm = this.fb.group({
-      name: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(2),
-          Validators.maxLength(100),
-        ],
-      ],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     });
 
     this.brandForm.get('name')?.valueChanges.subscribe((value) => {
       if (value) {
-        this.brandForm
-          .get('name')
-          ?.setValue(value.toUpperCase(), { emitEvent: false });
+        this.brandForm.get('name')?.setValue(value.toUpperCase(), { emitEvent: false });
       }
     });
   }

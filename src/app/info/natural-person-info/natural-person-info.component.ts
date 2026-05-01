@@ -1,12 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  inject,
-  Input,
-  OnInit,
-  Output,
-  ViewChild,
-} from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EventType } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -64,7 +56,7 @@ export class NaturalPersonInfoComponent implements OnInit {
   constructor(
     private toastrService: ToastrService,
     private personService: PersonService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   ngOnInit() {
@@ -74,12 +66,8 @@ export class NaturalPersonInfoComponent implements OnInit {
   checkPermissions() {
     // Utiliza authorizations granulares: sem dependência de ROLE_
     this.canEdit = this.authService.hasAuthority(Authorizations.EDIT_PERSON);
-    this.canDelete = this.authService.hasAuthority(
-      Authorizations.DELETE_PERSON
-    );
-    this.canManageUserAccess = this.authService.hasAuthority(
-      Authorizations.CREATE_USER
-    );
+    this.canDelete = this.authService.hasAuthority(Authorizations.DELETE_PERSON);
+    this.canManageUserAccess = this.authService.hasAuthority(Authorizations.CREATE_USER);
   }
 
   onDelete() {
@@ -91,18 +79,14 @@ export class NaturalPersonInfoComponent implements OnInit {
   }
 
   openDialog() {
-    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Confirmar Exclusão',
-          message:
-            'Você tem certeza que deseja <strong>excluir</strong> este registro?',
-          confirmText: 'Sim',
-          cancelText: 'Não',
-        },
-      }
-    );
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Confirmar Exclusão',
+        message: 'Você tem certeza que deseja <strong>excluir</strong> este registro?',
+        confirmText: 'Sim',
+        cancelText: 'Não',
+      },
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
@@ -121,8 +105,7 @@ export class NaturalPersonInfoComponent implements OnInit {
         },
         error: (error) => {
           console.error('Erro ao excluir pessoa:', error);
-          const errorMessage =
-            error?.error?.message || error?.message || 'Erro ao excluir pessoa';
+          const errorMessage = error?.error?.message || error?.message || 'Erro ao excluir pessoa';
           this.toastrService.error(errorMessage);
         },
       });

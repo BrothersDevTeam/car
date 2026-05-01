@@ -1,22 +1,12 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-  MatDialogRef,
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@interfaces/store';
 import { Person } from '@interfaces/person';
@@ -69,7 +59,7 @@ export class StoreOwnerDialogComponent implements OnInit {
     private fb: FormBuilder,
     private personService: PersonService,
     public dialogRef: MatDialogRef<StoreOwnerDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: StoreOwnerDialogData
+    @Inject(MAT_DIALOG_DATA) public data: StoreOwnerDialogData,
   ) {}
 
   ngOnInit(): void {
@@ -78,10 +68,7 @@ export class StoreOwnerDialogComponent implements OnInit {
 
     // Se for modo update e tiver owner, guarda referência
     if (this.mode === 'update' && this.data.store.owner) {
-      this.currentOwner =
-        typeof this.data.store.owner === 'object'
-          ? this.data.store.owner
-          : null;
+      this.currentOwner = typeof this.data.store.owner === 'object' ? this.data.store.owner : null;
     }
 
     this.initForm();
@@ -129,14 +116,7 @@ export class StoreOwnerDialogComponent implements OnInit {
       params['storeId'] = this.data.store.storeId;
     }
 
-    console.log(
-      '🔍 Buscando pessoas. Search:',
-      search,
-      'StoreId:',
-      params['storeId'],
-      'IsCarAdmin:',
-      this.isCarAdmin
-    );
+    console.log('🔍 Buscando pessoas. Search:', search, 'StoreId:', params['storeId'], 'IsCarAdmin:', this.isCarAdmin);
 
     this.personService.getPaginatedData(0, 100, params).subscribe({
       next: (response) => {
@@ -156,18 +136,14 @@ export class StoreOwnerDialogComponent implements OnInit {
    * Retorna o título do dialog baseado no modo
    */
   getDialogTitle(): string {
-    return this.mode === 'update'
-      ? 'Alterar Proprietário'
-      : 'Vincular Proprietário';
+    return this.mode === 'update' ? 'Alterar Proprietário' : 'Vincular Proprietário';
   }
 
   /**
    * Retorna o texto do botão de ação baseado no modo
    */
   getActionButtonText(): string {
-    return this.mode === 'update'
-      ? 'Alterar Proprietário'
-      : 'Vincular Proprietário';
+    return this.mode === 'update' ? 'Alterar Proprietário' : 'Vincular Proprietário';
   }
 
   /**
@@ -191,13 +167,11 @@ export class StoreOwnerDialogComponent implements OnInit {
   onSubmit(): void {
     if (this.ownerForm.valid) {
       const selectedPersonId = this.ownerForm.value.personId;
-      const selectedPerson = this.persons.find(
-        (p) => p.personId === selectedPersonId
-      );
+      const selectedPerson = this.persons.find((p) => p.personId === selectedPersonId);
 
       if (selectedPerson && !selectedPerson.hasUser) {
         alert(
-          'Esta pessoa não possui um usuário de sistema (login/senha) vinculado. \n\nPor favor, cadastre um usuário para esta pessoa antes de vinculá-la como proprietária.'
+          'Esta pessoa não possui um usuário de sistema (login/senha) vinculado. \n\nPor favor, cadastre um usuário para esta pessoa antes de vinculá-la como proprietária.',
         );
         return;
       }

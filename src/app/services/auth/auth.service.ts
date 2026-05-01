@@ -27,7 +27,7 @@ export class AuthService {
     private router: Router,
     private dialog: MatDialog,
     private actionsService: ActionsService,
-    private injector: Injector
+    private injector: Injector,
   ) {}
 
   login(email: string, password: string) {
@@ -45,7 +45,7 @@ export class AuthService {
             console.warn('Erro ao atualizar StoreContextService no login', e);
           }
           this.router.navigate(['/dashboard']);
-        })
+        }),
       );
   }
 
@@ -125,10 +125,7 @@ export class AuthService {
    * Ex: hasAuthority('edit:person')
    */
   hasAuthority(authority: string): boolean {
-    return (
-      this.getAuthorizations().includes(authority) ||
-      this.getAuthorizations().includes('root:admin')
-    );
+    return this.getAuthorizations().includes(authority) || this.getAuthorizations().includes('root:admin');
   }
 
   isLoggedIn(): boolean {

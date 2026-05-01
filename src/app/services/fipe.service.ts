@@ -37,29 +37,16 @@ export class FipeService {
   }
 
   getModelos(type: string, marcaId: string): Observable<FipeModelResponse> {
-    return this.http.get<FipeModelResponse>(
-      `${this.API_URL}/${type}/marcas/${marcaId}/modelos`
-    );
+    return this.http.get<FipeModelResponse>(`${this.API_URL}/${type}/marcas/${marcaId}/modelos`);
   }
 
-  getAnos(
-    type: string,
-    marcaId: string,
-    modeloId: string
-  ): Observable<FipeReference[]> {
-    return this.http.get<FipeReference[]>(
-      `${this.API_URL}/${type}/marcas/${marcaId}/modelos/${modeloId}/anos`
-    );
+  getAnos(type: string, marcaId: string, modeloId: string): Observable<FipeReference[]> {
+    return this.http.get<FipeReference[]>(`${this.API_URL}/${type}/marcas/${marcaId}/modelos/${modeloId}/anos`);
   }
 
-  getVehicleDetails(
-    type: string,
-    marcaId: string,
-    modeloId: string,
-    anoId: string
-  ): Observable<FipeVehicleDetails> {
+  getVehicleDetails(type: string, marcaId: string, modeloId: string, anoId: string): Observable<FipeVehicleDetails> {
     return this.http.get<FipeVehicleDetails>(
-      `${this.API_URL}/${type}/marcas/${marcaId}/modelos/${modeloId}/anos/${anoId}`
+      `${this.API_URL}/${type}/marcas/${marcaId}/modelos/${modeloId}/anos/${anoId}`,
     );
   }
 }

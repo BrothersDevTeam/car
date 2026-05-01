@@ -9,8 +9,8 @@
   // Background image similar to the reference - darker city/car night vibe
   background:
     linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-    url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80')
-      no-repeat center center;
+    url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80') no-repeat center
+      center;
   background-size: cover;
   overflow: hidden;
   font-family: 'Nasalization', sans-serif;
@@ -43,16 +43,8 @@
     font-family: 'Nasalization', sans-serif;
     color: rgba(255, 255, 255, 0.8);
     // Slight transparency effect on text
-    mask-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 1),
-      rgba(0, 0, 0, 0.6)
-    );
-    -webkit-mask-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 1),
-      rgba(0, 0, 0, 0.6)
-    );
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.6));
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.6));
   }
 
   .footer-text {
@@ -183,11 +175,7 @@
   width: 100%;
   padding: 15px;
   border-radius: 50px;
-  background: linear-gradient(
-    90deg,
-    #3b82f6 0%,
-    #a855f7 100%
-  ); // Blue to Purple gradient
+  background: linear-gradient(90deg, #3b82f6 0%, #a855f7 100%); // Blue to Purple gradient
   border: none;
   color: white;
   font-size: 1rem;

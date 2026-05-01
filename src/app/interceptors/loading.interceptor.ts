@@ -14,6 +14,6 @@ export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
     finalize(() => {
       console.log('Request completed: ', req.url);
       busyService.idle();
-    })
+    }),
   );
 };

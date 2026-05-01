@@ -1,11 +1,4 @@
-import {
-  Component,
-  Input,
-  OnInit,
-  inject,
-  Output,
-  EventEmitter,
-} from '@angular/core';
+import { Component, Input, OnInit, inject, Output, EventEmitter } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,13 +13,7 @@ import { catchError, forkJoin, of } from 'rxjs';
 @Component({
   selector: 'app-venda-info',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatDividerModule,
-    MatTooltipModule,
-  ],
+  imports: [CommonModule, MatIconModule, MatButtonModule, MatDividerModule, MatTooltipModule],
   providers: [DatePipe, CurrencyPipe],
   templateUrl: './venda-info.component.html',
   styleUrl: './venda-info.component.scss',

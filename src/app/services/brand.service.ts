@@ -13,9 +13,7 @@ export class BrandService {
   private cache: PaginationResponse<Brand> | null = null;
 
   // Subject para notificar mudanças no cache
-  private cacheUpdated$ = new BehaviorSubject<PaginationResponse<Brand> | null>(
-    null
-  );
+  private cacheUpdated$ = new BehaviorSubject<PaginationResponse<Brand> | null>(null);
 
   private readonly apiUrl: string = '/api/vehicle-brands';
 
@@ -31,15 +29,13 @@ export class BrandService {
       return of(this.cache);
     }
     // Busca todos os registros (size=1000)
-    return this.http
-      .get<PaginationResponse<Brand>>(`${this.apiUrl}?size=1000`)
-      .pipe(
-        first(),
-        tap((response) => {
-          console.log('Brands fetched:', response);
-          this.cache = response;
-        })
-      );
+    return this.http.get<PaginationResponse<Brand>>(`${this.apiUrl}?size=1000`).pipe(
+      first(),
+      tap((response) => {
+        console.log('Brands fetched:', response);
+        this.cache = response;
+      }),
+    );
   }
 
   create(data: CreateBrand) {
@@ -49,7 +45,7 @@ export class BrandService {
         this.clearCache();
         // Notifica mudança no cache
         this.getBrands().subscribe();
-      })
+      }),
     );
   }
 
@@ -61,7 +57,7 @@ export class BrandService {
         this.clearCache();
         // Notifica mudança no cache
         this.getBrands().subscribe();
-      })
+      }),
     );
   }
 
@@ -70,7 +66,7 @@ export class BrandService {
       tap((response: string) => {
         console.log('Marca deletada com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 

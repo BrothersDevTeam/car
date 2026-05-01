@@ -1,13 +1,7 @@
-<mat-card
-  class="card-container"
-  appearance="outlined"
->
+<mat-card class="card-container" appearance="outlined">
   <mat-card-content class="card-content">
     <!-- Dados Pessoais -->
-    <app-wrapper-card
-      class="person-info"
-      title="Dados pessoais"
-    >
+    <app-wrapper-card class="person-info" title="Dados pessoais">
       <div class="card-row">
         <h3 class="label">Nome:</h3>
         <h3 class="value">{{ person.name }}</h3>
@@ -33,35 +27,17 @@
       </div>
       <mat-card-footer class="card-footer">
         @if (canEdit) {
-          <button
-            type="button"
-            class="btn"
-            color="primary"
-            mat-raised-button
-            (click)="editEvent.emit()"
-          >
-            Editar
-          </button>
+          <button type="button" class="btn" color="primary" mat-raised-button (click)="editEvent.emit()">Editar</button>
         }
         @if (canDelete) {
-          <button
-            type="button"
-            class="btn"
-            color="warn"
-            mat-raised-button
-            matListItemIcon
-            (click)="onDelete()"
-          >
+          <button type="button" class="btn" color="warn" mat-raised-button matListItemIcon (click)="onDelete()">
             Excluir
           </button>
         }
       </mat-card-footer>
     </app-wrapper-card>
     @if (canManageUserAccess) {
-      <app-wrapper-card
-        title="Acesso ao Sistema"
-        class="access-card"
-      >
+      <app-wrapper-card title="Acesso ao Sistema" class="access-card">
         <app-user-access-management
           [personId]="person.personId"
           [hasUser]="person.hasUser ?? false"

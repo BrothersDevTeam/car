@@ -2,15 +2,7 @@ import { ToastrService } from 'ngx-toastr';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import {
-  Component,
-  EventEmitter,
-  inject,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-} from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 
@@ -51,15 +43,12 @@ export class VehicleInfoComponent implements OnChanges {
   constructor(
     private toastrService: ToastrService,
     private vehicleService: VehicleService,
-    private personService: PersonService
+    private personService: PersonService,
   ) {}
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['vehicle']) {
       // Se vendido, tentamos carregar os detalhes do comprador da venda
-      if (
-        this.vehicle?.status === 'VENDIDO' &&
-        this.vehicle.salesHistory?.[0]?.buyerName
-      ) {
+      if (this.vehicle?.status === 'VENDIDO' && this.vehicle.salesHistory?.[0]?.buyerName) {
         // Opcional: Poderíamos buscar o Person completo do comprador aqui se necessário
         // Por enquanto vamos usar os dados do histórico para exibição rápida
       }
@@ -90,26 +79,18 @@ export class VehicleInfoComponent implements OnChanges {
 
   get valorVendaEfetivo(): number {
     // Se está vendido, prioriza o valor da venda finalizada
-    if (
-      this.vehicle.status === 'VENDIDO' &&
-      this.vehicle.salesHistory?.[0]?.valorFinal
-    ) {
+    if (this.vehicle.status === 'VENDIDO' && this.vehicle.salesHistory?.[0]?.valorFinal) {
       return this.vehicle.salesHistory[0].valorFinal;
     }
     return this.vehicle.valorVenda ? parseFloat(this.vehicle.valorVenda) : 0;
   }
 
   get dataEntradaEfetiva(): string | undefined {
-    return (
-      this.vehicle.entryDate || this.vehicle.purchaseHistory?.[0]?.dataCompra
-    );
+    return this.vehicle.entryDate || this.vehicle.purchaseHistory?.[0]?.dataCompra;
   }
 
   get isVendaEfetiva(): boolean {
-    return (
-      this.vehicle.status === 'VENDIDO' &&
-      !!this.vehicle.salesHistory?.[0]?.valorFinal
-    );
+    return this.vehicle.status === 'VENDIDO' && !!this.vehicle.salesHistory?.[0]?.valorFinal;
   }
 
   get isCompraEfetiva(): boolean {
@@ -165,17 +146,14 @@ export class VehicleInfoComponent implements OnChanges {
   }
 
   openDialog() {
-    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Confirmar exclusão',
-          message: `Deseja realmente excluir o veículo <strong>${this.vehicle.plate}</strong>?`,
-          confirmText: 'Sim, excluir',
-          cancelText: 'Cancelar',
-        },
-      }
-    );
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Confirmar exclusão',
+        message: `Deseja realmente excluir o veículo <strong>${this.vehicle.plate}</strong>?`,
+        confirmText: 'Sim, excluir',
+        cancelText: 'Cancelar',
+      },
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {

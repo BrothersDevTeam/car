@@ -18,10 +18,7 @@
       </button>
     }
     <div class="search-container">
-      <mat-form-field
-        appearance="outline"
-        class="search-field"
-      >
+      <mat-form-field appearance="outline" class="search-field">
         <mat-label>Buscar pessoa</mat-label>
         <input
           matInput
@@ -30,12 +27,7 @@
           placeholder="Digite o nome, CPF, CNPJ ou email"
         />
         @if (searchValue) {
-          <button
-            matSuffix
-            mat-icon-button
-            aria-label="Limpar"
-            (click)="clearSearch()"
-          >
+          <button matSuffix mat-icon-button aria-label="Limpar" (click)="clearSearch()">
             <mat-icon>close</mat-icon>
           </button>
         }
@@ -82,23 +74,14 @@
           >
             VENDEDOR
           </mat-checkbox>
-          <mat-checkbox
-            [(ngModel)]="employeeSubFilters.gerente"
-            (change)="onEmployeeSubFilterChange()"
-            color="primary"
-          >
+          <mat-checkbox [(ngModel)]="employeeSubFilters.gerente" (change)="onEmployeeSubFilterChange()" color="primary">
             GERENTE
           </mat-checkbox>
         </div>
       }
 
       @if (hasActiveFilters()) {
-        <button
-          mat-button
-          color="warn"
-          (click)="clearFilters()"
-          class="clear-filters-btn"
-        >
+        <button mat-button color="warn" (click)="clearFilters()" class="clear-filters-btn">
           <mat-icon>backspace</mat-icon>
           Limpar Filtros
         </button>
@@ -177,10 +160,7 @@
   @if (openForm()) {
     <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
       <mat-tab-group [selectedIndex]="selectedPerson?.legalEntity ? 1 : 0">
-        <mat-tab
-          label="Pessoa Física"
-          [disabled]="selectedPerson && selectedPerson.legalEntity"
-        >
+        <mat-tab label="Pessoa Física" [disabled]="selectedPerson && selectedPerson.legalEntity">
           <app-natural-person-form
             [dataForm]="!selectedPerson?.legalEntity ? selectedPerson : null"
             [draft]="selectedDraft"
@@ -188,10 +168,7 @@
             (formChanged)="handleFormChanged($event)"
           />
         </mat-tab>
-        <mat-tab
-          label="Pessoa Jurídica"
-          [disabled]="selectedPerson && !selectedPerson.legalEntity"
-        >
+        <mat-tab label="Pessoa Jurídica" [disabled]="selectedPerson && !selectedPerson.legalEntity">
           <app-legal-entity-form
             [dataForm]="selectedPerson?.legalEntity ? selectedPerson : null"
             (formSubmitted)="onFormSubmitted()"

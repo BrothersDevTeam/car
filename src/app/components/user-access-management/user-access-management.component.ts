@@ -56,7 +56,7 @@ export class UserAccessManagementComponent implements OnInit {
     private fb: FormBuilder,
     private personService: PersonService,
     private toastr: ToastrService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
     this.userForm = this.fb.group(
       {
@@ -65,7 +65,7 @@ export class UserAccessManagementComponent implements OnInit {
         confirmPassword: ['', [Validators.required]],
         authorizations: this.fb.array<string>([], Validators.required),
       },
-      { validators: this.passwordMatchValidator }
+      { validators: this.passwordMatchValidator },
     ); // Added validator
   }
 
@@ -75,15 +75,14 @@ export class UserAccessManagementComponent implements OnInit {
 
   private checkUserPermissions(): void {
     this.hasPermissionToCreateAccess =
-      this.authService.hasAuthority('create:user') ||
-      this.authService.hasAuthority('edit:store');
+      this.authService.hasAuthority('create:user') || this.authService.hasAuthority('edit:store');
   }
 
   handleCreateAccessClick(): void {
     if (!this.hasPermissionToCreateAccess) {
       this.toastr.warning(
         'Sem permissão para criar acesso ao sistema. O acesso pode ser liberado apenas por Gerentes ou Administradores.',
-        'Acesso Negado'
+        'Acesso Negado',
       );
       return;
     }
@@ -91,9 +90,7 @@ export class UserAccessManagementComponent implements OnInit {
   }
 
   // Custom validator for password match
-  private passwordMatchValidator(
-    control: AbstractControl
-  ): ValidationErrors | null {
+  private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password');
     const confirmPassword = control.get('confirmPassword');
 
@@ -109,9 +106,7 @@ export class UserAccessManagementComponent implements OnInit {
       const errors = confirmPassword.errors;
       if (errors) {
         delete errors['passwordMismatch'];
-        confirmPassword.setErrors(
-          Object.keys(errors).length > 0 ? errors : null
-        );
+        confirmPassword.setErrors(Object.keys(errors).length > 0 ? errors : null);
       }
     }
 

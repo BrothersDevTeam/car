@@ -1,11 +1,6 @@
 import { Directive } from '@angular/core';
 import { CpfValidatorService } from '@services/cpf-validator.service';
-import {
-  NG_VALIDATORS,
-  Validator,
-  AbstractControl,
-  ValidationErrors,
-} from '@angular/forms';
+import { NG_VALIDATORS, Validator, AbstractControl, ValidationErrors } from '@angular/forms';
 
 @Directive({
   selector: '[appCpfValidator]',
@@ -22,8 +17,6 @@ export class CpfValidatorDirective implements Validator {
 
   validate(control: AbstractControl): ValidationErrors | null {
     const cpf = control.value;
-    return cpf && !this.cpfValidatorService.isValid(cpf)
-      ? { invalidCpf: true }
-      : null;
+    return cpf && !this.cpfValidatorService.isValid(cpf) ? { invalidCpf: true } : null;
   }
 }

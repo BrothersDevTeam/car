@@ -1,11 +1,5 @@
-<div
-  class="confirm-dialog-container"
-  [ngClass]="data.type || 'primary'"
->
-  <div
-    class="dialog-header"
-    *ngIf="data.icon"
-  >
+<div class="confirm-dialog-container" [ngClass]="data.type || 'primary'">
+  <div class="dialog-header" *ngIf="data.icon">
     <div class="icon-circle">
       <mat-icon>{{ data.icon }}</mat-icon>
     </div>
@@ -18,18 +12,10 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button
-      mat-button
-      mat-dialog-close
-      class="cancel-btn"
-    >
+    <button mat-button mat-dialog-close class="cancel-btn">
       {{ data.cancelText }}
     </button>
-    <button
-      mat-flat-button
-      [mat-dialog-close]="true"
-      class="confirm-btn"
-    >
+    <button mat-flat-button [mat-dialog-close]="true" class="confirm-btn">
       {{ data.confirmText }}
     </button>
   </mat-dialog-actions>

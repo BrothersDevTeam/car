@@ -1,8 +1,6 @@
 <h2 mat-dialog-title>
   <mat-icon class="title-icon">people</mat-icon>
-  {{
-    data.isRootAdmin ? 'Proprietário e Funcionários' : 'Funcionários da Loja'
-  }}
+  {{ data.isRootAdmin ? 'Proprietário e Funcionários' : 'Funcionários da Loja' }}
   <span class="store-name-subtitle">
     {{ data.store.tradeName || data.store.name }}
   </span>
@@ -24,16 +22,9 @@
       <!-- Busca para adicionar novo funcionário da base -->
       @if (canManageAccess) {
         <div class="add-employee-section">
-          <mat-form-field
-            appearance="outline"
-            class="search-field"
-          >
+          <mat-form-field appearance="outline" class="search-field">
             <mat-label>Pesquisar pessoa para adicionar à equipe...</mat-label>
-            <input
-              matInput
-              [formControl]="personSearchControl"
-              placeholder="Digite nome, CPF ou email"
-            />
+            <input matInput [formControl]="personSearchControl" placeholder="Digite nome, CPF ou email" />
             <mat-icon matSuffix>person_search</mat-icon>
           </mat-form-field>
 
@@ -47,20 +38,14 @@
             <div class="search-results-panel mat-elevation-z4">
               <mat-list>
                 @for (p of searchPeopleResults; track p.personId) {
-                  <mat-list-item
-                    (click)="selectPersonToPromote(p)"
-                    class="search-item"
-                  >
+                  <mat-list-item (click)="selectPersonToPromote(p)" class="search-item">
                     <span matListItemTitle>{{ p.name }}</span>
                     <span matListItemLine>
                       {{ p.cpf || p.email }} | Perfil:
                       {{ getRelationshipLabel(p.relationship) }}
                     </span>
                     <div matListItemMeta>
-                      <button
-                        mat-icon-button
-                        color="primary"
-                      >
+                      <button mat-icon-button color="primary">
                         <mat-icon>person_add</mat-icon>
                       </button>
                     </div>
@@ -74,10 +59,7 @@
 
       <div class="employees-list">
         @for (person of employees; track person.personId) {
-          <div
-            class="employee-card"
-            [class.no-access]="!person.hasUser"
-          >
+          <div class="employee-card" [class.no-access]="!person.hasUser">
             <!-- Cabeçalho do funcionário -->
             <div class="employee-header">
               <div class="employee-avatar">
@@ -100,72 +82,30 @@
                     updatingRelationshipFor === person.personId ||
                     person.relationship === RelationshipTypes.PROPRIETARIO
                   "
-                  [class.chip-manager]="
-                    person.relationship === RelationshipTypes.GERENTE
-                  "
-                  [class.chip-seller]="
-                    person.relationship === RelationshipTypes.VENDEDOR
-                  "
-                  [class.chip-owner]="
-                    person.relationship === RelationshipTypes.PROPRIETARIO
-                  "
+                  [class.chip-manager]="person.relationship === RelationshipTypes.GERENTE"
+                  [class.chip-seller]="person.relationship === RelationshipTypes.VENDEDOR"
+                  [class.chip-owner]="person.relationship === RelationshipTypes.PROPRIETARIO"
                 >
                   @if (updatingRelationshipFor === person.personId) {
-                    <mat-spinner
-                      diameter="12"
-                      class="chip-spinner"
-                    ></mat-spinner>
+                    <mat-spinner diameter="12" class="chip-spinner"></mat-spinner>
                   } @else {
                     {{ getRelationshipLabel(person.relationship) }}
-                    @if (
-                      canManageAccess &&
-                      person.relationship !== RelationshipTypes.PROPRIETARIO
-                    ) {
+                    @if (canManageAccess && person.relationship !== RelationshipTypes.PROPRIETARIO) {
                       <mat-icon class="chip-arrow">arrow_drop_down</mat-icon>
                     }
                   }
                 </button>
 
                 <mat-menu #roleMenu="matMenu">
-                  <button
-                    mat-menu-item
-                    (click)="
-                      changeRelationship(person, RelationshipTypes.GERENTE)
-                    "
-                  >
-                    <mat-icon
-                      [color]="
-                        person.relationship === RelationshipTypes.GERENTE
-                          ? 'primary'
-                          : ''
-                      "
-                    >
-                      {{
-                        person.relationship === RelationshipTypes.GERENTE
-                          ? 'check'
-                          : 'badge'
-                      }}
+                  <button mat-menu-item (click)="changeRelationship(person, RelationshipTypes.GERENTE)">
+                    <mat-icon [color]="person.relationship === RelationshipTypes.GERENTE ? 'primary' : ''">
+                      {{ person.relationship === RelationshipTypes.GERENTE ? 'check' : 'badge' }}
                     </mat-icon>
                     <span>Gerente</span>
                   </button>
-                  <button
-                    mat-menu-item
-                    (click)="
-                      changeRelationship(person, RelationshipTypes.VENDEDOR)
-                    "
-                  >
-                    <mat-icon
-                      [color]="
-                        person.relationship === RelationshipTypes.VENDEDOR
-                          ? 'primary'
-                          : ''
-                      "
-                    >
-                      {{
-                        person.relationship === RelationshipTypes.VENDEDOR
-                          ? 'check'
-                          : 'person'
-                      }}
+                  <button mat-menu-item (click)="changeRelationship(person, RelationshipTypes.VENDEDOR)">
+                    <mat-icon [color]="person.relationship === RelationshipTypes.VENDEDOR ? 'primary' : ''">
+                      {{ person.relationship === RelationshipTypes.VENDEDOR ? 'check' : 'person' }}
                     </mat-icon>
                     <span>Vendedor</span>
                   </button>
@@ -208,10 +148,7 @@
                   >
                     @if (revokingAccessFor === person.personId) {
                       <ng-container>
-                        <mat-spinner
-                          diameter="16"
-                          class="btn-spinner"
-                        ></mat-spinner>
+                        <mat-spinner diameter="16" class="btn-spinner"></mat-spinner>
                         Aguarde...
                       </ng-container>
                     } @else {
@@ -224,10 +161,7 @@
                 }
 
                 <!-- Funcionário SEM acesso: botão de criar -->
-                @if (
-                  !person.hasUser &&
-                  person.relationship !== RelationshipTypes.PROPRIETARIO
-                ) {
+                @if (!person.hasUser && person.relationship !== RelationshipTypes.PROPRIETARIO) {
                   <button
                     mat-raised-button
                     color="primary"
@@ -235,17 +169,9 @@
                     matTooltip="Criar login de acesso ao sistema para este funcionário"
                   >
                     <mat-icon>
-                      {{
-                        creatingAccessFor === person.personId
-                          ? 'expand_less'
-                          : 'person_add'
-                      }}
+                      {{ creatingAccessFor === person.personId ? 'expand_less' : 'person_add' }}
                     </mat-icon>
-                    {{
-                      creatingAccessFor === person.personId
-                        ? 'Cancelar'
-                        : 'Criar Acesso'
-                    }}
+                    {{ creatingAccessFor === person.personId ? 'Cancelar' : 'Criar Acesso' }}
                   </button>
                 }
               </div>
@@ -261,29 +187,13 @@
 
                 <form [formGroup]="getForm(person.personId)">
                   <div class="form-row">
-                    <mat-form-field
-                      appearance="outline"
-                      class="field-full"
-                    >
+                    <mat-form-field appearance="outline" class="field-full">
                       <mat-label>Nome de usuário</mat-label>
-                      <input
-                        matInput
-                        formControlName="username"
-                        placeholder="ex: joao.silva"
-                        autocomplete="off"
-                      />
-                      @if (
-                        getForm(person.personId)
-                          .get('username')
-                          ?.hasError('required')
-                      ) {
+                      <input matInput formControlName="username" placeholder="ex: joao.silva" autocomplete="off" />
+                      @if (getForm(person.personId).get('username')?.hasError('required')) {
                         <mat-error>Obrigatório</mat-error>
                       }
-                      @if (
-                        getForm(person.personId)
-                          .get('username')
-                          ?.hasError('minlength')
-                      ) {
+                      @if (getForm(person.personId).get('username')?.hasError('minlength')) {
                         <mat-error>Mínimo 3 caracteres</mat-error>
                       }
                     </mat-form-field>
@@ -299,33 +209,18 @@
                         placeholder="Mínimo 6 caracteres"
                         autocomplete="new-password"
                       />
-                      @if (
-                        getForm(person.personId)
-                          .get('password')
-                          ?.hasError('required')
-                      ) {
+                      @if (getForm(person.personId).get('password')?.hasError('required')) {
                         <mat-error>Obrigatório</mat-error>
                       }
-                      @if (
-                        getForm(person.personId)
-                          .get('password')
-                          ?.hasError('minlength')
-                      ) {
+                      @if (getForm(person.personId).get('password')?.hasError('minlength')) {
                         <mat-error>Mínimo 6 caracteres</mat-error>
                       }
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
                       <mat-label>Confirmar Senha</mat-label>
-                      <input
-                        matInput
-                        type="password"
-                        formControlName="confirmPassword"
-                        autocomplete="new-password"
-                      />
-                      @if (
-                        getForm(person.personId).errors?.['passwordMismatch']
-                      ) {
+                      <input matInput type="password" formControlName="confirmPassword" autocomplete="new-password" />
+                      @if (getForm(person.personId).errors?.['passwordMismatch']) {
                         <mat-error>As senhas não coincidem</mat-error>
                       }
                     </mat-form-field>
@@ -336,9 +231,7 @@
                     <h5 class="perm-title">
                       Permissões de Acesso
                       <span class="perm-hint">
-                        Pré-selecionadas com base no perfil "{{
-                          getRelationshipLabel(person.relationship)
-                        }}"
+                        Pré-selecionadas com base no perfil "{{ getRelationshipLabel(person.relationship) }}"
                       </span>
                     </h5>
 
@@ -351,12 +244,8 @@
                               <label class="perm-checkbox-label">
                                 <input
                                   type="checkbox"
-                                  [checked]="
-                                    isAuthorized(person.personId, perm.key)
-                                  "
-                                  (change)="
-                                    togglePermission(person.personId, perm.key)
-                                  "
+                                  [checked]="isAuthorized(person.personId, perm.key)"
+                                  (change)="togglePermission(person.personId, perm.key)"
                                 />
                                 {{ perm.label }}
                               </label>
@@ -368,29 +257,17 @@
                   </div>
 
                   <div class="panel-actions">
-                    <button
-                      mat-button
-                      type="button"
-                      (click)="creatingAccessFor = null"
-                    >
-                      Cancelar
-                    </button>
+                    <button mat-button type="button" (click)="creatingAccessFor = null">Cancelar</button>
                     <button
                       mat-raised-button
                       color="primary"
                       type="button"
                       (click)="saveAccess(person)"
-                      [disabled]="
-                        getForm(person.personId).invalid ||
-                        savingAccessFor === person.personId
-                      "
+                      [disabled]="getForm(person.personId).invalid || savingAccessFor === person.personId"
                     >
                       @if (savingAccessFor === person.personId) {
                         <ng-container>
-                          <mat-spinner
-                            diameter="18"
-                            class="btn-spinner"
-                          ></mat-spinner>
+                          <mat-spinner diameter="18" class="btn-spinner"></mat-spinner>
                           Salvando...
                         </ng-container>
                       } @else {
@@ -413,10 +290,5 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button
-    mat-button
-    (click)="close()"
-  >
-    Fechar
-  </button>
+  <button mat-button (click)="close()">Fechar</button>
 </mat-dialog-actions>

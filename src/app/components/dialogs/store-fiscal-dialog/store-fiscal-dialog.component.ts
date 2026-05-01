@@ -1,15 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogRef,
-  MatDialogModule,
-} from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 
@@ -23,10 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // Services
-import {
-  ParametroFiscalService,
-  ParametroFiscal,
-} from '@services/parametro-fiscal.service';
+import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fiscal.service';
 import { FocusNfeService } from '@services/focus-nfe.service';
 import { Store } from '@interfaces/store';
 
@@ -72,15 +60,12 @@ export class StoreFiscalDialogComponent implements OnInit {
     private focusNfeService: FocusNfeService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<StoreFiscalDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { store: Store }
+    @Inject(MAT_DIALOG_DATA) public data: { store: Store },
   ) {
     this.form = this.fb.group({
       parametroFiscalId: [null],
       parametroFiscalRegimeTributario: ['', Validators.required],
-      parametroFiscalInscricaoEstadual: [
-        '',
-        [Validators.required, Validators.maxLength(20)],
-      ],
+      parametroFiscalInscricaoEstadual: ['', [Validators.required, Validators.maxLength(20)]],
       parametroFiscalCalculoAutomaticoImpostos: [true, Validators.required],
       parametroFiscalUtilizarCreditoIcms: [false],
       parametroFiscalUtilizarCreditoPisCofins: [false],
@@ -102,31 +87,25 @@ export class StoreFiscalDialogComponent implements OnInit {
 
   loadParametros(): void {
     this.loading = true;
-    this.parametroFiscalService
-      .getByStoreId(this.data.store.storeId!)
-      .subscribe({
-        next: (config: any) => {
-          if (config && config.parametroFiscalId) {
-            this.hasExistingConfig = true;
+    this.parametroFiscalService.getByStoreId(this.data.store.storeId!).subscribe({
+      next: (config: any) => {
+        if (config && config.parametroFiscalId) {
+          this.hasExistingConfig = true;
 
-            // Mapeia a propriedade do backend (model) para a esperada pelo frontend/form (DTO)
-            if (
-              config.parametroFiscalRegime &&
-              !config.parametroFiscalRegimeTributario
-            ) {
-              config.parametroFiscalRegimeTributario =
-                config.parametroFiscalRegime;
-            }
-
-            this.form.patchValue(config);
+          // Mapeia a propriedade do backend (model) para a esperada pelo frontend/form (DTO)
+          if (config.parametroFiscalRegime && !config.parametroFiscalRegimeTributario) {
+            config.parametroFiscalRegimeTributario = config.parametroFiscalRegime;
           }
-          this.loading = false;
-        },
-        error: (err) => {
-          // Se retornar 404/400 (nao existe), tudo bem, carregamos o form vazio
-          this.loading = false;
-        },
-      });
+
+          this.form.patchValue(config);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        // Se retornar 404/400 (nao existe), tudo bem, carregamos o form vazio
+        this.loading = false;
+      },
+    });
   }
 
   onFileSelected(event: any): void {
@@ -183,30 +162,24 @@ export class StoreFiscalDialogComponent implements OnInit {
 
   onSyncFocusNfe(): void {
     if (this.saving || this.loading || !this.hasExistingConfig) {
-      this.snackBar.open(
-        'Salve os parâmetros fiscais primeiro antes de sincronizar.',
-        'Fechar',
-        { duration: 4000 }
-      );
+      this.snackBar.open('Salve os parâmetros fiscais primeiro antes de sincronizar.', 'Fechar', { duration: 4000 });
       return;
     }
 
     this.syncing = true;
     this.focusNfeService.syncStore(this.data.store.storeId!).subscribe({
       next: (res) => {
-        this.snackBar.open(
-          'Integração com Focus NFe realizada com sucesso!',
-          'OK',
-          { duration: 5000, panelClass: 'success-snackbar' }
-        );
+        this.snackBar.open('Integração com Focus NFe realizada com sucesso!', 'OK', {
+          duration: 5000,
+          panelClass: 'success-snackbar',
+        });
         this.syncing = false;
         this.form.patchValue({ parametroFiscalCadastradoFocusNfe: true });
         this.data.store = { ...this.data.store }; // Trigger a grid change se necessário
       },
       error: (err) => {
         console.error(err);
-        const errMsg =
-          err.error?.message || 'Erro ao comunicar com a Receita / Focus NFe.';
+        const errMsg = err.error?.message || 'Erro ao comunicar com a Receita / Focus NFe.';
         this.snackBar.open(errMsg, 'Fechar', {
           duration: 5000,
           panelClass: 'error-snackbar',

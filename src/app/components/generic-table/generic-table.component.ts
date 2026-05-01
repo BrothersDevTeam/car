@@ -4,16 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  signal,
-  SimpleChanges,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
 import { NgClass, NgIf } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
@@ -73,9 +64,7 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
   }
 
   get displayedColumns(): string[] {
-    return this.columns
-      .filter((col) => !col.hidden || !col.hidden())
-      .map((col) => col.key);
+    return this.columns.filter((col) => !col.hidden || !col.hidden()).map((col) => col.key);
   }
 
   onRowClick(row: T) {
@@ -87,16 +76,12 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
   }
 
   getNestedValue(obj: any, key: string): any {
-    return key
-      .split('.')
-      .reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj);
+    return key.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj);
   }
 
   formatValue(column: ColumnConfig<T>, row: T): string {
     const value = this.getNestedValue(row, column.key);
-    const columnValue = column.format
-      ? column.format(value, row)
-      : value?.toString() || '';
+    const columnValue = column.format ? column.format(value, row) : value?.toString() || '';
     return columnValue;
   }
 
@@ -115,18 +100,13 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
   }
 
   isAllSelected(): boolean {
-    const selectableRows = this.tableDataSource.data.filter((row) =>
-      this.shouldShowCheckbox(row)
-    );
+    const selectableRows = this.tableDataSource.data.filter((row) => this.shouldShowCheckbox(row));
     if (selectableRows.length === 0) return false;
     return selectableRows.every((row) => this.isSelected(row));
   }
 
   isSomeSelected(): boolean {
-    return (
-      this.tableDataSource.data.some((row) => this.isSelected(row)) &&
-      !this.isAllSelected()
-    );
+    return this.tableDataSource.data.some((row) => this.isSelected(row)) && !this.isAllSelected();
   }
 
   toggleAllRows(): void {
@@ -161,9 +141,7 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
 
   shouldShowDeleteIcon(row: T): boolean {
     const deleteColumn = this.columns.find((col) => col.key === 'delete');
-    return deleteColumn?.showDeleteIcon
-      ? deleteColumn.showDeleteIcon(row)
-      : true;
+    return deleteColumn?.showDeleteIcon ? deleteColumn.showDeleteIcon(row) : true;
   }
 
   shouldShowNfeIcon(row: T): boolean {

@@ -10,29 +10,20 @@ import { unsavedChangesGuard } from '@guards/unsaved-changes.guard';
 export const VENDAS_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./vendas-list/vendas-list.component').then(
-        (m) => m.VendasListComponent
-      ),
+    loadComponent: () => import('./vendas-list/vendas-list.component').then((m) => m.VendasListComponent),
     canActivate: [claimGuard],
     data: { claim: Authorizations.READ_VENDA },
   },
   {
     path: 'nova',
-    loadComponent: () =>
-      import('./venda-form/venda-form.component').then(
-        (m) => m.VendaFormComponent
-      ),
+    loadComponent: () => import('./venda-form/venda-form.component').then((m) => m.VendaFormComponent),
     canActivate: [claimGuard],
     canDeactivate: [unsavedChangesGuard],
     data: { claim: Authorizations.CREATE_VENDA },
   },
   {
     path: 'editar/:id',
-    loadComponent: () =>
-      import('./venda-form/venda-form.component').then(
-        (m) => m.VendaFormComponent
-      ),
+    loadComponent: () => import('./venda-form/venda-form.component').then((m) => m.VendaFormComponent),
     canActivate: [claimGuard],
     canDeactivate: [unsavedChangesGuard],
     data: { claim: Authorizations.EDIT_VENDA },

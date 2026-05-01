@@ -20,11 +20,9 @@ export class EmployeeService {
       storeId?: string;
       search?: string;
       includeInactive?: boolean;
-    }
+    },
   ): Observable<PaginationResponse<Person>> {
-    let params = new HttpParams()
-      .set('page', pageIndex.toString())
-      .set('size', pageSize.toString());
+    let params = new HttpParams().set('page', pageIndex.toString()).set('size', pageSize.toString());
 
     if (searchParams) {
       if (searchParams.storeId) {
@@ -37,19 +35,15 @@ export class EmployeeService {
       // pois o backend já resolve quem é funcionário baseado nas Authorizations do usuário logado.
     }
 
-    return this.http
-      .get<PaginationResponse<Person>>(this.apiUrl, { params })
-      .pipe(
-        map((response) => {
-          if (!searchParams?.includeInactive) {
-            response.content = response.content.filter(
-              (person) => person.active
-            );
-            response.page.totalElements = response.content.length;
-          }
-          return response;
-        })
-      );
+    return this.http.get<PaginationResponse<Person>>(this.apiUrl, { params }).pipe(
+      map((response) => {
+        if (!searchParams?.includeInactive) {
+          response.content = response.content.filter((person) => person.active);
+          response.page.totalElements = response.content.length;
+        }
+        return response;
+      }),
+    );
   }
 
   /**
@@ -59,12 +53,9 @@ export class EmployeeService {
    */
   createUserForPerson(
     personId: string,
-    data: { username: string; password: string; authorizations: string[] }
+    data: { username: string; password: string; authorizations: string[] },
   ): Observable<any> {
-    return this.http.post<any>(
-      `${this.employeeApiUrl}/${personId}/create-user`,
-      data
-    );
+    return this.http.post<any>(`${this.employeeApiUrl}/${personId}/create-user`, data);
   }
 
   /**
@@ -74,9 +65,7 @@ export class EmployeeService {
    * Requer: 'edit:store'
    */
   unlinkUser(userId: string): Observable<any> {
-    return this.http.delete<any>(
-      `${this.employeeApiUrl}/unlink-user/${userId}`
-    );
+    return this.http.delete<any>(`${this.employeeApiUrl}/unlink-user/${userId}`);
   }
 
   /**
@@ -87,7 +76,7 @@ export class EmployeeService {
     return this.http.put<any>(
       `${this.employeeApiUrl}/${personId}/relationship`,
       {},
-      { params: new HttpParams().set('type', type) }
+      { params: new HttpParams().set('type', type) },
     );
   }
 }

@@ -13,8 +13,7 @@ export class VehicleService {
   private cache: PaginationResponse<VehicleList> | null = null;
 
   // Subject para notificar mudanças no cache
-  private cacheUpdated$ =
-    new BehaviorSubject<PaginationResponse<VehicleList> | null>(null);
+  private cacheUpdated$ = new BehaviorSubject<PaginationResponse<VehicleList> | null>(null);
 
   private readonly apiUrl: string = '/api/vehicles';
 
@@ -33,10 +32,9 @@ export class VehicleService {
       storeId?: string;
       onlyInStock?: boolean;
       status?: 'DISPONIVEL' | 'VENDIDO' | 'TODOS';
-    }
+    },
   ): Observable<PaginationResponse<VehicleList>> {
-    const hasSearchParams =
-      searchParams && Object.keys(searchParams).length > 0;
+    const hasSearchParams = searchParams && Object.keys(searchParams).length > 0;
 
     // Only use cache if there are no search params
     if (this.cache && !hasSearchParams) {
@@ -72,7 +70,7 @@ export class VehicleService {
           this.cache = response;
           this.cacheUpdated$.next({ ...this.cache });
         }
-      })
+      }),
     );
   }
 
@@ -85,19 +83,17 @@ export class VehicleService {
       tap((response) => {
         console.log('Veículo criado com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 
   update(data: Vehicle) {
-    return this.http
-      .put<Vehicle>(`${this.apiUrl}/${data.vehicleId}`, data)
-      .pipe(
-        tap((response) => {
-          console.log('Veículo atualizado com sucesso!', response);
-          this.clearCache();
-        })
-      );
+    return this.http.put<Vehicle>(`${this.apiUrl}/${data.vehicleId}`, data).pipe(
+      tap((response) => {
+        console.log('Veículo atualizado com sucesso!', response);
+        this.clearCache();
+      }),
+    );
   }
 
   delete(id: string): Observable<MessageResponse> {
@@ -105,7 +101,7 @@ export class VehicleService {
       tap((response) => {
         console.log('Resposta do servidor:', response.message);
         this.clearCache();
-      })
+      }),
     );
   }
 

@@ -5,23 +5,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { Address } from '@interfaces/address';
-import {
-  AddressTypeLabels,
-  AddressTypeIcons,
-} from '../../../enums/addressTypes';
+import { AddressTypeLabels, AddressTypeIcons } from '../../../enums/addressTypes';
 import { AddressService } from '@services/address.service';
 import { SafePipe } from '../../../pipes/safe.pipe';
 
 @Component({
   selector: 'app-address-card',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTooltipModule,
-    SafePipe,
-  ],
+  imports: [CommonModule, MatIconModule, MatButtonModule, MatTooltipModule, SafePipe],
   templateUrl: './address-card.component.html',
   styleUrl: './address-card.component.scss',
 })
@@ -53,11 +44,7 @@ export class AddressCardComponent {
   }
 
   get fullAddress(): string {
-    const parts = [
-      this.address.street,
-      this.address.number,
-      this.address.complement,
-    ].filter(Boolean);
+    const parts = [this.address.street, this.address.number, this.address.complement].filter(Boolean);
     return parts.join(', ');
   }
 

@@ -1,22 +1,7 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  Output,
-  signal,
-  SimpleChanges,
-  ViewChild,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, Output, signal, SimpleChanges, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  FormArray,
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -98,9 +83,7 @@ import { VendaRequestDto } from '@interfaces/venda';
   templateUrl: './venda-form.component.html',
   styleUrls: ['./venda-form.component.scss'],
 })
-export class VendaFormComponent
-  implements OnInit, OnDestroy, CanComponentDeactivate
-{
+export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeactivate {
   isEdit = false;
   vendaId: string | null = null;
   title = 'Nova Venda';
@@ -140,7 +123,7 @@ export class VendaFormComponent
     private storeContextService: StoreContextService,
     private toastr: ToastrService,
     private formDraftService: FormDraftService,
-    private actionsService: ActionsService
+    private actionsService: ActionsService,
   ) {
     this.vendaForm = this.fb.group({
       vehicle: this.fb.group({
@@ -196,7 +179,7 @@ export class VendaFormComponent
     this.subscriptions.add(
       this.vendaForm.valueChanges.subscribe(() => {
         this.actionsService.hasFormChanges.set(this.hasUnsavedChanges());
-      })
+      }),
     );
   }
 
@@ -210,29 +193,23 @@ export class VendaFormComponent
     if (!storeId) return;
 
     // Carrega Veículos em Estoque
-    this.vehicleService
-      .getPaginatedData(0, 1000, { storeId, onlyInStock: true })
-      .subscribe((response) => {
-        this.vehicles = (response.content || []).map((v) => ({
-          id: v.vehicleId,
-          name: `${v.brand} ${v.model} (${v.plate})`,
-        }));
-      });
+    this.vehicleService.getPaginatedData(0, 1000, { storeId, onlyInStock: true }).subscribe((response) => {
+      this.vehicles = (response.content || []).map((v) => ({
+        id: v.vehicleId,
+        name: `${v.brand} ${v.model} (${v.plate})`,
+      }));
+    });
 
     // Carrega Pessoas (Compradores/Vendedores/Avalistas)
-    this.personService
-      .getPaginatedData(0, 1000, { storeId })
-      .subscribe((response) => {
-        const mapped = (response.content || []).map((p) => ({
-          id: p.personId,
-          name: p.cpf
-            ? `${p.name} - CPF: ${p.cpf}`
-            : `${p.name} - CNPJ: ${p.cnpj}`,
-        }));
-        this.buyers = [...mapped];
-        this.sellers = [...mapped];
-        this.avalistasOptions = [...mapped];
-      });
+    this.personService.getPaginatedData(0, 1000, { storeId }).subscribe((response) => {
+      const mapped = (response.content || []).map((p) => ({
+        id: p.personId,
+        name: p.cpf ? `${p.name} - CPF: ${p.cpf}` : `${p.name} - CNPJ: ${p.cnpj}`,
+      }));
+      this.buyers = [...mapped];
+      this.sellers = [...mapped];
+      this.avalistasOptions = [...mapped];
+    });
   }
 
   // Métodos para o Drawer de Person
@@ -260,9 +237,7 @@ export class VendaFormComponent
 
   onVehicleSelected(option: { id: string; name: string }) {
     this.vehicleService.getById(option.id).subscribe((vehicle) => {
-      const valorVenda = vehicle.valorVenda
-        ? parseFloat(vehicle.valorVenda.toString().replace(',', '.'))
-        : 0;
+      const valorVenda = vehicle.valorVenda ? parseFloat(vehicle.valorVenda.toString().replace(',', '.')) : 0;
 
       this.vendaForm.patchValue({
         valor: valorVenda,
@@ -348,12 +323,7 @@ export class VendaFormComponent
       avalistasDetails: this.selectedAvalistas,
     };
 
-    this.formDraftService.saveDraft(
-      this.FORM_TYPE,
-      draftData,
-      this.vendaId || undefined,
-      draftName
-    );
+    this.formDraftService.saveDraft(this.FORM_TYPE, draftData, this.vendaId || undefined, draftName);
 
     // Resetamos o estado de mudanças para permitir a navegação fluida
     this.initialFormValue = JSON.stringify(this.vendaForm.value);
@@ -368,13 +338,8 @@ export class VendaFormComponent
   }
 
   private checkForDrafts() {
-    this.availableDrafts = this.formDraftService.getDraftsByType(
-      this.FORM_TYPE
-    );
-    console.log(
-      '[checkForDrafts] Rascunhos encontrados:',
-      this.availableDrafts
-    );
+    this.availableDrafts = this.formDraftService.getDraftsByType(this.FORM_TYPE);
+    console.log('[checkForDrafts] Rascunhos encontrados:', this.availableDrafts);
   }
 
   handleDraftSelection(draft: FormDraft | null) {
@@ -424,9 +389,7 @@ export class VendaFormComponent
       });
     }
 
-    this.vendaForm
-      .get('avalistaSearchControl')
-      ?.setValue('', { emitEvent: false });
+    this.vendaForm.get('avalistaSearchControl')?.setValue('', { emitEvent: false });
 
     this.initialFormValue = JSON.stringify(this.vendaForm.value);
     this.toastr.success('Rascunho carregado com sucesso');
@@ -436,9 +399,7 @@ export class VendaFormComponent
   removeDraft(draft: FormDraft, event: MouseEvent) {
     event.stopPropagation(); // Evita selecionar o rascunho ao clicar em excluir
     this.formDraftService.removeDraftById(draft.id);
-    this.availableDrafts = this.formDraftService.getDraftsByType(
-      this.FORM_TYPE
-    );
+    this.availableDrafts = this.formDraftService.getDraftsByType(this.FORM_TYPE);
 
     if (this.selectedDraft?.id === draft.id) {
       this.selectedDraft = null;
@@ -475,9 +436,7 @@ export class VendaFormComponent
 
   onSubmit() {
     if (this.vendaForm.invalid) {
-      this.toastr.warning(
-        'Por favor, preencha todos os campos obrigatórios corretamente.'
-      );
+      this.toastr.warning('Por favor, preencha todos os campos obrigatórios corretamente.');
       return;
     }
 
@@ -511,9 +470,7 @@ export class VendaFormComponent
 
     request.pipe(finalize(() => this.isSubmitting.set(false))).subscribe({
       next: () => {
-        this.toastr.success(
-          `Venda ${this.isEdit ? 'atualizada' : 'registrada'} com sucesso!`
-        );
+        this.toastr.success(`Venda ${this.isEdit ? 'atualizada' : 'registrada'} com sucesso!`);
 
         // Se havia um rascunho selecionado via seletor, removemos ele pelo ID específico
         if (this.selectedDraft) {
@@ -521,10 +478,7 @@ export class VendaFormComponent
         }
 
         // Limpa rascunhos vinculados ao ID (fallback e edição)
-        this.formDraftService.removeDraft(
-          this.FORM_TYPE,
-          this.vendaId || undefined
-        );
+        this.formDraftService.removeDraft(this.FORM_TYPE, this.vendaId || undefined);
 
         this.initialFormValue = JSON.stringify(this.vendaForm.value);
         this.actionsService.hasFormChanges.set(false);
@@ -532,10 +486,7 @@ export class VendaFormComponent
       },
       error: (err) => {
         console.error(err);
-        const msg = extractErrorMessage(
-          err,
-          'Erro ao salvar venda. Verifique os dados e tente novamente.'
-        );
+        const msg = extractErrorMessage(err, 'Erro ao salvar venda. Verifique os dados e tente novamente.');
         this.toastr.error(msg);
       },
     });

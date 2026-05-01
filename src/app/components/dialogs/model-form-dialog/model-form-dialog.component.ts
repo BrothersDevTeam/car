@@ -1,11 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -69,7 +64,7 @@ export class ModelFormDialogComponent implements OnInit {
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<ModelFormDialogComponent>,
     private storeContextService: StoreContextService,
-    @Inject(MAT_DIALOG_DATA) public data: ModelFormDialogData
+    @Inject(MAT_DIALOG_DATA) public data: ModelFormDialogData,
   ) {}
 
   ngOnInit(): void {
@@ -82,21 +77,12 @@ export class ModelFormDialogComponent implements OnInit {
 
   private initForm(): void {
     this.modelForm = this.fb.group({
-      name: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(1),
-          Validators.maxLength(100),
-        ],
-      ],
+      name: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(100)]],
     });
 
     this.modelForm.get('name')?.valueChanges.subscribe((value) => {
       if (value) {
-        this.modelForm
-          .get('name')
-          ?.setValue(value.toUpperCase(), { emitEvent: false });
+        this.modelForm.get('name')?.setValue(value.toUpperCase(), { emitEvent: false });
       }
     });
   }
@@ -163,10 +149,7 @@ export class ModelFormDialogComponent implements OnInit {
       return `Ano máximo: ${control.errors?.['max'].max}`;
     }
 
-    if (
-      this.modelForm.hasError('yearRange') &&
-      (fieldName === 'yearEnd' || fieldName === 'yearStart')
-    ) {
+    if (this.modelForm.hasError('yearRange') && (fieldName === 'yearEnd' || fieldName === 'yearStart')) {
       return 'Ano final deve ser maior ou igual ao ano inicial';
     }
 

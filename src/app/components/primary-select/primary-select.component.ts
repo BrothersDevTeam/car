@@ -1,12 +1,4 @@
-import {
-  Component,
-  forwardRef,
-  Input,
-  HostListener,
-  OnInit,
-  OnChanges,
-  SimpleChanges,
-} from '@angular/core';
+import { Component, forwardRef, Input, HostListener, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RelationshipTypes } from '../../enums/relationshipTypes';
@@ -69,9 +61,7 @@ export interface SelectOption {
   templateUrl: './primary-select.component.html',
   styleUrl: './primary-select.component.scss',
 })
-export class PrimarySelectComponent
-  implements ControlValueAccessor, OnInit, OnChanges
-{
+export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnChanges {
   /**
    * Texto exibido quando nenhuma opção está selecionada
    */
@@ -195,10 +185,7 @@ export class PrimarySelectComponent
      * força a atualização visual
      */
     if (!hadOptions && this.options.length > 0 && this.value) {
-      console.log(
-        '[primary-select] Re-sincronizando valor após carregar opções:',
-        this.value
-      );
+      console.log('[primary-select] Re-sincronizando valor após carregar opções:', this.value);
       setTimeout(() => {
         // Não chama onChange para evitar emitir evento desnecessário
         // Apenas força a detecção de mudanças visuais
@@ -356,48 +343,35 @@ export class PrimarySelectComponent
       }
 
       const selectedLabels = this.value.map((val: any) => {
-        const option = this.options.find(
-          (opt) => this.getOptionValue(opt) === val
-        );
+        const option = this.options.find((opt) => this.getOptionValue(opt) === val);
         return option ? this.getOptionLabel(option) : val;
       });
 
-      const display =
-        selectedLabels.length > 1
-          ? `${selectedLabels.length} itens selecionados`
-          : selectedLabels[0];
+      const display = selectedLabels.length > 1 ? `${selectedLabels.length} itens selecionados` : selectedLabels[0];
 
       // Log apenas quando há valor mas campo pode estar vazio
       if (!display || display === '') {
-        console.warn(
-          `[primary-select ${this.inputName}] getDisplayValue retornando vazio!`,
-          {
-            value: this.value,
-            optionsLength: this.options.length,
-            selectedLabels,
-          }
-        );
+        console.warn(`[primary-select ${this.inputName}] getDisplayValue retornando vazio!`, {
+          value: this.value,
+          optionsLength: this.options.length,
+          selectedLabels,
+        });
       }
 
       return display;
     }
 
-    const option = this.options.find(
-      (opt) => this.getOptionValue(opt) === this.value
-    );
+    const option = this.options.find((opt) => this.getOptionValue(opt) === this.value);
 
     const display = option ? this.getOptionLabel(option) : this.value;
 
     // Log quando não encontra a opção
     if (!option && this.value) {
-      console.warn(
-        `[primary-select ${this.inputName}] Opção não encontrada para valor:`,
-        {
-          value: this.value,
-          options: this.options,
-          display,
-        }
-      );
+      console.warn(`[primary-select ${this.inputName}] Opção não encontrada para valor:`, {
+        value: this.value,
+        options: this.options,
+        display,
+      });
     }
 
     return display;
@@ -487,10 +461,7 @@ export class PrimarySelectComponent
         // ESPAÇO: Seleciona/desseleciona a opção focada
         event.preventDefault();
         event.stopPropagation();
-        if (
-          this.focusedOptionIndex >= 0 &&
-          this.focusedOptionIndex < this.options.length
-        ) {
+        if (this.focusedOptionIndex >= 0 && this.focusedOptionIndex < this.options.length) {
           const focusedOption = this.options[this.focusedOptionIndex];
           this.toggleOption(focusedOption);
         }
@@ -500,10 +471,7 @@ export class PrimarySelectComponent
         // ENTER: Seleciona (e fecha se single select)
         event.preventDefault();
         event.stopPropagation();
-        if (
-          this.focusedOptionIndex >= 0 &&
-          this.focusedOptionIndex < this.options.length
-        ) {
+        if (this.focusedOptionIndex >= 0 && this.focusedOptionIndex < this.options.length) {
           const focusedOption = this.options[this.focusedOptionIndex];
           if (this.allowMultiple) {
             this.toggleOption(focusedOption);
@@ -616,9 +584,7 @@ export class PrimarySelectComponent
   private scrollToFocusedOption(): void {
     // Aguarda o próximo ciclo de detecção para garantir que o DOM foi atualizado
     setTimeout(() => {
-      const focusedElement = document.querySelector(
-        '.option-item.keyboard-focused'
-      );
+      const focusedElement = document.querySelector('.option-item.keyboard-focused');
       if (focusedElement) {
         focusedElement.scrollIntoView({
           behavior: 'smooth',
@@ -673,57 +639,41 @@ export class PrimarySelectComponent
       this.value = value;
     }
 
-    console.log(
-      `[primary-select ${this.inputName}] Valor interno setado:`,
-      this.value
-    );
+    console.log(`[primary-select ${this.inputName}] Valor interno setado:`, this.value);
 
     /**
      * Se as opções ainda não foram carregadas, agenda múltiplas tentativas
      * Isso resolve o problema de valores não aparecerem ao editar
      */
     if (this.value && this.options.length === 0) {
-      console.log(
-        `[primary-select ${this.inputName}] Opções ainda não carregadas, aguardando...`
-      );
+      console.log(`[primary-select ${this.inputName}] Opções ainda não carregadas, aguardando...`);
 
       // Tentativa 1: 50ms
       setTimeout(() => {
         if (this.options.length > 0) {
-          console.log(
-            `[primary-select ${this.inputName}] Opções carregadas (50ms), exibindo valor:`,
-            this.value
-          );
+          console.log(`[primary-select ${this.inputName}] Opções carregadas (50ms), exibindo valor:`, this.value);
         }
       }, 50);
 
       // Tentativa 2: 150ms
       setTimeout(() => {
         if (this.options.length > 0) {
-          console.log(
-            `[primary-select ${this.inputName}] Opções carregadas (150ms), exibindo valor:`,
-            this.value
-          );
+          console.log(`[primary-select ${this.inputName}] Opções carregadas (150ms), exibindo valor:`, this.value);
         }
       }, 150);
 
       // Tentativa 3: 300ms (final)
       setTimeout(() => {
         if (this.options.length > 0) {
-          console.log(
-            `[primary-select ${this.inputName}] Opções carregadas (300ms), exibindo valor:`,
-            this.value
-          );
+          console.log(`[primary-select ${this.inputName}] Opções carregadas (300ms), exibindo valor:`, this.value);
         } else {
-          console.warn(
-            `[primary-select ${this.inputName}] Opções ainda não carregadas após 300ms!`
-          );
+          console.warn(`[primary-select ${this.inputName}] Opções ainda não carregadas após 300ms!`);
         }
       }, 300);
     } else if (this.value && this.options.length > 0) {
       console.log(
         `[primary-select ${this.inputName}] Opções já disponíveis, exibindo valor imediatamente:`,
-        this.value
+        this.value,
       );
     }
   }

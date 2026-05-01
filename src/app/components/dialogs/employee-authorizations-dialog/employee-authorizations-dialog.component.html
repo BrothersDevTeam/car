@@ -32,10 +32,7 @@
           </h3>
           <div class="auth-grid">
             @for (auth of module.authorizations; track auth.key) {
-              <mat-checkbox
-                [checked]="hasAuth(auth.key)"
-                (change)="onToggleAuth(auth.key, $event)"
-              >
+              <mat-checkbox [checked]="hasAuth(auth.key)" (change)="onToggleAuth(auth.key, $event)">
                 {{ auth.label }}
               </mat-checkbox>
             }
@@ -48,32 +45,14 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button
-    mat-button
-    (click)="close()"
-    [disabled]="saving"
-  >
-    Cancelar
-  </button>
+  <button mat-button (click)="close()" [disabled]="saving">Cancelar</button>
   @if (saving) {
-    <button
-      mat-raised-button
-      color="primary"
-      disabled
-    >
-      <mat-spinner
-        diameter="20"
-        class="btn-spinner"
-      ></mat-spinner>
+    <button mat-raised-button color="primary" disabled>
+      <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
       <span>Salvando...</span>
     </button>
   } @else {
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="save()"
-      [disabled]="loading"
-    >
+    <button mat-raised-button color="primary" (click)="save()" [disabled]="loading">
       <mat-icon>save</mat-icon>
       <span>Salvar</span>
     </button>

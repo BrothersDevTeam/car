@@ -70,7 +70,7 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
     private addressService: AddressService,
     private dialog: MatDialog,
     private toastr: ToastrService,
-    private formDraftService: FormDraftService
+    private formDraftService: FormDraftService,
   ) {}
 
   ngOnInit() {
@@ -82,7 +82,7 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
     this.subscriptions.push(
       this.formDraftService.draftsChanges.subscribe(() => {
         this.loadAvailableDrafts();
-      })
+      }),
     );
   }
 
@@ -92,10 +92,7 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['ownerId']) {
-      console.log(
-        'AddressList: ownerId changed',
-        changes['ownerId'].currentValue
-      );
+      console.log('AddressList: ownerId changed', changes['ownerId'].currentValue);
       if (!changes['ownerId'].firstChange) {
         this.loadAddresses();
         this.loadAvailableDrafts();
@@ -103,10 +100,7 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (changes['initialDraftId'] && this.initialDraftId) {
-      console.log(
-        'AddressList: initialDraftId changed to',
-        this.initialDraftId
-      );
+      console.log('AddressList: initialDraftId changed to', this.initialDraftId);
       this.openDraft(this.initialDraftId);
     }
   }
@@ -130,10 +124,7 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
       const allDrafts = this.formDraftService.getDraftsByType('endereco');
       const foundInAll = allDrafts.find((d) => d.id === draftId);
       if (foundInAll) {
-        console.warn(
-          'AddressList: Draft found in raw list but filtered out!',
-          foundInAll
-        );
+        console.warn('AddressList: Draft found in raw list but filtered out!', foundInAll);
         console.warn('Filter check:', {
           draftPersonId: (foundInAll.data as any).ownerId,
           componentPersonId: this.ownerId,
@@ -210,9 +201,7 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Excluir Rascunho',
-        message: `Tem certeza que deseja excluir o rascunho <strong>"${
-          draft.draftName || 'Sem nome'
-        }"</strong>?`,
+        message: `Tem certeza que deseja excluir o rascunho <strong>"${draft.draftName || 'Sem nome'}"</strong>?`,
         confirmText: 'Excluir',
         cancelText: 'Cancelar',
       },

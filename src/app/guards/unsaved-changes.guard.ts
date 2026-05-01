@@ -42,7 +42,7 @@ export interface CanComponentDeactivate {
  * não salvas antes de sair de um componente.
  */
 export const unsavedChangesGuard: CanDeactivateFn<CanComponentDeactivate> = (
-  component: CanComponentDeactivate
+  component: CanComponentDeactivate,
 ): Observable<boolean> | boolean => {
   // Injeta o serviço de diálogo usando a função inject() moderna
   const dialog = inject(MatDialog);
@@ -88,9 +88,7 @@ export const unsavedChangesGuard: CanDeactivateFn<CanComponentDeactivate> = (
 
       // Se escolheu salvar rascunho (pode ser 'draft' ou 'draft:Nome do Rascunho')
       if (result === 'draft' || result.startsWith('draft:')) {
-        const draftName = result.startsWith('draft:')
-          ? result.substring(6)
-          : undefined;
+        const draftName = result.startsWith('draft:') ? result.substring(6) : undefined;
 
         // Chamada compatível: primeiro silent (false), depois o nome
         component.saveLocalDraft(false, draftName);
@@ -99,6 +97,6 @@ export const unsavedChangesGuard: CanDeactivateFn<CanComponentDeactivate> = (
 
       // Fallback: não permite sair
       return false;
-    })
+    }),
   );
 };

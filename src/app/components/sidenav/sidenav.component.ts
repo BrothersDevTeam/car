@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  EventEmitter,
-  Input,
-  Output,
-  signal,
-} from '@angular/core';
+import { Component, computed, EventEmitter, Input, Output, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -26,14 +19,7 @@ export type MenuItem = {
 
 @Component({
   selector: 'app-sidenav',
-  imports: [
-    MatListModule,
-    MatIconModule,
-    RouterModule,
-    MatButtonModule,
-    CommonModule,
-    MatExpansionModule,
-  ],
+  imports: [MatListModule, MatIconModule, RouterModule, MatButtonModule, CommonModule, MatExpansionModule],
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
 })
@@ -53,17 +39,10 @@ export class SideNavComponent {
   constructor(
     private authService: AuthService,
     private actionsService: ActionsService,
-    private router: Router
+    private router: Router,
   ) {
-    this.loggedUsername.set(
-      this.authService.getPersonName() ||
-        this.authService.getUsername() ||
-        'Usuário'
-    );
-    this.userRole.set(
-      this.authService.getPersonRelationship() ||
-        this.formatRole(this.authService.getRoles())
-    );
+    this.loggedUsername.set(this.authService.getPersonName() || this.authService.getUsername() || 'Usuário');
+    this.userRole.set(this.authService.getPersonRelationship() || this.formatRole(this.authService.getRoles()));
 
     this.initializeMenuItems();
   }
@@ -158,13 +137,7 @@ export class SideNavComponent {
     };
 
     // Prioridade: CAR_ADMIN > ADMIN > MANAGER > SELLER > FINANCIAL
-    const priorityOrder = [
-      'ROLE_CAR_ADMIN',
-      'ROLE_ADMIN',
-      'ROLE_MANAGER',
-      'ROLE_SELLER',
-      'ROLE_FINANCIAL',
-    ];
+    const priorityOrder = ['ROLE_CAR_ADMIN', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SELLER', 'ROLE_FINANCIAL'];
 
     // Retorna a role de maior prioridade que o usuário possui
     for (const priorityRole of priorityOrder) {
@@ -197,9 +170,7 @@ export class SideNavComponent {
   isRouteActive(route?: string | null, subItems?: MenuItem[]): boolean {
     if (route && this.router.url === route) return true;
     if (subItems) {
-      return subItems.some(
-        (subItem) => subItem.route && this.router.url === subItem.route
-      );
+      return subItems.some((subItem) => subItem.route && this.router.url === subItem.route);
     }
     return false;
   }

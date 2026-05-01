@@ -2,8 +2,7 @@
 
 ## 📋 Visão Geral
 
-Sistema completo de gerenciamento de endereços para pessoas (clientes,
-funcionários, etc.) integrado com a API backend.
+Sistema completo de gerenciamento de endereços para pessoas (clientes, funcionários, etc.) integrado com a API backend.
 
 ## 🎯 Funcionalidades
 
@@ -13,8 +12,7 @@ funcionários, etc.) integrado com a API backend.
 - ✅ Definir endereço principal
 - ✅ Busca automática por CEP (ViaCEP)
 - ✅ Validações client-side
-- ✅ Múltiplos tipos de endereço (Residencial, Comercial, Entrega, Cobrança,
-  Outros)
+- ✅ Múltiplos tipos de endereço (Residencial, Comercial, Entrega, Cobrança, Outros)
 - ✅ Suporte a múltiplos endereços por pessoa
 - ✅ Interface responsiva
 
@@ -52,12 +50,7 @@ import { AddressListComponent } from '@components/address/address-list/address-l
 ### 2. Usar no Template
 
 ```html
-<app-address-list
-  [personId]="person.personId"
-  [canEdit]="true"
-  [canDelete]="true"
-  [canAdd]="true"
-></app-address-list>
+<app-address-list [personId]="person.personId" [canEdit]="true" [canDelete]="true" [canAdd]="true"></app-address-list>
 ```
 
 ### 3. Inputs Disponíveis
@@ -200,8 +193,7 @@ Os testes cobrem:
 
 ### Problema: CEP não preenche automaticamente
 
-**Solução**: Verifique se o CepService está corretamente configurado e a API do
-ViaCEP está acessível.
+**Solução**: Verifique se o CepService está corretamente configurado e a API do ViaCEP está acessível.
 
 ### Problema: Erro ao criar endereço "Person not found"
 
@@ -209,13 +201,11 @@ ViaCEP está acessível.
 
 ### Problema: Não consigo excluir endereço
 
-**Solução**: Verifique se o usuário logado possui `ROLE_MANAGER`. Apenas
-gerentes podem excluir endereços.
+**Solução**: Verifique se o usuário logado possui `ROLE_MANAGER`. Apenas gerentes podem excluir endereços.
 
 ### Problema: Múltiplos endereços principais
 
-**Solução**: Isso não deveria acontecer. O backend garante apenas um principal.
-Se ocorrer, é um bug no backend.
+**Solução**: Isso não deveria acontecer. O backend garante apenas um principal. Se ocorrer, é um bug no backend.
 
 ## 📚 Documentação Adicional
 

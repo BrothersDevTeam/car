@@ -1,9 +1,5 @@
 import { Component, inject } from '@angular/core';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogRef,
-  MatDialogModule,
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -55,14 +51,7 @@ export interface SaveDraftDialogResult {
 @Component({
   selector: 'app-save-draft-dialog',
   standalone: true,
-  imports: [
-    MatDialogModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    FormsModule,
-  ],
+  imports: [MatDialogModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule, FormsModule],
   template: `
     <div class="dialog-container">
       <!-- Cabeçalho -->
@@ -73,14 +62,9 @@ export interface SaveDraftDialogResult {
 
       <!-- Conteúdo -->
       <mat-dialog-content>
-        <p class="dialog-message">
-          Dê um nome para este rascunho para facilitar a identificação depois:
-        </p>
+        <p class="dialog-message">Dê um nome para este rascunho para facilitar a identificação depois:</p>
 
-        <mat-form-field
-          appearance="outline"
-          class="full-width"
-        >
+        <mat-form-field appearance="outline" class="full-width">
           <mat-label>Nome do rascunho</mat-label>
           <input
             matInput
@@ -97,29 +81,16 @@ export interface SaveDraftDialogResult {
         <div class="info-box">
           <mat-icon class="info-icon">info</mat-icon>
           <p class="info-text">
-            O rascunho será salvo localmente no seu navegador e ficará
-            disponível na lista de "Cadastros em andamento".
+            O rascunho será salvo localmente no seu navegador e ficará disponível na lista de "Cadastros em andamento".
           </p>
         </div>
       </mat-dialog-content>
 
       <!-- Rodapé com botões -->
       <mat-dialog-actions align="end">
-        <button
-          mat-button
-          (click)="onCancel()"
-          class="cancel-button"
-        >
-          Cancelar
-        </button>
+        <button mat-button (click)="onCancel()" class="cancel-button">Cancelar</button>
 
-        <button
-          mat-raised-button
-          color="primary"
-          [disabled]="!draftName.trim()"
-          (click)="onSave()"
-          class="save-button"
-        >
+        <button mat-raised-button color="primary" [disabled]="!draftName.trim()" (click)="onSave()" class="save-button">
           <mat-icon>check</mat-icon>
           Salvar rascunho
         </button>

@@ -21,12 +21,7 @@ import { StoreService } from '@services/store.service';
 import { AuthService } from '@services/auth/auth.service';
 import { StoreContextService } from '@services/store-context.service';
 import { Authorizations } from '../../enums/authorizations';
-import {
-  StoreStatus,
-  StoreStatusLabels,
-  StoreStatusIcons,
-  StoreStatusColors,
-} from '../../enums/storeTypes';
+import { StoreStatus, StoreStatusLabels, StoreStatusIcons, StoreStatusColors } from '../../enums/storeTypes';
 
 @Component({
   selector: 'app-store',
@@ -66,16 +61,12 @@ export class StoreComponent implements OnInit {
     private storeService: StoreService,
     private authService: AuthService,
     private storeContextService: StoreContextService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
     const savedViewMode = localStorage.getItem('storeViewMode');
-    if (
-      savedViewMode === 'grid' ||
-      savedViewMode === 'compact' ||
-      savedViewMode === 'table'
-    ) {
+    if (savedViewMode === 'grid' || savedViewMode === 'compact' || savedViewMode === 'table') {
       this.viewMode = savedViewMode;
     }
 
@@ -96,9 +87,7 @@ export class StoreComponent implements OnInit {
     this.canManageFiscal =
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
       this.authService.hasAuthority(Authorizations.EDIT_STORE) ||
-      this.authService.hasAuthority(
-        Authorizations.SYNC_FOCUSNFE as Authorizations
-      );
+      this.authService.hasAuthority(Authorizations.SYNC_FOCUSNFE as Authorizations);
 
     // Pode gerenciar funcionários quem tem: root:admin, edit:store ou create:user
     this.canManageEmployees =
@@ -107,9 +96,7 @@ export class StoreComponent implements OnInit {
       this.authService.hasAuthority(Authorizations.CREATE_USER);
 
     // Somente root pode gerenciar proprietário
-    this.canManageOwnerOnly = this.authService.hasAuthority(
-      Authorizations.ROOT_ADMIN
-    );
+    this.canManageOwnerOnly = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
   }
 
   private loadStores(): void {
@@ -125,15 +112,11 @@ export class StoreComponent implements OnInit {
         const allFetchedStores = response.content;
         if (this.selectedStoreId) {
           this.stores = allFetchedStores.filter(
-            (store: any) =>
-              store.storeId === this.selectedStoreId ||
-              store.mainStoreId === this.selectedStoreId
+            (store: any) => store.storeId === this.selectedStoreId || store.mainStoreId === this.selectedStoreId,
           );
         } else {
           if (this.isCarAdmin) {
-            this.stores = allFetchedStores.filter(
-              (store: any) => store.storeType === 'MATRIZ'
-            );
+            this.stores = allFetchedStores.filter((store: any) => store.storeType === 'MATRIZ');
           } else {
             this.stores = allFetchedStores;
           }
@@ -176,10 +159,7 @@ export class StoreComponent implements OnInit {
     if (!cnpj) return '';
     const cleanCnpj = cnpj.replace(/\D/g, '');
     if (cleanCnpj.length !== 14) return cnpj;
-    return cleanCnpj.replace(
-      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
-      '$1.$2.$3/$4-$5'
-    );
+    return cleanCnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
   }
 
   onEditStore(store: Store): void {
@@ -274,9 +254,7 @@ export class StoreComponent implements OnInit {
       width: '700px',
       disableClose: true,
       data: {
-        title: this.isCarAdmin
-          ? 'Cadastrar Nova Loja Matriz'
-          : 'Cadastrar Nova Filial',
+        title: this.isCarAdmin ? 'Cadastrar Nova Loja Matriz' : 'Cadastrar Nova Filial',
         mode: 'create',
         isCarAdmin: this.isCarAdmin, // Passa info para o dialog saber qual endpoint usar
       },
@@ -325,15 +303,12 @@ export class StoreComponent implements OnInit {
     this.storeService.updateOwner(storeId, personId).subscribe({
       next: (updatedStore) => {
         console.log('✅ Proprietário alterado com sucesso:', updatedStore);
-        alert(
-          `Proprietário alterado com sucesso para: ${updatedStore.owner?.name || 'novo proprietário'}`
-        );
+        alert(`Proprietário alterado com sucesso para: ${updatedStore.owner?.name || 'novo proprietário'}`);
         this.loadStores();
       },
       error: (err) => {
         console.error('❌ Erro ao alterar proprietário:', err);
-        const errorMessage =
-          err.error?.message || err.error || 'Erro ao alterar proprietário';
+        const errorMessage = err.error?.message || err.error || 'Erro ao alterar proprietário';
         alert(errorMessage);
       },
     });

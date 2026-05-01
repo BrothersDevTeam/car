@@ -1,11 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
@@ -15,12 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    PrimaryInputComponent,
-    MatIconModule,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, PrimaryInputComponent, MatIconModule],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.scss',
 })
@@ -34,13 +24,10 @@ export class ResetPasswordComponent {
     private route: ActivatedRoute,
     private router: Router,
     private httpClient: HttpClient,
-    private toastrService: ToastrService
+    private toastrService: ToastrService,
   ) {
     this.resetForm = new FormGroup({
-      password: new FormControl('', [
-        Validators.required,
-        Validators.minLength(4),
-      ]),
+      password: new FormControl('', [Validators.required, Validators.minLength(4)]),
       confirmPassword: new FormControl('', [Validators.required]),
     });
 
@@ -56,9 +43,7 @@ export class ResetPasswordComponent {
   submit() {
     if (this.resetForm.invalid) return;
 
-    if (
-      this.resetForm.value.password !== this.resetForm.value.confirmPassword
-    ) {
+    if (this.resetForm.value.password !== this.resetForm.value.confirmPassword) {
       this.toastrService.error('As senhas não coincidem!');
       return;
     }
@@ -70,19 +55,15 @@ export class ResetPasswordComponent {
           token: this.token,
           password: this.resetForm.value.password,
         },
-        { responseType: 'text' }
+        { responseType: 'text' },
       )
       .subscribe({
         next: () => {
-          this.toastrService.success(
-            'Senha redefinida com sucesso! Faça login.'
-          );
+          this.toastrService.success('Senha redefinida com sucesso! Faça login.');
           this.router.navigate(['/login']);
         },
         error: (err) => {
-          this.toastrService.error(
-            err.error || 'Erro ao redefinir senha. O link pode ter expirado.'
-          );
+          this.toastrService.error(err.error || 'Erro ao redefinir senha. O link pode ter expirado.');
         },
       });
   }

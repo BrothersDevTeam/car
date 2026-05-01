@@ -1,16 +1,8 @@
 import { Component, inject } from '@angular/core';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogRef,
-  MatDialogModule,
-  MatDialog,
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import {
-  SaveDraftDialogComponent,
-  SaveDraftDialogResult,
-} from '../save-draft-dialog/save-draft-dialog.component';
+import { SaveDraftDialogComponent, SaveDraftDialogResult } from '../save-draft-dialog/save-draft-dialog.component';
 
 /**
  * Interface que define os dados passados para o diálogo
@@ -75,8 +67,7 @@ export interface UnsavedChangesDialogData {
           <div class="info-box">
             <mat-icon class="info-icon">info</mat-icon>
             <p class="info-text">
-              O rascunho será salvo localmente no seu navegador e você poderá
-              continuar o preenchimento posteriormente.
+              O rascunho será salvo localmente no seu navegador e você poderá continuar o preenchimento posteriormente.
             </p>
           </div>
         }
@@ -86,46 +77,25 @@ export interface UnsavedChangesDialogData {
       <mat-dialog-actions align="end">
         <!-- Botão Salvar: salva completo (só aparece se canSave = true) -->
         @if (data.canSave) {
-          <button
-            mat-raised-button
-            color="primary"
-            (click)="onSave()"
-            class="save-button"
-          >
-            Salvar
-          </button>
+          <button mat-raised-button color="primary" (click)="onSave()" class="save-button">Salvar</button>
         }
 
         <!-- Botão Salvar Rascunho: salva localmente -->
         @if (!data.hideDraftOption) {
-          <button
-            mat-stroked-button
-            color="primary"
-            (click)="onSaveDraft()"
-            class="draft-button"
-          >
+          <button mat-stroked-button color="primary" (click)="onSaveDraft()" class="draft-button">
             <mat-icon>save_as</mat-icon>
             Salvar Rascunho
           </button>
         }
 
         <!-- Botão Não Salvar: descarta mudanças -->
-        <button
-          mat-stroked-button
-          color="warn"
-          (click)="onDiscard()"
-          class="discard-button"
-        >
+        <button mat-stroked-button color="warn" (click)="onDiscard()" class="discard-button">
           <mat-icon>delete_forever</mat-icon>
           Descartar alterações
         </button>
 
         <!-- Botão Cancelar: volta ao formulário -->
-        <button
-          mat-stroked-button
-          (click)="onCancel()"
-          class="cancel-button"
-        >
+        <button mat-stroked-button (click)="onCancel()" class="cancel-button">
           <mat-icon>arrow_forward</mat-icon>
           Retornar ao formulário
         </button>
@@ -263,9 +233,7 @@ export class UnsavedChangesDialogComponent {
   /**
    * Injeta a referência do diálogo para poder fechá-lo
    */
-  private readonly dialogRef = inject(
-    MatDialogRef<UnsavedChangesDialogComponent>
-  );
+  private readonly dialogRef = inject(MatDialogRef<UnsavedChangesDialogComponent>);
 
   /**
    * Injeta o MatDialog para abrir o diálogo de nomear rascunho

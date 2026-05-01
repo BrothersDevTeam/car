@@ -17,30 +17,23 @@ export const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'person',
-        loadChildren: () =>
-          import('./pages/person/person.routes').then((m) => m.PERSON_ROUTES),
+        loadChildren: () => import('./pages/person/person.routes').then((m) => m.PERSON_ROUTES),
       },
       {
         path: 'vehicle',
-        loadChildren: () =>
-          import('./pages/vehicle/vehicle.routes').then(
-            (m) => m.VEHICLE_ROUTES
-          ),
+        loadChildren: () => import('./pages/vehicle/vehicle.routes').then((m) => m.VEHICLE_ROUTES),
       },
       {
         path: 'store',
-        loadChildren: () =>
-          import('./pages/store/store.routes').then((m) => m.STORE_ROUTES),
+        loadChildren: () => import('./pages/store/store.routes').then((m) => m.STORE_ROUTES),
       },
       {
         path: 'nfe',
-        loadChildren: () =>
-          import('./pages/nfe/nfe.routes').then((m) => m.NFE_ROUTES),
+        loadChildren: () => import('./pages/nfe/nfe.routes').then((m) => m.NFE_ROUTES),
       },
       {
         path: 'vendas',
-        loadChildren: () =>
-          import('./pages/vendas/vendas.routes').then((m) => m.VENDAS_ROUTES),
+        loadChildren: () => import('./pages/vendas/vendas.routes').then((m) => m.VENDAS_ROUTES),
       },
       { path: 'dashboard', component: DashboardComponent },
     ],
@@ -52,10 +45,7 @@ export const routes: Routes = [
   },
   {
     path: 'reset-password',
-    loadComponent: () =>
-      import('./pages/reset-password/reset-password').then(
-        (m) => m.ResetPasswordComponent
-      ),
+    loadComponent: () => import('./pages/reset-password/reset-password').then((m) => m.ResetPasswordComponent),
   },
   { path: '**', redirectTo: '' },
 ];

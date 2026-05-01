@@ -13,15 +13,10 @@
   } @else if (persons.length === 0) {
     <div class="empty-container">
       <p>Nenhuma pessoa ativa cadastrada nesta loja.</p>
-      <p class="hint">
-        Cadastre uma pessoa primeiro para vinculá-la como proprietária.
-      </p>
+      <p class="hint">Cadastre uma pessoa primeiro para vinculá-la como proprietária.</p>
     </div>
   } @else {
-    <form
-      [formGroup]="ownerForm"
-      class="owner-form"
-    >
+    <form [formGroup]="ownerForm" class="owner-form">
       <div class="info-box">
         <p>
           <strong>Loja:</strong>
@@ -33,31 +28,19 @@
             <p class="owner-name">{{ currentOwner.name }}</p>
             <p class="owner-doc">
               {{ currentOwner.legalEntity ? 'CNPJ' : 'CPF' }}:
-              {{
-                currentOwner.legalEntity ? currentOwner.cnpj : currentOwner.cpf
-              }}
+              {{ currentOwner.legalEntity ? currentOwner.cnpj : currentOwner.cpf }}
             </p>
           </div>
         }
       </div>
 
-      <mat-form-field
-        appearance="outline"
-        class="full-width"
-      >
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>
-          {{
-            mode === 'update'
-              ? 'Selecione o novo proprietário'
-              : 'Selecione a pessoa'
-          }}
+          {{ mode === 'update' ? 'Selecione o novo proprietário' : 'Selecione a pessoa' }}
         </mat-label>
         <mat-select formControlName="personId">
           @for (person of persons; track person.personId) {
-            <mat-option
-              [value]="person.personId"
-              [disabled]="isCurrentOwner(person.personId)"
-            >
+            <mat-option [value]="person.personId" [disabled]="isCurrentOwner(person.personId)">
               {{ getPersonDisplay(person) }}
               @if (isCurrentOwner(person.personId)) {
                 <span class="current-badge">(Atual)</span>
@@ -65,10 +48,7 @@
             </mat-option>
           }
         </mat-select>
-        @if (
-          ownerForm.get('personId')?.invalid &&
-          ownerForm.get('personId')?.touched
-        ) {
+        @if (ownerForm.get('personId')?.invalid && ownerForm.get('personId')?.touched) {
           <mat-error>Selecione uma pessoa</mat-error>
         }
       </mat-form-field>
@@ -80,15 +60,10 @@
             <strong>alterar</strong>
             o proprietário desta loja.
           </p>
-          <p>
-            💼 O proprietário antigo permanecerá como Person normal na loja.
-          </p>
+          <p>💼 O proprietário antigo permanecerá como Person normal na loja.</p>
           <p>ℹ️ Operação permitida apenas para CAR_ADMIN.</p>
         } @else {
-          <p>
-            💡 Apenas pessoas ativas desta loja podem ser vinculadas como
-            proprietárias.
-          </p>
+          <p>💡 Apenas pessoas ativas desta loja podem ser vinculadas como proprietárias.</p>
         }
       </div>
     </form>
@@ -96,19 +71,9 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button
-    mat-button
-    (click)="onCancel()"
-  >
-    Cancelar
-  </button>
+  <button mat-button (click)="onCancel()">Cancelar</button>
   @if (!loading && !error && persons.length > 0) {
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="onSubmit()"
-      [disabled]="ownerForm.invalid"
-    >
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="ownerForm.invalid">
       {{ getActionButtonText() }}
     </button>
   }

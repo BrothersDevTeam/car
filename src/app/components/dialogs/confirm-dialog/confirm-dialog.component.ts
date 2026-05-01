@@ -41,7 +41,7 @@ export class ConfirmDialogComponent {
       icon?: string;
       type?: 'primary' | 'danger' | 'warning' | 'success';
     },
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
   ) {
     this.safeMessage = this.sanitizer.bypassSecurityTrustHtml(data.message);
   }

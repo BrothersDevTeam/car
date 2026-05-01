@@ -2,12 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
-import {
-  Address,
-  CreateAddress,
-  UpdateAddress,
-  AddressSearchFilters,
-} from '@interfaces/address';
+import { Address, CreateAddress, UpdateAddress, AddressSearchFilters } from '@interfaces/address';
 import { PaginationResponse } from '@interfaces/pagination';
 
 /**
@@ -90,7 +85,7 @@ export class AddressService {
       // Útil para logging, cache invalidation, etc.
       tap((created) => {
         console.log('✅ Endereço criado com sucesso:', created);
-      })
+      }),
     );
   }
 
@@ -128,7 +123,7 @@ export class AddressService {
     return this.http.put<Address>(`${this.apiUrl}/${addressId}`, address).pipe(
       tap((updated) => {
         console.log('✅ Endereço atualizado com sucesso:', updated);
-      })
+      }),
     );
   }
 
@@ -154,7 +149,7 @@ export class AddressService {
     return this.http.delete<void>(`${this.apiUrl}/${addressId}`).pipe(
       tap(() => {
         console.log('✅ Endereço deletado com sucesso');
-      })
+      }),
     );
   }
 
@@ -207,10 +202,8 @@ export class AddressService {
   getByPersonId(personId: string): Observable<Address[]> {
     return this.http.get<Address[]>(`${this.apiUrl}/person/${personId}`).pipe(
       tap((addresses) => {
-        console.log(
-          `✅ ${addresses.length} endereço(s) encontrado(s) para pessoa ${personId}`
-        );
-      })
+        console.log(`✅ ${addresses.length} endereço(s) encontrado(s) para pessoa ${personId}`);
+      }),
     );
   }
 
@@ -226,10 +219,8 @@ export class AddressService {
   getByStoreId(storeId: string): Observable<Address[]> {
     return this.http.get<Address[]>(`${this.apiUrl}/store/${storeId}`).pipe(
       tap((addresses) => {
-        console.log(
-          `✅ ${addresses.length} endereço(s) encontrado(s) para loja ${storeId}`
-        );
-      })
+        console.log(`✅ ${addresses.length} endereço(s) encontrado(s) para loja ${storeId}`);
+      }),
     );
   }
 
@@ -262,12 +253,12 @@ export class AddressService {
     return this.http
       .patch<Address>(
         `${this.apiUrl}/${addressId}/set-main`,
-        {} // Body vazio - o addressId na URL é suficiente
+        {}, // Body vazio - o addressId na URL é suficiente
       )
       .pipe(
         tap((address) => {
           console.log('✅ Endereço definido como principal:', address);
-        })
+        }),
       );
   }
 
@@ -301,15 +292,9 @@ export class AddressService {
    *   }
    * });
    */
-  getAll(
-    pageIndex: number,
-    pageSize: number,
-    filters?: AddressSearchFilters
-  ): Observable<PaginationResponse<Address>> {
+  getAll(pageIndex: number, pageSize: number, filters?: AddressSearchFilters): Observable<PaginationResponse<Address>> {
     // HttpParams: classe do Angular para construir query strings de forma type-safe
-    let params = new HttpParams()
-      .set('page', pageIndex.toString())
-      .set('size', pageSize.toString());
+    let params = new HttpParams().set('page', pageIndex.toString()).set('size', pageSize.toString());
 
     // Adiciona filtros apenas se fornecidos (evita query params vazios)
     if (filters) {
@@ -349,15 +334,11 @@ export class AddressService {
       }
     }
 
-    return this.http
-      .get<PaginationResponse<Address>>(this.apiUrl, { params })
-      .pipe(
-        tap((response) => {
-          console.log(
-            `✅ ${response.content.length} endereço(s) encontrado(s)`
-          );
-        })
-      );
+    return this.http.get<PaginationResponse<Address>>(this.apiUrl, { params }).pipe(
+      tap((response) => {
+        console.log(`✅ ${response.content.length} endereço(s) encontrado(s)`);
+      }),
+    );
   }
 
   /**
@@ -448,9 +429,7 @@ export class AddressService {
 
       // Se ambos são principais ou ambos não são, ordena por data de criação (mais recente primeiro)
       if (a.createdAt && b.createdAt) {
-        return (
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
 
       return 0;
@@ -509,7 +488,7 @@ export class AddressService {
         acc[type] = (acc[type] || 0) + 1;
         return acc;
       },
-      {} as Record<string, number>
+      {} as Record<string, number>,
     );
   }
 }

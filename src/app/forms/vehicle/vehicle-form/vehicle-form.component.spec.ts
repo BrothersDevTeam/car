@@ -1,9 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { VehicleFormComponent } from './vehicle-form.component';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -46,27 +43,19 @@ fdescribe('VehicleFormComponent', () => {
   };
 
   const brandServiceMock = {
-    getBrands: jasmine
-      .createSpy('getBrands')
-      .and.returnValue(of([{ id: '1', description: 'Brand 1' }])),
+    getBrands: jasmine.createSpy('getBrands').and.returnValue(of([{ id: '1', description: 'Brand 1' }])),
   };
 
   const modelServiceMock = {
-    getModels: jasmine
-      .createSpy('getModels')
-      .and.returnValue(of([{ id: '1', description: 'Model 1' }])),
+    getModels: jasmine.createSpy('getModels').and.returnValue(of([{ id: '1', description: 'Model 1' }])),
   };
 
   const fuelTypeServiceMock = {
-    getFuelTypes: jasmine
-      .createSpy('getFuelTypes')
-      .and.returnValue(of([{ id: '1', description: 'Gasolina' }])),
+    getFuelTypes: jasmine.createSpy('getFuelTypes').and.returnValue(of([{ id: '1', description: 'Gasolina' }])),
   };
 
   const colorServiceMock = {
-    getColors: jasmine
-      .createSpy('getColors')
-      .and.returnValue(of([{ id: '1', description: 'Branco' }])),
+    getColors: jasmine.createSpy('getColors').and.returnValue(of([{ id: '1', description: 'Branco' }])),
   };
 
   const toastrServiceMock = {
@@ -184,9 +173,7 @@ fdescribe('VehicleFormComponent', () => {
     });
     component.onSubmit();
     expect(vehicleServiceMock.create).toHaveBeenCalled();
-    expect(toastrServiceMock.success).toHaveBeenCalledWith(
-      'Cadastro realizado com sucesso'
-    );
+    expect(toastrServiceMock.success).toHaveBeenCalledWith('Cadastro realizado com sucesso');
     expect(component.formSubmitted.emit).toHaveBeenCalled();
   });
 
@@ -201,9 +188,7 @@ fdescribe('VehicleFormComponent', () => {
     // expect(vehicleServiceMock.update).toHaveBeenCalledWith(
     //   expect.objectContaining({ id: '1', licensePlate: 'ABC1234' })
     // );
-    expect(toastrServiceMock.success).toHaveBeenCalledWith(
-      'Atualização feita com sucesso'
-    );
+    expect(toastrServiceMock.success).toHaveBeenCalledWith('Atualização feita com sucesso');
     expect(component.formSubmitted.emit).toHaveBeenCalled();
   });
 
@@ -221,9 +206,7 @@ fdescribe('VehicleFormComponent', () => {
     component.dataForm = { id: '1' } as any;
     component.deleteConfirmed();
     expect(vehicleServiceMock.delete).toHaveBeenCalledWith('1');
-    expect(toastrServiceMock.success).toHaveBeenCalledWith(
-      'Deleção bem-sucedida'
-    );
+    expect(toastrServiceMock.success).toHaveBeenCalledWith('Deleção bem-sucedida');
     expect(component.formSubmitted.emit).toHaveBeenCalled();
   });
 

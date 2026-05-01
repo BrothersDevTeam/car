@@ -9,13 +9,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-drawer',
-  imports: [
-    MatSidenavModule,
-    MatToolbarModule,
-    MatListModule,
-    MatButtonModule,
-    MatIconModule,
-  ],
+  imports: [MatSidenavModule, MatToolbarModule, MatListModule, MatButtonModule, MatIconModule],
   templateUrl: './drawer.component.html',
   styleUrl: './drawer.component.scss',
   animations: [

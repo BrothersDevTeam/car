@@ -1,10 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,12 +13,7 @@ import { AuthService } from '@services/auth/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [
-    PrimaryInputComponent,
-    ReactiveFormsModule,
-    MatIconModule,
-    CommonModule,
-  ],
+  imports: [PrimaryInputComponent, ReactiveFormsModule, MatIconModule, CommonModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -38,14 +28,11 @@ export class LoginComponent {
   constructor(
     private authService: AuthService,
     private toastrService: ToastrService,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
   ) {
     this.loginForm = new FormGroup({
       username: new FormControl('', [Validators.required]),
-      password: new FormControl('', [
-        Validators.required,
-        Validators.minLength(4),
-      ]),
+      password: new FormControl('', [Validators.required, Validators.minLength(4)]),
     });
 
     this.forgotPasswordForm = new FormGroup({
@@ -61,15 +48,10 @@ export class LoginComponent {
   @Output('navigate') onNavigate = new EventEmitter();
 
   submit() {
-    this.authService
-      .login(this.loginForm.value.username, this.loginForm.value.password)
-      .subscribe({
-        next: () => this.toastrService.success('Login feito com sucesso'),
-        error: () =>
-          this.toastrService.error(
-            'Erro inesperado! Tente novamente mais tarde'
-          ),
-      });
+    this.authService.login(this.loginForm.value.username, this.loginForm.value.password).subscribe({
+      next: () => this.toastrService.success('Login feito com sucesso'),
+      error: () => this.toastrService.error('Erro inesperado! Tente novamente mais tarde'),
+    });
   }
 
   togglePasswordVisibility() {
@@ -78,13 +60,9 @@ export class LoginComponent {
 
   // --- Recovery Logic ---
   // valid states: 'LOGIN', 'SELECTION', 'FORGOT_PASSWORD', 'FORGOT_USERNAME'
-  viewState = signal<
-    'LOGIN' | 'SELECTION' | 'FORGOT_PASSWORD' | 'FORGOT_USERNAME'
-  >('LOGIN');
+  viewState = signal<'LOGIN' | 'SELECTION' | 'FORGOT_PASSWORD' | 'FORGOT_USERNAME'>('LOGIN');
 
-  setViewState(
-    state: 'LOGIN' | 'SELECTION' | 'FORGOT_PASSWORD' | 'FORGOT_USERNAME'
-  ) {
+  setViewState(state: 'LOGIN' | 'SELECTION' | 'FORGOT_PASSWORD' | 'FORGOT_USERNAME') {
     this.viewState.set(state);
   }
 
@@ -97,19 +75,15 @@ export class LoginComponent {
         {
           email: this.forgotPasswordForm.value.email,
         },
-        { responseType: 'text' }
+        { responseType: 'text' },
       )
       .subscribe({
         next: () => {
-          this.toastrService.success(
-            'Nome de usuário enviado para seu email! Verifique sua caixa de entrada.'
-          );
+          this.toastrService.success('Nome de usuário enviado para seu email! Verifique sua caixa de entrada.');
           this.setViewState('LOGIN');
         },
         error: (err) => {
-          this.toastrService.error(
-            err.error || 'Erro ao recuperar usuário. Verifique o email.'
-          );
+          this.toastrService.error(err.error || 'Erro ao recuperar usuário. Verifique o email.');
         },
       });
   }
@@ -123,19 +97,15 @@ export class LoginComponent {
         {
           email: this.forgotPasswordForm.value.email,
         },
-        { responseType: 'text' }
+        { responseType: 'text' },
       )
       .subscribe({
         next: () => {
-          this.toastrService.success(
-            'Email de recuperação enviado! Verifique sua caixa de entrada (ou logs).'
-          );
+          this.toastrService.success('Email de recuperação enviado! Verifique sua caixa de entrada (ou logs).');
           this.setViewState('LOGIN');
         },
         error: (err) => {
-          this.toastrService.error(
-            err.error || 'Erro ao solicitar recuperação de senha.'
-          );
+          this.toastrService.error(err.error || 'Erro ao solicitar recuperação de senha.');
         },
       });
   }

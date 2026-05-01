@@ -66,18 +66,11 @@ export class FormDraftService {
    * @param draftName - Nome dado pelo usuário ao rascunho (opcional)
    * @returns ID do rascunho salvo
    */
-  saveDraft<T>(
-    formType: string,
-    data: T,
-    entityId?: string | number,
-    draftName?: string
-  ): string {
+  saveDraft<T>(formType: string, data: T, entityId?: string | number, draftName?: string): string {
     // Se tiver entityId, usa ele como identificador (edição)
     // Se não, gera um ID único baseada no timestamp (novo cadastro)
     // Isso permite ter múltiplos rascunhos de "novo cadastro"
-    const draftId = entityId
-      ? `${formType}_${entityId}`
-      : `${formType}_new_${Date.now()}`;
+    const draftId = entityId ? `${formType}_${entityId}` : `${formType}_new_${Date.now()}`;
 
     const draft: FormDraft<T> = {
       id: draftId,
@@ -91,9 +84,7 @@ export class FormDraftService {
 
     // Salva no localStorage
     // Para novos, a chave precisa ser única também
-    const key = entityId
-      ? this.getStorageKey(formType, entityId)
-      : `${this.STORAGE_PREFIX}${draftId}`;
+    const key = entityId ? this.getStorageKey(formType, entityId) : `${this.STORAGE_PREFIX}${draftId}`;
 
     localStorage.setItem(key, JSON.stringify(draft));
 
@@ -110,10 +101,7 @@ export class FormDraftService {
    * @param entityId - ID da entidade (opcional)
    * @returns Rascunho encontrado ou null se não existir
    */
-  getDraft<T>(
-    formType: string,
-    entityId?: string | number
-  ): FormDraft<T> | null {
+  getDraft<T>(formType: string, entityId?: string | number): FormDraft<T> | null {
     const key = this.getStorageKey(formType, entityId);
     const stored = localStorage.getItem(key);
 
@@ -163,10 +151,7 @@ export class FormDraftService {
         const k = localStorage.key(i);
         if (k && k.startsWith(this.STORAGE_PREFIX) && k.includes(draftId)) {
           localStorage.removeItem(k);
-          this.toastr.info(
-            'Rascunho limpo automaticamente (fallback).',
-            'Sistema'
-          );
+          this.toastr.info('Rascunho limpo automaticamente (fallback).', 'Sistema');
           break;
         }
       }
@@ -202,9 +187,7 @@ export class FormDraftService {
     }
 
     // Ordena por data de modificação (mais recente primeiro)
-    return drafts.sort(
-      (a, b) => b.lastModified.getTime() - a.lastModified.getTime()
-    );
+    return drafts.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
   }
 
   /**
@@ -252,8 +235,6 @@ export class FormDraftService {
    * @returns Chave para uso no localStorage
    */
   private getStorageKey(formType: string, entityId?: string | number): string {
-    return entityId
-      ? `${this.STORAGE_PREFIX}${formType}_${entityId}`
-      : `${this.STORAGE_PREFIX}${formType}_new`;
+    return entityId ? `${this.STORAGE_PREFIX}${formType}_${entityId}` : `${this.STORAGE_PREFIX}${formType}_new`;
   }
 }

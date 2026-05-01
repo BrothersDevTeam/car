@@ -7,10 +7,7 @@
     (onClick)="handleOpenForm()"
   >
     <div class="search-container">
-      <mat-form-field
-        appearance="outline"
-        class="search-field"
-      >
+      <mat-form-field appearance="outline" class="search-field">
         <mat-label>Buscar NFe</mat-label>
         <input
           matInput
@@ -19,12 +16,7 @@
           placeholder="Digite a chave, natureza, ou nome do remetente/destinatário"
         />
         @if (searchValue) {
-          <button
-            matSuffix
-            mat-icon-button
-            aria-label="Limpar"
-            (click)="clearSearch()"
-          >
+          <button matSuffix mat-icon-button aria-label="Limpar" (click)="clearSearch()">
             <mat-icon>close</mat-icon>
           </button>
         }
@@ -32,21 +24,8 @@
       </mat-form-field>
     </div>
 
-    <button
-      mat-stroked-button
-      color="primary"
-      class="secondary-action-btn"
-    >
-      Consultar
-    </button>
-    <button
-      mat-stroked-button
-      color="primary"
-      class="secondary-action-btn"
-      (click)="onEnviarNfe()"
-    >
-      Enviar
-    </button>
+    <button mat-stroked-button color="primary" class="secondary-action-btn">Consultar</button>
+    <button mat-stroked-button color="primary" class="secondary-action-btn" (click)="onEnviarNfe()">Enviar</button>
   </app-content-header>
 
   <div class="premium-filter-bar">
@@ -141,30 +120,14 @@
           <div class="nfe-drawer-title">
             <span class="nfe-numero">
               NFe
-              {{
-                selectedNfe.nfeNumero
-                  ? '#' + selectedNfe.nfeNumero
-                  : '(Em Digitação)'
-              }}
+              {{ selectedNfe.nfeNumero ? '#' + selectedNfe.nfeNumero : '(Em Digitação)' }}
             </span>
-            <span
-              class="nfe-status-badge"
-              [ngClass]="'badge-' + (selectedNfe.nfeStatus || 'rascunho')"
-            >
-              {{
-                selectedNfe.nfeStatus === 'rascunho'
-                  ? 'Em digitação'
-                  : selectedNfe.nfeStatus
-              }}
+            <span class="nfe-status-badge" [ngClass]="'badge-' + (selectedNfe.nfeStatus || 'rascunho')">
+              {{ selectedNfe.nfeStatus === 'rascunho' ? 'Em digitação' : selectedNfe.nfeStatus }}
             </span>
           </div>
           @if (selectedNfe.nfeStatus === 'rascunho') {
-            <button
-              mat-raised-button
-              color="primary"
-              class="btn-editar-nfe"
-              (click)="handleEdit(selectedNfe)"
-            >
+            <button mat-raised-button color="primary" class="btn-editar-nfe" (click)="handleEdit(selectedNfe)">
               <mat-icon>edit</mat-icon>
               Editar NFe
             </button>
@@ -205,21 +168,13 @@
             <div class="info-item">
               <label>Data de Emissão</label>
               <span>
-                {{
-                  selectedNfe.nfeDataEmissao
-                    ? (selectedNfe.nfeDataEmissao | date: 'dd/MM/yyyy HH:mm')
-                    : '—'
-                }}
+                {{ selectedNfe.nfeDataEmissao ? (selectedNfe.nfeDataEmissao | date: 'dd/MM/yyyy HH:mm') : '—' }}
               </span>
             </div>
             <div class="info-item">
               <label>Criado em</label>
               <span>
-                {{
-                  selectedNfe.createdAt
-                    ? (selectedNfe.createdAt | date: 'dd/MM/yyyy HH:mm')
-                    : '—'
-                }}
+                {{ selectedNfe.createdAt ? (selectedNfe.createdAt | date: 'dd/MM/yyyy HH:mm') : '—' }}
               </span>
             </div>
             @if (selectedNfe.nfeChave) {
@@ -232,10 +187,7 @@
               <div class="info-item full-width error-item">
                 <label>Erros Identificados</label>
                 <div class="error-list">
-                  @for (
-                    error of selectedNfe.nfeMensagemErro.split(';');
-                    track error
-                  ) {
+                  @for (error of selectedNfe.nfeMensagemErro.split(';'); track error) {
                     @if (error.trim()) {
                       <div class="error-line">
                         <mat-icon>chevron_right</mat-icon>
@@ -258,9 +210,7 @@
           <div class="info-grid">
             <div class="info-item">
               <label>Valor Total</label>
-              <span class="valor-destaque">
-                R$ {{ nfeValorTotalCalculado }}
-              </span>
+              <span class="valor-destaque">R$ {{ nfeValorTotalCalculado }}</span>
             </div>
             @if (selectedNfe.nfeValorFrete) {
               <div class="info-item">
@@ -350,8 +300,7 @@
                     {{
                       selectedNfe.nfeEmitente.emitenteRegimeTributario === '1'
                         ? 'Simples Nacional'
-                        : selectedNfe.nfeEmitente.emitenteRegimeTributario ===
-                            '2'
+                        : selectedNfe.nfeEmitente.emitenteRegimeTributario === '2'
                           ? 'Simples Nacional — Excesso'
                           : 'Regime Normal'
                     }}
@@ -373,8 +322,7 @@
                     @if (selectedNfe.nfeEmitente.emitenteComplemento) {
                       — {{ selectedNfe.nfeEmitente.emitenteComplemento }}
                     }
-                    — {{ selectedNfe.nfeEmitente.emitenteBairro }} —
-                    {{ selectedNfe.nfeEmitente.emitenteMunicipio }}/{{
+                    — {{ selectedNfe.nfeEmitente.emitenteBairro }} — {{ selectedNfe.nfeEmitente.emitenteMunicipio }}/{{
                       selectedNfe.nfeEmitente.emitenteUf
                     }}
                     — CEP: {{ selectedNfe.nfeEmitente.emitenteCep }}
@@ -466,21 +414,14 @@
               <mat-icon>inventory_2</mat-icon>
               Itens da NFe
               <span class="item-count">
-                ({{ selectedNfe.nfeItens.length }}
-                {{ selectedNfe.nfeItens.length === 1 ? 'item' : 'itens' }})
+                ({{ selectedNfe.nfeItens.length }} {{ selectedNfe.nfeItens.length === 1 ? 'item' : 'itens' }})
               </span>
             </h3>
 
-            @for (
-              item of selectedNfe.nfeItens;
-              track item.itemNumero;
-              let idx = $index
-            ) {
+            @for (item of selectedNfe.nfeItens; track item.itemNumero; let idx = $index) {
               <div class="nfe-item-card">
                 <div class="nfe-item-header">
-                  <span class="item-numero">
-                    Item {{ item.itemNumero || idx + 1 }}
-                  </span>
+                  <span class="item-numero">Item {{ item.itemNumero || idx + 1 }}</span>
                   @if (item.itemDescricao) {
                     <span class="item-descricao">{{ item.itemDescricao }}</span>
                   }

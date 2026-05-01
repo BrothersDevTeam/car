@@ -14,10 +14,7 @@
     <section class="glass-card">
       <!-- LOGIN FORM -->
       <ng-container *ngIf="isLogin()">
-        <form
-          [formGroup]="loginForm"
-          (keydown.enter)="submit()"
-        >
+        <form [formGroup]="loginForm" (keydown.enter)="submit()">
           <div class="input-group">
             <app-primary-input
               formControlName="username"
@@ -38,28 +35,17 @@
               placeholder="SENHA"
               [uppercase]="false"
             >
-              <mat-icon
-                (click)="togglePasswordVisibility()"
-                style="cursor: pointer"
-              >
+              <mat-icon (click)="togglePasswordVisibility()" style="cursor: pointer">
                 {{ passwordVisible() ? 'visibility' : 'visibility_off' }}
               </mat-icon>
             </app-primary-input>
           </div>
 
-          <button
-            class="login-btn"
-            (click)="submit()"
-            [disabled]="!disablePrimaryBtn"
-            type="button"
-          >
+          <button class="login-btn" (click)="submit()" [disabled]="!disablePrimaryBtn" type="button">
             E N T R A R
           </button>
 
-          <div
-            class="form-footer"
-            style="flex-direction: column; align-items: flex-end; gap: 5px"
-          >
+          <div class="form-footer" style="flex-direction: column; align-items: flex-end; gap: 5px">
             <!-- Removed checkbox as per my understanding it wasn't requested or functional yet, or I can keep it but adjust layout -->
             <div
               style="
@@ -75,57 +61,32 @@
                 <span class="checkmark"></span>
                 Lembre-me
               </label>
-              <a
-                class="forgot-password"
-                (click)="setViewState('SELECTION')"
-                style="cursor: pointer"
-              >
+              <a class="forgot-password" (click)="setViewState('SELECTION')" style="cursor: pointer">
                 Recuperar Acesso
               </a>
             </div>
           </div>
 
-          <button
-            class="signup-btn"
-            type="button"
-          >
-            CADASTRE-SE
-          </button>
+          <button class="signup-btn" type="button">CADASTRE-SE</button>
         </form>
       </ng-container>
 
       <!-- SELECTION SCREEN -->
       <ng-container *ngIf="isSelection()">
-        <div
-          style="
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            width: 100%;
-          "
-        >
-          <h2 style="color: white; font-weight: 300; margin-bottom: 1rem">
-            O que você esqueceu?
-          </h2>
+        <div style="text-align: center; display: flex; flex-direction: column; gap: 1rem; width: 100%">
+          <h2 style="color: white; font-weight: 300; margin-bottom: 1rem">O que você esqueceu?</h2>
 
           <button
             class="login-btn"
             (click)="setViewState('FORGOT_PASSWORD')"
-            style="
-              background: rgba(255, 255, 255, 0.1);
-              border: 1px solid rgba(255, 255, 255, 0.3);
-            "
+            style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3)"
           >
             ESQUECI A SENHA
           </button>
           <button
             class="login-btn"
             (click)="setViewState('FORGOT_USERNAME')"
-            style="
-              background: rgba(255, 255, 255, 0.1);
-              border: 1px solid rgba(255, 255, 255, 0.3);
-            "
+            style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3)"
           >
             ESQUECI O USUÁRIO
           </button>
@@ -142,20 +103,9 @@
 
       <!-- FORGOT PASSWORD FORM -->
       <ng-container *ngIf="isForgotPassword()">
-        <form
-          [formGroup]="forgotPasswordForm"
-          (keydown.enter)="submitForgotPassword()"
-        >
+        <form [formGroup]="forgotPasswordForm" (keydown.enter)="submitForgotPassword()">
           <div style="margin-bottom: 20px; text-align: center">
-            <h2
-              style="
-                color: white;
-                font-family: 'Nasalization', sans-serif;
-                font-weight: 300;
-              "
-            >
-              Recuperar Senha
-            </h2>
+            <h2 style="color: white; font-family: 'Nasalization', sans-serif; font-weight: 300">Recuperar Senha</h2>
             <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem">
               Digite seu email para receber o link de recuperação.
             </p>
@@ -173,35 +123,17 @@
             </app-primary-input>
           </div>
 
-          <button
-            class="login-btn"
-            (click)="submitForgotPassword()"
-            type="button"
-          >
-            ENVIAR
-          </button>
+          <button class="login-btn" (click)="submitForgotPassword()" type="button">ENVIAR</button>
 
-          <div
-            class="form-footer"
-            style="justify-content: center; margin-top: 20px"
-          >
-            <a
-              class="forgot-password"
-              (click)="setViewState('SELECTION')"
-              style="cursor: pointer"
-            >
-              Voltar
-            </a>
+          <div class="form-footer" style="justify-content: center; margin-top: 20px">
+            <a class="forgot-password" (click)="setViewState('SELECTION')" style="cursor: pointer">Voltar</a>
           </div>
         </form>
       </ng-container>
 
       <!-- FORGOT USERNAME FORM -->
       <ng-container *ngIf="isForgotUsername()">
-        <form
-          [formGroup]="forgotPasswordForm"
-          (keydown.enter)="submitForgotUsername()"
-        >
+        <form [formGroup]="forgotPasswordForm" (keydown.enter)="submitForgotUsername()">
           <div style="margin-bottom: 20px; text-align: center">
             <h2 style="color: white; font-weight: 300">Recuperar Usuário</h2>
             <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem">
@@ -221,25 +153,10 @@
             </app-primary-input>
           </div>
 
-          <button
-            class="login-btn"
-            (click)="submitForgotUsername()"
-            type="button"
-          >
-            RECUPERAR USUÁRIO
-          </button>
+          <button class="login-btn" (click)="submitForgotUsername()" type="button">RECUPERAR USUÁRIO</button>
 
-          <div
-            class="form-footer"
-            style="justify-content: center; margin-top: 20px"
-          >
-            <a
-              class="forgot-password"
-              (click)="setViewState('SELECTION')"
-              style="cursor: pointer"
-            >
-              Voltar
-            </a>
+          <div class="form-footer" style="justify-content: center; margin-top: 20px">
+            <a class="forgot-password" (click)="setViewState('SELECTION')" style="cursor: pointer">Voltar</a>
           </div>
         </form>
       </ng-container>

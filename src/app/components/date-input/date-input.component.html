@@ -1,8 +1,4 @@
-<mat-form-field
-  appearance="outline"
-  class="date-field"
-  [class.mat-form-field-invalid]="error"
->
+<mat-form-field appearance="outline" class="date-field" [class.mat-form-field-invalid]="error">
   <mat-label>{{ label }}</mat-label>
   <input
     matInput
@@ -16,10 +12,7 @@
     (blur)="onBlur()"
     autocomplete="off"
   />
-  <mat-datepicker-toggle
-    matIconSuffix
-    [for]="picker"
-  >
+  <mat-datepicker-toggle matIconSuffix [for]="picker">
     <mat-icon matDatepickerToggleIcon>calendar_today</mat-icon>
   </mat-datepicker-toggle>
   <mat-datepicker #picker></mat-datepicker>

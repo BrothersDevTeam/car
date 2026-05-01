@@ -73,9 +73,7 @@ import { Authorizations } from '../../../enums/authorizations';
   templateUrl: './natural-person-form.component.html',
   styleUrl: './natural-person-form.component.scss',
 })
-export class NaturalPersonFormComponent
-  implements OnInit, OnChanges, CanComponentDeactivate
-{
+export class NaturalPersonFormComponent implements OnInit, OnChanges, CanComponentDeactivate {
   private subscriptions = new Subscription();
   submitted = false;
 
@@ -161,10 +159,7 @@ export class NaturalPersonFormComponent
    * @returns {boolean} true se o usuário tem ROLE_CAR_ADMIN ou ROLE_MANAGER
    */
   protected get canRegisterEmployee(): boolean {
-    return (
-      this.authService.hasAuthority('create:user') ||
-      this.authService.hasAuthority('edit:store')
-    );
+    return this.authService.hasAuthority('create:user') || this.authService.hasAuthority('edit:store');
   }
 
   /**
@@ -185,12 +180,9 @@ export class NaturalPersonFormComponent
     active: [true],
     storeId: [''],
     legalEntity: [false],
-    relationship: this.formBuilderService.control<RelationshipTypes>(
-      RelationshipTypes.CLIENTE,
-      {
-        validators: [Validators.required],
-      }
-    ),
+    relationship: this.formBuilderService.control<RelationshipTypes>(RelationshipTypes.CLIENTE, {
+      validators: [Validators.required],
+    }),
     username: [''],
     password: [''],
     confirmPassword: [''],
@@ -218,11 +210,7 @@ export class NaturalPersonFormComponent
     const selectedType = this.form.get('relationship')?.value;
     return (
       !!selectedType &&
-      [
-        RelationshipTypes.PROPRIETARIO,
-        RelationshipTypes.GERENTE,
-        RelationshipTypes.VENDEDOR,
-      ].includes(selectedType)
+      [RelationshipTypes.PROPRIETARIO, RelationshipTypes.GERENTE, RelationshipTypes.VENDEDOR].includes(selectedType)
     );
   }
 
@@ -231,7 +219,7 @@ export class NaturalPersonFormComponent
     private toastrService: ToastrService,
     private actionsService: ActionsService,
     private authService: AuthService,
-    private formDraftService: FormDraftService
+    private formDraftService: FormDraftService,
   ) {}
 
   /**
@@ -309,9 +297,7 @@ export class NaturalPersonFormComponent
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.toastrService.error(
-        'Por favor, preencha todos os campos obrigatórios'
-      );
+      this.toastrService.error('Por favor, preencha todos os campos obrigatórios');
       this.isSaving = false;
       return of(false);
     }
@@ -320,9 +306,7 @@ export class NaturalPersonFormComponent
       try {
         const storeId = this.storeContextService.currentStoreId;
         if (!storeId) {
-          this.toastrService.error(
-            'Loja não identificada. Faça login novamente.'
-          );
+          this.toastrService.error('Loja não identificada. Faça login novamente.');
           this.isSaving = false;
           observer.next(false);
           observer.complete();
@@ -361,53 +345,40 @@ export class NaturalPersonFormComponent
           // Captura o ID do rascunho ANTES da requisição
           const draftIdToDelete = this.selectedDraftId;
 
-          this.personService
-            .update(formValue, this.dataForm.personId)
-            .subscribe({
-              next: () => {
-                this.toastrService.success('Atualização feita com sucesso');
+          this.personService.update(formValue, this.dataForm.personId).subscribe({
+            next: () => {
+              this.toastrService.success('Atualização feita com sucesso');
 
-                // Remove pelo ID específico do rascunho se houver
-                if (draftIdToDelete) {
-                  console.log(
-                    '[saveForm] Removendo rascunho de edição:',
-                    draftIdToDelete
-                  );
-                  this.formDraftService.removeDraftById(draftIdToDelete);
-                } else {
-                  // Fallback: Remove pelo personId
-                  const personId = Number(this.dataForm!.personId);
-                  this.formDraftService.removeDraft(this.FORM_TYPE, personId);
-                }
+              // Remove pelo ID específico do rascunho se houver
+              if (draftIdToDelete) {
+                console.log('[saveForm] Removendo rascunho de edição:', draftIdToDelete);
+                this.formDraftService.removeDraftById(draftIdToDelete);
+              } else {
+                // Fallback: Remove pelo personId
+                const personId = Number(this.dataForm!.personId);
+                this.formDraftService.removeDraft(this.FORM_TYPE, personId);
+              }
 
-                this.isSaving = false;
-                observer.next(true);
-                observer.complete();
-              },
-              error: (error) => {
-                console.error('Erro ao atualizar:', error);
-                const msg = extractErrorMessage(
-                  error,
-                  'Erro ao atualizar pessoa'
-                );
-                this.toastrService.error(msg);
-                this.isSaving = false;
-                observer.next(false);
-                observer.complete();
-              },
-            });
+              this.isSaving = false;
+              observer.next(true);
+              observer.complete();
+            },
+            error: (error) => {
+              console.error('Erro ao atualizar:', error);
+              const msg = extractErrorMessage(error, 'Erro ao atualizar pessoa');
+              this.toastrService.error(msg);
+              this.isSaving = false;
+              observer.next(false);
+              observer.complete();
+            },
+          });
         } else {
-          const clean = removeEmptyPropertiesFromObject<CreateNaturalPerson>(
-            formValue as Person
-          );
+          const clean = removeEmptyPropertiesFromObject<CreateNaturalPerson>(formValue as Person);
 
           // Captura o ID do rascunho ANTES da requisição
           // Evita problemas caso resetForm seja chamado durante processamento
           const draftIdToDelete = this.selectedDraftId || this.draft?.id;
-          console.log(
-            '[saveForm] ID capturado para exclusão futura:',
-            draftIdToDelete
-          );
+          console.log('[saveForm] ID capturado para exclusão futura:', draftIdToDelete);
 
           this.personService.create(clean).subscribe({
             next: () => {
@@ -457,11 +428,9 @@ export class NaturalPersonFormComponent
     silent: boolean = false,
     draftName?: string,
     existingDraftId?: string,
-    closeAfterSave: boolean = true
+    closeAfterSave: boolean = true,
   ): void {
-    const personId = this.dataForm?.personId
-      ? Number(this.dataForm.personId)
-      : undefined;
+    const personId = this.dataForm?.personId ? Number(this.dataForm.personId) : undefined;
 
     // Se temos um ID de rascunho existente (seja passado explicitamente ou via unique ID strategy)
     // O service vai lidar com a criação ou atualização.
@@ -505,12 +474,7 @@ export class NaturalPersonFormComponent
       _editingId: this.dataForm?.personId, // Preserva o ID se estiver editando
     };
 
-    const draftId = this.formDraftService.saveDraft(
-      this.FORM_TYPE,
-      draftData,
-      effectiveEntityId,
-      draftName
-    );
+    const draftId = this.formDraftService.saveDraft(this.FORM_TYPE, draftData, effectiveEntityId, draftName);
 
     // CRITICAL FIX: SEMPRE atualiza o ID do rascunho selecionado
     this.selectedDraftId = draftId;
@@ -552,24 +516,21 @@ export class NaturalPersonFormComponent
   openSaveDraftDialog() {
     // 1. Se já tem um rascunho selecionado, atualiza direto SEM fechar
     if (this.selectedDraftId) {
-      const currentDraft = this.availableDrafts.find(
-        (d) => d.id === this.selectedDraftId
-      );
+      const currentDraft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);
       if (currentDraft) {
         // Salva silenciosamente, mantendo o formulário aberto
         this.saveLocalDraft(
           false,
           currentDraft.draftName,
           this.selectedDraftId,
-          true // FECHAR o formulário
+          true, // FECHAR o formulário
         );
         return;
       }
     }
 
     // 2. Se é novo, abre diálogo para nomear
-    const suggestedName =
-      this.form.value.name || `Rascunho ${new Date().toLocaleString()}`;
+    const suggestedName = this.form.value.name || `Rascunho ${new Date().toLocaleString()}`;
 
     const dialogRef = this.dialog.open(SaveDraftDialogComponent, {
       data: {
@@ -581,15 +542,10 @@ export class NaturalPersonFormComponent
     dialogRef.afterClosed().subscribe((result: SaveDraftDialogResult) => {
       if (result && result.confirmed) {
         // Validação estrita de nome único
-        const nameExists = this.availableDrafts.some(
-          (d) => d.draftName === result.draftName
-        );
+        const nameExists = this.availableDrafts.some((d) => d.draftName === result.draftName);
 
         if (nameExists) {
-          this.toastrService.error(
-            'Já existe um rascunho com este nome. Por favor, escolha outro.',
-            'Nome Duplicado'
-          );
+          this.toastrService.error('Já existe um rascunho com este nome. Por favor, escolha outro.', 'Nome Duplicado');
           // Reabre o diálogo para o usuário tentar novamente
           this.openSaveDraftDialog();
           return;
@@ -614,13 +570,8 @@ export class NaturalPersonFormComponent
    * Carrega a lista de rascunhos disponíveis
    */
   private loadAvailableDrafts(): void {
-    this.availableDrafts = this.formDraftService.getDraftsByType(
-      this.FORM_TYPE
-    );
-    console.log(
-      '[loadAvailableDrafts] Rascunhos carregados:',
-      this.availableDrafts.length
-    );
+    this.availableDrafts = this.formDraftService.getDraftsByType(this.FORM_TYPE);
+    console.log('[loadAvailableDrafts] Rascunhos carregados:', this.availableDrafts.length);
   }
 
   /**
@@ -704,15 +655,13 @@ export class NaturalPersonFormComponent
     }
 
     // Converte personId de string para number
-    const personId = this.dataForm?.personId
-      ? Number(this.dataForm.personId)
-      : undefined;
+    const personId = this.dataForm?.personId ? Number(this.dataForm.personId) : undefined;
 
     const draft = this.formDraftService.getDraft<any>(this.FORM_TYPE, personId);
 
     if (draft) {
       const loadDraft = confirm(
-        `Foi encontrado um rascunho salvo em ${draft.lastModified.toLocaleString()}.\n\nDeseja carregar este rascunho?`
+        `Foi encontrado um rascunho salvo em ${draft.lastModified.toLocaleString()}.\n\nDeseja carregar este rascunho?`,
       );
 
       if (loadDraft) {
@@ -734,9 +683,7 @@ export class NaturalPersonFormComponent
   }
 
   // Validator personalizado para verificar se as senhas coincidem
-  private passwordMatchValidator(
-    control: AbstractControl
-  ): ValidationErrors | null {
+  private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password');
     const confirmPassword = control.get('confirmPassword');
 
@@ -751,9 +698,7 @@ export class NaturalPersonFormComponent
       const errors = confirmPassword.errors;
       if (errors) {
         delete errors['passwordMismatch'];
-        confirmPassword.setErrors(
-          Object.keys(errors).length > 0 ? errors : null
-        );
+        confirmPassword.setErrors(Object.keys(errors).length > 0 ? errors : null);
       }
     }
 
@@ -766,7 +711,7 @@ export class NaturalPersonFormComponent
     this.subscriptions.add(
       this.form.get('relationship')!.valueChanges.subscribe(() => {
         this.updateConditionalValidators();
-      })
+      }),
     );
 
     this.subscriptions.add(
@@ -774,7 +719,7 @@ export class NaturalPersonFormComponent
         const hasChanges = this.hasUnsavedChanges();
         this.actionsService.hasFormChanges.set(hasChanges);
         this.formChanged.emit(hasChanges);
-      })
+      }),
     );
 
     this.subscriptions.add(
@@ -783,11 +728,9 @@ export class NaturalPersonFormComponent
         if (usernameControl?.hasError('usernameConflict')) {
           const errors = { ...usernameControl.errors };
           delete errors['usernameConflict'];
-          usernameControl.setErrors(
-            Object.keys(errors).length > 0 ? errors : null
-          );
+          usernameControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
         }
-      }) ?? new Subscription()
+      }) ?? new Subscription(),
     );
 
     this.loadAvailableDrafts();
@@ -801,7 +744,7 @@ export class NaturalPersonFormComponent
     this.subscriptions.add(
       this.formDraftService.draftsChanges.subscribe(() => {
         this.loadAvailableDrafts();
-      })
+      }),
     );
   }
 
@@ -810,10 +753,7 @@ export class NaturalPersonFormComponent
     this.form.markAsDirty();
 
     // Se o perfil selecionado é um que permite acesso ao sistema, vamos preencher permissões padrão
-    if (
-      profile === RelationshipTypes.GERENTE ||
-      profile === RelationshipTypes.VENDEDOR
-    ) {
+    if (profile === RelationshipTypes.GERENTE || profile === RelationshipTypes.VENDEDOR) {
       setTimeout(() => {
         this.applyDefaultAuthorizations(profile);
       });
@@ -888,18 +828,9 @@ export class NaturalPersonFormComponent
     const authorizationsControl = this.form.get('authorizations') as FormArray;
 
     if (this.shouldShowUserFields) {
-      usernameControl?.setValidators([
-        Validators.required,
-        Validators.minLength(3),
-      ]);
-      passwordControl?.setValidators([
-        Validators.required,
-        Validators.minLength(6),
-      ]);
-      confirmPasswordControl?.setValidators([
-        Validators.required,
-        Validators.minLength(6),
-      ]);
+      usernameControl?.setValidators([Validators.required, Validators.minLength(3)]);
+      passwordControl?.setValidators([Validators.required, Validators.minLength(6)]);
+      confirmPasswordControl?.setValidators([Validators.required, Validators.minLength(6)]);
       authorizationsControl?.setValidators([Validators.required]);
 
       usernameControl?.updateValueAndValidity({ emitEvent: false });
@@ -932,17 +863,13 @@ export class NaturalPersonFormComponent
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
       console.log('[natural-person-form] dataForm recebido:', this.dataForm);
-      const relationship =
-        this.dataForm.relationship || RelationshipTypes.CLIENTE;
+      const relationship = this.dataForm.relationship || RelationshipTypes.CLIENTE;
       this.isEmployee =
         relationship === RelationshipTypes.GERENTE ||
         relationship === RelationshipTypes.VENDEDOR ||
         relationship === RelationshipTypes.PROPRIETARIO;
 
-      console.log(
-        '[natural-person-form] isEmployee setado para:',
-        this.isEmployee
-      );
+      console.log('[natural-person-form] isEmployee setado para:', this.isEmployee);
 
       setTimeout(() => {
         this.form.patchValue({
@@ -956,22 +883,13 @@ export class NaturalPersonFormComponent
           rgIssuer: this.dataForm!.rgIssuer || '',
         });
 
-        console.log(
-          '[natural-person-form] Formulário após patchValue:',
-          this.form.value
-        );
-        console.log(
-          '[natural-person-form] relationship após patchValue:',
-          this.form.get('relationship')?.value
-        );
+        console.log('[natural-person-form] Formulário após patchValue:', this.form.value);
+        console.log('[natural-person-form] relationship após patchValue:', this.form.get('relationship')?.value);
       }, 200);
     }
 
     if (changes['draft'] && this.draft) {
-      console.log(
-        '[natural-person-form] Rascunho recebido via input:',
-        this.draft
-      );
+      console.log('[natural-person-form] Rascunho recebido via input:', this.draft);
       this.loadDraftData(this.draft);
     }
   }
@@ -1001,9 +919,7 @@ export class NaturalPersonFormComponent
       relationship === RelationshipTypes.VENDEDOR ||
       relationship === RelationshipTypes.PROPRIETARIO;
 
-    this.toastrService.success(
-      `Rascunho "${draft.draftName || 'sem nome'}" carregado`
-    );
+    this.toastrService.success(`Rascunho "${draft.draftName || 'sem nome'}" carregado`);
 
     console.log('[loadDraftData] Rascunho carregado:', draft);
     console.log('[loadDraftData] Modo de edição:', !!draft.data._editingId);
@@ -1020,10 +936,7 @@ export class NaturalPersonFormComponent
     if (event instanceof KeyboardEvent) {
       event.preventDefault();
 
-      if (
-        this.form.valid &&
-        document.activeElement === this.submitButton.nativeElement
-      ) {
+      if (this.form.valid && document.activeElement === this.submitButton.nativeElement) {
         this.onSubmit();
       }
 
@@ -1039,10 +952,7 @@ export class NaturalPersonFormComponent
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.toastrService.error(
-        'Por favor, verifique os campos em vermelho.',
-        'Formulário Inválido'
-      );
+      this.toastrService.error('Por favor, verifique os campos em vermelho.', 'Formulário Inválido');
 
       if (this.shouldShowUserFields) {
         if (this.form.get('username')?.invalid) {
@@ -1119,9 +1029,7 @@ export class NaturalPersonFormComponent
           if (error.error && Array.isArray(error.error)) {
             const validationErrors = error.error;
 
-            const usernameError = validationErrors.find(
-              (err: any) => err.code === 'usernameConflict'
-            );
+            const usernameError = validationErrors.find((err: any) => err.code === 'usernameConflict');
 
             if (usernameError) {
               this.toastrService.error('Nome de usuário já cadastrado', 'Erro');
@@ -1136,23 +1044,15 @@ export class NaturalPersonFormComponent
             }
 
             const firstError = validationErrors[0];
-            this.toastrService.error(
-              firstError.defaultMessage || 'Erro de validação',
-              'Erro ao atualizar'
-            );
+            this.toastrService.error(firstError.defaultMessage || 'Erro de validação', 'Erro ao atualizar');
             return;
           }
 
-          this.toastrService.error(
-            'Erro inesperado! Tente novamente mais tarde',
-            'Erro'
-          );
+          this.toastrService.error('Erro inesperado! Tente novamente mais tarde', 'Erro');
         },
       });
     } else {
-      const clean = removeEmptyPropertiesFromObject<CreateNaturalPerson>(
-        formValue as Person
-      );
+      const clean = removeEmptyPropertiesFromObject<CreateNaturalPerson>(formValue as Person);
       console.log('Dados limpos:', clean);
 
       // Captura o ID do rascunho ANTES da requisição
@@ -1181,9 +1081,7 @@ export class NaturalPersonFormComponent
           if (error.error && Array.isArray(error.error)) {
             const validationErrors = error.error;
 
-            const usernameError = validationErrors.find(
-              (err: any) => err.code === 'usernameConflict'
-            );
+            const usernameError = validationErrors.find((err: any) => err.code === 'usernameConflict');
 
             if (usernameError) {
               this.toastrService.error('Nome de usuário já cadastrado', 'Erro');
@@ -1198,17 +1096,11 @@ export class NaturalPersonFormComponent
             }
 
             const firstError = validationErrors[0];
-            this.toastrService.error(
-              firstError.defaultMessage || 'Erro de validação',
-              'Erro ao cadastrar'
-            );
+            this.toastrService.error(firstError.defaultMessage || 'Erro de validação', 'Erro ao cadastrar');
             return;
           }
 
-          this.toastrService.error(
-            'Erro inesperado! Tente novamente mais tarde',
-            'Erro'
-          );
+          this.toastrService.error('Erro inesperado! Tente novamente mais tarde', 'Erro');
         },
       });
     }
@@ -1238,23 +1130,17 @@ export class NaturalPersonFormComponent
   private focusUsernameField(): void {
     setTimeout(() => {
       if (this.usernameInput) {
-        const inputElement = this.usernameInput.nativeElement.querySelector(
-          'input'
-        ) as HTMLInputElement;
+        const inputElement = this.usernameInput.nativeElement.querySelector('input') as HTMLInputElement;
 
         if (inputElement) {
           inputElement.focus();
           inputElement.select();
           console.log('[focusUsernameField] Foco aplicado no campo username');
         } else {
-          console.warn(
-            '[focusUsernameField] Input username não encontrado no DOM'
-          );
+          console.warn('[focusUsernameField] Input username não encontrado no DOM');
         }
       } else {
-        console.warn(
-          '[focusUsernameField] ViewChild usernameInput não está disponível'
-        );
+        console.warn('[focusUsernameField] ViewChild usernameInput não está disponível');
       }
     }, 100);
   }

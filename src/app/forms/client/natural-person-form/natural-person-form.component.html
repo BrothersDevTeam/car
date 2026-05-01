@@ -1,7 +1,4 @@
-<form
-  [formGroup]="form"
-  (keydown.enter)="onEnter($event)"
->
+<form [formGroup]="form" (keydown.enter)="onEnter($event)">
   <!-- Seção Premium de Rascunhos -->
   @if (availableDrafts.length > 0 && !dataForm) {
     <div class="drafts-section">
@@ -9,30 +6,17 @@
         <mat-card-header>
           <mat-icon mat-card-avatar>history</mat-icon>
           <mat-card-title>Cadastros em andamento</mat-card-title>
-          <mat-card-subtitle>
-            Você possui rascunhos salvos para este perfil.
-          </mat-card-subtitle>
+          <mat-card-subtitle>Você possui rascunhos salvos para este perfil.</mat-card-subtitle>
         </mat-card-header>
 
         <mat-card-content>
           <div class="draft-selector-container">
-            <mat-form-field
-              appearance="outline"
-              class="draft-select-field"
-            >
+            <mat-form-field appearance="outline" class="draft-select-field">
               <mat-label>Selecione um rascunho para continuar</mat-label>
-              <mat-select
-                [(value)]="selectedDraftId"
-                (selectionChange)="onDraftSelected($event)"
-              >
-                <mat-option [value]="null">
-                  -- Iniciar novo cadastro --
-                </mat-option>
+              <mat-select [(value)]="selectedDraftId" (selectionChange)="onDraftSelected($event)">
+                <mat-option [value]="null">-- Iniciar novo cadastro --</mat-option>
                 @for (draft of availableDrafts; track draft.id) {
-                  <mat-option
-                    [value]="draft.id"
-                    class="draft-option-item"
-                  >
+                  <mat-option [value]="draft.id" class="draft-option-item">
                     <div class="draft-option-content">
                       <div class="draft-info">
                         <span class="draft-name">
@@ -65,15 +49,9 @@
   <app-wrapper-card title="Dados pessoais">
     @if (canRegisterEmployee && !dataForm) {
       <div class="form-row">
-        <mat-form-field
-          appearance="outline"
-          style="width: 100%; margin-bottom: 1rem"
-        >
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 1rem">
           <mat-label>Perfil de Cadastro</mat-label>
-          <mat-select
-            formControlName="relationship"
-            (selectionChange)="onProfileChange($event.value)"
-          >
+          <mat-select formControlName="relationship" (selectionChange)="onProfileChange($event.value)">
             <mat-option value="CLIENTE">Cliente Padrão</mat-option>
             <mat-option value="VENDEDOR">Vendedor do Sistema</mat-option>
             <mat-option value="GERENTE">Gerente da Loja</mat-option>
@@ -88,9 +66,7 @@
       label="Nome completo *"
       inputName="name"
       type="text"
-      [error]="
-        form.get('name')?.invalid && (form.get('name')?.touched || submitted)
-      "
+      [error]="form.get('name')?.invalid && (form.get('name')?.touched || submitted)"
     />
 
     <div class="form-row-2cols">
@@ -110,9 +86,7 @@
         placeholder="000.000.000-00"
         mask="000.000.000-00"
         appCpfValidator
-        [error]="
-          form.get('cpf')?.invalid && (form.get('cpf')?.touched || submitted)
-        "
+        [error]="form.get('cpf')?.invalid && (form.get('cpf')?.touched || submitted)"
       />
     </div>
     <!-- 
@@ -126,10 +100,7 @@
         inputName="email"
         type="email"
         placeholder="exemplo@email.com"
-        [error]="
-          form.get('email')?.invalid &&
-          (form.get('email')?.touched || submitted)
-        "
+        [error]="form.get('email')?.invalid && (form.get('email')?.touched || submitted)"
       />
 
       <app-primary-input
@@ -144,10 +115,7 @@
   </app-wrapper-card>
   @if (shouldShowUserFields) {
     <app-wrapper-card title="Dados de Acesso ao Sistema">
-      <app-access-data-form
-        [form]="form"
-        [submitted]="submitted"
-      ></app-access-data-form>
+      <app-access-data-form [form]="form" [submitted]="submitted"></app-access-data-form>
     </app-wrapper-card>
   }
 
@@ -238,13 +206,7 @@
   <!-- Botão de submit -->
   <div class="form-actions">
     @if (form.dirty) {
-      <button
-        mat-stroked-button
-        type="button"
-        color="primary"
-        (click)="openSaveDraftDialog()"
-        [disabled]="isSaving"
-      >
+      <button mat-stroked-button type="button" color="primary" (click)="openSaveDraftDialog()" [disabled]="isSaving">
         <mat-icon>save_as</mat-icon>
         Salvar Rascunho
       </button>

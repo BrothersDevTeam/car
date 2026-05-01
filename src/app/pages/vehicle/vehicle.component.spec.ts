@@ -1,10 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { VehicleComponent } from './vehicle.component';
-import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
@@ -16,12 +13,7 @@ describe('VehicleComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        BrowserAnimationsModule,
-        ToastrModule.forRoot(),
-        VehicleComponent,
-        ContentHeaderComponent,
-      ],
+      imports: [BrowserAnimationsModule, ToastrModule.forRoot(), VehicleComponent, ContentHeaderComponent],
       declarations: [],
       providers: [VehicleService, provideHttpClient(withInterceptorsFromDi())],
     }).compileComponents();

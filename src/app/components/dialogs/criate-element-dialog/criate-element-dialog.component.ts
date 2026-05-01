@@ -38,7 +38,7 @@ export class CriateElementConfirmDialogComponent {
       message: string;
       confirmText: string;
       cancelText: string;
-    }
+    },
   ) {}
 
   onCancel(): void {

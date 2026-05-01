@@ -12,12 +12,7 @@ import {
   ViewChild,
   ElementRef,
 } from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  FormsModule,
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
@@ -76,7 +71,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
     private vehicleService: VehicleService,
     private toastrService: ToastrService,
     private dialog: MatDialog,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -128,17 +123,12 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
 
   private setSelectedOption() {
     if (this.control instanceof FormControl && this.control.value) {
-      this.selectedOption =
-        this.options.find((option) => option.id === this.control.value.id) ||
-        null;
+      this.selectedOption = this.options.find((option) => option.id === this.control.value.id) || null;
     } else if (this.control instanceof FormGroup) {
       const value = this.control.value;
 
       // Se o valor está vazio (id e name vazios), não faz nada
-      if (
-        (!value.id && !value.name) ||
-        (value.id === '' && value.name === '')
-      ) {
+      if ((!value.id && !value.name) || (value.id === '' && value.name === '')) {
         return;
       }
 
@@ -150,15 +140,12 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
         const found = this.options.find((option) => option.name === value.name);
         this.selectedOption = found || { id: '', name: value.name };
       }
-      
+
       this.cdr.detectChanges();
 
       // Log final
       if (this.selectedOption) {
-        console.log(
-          `[${this.listType}] ✅ selectedOption SETADO:`,
-          this.selectedOption
-        );
+        console.log(`[${this.listType}] ✅ selectedOption SETADO:`, this.selectedOption);
       }
     }
   }
@@ -359,16 +346,12 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
           next: () => {
             this.options = this.options.filter((item) => item.id !== option.id);
             this.filteredOptions = [...this.options];
-            this.toastrService.success(
-              this.typeListTexts[this.listType].successDeleteMessage
-            );
+            this.toastrService.success(this.typeListTexts[this.listType].successDeleteMessage);
             this.itemChanged.emit();
           },
           error: (error: any) => {
             console.error('Erro ao deletar:', error);
-            this.toastrService.error(
-              `Erro ao deletar ${this.listType}. Tente novamente.`
-            );
+            this.toastrService.error(`Erro ao deletar ${this.listType}. Tente novamente.`);
           },
         });
       }
@@ -383,9 +366,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       width: '600px',
       data: {
         title:
-          mode === 'create'
-            ? this.typeListTexts.brand.create
-            : `${this.typeListTexts.brand.update}: ${option?.name}`,
+          mode === 'create' ? this.typeListTexts.brand.create : `${this.typeListTexts.brand.update}: ${option?.name}`,
         mode: mode,
         brand: mode === 'edit' ? option : undefined,
       },
@@ -397,9 +378,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
           this.brandService.create(payload).subscribe({
             next: (response: any) => {
               this.reloadBrands();
-              this.toastrService.success(
-                this.typeListTexts.brand.successCreateMessage
-              );
+              this.toastrService.success(this.typeListTexts.brand.successCreateMessage);
             },
             error: (error: any) => {
               console.error('Erro ao criar marca:', error);
@@ -410,15 +389,11 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
           this.brandService.update(payload).subscribe({
             next: (response: any) => {
               this.reloadBrands();
-              this.toastrService.success(
-                this.typeListTexts.brand.successUpdateMessage
-              );
+              this.toastrService.success(this.typeListTexts.brand.successUpdateMessage);
             },
             error: (error: any) => {
               console.error('Erro ao editar marca:', error);
-              this.toastrService.error(
-                'Erro ao editar marca. Tente novamente.'
-              );
+              this.toastrService.error('Erro ao editar marca. Tente novamente.');
             },
           });
         }
@@ -439,14 +414,11 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       width: '650px',
       data: {
         title:
-          mode === 'create'
-            ? this.typeListTexts.model.create
-            : `${this.typeListTexts.model.update}: ${option?.name}`,
+          mode === 'create' ? this.typeListTexts.model.create : `${this.typeListTexts.model.update}: ${option?.name}`,
         mode: mode,
         model: mode === 'edit' ? option : undefined,
         brandId: this.selectedBrand.id,
-        brandName: this.options.find((o) => o.id === this.selectedBrand.id)
-          ?.name,
+        brandName: this.options.find((o) => o.id === this.selectedBrand.id)?.name,
       },
     });
 
@@ -456,14 +428,9 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
         if (mode === 'create') {
           this.modelService.create(payload).subscribe({
             next: (response: any) => {
-              console.log(
-                'CustomSelect - Modelo criado, recarregando...',
-                response
-              );
+              console.log('CustomSelect - Modelo criado, recarregando...', response);
               this.reloadModels();
-              this.toastrService.success(
-                this.typeListTexts.model.successCreateMessage
-              );
+              this.toastrService.success(this.typeListTexts.model.successCreateMessage);
               console.log('CustomSelect - Emitting itemChanged');
               this.itemChanged.emit();
             },
@@ -476,15 +443,11 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
           this.modelService.update(payload.modelId, payload).subscribe({
             next: (response: any) => {
               this.reloadModels();
-              this.toastrService.success(
-                this.typeListTexts.model.successUpdateMessage
-              );
+              this.toastrService.success(this.typeListTexts.model.successUpdateMessage);
             },
             error: (error: any) => {
               console.error('Erro ao editar modelo:', error);
-              this.toastrService.error(
-                'Erro ao editar modelo. Tente novamente.'
-              );
+              this.toastrService.error('Erro ao editar modelo. Tente novamente.');
             },
           });
         }
@@ -500,9 +463,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       width: '600px',
       data: {
         title:
-          mode === 'create'
-            ? this.typeListTexts.color.create
-            : `${this.typeListTexts.color.update}: ${option?.name}`,
+          mode === 'create' ? this.typeListTexts.color.create : `${this.typeListTexts.color.update}: ${option?.name}`,
         mode: mode,
         color: mode === 'edit' ? option : undefined,
       },
@@ -515,9 +476,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
           this.colorService.create(payload).subscribe({
             next: (response: any) => {
               this.reloadColors();
-              this.toastrService.success(
-                this.typeListTexts.color.successCreateMessage
-              );
+              this.toastrService.success(this.typeListTexts.color.successCreateMessage);
             },
             error: (error: any) => {
               console.error('Erro ao criar cor:', error);
@@ -528,9 +487,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
           this.colorService.update(payload.colorId, payload).subscribe({
             next: (response: any) => {
               this.reloadColors();
-              this.toastrService.success(
-                this.typeListTexts.color.successUpdateMessage
-              );
+              this.toastrService.success(this.typeListTexts.color.successUpdateMessage);
             },
             error: (error: any) => {
               console.error('Erro ao editar cor:', error);
@@ -545,11 +502,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Abre o dialog simples para FuelType
    */
-  private openSimpleDialog(
-    mode: 'create' | 'edit',
-    service: any,
-    option?: any
-  ) {
+  private openSimpleDialog(mode: 'create' | 'edit', service: any, option?: any) {
     const dialogRef = this.dialog.open(CriateElementConfirmDialogComponent, {
       width: '400px',
       data: {
@@ -576,16 +529,12 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
               };
               this.options.push(newOption);
               this.filteredOptions = [...this.options];
-              this.toastrService.success(
-                this.typeListTexts[this.listType].successCreateMessage
-              );
+              this.toastrService.success(this.typeListTexts[this.listType].successCreateMessage);
               this.itemChanged.emit();
             },
             error: (error: any) => {
               console.error('Erro ao criar:', error);
-              this.toastrService.error(
-                `Erro ao criar ${this.listType}. Tente novamente.`
-              );
+              this.toastrService.error(`Erro ao criar ${this.listType}. Tente novamente.`);
             },
           });
         } else {
@@ -601,16 +550,12 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
                 };
                 this.filteredOptions = [...this.options];
               }
-              this.toastrService.success(
-                this.typeListTexts[this.listType].successUpdateMessage
-              );
+              this.toastrService.success(this.typeListTexts[this.listType].successUpdateMessage);
               this.itemChanged.emit();
             },
             error: (error: any) => {
               console.error('Erro ao editar:', error);
-              this.toastrService.error(
-                `Erro ao editar ${this.listType}. Tente novamente.`
-              );
+              this.toastrService.error(`Erro ao editar ${this.listType}. Tente novamente.`);
             },
           });
         }
@@ -684,9 +629,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
     return new Promise((resolve, reject) => {
       this.brandService.getBrands().subscribe({
         next: (response) => {
-          const fullBrand = response.content.find(
-            (b: any) => b.brandId === brandId
-          );
+          const fullBrand = response.content.find((b: any) => b.brandId === brandId);
           if (fullBrand) {
             resolve(fullBrand);
           } else {
@@ -709,9 +652,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       if (this.selectedBrand?.id) {
         this.modelService.getModelsByBrand(this.selectedBrand.id).subscribe({
           next: (response) => {
-            const fullModel = response.content.find(
-              (m: any) => m.modelId === modelId
-            );
+            const fullModel = response.content.find((m: any) => m.modelId === modelId);
             if (fullModel) {
               resolve(fullModel);
             } else {
@@ -736,9 +677,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
     return new Promise((resolve, reject) => {
       this.colorService.getColors().subscribe({
         next: (response) => {
-          const fullColor = response.content.find(
-            (c: any) => c.colorId === colorId
-          );
+          const fullColor = response.content.find((c: any) => c.colorId === colorId);
           if (fullColor) {
             resolve(fullColor);
           } else {
@@ -764,9 +703,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    this.filteredOptions = this.options.filter((option) =>
-      option.name.toLowerCase().includes(term)
-    );
+    this.filteredOptions = this.options.filter((option) => option.name.toLowerCase().includes(term));
   }
 
   /**

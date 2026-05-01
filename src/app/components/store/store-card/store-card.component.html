@@ -1,27 +1,14 @@
-<div
-  class="store-card"
-  [class.highlighted]="isHighlighted"
-  [class.compact]="compactMode"
-  [class.inactive]="!isActive"
->
+<div class="store-card" [class.highlighted]="isHighlighted" [class.compact]="compactMode" [class.inactive]="!isActive">
   <div class="card-header">
     <div class="store-logo">
       @if (hasValidImage) {
-        <img
-          [src]="store.imageUrl"
-          [alt]="displayName"
-          class="logo-image"
-        />
+        <img [src]="store.imageUrl" [alt]="displayName" class="logo-image" />
       } @else {
         <div class="logo-placeholder">
           <mat-icon class="placeholder-icon">{{ typeIcon }}</mat-icon>
         </div>
       }
-      <div
-        class="type-badge"
-        [class.matriz]="isMainStore"
-        [class.filial]="isBranchStore"
-      >
+      <div class="type-badge" [class.matriz]="isMainStore" [class.filial]="isBranchStore">
         <mat-icon class="type-icon">{{ typeIcon }}</mat-icon>
         <span class="type-label">{{ typeLabel }}</span>
       </div>
@@ -42,17 +29,11 @@
 
   <div class="card-body">
     <div class="store-name-section">
-      <h3
-        class="store-name"
-        [matTooltip]="store.tradeName ? 'Nome Fantasia' : 'Razão Social'"
-      >
+      <h3 class="store-name" [matTooltip]="store.tradeName ? 'Nome Fantasia' : 'Razão Social'">
         {{ displayName }}
       </h3>
       @if (store.tradeName && store.tradeName !== store.name && !compactMode) {
-        <p
-          class="store-legal-name"
-          matTooltip="Razão Social"
-        >
+        <p class="store-legal-name" matTooltip="Razão Social">
           {{ store.name }}
         </p>
       }
@@ -84,21 +65,12 @@
   <div class="card-footer">
     <div class="primary-actions">
       @if (shouldShowViewBranches) {
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="onViewBranches()"
-          class="btn-view-branches"
-        >
+        <button mat-raised-button color="primary" (click)="onViewBranches()" class="btn-view-branches">
           <mat-icon>store</mat-icon>
           Ver Filiais
         </button>
       }
-      <button
-        mat-stroked-button
-        (click)="onViewDetails()"
-        class="btn-details"
-      >
+      <button mat-stroked-button (click)="onViewDetails()" class="btn-details">
         <mat-icon>info</mat-icon>
         Detalhes
       </button>
@@ -106,84 +78,56 @@
 
     <div class="secondary-actions">
       @if (compactMode) {
-        <button
-          mat-icon-button
-          [matMenuTriggerFor]="compactMenu"
-          aria-label="Ações Secundárias"
-        >
+        <button mat-icon-button [matMenuTriggerFor]="compactMenu" aria-label="Ações Secundárias">
           <mat-icon>more_horiz</mat-icon>
         </button>
         <mat-menu #compactMenu="matMenu">
           @if (canEdit) {
-            <button
-              mat-menu-item
-              (click)="onEdit()"
-            >
+            <button mat-menu-item (click)="onEdit()">
               <mat-icon>edit</mat-icon>
               <span>Editar</span>
             </button>
           }
           @if (canUploadImage) {
-            <button
-              mat-menu-item
-              (click)="onUploadImage()"
-            >
+            <button mat-menu-item (click)="onUploadImage()">
               <mat-icon>add_photo_alternate</mat-icon>
               <span>Logo</span>
             </button>
           }
           <mat-divider></mat-divider>
           @if (canManageAddress) {
-            <button
-              mat-menu-item
-              (click)="onManageAddress()"
-            >
+            <button mat-menu-item (click)="onManageAddress()">
               <mat-icon>location_on</mat-icon>
               <span>Endereços</span>
             </button>
           }
           @if (canManageOwner) {
-            <button
-              mat-menu-item
-              (click)="onManageOwner()"
-            >
+            <button mat-menu-item (click)="onManageOwner()">
               <mat-icon>person_add</mat-icon>
               <span>Definir Proprietário</span>
             </button>
           }
           @if (canManageEmployees) {
-            <button
-              mat-menu-item
-              (click)="onManageEmployees()"
-            >
+            <button mat-menu-item (click)="onManageEmployees()">
               <mat-icon>group</mat-icon>
               <span>Gerenciar Equipe</span>
             </button>
           }
           @if (canManageAuthorizations) {
-            <button
-              mat-menu-item
-              (click)="onManageAuthorizations()"
-            >
+            <button mat-menu-item (click)="onManageAuthorizations()">
               <mat-icon>security</mat-icon>
               <span>Autorizações</span>
             </button>
           }
           <mat-divider></mat-divider>
           @if (canManageFiscal) {
-            <button
-              mat-menu-item
-              (click)="onManageFiscal()"
-            >
+            <button mat-menu-item (click)="onManageFiscal()">
               <mat-icon>receipt_long</mat-icon>
               <span>Configuração Fiscal</span>
             </button>
           }
           @if (canDelete) {
-            <button
-              mat-menu-item
-              (click)="onDelete()"
-            >
+            <button mat-menu-item (click)="onDelete()">
               <mat-icon color="warn">delete</mat-icon>
               <span>Excluir</span>
             </button>
@@ -191,22 +135,12 @@
         </mat-menu>
       } @else {
         @if (canEdit) {
-          <button
-            mat-icon-button
-            (click)="onEdit()"
-            matTooltip="Editar loja"
-            class="action-btn edit-btn"
-          >
+          <button mat-icon-button (click)="onEdit()" matTooltip="Editar loja" class="action-btn edit-btn">
             <mat-icon>edit</mat-icon>
           </button>
         }
         @if (canUploadImage) {
-          <button
-            mat-icon-button
-            (click)="onUploadImage()"
-            matTooltip="Alterar logo"
-            class="action-btn upload-btn"
-          >
+          <button mat-icon-button (click)="onUploadImage()" matTooltip="Alterar logo" class="action-btn upload-btn">
             <mat-icon>add_photo_alternate</mat-icon>
           </button>
         }
@@ -261,12 +195,7 @@
           </button>
         }
         @if (canDelete) {
-          <button
-            mat-icon-button
-            (click)="onDelete()"
-            matTooltip="Excluir loja"
-            class="action-btn delete-btn"
-          >
+          <button mat-icon-button (click)="onDelete()" matTooltip="Excluir loja" class="action-btn delete-btn">
             <mat-icon>delete</mat-icon>
           </button>
         }

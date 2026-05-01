@@ -42,15 +42,9 @@ export interface Person {
   hasUser?: boolean;
 }
 
-export type CreateNaturalPerson = Omit<
-  Person,
-  'personId' | 'cnpj' | 'ie' | 'crt'
->;
+export type CreateNaturalPerson = Omit<Person, 'personId' | 'cnpj' | 'ie' | 'crt'>;
 
-export type CreateLegalEntity = Omit<
-  Person,
-  'personId' | 'cpf' | 'rg' | 'rgIssuer'
->;
+export type CreateLegalEntity = Omit<Person, 'personId' | 'cpf' | 'rg' | 'rgIssuer'>;
 
 export interface Address {
   street: string;

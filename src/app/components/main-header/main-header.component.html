@@ -1,8 +1,5 @@
 <mat-toolbar>
-  <button
-    mat-icon-button
-    (click)="collapsedEvent.emit()"
-  >
+  <button mat-icon-button (click)="collapsedEvent.emit()">
     <mat-icon>menu</mat-icon>
   </button>
   <span>C.A.R.</span>
@@ -26,10 +23,7 @@
     </mat-select-trigger>
 
     @if (isCarAdmin || canReadStoreOthers) {
-      <mat-option
-        value="ALL"
-        class="custom-store-option global-option"
-      >
+      <mat-option value="ALL" class="custom-store-option global-option">
         <div class="option-content-container">
           <mat-icon color="accent">public</mat-icon>
           <span class="option-title">
@@ -39,10 +33,7 @@
       </mat-option>
 
       @for (store of stores; track store.storeId) {
-        <mat-option
-          [value]="store.storeId"
-          class="custom-store-option"
-        >
+        <mat-option [value]="store.storeId" class="custom-store-option">
           <div class="option-content-container">
             <mat-icon color="primary">store</mat-icon>
             <span class="option-title">
@@ -52,10 +43,7 @@
         </mat-option>
       }
     } @else {
-      <mat-option
-        [value]="selectedStoreId"
-        class="custom-store-option"
-      >
+      <mat-option [value]="selectedStoreId" class="custom-store-option">
         <div class="option-content-container">
           <mat-icon color="primary">store</mat-icon>
           <span class="option-title">{{ storeName() || 'Filial' }}</span>

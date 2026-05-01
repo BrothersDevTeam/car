@@ -13,14 +13,7 @@ import { GenericTableComponent } from '@components/generic-table/generic-table.c
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { UnsavedChangesDialogComponent } from '@components/dialogs/unsaved-changes-dialog/unsaved-changes-dialog.component';
-import {
-  Subject,
-  Subscription,
-  catchError,
-  debounceTime,
-  of,
-  Observable,
-} from 'rxjs';
+import { Subject, Subscription, catchError, debounceTime, of, Observable } from 'rxjs';
 import { EmptyStateComponent } from '@components/empty-state/empty-state.component';
 
 import { FormsModule } from '@angular/forms';
@@ -129,16 +122,14 @@ export class VehicleComponent implements CanComponentDeactivate {
           icon: 'input',
           color: 'primary',
           action: (row) => this.viewNfe(row, '0'),
-          hidden: (row) =>
-            !row.nfeHistory?.some((n) => n.nfeTipoDocumento === '0'),
+          hidden: (row) => !row.nfeHistory?.some((n) => n.nfeTipoDocumento === '0'),
         },
         {
           label: 'NFe de Saída',
           icon: 'output',
           color: 'accent',
           action: (row) => this.viewNfe(row, '1'),
-          hidden: (row) =>
-            !row.nfeHistory?.some((n) => n.nfeTipoDocumento === '1'),
+          hidden: (row) => !row.nfeHistory?.some((n) => n.nfeTipoDocumento === '1'),
         },
       ],
     },
@@ -151,8 +142,7 @@ export class VehicleComponent implements CanComponentDeactivate {
           icon: 'receipt_long',
           color: 'primary',
           action: (row) => this.gerarNfeCompra(row),
-          hidden: (row) =>
-            !!row.nfeHistory?.some((nfe) => nfe.nfeTipoDocumento === '0'),
+          hidden: (row) => !!row.nfeHistory?.some((nfe) => nfe.nfeTipoDocumento === '0'),
         },
       ],
       alertConfig: {
@@ -181,27 +171,21 @@ export class VehicleComponent implements CanComponentDeactivate {
   openInfo = signal(false);
 
   // Configurações dinâmicas para o Empty State baseadas no status do veículo
-  private readonly emptyStateConfigs: Record<
-    string,
-    { icon: string; title: string; description: string }
-  > = {
+  private readonly emptyStateConfigs: Record<string, { icon: string; title: string; description: string }> = {
     TODOS: {
       icon: 'no_sim',
       title: 'Nenhum veículo no estoque',
-      description:
-        'Sua lista de veículos aparecerá aqui assim que você adicionar novos itens ao estoque.',
+      description: 'Sua lista de veículos aparecerá aqui assim que você adicionar novos itens ao estoque.',
     },
     DISPONIVEL: {
       icon: 'check_circle',
       title: 'Nenhum veículo disponível',
-      description:
-        'Todos os seus veículos foram vendidos ou o estoque está vazio.',
+      description: 'Todos os seus veículos foram vendidos ou o estoque está vazio.',
     },
     VENDIDO: {
       icon: 'sell',
       title: 'Nenhum veículo vendido',
-      description:
-        'O histórico de veículos comercializados aparecerá neste filtro.',
+      description: 'O histórico de veículos comercializados aparecerá neste filtro.',
     },
   };
 
@@ -210,17 +194,11 @@ export class VehicleComponent implements CanComponentDeactivate {
   }
 
   get emptyStateTitle(): string {
-    return (
-      this.emptyStateConfigs[this.selectedStatus]?.title ||
-      'Nenhum veículo encontrado'
-    );
+    return this.emptyStateConfigs[this.selectedStatus]?.title || 'Nenhum veículo encontrado';
   }
 
   get emptyStateDescription(): string {
-    return (
-      this.emptyStateConfigs[this.selectedStatus]?.description ||
-      'Sua lista de veículos aparecerá aqui.'
-    );
+    return this.emptyStateConfigs[this.selectedStatus]?.description || 'Sua lista de veículos aparecerá aqui.';
   }
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -232,7 +210,7 @@ export class VehicleComponent implements CanComponentDeactivate {
     private actionsService: ActionsService,
     private storeContextService: StoreContextService,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
   ) {
     // Inscrever-se nas mudanças do cache
     this.setupCacheSubscription();
@@ -241,22 +219,20 @@ export class VehicleComponent implements CanComponentDeactivate {
 
   ngOnInit() {
     this.subscription.add(
-      this.actionsService.sidebarClick$.subscribe(
-        (targetRoute: string | undefined) => {
-          // Se a gaveta estiver aberta...
-          if (this.openForm() || this.openInfo()) {
-            const currentRoute = '/vehicle';
+      this.actionsService.sidebarClick$.subscribe((targetRoute: string | undefined) => {
+        // Se a gaveta estiver aberta...
+        if (this.openForm() || this.openInfo()) {
+          const currentRoute = '/vehicle';
 
-            // Se o clique foi em um menu que aponta para OUTRA rota,
-            // não fazemos nada aqui e deixamos o unsavedChangesGuard agir.
-            if (targetRoute && targetRoute !== currentRoute) {
-              return;
-            }
-
-            this.handleConfirmationCloseDrawer();
+          // Se o clique foi em um menu que aponta para OUTRA rota,
+          // não fazemos nada aqui e deixamos o unsavedChangesGuard agir.
+          if (targetRoute && targetRoute !== currentRoute) {
+            return;
           }
+
+          this.handleConfirmationCloseDrawer();
         }
-      )
+      }),
     );
 
     // Contexto Global de Loja
@@ -264,12 +240,8 @@ export class VehicleComponent implements CanComponentDeactivate {
       this.storeContextService.currentStoreId$.subscribe((storeId) => {
         this.selectedStoreId = storeId;
         this.vehicleService.clearCache(); // Limpa cache sempre que a loja mudar (Global ou Específica)
-        this.loadVehicleList(
-          0,
-          this.paginationRequestConfig.pageSize,
-          this.searchValue
-        );
-      })
+        this.loadVehicleList(0, this.paginationRequestConfig.pageSize, this.searchValue);
+      }),
     );
   }
 
@@ -284,13 +256,11 @@ export class VehicleComponent implements CanComponentDeactivate {
 
   // Método para configurar a inscrição do cache
   private setupCacheSubscription() {
-    this.cacheSubscription = this.vehicleService.cacheUpdated.subscribe(
-      (updatedCache) => {
-        if (updatedCache) {
-          this.vehiclePaginatedList = updatedCache;
-        }
+    this.cacheSubscription = this.vehicleService.cacheUpdated.subscribe((updatedCache) => {
+      if (updatedCache) {
+        this.vehiclePaginatedList = updatedCache;
       }
-    );
+    });
   }
 
   // Configura o debounce de 500ms para a busca
@@ -298,15 +268,15 @@ export class VehicleComponent implements CanComponentDeactivate {
     this.subscription.add(
       this.searchSubject
         .pipe(
-          debounceTime(500) // Aguarda 500ms após o usuário parar de digitar
+          debounceTime(500), // Aguarda 500ms após o usuário parar de digitar
         )
         .subscribe((searchValue) => {
           this.loadVehicleList(
             0, // Sempre volta para a primeira página ao buscar
             this.paginationRequestConfig.pageSize,
-            searchValue
+            searchValue,
           );
-        })
+        }),
     );
   }
 
@@ -356,7 +326,7 @@ export class VehicleComponent implements CanComponentDeactivate {
           console.error('Erro ao carregar a lista de veículos:', err);
           this.toastr.error('Erro ao buscar dados da tabela de veículos');
           return of(null as unknown as PaginationResponse<VehicleList>);
-        })
+        }),
       )
       .subscribe((response) => {
         this.vehicleListLoading.set(false);
@@ -412,19 +382,12 @@ export class VehicleComponent implements CanComponentDeactivate {
 
   onStatusChange(status: any) {
     this.selectedStatus = status;
-    this.loadVehicleList(
-      0,
-      this.paginationRequestConfig.pageSize,
-      this.searchValue
-    );
+    this.loadVehicleList(0, this.paginationRequestConfig.pageSize, this.searchValue);
   }
 
   clearSearch() {
     this.searchValue = '';
-    this.loadVehicleList(
-      this.paginationRequestConfig.pageIndex,
-      this.paginationRequestConfig.pageSize
-    );
+    this.loadVehicleList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
   }
 
   /**
@@ -435,11 +398,7 @@ export class VehicleComponent implements CanComponentDeactivate {
   handleEdit(vehicle: VehicleList | Vehicle | VehicleForm) {
     if (!this.storeContextService.validateStoreSelection()) return;
 
-    if (
-      'vehicleId' in vehicle &&
-      !('chassis' in vehicle) &&
-      !('buyerDisplay' in vehicle)
-    ) {
+    if ('vehicleId' in vehicle && !('chassis' in vehicle) && !('buyerDisplay' in vehicle)) {
       // É VehicleList (veio da tabela), precisa buscar o completo
       this.vehicleService.getById(vehicle.vehicleId!).subscribe({
         next: (fullVehicle) => {
@@ -447,18 +406,13 @@ export class VehicleComponent implements CanComponentDeactivate {
           this.openInfo.set(false);
           this.openForm.set(true);
         },
-        error: (err) =>
-          this.toastr.error('Erro ao carregar veículo para edição'),
+        error: (err) => this.toastr.error('Erro ao carregar veículo para edição'),
       });
       return;
     }
 
     // Se for Vehicle (tem propriedade owner do tipo Person), converte
-    if (
-      'owner' in vehicle &&
-      vehicle.owner &&
-      typeof vehicle.owner === 'object'
-    ) {
+    if ('owner' in vehicle && vehicle.owner && typeof vehicle.owner === 'object') {
       this.selectedVehicle = this.vehicleToForm(vehicle as Vehicle);
     } else {
       // Já é VehicleForm ou já tem o formato correto
@@ -470,10 +424,7 @@ export class VehicleComponent implements CanComponentDeactivate {
   }
 
   onFormSubmitted() {
-    this.loadVehicleList(
-      this.paginationRequestConfig.pageIndex,
-      this.paginationRequestConfig.pageSize
-    );
+    this.loadVehicleList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
     this.openForm.set(false);
     this.openInfo.set(false);
     this.selectedVehicle = null;
@@ -483,17 +434,14 @@ export class VehicleComponent implements CanComponentDeactivate {
   handleDelete(vehicle: VehicleList) {
     if (!this.storeContextService.validateStoreSelection()) return;
 
-    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Confirmar exclusão',
-          message: `Deseja realmente excluir o veículo <strong>${vehicle.plate}</strong>?`,
-          confirmText: 'Sim, excluir',
-          cancelText: 'Cancelar',
-        },
-      }
-    );
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Confirmar exclusão',
+        message: `Deseja realmente excluir o veículo <strong>${vehicle.plate}</strong>?`,
+        confirmText: 'Sim, excluir',
+        cancelText: 'Cancelar',
+      },
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
@@ -506,10 +454,7 @@ export class VehicleComponent implements CanComponentDeactivate {
     this.vehicleService.delete(vehicleId).subscribe({
       next: (response) => {
         this.toastr.success('Veículo deletado com sucesso!');
-        this.loadVehicleList(
-          this.paginationRequestConfig.pageIndex,
-          this.paginationRequestConfig.pageSize
-        );
+        this.loadVehicleList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
       },
       error: (err) => {
         console.error('Erro ao deletar veículo:', err);
@@ -528,7 +473,7 @@ export class VehicleComponent implements CanComponentDeactivate {
     } else if (nfe) {
       this.toastr.info(
         'DANFE não disponível. A NFe está em rascunho ou processamento. Redirecionando para a lista de NFes...',
-        'Info'
+        'Info',
       );
       this.router.navigate(['/nfe']);
     } else {
@@ -545,7 +490,7 @@ export class VehicleComponent implements CanComponentDeactivate {
       this.snackBar.open(
         'Resolva as pendências antes de gerar a NFe de Entrada. Verifique o ícone de alerta (!).',
         'OK',
-        { duration: 5000, panelClass: ['warn-snackbar'] }
+        { duration: 5000, panelClass: ['warn-snackbar'] },
       );
       return;
     }
@@ -559,10 +504,7 @@ export class VehicleComponent implements CanComponentDeactivate {
       error: (err: any) => {
         console.error('Erro ao gerar NFe:', err);
         // Tenta extrair a mensagem detalhada da API (errorMessage ou message)
-        const msg =
-          err.error?.errorMessage ||
-          err.error?.message ||
-          'Erro ao gerar rascunho de NFe';
+        const msg = err.error?.errorMessage || err.error?.message || 'Erro ao gerar rascunho de NFe';
         this.toastr.error(msg, 'Erro ao gerar rascunho de NFe');
       },
     });
@@ -646,21 +588,16 @@ export class VehicleComponent implements CanComponentDeactivate {
     if (!vehicle.vehicleType) errors.push('Tipo');
     if (!vehicle.species) errors.push('Espécie');
     if (!vehicle.category) errors.push('Categoria');
-    if (!vehicle.fuelTypes || vehicle.fuelTypes.length === 0)
-      errors.push('Combustível');
+    if (!vehicle.fuelTypes || vehicle.fuelTypes.length === 0) errors.push('Combustível');
 
     // Dados de Compra (necessários para NFe de Entrada)
     // Só valida se não tiver NFe de entrada autorizada
-    const temNfeEntrada = vehicle.nfeHistory?.some(
-      (n) => n.nfeTipoDocumento === '0' && n.nfeStatus === 'autorizado'
-    );
+    const temNfeEntrada = vehicle.nfeHistory?.some((n) => n.nfeTipoDocumento === '0' && n.nfeStatus === 'autorizado');
     if (!temNfeEntrada) {
       if (!vehicle.supplierId) errors.push('Fornecedor');
-      else if (vehicle.hasSupplierAddress === false)
-        errors.push('Endereço do Fornecedor');
+      else if (vehicle.hasSupplierAddress === false) errors.push('Endereço do Fornecedor');
 
-      if (!vehicle.valorCompra || vehicle.valorCompra === '0')
-        errors.push('Valor Compra');
+      if (!vehicle.valorCompra || vehicle.valorCompra === '0') errors.push('Valor Compra');
       if (!vehicle.dataCompra) errors.push('Data Compra');
     }
 

@@ -11,9 +11,7 @@ export class NfeService {
   private cache: PaginationResponse<Nfe> | null = null;
 
   // Subject para notificar mudanças no cache
-  private cacheUpdated$ = new BehaviorSubject<PaginationResponse<Nfe> | null>(
-    null
-  );
+  private cacheUpdated$ = new BehaviorSubject<PaginationResponse<Nfe> | null>(null);
 
   private readonly apiUrl: string = '/api/nfes';
 
@@ -27,7 +25,7 @@ export class NfeService {
   getPaginatedData(
     pageIndex: number,
     pageSize: number,
-    searchParams?: { search?: string; storeId?: string; nfeStatus?: string }
+    searchParams?: { search?: string; storeId?: string; nfeStatus?: string },
   ): Observable<PaginationResponse<Nfe>> {
     const hasSearchParams =
       searchParams &&
@@ -65,7 +63,7 @@ export class NfeService {
         } else {
           response.page.totalElements = response.content.length;
         }
-      })
+      }),
     );
   }
 
@@ -82,7 +80,7 @@ export class NfeService {
       tap((response: string) => {
         console.log('Formulário enviado com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 
@@ -91,7 +89,7 @@ export class NfeService {
       tap((response: string) => {
         console.log('Formulário enviado com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 
@@ -101,7 +99,7 @@ export class NfeService {
       tap((response: string) => {
         console.log('NFe cancelada com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 
@@ -110,7 +108,7 @@ export class NfeService {
       tap((response) => {
         console.log('Ordem de envio solicitada com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 

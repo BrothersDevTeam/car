@@ -21,7 +21,7 @@ export class IssuerService {
       first(),
       tap((response) => {
         this.cache = response;
-      })
+      }),
     );
   }
 
@@ -30,7 +30,7 @@ export class IssuerService {
       tap((response: string) => {
         console.log('Formulário enviado com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 
@@ -39,7 +39,7 @@ export class IssuerService {
       tap((response: string) => {
         console.log('Formulário enviado com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 
@@ -48,7 +48,7 @@ export class IssuerService {
       tap((response: string) => {
         console.log('Emissor deletado com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 

@@ -1,11 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -52,7 +47,7 @@ export class ColorFormDialogComponent implements OnInit {
     private fb: FormBuilder,
     private storeContextService: StoreContextService,
     public dialogRef: MatDialogRef<ColorFormDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ColorFormDialogData
+    @Inject(MAT_DIALOG_DATA) public data: ColorFormDialogData,
   ) {}
 
   ngOnInit(): void {
@@ -67,14 +62,7 @@ export class ColorFormDialogComponent implements OnInit {
 
   private initForm(): void {
     this.colorForm = this.fb.group({
-      name: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(2),
-          Validators.maxLength(100),
-        ],
-      ],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     });
   }
 

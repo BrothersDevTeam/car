@@ -20,14 +20,7 @@ import {
 @Component({
   selector: 'app-store-card',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTooltipModule,
-    MatMenuModule,
-    MatDividerModule,
-  ],
+  imports: [CommonModule, MatIconModule, MatButtonModule, MatTooltipModule, MatMenuModule, MatDividerModule],
   templateUrl: './store-card.component.html',
   styleUrl: './store-card.component.scss',
 })
@@ -89,19 +82,14 @@ export class StoreCardComponent {
     if (!this.store.cnpj) return '';
     const cnpj = this.store.cnpj.replace(/\D/g, '');
     if (cnpj.length !== 14) return this.store.cnpj;
-    return cnpj.replace(
-      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
-      '$1.$2.$3/$4-$5'
-    );
+    return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
   }
 
   get formattedPhone(): string {
     if (!this.store.phone) return '';
     const phone = this.store.phone.replace(/\D/g, '');
-    if (phone.length === 11)
-      return phone.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
-    if (phone.length === 10)
-      return phone.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
+    if (phone.length === 11) return phone.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+    if (phone.length === 10) return phone.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
     return this.store.phone;
   }
 

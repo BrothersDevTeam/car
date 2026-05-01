@@ -14,7 +14,7 @@ export class StoreContextService {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly toastr: ToastrService
+    private readonly toastr: ToastrService,
   ) {
     const savedStoreId = localStorage.getItem(this.STORE_KEY);
     const defaultStoreId = this.authService.getStoreId();
@@ -82,7 +82,7 @@ export class StoreContextService {
     if (!this.currentStoreId) {
       this.toastr.warning(
         'Por favor, selecione uma loja específica no topo da página para realizar esta ação.',
-        'Loja Não Selecionada'
+        'Loja Não Selecionada',
       );
       return false;
     }

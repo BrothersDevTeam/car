@@ -17,12 +17,7 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -44,12 +39,7 @@ import { PrimaryInputComponent } from '@components/primary-input/primary-input.c
 import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
-import {
-  VehicleForm,
-  SPECIES_OPTIONS,
-  CATEGORY_OPTIONS,
-  VEHICLE_TYPE_OPTIONS,
-} from '@interfaces/vehicle';
+import { VehicleForm, SPECIES_OPTIONS, CATEGORY_OPTIONS, VEHICLE_TYPE_OPTIONS } from '@interfaces/vehicle';
 import { extractErrorMessage } from '@utils/error-utils';
 import { FuelTypes, FuelTypesLabels } from '../../../enums/fuelTypes';
 
@@ -212,7 +202,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     private fipeService: FipeService, // Injected FipeService
     private colorService: ColorService,
     private personService: PersonService,
-    private toastrService: ToastrService
+    private toastrService: ToastrService,
   ) {}
 
   hasUnsavedChanges(): boolean {
@@ -238,12 +228,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   saveLocalDraft(silent: boolean = false, name?: string): void {
     const draftName = name || `Veículo em ${new Date().toLocaleString()}`;
 
-    this.formDraftService.saveDraft(
-      this.FORM_TYPE,
-      this.form.value,
-      this.dataForm?.vehicleId || undefined,
-      draftName
-    );
+    this.formDraftService.saveDraft(this.FORM_TYPE, this.form.value, this.dataForm?.vehicleId || undefined, draftName);
 
     this.initialFormValue = JSON.stringify(this.form.value);
     this.actionsService.hasFormChanges.set(false);
@@ -255,9 +240,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private checkForDrafts() {
-    this.availableDrafts = this.formDraftService.getDraftsByType(
-      this.FORM_TYPE
-    );
+    this.availableDrafts = this.formDraftService.getDraftsByType(this.FORM_TYPE);
   }
 
   handleDraftSelection(draft: FormDraft | null) {
@@ -359,9 +342,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
           // Se estamos editando, tenta selecionar o modelo correto
           if (this.dataForm?.model) {
-            const selectedModel = this.models.find(
-              (m) => m.name === this.dataForm!.model
-            );
+            const selectedModel = this.models.find((m) => m.name === this.dataForm!.model);
             if (selectedModel && !this.modelControl.value?.id) {
               this.modelControl.patchValue({
                 id: selectedModel.id,
@@ -416,45 +397,35 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
     if (brandId && modelId && yearId) {
       this.loadingDetails.set(true);
-      this.fipeService
-        .getVehicleDetails(fipeType, brandId, modelId, yearId)
-        .subscribe({
-          next: (details) => {
-            this.loadingDetails.set(false);
+      this.fipeService.getVehicleDetails(fipeType, brandId, modelId, yearId).subscribe({
+        next: (details) => {
+          this.loadingDetails.set(false);
 
-            // Preenche automaticamente os campos com dados da FIPE
-            // Se o ano for 32000, considera como Zero KM (usa o ano atual)
-            const fipeYear =
-              details.AnoModelo === 32000
-                ? new Date().getFullYear()
-                : details.AnoModelo;
+          // Preenche automaticamente os campos com dados da FIPE
+          // Se o ano for 32000, considera como Zero KM (usa o ano atual)
+          const fipeYear = details.AnoModelo === 32000 ? new Date().getFullYear() : details.AnoModelo;
 
-            // Extração de cilindrada do modelo (ex: "GOL 1.0" -> "1.0" ou "2.0")
-            // Procura por padrão número.número (ex: 1.0, 2.0, 1.6)
-            const engineDisplacementMatch = details.Modelo.match(/(\d+\.\d+)/);
-            const extractedDisplacement = engineDisplacementMatch
-              ? engineDisplacementMatch[0]
-              : '';
+          // Extração de cilindrada do modelo (ex: "GOL 1.0" -> "1.0" ou "2.0")
+          // Procura por padrão número.número (ex: 1.0, 2.0, 1.6)
+          const engineDisplacementMatch = details.Modelo.match(/(\d+\.\d+)/);
+          const extractedDisplacement = engineDisplacementMatch ? engineDisplacementMatch[0] : '';
 
-            this.form.patchValue({
-              vehicleYear: fipeYear,
-              modelYear: fipeYear, // FIPE geralmente retorna apenas AnoModelo
-              engineDisplacement: extractedDisplacement,
-              fuelTypes: this.mapFuelTypeToBackend(details.Combustivel),
-            });
+          this.form.patchValue({
+            vehicleYear: fipeYear,
+            modelYear: fipeYear, // FIPE geralmente retorna apenas AnoModelo
+            engineDisplacement: extractedDisplacement,
+            fuelTypes: this.mapFuelTypeToBackend(details.Combustivel),
+          });
 
-            // Opcional: Se quiser salvar o valor da tabela FIPE em algum lugar, pode fazer aqui
-            console.log('Detalhes FIPE:', details);
-            this.toastrService.info(
-              `Valor tabela FIPE: ${details.Valor}`,
-              'Dados carregados'
-            );
-          },
-          error: (error) => {
-            console.error('Erro ao carregar detalhes FIPE:', error);
-            this.loadingDetails.set(false);
-          },
-        });
+          // Opcional: Se quiser salvar o valor da tabela FIPE em algum lugar, pode fazer aqui
+          console.log('Detalhes FIPE:', details);
+          this.toastrService.info(`Valor tabela FIPE: ${details.Valor}`, 'Dados carregados');
+        },
+        error: (error) => {
+          console.error('Erro ao carregar detalhes FIPE:', error);
+          this.loadingDetails.set(false);
+        },
+      });
     }
   }
 
@@ -537,7 +508,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
         // Recarrega marcas com o novo tipo
         this.loadBrands();
-      })
+      }),
     );
 
     // Cascata: Marca -> Modelo
@@ -560,7 +531,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
             this.selectModelDisabled.set(true);
             this.selectYearDisabled.set(true);
           }
-        })
+        }),
     );
 
     // Cascata: Modelo -> Ano
@@ -577,7 +548,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
             this.fipeYearControl.reset();
             this.selectYearDisabled.set(true);
           }
-        })
+        }),
     );
 
     // Cascata: Ano -> Detalhes
@@ -588,7 +559,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           if (year && year.id) {
             this.loadVehicleDetails();
           }
-        })
+        }),
     );
   }
 
@@ -611,12 +582,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
    */
   private tryFillFormOnEdit(): void {
     // Verifica se tem dataForm e se brands, colors e persons já foram carregados
-    if (
-      !this.dataForm ||
-      !this.brandsLoaded ||
-      !this.colorsLoaded ||
-      !this.personsLoaded
-    ) {
+    if (!this.dataForm || !this.brandsLoaded || !this.colorsLoaded || !this.personsLoaded) {
       console.log('tryFillFormOnEdit - aguardando carregamento:', {
         hasDataForm: !!this.dataForm,
         brandsLoaded: this.brandsLoaded,
@@ -628,27 +594,19 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
     // Se já preencheu uma vez, não preenche novamente
     if (this.formFilled) {
-      console.log(
-        'tryFillFormOnEdit - formulário já foi preenchido, ignorando'
-      );
+      console.log('tryFillFormOnEdit - formulário já foi preenchido, ignorando');
       return;
     }
 
     // Para edição, busca a marca pelo nome
     // FIPE retorna nomes em maiúsculo ou formato específico, pode precisar de normalização de comparação
-    const selectedBrand = this.brands.find(
-      (b) => b.name.toLowerCase() === (this.dataForm!.brand || '').toLowerCase()
-    );
+    const selectedBrand = this.brands.find((b) => b.name.toLowerCase() === (this.dataForm!.brand || '').toLowerCase());
 
     // Para edição, busca a cor pelo nome
-    const selectedColor = this.colors.find(
-      (c) => c.name === (this.dataForm!.color || '')
-    );
+    const selectedColor = this.colors.find((c) => c.name === (this.dataForm!.color || ''));
 
     // Para edição, busca o proprietário pelo ID
-    const selectedOwner = this.dataForm!.owner
-      ? this.persons.find((p) => p.id === this.dataForm!.owner)
-      : null;
+    const selectedOwner = this.dataForm!.owner ? this.persons.find((p) => p.id === this.dataForm!.owner) : null;
 
     // Para edição, busca o fornecedor pelo ID
     const selectedSupplier = this.dataForm!.supplierId
@@ -659,21 +617,15 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     this.isFillingForm = true;
     this.form.patchValue({
       plate: this.dataForm!.plate || '',
-      owner: selectedOwner
-        ? { id: selectedOwner.id, name: selectedOwner.name }
-        : { id: '', name: '' },
-      supplier: selectedSupplier
-        ? { id: selectedSupplier.id, name: selectedSupplier.name }
-        : { id: '', name: '' },
+      owner: selectedOwner ? { id: selectedOwner.id, name: selectedOwner.name } : { id: '', name: '' },
+      supplier: selectedSupplier ? { id: selectedSupplier.id, name: selectedSupplier.name } : { id: '', name: '' },
       brand: selectedBrand
         ? { id: selectedBrand.id, name: selectedBrand.name }
         : { id: '', name: this.dataForm!.brand || '' }, // Fallback se não encontrar ID
       model: { id: '', name: this.dataForm!.model || '' },
       vehicleYear: this.dataForm!.vehicleYear || '',
       modelYear: this.dataForm!.modelYear || '',
-      color: selectedColor
-        ? { id: selectedColor.id, name: selectedColor.name }
-        : { id: '', name: '' },
+      color: selectedColor ? { id: selectedColor.id, name: selectedColor.name } : { id: '', name: '' },
       chassis: this.dataForm!.chassis || '',
       renavam: this.dataForm!.renavam || '',
       doors: this.dataForm!.doors || '',
@@ -691,12 +643,8 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       dataCompra: this.dataForm!.dataCompra || '',
       valorVenda: this.dataForm!.valorVenda || '',
       observation: this.dataForm!.observation || '',
-      entryDate: this.dataForm!.entryDate
-        ? this.dataForm!.entryDate.toString().substring(0, 16)
-        : '',
-      exitDate: this.dataForm!.exitDate
-        ? this.dataForm!.exitDate.toString().substring(0, 16)
-        : '',
+      entryDate: this.dataForm!.entryDate ? this.dataForm!.entryDate.toString().substring(0, 16) : '',
+      exitDate: this.dataForm!.exitDate ? this.dataForm!.exitDate.toString().substring(0, 16) : '',
     });
     this.isFillingForm = false;
 
@@ -718,9 +666,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
           // Após carregar os modelos, busca o modelo selecionado
           const selectedModel = this.models.find(
-            (m) =>
-              m.name.toLowerCase() ===
-              (this.dataForm!.model || '').toLowerCase()
+            (m) => m.name.toLowerCase() === (this.dataForm!.model || '').toLowerCase(),
           );
 
           if (selectedModel) {
@@ -744,10 +690,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     if (event instanceof KeyboardEvent) {
       event.preventDefault();
 
-      if (
-        this.form.valid &&
-        document.activeElement === this.submitButton.nativeElement
-      ) {
+      if (this.form.valid && document.activeElement === this.submitButton.nativeElement) {
         this.onSubmit();
       }
 
@@ -769,9 +712,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
       if (controls['plate'].invalid) invalidFields.push('Placa');
 
-      this.toastrService.warning(
-        `Campos obrigatórios pendentes: ${invalidFields.join(', ')}`
-      );
+      this.toastrService.warning(`Campos obrigatórios pendentes: ${invalidFields.join(', ')}`);
 
       // Se houver erro na aba "Veículo", volta para ela (índice 0)
       const hasVehicleErrors = controls['plate'].invalid;
@@ -822,42 +763,33 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
     // Remove campos vazios, EXCETO color que pode ser string vazia
     Object.keys(payload).forEach((key) => {
-      if (
-        payload[key] === '' ||
-        payload[key] === null ||
-        payload[key] === undefined
-      ) {
+      if (payload[key] === '' || payload[key] === null || payload[key] === undefined) {
         delete payload[key];
       }
     });
 
     // Cria ou atualiza o veículo
     if (this.dataForm?.vehicleId) {
-      this.vehicleService
-        .update({ ...payload, vehicleId: this.dataForm.vehicleId })
-        .subscribe({
-          next: () => {
-            this.toastrService.success('Veículo atualizado com sucesso');
+      this.vehicleService.update({ ...payload, vehicleId: this.dataForm.vehicleId }).subscribe({
+        next: () => {
+          this.toastrService.success('Veículo atualizado com sucesso');
 
-            // Limpa rascunhos
-            if (this.selectedDraft) {
-              this.formDraftService.removeDraftById(this.selectedDraft.id);
-            }
-            this.formDraftService.removeDraft(
-              this.FORM_TYPE,
-              this.dataForm?.vehicleId
-            );
+          // Limpa rascunhos
+          if (this.selectedDraft) {
+            this.formDraftService.removeDraftById(this.selectedDraft.id);
+          }
+          this.formDraftService.removeDraft(this.FORM_TYPE, this.dataForm?.vehicleId);
 
-            this.initialFormValue = JSON.stringify(this.form.value);
-            this.actionsService.hasFormChanges.set(false);
-            this.formSubmitted.emit();
-          },
-          error: (error) => {
-            console.error('Erro ao atualizar:', error);
-            const msg = extractErrorMessage(error, 'Erro ao atualizar veículo');
-            this.toastrService.error(msg);
-          },
-        });
+          this.initialFormValue = JSON.stringify(this.form.value);
+          this.actionsService.hasFormChanges.set(false);
+          this.formSubmitted.emit();
+        },
+        error: (error) => {
+          console.error('Erro ao atualizar:', error);
+          const msg = extractErrorMessage(error, 'Erro ao atualizar veículo');
+          this.toastrService.error(msg);
+        },
+      });
     } else {
       this.vehicleService.create(payload).subscribe({
         next: () => {
@@ -886,20 +818,16 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   openDialog() {
-    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Confirmar Deleção',
-          message:
-            'Você tem certeza que deseja <strong>deletar</strong> este registro?',
-          confirmText: 'Sim, Deletar',
-          cancelText: 'Não',
-          icon: 'delete_forever',
-          type: 'danger',
-        },
-      }
-    );
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Confirmar Deleção',
+        message: 'Você tem certeza que deseja <strong>deletar</strong> este registro?',
+        confirmText: 'Sim, Deletar',
+        cancelText: 'Não',
+        icon: 'delete_forever',
+        type: 'danger',
+      },
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {

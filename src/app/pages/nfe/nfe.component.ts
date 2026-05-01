@@ -169,39 +169,31 @@ export class NfeComponent {
   selectedTabIndex = signal(0); // 0 = Entrada, 1 = Saída
 
   // Configurações dinâmicas para o Empty State baseadas no status selecionado
-  private readonly emptyStateConfigs: Record<
-    string,
-    { icon: string; title: string; description: string }
-  > = {
+  private readonly emptyStateConfigs: Record<string, { icon: string; title: string; description: string }> = {
     TODOS: {
       icon: 'file_present',
       title: 'Nenhuma NFe encontrada',
-      description:
-        'Seu histórico de Notas Fiscais Eletrônicas aparecerá aqui após a sincronização ou emissão.',
+      description: 'Seu histórico de Notas Fiscais Eletrônicas aparecerá aqui após a sincronização ou emissão.',
     },
     rascunho: {
       icon: 'edit_note',
       title: 'Nenhuma NFe em Digitação',
-      description:
-        'Você não possui Notas Fiscais em fase de digitação no momento.',
+      description: 'Você não possui Notas Fiscais em fase de digitação no momento.',
     },
     processando: {
       icon: 'sync',
       title: 'Nada sendo processado',
-      description:
-        'Nenhuma Nota Fiscal está em fila de processamento no momento.',
+      description: 'Nenhuma Nota Fiscal está em fila de processamento no momento.',
     },
     autorizado: {
       icon: 'check_circle',
       title: 'Nenhuma NFe autorizada',
-      description:
-        'As notas que forem aprovadas pela SEFAZ serão listadas aqui.',
+      description: 'As notas que forem aprovadas pela SEFAZ serão listadas aqui.',
     },
     cancelado: {
       icon: 'block',
       title: 'Nenhuma NFe cancelada',
-      description:
-        'Notas fiscais canceladas ou estornadas aparecerão neste filtro.',
+      description: 'Notas fiscais canceladas ou estornadas aparecerão neste filtro.',
     },
     denegado: {
       icon: 'gavel',
@@ -211,8 +203,7 @@ export class NfeComponent {
     inutilizada: {
       icon: 'delete_sweep',
       title: 'Nenhuma NFe inutilizada',
-      description:
-        'Numerações de notas que foram inutilizadas aparecerão aqui.',
+      description: 'Numerações de notas que foram inutilizadas aparecerão aqui.',
     },
   };
 
@@ -221,10 +212,7 @@ export class NfeComponent {
   }
 
   get emptyStateTitle(): string {
-    return (
-      this.emptyStateConfigs[this.selectedStatus]?.title ||
-      'Nenhuma NFe encontrada'
-    );
+    return this.emptyStateConfigs[this.selectedStatus]?.title || 'Nenhuma NFe encontrada';
   }
 
   get emptyStateDescription(): string {
@@ -242,7 +230,7 @@ export class NfeComponent {
     private nfeService: NfeService,
     private toastr: ToastrService,
     private actionsService: ActionsService,
-    private storeContextService: StoreContextService
+    private storeContextService: StoreContextService,
   ) {
     this.setupCacheSubscription();
     this.setupSearchDebounce();
@@ -252,7 +240,7 @@ export class NfeComponent {
     this.subscription.add(
       this.actionsService.sidebarClick$.subscribe(() => {
         this.handleConfirmationCloseDrawer();
-      })
+      }),
     );
 
     // Contexto Global de Loja
@@ -260,12 +248,8 @@ export class NfeComponent {
       this.storeContextService.currentStoreId$.subscribe((storeId) => {
         this.selectedStoreId = storeId;
         this.nfeService.clearCache(); // Limpa cache para garantir dados da nova loja/rede
-        this.loadNfeList(
-          0,
-          this.paginationRequestConfig.pageSize,
-          this.searchValue
-        );
-      })
+        this.loadNfeList(0, this.paginationRequestConfig.pageSize, this.searchValue);
+      }),
     );
   }
 
@@ -280,13 +264,11 @@ export class NfeComponent {
 
   // Método para configurar a inscrição do cache
   private setupCacheSubscription() {
-    this.cacheSubscription = this.nfeService.cacheUpdated.subscribe(
-      (updatedCache) => {
-        if (updatedCache) {
-          this.nfePaginatedList = updatedCache;
-        }
+    this.cacheSubscription = this.nfeService.cacheUpdated.subscribe((updatedCache) => {
+      if (updatedCache) {
+        this.nfePaginatedList = updatedCache;
       }
-    );
+    });
   }
 
   // Configura o debounce de 500ms para a busca
@@ -294,15 +276,15 @@ export class NfeComponent {
     this.subscription.add(
       this.searchSubject
         .pipe(
-          debounceTime(500) // Aguarda 500ms após o usuário parar de digitar
+          debounceTime(500), // Aguarda 500ms após o usuário parar de digitar
         )
         .subscribe((searchValue) => {
           this.loadNfeList(
             0, // Sempre volta para a primeira página ao buscar
             this.paginationRequestConfig.pageSize,
-            searchValue
+            searchValue,
           );
-        })
+        }),
     );
   }
 
@@ -353,7 +335,7 @@ export class NfeComponent {
           console.error('Erro ao carregar a lista de NFes:', err);
           this.toastr.error('Erro ao buscar dados da tabela de NFes');
           return of(null as unknown as PaginationResponse<Nfe>);
-        })
+        }),
       )
       .subscribe((response) => {
         this.nfeListLoading.set(false);
@@ -398,19 +380,12 @@ export class NfeComponent {
 
   onStatusChange(status: string) {
     this.selectedStatus = status;
-    this.loadNfeList(
-      0,
-      this.paginationRequestConfig.pageSize,
-      this.searchValue
-    );
+    this.loadNfeList(0, this.paginationRequestConfig.pageSize, this.searchValue);
   }
 
   clearSearch() {
     this.searchValue = '';
-    this.loadNfeList(
-      this.paginationRequestConfig.pageIndex,
-      this.paginationRequestConfig.pageSize
-    );
+    this.loadNfeList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
   }
 
   handleEdit(nfeSummary: Nfe) {
@@ -424,14 +399,14 @@ export class NfeComponent {
         // nfeTipoDocumento: '0' = Entrada, '1' = Saída
         const isEntrada = fullNfe.nfeTipoDocumento === '0';
         this.selectedTabIndex.set(isEntrada ? 0 : 1);
-        
+
         this.openInfo.set(false);
         this.openForm.set(true);
       },
       error: (err) => {
         this.toastr.error('Erro ao carregar detalhes da NFe para edição.');
         console.error(err);
-      }
+      },
     });
   }
 
@@ -447,9 +422,7 @@ export class NfeComponent {
     }
 
     if (this.selectedRows.length > 1) {
-      this.toastr.warning(
-        'Por favor, selecione apenas uma NFe por vez para envio.'
-      );
+      this.toastr.warning('Por favor, selecione apenas uma NFe por vez para envio.');
       return;
     }
 
@@ -457,9 +430,7 @@ export class NfeComponent {
 
     // Impedir envio de NFes que não sejam rascunho
     if (nfe.nfeStatus !== 'rascunho') {
-      this.toastr.info(
-        'Apenas NFes Em Digitação podem ser enviadas para a SEFAZ.'
-      );
+      this.toastr.info('Apenas NFes Em Digitação podem ser enviadas para a SEFAZ.');
       return;
     }
 
@@ -474,30 +445,19 @@ export class NfeComponent {
         this.nfeListLoading.set(false);
         this.selectedRows = [];
         this.toastr.success('NFe enviada para processamento com sucesso!');
-        this.loadNfeList(
-          this.paginationRequestConfig.pageIndex,
-          this.paginationRequestConfig.pageSize
-        );
+        this.loadNfeList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
       },
       error: (err) => {
         this.nfeListLoading.set(false);
-        this.toastr.error(
-          'Ocorreu um erro ao enviar a NFe. Verifique os dados e tente novamente.'
-        );
+        this.toastr.error('Ocorreu um erro ao enviar a NFe. Verifique os dados e tente novamente.');
         // Recarregar a lista caso a NFe tenha sido processada e retornado erro do SEFAZ
-        this.loadNfeList(
-          this.paginationRequestConfig.pageIndex,
-          this.paginationRequestConfig.pageSize
-        );
+        this.loadNfeList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
       },
     });
   }
 
   onFormSubmitted() {
-    this.loadNfeList(
-      this.paginationRequestConfig.pageIndex,
-      this.paginationRequestConfig.pageSize
-    );
+    this.loadNfeList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
     this.openForm.set(false);
     this.openInfo.set(false);
     this.selectedNfe = null;
@@ -506,10 +466,7 @@ export class NfeComponent {
 
   openDialog() {
     // Verifica qual formulário está ativo para checar a validade
-    const activeFormRef =
-      this.selectedTabIndex() === 0
-        ? this.entradaFormRef?.nfeForm
-        : this.saidaFormRef?.nfeForm;
+    const activeFormRef = this.selectedTabIndex() === 0 ? this.entradaFormRef?.nfeForm : this.saidaFormRef?.nfeForm;
 
     const canSave = activeFormRef?.valid ?? false;
 
@@ -553,7 +510,7 @@ export class NfeComponent {
 
   get nfeValorTotalCalculado(): string {
     if (!this.selectedNfe) return '0,00';
-    
+
     // Se o backend já enviou o total, apenas formata
     if (this.selectedNfe.nfeValorTotal && parseFloat(this.selectedNfe.nfeValorTotal) > 0) {
       return this.formatCurrency(this.selectedNfe.nfeValorTotal);
@@ -569,7 +526,7 @@ export class NfeComponent {
     const seguro = parseFloat(this.selectedNfe.nfeValorSeguro || '0');
     const outras = parseFloat(this.selectedNfe.nfeValorOutrasDespesas || '0');
     const desconto = parseFloat(this.selectedNfe.nfeValorDesconto || '0');
-    
+
     return this.formatCurrency(produtos + frete + seguro + outras - desconto);
   }
 }

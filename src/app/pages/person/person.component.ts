@@ -1,24 +1,9 @@
 import { ToastrService } from 'ngx-toastr';
 
-import {
-  inject,
-  OnInit,
-  signal,
-  Component,
-  OnDestroy,
-  ViewChild,
-} from '@angular/core';
+import { inject, OnInit, signal, Component, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  catchError,
-  debounceTime,
-  Observable,
-  of,
-  Subject,
-  Subscription,
-  filter,
-} from 'rxjs';
+import { catchError, debounceTime, Observable, of, Subject, Subscription, filter } from 'rxjs';
 import { RelationshipTypes } from '../../enums/relationshipTypes';
 import { Authorizations } from '../../enums/authorizations';
 import { CanComponentDeactivate } from '@guards/unsaved-changes.guard';
@@ -103,9 +88,7 @@ interface EmployeeSubFilters {
   templateUrl: './person.component.html',
   styleUrl: './person.component.scss',
 })
-export class PersonComponent
-  implements OnInit, OnDestroy, CanComponentDeactivate
-{
+export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivate {
   readonly dialog = inject(MatDialog);
   private subscriptions: Subscription[] = [];
   private searchSubject = new Subject<string>();
@@ -124,52 +107,37 @@ export class PersonComponent
   pendingAddressDraftId: string | null = null;
 
   // Configurações dinâmicas para o Empty State baseadas no tipo de relacionamento
-  private readonly emptyStateConfigs: Record<
-    string,
-    { icon: string; title: string; description: string }
-  > = {
+  private readonly emptyStateConfigs: Record<string, { icon: string; title: string; description: string }> = {
     null: {
       icon: 'person_off',
       title: 'Nenhuma pessoa encontrada',
-      description:
-        'Cadastre novos clientes ou funcionários para começar a gerenciar sua rede.',
+      description: 'Cadastre novos clientes ou funcionários para começar a gerenciar sua rede.',
     },
     CLIENTE: {
       icon: 'person',
       title: 'Nenhum cliente cadastrado',
-      description:
-        'Sua lista de clientes aparecerá aqui. Adicione um novo cliente para começar.',
+      description: 'Sua lista de clientes aparecerá aqui. Adicione um novo cliente para começar.',
     },
     FUNCIONARIO: {
       icon: 'badge',
       title: 'Nenhum funcionário encontrado',
-      description:
-        'Parece que não há colaboradores registrados com este filtro.',
+      description: 'Parece que não há colaboradores registrados com este filtro.',
     },
   };
 
   get emptyStateIcon(): string {
-    const key = this.selectedRelationshipType
-      ? this.selectedRelationshipType.toString()
-      : 'null';
+    const key = this.selectedRelationshipType ? this.selectedRelationshipType.toString() : 'null';
     return this.emptyStateConfigs[key]?.icon || 'person_off';
   }
 
   get emptyStateTitle(): string {
-    const key = this.selectedRelationshipType
-      ? this.selectedRelationshipType.toString()
-      : 'null';
+    const key = this.selectedRelationshipType ? this.selectedRelationshipType.toString() : 'null';
     return this.emptyStateConfigs[key]?.title || 'Nenhuma pessoa encontrada';
   }
 
   get emptyStateDescription(): string {
-    const key = this.selectedRelationshipType
-      ? this.selectedRelationshipType.toString()
-      : 'null';
-    return (
-      this.emptyStateConfigs[key]?.description ||
-      'Cadastre pessoas para gerenciar sua rede.'
-    );
+    const key = this.selectedRelationshipType ? this.selectedRelationshipType.toString() : 'null';
+    return this.emptyStateConfigs[key]?.description || 'Cadastre pessoas para gerenciar sua rede.';
   }
 
   /**
@@ -209,8 +177,7 @@ export class PersonComponent
         // Gerente não pode excluir outro gerente nem proprietário
         if (
           loggedUserRelationship === RelationshipTypes.GERENTE &&
-          (row.relationship === RelationshipTypes.GERENTE ||
-            row.relationship === RelationshipTypes.PROPRIETARIO)
+          (row.relationship === RelationshipTypes.GERENTE || row.relationship === RelationshipTypes.PROPRIETARIO)
         ) {
           return false;
         }
@@ -257,8 +224,7 @@ export class PersonComponent
     {
       key: 'cnpj',
       header: 'PF/PJ',
-      format: (value: any, row: Person) =>
-        row.legalEntity ? 'PESSOA JURÍDICA' : 'PESSOA FÍSICA',
+      format: (value: any, row: Person) => (row.legalEntity ? 'PESSOA JURÍDICA' : 'PESSOA FÍSICA'),
     },
     {
       key: 'cpf-cnpj',
@@ -296,8 +262,7 @@ export class PersonComponent
         // Gerente não pode excluir outro gerente nem proprietário
         if (
           loggedUserRelationship === RelationshipTypes.GERENTE &&
-          (row.relationship === RelationshipTypes.GERENTE ||
-            row.relationship === RelationshipTypes.PROPRIETARIO)
+          (row.relationship === RelationshipTypes.GERENTE || row.relationship === RelationshipTypes.PROPRIETARIO)
         ) {
           return false;
         }
@@ -356,7 +321,7 @@ export class PersonComponent
     private personService: PersonService,
     private toastr: ToastrService,
     private actionsService: ActionsService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
     // Verifica se o usuário é CAR_ADMIN
     this.checkUserRole();
@@ -370,22 +335,20 @@ export class PersonComponent
 
   ngOnInit() {
     this.subscriptions.push(
-      this.actionsService.sidebarClick$.subscribe(
-        (targetRoute: string | undefined) => {
-          // Se a gaveta estiver aberta...
-          if (this.openForm() || this.openInfo()) {
-            const currentRoute = '/person';
+      this.actionsService.sidebarClick$.subscribe((targetRoute: string | undefined) => {
+        // Se a gaveta estiver aberta...
+        if (this.openForm() || this.openInfo()) {
+          const currentRoute = '/person';
 
-            // Se o clique foi em um menu que aponta para OUTRA rota,
-            // não fazemos nada aqui e deixamos o unsavedChangesGuard agir.
-            if (targetRoute && targetRoute !== currentRoute) {
-              return;
-            }
-
-            this.handleConfirmationCloseDrawer();
+          // Se o clique foi em um menu que aponta para OUTRA rota,
+          // não fazemos nada aqui e deixamos o unsavedChangesGuard agir.
+          if (targetRoute && targetRoute !== currentRoute) {
+            return;
           }
+
+          this.handleConfirmationCloseDrawer();
         }
-      )
+      }),
     );
 
     // Contexto Global de Loja
@@ -394,7 +357,7 @@ export class PersonComponent
         this.selectedStoreId = storeId;
         this.personService.clearCache(); // Limpa cache para garantir dados da nova loja/rede
         this.performSearch(); // Executa a busca baseada na nova loja global selecionada
-      })
+      }),
     );
 
     // Verifica se há um ID de edição vindo da rota (ex: redirecionamento de erro de endereço)
@@ -404,7 +367,7 @@ export class PersonComponent
         if (editId) {
           this.loadPersonForEdit(editId);
         }
-      })
+      }),
     );
   }
 
@@ -437,7 +400,7 @@ export class PersonComponent
         if (updatedCache) {
           this.personPaginatedList = updatedCache;
         }
-      })
+      }),
     );
   }
 
@@ -446,15 +409,15 @@ export class PersonComponent
     this.subscriptions.push(
       this.searchSubject
         .pipe(
-          debounceTime(500) // Aguarda 500ms após o usuário parar de digitar
+          debounceTime(500), // Aguarda 500ms após o usuário parar de digitar
         )
         .subscribe((searchValue) => {
           this.loadPersonList(
             0, // Sempre volta para a primeira página ao buscar
             this.paginationRequestConfig.pageSize,
-            searchValue
+            searchValue,
           );
-        })
+        }),
     );
   }
 
@@ -547,11 +510,7 @@ export class PersonComponent
         // Passa o ID do rascunho existente para garantir atualização
         const existingDraftId = this.selectedDraft?.id;
 
-        (formComponent as any).saveLocalDraft(
-          false,
-          draftName,
-          existingDraftId
-        );
+        (formComponent as any).saveLocalDraft(false, draftName, existingDraftId);
         this.handleCloseDrawer();
         return;
       }
@@ -621,7 +580,7 @@ export class PersonComponent
           console.error('Erro ao carregar a lista de pessoas:', err);
           this.toastr.error('Erro ao buscar dados da tabela de clientes');
           return of();
-        })
+        }),
       )
       .subscribe((response) => {
         this.clientListLoading.set(false);
@@ -671,16 +630,13 @@ export class PersonComponent
     this.loadPersonList(
       0, // Sempre volta para a primeira página ao buscar
       this.paginationRequestConfig.pageSize,
-      this.searchValue
+      this.searchValue,
     );
   }
 
   clearSearch() {
     this.searchValue = '';
-    this.loadPersonList(
-      this.paginationRequestConfig.pageIndex,
-      this.paginationRequestConfig.pageSize
-    );
+    this.loadPersonList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
   }
 
   handleEdit(person?: Person) {
@@ -696,19 +652,16 @@ export class PersonComponent
   }
 
   openDeleteDialog(person: Person) {
-    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Confirmar Exclusão',
-          message: `Tem certeza que deseja <strong>excluir</strong> ${person.name}?`,
-          confirmText: 'Sim, Excluir',
-          cancelText: 'Não',
-          icon: 'delete_outline',
-          type: 'danger',
-        },
-      }
-    );
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Confirmar Exclusão',
+        message: `Tem certeza que deseja <strong>excluir</strong> ${person.name}?`,
+        confirmText: 'Sim, Excluir',
+        cancelText: 'Não',
+        icon: 'delete_outline',
+        type: 'danger',
+      },
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
@@ -729,8 +682,7 @@ export class PersonComponent
         error: (error) => {
           console.error('Erro ao excluir pessoa:', error);
           // Verifica se há mensagem de erro específica do backend
-          const errorMessage =
-            error?.error?.message || error?.message || 'Erro ao excluir pessoa';
+          const errorMessage = error?.error?.message || error?.message || 'Erro ao excluir pessoa';
           this.toastr.error(errorMessage);
         },
       });
@@ -744,25 +696,20 @@ export class PersonComponent
     if (!this.storeContextService.validateStoreSelection()) return;
     if (this.selectedPeople.length === 0) return;
 
-    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Excluir Selecionados',
-          message: `Tem certeza que deseja <strong>excluir ${this.selectedPeople.length}</strong> pessoas selecionadas?`,
-          confirmText: 'Sim, Excluir',
-          cancelText: 'Cancelar',
-          icon: 'delete_sweep',
-          type: 'danger',
-        },
-      }
-    );
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Excluir Selecionados',
+        message: `Tem certeza que deseja <strong>excluir ${this.selectedPeople.length}</strong> pessoas selecionadas?`,
+        confirmText: 'Sim, Excluir',
+        cancelText: 'Cancelar',
+        icon: 'delete_sweep',
+        type: 'danger',
+      },
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        const ids = this.selectedPeople
-          .map((p) => p.personId)
-          .filter((id): id is string => id !== undefined);
+        const ids = this.selectedPeople.map((p) => p.personId).filter((id): id is string => id !== undefined);
 
         if (ids.length === 0) {
           this.toastr.error('Nenhum ID válido selecionado.');
@@ -785,10 +732,7 @@ export class PersonComponent
   }
 
   onFormSubmitted() {
-    this.loadPersonList(
-      this.paginationRequestConfig.pageIndex,
-      this.paginationRequestConfig.pageSize
-    );
+    this.loadPersonList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
     this.openForm.set(false);
     this.openInfo.set(false);
     this.selectedPerson = null;
@@ -836,7 +780,7 @@ export class PersonComponent
     this.loadPersonList(
       this.paginationRequestConfig.pageIndex,
       this.paginationRequestConfig.pageSize,
-      this.searchValue
+      this.searchValue,
     );
   }
 
@@ -846,9 +790,7 @@ export class PersonComponent
    */
   hasActiveFilters(): boolean {
     return (
-      this.selectedRelationshipType !== null ||
-      this.employeeSubFilters.vendedor ||
-      this.employeeSubFilters.gerente
+      this.selectedRelationshipType !== null || this.employeeSubFilters.vendedor || this.employeeSubFilters.gerente
     );
   }
 
@@ -956,17 +898,14 @@ export class PersonComponent
    * Fallback para o comportamento antigo
    */
   private openSimpleDialog() {
-    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Há mudanças não salvas',
-          message: 'Deseja fechar <strong>sem salvar</strong>?',
-          confirmText: 'Sim',
-          cancelText: 'Não',
-        },
-      }
-    );
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Há mudanças não salvas',
+        message: 'Deseja fechar <strong>sem salvar</strong>?',
+        confirmText: 'Sim',
+        cancelText: 'Não',
+      },
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {

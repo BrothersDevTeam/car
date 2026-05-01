@@ -1,7 +1,4 @@
-<div
-  class="info-container"
-  *ngIf="!loading && venda; else stateTemplate"
->
+<div class="info-container" *ngIf="!loading && venda; else stateTemplate">
   <!-- Header -->
   <header class="info-header">
     <div class="header-main">
@@ -9,9 +6,7 @@
         <mat-icon class="header-icon">receipt_long</mat-icon>
         <div class="title-text">
           <h1>Venda #{{ venda.numero || '—' }}</h1>
-          <p class="subtitle">
-            Registrada em {{ formatDate(venda.createdAt) }}
-          </p>
+          <p class="subtitle">Registrada em {{ formatDate(venda.createdAt) }}</p>
         </div>
       </div>
       <div class="header-actions">
@@ -24,12 +19,7 @@
         >
           <mat-icon>edit</mat-icon>
         </button>
-        <button
-          mat-icon-button
-          (click)="onClose()"
-          matTooltip="Fechar"
-          class="btn-close"
-        >
+        <button mat-icon-button (click)="onClose()" matTooltip="Fechar" class="btn-close">
           <mat-icon>close</mat-icon>
         </button>
       </div>
@@ -39,22 +29,13 @@
     <div class="status-bar">
       <div class="status-item">
         <span class="status-label">Status da Venda:</span>
-        <span
-          class="status-badge"
-          [ngClass]="getStatusClass(venda.vendaStatus)"
-        >
+        <span class="status-badge" [ngClass]="getStatusClass(venda.vendaStatus)">
           {{ getStatusLabel(venda.vendaStatus) }}
         </span>
       </div>
-      <div
-        class="status-item"
-        *ngIf="nfe"
-      >
+      <div class="status-item" *ngIf="nfe">
         <span class="status-label">NFe:</span>
-        <span
-          class="status-badge"
-          [ngClass]="getStatusClass(nfe.nfeStatus)"
-        >
+        <span class="status-badge" [ngClass]="getStatusClass(nfe.nfeStatus)">
           {{ getStatusLabel(nfe.nfeStatus) }}
         </span>
       </div>
@@ -84,10 +65,7 @@
               <span class="label">Nome</span>
               <span class="value bold">{{ venda.buyerName || '—' }}</span>
             </div>
-            <div
-              class="data-item"
-              *ngIf="venda.observacao"
-            >
+            <div class="data-item" *ngIf="venda.observacao">
               <span class="label">Observação da Venda</span>
               <span class="value italic">"{{ venda.observacao }}"</span>
             </div>
@@ -115,57 +93,32 @@
         </section>
 
         <!-- Card NFe (se houver) -->
-        <section
-          class="info-card"
-          *ngIf="nfe"
-        >
+        <section class="info-card" *ngIf="nfe">
           <div class="card-header">
             <mat-icon>description</mat-icon>
             <h2>Documento Fiscal (NFe)</h2>
           </div>
           <div class="card-body">
-            <div
-              class="data-item"
-              *ngIf="nfe.nfeNumero"
-            >
+            <div class="data-item" *ngIf="nfe.nfeNumero">
               <span class="label">Número / Série</span>
-              <span class="value">
-                {{ nfe.nfeNumero }} / {{ nfe.nfeSerie }}
-              </span>
+              <span class="value">{{ nfe.nfeNumero }} / {{ nfe.nfeSerie }}</span>
             </div>
-            <div
-              class="data-item"
-              *ngIf="nfe.nfeChave"
-            >
+            <div class="data-item" *ngIf="nfe.nfeChave">
               <span class="label">Chave de Acesso</span>
               <span class="value code small">{{ nfe.nfeChave }}</span>
             </div>
 
-            <div
-              class="nfe-actions"
-              *ngIf="nfe.nfeStatus === 'autorizado'"
-            >
-              <button
-                mat-stroked-button
-                color="primary"
-                (click)="openDanfe()"
-              >
+            <div class="nfe-actions" *ngIf="nfe.nfeStatus === 'autorizado'">
+              <button mat-stroked-button color="primary" (click)="openDanfe()">
                 <mat-icon>picture_as_pdf</mat-icon>
                 DANFE
               </button>
-              <button
-                mat-stroked-button
-                color="primary"
-                (click)="openXml()"
-              >
+              <button mat-stroked-button color="primary" (click)="openXml()">
                 <mat-icon>code</mat-icon>
                 XML
               </button>
             </div>
-            <div
-              class="nfe-error"
-              *ngIf="nfe.nfeStatus === 'erro_autorizacao'"
-            >
+            <div class="nfe-error" *ngIf="nfe.nfeStatus === 'erro_autorizacao'">
               <mat-icon>error_outline</mat-icon>
               <span>
                 Erro ao emitir:
@@ -197,19 +150,13 @@
                 <tr *ngFor="let pag of venda.pagamentos">
                   <td>
                     <span class="pag-method">{{ pag.formaPagamento }}</span>
-                    <small
-                      *ngIf="pag.descricao"
-                      class="pag-desc"
-                    >
+                    <small *ngIf="pag.descricao" class="pag-desc">
                       {{ pag.descricao }}
                     </small>
                   </td>
                   <td>{{ formatDate(pag.vencimento) }}</td>
                   <td>
-                    <span
-                      class="type-badge"
-                      [ngClass]="pag.tipo === 'D' ? 'type-down' : 'type-up'"
-                    >
+                    <span class="type-badge" [ngClass]="pag.tipo === 'D' ? 'type-down' : 'type-up'">
                       {{ pag.tipo === 'D' ? 'Entrada / Débito' : 'Recebível' }}
                     </span>
                   </td>
@@ -220,25 +167,13 @@
               </tbody>
               <tfoot>
                 <tr>
-                  <td
-                    colspan="3"
-                    class="text-right"
-                  >
-                    Total Negociado:
-                  </td>
+                  <td colspan="3" class="text-right">Total Negociado:</td>
                   <td class="text-right total-value">
                     {{ formatCurrency(venda.valor) }}
                   </td>
                 </tr>
-                <tr
-                  *ngIf="venda.valorFinal && venda.valorFinal !== venda.valor"
-                >
-                  <td
-                    colspan="3"
-                    class="text-right"
-                  >
-                    Valor Final (c/ Ajustes):
-                  </td>
+                <tr *ngIf="venda.valorFinal && venda.valorFinal !== venda.valor">
+                  <td colspan="3" class="text-right">Valor Final (c/ Ajustes):</td>
                   <td class="text-right total-final">
                     {{ formatCurrency(venda.valorFinal) }}
                   </td>
@@ -268,10 +203,7 @@
                 </span>
               </div>
             </div>
-            <div
-              class="audit-item"
-              *ngIf="venda.updatedAt !== venda.createdAt"
-            >
+            <div class="audit-item" *ngIf="venda.updatedAt !== venda.createdAt">
               <mat-icon>update</mat-icon>
               <div class="audit-info">
                 <span class="audit-text">
@@ -293,32 +225,17 @@
 
 <!-- State Templates -->
 <ng-template #stateTemplate>
-  <div
-    class="state-container loading"
-    *ngIf="loading"
-  >
+  <div class="state-container loading" *ngIf="loading">
     <div class="spinner-box">
       <div class="spinner"></div>
       <p>Carregando detalhes da venda...</p>
     </div>
   </div>
 
-  <div
-    class="state-container error"
-    *ngIf="error"
-  >
+  <div class="state-container error" *ngIf="error">
     <mat-icon>error_outline</mat-icon>
     <h3>Erro ao carregar dados</h3>
-    <p>
-      Não foi possível recuperar as informações desta venda. Tente novamente
-      mais tarde.
-    </p>
-    <button
-      mat-flat-button
-      color="primary"
-      (click)="loadVendaDetails()"
-    >
-      Tentar Novamente
-    </button>
+    <p>Não foi possível recuperar as informações desta venda. Tente novamente mais tarde.</p>
+    <button mat-flat-button color="primary" (click)="loadVendaDetails()">Tentar Novamente</button>
   </div>
 </ng-template>

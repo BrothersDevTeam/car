@@ -12,6 +12,5 @@ import { MatIconModule } from '@angular/material/icon';
 export class EmptyStateComponent {
   @Input({ required: true }) icon: string = 'sentiment_dissatisfied';
   @Input({ required: true }) title: string = 'Nenhum dado encontrado';
-  @Input({ required: false }) description: string =
-    'Tente ajustar seus filtros ou realizar uma nova busca.';
+  @Input({ required: false }) description: string = 'Tente ajustar seus filtros ou realizar uma nova busca.';
 }

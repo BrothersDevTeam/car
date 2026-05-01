@@ -25,14 +25,7 @@ import { PersonService } from '@services/person.service';
 
 @Component({
   selector: 'app-person-table',
-  imports: [
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatIconModule,
-    MatButtonModule,
-    PaginationComponent,
-  ],
+  imports: [MatTableModule, MatPaginatorModule, MatSortModule, MatIconModule, MatButtonModule, PaginationComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './person-table.component.html',
   styleUrl: './person-table.component.scss',
@@ -54,7 +47,7 @@ export class PersonTableComponent implements OnInit, OnChanges {
 
   constructor(
     private toastrService: ToastrService,
-    private personService: PersonService
+    private personService: PersonService,
   ) {}
 
   ngAfterViewInit() {}
@@ -74,10 +67,7 @@ export class PersonTableComponent implements OnInit, OnChanges {
     if (this.searchValue?.length) {
       this.filteredData = this.personPaginatedList.content.filter((element) => {
         if (element.name || element.legalEntity === true) {
-          return element.name
-            .trim()
-            .toLowerCase()
-            .includes(this.searchValue!.trim().toLowerCase());
+          return element.name.trim().toLowerCase().includes(this.searchValue!.trim().toLowerCase());
         } else return false;
       });
       this.dataSource.data = this.filteredData;
@@ -116,17 +106,14 @@ export class PersonTableComponent implements OnInit, OnChanges {
   }
 
   openDeleteDialog(person: Person) {
-    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Confirmar Exclusão',
-          message: `Tem certeza que deseja <strong>excluir</strong> ${person.name}?`,
-          confirmText: 'Sim',
-          cancelText: 'Não',
-        },
-      }
-    );
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Confirmar Exclusão',
+        message: `Tem certeza que deseja <strong>excluir</strong> ${person.name}?`,
+        confirmText: 'Sim',
+        cancelText: 'Não',
+      },
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
@@ -146,8 +133,7 @@ export class PersonTableComponent implements OnInit, OnChanges {
         error: (error) => {
           console.error('Erro ao excluir pessoa:', error);
           // Verifica se há mensagem de erro específica do backend
-          const errorMessage =
-            error?.error?.message || error?.message || 'Erro ao excluir pessoa';
+          const errorMessage = error?.error?.message || error?.message || 'Erro ao excluir pessoa';
           this.toastrService.error(errorMessage);
         },
       });

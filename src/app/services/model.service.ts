@@ -13,9 +13,7 @@ export class ModelService {
   private cache: Map<string, PaginationResponse<Model>> = new Map();
 
   // Subject para notificar mudanças no cache
-  private cacheUpdated$ = new BehaviorSubject<PaginationResponse<Model> | null>(
-    null
-  );
+  private cacheUpdated$ = new BehaviorSubject<PaginationResponse<Model> | null>(null);
 
   private readonly apiUrl: string = '/api/vehicle-models';
 
@@ -36,20 +34,12 @@ export class ModelService {
 
     // Busca todos os modelos da marca (size=1000)
     // REMOVIDO CACHE TEMPORARIAMENTE PARA DEBUG
-    return this.http
-      .get<
-        PaginationResponse<Model>
-      >(`${this.apiUrl}?brandId=${brandId}&status=ACTIVE&size=1000`)
-      .pipe(
-        first(),
-        tap((response) => {
-          console.log(
-            'Modelos carregados para marca (SEM CACHE):',
-            brandId,
-            response
-          );
-        })
-      );
+    return this.http.get<PaginationResponse<Model>>(`${this.apiUrl}?brandId=${brandId}&status=ACTIVE&size=1000`).pipe(
+      first(),
+      tap((response) => {
+        console.log('Modelos carregados para marca (SEM CACHE):', brandId, response);
+      }),
+    );
   }
 
   /**
@@ -57,14 +47,12 @@ export class ModelService {
    * @returns Observable com a lista paginada de modelos
    */
   getModels(): Observable<PaginationResponse<Model>> {
-    return this.http
-      .get<PaginationResponse<Model>>(`${this.apiUrl}?status=ACTIVE`)
-      .pipe(
-        first(),
-        tap((response) => {
-          console.log('Todos os modelos carregados:', response);
-        })
-      );
+    return this.http.get<PaginationResponse<Model>>(`${this.apiUrl}?status=ACTIVE`).pipe(
+      first(),
+      tap((response) => {
+        console.log('Todos os modelos carregados:', response);
+      }),
+    );
   }
 
   /**
@@ -77,7 +65,7 @@ export class ModelService {
       tap((response) => {
         console.log('Modelo criado com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 
@@ -92,7 +80,7 @@ export class ModelService {
       tap((response) => {
         console.log('Modelo atualizado com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 
@@ -106,7 +94,7 @@ export class ModelService {
       tap((response) => {
         console.log('Modelo deletado com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 

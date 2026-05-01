@@ -1,11 +1,4 @@
-import {
-  Component,
-  inject,
-  signal,
-  ViewChild,
-  OnInit,
-  OnDestroy,
-} from '@angular/core';
+import { Component, inject, signal, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -116,8 +109,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
     {
       key: 'valorFinal',
       header: 'Valor Total',
-      format: (val) =>
-        this.currencyPipe.transform(val, 'BRL', 'symbol', '1.2-2') || '—',
+      format: (val) => this.currencyPipe.transform(val, 'BRL', 'symbol', '1.2-2') || '—',
     },
     {
       key: 'vendaStatus',
@@ -138,36 +130,28 @@ export class VendasListComponent implements OnInit, OnDestroy {
       key: 'edit',
       header: '',
       showEditIcon: (row) =>
-        this.authService.hasAuthority(Authorizations.EDIT_VENDA) &&
-        row.vendaStatus !== VendaStatus.CANCELADA,
+        this.authService.hasAuthority(Authorizations.EDIT_VENDA) && row.vendaStatus !== VendaStatus.CANCELADA,
     },
     {
       key: 'nfe',
       header: '',
       showNfeIcon: (row) =>
-        this.authService.hasAuthority(Authorizations.EMITIR_NFE) &&
-        row.vendaStatus === VendaStatus.ATIVA &&
-        !row.nfeId,
+        this.authService.hasAuthority(Authorizations.EMITIR_NFE) && row.vendaStatus === VendaStatus.ATIVA && !row.nfeId,
     },
     {
       key: 'delete',
       header: '',
       showDeleteIcon: (row) =>
-        this.authService.hasAuthority(Authorizations.CANCEL_VENDA) &&
-        row.vendaStatus !== VendaStatus.CANCELADA,
+        this.authService.hasAuthority(Authorizations.CANCEL_VENDA) && row.vendaStatus !== VendaStatus.CANCELADA,
     },
   ];
 
   // Configurações dinâmicas para o Empty State baseadas no status da venda
-  private readonly emptyStateConfigs: Record<
-    string,
-    { icon: string; title: string; description: string }
-  > = {
+  private readonly emptyStateConfigs: Record<string, { icon: string; title: string; description: string }> = {
     TODOS: {
       icon: 'receipt_long',
       title: 'Nenhuma venda realizada',
-      description:
-        'Suas vendas aparecerão aqui assim que forem concluídas e registradas no sistema.',
+      description: 'Suas vendas aparecerão aqui assim que forem concluídas e registradas no sistema.',
     },
     ATIVA: {
       icon: 'check_circle',
@@ -191,17 +175,11 @@ export class VendasListComponent implements OnInit, OnDestroy {
   }
 
   get emptyStateTitle(): string {
-    return (
-      this.emptyStateConfigs[this.selectedStatus]?.title ||
-      'Nenhuma venda encontrada'
-    );
+    return this.emptyStateConfigs[this.selectedStatus]?.title || 'Nenhuma venda encontrada';
   }
 
   get emptyStateDescription(): string {
-    return (
-      this.emptyStateConfigs[this.selectedStatus]?.description ||
-      'Suas vendas aparecerão aqui após o registro.'
-    );
+    return this.emptyStateConfigs[this.selectedStatus]?.description || 'Suas vendas aparecerão aqui após o registro.';
   }
 
   ngOnInit() {
@@ -211,18 +189,16 @@ export class VendasListComponent implements OnInit, OnDestroy {
         this.selectedStoreId = storeId;
         this.vendaService.clearCache(); // Limpa cache para garantir dados da nova loja/rede
         this.loadVendasList();
-      })
+      }),
     );
 
     // Setup de busca com debounce
     this.subscription.add(
-      this.searchSubject
-        .pipe(debounceTime(400), distinctUntilChanged())
-        .subscribe((value) => {
-          this.searchValue = value;
-          this.paginationConfig.pageIndex = 0;
-          this.loadVendasList();
-        })
+      this.searchSubject.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
+        this.searchValue = value;
+        this.paginationConfig.pageIndex = 0;
+        this.loadVendasList();
+      }),
     );
   }
 
@@ -234,22 +210,17 @@ export class VendasListComponent implements OnInit, OnDestroy {
     this.vendasListLoading.set(true);
 
     this.vendaService
-      .getPaginatedData(
-        this.paginationConfig.pageIndex,
-        this.paginationConfig.pageSize,
-        {
-          search: this.searchValue,
-          storeId: this.selectedStoreId ?? undefined,
-          status:
-            this.selectedStatus !== 'TODOS' ? this.selectedStatus : undefined,
-        }
-      )
+      .getPaginatedData(this.paginationConfig.pageIndex, this.paginationConfig.pageSize, {
+        search: this.searchValue,
+        storeId: this.selectedStoreId ?? undefined,
+        status: this.selectedStatus !== 'TODOS' ? this.selectedStatus : undefined,
+      })
       .pipe(
         catchError((err) => {
           this.vendasListLoading.set(false);
           this.toastr.error('Erro ao carregar lista de vendas');
           return of(null);
-        })
+        }),
       )
       .subscribe((response) => {
         this.vendasListLoading.set(false);
@@ -319,9 +290,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
         this.vendasListLoading.set(true);
         this.vendaService.gerarNfe(venda.vendaId, venda.storeId).subscribe({
           next: () => {
-            this.toastr.success(
-              'Rascunho da NFe gerado com sucesso! A emissão foi disparada.'
-            );
+            this.toastr.success('Rascunho da NFe gerado com sucesso! A emissão foi disparada.');
             this.loadVendasList();
           },
           error: (err) => {
@@ -331,10 +300,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
 
             // Tratamento específico para falta de endereço
             if (details && details['missingAddressPersonId']) {
-              this.handleMissingAddressError(
-                details['missingAddressPersonId'],
-                errorMessage
-              );
+              this.handleMissingAddressError(details['missingAddressPersonId'], errorMessage);
             } else {
               this.toastr.error(errorMessage);
             }

@@ -1,13 +1,7 @@
-<mat-card
-  class="card-container"
-  appearance="outlined"
->
+<mat-card class="card-container" appearance="outlined">
   <mat-card-content class="card-content">
     <!-- Dados da Empresa -->
-    <app-wrapper-card
-      class="person-info"
-      title="Dados da empresa"
-    >
+    <app-wrapper-card class="person-info" title="Dados da empresa">
       <div class="card-row">
         <h3 class="label">Razão Social:</h3>
         <h3 class="value">{{ person.name }}</h3>
@@ -30,23 +24,8 @@
       </div>
       <mat-card-footer class="card-footer">
         @if (canEditOrDelete) {
-          <button
-            type="button"
-            class="btn"
-            color="primary"
-            mat-raised-button
-            (click)="editEvent.emit()"
-          >
-            Editar
-          </button>
-          <button
-            type="button"
-            class="btn"
-            color="warn"
-            mat-raised-button
-            matListItemIcon
-            (click)="onDelete()"
-          >
+          <button type="button" class="btn" color="primary" mat-raised-button (click)="editEvent.emit()">Editar</button>
+          <button type="button" class="btn" color="warn" mat-raised-button matListItemIcon (click)="onDelete()">
             Excluir
           </button>
         }

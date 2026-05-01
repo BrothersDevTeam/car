@@ -1,10 +1,5 @@
 import { Component, Input, OnInit, inject } from '@angular/core';
-import {
-  FormArray,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormArray, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { CommonModule } from '@angular/common';
 
@@ -20,12 +15,7 @@ interface AuthGroup {
 @Component({
   selector: 'app-access-data-form',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    PrimaryInputComponent,
-    MatCheckboxModule,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, PrimaryInputComponent, MatCheckboxModule],
   template: `
     <div [formGroup]="form">
       <div class="form-row-2cols">
@@ -36,10 +26,7 @@ interface AuthGroup {
           type="text"
           [uppercase]="false"
           placeholder="Digite o nome de usuário"
-          [error]="
-            form.get('username')?.invalid &&
-            (form.get('username')?.touched || submitted)
-          "
+          [error]="form.get('username')?.invalid && (form.get('username')?.touched || submitted)"
         />
       </div>
 
@@ -51,10 +38,7 @@ interface AuthGroup {
           type="password"
           [uppercase]="false"
           placeholder="Mínimo 6 caracteres"
-          [error]="
-            form.get('password')?.invalid &&
-            (form.get('password')?.touched || submitted)
-          "
+          [error]="form.get('password')?.invalid && (form.get('password')?.touched || submitted)"
         />
 
         <app-primary-input
@@ -65,18 +49,14 @@ interface AuthGroup {
           [uppercase]="false"
           placeholder="Digite a senha novamente"
           [error]="
-            (form.get('confirmPassword')?.invalid ||
-              form.errors?.['passwordMismatch']) &&
+            (form.get('confirmPassword')?.invalid || form.errors?.['passwordMismatch']) &&
             (form.get('confirmPassword')?.touched || submitted)
           "
         />
       </div>
 
       <!-- Erros de validação de usuário/senha -->
-      <div
-        class="validation-errors"
-        *ngIf="submitted"
-      >
+      <div class="validation-errors" *ngIf="submitted">
         @if (form.errors?.['passwordMismatch']) {
           <div class="error-message">As senhas não coincidem</div>
         }
@@ -90,24 +70,17 @@ interface AuthGroup {
           </div>
         }
         @if (form.get('password')?.invalid) {
-          <div class="error-message">
-            Senha é obrigatória (mínimo 6 caracteres)
-          </div>
+          <div class="error-message">Senha é obrigatória (mínimo 6 caracteres)</div>
         }
       </div>
 
       <!-- SEÇÃO DE PERMISSÕES GRANULARES -->
       <div class="permissions-container">
         <h3 class="permissions-title">Permissões de Acesso</h3>
-        <p class="permissions-subtitle">
-          Selecione as ações que este funcionário poderá realizar.
-        </p>
+        <p class="permissions-subtitle">Selecione as ações que este funcionário poderá realizar.</p>
 
         <div class="groups-grid">
-          <div
-            *ngFor="let group of authGroups"
-            class="auth-group"
-          >
+          <div *ngFor="let group of authGroups" class="auth-group">
             <h4 class="group-title">{{ group.name }}</h4>
             <div class="permissions-list">
               <mat-checkbox
@@ -274,9 +247,7 @@ export class AccessDataFormComponent implements OnInit {
     },
     {
       name: 'Super Admin',
-      permissions: [
-        { key: Authorizations.ROOT_ADMIN, label: 'Acesso Administrativo Root' },
-      ],
+      permissions: [{ key: Authorizations.ROOT_ADMIN, label: 'Acesso Administrativo Root' }],
     },
     {
       name: 'Usuários do Sistema',
@@ -298,9 +269,7 @@ export class AccessDataFormComponent implements OnInit {
   ngOnInit() {
     // Garante que o controlador de authorizations exista no form
     if (!this.form.get('authorizations')) {
-      console.error(
-        'O form pai deve prover um FormArray chamado "authorizations"'
-      );
+      console.error('O form pai deve prover um FormArray chamado "authorizations"');
     }
 
     // Filtra as permissões exclusivas de root se o usuário não for root
@@ -310,9 +279,7 @@ export class AccessDataFormComponent implements OnInit {
       this.authGroups = this.authGroups
         .map((group) => ({
           ...group,
-          permissions: group.permissions.filter(
-            (p) => !rootOnlyKeys.includes(p.key as Authorizations)
-          ),
+          permissions: group.permissions.filter((p) => !rootOnlyKeys.includes(p.key as Authorizations)),
         }))
         .filter((group) => group.permissions.length > 0);
     }

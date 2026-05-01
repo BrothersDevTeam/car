@@ -1,11 +1,5 @@
-<app-content-header
-  [title]="title"
-  [subtitle]="subtitle"
->
-  <button
-    mat-stroked-button
-    (click)="goBack()"
-  >
+<app-content-header [title]="title" [subtitle]="subtitle">
+  <button mat-stroked-button (click)="goBack()">
     <mat-icon>arrow_back</mat-icon>
     Voltar para lista
   </button>
@@ -22,31 +16,19 @@
       <div class="drafts-section">
         <mat-card class="draft-card">
           <mat-card-header>
-            <mat-icon
-              mat-card-avatar
-              color="primary"
-            >
-              history
-            </mat-icon>
+            <mat-icon mat-card-avatar color="primary">history</mat-icon>
             <mat-card-title>Vendas em andamento</mat-card-title>
-            <mat-card-subtitle>
-              Selecione um rascunho para continuar
-            </mat-card-subtitle>
+            <mat-card-subtitle>Selecione um rascunho para continuar</mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
-            <mat-form-field
-              appearance="outline"
-              class="draft-select-field"
-            >
+            <mat-form-field appearance="outline" class="draft-select-field">
               <mat-label>Continuar preenchimento</mat-label>
               <mat-select
                 [value]="selectedDraft"
                 (selectionChange)="handleDraftSelection($event.value)"
                 placeholder="Selecione um rascunho"
               >
-                <mat-option [value]="null">
-                  -- Iniciar novo cadastro --
-                </mat-option>
+                <mat-option [value]="null">-- Iniciar novo cadastro --</mat-option>
                 @for (draft of availableDrafts; track draft.id) {
                   <mat-option [value]="draft">
                     <div class="draft-option-content">
@@ -78,11 +60,7 @@
       </div>
     }
 
-    <form
-      [formGroup]="vendaForm"
-      (ngSubmit)="onSubmit()"
-      class="venda-form"
-    >
+    <form [formGroup]="vendaForm" (ngSubmit)="onSubmit()" class="venda-form">
       <!-- SEÇÃO 1: VEÍCULO E CLIENTE -->
       <mat-card class="form-section">
         <mat-card-header>
@@ -153,10 +131,7 @@
             [required]="true"
           ></app-currency-input>
 
-          <mat-form-field
-            appearance="outline"
-            class="col-12"
-          >
+          <mat-form-field appearance="outline" class="col-12">
             <mat-label>Observações</mat-label>
             <textarea
               matInput
@@ -172,31 +147,17 @@
       <mat-card class="form-section">
         <mat-card-header class="header-with-action">
           <mat-card-title>Formas de Pagamento</mat-card-title>
-          <button
-            type="button"
-            mat-flat-button
-            color="primary"
-            (click)="addPagamento()"
-          >
+          <button type="button" mat-flat-button color="primary" (click)="addPagamento()">
             <mat-icon>add</mat-icon>
             Adicionar Pagamento
           </button>
         </mat-card-header>
 
         <mat-card-content>
-          <div
-            formArrayName="pagamentos"
-            class="pagamentos-list"
-          >
+          <div formArrayName="pagamentos" class="pagamentos-list">
             @for (pag of pagamentos.controls; track $index) {
-              <div
-                [formGroupName]="$index"
-                class="pagamento-item grid-row"
-              >
-                <mat-form-field
-                  appearance="outline"
-                  class="col-3"
-                >
+              <div [formGroupName]="$index" class="pagamento-item grid-row">
+                <mat-form-field appearance="outline" class="col-3">
                   <mat-label>Forma</mat-label>
                   <mat-select formControlName="formaPagamento">
                     <mat-option value="DINHEIRO">DINHEIRO</mat-option>
@@ -216,20 +177,10 @@
                   class="col-3"
                 ></app-currency-input>
 
-                <mat-form-field
-                  appearance="outline"
-                  class="col-3"
-                >
+                <mat-form-field appearance="outline" class="col-3">
                   <mat-label>Vencimento</mat-label>
-                  <input
-                    matInput
-                    [matDatepicker]="vencPicker"
-                    formControlName="vencimento"
-                  />
-                  <mat-datepicker-toggle
-                    matIconSuffix
-                    [for]="vencPicker"
-                  ></mat-datepicker-toggle>
+                  <input matInput [matDatepicker]="vencPicker" formControlName="vencimento" />
+                  <mat-datepicker-toggle matIconSuffix [for]="vencPicker"></mat-datepicker-toggle>
                   <mat-datepicker #vencPicker></mat-datepicker>
                 </mat-form-field>
 
@@ -247,23 +198,12 @@
                   }
                 </div>
 
-                <mat-form-field
-                  appearance="outline"
-                  class="col-12"
-                  style="margin-top: -12px"
-                >
+                <mat-form-field appearance="outline" class="col-12" style="margin-top: -12px">
                   <mat-label>Descrição / Detalhes do Pagamento</mat-label>
-                  <input
-                    matInput
-                    formControlName="descricao"
-                    placeholder="Ex: Banco, n° do cheque, comprovante..."
-                  />
+                  <input matInput formControlName="descricao" placeholder="Ex: Banco, n° do cheque, comprovante..." />
                 </mat-form-field>
 
-                <mat-divider
-                  style="margin-bottom: 24px"
-                  class="col-12"
-                ></mat-divider>
+                <mat-divider style="margin-bottom: 24px" class="col-12"></mat-divider>
               </div>
             }
           </div>
@@ -284,9 +224,7 @@
               [control]="$any(vendaForm.get('avalistaSearchControl'))"
               placeholder="Pesquise pelo nome do avalista"
               (itemChanged)="
-                addAvalistaDirectly(
-                  $any(vendaForm.get('avalistaSearchControl')?.value)
-                );
+                addAvalistaDirectly($any(vendaForm.get('avalistaSearchControl')?.value));
                 vendaForm.get('avalistaSearchControl')?.reset()
               "
             ></app-custom-select>
@@ -297,17 +235,10 @@
               <p class="empty-state">Nenhum avalista adicionado.</p>
             } @else {
               <mat-chip-set>
-                @for (
-                  person of selectedAvalistas;
-                  track person.personId;
-                  let i = $index
-                ) {
+                @for (person of selectedAvalistas; track person.personId; let i = $index) {
                   <mat-chip-row (removed)="removeAvalista(i)">
                     {{ person.name }}
-                    <button
-                      matChipRemove
-                      aria-label="Remover"
-                    >
+                    <button matChipRemove aria-label="Remover">
                       <mat-icon>cancel</mat-icon>
                     </button>
                   </mat-chip-row>
@@ -320,14 +251,7 @@
 
       <!-- AÇÕES FINAIS -->
       <div class="form-actions">
-        <button
-          type="button"
-          mat-button
-          (click)="goBack()"
-          [disabled]="isSubmitting()"
-        >
-          Cancelar
-        </button>
+        <button type="button" mat-button (click)="goBack()" [disabled]="isSubmitting()">Cancelar</button>
 
         @if (hasUnsavedChanges()) {
           <button
@@ -342,12 +266,7 @@
           </button>
         }
 
-        <button
-          type="submit"
-          mat-raised-button
-          color="primary"
-          [disabled]="vendaForm.invalid || isSubmitting()"
-        >
+        <button type="submit" mat-raised-button color="primary" [disabled]="vendaForm.invalid || isSubmitting()">
           <mat-icon>{{ isEdit ? 'save' : 'check' }}</mat-icon>
           {{ isEdit ? 'Salvar Alterações' : 'Concluir Registro de Venda' }}
         </button>
@@ -359,32 +278,16 @@
 <!-- Drawer para criar/editar pessoa -->
 @if (openPersonForm()) {
   <app-drawer (closeDrawer)="handleClosePersonDrawer()">
-    <mat-tab-group
-      [selectedIndex]="selectedPersonToEdit()?.legalEntity ? 1 : 0"
-    >
-      <mat-tab
-        label="Pessoa Física"
-        [disabled]="
-          selectedPersonToEdit() && selectedPersonToEdit()!.legalEntity
-        "
-      >
+    <mat-tab-group [selectedIndex]="selectedPersonToEdit()?.legalEntity ? 1 : 0">
+      <mat-tab label="Pessoa Física" [disabled]="selectedPersonToEdit() && selectedPersonToEdit()!.legalEntity">
         <app-natural-person-form
-          [dataForm]="
-            !selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null
-          "
+          [dataForm]="!selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null"
           (formSubmitted)="onPersonFormSubmitted()"
         />
       </mat-tab>
-      <mat-tab
-        label="Pessoa Jurídica"
-        [disabled]="
-          selectedPersonToEdit() && !selectedPersonToEdit()!.legalEntity
-        "
-      >
+      <mat-tab label="Pessoa Jurídica" [disabled]="selectedPersonToEdit() && !selectedPersonToEdit()!.legalEntity">
         <app-legal-entity-form
-          [dataForm]="
-            selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null
-          "
+          [dataForm]="selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null"
           (formSubmitted)="onPersonFormSubmitted()"
         />
       </mat-tab>

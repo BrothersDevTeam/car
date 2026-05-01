@@ -18,13 +18,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import {
-  AbstractControl,
-  FormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { ToastrService } from 'ngx-toastr';
@@ -69,9 +63,7 @@ import { StoreContextService } from '@services/store-context.service';
   templateUrl: './legal-entity-form.component.html',
   styleUrl: './legal-entity-form.component.scss',
 })
-export class LegalEntityFormComponent
-  implements OnInit, OnChanges, OnDestroy, CanComponentDeactivate
-{
+export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, CanComponentDeactivate {
   private subscriptions = new Subscription();
   submitted = false;
 
@@ -137,12 +129,9 @@ export class LegalEntityFormComponent
     active: [true],
     storeId: [''],
     legalEntity: [true],
-    relationship: this.formBuilderService.control<RelationshipTypes>(
-      RelationshipTypes.CLIENTE,
-      {
-        validators: [Validators.required],
-      }
-    ),
+    relationship: this.formBuilderService.control<RelationshipTypes>(RelationshipTypes.CLIENTE, {
+      validators: [Validators.required],
+    }),
     username: [''],
     password: [''],
     confirmPassword: [''],
@@ -150,9 +139,7 @@ export class LegalEntityFormComponent
   });
 
   // Validator personalizado para verificar se as senhas coincidem
-  private passwordMatchValidator(
-    control: AbstractControl
-  ): ValidationErrors | null {
+  private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password');
     const confirmPassword = control.get('confirmPassword');
 
@@ -167,9 +154,7 @@ export class LegalEntityFormComponent
       const errors = confirmPassword.errors;
       if (errors) {
         delete errors['passwordMismatch'];
-        confirmPassword.setErrors(
-          Object.keys(errors).length > 0 ? errors : null
-        );
+        confirmPassword.setErrors(Object.keys(errors).length > 0 ? errors : null);
       }
     }
 
@@ -180,11 +165,7 @@ export class LegalEntityFormComponent
     const selectedType = this.form.get('relationship')?.value;
     return (
       !!selectedType &&
-      [
-        RelationshipTypes.PROPRIETARIO,
-        RelationshipTypes.GERENTE,
-        RelationshipTypes.VENDEDOR,
-      ].includes(selectedType)
+      [RelationshipTypes.PROPRIETARIO, RelationshipTypes.GERENTE, RelationshipTypes.VENDEDOR].includes(selectedType)
     );
   }
 
@@ -192,7 +173,7 @@ export class LegalEntityFormComponent
     private personService: PersonService,
     private toastrService: ToastrService,
     private actionsService: ActionsService,
-    private formDraftService: FormDraftService
+    private formDraftService: FormDraftService,
   ) {}
 
   ngOnInit() {
@@ -209,7 +190,7 @@ export class LegalEntityFormComponent
     this.subscriptions.add(
       this.form.get('relationship')!.valueChanges.subscribe(() => {
         this.updateConditionalValidators();
-      })
+      }),
     );
 
     this.subscriptions.add(
@@ -217,7 +198,7 @@ export class LegalEntityFormComponent
         const hasChanges = this.hasUnsavedChanges();
         this.actionsService.hasFormChanges.set(hasChanges);
         this.formChanged.emit(hasChanges);
-      })
+      }),
     );
 
     this.loadAvailableDrafts();
@@ -237,18 +218,9 @@ export class LegalEntityFormComponent
     const roleNameControl = this.form.get('roleName');
 
     if (this.shouldShowUserFields) {
-      usernameControl?.setValidators([
-        Validators.required,
-        Validators.minLength(3),
-      ]);
-      passwordControl?.setValidators([
-        Validators.required,
-        Validators.minLength(6),
-      ]);
-      confirmPasswordControl?.setValidators([
-        Validators.required,
-        Validators.minLength(6),
-      ]);
+      usernameControl?.setValidators([Validators.required, Validators.minLength(3)]);
+      passwordControl?.setValidators([Validators.required, Validators.minLength(6)]);
+      confirmPasswordControl?.setValidators([Validators.required, Validators.minLength(6)]);
       roleNameControl?.setValidators([Validators.required]);
 
       usernameControl?.updateValueAndValidity({ emitEvent: false });
@@ -351,9 +323,7 @@ export class LegalEntityFormComponent
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.toastrService.error(
-        'Por favor, preencha todos os campos obrigatórios'
-      );
+      this.toastrService.error('Por favor, preencha todos os campos obrigatórios');
       this.isSaving = false;
       return of(false);
     }
@@ -362,9 +332,7 @@ export class LegalEntityFormComponent
       try {
         const storeId = this.storeContextService.currentStoreId;
         if (!storeId) {
-          this.toastrService.error(
-            'Loja não identificada. Faça login novamente.'
-          );
+          this.toastrService.error('Loja não identificada. Faça login novamente.');
           this.isSaving = false;
           observer.next(false);
           observer.complete();
@@ -401,35 +369,27 @@ export class LegalEntityFormComponent
         }
 
         if (this.dataForm?.personId) {
-          this.personService
-            .update(formValue, this.dataForm.personId)
-            .subscribe({
-              next: () => {
-                this.toastrService.success('Atualização feita com sucesso');
-                // Converte personId para o tipo correto antes de passar
-                const personId = Number(this.dataForm!.personId);
-                this.formDraftService.removeDraft(this.FORM_TYPE, personId);
-                this.isSaving = false;
-                observer.next(true);
-                observer.complete();
-              },
-              error: (error) => {
-                console.error('Erro ao atualizar:', error);
-                const msg = extractErrorMessage(
-                  error,
-                  'Erro ao atualizar pessoa'
-                );
-                this.toastrService.error(msg);
-                this.isSaving = false;
-                observer.next(false);
-                observer.complete();
-              },
-            });
+          this.personService.update(formValue, this.dataForm.personId).subscribe({
+            next: () => {
+              this.toastrService.success('Atualização feita com sucesso');
+              // Converte personId para o tipo correto antes de passar
+              const personId = Number(this.dataForm!.personId);
+              this.formDraftService.removeDraft(this.FORM_TYPE, personId);
+              this.isSaving = false;
+              observer.next(true);
+              observer.complete();
+            },
+            error: (error) => {
+              console.error('Erro ao atualizar:', error);
+              const msg = extractErrorMessage(error, 'Erro ao atualizar pessoa');
+              this.toastrService.error(msg);
+              this.isSaving = false;
+              observer.next(false);
+              observer.complete();
+            },
+          });
         } else {
-          const formCleaned =
-            removeEmptyPropertiesFromObject<CreateLegalEntity>(
-              formValue as Person
-            );
+          const formCleaned = removeEmptyPropertiesFromObject<CreateLegalEntity>(formValue as Person);
           this.personService.create(formCleaned).subscribe({
             next: () => {
               this.toastrService.success('Cadastro realizado com sucesso');
@@ -461,7 +421,7 @@ export class LegalEntityFormComponent
     silent: boolean = false,
     draftName?: string,
     existingDraftId?: string,
-    closeAfterSave: boolean = true
+    closeAfterSave: boolean = true,
   ): void {
     // Prepara os dados do rascunho incluindo ID de edição se aplicável
     const draftData = {
@@ -469,12 +429,7 @@ export class LegalEntityFormComponent
       _editingId: this.dataForm?.personId, // Preserva o ID se estiver editando
     };
 
-    const draftId = this.formDraftService.saveDraft(
-      this.FORM_TYPE,
-      draftData,
-      this.dataForm?.personId,
-      draftName
-    );
+    const draftId = this.formDraftService.saveDraft(this.FORM_TYPE, draftData, this.dataForm?.personId, draftName);
 
     // Atualiza o ID do rascunho selecionado
     this.selectedDraftId = draftId;
@@ -522,9 +477,7 @@ export class LegalEntityFormComponent
    * Carrega a lista de rascunhos disponíveis
    */
   private loadAvailableDrafts(): void {
-    this.availableDrafts = this.formDraftService.getDraftsByType(
-      this.FORM_TYPE
-    );
+    this.availableDrafts = this.formDraftService.getDraftsByType(this.FORM_TYPE);
   }
 
   /**
@@ -601,13 +554,9 @@ export class LegalEntityFormComponent
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
       console.log('[legal-entity-form] dataForm recebido:', this.dataForm);
-      console.log(
-        '[legal-entity-form] relationship do banco:',
-        this.dataForm.relationship
-      );
+      console.log('[legal-entity-form] relationship do banco:', this.dataForm.relationship);
 
-      const relationship =
-        this.dataForm.relationship || RelationshipTypes.CLIENTE;
+      const relationship = this.dataForm.relationship || RelationshipTypes.CLIENTE;
 
       console.log('[legal-entity-form] relationship mapeado:', relationship);
 
@@ -625,14 +574,8 @@ export class LegalEntityFormComponent
           ie: this.dataForm!.ie || '',
         });
 
-        console.log(
-          '[legal-entity-form] Formulário após patchValue:',
-          this.form.value
-        );
-        console.log(
-          '[legal-entity-form] relationship após patchValue:',
-          this.form.get('relationship')?.value
-        );
+        console.log('[legal-entity-form] Formulário após patchValue:', this.form.value);
+        console.log('[legal-entity-form] relationship após patchValue:', this.form.get('relationship')?.value);
       }, 200);
     }
   }
@@ -641,10 +584,7 @@ export class LegalEntityFormComponent
     if (event instanceof KeyboardEvent) {
       event.preventDefault();
 
-      if (
-        this.form.valid &&
-        document.activeElement === this.submitButton.nativeElement
-      ) {
+      if (this.form.valid && document.activeElement === this.submitButton.nativeElement) {
         this.onSubmit();
       }
 
@@ -661,20 +601,14 @@ export class LegalEntityFormComponent
       console.log('Formulário inválido: ', this.form.value);
 
       if (this.form.get('relationshipTypes')?.invalid) {
-        console.log(
-          'RelationshipTypes é obrigatório e deve ter pelo menos 1 item'
-        );
+        console.log('RelationshipTypes é obrigatório e deve ter pelo menos 1 item');
       }
       if (this.shouldShowUserFields) {
         if (this.form.get('username')?.invalid) {
-          console.log(
-            'Username é obrigatório para funcionários/contadores/proprietários'
-          );
+          console.log('Username é obrigatório para funcionários/contadores/proprietários');
         }
         if (this.form.get('password')?.invalid) {
-          console.log(
-            'Password é obrigatório para funcionários/contadores/proprietários'
-          );
+          console.log('Password é obrigatório para funcionários/contadores/proprietários');
         }
         if (this.form.get('confirmPassword')?.invalid) {
           console.log('Confirmação de senha é obrigatória');
@@ -683,9 +617,7 @@ export class LegalEntityFormComponent
           console.log('As senhas não coincidem');
         }
         if (this.form.get('roleName')?.invalid) {
-          console.log(
-            'RoleName é obrigatório para funcionários/contadores/proprietários'
-          );
+          console.log('RoleName é obrigatório para funcionários/contadores/proprietários');
         }
       }
       return;
@@ -736,15 +668,11 @@ export class LegalEntityFormComponent
         },
         error: (error) => {
           console.error('Erro ao atualizar:', error);
-          this.toastrService.error(
-            'Erro inesperado! Tente novamente mais tarde'
-          );
+          this.toastrService.error('Erro inesperado! Tente novamente mais tarde');
         },
       });
     } else {
-      const formCleaned = removeEmptyPropertiesFromObject<CreateLegalEntity>(
-        formValue as Person
-      );
+      const formCleaned = removeEmptyPropertiesFromObject<CreateLegalEntity>(formValue as Person);
       console.log('Dados limpos:', formCleaned);
       this.personService.create(formCleaned).subscribe({
         next: () => {
@@ -754,9 +682,7 @@ export class LegalEntityFormComponent
         },
         error: (error) => {
           console.error('Erro ao criar:', error);
-          this.toastrService.error(
-            'Erro inesperado! Tente novamente mais tarde'
-          );
+          this.toastrService.error('Erro inesperado! Tente novamente mais tarde');
         },
       });
     }

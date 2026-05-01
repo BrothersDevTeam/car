@@ -184,10 +184,7 @@ export interface Address {
  *   mainAddress: true
  * };
  */
-export type CreateAddress = Omit<
-  Address,
-  'addressId' | 'createdAt' | 'updatedAt'
->;
+export type CreateAddress = Omit<Address, 'addressId' | 'createdAt' | 'updatedAt'>;
 
 /**
  * Type para atualização de um endereço existente (PUT).

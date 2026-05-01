@@ -5,14 +5,7 @@ import { EventType } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import {
-  Component,
-  EventEmitter,
-  inject,
-  Input,
-  Output,
-  ViewChild,
-} from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
@@ -25,13 +18,7 @@ import { AuthService } from '@services/auth/auth.service';
 
 @Component({
   selector: 'app-legal-entity-info',
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatCardModule,
-    WrapperCardComponent,
-    AddressListComponent,
-  ],
+  imports: [CommonModule, MatButtonModule, MatCardModule, WrapperCardComponent, AddressListComponent],
   templateUrl: './legal-entity-info.component.html',
   styleUrl: './legal-entity-info.component.scss',
 })
@@ -53,7 +40,7 @@ export class LegalEntityInfoComponent {
   constructor(
     private toastrService: ToastrService,
     private personService: PersonService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   ngOnInit() {
@@ -68,9 +55,7 @@ export class LegalEntityInfoComponent {
       !roles.includes('ROLE_ADMIN') &&
       !roles.includes('CAR_ADMIN');
 
-    const relationshipTypes =
-      (this.person as any).relationships?.map((r: any) => r.relationshipName) ||
-      [];
+    const relationshipTypes = (this.person as any).relationships?.map((r: any) => r.relationshipName) || [];
     const isClientOnly =
       relationshipTypes.includes('CLIENTE') &&
       !relationshipTypes.includes('FUNCIONARIO') &&
@@ -86,18 +71,14 @@ export class LegalEntityInfoComponent {
   }
 
   openDialog() {
-    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Confirmar Exclusão',
-          message:
-            'Tem certeza que deseja <strong>excluir</strong> este registro?',
-          confirmText: 'Sim',
-          cancelText: 'Nao',
-        },
-      }
-    );
+    const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Confirmar Exclusão',
+        message: 'Tem certeza que deseja <strong>excluir</strong> este registro?',
+        confirmText: 'Sim',
+        cancelText: 'Nao',
+      },
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
@@ -116,8 +97,7 @@ export class LegalEntityInfoComponent {
         },
         error: (error) => {
           console.error('Erro ao excluir pessoa:', error);
-          const errorMessage =
-            error?.error?.message || error?.message || 'Erro ao excluir pessoa';
+          const errorMessage = error?.error?.message || error?.message || 'Erro ao excluir pessoa';
           this.toastrService.error(errorMessage);
         },
       });

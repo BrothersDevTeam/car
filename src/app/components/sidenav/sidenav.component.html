@@ -7,17 +7,9 @@
         [height]="profilePicSize()"
       /> -->
       @if (!sideNavCollapsed()) {
-        <mat-icon
-          class="mat-18 user-icon"
-          fontSet="material-icons-outlined"
-        >
-          person
-        </mat-icon>
+        <mat-icon class="mat-18 user-icon" fontSet="material-icons-outlined">person</mat-icon>
       }
-      <div
-        class="header-text"
-        [class.hide-header-text]="sideNavCollapsed()"
-      >
+      <div class="header-text" [class.hide-header-text]="sideNavCollapsed()">
         @if (loggedUsername()) {
           <p class="username">{{ loggedUsername() }}</p>
           <p class="user-role">{{ userRole() }}</p>
@@ -33,11 +25,7 @@
             (click)="onMenuItemClick(item.route!, $event)"
           >
             <mat-icon
-              [fontSet]="
-                isRouteActive(item.route!)
-                  ? 'material-icons'
-                  : 'material-icons-outlined'
-              "
+              [fontSet]="isRouteActive(item.route!) ? 'material-icons' : 'material-icons-outlined'"
               matListItemIcon
             >
               {{ item.icon }}
@@ -53,24 +41,17 @@
             [hideToggle]="sideNavCollapsed()"
             class="expansion-button"
           >
-            <mat-expansion-panel-header
-              [ngClass]="{ collapsed: sideNavCollapsed() }"
-            >
+            <mat-expansion-panel-header [ngClass]="{ collapsed: sideNavCollapsed() }">
               <mat-panel-title>
                 <mat-icon
-                  [fontSet]="
-                    !true ? 'material-icons' : 'material-icons-outlined'
-                  "
+                  [fontSet]="!true ? 'material-icons' : 'material-icons-outlined'"
                   [style.color]="'var(--text-color)'"
                 >
                   {{ item.icon }}
                 </mat-icon>
 
                 @if (!sideNavCollapsed()) {
-                  <span
-                    [style.font-size]="'medium'"
-                    [style.color]="'var(--text-color)'"
-                  >
+                  <span [style.font-size]="'medium'" [style.color]="'var(--text-color)'">
                     {{ item.label }}
                   </span>
                 }
@@ -85,11 +66,7 @@
                     (click)="onMenuItemClick(subItem.route!, $event)"
                   >
                     <mat-icon
-                      [fontSet]="
-                        isRouteActive(subItem.route!)
-                          ? 'material-icons'
-                          : 'material-icons-outlined'
-                      "
+                      [fontSet]="isRouteActive(subItem.route!) ? 'material-icons' : 'material-icons-outlined'"
                       matListItemIcon
                     >
                       {{ subItem.icon }}
@@ -107,11 +84,7 @@
       }
     </mat-nav-list>
   </div>
-  <mat-list-item
-    class="menu-item exit_btn"
-    mat-button
-    (click)="handleLogout()"
-  >
+  <mat-list-item class="menu-item exit_btn" mat-button (click)="handleLogout()">
     <mat-icon matListItemIcon>exit_to_app</mat-icon>
     @if (!sideNavCollapsed()) {
       <span matListItemTitle>Sair</span>

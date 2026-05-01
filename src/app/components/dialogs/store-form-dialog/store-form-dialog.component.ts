@@ -1,22 +1,13 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-  MatDialogRef,
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@interfaces/store';
 import { StoreService } from '@services/store.service';
@@ -95,7 +86,7 @@ export class StoreFormDialogComponent implements OnInit {
     private personService: PersonService,
     private storeContextService: StoreContextService,
     public dialogRef: MatDialogRef<StoreFormDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: StoreFormDialogData
+    @Inject(MAT_DIALOG_DATA) public data: StoreFormDialogData,
   ) {}
 
   ngOnInit(): void {
@@ -108,80 +99,37 @@ export class StoreFormDialogComponent implements OnInit {
   private initForms(): void {
     // STEP 1: Formulário de dados da loja
     this.storeForm = this.fb.group({
-      name: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(50),
-        ],
-      ],
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       tradeName: ['', [Validators.minLength(3), Validators.maxLength(50)]],
-      cnpj: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(14),
-          Validators.maxLength(14),
-        ],
-      ],
-      email: [
-        '',
-        [Validators.required, Validators.email, Validators.maxLength(50)],
-      ],
+      cnpj: ['', [Validators.required, Validators.minLength(14), Validators.maxLength(14)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(50)]],
       phoneNumber: ['', [Validators.maxLength(20)]],
     });
 
     // STEP 2: Formulário de dados do proprietário
     this.personForm = this.fb.group({
       legalEntity: [false], // false = Pessoa Física, true = Pessoa Jurídica
-      name: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(50),
-        ],
-      ],
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       nickName: ['', [Validators.minLength(3), Validators.maxLength(50)]],
       cpf: [''], // Validação condicional
       cnpj: [''], // Validação condicional
       rg: ['', [Validators.maxLength(14)]],
       rgIssuer: ['', [Validators.maxLength(14)]],
-      email: [
-        '',
-        [Validators.required, Validators.email, Validators.maxLength(255)],
-      ],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
       phone: ['', [Validators.maxLength(14)]],
     });
 
     // STEP 3: Formulário de dados de acesso
     this.accessForm = this.fb.group({
-      username: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(50),
-        ],
-      ],
-      password: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(6),
-          Validators.maxLength(20),
-        ],
-      ],
+      username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
+      password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(20)]],
       confirmPassword: ['', [Validators.required]],
     });
 
     // Listener para alternar validação entre CPF e CNPJ
-    this.personForm
-      .get('legalEntity')
-      ?.valueChanges.subscribe((isLegalEntity) => {
-        this.updatePersonDocumentValidation(isLegalEntity);
-      });
+    this.personForm.get('legalEntity')?.valueChanges.subscribe((isLegalEntity) => {
+      this.updatePersonDocumentValidation(isLegalEntity);
+    });
 
     // Inicializa validação de CPF (padrão é Pessoa Física)
     this.updatePersonDocumentValidation(false);
@@ -198,19 +146,11 @@ export class StoreFormDialogComponent implements OnInit {
     if (isLegalEntity) {
       // Pessoa Jurídica: CNPJ obrigatório, CPF opcional
       cpfControl?.clearValidators();
-      cnpjControl?.setValidators([
-        Validators.required,
-        Validators.minLength(14),
-        Validators.maxLength(14),
-      ]);
+      cnpjControl?.setValidators([Validators.required, Validators.minLength(14), Validators.maxLength(14)]);
     } else {
       // Pessoa Física: CPF obrigatório, CNPJ opcional
       cnpjControl?.clearValidators();
-      cpfControl?.setValidators([
-        Validators.required,
-        Validators.minLength(11),
-        Validators.maxLength(11),
-      ]);
+      cpfControl?.setValidators([Validators.required, Validators.minLength(11), Validators.maxLength(11)]);
     }
 
     cpfControl?.updateValueAndValidity();
@@ -244,11 +184,7 @@ export class StoreFormDialogComponent implements OnInit {
    */
   onSubmit(): void {
     // Valida todos os formulários
-    if (
-      !this.storeForm.valid ||
-      !this.personForm.valid ||
-      !this.accessForm.valid
-    ) {
+    if (!this.storeForm.valid || !this.personForm.valid || !this.accessForm.valid) {
       this.markAllAsTouched();
       return;
     }
@@ -274,14 +210,8 @@ export class StoreFormDialogComponent implements OnInit {
     }
 
     // 📝 LOG: Mostra qual endpoint será chamado
-    console.log(
-      '🎯 Tipo de cadastro:',
-      this.data.isCarAdmin ? 'MATRIZ' : 'FILIAL'
-    );
-    console.log(
-      '📦 Payload que será enviado:',
-      JSON.stringify(storePayload, null, 2)
-    );
+    console.log('🎯 Tipo de cadastro:', this.data.isCarAdmin ? 'MATRIZ' : 'FILIAL');
+    console.log('📦 Payload que será enviado:', JSON.stringify(storePayload, null, 2));
 
     // PASSO 1: Criar Store (MATRIZ ou FILIAL baseado na role)
     const createStoreObservable = this.data.isCarAdmin
@@ -335,15 +265,12 @@ export class StoreFormDialogComponent implements OnInit {
               return this.storeService
                 .setStoreOwner(
                   createdStore.storeId,
-                  createdPerson.personId // ✅ Agora extrai do objeto
+                  createdPerson.personId, // ✅ Agora extrai do objeto
                 )
                 .pipe(
                   tap({
                     next: (updatedStore) => {
-                      console.log(
-                        '✅ Proprietário vinculado com sucesso:',
-                        updatedStore
-                      );
+                      console.log('✅ Proprietário vinculado com sucesso:', updatedStore);
                     },
                     error: (error) => {
                       console.error('❌ Erro ao vincular proprietário:', error);
@@ -356,9 +283,9 @@ export class StoreFormDialogComponent implements OnInit {
                     },
                   }),
                   // Retorna a store completa
-                  switchMap(() => of(createdStore))
+                  switchMap(() => of(createdStore)),
                 );
-            })
+            }),
           );
         }),
 
@@ -371,49 +298,30 @@ export class StoreFormDialogComponent implements OnInit {
           if (error.error?.message) {
             this.submitError = error.error.message;
           } else if (error.status === 400) {
-            this.submitError =
-              'Dados inválidos. Verifique os campos e tente novamente.';
+            this.submitError = 'Dados inválidos. Verifique os campos e tente novamente.';
           } else if (error.status === 409 || error.status === 500) {
             // Verifica se é erro de duplicação no corpo do erro
-            const errorMessage = JSON.stringify(
-              error.error || error.message || ''
-            ).toLowerCase();
+            const errorMessage = JSON.stringify(error.error || error.message || '').toLowerCase();
 
-            if (
-              errorMessage.includes('email') &&
-              errorMessage.includes('already exists')
-            ) {
-              this.submitError =
-                '❌ Este email já está cadastrado no sistema. Use outro email para a loja.';
-            } else if (
-              errorMessage.includes('cnpj') &&
-              errorMessage.includes('already exists')
-            ) {
+            if (errorMessage.includes('email') && errorMessage.includes('already exists')) {
+              this.submitError = '❌ Este email já está cadastrado no sistema. Use outro email para a loja.';
+            } else if (errorMessage.includes('cnpj') && errorMessage.includes('already exists')) {
               this.submitError = '❌ Este CNPJ já está cadastrado no sistema.';
-            } else if (
-              errorMessage.includes('cpf') &&
-              errorMessage.includes('already exists')
-            ) {
+            } else if (errorMessage.includes('cpf') && errorMessage.includes('already exists')) {
               this.submitError = '❌ Este CPF já está cadastrado no sistema.';
-            } else if (
-              errorMessage.includes('username') &&
-              errorMessage.includes('already exists')
-            ) {
-              this.submitError =
-                '❌ Este nome de usuário já está em uso. Escolha outro.';
+            } else if (errorMessage.includes('username') && errorMessage.includes('already exists')) {
+              this.submitError = '❌ Este nome de usuário já está em uso. Escolha outro.';
             } else if (errorMessage.includes('duplicate key')) {
-              this.submitError =
-                '❌ Dados duplicados. Verifique se o email, CNPJ ou CPF já não estão cadastrados.';
+              this.submitError = '❌ Dados duplicados. Verifique se o email, CNPJ ou CPF já não estão cadastrados.';
             } else {
-              this.submitError =
-                'Erro ao cadastrar loja. Tente novamente ou contate o suporte.';
+              this.submitError = 'Erro ao cadastrar loja. Tente novamente ou contate o suporte.';
             }
           } else {
             this.submitError = 'Erro ao cadastrar loja. Tente novamente.';
           }
 
           return throwError(() => error);
-        })
+        }),
       )
       .subscribe({
         next: (createdStore: Store) => {
@@ -445,9 +353,7 @@ export class StoreFormDialogComponent implements OnInit {
       tradeName: formValue.tradeName || null,
       cnpj: formValue.cnpj.replace(/\D/g, ''), // Remove formatação
       email: formValue.email,
-      phoneNumber: formValue.phoneNumber
-        ? formValue.phoneNumber.replace(/\D/g, '')
-        : null,
+      phoneNumber: formValue.phoneNumber ? formValue.phoneNumber.replace(/\D/g, '') : null,
     };
 
     // Se não for CAR_ADMIN, é uma filial e precisa do mainStoreId
@@ -457,9 +363,7 @@ export class StoreFormDialogComponent implements OnInit {
 
       // ⚠️ VALIDAÇÃO CRÍTICA: Backend exige mainStoreId para criar filial
       if (!userStoreId) {
-        throw new Error(
-          'Erro: não foi possível identificar a loja matriz. Faça login novamente.'
-        );
+        throw new Error('Erro: não foi possível identificar a loja matriz. Faça login novamente.');
       }
 
       console.log('🏢 Criando FILIAL da matriz:', userStoreId);
@@ -489,9 +393,7 @@ export class StoreFormDialogComponent implements OnInit {
       phone: personValue.phone ? personValue.phone.replace(/\D/g, '') : null,
       legalEntity: personValue.legalEntity,
       cpf: personValue.legalEntity ? null : personValue.cpf?.replace(/\D/g, ''),
-      cnpj: personValue.legalEntity
-        ? personValue.cnpj?.replace(/\D/g, '')
-        : null,
+      cnpj: personValue.legalEntity ? personValue.cnpj?.replace(/\D/g, '') : null,
       rg: personValue.rg || null,
       rgIssuer: personValue.rgIssuer || null,
       ie: null,

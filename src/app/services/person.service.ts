@@ -2,11 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, first, Observable, of, tap, forkJoin } from 'rxjs';
 
-import {
-  CreateLegalEntity,
-  CreateNaturalPerson,
-  Person,
-} from '@interfaces/person';
+import { CreateLegalEntity, CreateNaturalPerson, Person } from '@interfaces/person';
 import { PaginationResponse } from '@interfaces/pagination';
 import { AuthService } from './auth/auth.service';
 
@@ -17,14 +13,13 @@ export class PersonService {
   private cache: PaginationResponse<Person> | null = null;
 
   // Subject para notificar mudanças no cache
-  private cacheUpdated$ =
-    new BehaviorSubject<PaginationResponse<Person> | null>(null);
+  private cacheUpdated$ = new BehaviorSubject<PaginationResponse<Person> | null>(null);
 
   private readonly apiUrl: string = '/api/persons';
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   // Observable público para componentes se inscreverem
@@ -40,9 +35,7 @@ export class PersonService {
   private updatePersonOnCache(person: Person) {
     if (this.cache?.content) {
       // Remove a pessoa antiga do cache
-      const filteredCache = this.cache.content.filter(
-        (personCache) => personCache.personId !== person.personId
-      );
+      const filteredCache = this.cache.content.filter((personCache) => personCache.personId !== person.personId);
 
       // Adiciona a pessoa atualizada no início
       const updatedContent = [person, ...filteredCache];
@@ -69,7 +62,7 @@ export class PersonService {
       roleNames?: string[]; // NOVO: Parâmetro para filtrar por roles
       includeInactive?: boolean; // NOVO: Se true, retorna inativos
       networkStoreId?: string; // NOVO: Parâmetro para filtrar pela rede da loja
-    }
+    },
   ): Observable<PaginationResponse<Person>> {
     // Se houver parâmetros de busca, não usa cache
     // Verifica se há algum parâmetro de busca válido (string com conteúdo ou array não vazio)
@@ -116,17 +109,12 @@ export class PersonService {
       }
 
       if (searchParams.networkStoreId?.trim()) {
-        url += `&networkStoreId=${encodeURIComponent(
-          searchParams.networkStoreId.trim()
-        )}`;
+        url += `&networkStoreId=${encodeURIComponent(searchParams.networkStoreId.trim())}`;
       }
 
       // Adiciona o filtro de relationshipTypes se fornecido
       // O backend espera múltiplos valores no formato: ?relationshipTypes=CLIENTE&relationshipTypes=FUNCIONARIO
-      if (
-        searchParams.relationshipTypes &&
-        searchParams.relationshipTypes.length > 0
-      ) {
+      if (searchParams.relationshipTypes && searchParams.relationshipTypes.length > 0) {
         searchParams.relationshipTypes.forEach((type) => {
           url += `&relationshipTypes=${encodeURIComponent(type)}`;
         });
@@ -164,7 +152,7 @@ export class PersonService {
           }
           response.page.totalElements = response.content.length;
         }
-      })
+      }),
     );
   }
 
@@ -172,7 +160,7 @@ export class PersonService {
     return this.http.post<string>(`${this.apiUrl}`, data).pipe(
       tap((response: string) => {
         this.clearCache();
-      })
+      }),
     );
   }
 
@@ -182,13 +170,11 @@ export class PersonService {
    * @param data Dados do usuário (username, password, roleName)
    */
   createEmployeeUser(personId: string, data: any) {
-    return this.http
-      .post<any>(`/api/employees/${personId}/create-user`, data)
-      .pipe(
-        tap(() => {
-          this.clearCache();
-        })
-      );
+    return this.http.post<any>(`/api/employees/${personId}/create-user`, data).pipe(
+      tap(() => {
+        this.clearCache();
+      }),
+    );
   }
 
   /**
@@ -206,7 +192,7 @@ export class PersonService {
       tap((response: string) => {
         console.log('Formulário enviado com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 
@@ -215,19 +201,17 @@ export class PersonService {
       tap((response: string) => {
         console.log('Cliente deletado com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 
   deleteMany(ids: string[]) {
-    const deleteRequests = ids.map((id) =>
-      this.http.delete<string>(`${this.apiUrl}/${id}`)
-    );
+    const deleteRequests = ids.map((id) => this.http.delete<string>(`${this.apiUrl}/${id}`));
     return forkJoin(deleteRequests).pipe(
       tap((responses) => {
         console.log('Clientes deletados com sucesso!', responses);
         this.clearCache();
-      })
+      }),
     );
   }
 

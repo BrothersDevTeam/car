@@ -2,10 +2,7 @@
   <h2 mat-dialog-title>{{ data.title }}</h2>
 
   <mat-dialog-content>
-    <form
-      [formGroup]="modelForm"
-      class="model-form"
-    >
+    <form [formGroup]="modelForm" class="model-form">
       <!-- Marca (somente visualização) -->
       @if (data.brandName) {
         <div class="brand-info">
@@ -15,17 +12,9 @@
       }
 
       <!-- Nome do Modelo -->
-      <mat-form-field
-        appearance="outline"
-        class="full-width"
-      >
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>Nome do Modelo *</mat-label>
-        <input
-          matInput
-          formControlName="name"
-          placeholder="Ex: Corolla, Civic, Gol"
-          maxlength="100"
-        />
+        <input matInput formControlName="name" placeholder="Ex: Corolla, Civic, Gol" maxlength="100" />
         @if (modelForm.get('name')?.invalid && modelForm.get('name')?.touched) {
           <mat-error>{{ getErrorMessage('name') }}</mat-error>
         }
@@ -34,20 +23,8 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button
-      mat-button
-      (click)="onCancel()"
-      type="button"
-    >
-      Cancelar
-    </button>
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="onSubmit()"
-      type="button"
-      [disabled]="modelForm.invalid"
-    >
+    <button mat-button (click)="onCancel()" type="button">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" type="button" [disabled]="modelForm.invalid">
       {{ data.mode === 'create' ? 'Criar' : 'Salvar' }}
     </button>
   </mat-dialog-actions>

@@ -3,11 +3,7 @@
     {{ isEditMode ? 'Editar Endereço' : 'Novo Endereço' }}
   </h2>
 
-  <form
-    [formGroup]="form"
-    (ngSubmit)="onSubmit()"
-    class="address-form"
-  >
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="address-form">
     <!-- Combobox de Rascunhos -->
     @if (availableDrafts.length > 0 && !isEditMode) {
       <div class="drafts-section">
@@ -16,15 +12,9 @@
           <span>Cadastros em andamento</span>
         </div>
 
-        <mat-form-field
-          appearance="outline"
-          class="draft-select-field"
-        >
+        <mat-form-field appearance="outline" class="draft-select-field">
           <mat-label>Selecione um cadastro para continuar</mat-label>
-          <mat-select
-            [(value)]="selectedDraftId"
-            (selectionChange)="onDraftSelected($event)"
-          >
+          <mat-select [(value)]="selectedDraftId" (selectionChange)="onDraftSelected($event)">
             <mat-option [value]="null">-- Iniciar novo cadastro --</mat-option>
             @for (draft of availableDrafts; track draft.id) {
               <mat-option [value]="draft.id">
@@ -83,9 +73,7 @@
       </app-primary-input>
 
       @if (!loadingCep) {
-        <small class="help-text">
-          Digite o CEP e pressione Tab para buscar automaticamente
-        </small>
+        <small class="help-text">Digite o CEP e pressione Tab para buscar automaticamente</small>
       }
 
       @if (loadingCep) {
@@ -160,48 +148,26 @@
     <!-- Checkboxes -->
     <div class="form-row checkboxes">
       <label class="checkbox-label">
-        <input
-          type="checkbox"
-          formControlName="mainAddress"
-        />
+        <input type="checkbox" formControlName="mainAddress" />
         <span>Endereço Principal</span>
-        <mat-icon
-          class="info-icon"
-          matTooltip="Apenas um endereço pode ser principal"
-        >
-          info
-        </mat-icon>
+        <mat-icon class="info-icon" matTooltip="Apenas um endereço pode ser principal">info</mat-icon>
       </label>
 
       <label class="checkbox-label">
-        <input
-          type="checkbox"
-          formControlName="active"
-        />
+        <input type="checkbox" formControlName="active" />
         <span>Ativo</span>
       </label>
     </div>
 
     <!-- Botões -->
     <div class="form-actions">
-      <button
-        type="button"
-        mat-stroked-button
-        (click)="onCancel()"
-        class="btn-cancel"
-      >
+      <button type="button" mat-stroked-button (click)="onCancel()" class="btn-cancel">
         <mat-icon>close</mat-icon>
         Cancelar
       </button>
 
       @if (form.dirty) {
-        <button
-          mat-stroked-button
-          type="button"
-          color="primary"
-          (click)="openSaveDraftDialog()"
-          [disabled]="isSaving"
-        >
+        <button mat-stroked-button type="button" color="primary" (click)="openSaveDraftDialog()" [disabled]="isSaving">
           <mat-icon>save_as</mat-icon>
           Salvar Rascunho
         </button>
