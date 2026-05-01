@@ -250,66 +250,56 @@
         </div>
 
         <!-- ======= SEÇÃO 2: VALORES ======= -->
-        @if (selectedNfe.nfeValorTotal || selectedNfe.nfeValorProdutos) {
-          <div class="nfe-section">
-            <h3 class="section-title">
-              <mat-icon>monetization_on</mat-icon>
-              Valores
-            </h3>
-            <div class="info-grid">
-              @if (selectedNfe.nfeValorProdutos) {
-                <div class="info-item">
-                  <label>Valor dos Produtos</label>
-                  <span>R$ {{ selectedNfe.nfeValorProdutos }}</span>
-                </div>
-              }
-              @if (selectedNfe.nfeValorTotal) {
-                <div class="info-item">
-                  <label>Valor Total</label>
-                  <span class="valor-destaque">
-                    R$ {{ selectedNfe.nfeValorTotal }}
-                  </span>
-                </div>
-              }
-              @if (selectedNfe.nfeValorFrete) {
-                <div class="info-item">
-                  <label>Valor do Frete</label>
-                  <span>R$ {{ selectedNfe.nfeValorFrete }}</span>
-                </div>
-              }
-              @if (selectedNfe.nfeValorDesconto) {
-                <div class="info-item">
-                  <label>Desconto</label>
-                  <span>R$ {{ selectedNfe.nfeValorDesconto }}</span>
-                </div>
-              }
-              @if (selectedNfe.nfeIcmsValorTotal) {
-                <div class="info-item">
-                  <label>ICMS Total</label>
-                  <span>R$ {{ selectedNfe.nfeIcmsValorTotal }}</span>
-                </div>
-              }
-              @if (selectedNfe.nfeValorIpi) {
-                <div class="info-item">
-                  <label>IPI</label>
-                  <span>R$ {{ selectedNfe.nfeValorIpi }}</span>
-                </div>
-              }
-              @if (selectedNfe.nfeValorPis) {
-                <div class="info-item">
-                  <label>PIS</label>
-                  <span>R$ {{ selectedNfe.nfeValorPis }}</span>
-                </div>
-              }
-              @if (selectedNfe.nfeValorCofins) {
-                <div class="info-item">
-                  <label>COFINS</label>
-                  <span>R$ {{ selectedNfe.nfeValorCofins }}</span>
-                </div>
-              }
+        <div class="nfe-section">
+          <h3 class="section-title">
+            <mat-icon>monetization_on</mat-icon>
+            Valores
+          </h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Valor Total</label>
+              <span class="valor-destaque">
+                R$ {{ nfeValorTotalCalculado }}
+              </span>
             </div>
+            @if (selectedNfe.nfeValorFrete) {
+              <div class="info-item">
+                <label>Valor do Frete</label>
+                <span>R$ {{ selectedNfe.nfeValorFrete }}</span>
+              </div>
+            }
+            @if (selectedNfe.nfeValorDesconto) {
+              <div class="info-item">
+                <label>Desconto</label>
+                <span>R$ {{ selectedNfe.nfeValorDesconto }}</span>
+              </div>
+            }
+            @if (selectedNfe.nfeIcmsValorTotal) {
+              <div class="info-item">
+                <label>ICMS Total</label>
+                <span>R$ {{ selectedNfe.nfeIcmsValorTotal }}</span>
+              </div>
+            }
+            @if (selectedNfe.nfeValorIpi) {
+              <div class="info-item">
+                <label>IPI</label>
+                <span>R$ {{ selectedNfe.nfeValorIpi }}</span>
+              </div>
+            }
+            @if (selectedNfe.nfeValorPis) {
+              <div class="info-item">
+                <label>PIS</label>
+                <span>R$ {{ selectedNfe.nfeValorPis }}</span>
+              </div>
+            }
+            @if (selectedNfe.nfeValorCofins) {
+              <div class="info-item">
+                <label>COFINS</label>
+                <span>R$ {{ selectedNfe.nfeValorCofins }}</span>
+              </div>
+            }
           </div>
-        }
+        </div>
 
         <!-- ======= SEÇÃO 3: EMITENTE ======= -->
         @if (selectedNfe.nfeEmitente) {
@@ -580,18 +570,22 @@
     <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
       <mat-tab-group [selectedIndex]="selectedTabIndex()">
         <mat-tab label="NFe Entrada">
-          <app-nfe-entrada-form
-            [dataForm]="selectedNfe"
-            (formSubmitted)="onFormSubmitted()"
-            (formChanged)="handleFormChanged($event)"
-          />
+          <ng-template matTabContent>
+            <app-nfe-entrada-form
+              [dataForm]="selectedNfe"
+              (formSubmitted)="onFormSubmitted()"
+              (formChanged)="handleFormChanged($event)"
+            />
+          </ng-template>
         </mat-tab>
         <mat-tab label="NFe Saída">
-          <app-nfe-saida-form
-            [dataForm]="selectedNfe"
-            (formSubmitted)="onFormSubmitted()"
-            (formChanged)="handleFormChanged($event)"
-          />
+          <ng-template matTabContent>
+            <app-nfe-saida-form
+              [dataForm]="selectedNfe"
+              (formSubmitted)="onFormSubmitted()"
+              (formChanged)="handleFormChanged($event)"
+            />
+          </ng-template>
         </mat-tab>
       </mat-tab-group>
     </app-drawer>
