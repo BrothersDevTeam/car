@@ -7,6 +7,7 @@ import {
   OnChanges,
   OnInit,
   OnDestroy,
+  SimpleChanges,
   ChangeDetectorRef,
   ViewChild,
   ElementRef,
@@ -100,36 +101,27 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  ngOnChanges(): void {
-    console.log(
-      `[${this.listType}] ngOnChanges - options received:`,
-      this.options?.length
-    );
-    if (this.options.length > 0) {
-      this.filteredOptions = [...this.options];
-      console.log(
-        `[${this.listType}] ngOnChanges - filteredOptions updated:`,
-        this.filteredOptions.length
-      );
-      // Aguarda o ciclo de detecção de mudanças para pegar o valor correto do control
-      setTimeout(() => {
-        this.setSelectedOption();
-        this.cdr.detectChanges(); // Força detecção de mudanças
-      }, 100); // Aumentado para 100ms
-    } else {
-      console.log(`[${this.listType}] ngOnChanges - options empty or null`);
-      // Aguarda um pouco para as opções carregarem
-      setTimeout(() => {
-        if (this.options.length > 0) {
-          this.filteredOptions = [...this.options];
-          console.log(
-            `[${this.listType}] ngOnChanges (delayed) - filteredOptions updated:`,
-            this.filteredOptions.length
-          );
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['control']) {
+      if (this.valueSub) {
+        this.valueSub.unsubscribe();
+      }
+      if (this.control) {
+        this.valueSub = this.control.valueChanges.subscribe(() => {
           this.setSelectedOption();
           this.cdr.detectChanges();
-        }
-      }, 150);
+        });
+      }
+    }
+
+    if (this.options.length > 0) {
+      this.filteredOptions = [...this.options];
+      this.setSelectedOption();
+      this.cdr.detectChanges();
+    } else {
+      // Tenta setar a opção mesmo sem lista (usando o fallback do control)
+      this.setSelectedOption();
+      this.cdr.detectChanges();
     }
   }
 
@@ -150,13 +142,15 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       }
 
       if (value && value.id) {
-        this.selectedOption =
-          this.options.find((option) => option.id === value.id) || null;
+        const found = this.options.find((option) => option.id === value.id);
+        this.selectedOption = found || (value.name ? { id: value.id, name: value.name } : null);
       } else if (value && value.name && !value.id) {
         // Se só tem name, busca pela name
-        this.selectedOption =
-          this.options.find((option) => option.name === value.name) || null;
+        const found = this.options.find((option) => option.name === value.name);
+        this.selectedOption = found || { id: '', name: value.name };
       }
+      
+      this.cdr.detectChanges();
 
       // Log final
       if (this.selectedOption) {

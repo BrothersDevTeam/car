@@ -365,6 +365,9 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
+    const itemTipo = this.dataForm.vehicleId ? 'veiculo' : 'produto';
+    this.form.get('itemTipo')?.setValue(itemTipo, { emitEvent: false });
+
     this.itens.clear();
     if (this.dataForm.nfeItens && this.dataForm.nfeItens.length > 0) {
       this.dataForm.nfeItens.forEach((item) => {
@@ -372,9 +375,14 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
         const pis = (item.itemPis || {}) as any;
         const cofins = (item.itemCofins || {}) as any;
 
+        const vehicleId = item.vehicleId || this.dataForm?.vehicleId;
+        const vehicleName = item.itemDescricao || this.dataForm?.productIdentifier || '';
+
         this.itens.push(
           this.createItem({
             ...item,
+            vehicleId: vehicleId,
+            vehicleName: vehicleName,
             icmsOrigem: icms.icmsOrigem,
             icmsSituacaoTributaria: icms.icmsSituacaoTributaria,
             icmsValorBaseCalculo: icms.icmsValorBaseCalculo,
@@ -396,7 +404,6 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.form.patchValue({
-      itemTipo: this.dataForm.vehicleId ? 'veiculo' : 'produto',
       person: {
         id: this.dataForm.personId || '',
         name:

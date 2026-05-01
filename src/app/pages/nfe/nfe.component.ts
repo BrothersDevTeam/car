@@ -413,17 +413,26 @@ export class NfeComponent {
     );
   }
 
-  handleEdit(nfe: Nfe) {
+  handleEdit(nfeSummary: Nfe) {
     if (!this.storeContextService.validateStoreSelection()) return;
-    if (nfe) {
-      this.selectedNfe = nfe;
+    if (!nfeSummary.nfeId) return;
 
-      // nfeTipoDocumento: '0' = Entrada, '1' = Saída
-      const isEntrada = nfe.nfeTipoDocumento === '0';
-      this.selectedTabIndex.set(isEntrada ? 0 : 1);
-    }
-    this.openInfo.set(false);
-    this.openForm.set(true);
+    this.nfeService.getById(nfeSummary.nfeId).subscribe({
+      next: (fullNfe) => {
+        this.selectedNfe = fullNfe;
+
+        // nfeTipoDocumento: '0' = Entrada, '1' = Saída
+        const isEntrada = fullNfe.nfeTipoDocumento === '0';
+        this.selectedTabIndex.set(isEntrada ? 0 : 1);
+        
+        this.openInfo.set(false);
+        this.openForm.set(true);
+      },
+      error: (err) => {
+        this.toastr.error('Erro ao carregar detalhes da NFe para edição.');
+        console.error(err);
+      }
+    });
   }
 
   handleSelectionChange(selectedRows: Nfe[]) {
