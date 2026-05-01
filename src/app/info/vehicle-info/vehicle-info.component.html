@@ -10,11 +10,8 @@
         <h1>{{ vehicle.brand }} {{ vehicle.model }}</h1>
         <div class="badges-row">
           <mat-chip-set>
-            <mat-chip
-              [class.chip-disponivel]="vehicle.status === 'DISPONIVEL'"
-              [class.chip-vendido]="vehicle.status === 'VENDIDO'"
-            >
-              {{ vehicle.status === 'DISPONIVEL' ? 'Em Estoque' : 'Vendido' }}
+            <mat-chip [ngClass]="statusClass">
+              {{ statusLabel }}
             </mat-chip>
             <mat-chip class="chip-year">{{ vehicle.vehicleYear }}/{{ vehicle.modelYear }}</mat-chip>
           </mat-chip-set>
@@ -142,9 +139,9 @@
       </mat-tab>
 
       <!-- ABA: PROPRIETÁRIO / COMPRADOR -->
-      <mat-tab [label]="vehicle.status === 'VENDIDO' ? 'Comprador' : 'Proprietário'">
+      <mat-tab [label]="isVendido ? 'Comprador' : 'Proprietário'">
         <div class="tab-body">
-          @if (vehicle.status === 'VENDIDO' && vehicle.salesHistory?.[0]) {
+          @if (isVendido && vehicle.salesHistory?.[0]) {
             <!-- Mostra o comprador se o veículo estiver vendido -->
             <div class="owner-card buyer-mode">
               <div class="owner-header">

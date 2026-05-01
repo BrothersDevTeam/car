@@ -137,6 +137,39 @@ export class VehicleInfoComponent implements OnChanges {
     });
   }
 
+  get statusLabel(): string {
+    const s = this.vehicle?.status?.toUpperCase() || '';
+    // Se estiver vazio, assumimos que está em estoque por padrão
+    if (!s || s.includes('DISPONIVEL') || s.includes('DISPONÍVEL')) {
+      return 'Em Estoque';
+    }
+    if (s === 'VENDIDO') {
+      return 'Vendido';
+    }
+    if (s === 'RESERVADO') {
+      return 'Reservado';
+    }
+    return s;
+  }
+
+  get statusClass(): string {
+    const s = this.vehicle?.status?.toUpperCase() || '';
+    if (!s || s.includes('DISPONIVEL') || s.includes('DISPONÍVEL')) {
+      return 'chip-disponivel';
+    }
+    if (s === 'VENDIDO') {
+      return 'chip-vendido';
+    }
+    if (s === 'RESERVADO') {
+      return 'chip-reservado';
+    }
+    return '';
+  }
+
+  get isVendido(): boolean {
+    return this.vehicle?.status?.toUpperCase() === 'VENDIDO';
+  }
+
   onEdit() {
     this.editEvent.emit(this.vehicle);
   }
