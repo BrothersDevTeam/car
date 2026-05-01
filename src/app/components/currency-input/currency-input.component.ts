@@ -112,8 +112,22 @@ export class CurrencyInputComponent implements ControlValueAccessor {
     if (value === null || value === undefined || value === '') return 0;
     if (typeof value === 'number') return value;
 
-    // Se vier como string, tenta limpar
-    const clean = value.toString().replace(/\D/g, '');
-    return parseFloat(clean) / 100 || 0;
+    let stringValue = value.toString().trim();
+    if (stringValue === '') return 0;
+
+    // Se a string contiver vírgula, assume formato brasileiro (ex: 1.234,56 ou 1234,56)
+    if (stringValue.includes(',')) {
+      // Remove pontos de milhar e troca vírgula por ponto decimal
+      const normalized = stringValue.replace(/\./g, '').replace(',', '.');
+      return parseFloat(normalized) || 0;
+    }
+
+    // Se a string NÃO tiver vírgula mas tiver ponto, assume formato de banco/americano (ex: 1234.56)
+    if (stringValue.includes('.')) {
+      return parseFloat(stringValue) || 0;
+    }
+
+    // Se for uma string puramente numérica (ex: "99000"), assume que são reais inteiros
+    return parseFloat(stringValue) || 0;
   }
 }

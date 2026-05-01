@@ -542,4 +542,34 @@ export class NfeComponent {
       }
     });
   }
+  private formatCurrency(value: number | string): string {
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(num)) return '0,00';
+    return new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num);
+  }
+
+  get nfeValorTotalCalculado(): string {
+    if (!this.selectedNfe) return '0,00';
+    
+    // Se o backend já enviou o total, apenas formata
+    if (this.selectedNfe.nfeValorTotal && parseFloat(this.selectedNfe.nfeValorTotal) > 0) {
+      return this.formatCurrency(this.selectedNfe.nfeValorTotal);
+    }
+
+    // Cálculo manual para rascunhos incompletos (soma dos itens + encargos - desconto)
+    const produtos = (this.selectedNfe.nfeItens || []).reduce((acc, item) => {
+      const valor = item.itemValorBruto ? parseFloat(item.itemValorBruto.toString().replace(',', '.')) : 0;
+      return acc + valor;
+    }, 0);
+
+    const frete = parseFloat(this.selectedNfe.nfeValorFrete || '0');
+    const seguro = parseFloat(this.selectedNfe.nfeValorSeguro || '0');
+    const outras = parseFloat(this.selectedNfe.nfeValorOutrasDespesas || '0');
+    const desconto = parseFloat(this.selectedNfe.nfeValorDesconto || '0');
+    
+    return this.formatCurrency(produtos + frete + seguro + outras - desconto);
+  }
 }

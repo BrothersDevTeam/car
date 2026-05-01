@@ -322,11 +322,28 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
     this.vehicleService.getById(option.id).subscribe((vehicle) => {
       const itemGroup = this.itens.at(index) as FormGroup;
-      const valor = vehicle.valorCompra
-        ? parseFloat(vehicle.valorCompra.toString().replace(',', '.'))
-        : 0;
+      
+      // Helper para parsing robusto
+      const parse = (v: any) => {
+        if (!v) return 0;
+        let s = v.toString();
+        if (s.includes(',') && s.includes('.')) s = s.replace(/\./g, '').replace(',', '.');
+        else if (s.includes(',')) s = s.replace(',', '.');
+        return parseFloat(s) || 0;
+      };
+
+      const vCompra = parse(vehicle.valorCompra);
+      const vVenda = parse(vehicle.valorVenda);
+
+      // Fallback: Se não houver valor de compra, sugere o de venda
+      const valor = vCompra || vVenda;
 
       itemGroup.patchValue({
+        vehicle: {
+          id: vehicle.vehicleId,
+          name: this.getVehicleDisplay(vehicle),
+        },
+        itemDescricao: this.getVehicleDisplay(vehicle),
         itemValorUnitarioComercial: valor,
         itemValorBruto: valor.toFixed(2),
       });
@@ -428,33 +445,16 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     const nfeItens = this.itens.getRawValue().map((item) => {
+      const isVeiculo = this.form.value.itemTipo === 'veiculo';
+      
       return {
-        vehicleId:
-          this.form.value.itemTipo === 'veiculo' ? item.vehicle?.id : undefined,
-        itemDescricao:
-          this.form.value.itemTipo === 'produto'
-            ? item.itemDescricao
-            : undefined,
-        itemQuantidadeComercial:
-          this.form.value.itemTipo === 'produto'
-            ? String(item.itemQuantidadeComercial)
-            : '1',
-        itemUnidadeComercial:
-          this.form.value.itemTipo === 'produto'
-            ? item.itemUnidadeComercial
-            : 'UN',
-        itemValorUnitarioComercial:
-          this.form.value.itemTipo === 'produto'
-            ? String(item.itemValorUnitarioComercial)
-            : undefined,
-        itemValorBruto:
-          this.form.value.itemTipo === 'produto'
-            ? String(item.itemValorBruto)
-            : undefined,
-        itemCodigoProduto:
-          this.form.value.itemTipo === 'produto'
-            ? item.itemCodigoProduto
-            : undefined,
+        vehicleId: isVeiculo ? item.vehicle?.id : undefined,
+        itemDescricao: isVeiculo ? item.vehicle?.name : item.itemDescricao,
+        itemQuantidadeComercial: isVeiculo ? '1' : String(item.itemQuantidadeComercial),
+        itemUnidadeComercial: isVeiculo ? 'UN' : item.itemUnidadeComercial,
+        itemValorUnitarioComercial: String(item.itemValorUnitarioComercial || '0'),
+        itemValorBruto: String(item.itemValorBruto || '0'),
+        itemCodigoProduto: !isVeiculo ? item.itemCodigoProduto : undefined,
         itemCodigoNcm: item.itemCodigoNcm || undefined,
         itemCfop: item.itemCfop || undefined,
         itemIcms: {
@@ -481,6 +481,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     const formValues: Nfe = {
+      nfeId: this.dataForm?.nfeId,
       storeId: this.storeContextService.currentStoreId!,
       nfeItens: nfeItens,
       personId: this.form.value.person?.id,
@@ -491,7 +492,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     if (this.dataForm?.nfeId) {
-      this.nfeService.update({ ...this.dataForm, ...formValues }).subscribe({
+      this.nfeService.update(formValues).subscribe({
         next: () => {
           this.toastrService.success('NFe atualizada com sucesso');
           this.formSubmitted.emit();
