@@ -609,7 +609,6 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Para edição, busca a cor pelo nome
     const selectedColor = this.colors.find((c) => c.name === (this.dataForm!.color || ''));
 
-
     // Preenche o formulário com os dados do veículo
     this.isFillingForm = true;
     this.form.patchValue({

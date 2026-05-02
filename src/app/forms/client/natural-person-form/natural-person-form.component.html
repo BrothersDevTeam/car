@@ -47,19 +47,6 @@
 
   <!-- Seção: Dados Pessoais -->
   <app-wrapper-card title="Dados pessoais">
-    @if (canRegisterEmployee && !dataForm) {
-      <div class="form-row">
-        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 1rem">
-          <mat-label>Perfil de Cadastro</mat-label>
-          <mat-select formControlName="relationship" (selectionChange)="onProfileChange($event.value)">
-            <mat-option value="CLIENTE">Cliente Padrão</mat-option>
-            <mat-option value="VENDEDOR">Vendedor do Sistema</mat-option>
-            <mat-option value="GERENTE">Gerente da Loja</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    }
-
     <!-- Campo de Nome (ocupa 100% da largura) -->
     <app-primary-input
       formControlName="name"

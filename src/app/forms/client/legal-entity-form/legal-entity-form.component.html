@@ -50,24 +50,14 @@
       Layout: Nome da Empresa (50%) + Tipo (50%)
       Proporção equilibrada
     -->
-    <div class="form-row-2cols">
-      <app-primary-input
-        formControlName="name"
-        label="Nome da Empresa (Razão Social) *"
-        inputName="name"
-        type="text"
-        [error]="form.get('name')?.invalid && (form.get('name')?.touched || submitted)"
-      />
 
-      <app-primary-select
-        label="Tipo *"
-        placeholder="Selecione"
-        inputName="relationshipTypes"
-        [allowMultiple]="true"
-        formControlName="relationshipTypes"
-        [error]="submitted && form.get('relationshipTypes')?.invalid"
-      ></app-primary-select>
-    </div>
+    <app-primary-input
+      formControlName="name"
+      label="Nome da Empresa (Razão Social) *"
+      inputName="name"
+      type="text"
+      [error]="form.get('name')?.invalid && (form.get('name')?.touched || submitted)"
+    />
 
     <!-- Mensagem de erro para relationshipTypes -->
     @if (submitted && form.get('relationshipTypes')?.invalid) {

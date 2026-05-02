@@ -154,15 +154,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   protected isEmployee = false;
 
   /**
-   * Verifica se o usuário logado tem permissão para cadastrar funcionários
-   *
-   * @returns {boolean} true se o usuário tem ROLE_CAR_ADMIN ou ROLE_MANAGER
-   */
-  protected get canRegisterEmployee(): boolean {
-    return this.authService.hasAuthority('create:user') || this.authService.hasAuthority('edit:store');
-  }
-
-  /**
    * Formulário reativo para cadastro/edição de pessoa física
    *
    * IMPORTANTE: relationship agora é controlado pelo checkbox 'isEmployee'
@@ -189,29 +180,8 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     authorizations: this.formBuilderService.array<string>([]),
   });
 
-  /**
-   * Verifica se deve mostrar os campos de usuário do sistema
-   *
-   * @returns {boolean} true se deve mostrar os campos
-   *
-   * @description
-   * Os campos de usuário (username, password, roleName) só aparecem quando:
-   * 1. O tipo selecionado é FUNCIONARIO ou PROPRIETARIO
-   * 2. Está no modo de CRIAÇÃO (dataForm é null)
-   *
-   * No modo de EDIÇÃO, esses campos NUNCA aparecem.
-   * A edição de dados de acesso será feita posteriormente em outra tela.
-   */
   get shouldShowUserFields(): boolean {
-    if (this.dataForm) {
-      return false;
-    }
-
-    const selectedType = this.form.get('relationship')?.value;
-    return (
-      !!selectedType &&
-      [RelationshipTypes.PROPRIETARIO, RelationshipTypes.GERENTE, RelationshipTypes.VENDEDOR].includes(selectedType)
-    );
+    return false;
   }
 
   constructor(
@@ -748,77 +718,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     );
   }
 
-  protected onProfileChange(profile: RelationshipTypes): void {
-    this.form.get('relationship')?.setValue(profile);
-    this.form.markAsDirty();
-
-    // Se o perfil selecionado é um que permite acesso ao sistema, vamos preencher permissões padrão
-    if (profile === RelationshipTypes.GERENTE || profile === RelationshipTypes.VENDEDOR) {
-      setTimeout(() => {
-        this.applyDefaultAuthorizations(profile);
-      });
-    }
-  }
-
-  private applyDefaultAuthorizations(profile: RelationshipTypes): void {
-    const authArray = this.form.get('authorizations') as FormArray;
-    if (!authArray) return;
-
-    authArray.clear();
-
-    let defaults: string[] = [];
-
-    if (profile === RelationshipTypes.GERENTE) {
-      defaults = [
-        Authorizations.READ_STORE,
-        Authorizations.READ_USER,
-        Authorizations.READ_USER_OTHERS,
-        Authorizations.CREATE_USER,
-        Authorizations.EDIT_USER,
-        Authorizations.EDIT_USER_OTHERS,
-        Authorizations.DELETE_USER,
-        Authorizations.READ_PERSON,
-        Authorizations.READ_PERSON_OTHERS,
-        Authorizations.CREATE_PERSON,
-        Authorizations.EDIT_PERSON,
-        Authorizations.DELETE_PERSON,
-        Authorizations.READ_VEHICLE,
-        Authorizations.CREATE_VEHICLE,
-        Authorizations.EDIT_VEHICLE,
-        Authorizations.DELETE_VEHICLE,
-        Authorizations.READ_VEHICLE_PURCHASE_PRICE,
-        Authorizations.READ_VEHICLE_PROFIT,
-        Authorizations.READ_NFE,
-        Authorizations.CREATE_NFE,
-        Authorizations.EMITIR_NFE,
-        Authorizations.CANCEL_NFE,
-        Authorizations.READ_VENDA,
-        Authorizations.CREATE_VENDA,
-        Authorizations.EDIT_VENDA,
-        Authorizations.CANCEL_VENDA,
-        Authorizations.SYNC_FOCUSNFE,
-      ];
-    } else if (profile === RelationshipTypes.VENDEDOR) {
-      defaults = [
-        Authorizations.READ_STORE,
-        Authorizations.READ_USER,
-        Authorizations.EDIT_USER,
-        Authorizations.READ_PERSON,
-        Authorizations.CREATE_PERSON,
-        Authorizations.EDIT_PERSON,
-        Authorizations.READ_VEHICLE,
-        Authorizations.READ_VENDA,
-        Authorizations.CREATE_VENDA,
-      ];
-    }
-
-    defaults.forEach((auth) => {
-      authArray.push(this.formBuilderService.control(auth));
-    });
-
-    this.form.markAsDirty();
-  }
-
   private updateConditionalValidators() {
     if (!this.form) return;
 
@@ -872,15 +771,17 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       console.log('[natural-person-form] isEmployee setado para:', this.isEmployee);
 
       setTimeout(() => {
+        if (!this.dataForm) return;
+
         this.form.patchValue({
-          name: this.dataForm!.name || '',
+          name: this.dataForm.name || '',
           relationship: relationship || RelationshipTypes.CLIENTE,
-          nickName: this.dataForm!.nickName || '',
-          email: this.dataForm!.email || '',
-          phone: this.dataForm!.phone || '',
-          cpf: this.dataForm!.cpf || '',
-          rg: this.dataForm!.rg || '',
-          rgIssuer: this.dataForm!.rgIssuer || '',
+          nickName: this.dataForm.nickName || '',
+          email: this.dataForm.email || '',
+          phone: this.dataForm.phone || '',
+          cpf: this.dataForm.cpf || '',
+          rg: this.dataForm.rg || '',
+          rgIssuer: this.dataForm.rgIssuer || '',
         });
 
         console.log('[natural-person-form] Formulário após patchValue:', this.form.value);
@@ -902,9 +803,14 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     this.selectedDraftId = draft.id;
     console.log('[loadDraftData] selectedDraftId definido para:', draft.id);
 
-    // Se o rascunho tem _editingId, significa que é edição de registro existente
-    if (draft.data._editingId) {
-      // Restaura o dataForm para indicar modo de edição
+    // Restaura o dataForm para indicar modo de edição
+    if (this.dataForm) {
+      this.dataForm = {
+        ...this.dataForm,
+        personId: draft.data._editingId,
+        ...draft.data,
+      } as any;
+    } else {
       this.dataForm = {
         personId: draft.data._editingId,
         ...draft.data,

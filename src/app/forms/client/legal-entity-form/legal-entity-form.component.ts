@@ -162,11 +162,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
   }
 
   get shouldShowUserFields(): boolean {
-    const selectedType = this.form.get('relationship')?.value;
-    return (
-      !!selectedType &&
-      [RelationshipTypes.PROPRIETARIO, RelationshipTypes.GERENTE, RelationshipTypes.VENDEDOR].includes(selectedType)
-    );
+    return false;
   }
 
   constructor(
