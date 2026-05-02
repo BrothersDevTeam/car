@@ -34,9 +34,10 @@ import { MatTabsModule } from '@angular/material/tabs';
 export class VehicleInfoComponent implements OnChanges {
   readonly dialog = inject(MatDialog);
 
-  proprietario: Person | null = null;
-
   @Input() vehicle!: VehicleForm;
+  proprietario: Person | null = null;
+  fornecedor: Person | null = null;
+
   @Output() editEvent = new EventEmitter<VehicleForm>();
   @Output() formSubmitted = new EventEmitter<void>();
 
@@ -66,6 +67,21 @@ export class VehicleInfoComponent implements OnChanges {
         });
       } else {
         this.proprietario = null;
+      }
+
+      if (this.vehicle?.supplierId) {
+        // Busca o fornecedor quando o veículo mudar
+        this.personService.getById(this.vehicle.supplierId).subscribe({
+          next: (person) => {
+            this.fornecedor = person;
+          },
+          error: (error) => {
+            console.error('Erro ao carregar fornecedor:', error);
+            this.fornecedor = null;
+          },
+        });
+      } else {
+        this.fornecedor = null;
       }
     }
   }

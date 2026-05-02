@@ -53,7 +53,8 @@ export interface CompraSummary {
 export interface Vehicle {
   storeId?: string;
   vehicleId?: string;
-  owner?: Person;
+  ownerId?: string;
+  ownerName?: string;
   plate: string;
   brand: string;
   model: string;
@@ -75,6 +76,7 @@ export interface Vehicle {
   origin?: string;
   valorCompra?: string;
   supplierId?: string;
+  supplierName?: string;
   dataCompra?: string;
   valorVenda?: string;
   observation?: string;
@@ -87,7 +89,7 @@ export interface Vehicle {
 }
 
 /**
- * Interface para listagem otimizada de veículos
+ * Interface para listagem otimizada de veículos (Payload reduzido)
  */
 export interface VehicleList {
   vehicleId: string;
@@ -99,12 +101,15 @@ export interface VehicleList {
   vehicleYear: string;
   modelYear?: string;
   color: string;
+  status: string;
   km: string;
   vehicleType: string;
   valorVenda?: string;
   entryDate?: string;
-  exitDate?: string;
-  status: string;
+  hasInputNfe?: boolean;
+  hasOutputNfe?: boolean;
+  ownerName?: string;
+  // Campos técnicos para validação na grid
   chassis?: string;
   renavam?: string;
   species?: string;
@@ -114,9 +119,6 @@ export interface VehicleList {
   hasSupplierAddress?: boolean;
   valorCompra?: string;
   dataCompra?: string;
-  owner?: PersonSummary;
-  nfeHistory?: NfeSummary[];
-  salesHistory?: VendaSummary[];
 }
 
 export type CreateVehicle = Omit<Vehicle, 'vehicleId'>;
@@ -125,10 +127,8 @@ export type CreateVehicle = Omit<Vehicle, 'vehicleId'>;
  * Interface para o formulário de Vehicle
  * Converte owner de Person para string (ID)
  */
-export type VehicleForm = Omit<Vehicle, 'owner'> & {
+export type VehicleForm = Vehicle & {
   owner?: string;
-  supplierId?: string;
-  dataCompra?: string;
 };
 
 /**

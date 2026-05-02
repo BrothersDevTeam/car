@@ -122,14 +122,14 @@ export class VehicleComponent implements CanComponentDeactivate {
           icon: 'input',
           color: 'primary',
           action: (row) => this.viewNfe(row, '0'),
-          hidden: (row) => !row.nfeHistory?.some((n) => n.nfeTipoDocumento === '0'),
+          hidden: (row) => !row.hasInputNfe,
         },
         {
           label: 'NFe de Saída',
           icon: 'output',
           color: 'accent',
           action: (row) => this.viewNfe(row, '1'),
-          hidden: (row) => !row.nfeHistory?.some((n) => n.nfeTipoDocumento === '1'),
+          hidden: (row) => !row.hasOutputNfe,
         },
       ],
     },
@@ -142,7 +142,7 @@ export class VehicleComponent implements CanComponentDeactivate {
           icon: 'receipt_long',
           color: 'primary',
           action: (row) => this.gerarNfeCompra(row),
-          hidden: (row) => !!row.nfeHistory?.some((nfe) => nfe.nfeTipoDocumento === '0'),
+          hidden: (row) => !!row.hasInputNfe,
         },
       ],
       alertConfig: {
@@ -344,7 +344,7 @@ export class VehicleComponent implements CanComponentDeactivate {
   private vehicleToForm(vehicle: Vehicle): VehicleForm {
     const form = {
       ...vehicle,
-      owner: vehicle.owner?.personId || undefined,
+      owner: vehicle.ownerId || undefined,
     };
     return form;
   }
@@ -591,8 +591,8 @@ export class VehicleComponent implements CanComponentDeactivate {
     if (!vehicle.fuelTypes || vehicle.fuelTypes.length === 0) errors.push('Combustível');
 
     // Dados de Compra (necessários para NFe de Entrada)
-    // Só valida se não tiver NFe de entrada autorizada
-    const temNfeEntrada = vehicle.nfeHistory?.some((n) => n.nfeTipoDocumento === '0' && n.nfeStatus === 'autorizado');
+    // Só valida se não tiver NFe de entrada vinculada
+    const temNfeEntrada = vehicle.hasInputNfe;
     if (!temNfeEntrada) {
       if (!vehicle.supplierId) errors.push('Fornecedor');
       else if (vehicle.hasSupplierAddress === false) errors.push('Endereço do Fornecedor');

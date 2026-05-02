@@ -291,7 +291,12 @@
           <app-date-input formControlName="entryDate" label="Data de Entrada"></app-date-input>
 
           <app-date-input formControlName="exitDate" label="Data de Saída"></app-date-input>
-          <app-primary-input formControlName="observation" label="Observações" inputName="observation" type="text" />
+          <div class="custom-selects-container">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Observações</mat-label>
+              <textarea matInput formControlName="observation" rows="4" placeholder="Observações internas sobre o veículo..."></textarea>
+            </mat-form-field>
+          </div>
         </app-wrapper-card>
       </mat-tab>
     </mat-tab-group>

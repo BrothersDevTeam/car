@@ -100,6 +100,12 @@
               Registro e Datas
             </h2>
             <div class="info-grid">
+              @if (fornecedor) {
+                <div class="info-item full-width">
+                  <label>Fornecedor (Origem)</label>
+                  <span class="highlight-text">{{ fornecedor.name }}</span>
+                </div>
+              }
               <div class="info-item">
                 <label>Data de Entrada</label>
                 <span>
@@ -113,12 +119,12 @@
                 </span>
               </div>
               <div class="info-item">
-                <label>Tipo de Veículo</label>
-                <span>{{ vehicle.vehicleType }}</span>
+                <label>Data da Compra</label>
+                <span>{{ (vehicle.dataCompra | date: 'dd/MM/yyyy') || '-' }}</span>
               </div>
               <div class="info-item">
-                <label>Espécie</label>
-                <span>{{ vehicle.species || '-' }}</span>
+                <label>Tipo de Veículo</label>
+                <span>{{ vehicle.vehicleType }}</span>
               </div>
             </div>
           </div>

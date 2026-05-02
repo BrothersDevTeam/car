@@ -29,6 +29,8 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 import { ToastrService } from 'ngx-toastr';
 import { distinctUntilChanged, Subscription, of, Observable } from 'rxjs';
@@ -76,6 +78,8 @@ import { ActionsService } from '@services/actions.service';
     DateInputComponent,
     MatTooltipModule,
     MatCardModule,
+    MatInputModule,
+    MatFormFieldModule,
   ],
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',
@@ -605,20 +609,17 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Para edição, busca a cor pelo nome
     const selectedColor = this.colors.find((c) => c.name === (this.dataForm!.color || ''));
 
-    // Para edição, busca o proprietário pelo ID
-    const selectedOwner = this.dataForm!.owner ? this.persons.find((p) => p.id === this.dataForm!.owner) : null;
-
-    // Para edição, busca o fornecedor pelo ID
-    const selectedSupplier = this.dataForm!.supplierId
-      ? this.persons.find((p) => p.id === this.dataForm!.supplierId)
-      : null;
 
     // Preenche o formulário com os dados do veículo
     this.isFillingForm = true;
     this.form.patchValue({
       plate: this.dataForm!.plate || '',
-      owner: selectedOwner ? { id: selectedOwner.id, name: selectedOwner.name } : { id: '', name: '' },
-      supplier: selectedSupplier ? { id: selectedSupplier.id, name: selectedSupplier.name } : { id: '', name: '' },
+      owner: this.dataForm!.ownerId
+        ? { id: this.dataForm!.ownerId, name: this.dataForm!.ownerName || 'Proprietário não identificado' }
+        : { id: '', name: '' },
+      supplier: this.dataForm!.supplierId
+        ? { id: this.dataForm!.supplierId, name: this.dataForm!.supplierName || 'Fornecedor não identificado' }
+        : { id: '', name: '' },
       brand: selectedBrand
         ? { id: selectedBrand.id, name: selectedBrand.name }
         : { id: '', name: this.dataForm!.brand || '' }, // Fallback se não encontrar ID
