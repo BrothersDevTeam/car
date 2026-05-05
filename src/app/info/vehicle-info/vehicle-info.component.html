@@ -103,7 +103,10 @@
               @if (fornecedor) {
                 <div class="info-item full-width">
                   <label>Fornecedor (Origem)</label>
-                  <span class="highlight-text">{{ fornecedor.name }}</span>
+                  <span class="highlight-text clickable-link" (click)="navigateToPerson(fornecedor.personId)">
+                    {{ fornecedor.name }}
+                    <mat-icon>open_in_new</mat-icon>
+                  </span>
                 </div>
               }
               <div class="info-item">
@@ -155,7 +158,10 @@
                   <mat-icon>shopping_cart_checkout</mat-icon>
                 </div>
                 <div class="owner-name-info">
-                  <h3>{{ vehicle.salesHistory![0].buyerName }}</h3>
+                  <h3 class="clickable-link" (click)="navigateToPerson(vehicle.salesHistory![0].buyerId)">
+                    {{ vehicle.salesHistory![0].buyerName }}
+                    <mat-icon>open_in_new</mat-icon>
+                  </h3>
                   <p>Comprador desta venda</p>
                 </div>
               </div>
@@ -190,7 +196,10 @@
                   </mat-icon>
                 </div>
                 <div class="owner-name-info">
-                  <h3>{{ proprietario.name }}</h3>
+                  <h3 class="clickable-link" (click)="navigateToPerson(proprietario.personId)">
+                    {{ proprietario.name }}
+                    <mat-icon>open_in_new</mat-icon>
+                  </h3>
                   <p>{{ proprietario.email }}</p>
                 </div>
               </div>
@@ -237,8 +246,14 @@
                   <div class="history-date">
                     {{ item.date | date: 'dd/MM/yyyy' }}
                   </div>
-                  <div class="history-desc">
-                    {{ item.description }}
+                  <div class="history-desc" [class.clickable-link]="item.personId" (click)="navigateToPerson(item.personId)">
+                    <strong>{{ item.title }}</strong>
+                    <p class="m-0 text-muted small">
+                      {{ item.description }}
+                      @if (item.personId) {
+                        <mat-icon style="font-size: 14px; width: 14px; height: 14px; vertical-align: middle; margin-left: 4px;">open_in_new</mat-icon>
+                      }
+                    </p>
                   </div>
                   <div class="history-value" [class.val-negativo]="item.type === 'COMPRA'">
                     {{ item.value | currency: 'BRL' }}

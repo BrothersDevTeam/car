@@ -3,6 +3,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 
@@ -45,6 +46,7 @@ export class VehicleInfoComponent implements OnChanges {
     private toastrService: ToastrService,
     private vehicleService: VehicleService,
     private personService: PersonService,
+    private router: Router,
   ) {}
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['vehicle']) {
@@ -121,13 +123,15 @@ export class VehicleInfoComponent implements OnChanges {
 
     // Adiciona compras
     if (this.vehicle.purchaseHistory) {
-      this.vehicle.purchaseHistory.forEach((c) => {
+      this.vehicle.purchaseHistory.forEach((compra) => {
         timeline.push({
-          date: c.dataCompra,
-          description: `Comprado de ${c.supplierName || 'Fornecedor'}`,
-          value: c.valorCompra,
+          date: compra.dataCompra || this.vehicle.dataCompra,
+          title: 'Entrada no Estoque (Compra)',
+          description: `Veículo adquirido de ${compra.supplierName || this.vehicle.supplierName || 'Fornecedor'}`,
+          value: compra.valorCompra || this.vehicle.valorCompra,
           type: 'COMPRA',
           icon: 'input',
+          personId: compra.supplierId || this.vehicle.supplierId,
         });
       });
     }
@@ -137,10 +141,12 @@ export class VehicleInfoComponent implements OnChanges {
       this.vehicle.salesHistory.forEach((v) => {
         timeline.push({
           date: v.dataVenda,
-          description: `Vendido para ${v.buyerName || 'Cliente'}`,
+          title: 'Venda Realizada',
+          description: `Veículo vendido para ${v.buyerName}`,
           value: v.valorFinal,
           type: 'VENDA',
-          icon: 'output',
+          icon: 'shopping_cart_checkout',
+          personId: v.buyerId,
         });
       });
     }
@@ -224,9 +230,11 @@ export class VehicleInfoComponent implements OnChanges {
           this.toastrService.error('Erro ao excluir veículo');
         },
       });
-    } else {
-      console.error('ID nao encontrado para exclusao');
-      this.toastrService.error('ID nao encontrado para exclusao');
     }
+  }
+
+  navigateToPerson(personId?: string) {
+    if (!personId) return;
+    this.router.navigate(['/person'], { queryParams: { editId: personId } });
   }
 }

@@ -417,3 +417,23 @@
     color: #1967d2 !important;
   }
 }
+
+.clickable-link {
+  cursor: pointer;
+  color: #1967d2 !important;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  &:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}

@@ -38,6 +38,7 @@ export interface VendaSummary {
   valorFinal?: number;
   vendaStatus?: string;
   buyerName?: string;
+  buyerId?: string;
 }
 
 export interface CompraSummary {
@@ -45,6 +46,7 @@ export interface CompraSummary {
   dataCompra?: string;
   valorCompra?: number;
   supplierName?: string;
+  supplierId?: string;
 }
 
 /**
