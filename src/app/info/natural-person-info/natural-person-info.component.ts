@@ -9,7 +9,6 @@ import { ToastrService } from 'ngx-toastr';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { AddressListComponent } from '@components/address/address-list/address-list.component';
-import { UserAccessManagementComponent } from '../../components/user-access-management/user-access-management.component';
 
 import { Person } from '@interfaces/person';
 import { PersonService } from '@services/person.service';
@@ -25,7 +24,6 @@ import { Authorizations } from '../../enums/authorizations';
     MatCardModule,
     WrapperCardComponent,
     AddressListComponent,
-    UserAccessManagementComponent,
   ],
   templateUrl: './natural-person-info.component.html',
   styleUrl: './natural-person-info.component.scss',
@@ -44,9 +42,6 @@ export class NaturalPersonInfoComponent implements OnInit {
 
   /** Indica se o usuário pode excluir a pessoa exibida. */
   canDelete: boolean = false;
-
-  /** Indica se o usuário pode gerenciar o acesso ao sistema desta pessoa (seção "Acesso ao Sistema"). */
-  canManageUserAccess: boolean = false;
 
   /** Retorna o componente de formulário ativo (usado pelo drawer para controle de estado). */
   getActiveFormComponent(): any {
@@ -67,15 +62,10 @@ export class NaturalPersonInfoComponent implements OnInit {
     // Utiliza authorizations granulares: sem dependência de ROLE_
     this.canEdit = this.authService.hasAuthority(Authorizations.EDIT_PERSON);
     this.canDelete = this.authService.hasAuthority(Authorizations.DELETE_PERSON);
-    this.canManageUserAccess = this.authService.hasAuthority(Authorizations.CREATE_USER);
   }
 
   onDelete() {
     this.openDialog();
-  }
-
-  onAccessUpdated() {
-    this.formSubmitted.emit(); // Refresh list to get updated data from backend
   }
 
   openDialog() {

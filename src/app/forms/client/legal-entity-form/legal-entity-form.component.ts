@@ -18,7 +18,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { ToastrService } from 'ngx-toastr';
@@ -26,7 +26,6 @@ import { Subscription, Observable, of } from 'rxjs';
 
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
-import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
 
 import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
 
@@ -53,7 +52,6 @@ import { StoreContextService } from '@services/store-context.service';
     MatButtonModule,
     MatIconModule,
     CnpjValidatorDirective,
-    PrimarySelectComponent,
     MatCardModule,
     MatTooltipModule,
     MatSelectModule,
@@ -132,38 +130,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     relationship: this.formBuilderService.control<RelationshipTypes>(RelationshipTypes.CLIENTE, {
       validators: [Validators.required],
     }),
-    username: [''],
-    password: [''],
-    confirmPassword: [''],
-    roleName: [''],
   });
-
-  // Validator personalizado para verificar se as senhas coincidem
-  private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
-    const password = control.get('password');
-    const confirmPassword = control.get('confirmPassword');
-
-    if (!password || !confirmPassword) {
-      return null;
-    }
-
-    if (password.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
-    } else {
-      const errors = confirmPassword.errors;
-      if (errors) {
-        delete errors['passwordMismatch'];
-        confirmPassword.setErrors(Object.keys(errors).length > 0 ? errors : null);
-      }
-    }
-
-    return null;
-  }
-
-  get shouldShowUserFields(): boolean {
-    return false;
-  }
 
   constructor(
     private personService: PersonService,
@@ -180,9 +147,6 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
       this.form.get('relationship')?.setValue(RelationshipTypes.CLIENTE);
     }
 
-    // Adiciona o validator de senha no formulário
-    this.form.setValidators(this.passwordMatchValidator.bind(this));
-
     this.subscriptions.add(
       this.form.get('relationship')!.valueChanges.subscribe(() => {
         this.updateConditionalValidators();
@@ -198,7 +162,6 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     );
 
     this.loadAvailableDrafts();
-    // this.checkForDrafts(); // Removido verificação automática pois agora é selecionável
 
     setTimeout(() => {
       this.captureInitialFormValue();
@@ -206,39 +169,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
   }
 
   private updateConditionalValidators() {
-    if (!this.form) return;
-
-    const usernameControl = this.form.get('username');
-    const passwordControl = this.form.get('password');
-    const confirmPasswordControl = this.form.get('confirmPassword');
-    const roleNameControl = this.form.get('roleName');
-
-    if (this.shouldShowUserFields) {
-      usernameControl?.setValidators([Validators.required, Validators.minLength(3)]);
-      passwordControl?.setValidators([Validators.required, Validators.minLength(6)]);
-      confirmPasswordControl?.setValidators([Validators.required, Validators.minLength(6)]);
-      roleNameControl?.setValidators([Validators.required]);
-
-      usernameControl?.updateValueAndValidity({ emitEvent: false });
-      passwordControl?.updateValueAndValidity({ emitEvent: false });
-      confirmPasswordControl?.updateValueAndValidity({ emitEvent: false });
-      roleNameControl?.updateValueAndValidity({ emitEvent: false });
-    } else {
-      usernameControl?.clearValidators();
-      passwordControl?.clearValidators();
-      confirmPasswordControl?.clearValidators();
-      roleNameControl?.clearValidators();
-
-      usernameControl?.setValue('', { emitEvent: false });
-      passwordControl?.setValue('', { emitEvent: false });
-      confirmPasswordControl?.setValue('', { emitEvent: false });
-      roleNameControl?.setValue('', { emitEvent: false });
-
-      usernameControl?.updateValueAndValidity({ emitEvent: false });
-      passwordControl?.updateValueAndValidity({ emitEvent: false });
-      confirmPasswordControl?.updateValueAndValidity({ emitEvent: false });
-      roleNameControl?.updateValueAndValidity({ emitEvent: false });
-    }
+    // Mantido vazio para compatibilidade, lógica de campos de usuário removida.
   }
 
   ngOnDestroy(): void {
@@ -349,20 +280,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
           relationship: this.form.value.relationship as RelationshipTypes,
         };
 
-        let formValue: CreateLegalEntity;
-
-        if (this.shouldShowUserFields) {
-          // Só adiciona username, password e roleName se for funcionário/contador/proprietário
-          formValue = {
-            ...baseData,
-            username: this.form.value.username || '',
-            password: this.form.value.password || '',
-            roleName: this.form.value.roleName || '',
-          };
-        } else {
-          // Cliente: NÃO envia username, password e roleName
-          formValue = baseData;
-        }
+        const formValue: CreateLegalEntity = baseData;
 
         if (this.dataForm?.personId) {
           this.personService.update(formValue, this.dataForm.personId).subscribe({
@@ -596,26 +514,6 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
       this.form.markAllAsTouched();
       console.log('Formulário inválido: ', this.form.value);
 
-      if (this.form.get('relationshipTypes')?.invalid) {
-        console.log('RelationshipTypes é obrigatório e deve ter pelo menos 1 item');
-      }
-      if (this.shouldShowUserFields) {
-        if (this.form.get('username')?.invalid) {
-          console.log('Username é obrigatório para funcionários/contadores/proprietários');
-        }
-        if (this.form.get('password')?.invalid) {
-          console.log('Password é obrigatório para funcionários/contadores/proprietários');
-        }
-        if (this.form.get('confirmPassword')?.invalid) {
-          console.log('Confirmação de senha é obrigatória');
-        }
-        if (this.form.errors?.['passwordMismatch']) {
-          console.log('As senhas não coincidem');
-        }
-        if (this.form.get('roleName')?.invalid) {
-          console.log('RoleName é obrigatório para funcionários/contadores/proprietários');
-        }
-      }
       return;
     }
 
@@ -639,20 +537,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
       relationship: this.form.value.relationship as RelationshipTypes,
     };
 
-    let formValue: CreateLegalEntity;
-
-    if (this.shouldShowUserFields) {
-      // Só adiciona username, password e roleName se for funcionário/contador/proprietário
-      formValue = {
-        ...baseData,
-        username: this.form.value.username || '',
-        password: this.form.value.password || '',
-        roleName: this.form.value.roleName || '',
-      };
-    } else {
-      // Cliente: NÃO envia username, password e roleName
-      formValue = baseData;
-    }
+    const formValue: CreateLegalEntity = baseData;
 
     console.log('Dados a serem enviados:', formValue);
 

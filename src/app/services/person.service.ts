@@ -165,19 +165,6 @@ export class PersonService {
   }
 
   /**
-   * Cria um usuário para um funcionário/proprietário existente
-   * @param personId ID da pessoa
-   * @param data Dados do usuário (username, password, roleName)
-   */
-  createEmployeeUser(personId: string, data: any) {
-    return this.http.post<any>(`/api/employees/${personId}/create-user`, data).pipe(
-      tap(() => {
-        this.clearCache();
-      }),
-    );
-  }
-
-  /**
    * Cria uma nova pessoa no sistema
    * Alias para o método create para melhor clareza
    * @param data Dados da pessoa a ser criada

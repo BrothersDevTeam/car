@@ -19,14 +19,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatCardModule } from '@angular/material/card';
-import {
-  AbstractControl,
-  FormArray,
-  FormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
@@ -48,7 +41,6 @@ import { AuthService } from '@services/auth/auth.service';
 import { StoreContextService } from '@services/store-context.service';
 
 import { removeEmptyPropertiesFromObject } from '../../../utils/removeEmptyPropertiesFromObject';
-import { AccessDataFormComponent } from '@components/access-data-form/access-data-form.component';
 import { RelationshipTypes } from '../../../enums/relationshipTypes';
 import { extractErrorMessage } from '@utils/error-utils';
 import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
@@ -63,7 +55,6 @@ import { Authorizations } from '../../../enums/authorizations';
     MatButtonModule,
     MatIconModule,
     CpfValidatorDirective,
-    AccessDataFormComponent,
     MatSelectModule,
     MatFormFieldModule,
     MatTooltipModule,
@@ -174,15 +165,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     relationship: this.formBuilderService.control<RelationshipTypes>(RelationshipTypes.CLIENTE, {
       validators: [Validators.required],
     }),
-    username: [''],
-    password: [''],
-    confirmPassword: [''],
-    authorizations: this.formBuilderService.array<string>([]),
   });
-
-  get shouldShowUserFields(): boolean {
-    return false;
-  }
 
   constructor(
     private personService: PersonService,
@@ -298,18 +281,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
           relationship: this.form.value.relationship as RelationshipTypes,
         };
 
-        let formValue: CreateNaturalPerson;
-
-        if (this.shouldShowUserFields) {
-          formValue = {
-            ...baseData,
-            username: this.form.value.username || '',
-            password: this.form.value.password || '',
-            authorizations: (this.form.value.authorizations as string[]) || [],
-          };
-        } else {
-          formValue = baseData;
-        }
+        const formValue: CreateNaturalPerson = baseData;
 
         if (this.dataForm?.personId) {
           // Captura o ID do rascunho ANTES da requisição
@@ -652,32 +624,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     }
   }
 
-  // Validator personalizado para verificar se as senhas coincidem
-  private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
-    const password = control.get('password');
-    const confirmPassword = control.get('confirmPassword');
-
-    if (!password || !confirmPassword) {
-      return null;
-    }
-
-    if (password.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
-    } else {
-      const errors = confirmPassword.errors;
-      if (errors) {
-        delete errors['passwordMismatch'];
-        confirmPassword.setErrors(Object.keys(errors).length > 0 ? errors : null);
-      }
-    }
-
-    return null;
-  }
-
   ngOnInit() {
-    this.form.setValidators(this.passwordMatchValidator.bind(this));
-
     this.subscriptions.add(
       this.form.get('relationship')!.valueChanges.subscribe(() => {
         this.updateConditionalValidators();
@@ -690,17 +637,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
         this.actionsService.hasFormChanges.set(hasChanges);
         this.formChanged.emit(hasChanges);
       }),
-    );
-
-    this.subscriptions.add(
-      this.form.get('username')?.valueChanges.subscribe(() => {
-        const usernameControl = this.form.get('username');
-        if (usernameControl?.hasError('usernameConflict')) {
-          const errors = { ...usernameControl.errors };
-          delete errors['usernameConflict'];
-          usernameControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
-        }
-      }) ?? new Subscription(),
     );
 
     this.loadAvailableDrafts();
@@ -719,39 +655,8 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   }
 
   private updateConditionalValidators() {
-    if (!this.form) return;
-
-    const usernameControl = this.form.get('username');
-    const passwordControl = this.form.get('password');
-    const confirmPasswordControl = this.form.get('confirmPassword');
-    const authorizationsControl = this.form.get('authorizations') as FormArray;
-
-    if (this.shouldShowUserFields) {
-      usernameControl?.setValidators([Validators.required, Validators.minLength(3)]);
-      passwordControl?.setValidators([Validators.required, Validators.minLength(6)]);
-      confirmPasswordControl?.setValidators([Validators.required, Validators.minLength(6)]);
-      authorizationsControl?.setValidators([Validators.required]);
-
-      usernameControl?.updateValueAndValidity({ emitEvent: false });
-      passwordControl?.updateValueAndValidity({ emitEvent: false });
-      confirmPasswordControl?.updateValueAndValidity({ emitEvent: false });
-      authorizationsControl?.updateValueAndValidity({ emitEvent: false });
-    } else {
-      usernameControl?.clearValidators();
-      passwordControl?.clearValidators();
-      confirmPasswordControl?.clearValidators();
-      authorizationsControl?.clearValidators();
-
-      usernameControl?.setValue('', { emitEvent: false });
-      passwordControl?.setValue('', { emitEvent: false });
-      confirmPasswordControl?.setValue('', { emitEvent: false });
-      authorizationsControl?.clear(); // Limpa o FormArray
-
-      usernameControl?.updateValueAndValidity({ emitEvent: false });
-      passwordControl?.updateValueAndValidity({ emitEvent: false });
-      confirmPasswordControl?.updateValueAndValidity({ emitEvent: false });
-      authorizationsControl?.updateValueAndValidity({ emitEvent: false });
-    }
+    // Método mantido vazio para compatibilidade se necessário em refatorações futuras,
+    // mas a lógica de campos de usuário foi removida.
   }
 
   ngOnDestroy(): void {
@@ -851,7 +756,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       }
     }
   }
-
   onSubmit() {
     this.submitted = true;
     this.isSaving = true;
@@ -860,23 +764,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       this.form.markAllAsTouched();
       this.toastrService.error('Por favor, verifique os campos em vermelho.', 'Formulário Inválido');
 
-      if (this.shouldShowUserFields) {
-        if (this.form.get('username')?.invalid) {
-          console.log('[onSubmit] Username é obrigatório para funcionários');
-        }
-        if (this.form.get('password')?.invalid) {
-          console.log('[onSubmit] Password é obrigatório para funcionários');
-        }
-        if (this.form.get('confirmPassword')?.invalid) {
-          console.log('[onSubmit] Confirmação de senha é obrigatória');
-        }
-        if (this.form.errors?.['passwordMismatch']) {
-          console.log('[onSubmit] As senhas não coincidem');
-        }
-        if (this.form.get('roleName')?.invalid) {
-          console.log('[onSubmit] RoleName é obrigatório para funcionários');
-        }
-      }
       this.isSaving = false;
       return;
     }
@@ -903,18 +790,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       relationship: this.form.value.relationship as RelationshipTypes,
     };
 
-    let formValue: CreateNaturalPerson;
-
-    if (this.shouldShowUserFields) {
-      formValue = {
-        ...baseData,
-        username: this.form.value.username || '',
-        password: this.form.value.password || '',
-        authorizations: (this.form.value.authorizations as string[]) || [],
-      };
-    } else {
-      formValue = baseData;
-    }
+    const formValue: CreateNaturalPerson = baseData;
 
     console.log('Dados a serem enviados:', formValue);
 
