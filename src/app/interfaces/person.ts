@@ -29,6 +29,10 @@ export interface Person {
   rg?: string;
   rgIssuer?: string;
   ie?: string;
+  indicadorIe?: string;
+  isuf?: string;
+  idEstrangeiro?: string;
+  im?: string;
   crc?: string;
   active: boolean;
   relationship: RelationshipTypes;

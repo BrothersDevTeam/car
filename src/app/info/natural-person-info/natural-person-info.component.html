@@ -1,55 +1,135 @@
-<mat-card class="card-container" appearance="outlined">
-  <mat-card-content class="card-content">
-    <!-- Dados Pessoais -->
-    <app-wrapper-card class="person-info" title="Dados pessoais">
-      <div class="card-row">
-        <h3 class="label">Nome:</h3>
-        <h3 class="value">{{ person.name }}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Apelido:</h3>
-        <h3 class="value">{{ person.nickName }}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Email:</h3>
-        <h3 class="value">{{ person.email }}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Telefone:</h3>
-        <h3 class="value">{{ person.phone }}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">CPF:</h3>
-        <h3 class="value">{{ person.cpf }}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="value">{{ person.relationship }}</h3>
-      </div>
-      <mat-card-footer class="card-footer">
-        @if (canEdit) {
-          <button type="button" class="btn" color="primary" mat-raised-button (click)="editEvent.emit()">Editar</button>
+<div class="person-info-container">
+  <!-- Header Section with Avatar -->
+  <header class="info-header">
+    <div class="avatar-container">
+      <div class="avatar shadow-elegant">{{ getInitials(person.name) }}</div>
+      <div class="status-indicator" [class.active]="person.active" [matTooltip]="person.active ? 'Acesso Ativo' : 'Inativo'"></div>
+    </div>
+    <div class="header-details">
+      <h1 class="person-name">{{ person.name }}</h1>
+      <div class="badge-group">
+        <span class="relationship-badge shadow-sm">
+          <mat-icon>{{ getRelationshipIcon(person.relationship) }}</mat-icon>
+          {{ person.relationship }}
+        </span>
+        @if (person.storeName) {
+          <span class="store-badge shadow-sm">
+            <mat-icon>store</mat-icon>
+            {{ person.storeName }}
+          </span>
         }
-        @if (canDelete) {
-          <button type="button" class="btn" color="warn" mat-raised-button matListItemIcon (click)="onDelete()">
-            Excluir
-          </button>
-        }
-      </mat-card-footer>
-    </app-wrapper-card>
-
-    <app-wrapper-card>
-      <!-- Seção de Endereços -->
-      @if (person.personId) {
-        <div class="address-section">
-          <app-address-list
-            [ownerId]="person.personId"
-            [canEdit]="true"
-            [canDelete]="true"
-            [canAdd]="true"
-            [initialDraftId]="initialAddressDraftId"
-          ></app-address-list>
-        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      @if (canEdit) {
+        <button mat-fab color="primary" class="fab-btn shadow-elegant" (click)="editEvent.emit()" matTooltip="Editar Dados">
+          <mat-icon>edit</mat-icon>
+        </button>
       }
-    </app-wrapper-card>
-  </mat-card-content>
-</mat-card>
+      @if (canDelete) {
+        <button mat-fab color="warn" class="fab-btn shadow-elegant" (click)="onDelete()" matTooltip="Excluir Registro">
+          <mat-icon>delete</mat-icon>
+        </button>
+      }
+    </div>
+  </header>
+
+  <mat-divider></mat-divider>
+
+  <div class="info-grid">
+    <!-- Group: Identificação -->
+    <section class="info-section">
+      <div class="section-header">
+        <mat-icon>badge</mat-icon>
+        <h2>Identificação</h2>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>CPF</label>
+          <span class="value">{{ person.cpf || '---' }}</span>
+        </div>
+        <div class="field">
+          <label>RG</label>
+          <span class="value">{{ person.rg || '---' }}</span>
+        </div>
+        @if (person.rgIssuer) {
+          <div class="field">
+            <label>Órgão Emissor</label>
+            <span class="value">{{ person.rgIssuer }}</span>
+          </div>
+        }
+        <div class="field">
+          <label>Apelido/Nome Social</label>
+          <span class="value">{{ person.nickName || '---' }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Group: Contato -->
+    <section class="info-section">
+      <div class="section-header">
+        <mat-icon>contact_mail</mat-icon>
+        <h2>Contato</h2>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>E-mail Principal</label>
+          <span class="value highlight">{{ person.email || 'Não informado' }}</span>
+        </div>
+        <div class="field">
+          <label>Telefone / WhatsApp</label>
+          <span class="value">{{ person.phone || 'Não informado' }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Group: Dados Adicionais -->
+    @if (person.ie || person.im || person.crc) {
+      <section class="info-section">
+        <div class="section-header">
+          <mat-icon>description</mat-icon>
+          <h2>Dados Fiscais / Profissionais</h2>
+        </div>
+        <div class="field-group">
+          @if (person.ie) {
+            <div class="field">
+              <label>Inscrição Estadual</label>
+              <span class="value">{{ person.ie }}</span>
+            </div>
+          }
+          @if (person.im) {
+            <div class="field">
+              <label>Inscrição Municipal</label>
+              <span class="value">{{ person.im }}</span>
+            </div>
+          }
+          @if (person.crc) {
+            <div class="field">
+              <label>CRC</label>
+              <span class="value">{{ person.crc }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  </div>
+
+  <!-- Addresses Section -->
+  <section class="info-section full-width">
+    <div class="section-header">
+      <mat-icon>location_on</mat-icon>
+      <h2>Endereços Cadastrados</h2>
+    </div>
+    <div class="address-wrapper shadow-sm">
+      @if (person.personId) {
+        <app-address-list
+          [ownerId]="person.personId"
+          [canEdit]="true"
+          [canDelete]="true"
+          [canAdd]="true"
+          [initialDraftId]="initialAddressDraftId"
+        ></app-address-list>
+      }
+    </div>
+  </section>
+</div>

@@ -2,13 +2,15 @@ import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
 
 import { EventType } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatCardModule } from '@angular/material/card';
 import { Component, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
-import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { AddressListComponent } from '@components/address/address-list/address-list.component';
 
 import type { Person } from '@interfaces/person';
@@ -18,7 +20,15 @@ import { AuthService } from '@services/auth/auth.service';
 
 @Component({
   selector: 'app-legal-entity-info',
-  imports: [CommonModule, MatButtonModule, MatCardModule, WrapperCardComponent, AddressListComponent],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatCardModule,
+    AddressListComponent,
+    MatIconModule,
+    MatDividerModule,
+    MatTooltipModule,
+  ],
   templateUrl: './legal-entity-info.component.html',
   styleUrl: './legal-entity-info.component.scss',
 })
@@ -105,5 +115,14 @@ export class LegalEntityInfoComponent {
       console.error('ID não encontrado para exclusão');
       this.toastrService.error('ID não encontrado para exclusão');
     }
+  }
+
+  getInitials(name: string): string {
+    if (!name) return '?';
+    const parts = name.split(' ');
+    if (parts.length > 1) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
   }
 }

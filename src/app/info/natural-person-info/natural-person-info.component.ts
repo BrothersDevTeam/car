@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { EventType } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
-import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { AddressListComponent } from '@components/address/address-list/address-list.component';
 
 import { Person } from '@interfaces/person';
@@ -22,8 +24,10 @@ import { Authorizations } from '../../enums/authorizations';
     CommonModule,
     MatButtonModule,
     MatCardModule,
-    WrapperCardComponent,
     AddressListComponent,
+    MatIconModule,
+    MatDividerModule,
+    MatTooltipModule,
   ],
   templateUrl: './natural-person-info.component.html',
   styleUrl: './natural-person-info.component.scss',
@@ -103,5 +107,23 @@ export class NaturalPersonInfoComponent implements OnInit {
       console.error('ID não encontrado para exclusão');
       this.toastrService.error('ID não encontrado para exclusão');
     }
+  }
+
+  getInitials(name: string): string {
+    if (!name) return '?';
+    const parts = name.split(' ');
+    if (parts.length > 1) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
+  }
+
+  getRelationshipIcon(type: string): string {
+    const t = type?.toUpperCase();
+    if (t === 'CLIENTE') return 'person';
+    if (t === 'VENDEDOR') return 'sell';
+    if (t === 'GERENTE') return 'manage_accounts';
+    if (t === 'PROPRIETARIO') return 'stars';
+    return 'account_circle';
   }
 }

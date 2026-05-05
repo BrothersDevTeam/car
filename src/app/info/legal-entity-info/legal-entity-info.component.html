@@ -1,50 +1,127 @@
-<mat-card class="card-container" appearance="outlined">
-  <mat-card-content class="card-content">
-    <!-- Dados da Empresa -->
-    <app-wrapper-card class="person-info" title="Dados da empresa">
-      <div class="card-row">
-        <h3 class="label">Razão Social:</h3>
-        <h3 class="value">{{ person.name }}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Nome Fantasia:</h3>
-        <h3 class="value">{{ person.nickName }}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Email:</h3>
-        <h3 class="value">{{ person.email }}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">Telefone:</h3>
-        <h3 class="value">{{ person.phone }}</h3>
-      </div>
-      <div class="card-row">
-        <h3 class="label">CNPJ:</h3>
-        <h3 class="value">{{ person.cnpj }}</h3>
-      </div>
-      <mat-card-footer class="card-footer">
-        @if (canEditOrDelete) {
-          <button type="button" class="btn" color="primary" mat-raised-button (click)="editEvent.emit()">Editar</button>
-          <button type="button" class="btn" color="warn" mat-raised-button matListItemIcon (click)="onDelete()">
-            Excluir
-          </button>
+<div class="person-info-container">
+  <!-- Header Section with Avatar -->
+  <header class="info-header">
+    <div class="avatar-container">
+      <div class="avatar shadow-elegant business-avatar">{{ getInitials(person.name) }}</div>
+      <div class="status-indicator" [class.active]="person.active" [matTooltip]="person.active ? 'Acesso Ativo' : 'Inativo'"></div>
+    </div>
+    <div class="header-details">
+      <h1 class="person-name">{{ person.name }}</h1>
+      <div class="badge-group">
+        <span class="relationship-badge shadow-sm">
+          <mat-icon>business</mat-icon>
+          Pessoa Jurídica
+        </span>
+        @if (person.storeName) {
+          <span class="store-badge shadow-sm">
+            <mat-icon>store</mat-icon>
+            {{ person.storeName }}
+          </span>
         }
-      </mat-card-footer>
-    </app-wrapper-card>
-
-    <app-wrapper-card>
-      <!-- Seção de Endereços -->
-      @if (person.personId) {
-        <div class="address-section">
-          <app-address-list
-            [ownerId]="person.personId"
-            [canEdit]="true"
-            [canDelete]="true"
-            [canAdd]="true"
-            [initialDraftId]="initialAddressDraftId"
-          ></app-address-list>
-        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      @if (canEditOrDelete) {
+        <button mat-fab color="primary" class="fab-btn shadow-elegant" (click)="editEvent.emit()" matTooltip="Editar Dados">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-fab color="warn" class="fab-btn shadow-elegant" (click)="onDelete()" matTooltip="Excluir Registro">
+          <mat-icon>delete</mat-icon>
+        </button>
       }
-    </app-wrapper-card>
-  </mat-card-content>
-</mat-card>
+    </div>
+  </header>
+
+  <mat-divider></mat-divider>
+
+  <div class="info-grid">
+    <!-- Group: Identificação da Empresa -->
+    <section class="info-section">
+      <div class="section-header">
+        <mat-icon>corporate_fare</mat-icon>
+        <h2>Dados da Empresa</h2>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Razão Social</label>
+          <span class="value">{{ person.name || '---' }}</span>
+        </div>
+        <div class="field">
+          <label>Nome Fantasia</label>
+          <span class="value">{{ person.nickName || '---' }}</span>
+        </div>
+        <div class="field">
+          <label>CNPJ</label>
+          <span class="value">{{ person.cnpj || '---' }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Group: Contato -->
+    <section class="info-section">
+      <div class="section-header">
+        <mat-icon>alternate_email</mat-icon>
+        <h2>Contato Corporativo</h2>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>E-mail Comercial</label>
+          <span class="value highlight">{{ person.email || 'Não informado' }}</span>
+        </div>
+        <div class="field">
+          <label>Telefone / WhatsApp</label>
+          <span class="value">{{ person.phone || 'Não informado' }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Group: Dados Fiscais -->
+    <section class="info-section">
+      <div class="section-header">
+        <mat-icon>gavel</mat-icon>
+        <h2>Dados Fiscais</h2>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <label>Inscrição Estadual (IE)</label>
+          <span class="value">{{ person.ie || 'Isento/Não informado' }}</span>
+        </div>
+        @if (person.indicadorIe) {
+          <div class="field">
+            <label>Indicador de IE</label>
+            <span class="value">{{ person.indicadorIe }}</span>
+          </div>
+        }
+        <div class="field">
+          <label>Inscrição Municipal (IM)</label>
+          <span class="value">{{ person.im || '---' }}</span>
+        </div>
+        @if (person.isuf) {
+          <div class="field">
+            <label>Suframa</label>
+            <span class="value">{{ person.isuf }}</span>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+
+  <!-- Addresses Section -->
+  <section class="info-section full-width">
+    <div class="section-header">
+      <mat-icon>map</mat-icon>
+      <h2>Localização e Sedes</h2>
+    </div>
+    <div class="address-wrapper shadow-sm">
+      @if (person.personId) {
+        <app-address-list
+          [ownerId]="person.personId"
+          [canEdit]="true"
+          [canDelete]="true"
+          [canAdd]="true"
+          [initialDraftId]="initialAddressDraftId"
+        ></app-address-list>
+      }
+    </div>
+  </section>
+</div>
