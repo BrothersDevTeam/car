@@ -31,6 +31,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { ToastrService } from 'ngx-toastr';
 import { distinctUntilChanged, Subscription, of, Observable } from 'rxjs';
@@ -39,7 +40,6 @@ import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confi
 import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
-import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 
 import { VehicleForm, SPECIES_OPTIONS, CATEGORY_OPTIONS, VEHICLE_TYPE_OPTIONS } from '@interfaces/vehicle';
 import { extractErrorMessage } from '@utils/error-utils';
@@ -63,7 +63,6 @@ import { ActionsService } from '@services/actions.service';
     PrimaryInputComponent,
     PrimarySelectComponent,
     ReactiveFormsModule,
-    WrapperCardComponent,
     MatButtonModule,
     MatIconModule,
     MatOptionModule,
@@ -80,6 +79,7 @@ import { ActionsService } from '@services/actions.service';
     MatCardModule,
     MatInputModule,
     MatFormFieldModule,
+    MatButtonToggleModule,
   ],
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',
