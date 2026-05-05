@@ -1,1 +1,118 @@
-<p>business-done-table works!</p>
+<div class="business-history-container">
+  @if (loading()) {
+    <div class="loader-container">
+      <span class="loader"></span>
+      <p>Carregando histórico de negócios...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-container">
+      <mat-icon>error_outline</mat-icon>
+      <h3>Erro ao carregar dados</h3>
+      <p>Não foi possível recuperar o histórico de transações desta pessoa.</p>
+      <button mat-flat-button color="primary" (click)="loadHistory()">Tentar Novamente</button>
+    </div>
+  } @else if (history()?.transactions?.length === 0) {
+    <div class="empty-container">
+      <mat-icon>receipt_long</mat-icon>
+      <h3>Nenhum negócio efetuado</h3>
+      <p>Esta pessoa ainda não possui registros de compras ou vendas nesta loja.</p>
+    </div>
+  } @else {
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="summary-card purchase">
+        <div class="card-icon">
+          <mat-icon>shopping_cart</mat-icon>
+        </div>
+        <div class="card-info">
+          <span class="label">Total que a Loja Comprou</span>
+          <span class="value">{{ history()?.totalPurchased | currency: 'BRL' }}</span>
+          <span class="count">{{ history()?.purchaseCount }} transações</span>
+        </div>
+      </div>
+
+      <div class="summary-card sale">
+        <div class="card-icon">
+          <mat-icon>payments</mat-icon>
+        </div>
+        <div class="card-info">
+          <span class="label">Total que a Loja Vendeu</span>
+          <span class="value">{{ history()?.totalSold | currency: 'BRL' }}</span>
+          <span class="count">{{ history()?.saleCount }} transações</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="history()?.transactions || []" class="premium-table">
+        
+        <!-- Type Column -->
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Tipo</th>
+          <td mat-cell *matCellDef="let t">
+            <div class="type-indicator" [ngClass]="getTransactionTypeClass(t.type)">
+              <mat-icon>{{ t.type === 'COMPRA' ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
+              <span>{{ getTransactionTypeLabel(t.type) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Date Column -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Data</th>
+          <td mat-cell *matCellDef="let t">{{ t.date | date: 'dd/MM/yyyy' }}</td>
+        </ng-container>
+
+        <!-- Vehicle Column -->
+        <ng-container matColumnDef="vehicle">
+          <th mat-header-cell *matHeaderCellDef>Veículo</th>
+          <td mat-cell *matCellDef="let t">
+            <div class="vehicle-info">
+              <span class="vehicle-name">{{ t.vehicleInfo }}</span>
+              <span class="transaction-desc">{{ t.description }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Value Column -->
+        <ng-container matColumnDef="value">
+          <th mat-header-cell *matHeaderCellDef>Valor</th>
+          <td mat-cell *matCellDef="let t" class="value-cell">
+            {{ t.value | currency: 'BRL' }}
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let t">
+            <span class="status-badge" [ngClass]="getStatusClass(t.status)">
+              {{ getStatusLabel(t.status) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Ações</th>
+          <td mat-cell *matCellDef="let t">
+            <div class="action-buttons">
+              <button mat-icon-button color="primary" [routerLink]="['/vehicles']" [queryParams]="{ search: t.vehicleId }" matTooltip="Ver Veículo">
+                <mat-icon>directions_car</mat-icon>
+              </button>
+              @if (t.type === 'VENDA') {
+                <button mat-icon-button color="accent" [routerLink]="['/vendas']" [queryParams]="{ search: t.transactionId }" matTooltip="Ver Detalhes da Venda">
+                  <mat-icon>description</mat-icon>
+                </button>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+  }
+</div>

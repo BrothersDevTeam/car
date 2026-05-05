@@ -55,3 +55,22 @@ export interface Address {
   zipcode: string;
   neighborhood: string;
 }
+
+export interface BusinessTransaction {
+  transactionId: string;
+  type: 'COMPRA' | 'VENDA';
+  date: string;
+  value: number;
+  vehicleInfo: string;
+  vehicleId: string;
+  status: string;
+  description: string;
+}
+
+export interface BusinessHistory {
+  transactions: BusinessTransaction[];
+  totalPurchased: number;
+  totalSold: number;
+  purchaseCount: number;
+  saleCount: number;
+}

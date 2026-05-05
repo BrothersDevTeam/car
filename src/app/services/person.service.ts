@@ -220,4 +220,8 @@ export class PersonService {
     const roles = this.authService.getRoles();
     return roles.includes(roleName);
   }
+
+  getBusinessHistory(personId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${personId}/business-history`).pipe(first());
+  }
 }

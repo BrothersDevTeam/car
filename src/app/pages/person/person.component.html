@@ -135,7 +135,7 @@
             />
           </mat-tab>
           <mat-tab label="Negócios efetuados">
-            <app-business-done-table />
+            <app-business-done-table [personId]="selectedPerson!.personId" />
           </mat-tab>
         </mat-tab-group>
       } @else if (selectedPerson?.legalEntity) {
@@ -149,7 +149,7 @@
             />
           </mat-tab>
           <mat-tab label="Negócios efetuados">
-            <app-business-done-table />
+            <app-business-done-table [personId]="selectedPerson!.personId" />
           </mat-tab>
         </mat-tab-group>
       } @else {
