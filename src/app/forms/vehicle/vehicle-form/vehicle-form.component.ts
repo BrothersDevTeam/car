@@ -938,68 +938,42 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /**
-   * Mapeia os valores complexos do frontend para o Enum simples do backend
+   * Mapeia os valores do frontend/FIPE para o Enum do backend
    */
   private mapFuelTypeToBackend(frontendValue: string | string[]): string[] {
-    const valueToCheck = Array.isArray(frontendValue)
-      ? frontendValue[0] // Assumindo seleção única por enquanto, pega o primeiro
-      : frontendValue;
-
+    const valueToCheck = Array.isArray(frontendValue) ? frontendValue[0] : frontendValue;
     if (!valueToCheck) return [];
 
-    // Normaliza para maiúsculas para facilitar comparação
     const upperValue = valueToCheck.toUpperCase();
 
-    // Mapeamento baseado no FuelTypes.ts do frontend
-    switch (upperValue) {
-      case 'ÁLCOOL':
-        return ['ALCOOL'];
-      case 'GASOLINA':
-        return ['GASOLINA'];
-      case 'DIESEL':
-        return ['DIESEL'];
-      case 'GÁS NATURAL VEICULAR':
-        return ['GNV'];
+    // Mapeamento Direto (Nomes dos Enums do Backend)
+    const directMatch = Object.keys(FuelTypes).find((key) => key === upperValue);
+    if (directMatch) return [directMatch];
 
-      // Elétricos
-      case 'ELÉTRICO/FONTE INTERNA':
-      case 'ELÉTRICO/FONTE EXTERNA':
-        return ['ELETRICO'];
-
-      // Flex e Misturas
-      case 'ÁLCOOL/GASOLINA': // Flex
-        return ['ALCOOL', 'GASOLINA'];
-
-      // Híbridos
-      case 'GASOLINA/ELÉTRICO':
-        return ['GASOLINA', 'ELETRICO'];
-
-      // GNV Combinado
-      case 'GASOLINA/GÁS NATURAL VEICULAR':
-      case 'GASOLINA/GÁS NATURAL COMBUSTÍVEL':
-        return ['GASOLINA', 'GNV'];
-
-      case 'ÁLCOOL/GÁS NATURAL VEICULAR':
-      case 'ÁLCOOL/GÁS NATURAL COMBUSTÍVEL':
-        return ['ALCOOL', 'GNV'];
-
-      case 'DIESEL/GÁS NATURAL VEICULAR':
-      case 'DIESEL/GÁS NATURAL COMBUSTÍVEL':
-        return ['DIESEL', 'GNV'];
-
-      case 'GASOLINA/ÁLCOOL/GÁS NATURAL VEICULAR': // Flex + GNV
-        return ['GASOLINA', 'ALCOOL', 'GNV'];
-
-      default:
-        // Se não encontrar mapeamento exato, tenta retornar o próprio valor
-        // se ele for um dos aceitos pelo backend (ex: GASOLINA, ALCOOL)
-        // Remove acentos e caracteres especiais para tentar dar match
-        return [
-          valueToCheck
-            .normalize('NFD') // Decomponha acentos
-            .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-            .toUpperCase(),
-        ];
+    // Mapeamento por Descrição (FIPE / Labels)
+    if (upperValue.includes('ALCOOL/GASOLINA') || upperValue === 'FLEX' || upperValue === 'ALCOOL/GASOL') {
+      return ['FLEX'];
     }
+    if (upperValue === 'GASOLINA/ALCOOL/GAS NATURAL VEICULAR' || upperValue.includes('FLEX') && upperValue.includes('GNV')) {
+      return ['FLEX_GNV'];
+    }
+    if (upperValue === 'GASOLINA/ELETRICO' || upperValue === 'HIBRIDO') {
+      return ['HIBRIDO'];
+    }
+    if (upperValue === 'ALCOOL' || upperValue === 'ETANOL') return ['ALCOOL'];
+    if (upperValue === 'GASOLINA') return ['GASOLINA'];
+    if (upperValue === 'DIESEL') return ['DIESEL'];
+    if (upperValue.includes('GNV') || upperValue.includes('GAS NATURAL VEICULAR')) return ['GNV'];
+    if (upperValue.includes('ELETRICO')) return ['ELETRICO_FONTE_INTERNA'];
+
+    // Fallback: Tenta normalizar e ver se bate com algum enum
+    const normalized = valueToCheck
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .replace(/\s+/g, '_');
+
+    const normalizedMatch = Object.keys(FuelTypes).find((key) => key === normalized);
+    return normalizedMatch ? [normalizedMatch] : [];
   }
 }

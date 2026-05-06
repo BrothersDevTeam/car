@@ -104,23 +104,14 @@ export interface VehicleList {
   modelYear?: string;
   color: string;
   status: string;
-  km: string;
-  vehicleType: string;
   valorVenda?: string;
   entryDate?: string;
   hasInputNfe?: boolean;
   hasOutputNfe?: boolean;
   ownerName?: string;
-  // Campos técnicos para validação na grid
-  chassis?: string;
-  renavam?: string;
-  species?: string;
-  category?: string;
-  fuelTypes?: string[];
-  supplierId?: string;
-  hasSupplierAddress?: boolean;
-  valorCompra?: string;
-  dataCompra?: string;
+  origin?: string;
+  nfeHistory?: NfeSummary[];
+  nfeValidationErrors?: string[];
 }
 
 export type CreateVehicle = Omit<Vehicle, 'vehicleId'>;

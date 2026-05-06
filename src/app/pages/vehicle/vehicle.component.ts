@@ -147,8 +147,9 @@ export class VehicleComponent implements CanComponentDeactivate {
       ],
       alertConfig: {
         getMessage: (row) => {
-          const errors = this.getVehicleNfeValidationErrors(row);
-          return errors.length > 0 ? errors.join('; ') : null;
+          return row.nfeValidationErrors && row.nfeValidationErrors.length > 0 
+            ? row.nfeValidationErrors.join('; ') 
+            : null;
         },
         icon: 'error_outline',
       },
@@ -484,11 +485,9 @@ export class VehicleComponent implements CanComponentDeactivate {
   gerarNfeCompra(vehicle: VehicleList) {
     if (!this.storeContextService.validateStoreSelection()) return;
 
-    const errors = this.getVehicleNfeValidationErrors(vehicle);
-
-    if (errors.length > 0) {
+    if (vehicle.nfeValidationErrors && vehicle.nfeValidationErrors.length > 0) {
       this.snackBar.open(
-        'Resolva as pendências antes de gerar a NFe de Entrada. Verifique o ícone de alerta (!).',
+        'Resolva as pendências antes de gerar a NFe de Entrada: ' + vehicle.nfeValidationErrors.join(', '),
         'OK',
         { duration: 5000, panelClass: ['warn-snackbar'] },
       );
@@ -570,37 +569,5 @@ export class VehicleComponent implements CanComponentDeactivate {
       }
     });
   }
-
-  /**
-   * Verifica campos obrigatórios para emissão de NFe e retorna lista de pendências.
-   */
-  getVehicleNfeValidationErrors(vehicle: VehicleList): string[] {
-    const errors: string[] = [];
-
-    // Dados Básicos do Veículo
-    if (!vehicle.brand) errors.push('Marca');
-    if (!vehicle.model) errors.push('Modelo');
-    if (!vehicle.vehicleYear) errors.push('Ano Fabr.');
-    if (!vehicle.modelYear) errors.push('Ano Mod.');
-    if (!vehicle.color) errors.push('Cor');
-    if (!vehicle.chassis) errors.push('Chassi');
-    if (!vehicle.renavam) errors.push('Renavam');
-    if (!vehicle.vehicleType) errors.push('Tipo');
-    if (!vehicle.species) errors.push('Espécie');
-    if (!vehicle.category) errors.push('Categoria');
-    if (!vehicle.fuelTypes || vehicle.fuelTypes.length === 0) errors.push('Combustível');
-
-    // Dados de Compra (necessários para NFe de Entrada)
-    // Só valida se não tiver NFe de entrada vinculada
-    const temNfeEntrada = vehicle.hasInputNfe;
-    if (!temNfeEntrada) {
-      if (!vehicle.supplierId) errors.push('Fornecedor');
-      else if (vehicle.hasSupplierAddress === false) errors.push('Endereço do Fornecedor');
-
-      if (!vehicle.valorCompra || vehicle.valorCompra === '0') errors.push('Valor Compra');
-      if (!vehicle.dataCompra) errors.push('Data Compra');
-    }
-
-    return errors;
-  }
 }
+
