@@ -89,13 +89,11 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.data.person.authorizations) {
-      this.data.person.authorizations.forEach((auth) => this.selectedAuths.add(auth));
-    }
     this.loadAuthorizations();
   }
 
   loadAuthorizations(): void {
+    // 1. Carrega o mapa de permissões disponíveis no sistema
     this.http.get<Record<string, Authorization[]>>('/api/authorizations').subscribe({
       next: (response) => {
         const isRoot = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
@@ -113,11 +111,25 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
             };
           })
           .filter((m) => m.authorizations.length > 0);
-        this.loading = false;
+
+        // 2. Carrega as permissões atuais do usuário (apenas se for necessário)
+        this.http.get<{ authorizations: string[] }>(`/api/persons/${this.data.person.personId}/authorizations`).subscribe({
+          next: (userAuths) => {
+            if (userAuths && userAuths.authorizations) {
+              userAuths.authorizations.forEach((auth) => this.selectedAuths.add(auth));
+            }
+            this.loading = false;
+          },
+          error: (err) => {
+            console.error('Failed to load user authorizations', err);
+            this.snackBar.open('Erro ao carregar permissões atuais do funcionário.', 'Fechar', { duration: 3000 });
+            this.loading = false;
+          },
+        });
       },
       error: (err) => {
-        console.error('Failed to load authorizations', err);
-        this.snackBar.open('Erro ao carregar lista de permissões.', 'Fechar', { duration: 3000 });
+        console.error('Failed to load authorizations map', err);
+        this.snackBar.open('Erro ao carregar lista de permissões disponíveis.', 'Fechar', { duration: 3000 });
         this.loading = false;
       },
     });

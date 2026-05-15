@@ -45,6 +45,24 @@ export class StoreService {
     });
   }
 
+  getAllMinimal(filters?: StoreSearchFilters): Observable<StorePageResponse> {
+    let params = new HttpParams();
+    if (filters) {
+      if (filters.page !== undefined) params = params.set('page', filters.page.toString());
+      if (filters.size !== undefined) params = params.set('size', filters.size.toString());
+    }
+    return this.http.get<StorePageResponse>(`${this.apiUrl}/minimal`, { params });
+  }
+
+  getBranchesMinimal(filters?: StoreSearchFilters): Observable<StorePageResponse> {
+    let params = new HttpParams();
+    if (filters) {
+      if (filters.page !== undefined) params = params.set('page', filters.page.toString());
+      if (filters.size !== undefined) params = params.set('size', filters.size.toString());
+    }
+    return this.http.get<StorePageResponse>(`${this.apiUrl}/branches/minimal`, { params });
+  }
+
   getById(storeId: string): Observable<Store> {
     return this.http.get<Store>(`${this.apiUrl}/${storeId}`);
   }

@@ -20,6 +20,13 @@ export interface Store {
   _links?: any;
 }
 
+export interface StoreMinimal {
+  storeId: string;
+  name: string;
+  tradeName: string;
+  cnpj: string;
+}
+
 export type CreateMainStore = {
   name: string;
   tradeName?: string;

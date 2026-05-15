@@ -10,7 +10,7 @@ import { Authorizations } from '../../enums/authorizations';
 import { Store } from '@interfaces/store';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-main-header',
@@ -39,7 +39,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     this.canReadStoreOthers = this.authService.hasAuthority(Authorizations.READ_STORE_OTHERS);
 
     // Escuta mudanças na loja globalmente selecionada
-    this.storeContextService.currentStoreId$.pipe(takeUntil(this.destroy$)).subscribe((storeId) => {
+    this.storeContextService.currentStoreId$.pipe(
+      takeUntil(this.destroy$),
+      distinctUntilChanged()
+    ).subscribe((storeId) => {
       // Configura o ID inicial pelo contexto global (usando 'ALL' em vez de null para o html renderizar)
       this.selectedStoreId = storeId ?? 'ALL';
 
@@ -59,8 +62,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   private loadAllStores() {
     this.storeName.set('Carregando Lojas...');
     const serviceCall = this.isCarAdmin
-      ? this.storeService.getAll({ size: 1000 })
-      : this.storeService.getBranches({ size: 1000 });
+      ? this.storeService.getAllMinimal({ size: 1000 })
+      : this.storeService.getBranchesMinimal({ size: 1000 });
 
     serviceCall.subscribe({
       next: (response) => {
