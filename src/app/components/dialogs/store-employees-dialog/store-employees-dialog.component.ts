@@ -496,7 +496,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
 
   openAuthorizationsDialog(person: Person): void {
     const dialogRef = this.dialog.open(EmployeeAuthorizationsDialogComponent, {
-      width: '600px',
+      width: '900px',
       data: {
         person,
         store: this.data.store,

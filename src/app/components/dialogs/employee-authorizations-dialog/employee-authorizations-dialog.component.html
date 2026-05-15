@@ -18,28 +18,27 @@
       <p>Carregando opções...</p>
     </div>
   } @else {
-    <div class="modules-container">
-      @for (module of modules; track module.module) {
-        <div class="module-section">
-          <h3 class="module-title">
-            <mat-checkbox
-              [checked]="isModuleAllSelected(module)"
-              [indeterminate]="isModulePartiallySelected(module)"
-              (change)="toggleModuleAuths(module, $event)"
-            >
-              {{ getTranslatedModule(module.module) }}
-            </mat-checkbox>
-          </h3>
-          <div class="auth-grid">
-            @for (auth of module.authorizations; track auth.key) {
-              <mat-checkbox [checked]="hasAuth(auth.key)" (change)="onToggleAuth(auth.key, $event)">
-                {{ auth.label }}
-              </mat-checkbox>
-            }
+    <div class="permissions-section">
+      <div class="perm-groups">
+        @for (module of modules; track module.module) {
+          <div class="perm-group">
+            <span class="perm-group-title">{{ getTranslatedModule(module.module) }}</span>
+            <div class="perm-checkboxes">
+              @for (auth of module.authorizations; track auth.key) {
+                <label class="perm-checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="hasAuth(auth.key)"
+                    (change)="onToggleAuth(auth.key)"
+                  />
+                  <span class="custom-checkbox"></span>
+                  <span class="label-text">{{ auth.label }}</span>
+                </label>
+              }
+            </div>
           </div>
-        </div>
-        <mat-divider></mat-divider>
-      }
+        }
+      </div>
     </div>
   }
 </mat-dialog-content>

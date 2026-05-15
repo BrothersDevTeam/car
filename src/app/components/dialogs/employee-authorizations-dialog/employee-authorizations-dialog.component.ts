@@ -69,22 +69,11 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
     return translations[moduleStr] || moduleStr;
   }
 
-  isModuleAllSelected(module: ModuleAuthorizations): boolean {
-    if (!module || !module.authorizations || module.authorizations.length === 0) return false;
-    return module.authorizations.every((auth) => this.selectedAuths.has(auth.key));
-  }
-
-  isModulePartiallySelected(module: ModuleAuthorizations): boolean {
-    if (!module || !module.authorizations || module.authorizations.length === 0) return false;
-    const selectedCount = module.authorizations.filter((auth) => this.selectedAuths.has(auth.key)).length;
-    return selectedCount > 0 && selectedCount < module.authorizations.length;
-  }
-
-  toggleModuleAuths(module: ModuleAuthorizations, event: MatCheckboxChange): void {
-    if (event.checked) {
-      module.authorizations.forEach((auth) => this.selectedAuths.add(auth.key));
+  onToggleAuth(key: string): void {
+    if (this.selectedAuths.has(key)) {
+      this.selectedAuths.delete(key);
     } else {
-      module.authorizations.forEach((auth) => this.selectedAuths.delete(auth.key));
+      this.selectedAuths.add(key);
     }
   }
 
@@ -137,13 +126,6 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
     });
   }
 
-  onToggleAuth(key: string, event: MatCheckboxChange): void {
-    if (event.checked) {
-      this.selectedAuths.add(key);
-    } else {
-      this.selectedAuths.delete(key);
-    }
-  }
 
   hasAuth(key: string): boolean {
     return this.selectedAuths.has(key);
