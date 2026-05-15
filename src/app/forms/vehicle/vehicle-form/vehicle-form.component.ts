@@ -954,7 +954,10 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     if (upperValue.includes('ALCOOL/GASOLINA') || upperValue === 'FLEX' || upperValue === 'ALCOOL/GASOL') {
       return ['FLEX'];
     }
-    if (upperValue === 'GASOLINA/ALCOOL/GAS NATURAL VEICULAR' || upperValue.includes('FLEX') && upperValue.includes('GNV')) {
+    if (
+      upperValue === 'GASOLINA/ALCOOL/GAS NATURAL VEICULAR' ||
+      (upperValue.includes('FLEX') && upperValue.includes('GNV'))
+    ) {
       return ['FLEX_GNV'];
     }
     if (upperValue === 'GASOLINA/ELETRICO' || upperValue === 'HIBRIDO') {

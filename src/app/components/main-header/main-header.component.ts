@@ -39,19 +39,18 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     this.canReadStoreOthers = this.authService.hasAuthority(Authorizations.READ_STORE_OTHERS);
 
     // Escuta mudanças na loja globalmente selecionada
-    this.storeContextService.currentStoreId$.pipe(
-      takeUntil(this.destroy$),
-      distinctUntilChanged()
-    ).subscribe((storeId) => {
-      // Configura o ID inicial pelo contexto global (usando 'ALL' em vez de null para o html renderizar)
-      this.selectedStoreId = storeId ?? 'ALL';
+    this.storeContextService.currentStoreId$
+      .pipe(takeUntil(this.destroy$), distinctUntilChanged())
+      .subscribe((storeId) => {
+        // Configura o ID inicial pelo contexto global (usando 'ALL' em vez de null para o html renderizar)
+        this.selectedStoreId = storeId ?? 'ALL';
 
-      if (this.isCarAdmin || this.canReadStoreOthers) {
-        this.loadAllStores();
-      } else {
-        this.loadCurrentStoreName();
-      }
-    });
+        if (this.isCarAdmin || this.canReadStoreOthers) {
+          this.loadAllStores();
+        } else {
+          this.loadCurrentStoreName();
+        }
+      });
   }
 
   ngOnDestroy(): void {

@@ -113,19 +113,21 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
           .filter((m) => m.authorizations.length > 0);
 
         // 2. Carrega as permissões atuais do usuário (apenas se for necessário)
-        this.http.get<{ authorizations: string[] }>(`/api/persons/${this.data.person.personId}/authorizations`).subscribe({
-          next: (userAuths) => {
-            if (userAuths && userAuths.authorizations) {
-              userAuths.authorizations.forEach((auth) => this.selectedAuths.add(auth));
-            }
-            this.loading = false;
-          },
-          error: (err) => {
-            console.error('Failed to load user authorizations', err);
-            this.snackBar.open('Erro ao carregar permissões atuais do funcionário.', 'Fechar', { duration: 3000 });
-            this.loading = false;
-          },
-        });
+        this.http
+          .get<{ authorizations: string[] }>(`/api/persons/${this.data.person.personId}/authorizations`)
+          .subscribe({
+            next: (userAuths) => {
+              if (userAuths && userAuths.authorizations) {
+                userAuths.authorizations.forEach((auth) => this.selectedAuths.add(auth));
+              }
+              this.loading = false;
+            },
+            error: (err) => {
+              console.error('Failed to load user authorizations', err);
+              this.snackBar.open('Erro ao carregar permissões atuais do funcionário.', 'Fechar', { duration: 3000 });
+              this.loading = false;
+            },
+          });
       },
       error: (err) => {
         console.error('Failed to load authorizations map', err);

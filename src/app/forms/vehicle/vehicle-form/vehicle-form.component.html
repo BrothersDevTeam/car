@@ -24,7 +24,12 @@
                       <span class="draft-name">{{ draft.draftName || 'Rascunho sem nome' }}</span>
                       <span class="draft-date">Salvo em: {{ draft.lastModified | date: 'dd/MM/yyyy HH:mm' }}</span>
                     </div>
-                    <button mat-icon-button color="warn" (click)="removeDraft(draft, $event)" matTooltip="Excluir rascunho">
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      (click)="removeDraft(draft, $event)"
+                      matTooltip="Excluir rascunho"
+                    >
                       <mat-icon>delete_outline</mat-icon>
                     </button>
                   </div>
@@ -41,7 +46,10 @@
     @if (dataForm?.plate) {
       <div class="form-header-title">
         <mat-icon>directions_car</mat-icon>
-        <h2>Veículo Placa: <span>{{ dataForm!.plate }}</span></h2>
+        <h2>
+          Veículo Placa:
+          <span>{{ dataForm!.plate }}</span>
+        </h2>
       </div>
     }
 
@@ -68,11 +76,15 @@
               <mat-icon>info</mat-icon>
               <h3>Identificação Básica</h3>
             </div>
-            
+
             <div class="form-grid grid-3-cols align-items-end">
               <div class="field-container">
                 <label class="modern-label">Origem do Veículo</label>
-                <mat-button-toggle-group formControlName="origin" aria-label="Origem do Veículo" class="premium-toggle-group">
+                <mat-button-toggle-group
+                  formControlName="origin"
+                  aria-label="Origem do Veículo"
+                  class="premium-toggle-group"
+                >
                   <mat-button-toggle value="NACIONAL">
                     <mat-icon>flag</mat-icon>
                     Nacional
@@ -108,7 +120,7 @@
               <mat-icon>category</mat-icon>
               <h3>Marca e Modelo</h3>
             </div>
-            
+
             <div class="form-grid">
               <app-custom-select
                 listType="person"
@@ -161,7 +173,7 @@
               <mat-icon>settings</mat-icon>
               <h3>Especificações Técnicas</h3>
             </div>
-            
+
             <div class="form-grid grid-3">
               <app-custom-select
                 listType="color"
@@ -192,14 +204,14 @@
               <mat-icon>description</mat-icon>
               <h3>Documentação e Motor</h3>
             </div>
-            
+
             <div class="form-grid">
               <app-primary-input formControlName="chassis" label="Chassi" mask="AAAAAAAAAAAAAAAAA" />
               <app-primary-input formControlName="renavam" label="Renavam" />
               <app-primary-input formControlName="engineNumber" label="Nº do Motor" />
               <app-primary-input formControlName="engineDisplacement" label="Cilindrada" />
               <app-primary-input formControlName="horsepower" label="Potência (CV)" />
-              
+
               <app-primary-select
                 formControlName="species"
                 label="Espécie"
@@ -235,7 +247,7 @@
               <mat-icon>shopping_cart</mat-icon>
               <h3>Informações de Aquisição</h3>
             </div>
-            
+
             <div class="vertical-form-stack">
               <div class="field-container">
                 <label class="modern-label">Informações do Fornecedor</label>
@@ -289,7 +301,12 @@
             <div class="full-row">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Observações Internas</mat-label>
-                <textarea matInput formControlName="observation" rows="4" placeholder="Detalhes importantes..."></textarea>
+                <textarea
+                  matInput
+                  formControlName="observation"
+                  rows="4"
+                  placeholder="Detalhes importantes..."
+                ></textarea>
               </mat-form-field>
             </div>
           </section>

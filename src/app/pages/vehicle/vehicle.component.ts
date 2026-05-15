@@ -147,8 +147,8 @@ export class VehicleComponent implements CanComponentDeactivate {
       ],
       alertConfig: {
         getMessage: (row) => {
-          return row.nfeValidationErrors && row.nfeValidationErrors.length > 0 
-            ? row.nfeValidationErrors.join('; ') 
+          return row.nfeValidationErrors && row.nfeValidationErrors.length > 0
+            ? row.nfeValidationErrors.join('; ')
             : null;
         },
         icon: 'error_outline',
@@ -570,4 +570,3 @@ export class VehicleComponent implements CanComponentDeactivate {
     });
   }
 }
-

@@ -3,7 +3,11 @@
   <header class="info-header">
     <div class="avatar-container">
       <div class="avatar shadow-elegant business-avatar">{{ getInitials(person.name) }}</div>
-      <div class="status-indicator" [class.active]="person.active" [matTooltip]="person.active ? 'Acesso Ativo' : 'Inativo'"></div>
+      <div
+        class="status-indicator"
+        [class.active]="person.active"
+        [matTooltip]="person.active ? 'Acesso Ativo' : 'Inativo'"
+      ></div>
     </div>
     <div class="header-details">
       <h1 class="person-name">{{ person.name }}</h1>
@@ -22,7 +26,13 @@
     </div>
     <div class="header-actions">
       @if (canEditOrDelete) {
-        <button mat-fab color="primary" class="fab-btn shadow-elegant" (click)="editEvent.emit()" matTooltip="Editar Dados">
+        <button
+          mat-fab
+          color="primary"
+          class="fab-btn shadow-elegant"
+          (click)="editEvent.emit()"
+          matTooltip="Editar Dados"
+        >
           <mat-icon>edit</mat-icon>
         </button>
         <button mat-fab color="warn" class="fab-btn shadow-elegant" (click)="onDelete()" matTooltip="Excluir Registro">

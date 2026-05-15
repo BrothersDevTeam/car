@@ -246,12 +246,20 @@
                   <div class="history-date">
                     {{ item.date | date: 'dd/MM/yyyy' }}
                   </div>
-                  <div class="history-desc" [class.clickable-link]="item.personId" (click)="navigateToPerson(item.personId)">
+                  <div
+                    class="history-desc"
+                    [class.clickable-link]="item.personId"
+                    (click)="navigateToPerson(item.personId)"
+                  >
                     <strong>{{ item.title }}</strong>
                     <p class="m-0 text-muted small">
                       {{ item.description }}
                       @if (item.personId) {
-                        <mat-icon style="font-size: 14px; width: 14px; height: 14px; vertical-align: middle; margin-left: 4px;">open_in_new</mat-icon>
+                        <mat-icon
+                          style="font-size: 14px; width: 14px; height: 14px; vertical-align: middle; margin-left: 4px"
+                        >
+                          open_in_new
+                        </mat-icon>
                       }
                     </p>
                   </div>
