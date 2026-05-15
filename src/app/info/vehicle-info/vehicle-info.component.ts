@@ -49,41 +49,48 @@ export class VehicleInfoComponent implements OnChanges {
     private router: Router,
   ) {}
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['vehicle']) {
-      // Se vendido, tentamos carregar os detalhes do comprador da venda
-      if (this.vehicle?.status === 'VENDIDO' && this.vehicle.salesHistory?.[0]?.buyerName) {
-        // Opcional: Poderíamos buscar o Person completo do comprador aqui se necessário
-        // Por enquanto vamos usar os dados do histórico para exibição rápida
-      }
+    if (changes['vehicle'] && this.vehicle) {
+      const ownerId = this.vehicle.owner;
+      const supplierId = this.vehicle.supplierId;
 
-      if (this.vehicle?.owner) {
-        // Busca o proprietário quando o veículo mudar
-        this.personService.getById(this.vehicle.owner).subscribe({
+      // Se proprietário e fornecedor forem a mesma pessoa, fazemos apenas uma chamada
+      if (ownerId && supplierId && ownerId === supplierId) {
+        this.personService.getById(ownerId).subscribe({
           next: (person) => {
             this.proprietario = person;
-          },
-          error: (error) => {
-            console.error('Erro ao carregar proprietário:', error);
-            this.proprietario = null;
-          },
-        });
-      } else {
-        this.proprietario = null;
-      }
-
-      if (this.vehicle?.supplierId) {
-        // Busca o fornecedor quando o veículo mudar
-        this.personService.getById(this.vehicle.supplierId).subscribe({
-          next: (person) => {
             this.fornecedor = person;
           },
           error: (error) => {
-            console.error('Erro ao carregar fornecedor:', error);
+            console.error('Erro ao carregar pessoa (proprietário/fornecedor):', error);
+            this.proprietario = null;
             this.fornecedor = null;
           },
         });
       } else {
-        this.fornecedor = null;
+        // Caso sejam diferentes, carrega individualmente (se existirem)
+        if (ownerId) {
+          this.personService.getById(ownerId).subscribe({
+            next: (person) => (this.proprietario = person),
+            error: (error) => {
+              console.error('Erro ao carregar proprietário:', error);
+              this.proprietario = null;
+            },
+          });
+        } else {
+          this.proprietario = null;
+        }
+
+        if (supplierId) {
+          this.personService.getById(supplierId).subscribe({
+            next: (person) => (this.fornecedor = person),
+            error: (error) => {
+              console.error('Erro ao carregar fornecedor:', error);
+              this.fornecedor = null;
+            },
+          });
+        } else {
+          this.fornecedor = null;
+        }
       }
     }
   }
