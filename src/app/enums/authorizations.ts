@@ -1,132 +1,71 @@
-/**
- * Catálogo centralizado de todas as permissões (authorizations) do sistema CAR.
- * Este enum reflete exatamente as chaves de autorização mapeadas e utilizadas pela API.
- */
 export enum Authorizations {
-  // ─────────────────────────────────────────────────
-  // SUPER PERMISSÃO (apenas do administrador raiz do sistema)
-  // ─────────────────────────────────────────────────
+    ROOT_ADMIN = 'root:admin',
 
-  /** Acesso irrestrito ao sistema. Exclusivo do CAR_ADMIN. */
-  ROOT_ADMIN = 'root:admin',
+    // STORE
+    READ_STORE_SELF = 'read:store:self',
+    READ_STORE_NETWORK = 'read:store:network',
+    EDIT_STORE_SELF = 'edit:store:self',
+    EDIT_STORE_NETWORK = 'edit:store:network',
 
-  // ─────────────────────────────────────────────────
-  // STORE – Gerenciamento de Lojas
-  // ─────────────────────────────────────────────────
+    // USER
+    READ_USER_SELF = 'read:user:self',
+    READ_USER_STORE = 'read:user:store',
+    READ_USER_NETWORK = 'read:user:network',
+    CREATE_USER_STORE = 'create:user:store',
+    CREATE_USER_NETWORK = 'create:user:network',
+    EDIT_USER_SELF = 'edit:user:self',
+    EDIT_USER_STORE = 'edit:user:store',
+    EDIT_USER_NETWORK = 'edit:user:network',
+    DELETE_USER_STORE = 'delete:user:store',
+    DELETE_USER_NETWORK = 'delete:user:network',
+    EDIT_MANAGER_AUTH = 'edit:manager:auth',
+    EDIT_SELLER_AUTH = 'edit:seller:auth',
 
-  /** Visualizar dados da loja. */
-  READ_STORE = 'read:store',
+    // PERSON
+    READ_PERSON_SELF = 'read:person:self',
+    READ_PERSON_STORE = 'read:person:store',
+    READ_PERSON_NETWORK = 'read:person:network',
+    CREATE_PERSON_STORE = 'create:person:store',
+    CREATE_PERSON_NETWORK = 'create:person:network',
+    EDIT_PERSON_SELF = 'edit:person:self',
+    EDIT_PERSON_STORE = 'edit:person:store',
+    EDIT_PERSON_NETWORK = 'edit:person:network',
+    DELETE_PERSON_STORE = 'delete:person:store',
+    DELETE_PERSON_NETWORK = 'delete:person:network',
 
-  /** Visualizar dados das lojas da rede. */
-  READ_STORE_OTHERS = 'read:store:others',
+    // VEHICLE
+    READ_VEHICLE_STORE = 'read:vehicle:store',
+    READ_VEHICLE_NETWORK = 'read:vehicle:network',
+    CREATE_VEHICLE_STORE = 'create:vehicle:store',
+    CREATE_VEHICLE_NETWORK = 'create:vehicle:network',
+    EDIT_VEHICLE_STORE = 'edit:vehicle:store',
+    EDIT_VEHICLE_NETWORK = 'edit:vehicle:network',
+    DELETE_VEHICLE_STORE = 'delete:vehicle:store',
+    DELETE_VEHICLE_NETWORK = 'delete:vehicle:network',
+    READ_VEHICLE_PURCHASE_PRICE = 'read:vehicle:purchase_price',
+    READ_VEHICLE_PROFIT = 'read:vehicle:profit',
 
-  /** Criar e editar lojas, filiais, endereços e proprietário. */
-  EDIT_STORE = 'edit:store',
+    // NFE
+    READ_NFE_STORE = 'read:nfe:store',
+    READ_NFE_NETWORK = 'read:nfe:network',
+    CREATE_NFE_STORE = 'create:nfe:store',
+    CREATE_NFE_NETWORK = 'create:nfe:network',
+    EMITIR_NFE_STORE = 'emitir:nfe:store',
+    EMITIR_NFE_NETWORK = 'emitir:nfe:network',
+    EDIT_NFE_NETWORK = 'edit:nfe:network',
+    CANCEL_NFE_STORE = 'cancel:nfe:store',
+    CANCEL_NFE_NETWORK = 'cancel:nfe:network',
 
-  // ─────────────────────────────────────────────────
-  // USER – Gerenciamento de Usuários
-  // ─────────────────────────────────────────────────
+    // VENDA
+    READ_VENDA_STORE = 'read:venda:store',
+    READ_VENDA_NETWORK = 'read:venda:network',
+    CREATE_VENDA_STORE = 'create:venda:store',
+    CREATE_VENDA_NETWORK = 'create:venda:network',
+    EDIT_VENDA_STORE = 'edit:venda:store',
+    EDIT_VENDA_NETWORK = 'edit:venda:network',
+    CANCEL_VENDA_STORE = 'cancel:venda:store',
+    CANCEL_VENDA_NETWORK = 'cancel:venda:network',
 
-  /** Visualizar o próprio usuário. */
-  READ_USER = 'read:user',
-
-  /** Visualizar usuários de outros da mesma loja. */
-  READ_USER_OTHERS = 'read:user:others',
-
-  /** Criar novos usuários na loja. */
-  CREATE_USER = 'create:user',
-
-  /** Editar o próprio usuário (ex: senha, imagem). */
-  EDIT_USER = 'edit:user',
-
-  /** Editar usuários de outros da mesma loja. */
-  EDIT_USER_OTHERS = 'edit:user:others',
-
-  /** Excluir usuários da loja. */
-  DELETE_USER = 'delete:user',
-
-  // ─────────────────────────────────────────────────
-  // PERSON – Gerenciamento de Clientes / Funcionários
-  // ─────────────────────────────────────────────────
-
-  /** Visualizar o próprio registro de pessoa. */
-  READ_PERSON = 'read:person',
-
-  /** Visualizar registros de outras pessoas da loja. */
-  READ_PERSON_OTHERS = 'read:person:others',
-
-  /** Criar novos registros de pessoa (cliente, funcionário). */
-  CREATE_PERSON = 'create:person',
-
-  /** Editar registros de pessoa. */
-  EDIT_PERSON = 'edit:person',
-
-  /** Excluir registros de pessoa. */
-  DELETE_PERSON = 'delete:person',
-
-  // ─────────────────────────────────────────────────
-  // VEHICLE – Gerenciamento de Veículos
-  // ─────────────────────────────────────────────────
-
-  /** Visualizar veículos do estoque. */
-  READ_VEHICLE = 'read:vehicle',
-
-  /** Criar veículos no estoque. */
-  CREATE_VEHICLE = 'create:vehicle',
-
-  /** Editar veículos do estoque. */
-  EDIT_VEHICLE = 'edit:vehicle',
-
-  /** Excluir veículos do estoque. */
-  DELETE_VEHICLE = 'delete:vehicle',
-
-  /** Visualizar o valor de compra dos veículos. */
-  READ_VEHICLE_PURCHASE_PRICE = 'read:vehicle:purchase_price',
-
-  /** Visualizar o lucro e margem de vendas dos veículos. */
-  READ_VEHICLE_PROFIT = 'read:vehicle:profit',
-
-  // ─────────────────────────────────────────────────
-  // NFE – Gerenciamento de Notas Fiscais
-  // ─────────────────────────────────────────────────
-
-  /** Visualizar Notas Fiscais. */
-  READ_NFE = 'read:nfe',
-
-  /** Criar Notas Fiscais. */
-  CREATE_NFE = 'create:nfe',
-
-  /** Emitir Notas Fiscais (entrada e saída). */
-  EMITIR_NFE = 'emitir:nfe',
-
-  /** Cancelar Notas Fiscais. */
-  CANCEL_NFE = 'cancelar:nfe',
-
-  // ─────────────────────────────────────────────────
-  // VENDA – Módulo de Vendas de Veículos
-  // ─────────────────────────────────────────────────
-
-  /** Visualizar vendas registradas na loja. */
-  READ_VENDA = 'read:venda',
-
-  /** Registrar uma nova venda de veículo. */
-  CREATE_VENDA = 'create:venda',
-
-  /** Editar dados de uma venda existente. */
-  EDIT_VENDA = 'edit:venda',
-
-  /** Cancelar uma venda registrada. */
-  CANCEL_VENDA = 'cancel:venda',
-
-  // ─────────────────────────────────────────────────
-  // INTEGRATIONS – Integrações da Loja
-  // ─────────────────────────────────────────────────
-
-  /** Sincronizar dados fiscais e cadastrais com a Focus NFe. */
-  SYNC_FOCUSNFE = 'focusnfe:sync',
+    // INTEGRATIONS
+    SYNC_FOCUSNFE = 'focusnfe:sync'
 }
-
-/**
- * Array com todas as chaves de autorização para facilitar iterações caso necessário (ex: select boxes ou tabelas)
- */
-export const AUTHORIZATIONS_LIST = Object.values(Authorizations);
