@@ -37,19 +37,19 @@ const AUTH_GROUPS = [
   {
     name: 'Vendas',
     permissions: [
-      { key: Authorizations.READ_VENDA, label: 'Visualizar vendas' },
-      { key: Authorizations.CREATE_VENDA, label: 'Registrar venda' },
-      { key: Authorizations.EDIT_VENDA, label: 'Editar venda' },
-      { key: Authorizations.CANCEL_VENDA, label: 'Cancelar venda' },
+      { key: Authorizations.READ_VENDA_STORE, label: 'Visualizar vendas' },
+      { key: Authorizations.CREATE_VENDA_STORE, label: 'Registrar venda' },
+      { key: Authorizations.EDIT_VENDA_STORE, label: 'Editar venda' },
+      { key: Authorizations.CANCEL_VENDA_STORE, label: 'Cancelar venda' },
     ],
   },
   {
     name: 'Veículos',
     permissions: [
-      { key: Authorizations.READ_VEHICLE, label: 'Visualizar estoque' },
-      { key: Authorizations.CREATE_VEHICLE, label: 'Cadastrar veículos' },
-      { key: Authorizations.EDIT_VEHICLE, label: 'Editar veículos' },
-      { key: Authorizations.DELETE_VEHICLE, label: 'Excluir veículos' },
+      { key: Authorizations.READ_VEHICLE_STORE, label: 'Visualizar estoque' },
+      { key: Authorizations.CREATE_VEHICLE_STORE, label: 'Cadastrar veículos' },
+      { key: Authorizations.EDIT_VEHICLE_STORE, label: 'Editar veículos' },
+      { key: Authorizations.DELETE_VEHICLE_STORE, label: 'Excluir veículos' },
       {
         key: Authorizations.READ_VEHICLE_PURCHASE_PRICE,
         label: 'Ver preço de compra',
@@ -60,96 +60,106 @@ const AUTH_GROUPS = [
   {
     name: 'Clientes e Pessoas',
     permissions: [
-      { key: Authorizations.READ_PERSON, label: 'Visualizar pessoas' },
+      { key: Authorizations.READ_PERSON_STORE, label: 'Visualizar pessoas' },
       {
-        key: Authorizations.READ_PERSON_OTHERS,
+        key: Authorizations.READ_PERSON_NETWORK,
         label: 'Visualizar pessoas da rede',
       },
-      { key: Authorizations.CREATE_PERSON, label: 'Cadastrar pessoas' },
-      { key: Authorizations.EDIT_PERSON, label: 'Editar pessoas' },
-      { key: Authorizations.DELETE_PERSON, label: 'Excluir pessoas' },
+      { key: Authorizations.CREATE_PERSON_STORE, label: 'Cadastrar pessoas' },
+      { key: Authorizations.EDIT_PERSON_STORE, label: 'Editar pessoas' },
+      { key: Authorizations.DELETE_PERSON_STORE, label: 'Excluir pessoas' },
     ],
   },
   {
     name: 'Notas Fiscais (NFe)',
     permissions: [
-      { key: Authorizations.READ_NFE, label: 'Visualizar NFes' },
-      { key: Authorizations.CREATE_NFE, label: 'Gerar NFes' },
-      { key: Authorizations.EMITIR_NFE, label: 'Emitir para a Focus' },
-      { key: Authorizations.CANCEL_NFE, label: 'Cancelar NFes' },
+      { key: Authorizations.READ_NFE_STORE, label: 'Visualizar NFes' },
+      { key: Authorizations.CREATE_NFE_STORE, label: 'Gerar NFes' },
+      { key: Authorizations.EMITIR_NFE_STORE, label: 'Emitir para a Focus' },
+      { key: Authorizations.CANCEL_NFE_STORE, label: 'Cancelar NFes' },
     ],
   },
   {
     name: 'Configurações de Loja',
     permissions: [
-      { key: Authorizations.READ_STORE, label: 'Visualizar dados da loja' },
+      { key: Authorizations.READ_STORE_SELF, label: 'Visualizar dados da loja' },
       {
-        key: Authorizations.READ_STORE_OTHERS,
+        key: Authorizations.READ_STORE_NETWORK,
         label: 'Visualizar dados da rede',
       },
-      { key: Authorizations.EDIT_STORE, label: 'Configurar loja/filiais' },
+      { key: Authorizations.EDIT_STORE_SELF, label: 'Configurar loja/filiais' },
       { key: Authorizations.SYNC_FOCUSNFE, label: 'Sincronizar Focus NFe' },
     ],
   },
   {
     name: 'Usuários do Sistema',
     permissions: [
-      { key: Authorizations.READ_USER, label: 'Ver próprio perfil' },
+      { key: Authorizations.READ_USER_SELF, label: 'Ver próprio perfil' },
       {
-        key: Authorizations.READ_USER_OTHERS,
+        key: Authorizations.READ_USER_STORE,
         label: 'Visualizar outros usuários',
       },
-      { key: Authorizations.CREATE_USER, label: 'Criar usuários' },
-      { key: Authorizations.EDIT_USER, label: 'Editar próprio perfil' },
-      { key: Authorizations.EDIT_USER_OTHERS, label: 'Editar outros usuários' },
-      { key: Authorizations.DELETE_USER, label: 'Excluir usuários' },
+      { key: Authorizations.CREATE_USER_STORE, label: 'Criar usuários' },
+      { key: Authorizations.EDIT_USER_SELF, label: 'Editar próprio perfil' },
+      { key: Authorizations.EDIT_USER_STORE, label: 'Editar outros usuários' },
+      { key: Authorizations.DELETE_USER_STORE, label: 'Excluir usuários' },
     ],
   },
 ];
 
 // Presets de autorização por perfil
 const PRESET_GERENTE: string[] = [
-  Authorizations.READ_STORE,
-  Authorizations.READ_STORE_OTHERS,
-  Authorizations.READ_USER,
-  Authorizations.READ_USER_OTHERS,
-  Authorizations.CREATE_USER,
-  Authorizations.EDIT_USER,
-  Authorizations.EDIT_USER_OTHERS,
-  Authorizations.DELETE_USER,
-  Authorizations.READ_PERSON,
-  Authorizations.READ_PERSON_OTHERS,
-  Authorizations.CREATE_PERSON,
-  Authorizations.EDIT_PERSON,
-  Authorizations.DELETE_PERSON,
-  Authorizations.READ_VEHICLE,
-  Authorizations.CREATE_VEHICLE,
-  Authorizations.EDIT_VEHICLE,
-  Authorizations.DELETE_VEHICLE,
+  Authorizations.READ_STORE_SELF,
+  Authorizations.READ_STORE_NETWORK,
+  Authorizations.READ_USER_SELF,
+  Authorizations.READ_USER_STORE,
+  Authorizations.CREATE_USER_STORE,
+  Authorizations.EDIT_USER_SELF,
+  Authorizations.EDIT_USER_STORE,
+  Authorizations.DELETE_USER_STORE,
+  Authorizations.EDIT_SELLER_AUTH,
+  Authorizations.READ_PERSON_SELF,
+  Authorizations.READ_PERSON_STORE,
+  Authorizations.READ_PERSON_NETWORK,
+  Authorizations.CREATE_PERSON_STORE,
+  Authorizations.EDIT_PERSON_SELF,
+  Authorizations.EDIT_PERSON_STORE,
+  Authorizations.DELETE_PERSON_STORE,
+  Authorizations.READ_VEHICLE_STORE,
+  Authorizations.READ_VEHICLE_NETWORK,
+  Authorizations.CREATE_VEHICLE_STORE,
+  Authorizations.EDIT_VEHICLE_STORE,
   Authorizations.READ_VEHICLE_PURCHASE_PRICE,
   Authorizations.READ_VEHICLE_PROFIT,
-  Authorizations.READ_NFE,
-  Authorizations.CREATE_NFE,
-  Authorizations.EMITIR_NFE,
-  Authorizations.CANCEL_NFE,
-  Authorizations.READ_VENDA,
-  Authorizations.CREATE_VENDA,
-  Authorizations.EDIT_VENDA,
-  Authorizations.CANCEL_VENDA,
+  Authorizations.READ_NFE_STORE,
+  Authorizations.CREATE_NFE_STORE,
+  Authorizations.EMITIR_NFE_STORE,
+  Authorizations.CANCEL_NFE_STORE,
+  Authorizations.READ_VENDA_STORE,
+  Authorizations.CREATE_VENDA_STORE,
+  Authorizations.EDIT_VENDA_STORE,
+  Authorizations.CANCEL_VENDA_STORE,
   Authorizations.SYNC_FOCUSNFE,
 ];
 
 const PRESET_VENDEDOR: string[] = [
-  Authorizations.READ_STORE,
-  Authorizations.READ_STORE_OTHERS,
-  Authorizations.READ_USER,
-  Authorizations.EDIT_USER,
-  Authorizations.READ_PERSON,
-  Authorizations.CREATE_PERSON,
-  Authorizations.EDIT_PERSON,
-  Authorizations.READ_VEHICLE,
-  Authorizations.READ_VENDA,
-  Authorizations.CREATE_VENDA,
+  Authorizations.READ_STORE_SELF,
+  Authorizations.READ_USER_SELF,
+  Authorizations.EDIT_USER_SELF,
+  Authorizations.READ_PERSON_SELF,
+  Authorizations.READ_PERSON_STORE,
+  Authorizations.CREATE_PERSON_STORE,
+  Authorizations.EDIT_PERSON_SELF,
+  Authorizations.EDIT_PERSON_STORE,
+  Authorizations.READ_VEHICLE_STORE,
+  Authorizations.CREATE_VEHICLE_STORE,
+  Authorizations.EDIT_VEHICLE_STORE,
+  Authorizations.READ_NFE_STORE,
+  Authorizations.CREATE_NFE_STORE,
+  Authorizations.EMITIR_NFE_STORE,
+  Authorizations.READ_VENDA_STORE,
+  Authorizations.CREATE_VENDA_STORE,
+  Authorizations.EDIT_VENDA_STORE,
 ];
 
 @Component({
@@ -273,8 +283,8 @@ export class StoreEmployeesDialogComponent implements OnInit {
 
   get canManageAccess(): boolean {
     return (
-      this.authService.hasAuthority(Authorizations.CREATE_USER) ||
-      this.authService.hasAuthority(Authorizations.EDIT_STORE) ||
+      this.authService.hasAuthority(Authorizations.CREATE_USER_STORE) ||
+      this.authService.hasAuthority(Authorizations.EDIT_STORE_SELF) ||
       this.isRootAdmin
     );
   }

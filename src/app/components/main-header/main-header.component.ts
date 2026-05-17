@@ -36,7 +36,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
-    this.canReadStoreOthers = this.authService.hasAuthority(Authorizations.READ_STORE_OTHERS);
+    this.canReadStoreOthers = this.authService.hasAuthority(Authorizations.READ_STORE_NETWORK);
 
     // Escuta mudanças na loja globalmente selecionada
     this.storeContextService.currentStoreId$

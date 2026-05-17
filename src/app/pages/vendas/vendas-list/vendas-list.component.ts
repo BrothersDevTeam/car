@@ -130,19 +130,19 @@ export class VendasListComponent implements OnInit, OnDestroy {
       key: 'edit',
       header: '',
       showEditIcon: (row) =>
-        this.authService.hasAuthority(Authorizations.EDIT_VENDA) && row.vendaStatus !== VendaStatus.CANCELADA,
+        this.authService.hasAuthority(Authorizations.EDIT_VENDA_STORE) && row.vendaStatus !== VendaStatus.CANCELADA,
     },
     {
       key: 'nfe',
       header: '',
       showNfeIcon: (row) =>
-        this.authService.hasAuthority(Authorizations.EMITIR_NFE) && row.vendaStatus === VendaStatus.ATIVA && !row.nfeId,
+        this.authService.hasAuthority(Authorizations.EMITIR_NFE_STORE) && row.vendaStatus === VendaStatus.ATIVA && !row.nfeId,
     },
     {
       key: 'delete',
       header: '',
       showDeleteIcon: (row) =>
-        this.authService.hasAuthority(Authorizations.CANCEL_VENDA) && row.vendaStatus !== VendaStatus.CANCELADA,
+        this.authService.hasAuthority(Authorizations.CANCEL_VENDA_STORE) && row.vendaStatus !== VendaStatus.CANCELADA,
     },
   ];
 

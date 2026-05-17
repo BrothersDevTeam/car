@@ -64,8 +64,8 @@ export class NaturalPersonInfoComponent implements OnInit {
 
   checkPermissions() {
     // Utiliza authorizations granulares: sem dependência de ROLE_
-    this.canEdit = this.authService.hasAuthority(Authorizations.EDIT_PERSON);
-    this.canDelete = this.authService.hasAuthority(Authorizations.DELETE_PERSON);
+    this.canEdit = this.authService.hasAuthority(Authorizations.EDIT_PERSON_STORE);
+    this.canDelete = this.authService.hasAuthority(Authorizations.DELETE_PERSON_STORE);
   }
 
   onDelete() {

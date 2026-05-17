@@ -82,18 +82,18 @@ export class StoreComponent implements OnInit {
 
     this.canCreateStore =
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
-      this.authService.hasAuthority(Authorizations.EDIT_STORE);
+      this.authService.hasAuthority(Authorizations.EDIT_STORE_SELF);
 
     this.canManageFiscal =
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
-      this.authService.hasAuthority(Authorizations.EDIT_STORE) ||
+      this.authService.hasAuthority(Authorizations.EDIT_STORE_SELF) ||
       this.authService.hasAuthority(Authorizations.SYNC_FOCUSNFE as Authorizations);
 
     // Pode gerenciar funcionários quem tem: root:admin, edit:store ou create:user
     this.canManageEmployees =
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
-      this.authService.hasAuthority(Authorizations.EDIT_STORE) ||
-      this.authService.hasAuthority(Authorizations.CREATE_USER);
+      this.authService.hasAuthority(Authorizations.EDIT_STORE_SELF) ||
+      this.authService.hasAuthority(Authorizations.CREATE_USER_STORE);
 
     // Somente root pode gerenciar proprietário
     this.canManageOwnerOnly = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);

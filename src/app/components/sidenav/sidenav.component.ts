@@ -52,8 +52,8 @@ export class SideNavComponent {
 
     // Lojas
     if (
-      this.authService.hasAuthority(Authorizations.READ_STORE) ||
-      this.authService.hasAuthority(Authorizations.READ_STORE_OTHERS) ||
+      this.authService.hasAuthority(Authorizations.READ_STORE_SELF) ||
+      this.authService.hasAuthority(Authorizations.READ_STORE_NETWORK) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.push({
@@ -65,8 +65,8 @@ export class SideNavComponent {
 
     // Pessoas
     if (
-      this.authService.hasAuthority(Authorizations.READ_PERSON) ||
-      this.authService.hasAuthority(Authorizations.READ_PERSON_OTHERS) ||
+      this.authService.hasAuthority(Authorizations.READ_PERSON_STORE) ||
+      this.authService.hasAuthority(Authorizations.READ_PERSON_NETWORK) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.push({
@@ -78,7 +78,7 @@ export class SideNavComponent {
 
     // Veículos
     if (
-      this.authService.hasAuthority(Authorizations.READ_VEHICLE) ||
+      this.authService.hasAuthority(Authorizations.READ_VEHICLE_STORE) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.push({
@@ -90,7 +90,7 @@ export class SideNavComponent {
 
     // Vendas
     if (
-      this.authService.hasAuthority(Authorizations.READ_VENDA) ||
+      this.authService.hasAuthority(Authorizations.READ_VENDA_STORE) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.push({
@@ -102,7 +102,7 @@ export class SideNavComponent {
 
     // Notas Fiscais
     if (
-      this.authService.hasAuthority(Authorizations.READ_NFE) ||
+      this.authService.hasAuthority(Authorizations.READ_NFE_STORE) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.push({

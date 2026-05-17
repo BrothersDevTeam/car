@@ -12,20 +12,20 @@ export const VENDAS_ROUTES: Routes = [
     path: '',
     loadComponent: () => import('./vendas-list/vendas-list.component').then((m) => m.VendasListComponent),
     canActivate: [claimGuard],
-    data: { claim: Authorizations.READ_VENDA },
+    data: { claim: Authorizations.READ_VENDA_STORE },
   },
   {
     path: 'nova',
     loadComponent: () => import('./venda-form/venda-form.component').then((m) => m.VendaFormComponent),
     canActivate: [claimGuard],
     canDeactivate: [unsavedChangesGuard],
-    data: { claim: Authorizations.CREATE_VENDA },
+    data: { claim: Authorizations.CREATE_VENDA_STORE },
   },
   {
     path: 'editar/:id',
     loadComponent: () => import('./venda-form/venda-form.component').then((m) => m.VendaFormComponent),
     canActivate: [claimGuard],
     canDeactivate: [unsavedChangesGuard],
-    data: { claim: Authorizations.EDIT_VENDA },
+    data: { claim: Authorizations.EDIT_VENDA_STORE },
   },
 ];

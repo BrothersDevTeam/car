@@ -238,14 +238,14 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
       header: '',
       showEditIcon: () =>
         // Exibe o botão de edição apenas para quem tem autorização granular de editar pessoas
-        this.authService.hasAuthority(Authorizations.EDIT_PERSON),
+        this.authService.hasAuthority(Authorizations.EDIT_PERSON_STORE),
     },
     {
       key: 'delete',
       header: '',
       showDeleteIcon: (row: Person) => {
         // Exibe o botão de exclusão apenas para quem tem autorização granular de excluir pessoas
-        if (!this.authService.hasAuthority(Authorizations.DELETE_PERSON)) {
+        if (!this.authService.hasAuthority(Authorizations.DELETE_PERSON_STORE)) {
           return false;
         }
 
