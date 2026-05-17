@@ -51,6 +51,17 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
           this.loadCurrentStoreName();
         }
       });
+
+    // Escuta atualizações de lojas para recarregar a lista do header sem f5
+    this.storeService.storeUpdated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.isCarAdmin || this.canReadStoreOthers) {
+          this.loadAllStores();
+        } else {
+          this.loadCurrentStoreName();
+        }
+      });
   }
 
   ngOnDestroy(): void {

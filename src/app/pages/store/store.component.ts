@@ -263,8 +263,12 @@ export class StoreComponent implements OnInit {
     dialogRef.afterClosed().subscribe((createdStore: Store | null) => {
       if (createdStore) {
         console.log('✅ Loja, proprietário e usuário criados com sucesso!');
-        // Recarrega a lista de lojas para exibir a nova
-        this.loadStores();
+        if (this.isCarAdmin) {
+          // Redefine a seleção global para "Toda a Rede" para exibir a nova Matriz cadastrada na listagem geral
+          this.storeContextService.setStoreId(null);
+        } else {
+          this.loadStores();
+        }
       }
     });
   }

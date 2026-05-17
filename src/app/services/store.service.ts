@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { Store, StorePageResponse, StoreSearchFilters } from '@interfaces/store';
 
 @Injectable({
@@ -8,6 +8,13 @@ import { Store, StorePageResponse, StoreSearchFilters } from '@interfaces/store'
 })
 export class StoreService {
   private readonly apiUrl: string = '/api/stores';
+
+  private storeUpdatedSource = new Subject<void>();
+  storeUpdated$ = this.storeUpdatedSource.asObservable();
+
+  notifyStoreUpdated(): void {
+    this.storeUpdatedSource.next();
+  }
 
   constructor(private http: HttpClient) {}
 

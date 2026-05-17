@@ -327,6 +327,8 @@ export class StoreFormDialogComponent implements OnInit {
         next: (createdStore: Store) => {
           console.log('🎉 Cadastro completo com sucesso!');
           this.isSubmitting = false;
+          // Notifica o sistema que uma nova loja foi adicionada
+          this.storeService.notifyStoreUpdated();
           // Fecha dialog e retorna a store criada
           this.dialogRef.close(createdStore);
         },
