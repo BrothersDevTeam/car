@@ -22,7 +22,17 @@
       <div class="perm-groups">
         @for (module of modules; track module.module) {
           <div class="perm-group">
-            <span class="perm-group-title">{{ getTranslatedModule(module.module) }}</span>
+            <span class="perm-group-title">
+              <label class="group-title-label">
+                <input
+                  type="checkbox"
+                  [checked]="isAllModuleSelected(module)"
+                  [indeterminate]="isSomeModuleSelected(module)"
+                  (change)="toggleAllModule(module, $event)"
+                />
+                {{ getTranslatedModule(module.module) }}
+              </label>
+            </span>
             <div class="perm-checkboxes">
               @for (auth of module.authorizations; track auth.key) {
                 <label class="perm-checkbox-label">

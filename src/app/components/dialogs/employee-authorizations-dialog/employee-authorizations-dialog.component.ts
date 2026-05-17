@@ -78,6 +78,26 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
     }
   }
 
+  isAllModuleSelected(module: any): boolean {
+    return module.authorizations.every((auth: any) => this.selectedAuths.has(auth.key));
+  }
+
+  isSomeModuleSelected(module: any): boolean {
+    const checkedCount = module.authorizations.filter((auth: any) => this.selectedAuths.has(auth.key)).length;
+    return checkedCount > 0 && checkedCount < module.authorizations.length;
+  }
+
+  toggleAllModule(module: any, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    module.authorizations.forEach((auth: any) => {
+      if (checked) {
+        this.selectedAuths.add(auth.key);
+      } else {
+        this.selectedAuths.delete(auth.key);
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.loadAuthorizations();
   }

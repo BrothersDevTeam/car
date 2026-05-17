@@ -243,7 +243,17 @@
                     <div class="perm-groups">
                       @for (group of authGroups; track group.name) {
                         <div class="perm-group">
-                          <span class="perm-group-title">{{ group.name }}</span>
+                           <span class="perm-group-title">
+                             <label class="group-title-label">
+                               <input
+                                 type="checkbox"
+                                 [checked]="isAllGroupSelected(person.personId, group)"
+                                 [indeterminate]="isSomeGroupSelected(person.personId, group)"
+                                 (change)="toggleAllGroup(person.personId, group, $event)"
+                               />
+                               {{ group.name }}
+                             </label>
+                           </span>
                           <div class="perm-checkboxes">
                             @for (perm of group.permissions; track perm.key) {
                               <label class="perm-checkbox-label">

@@ -417,6 +417,41 @@ export class StoreEmployeesDialogComponent implements OnInit {
     }
   }
 
+  isAllGroupSelected(personId: string, group: any): boolean {
+    const form = this.createAccessForms.get(personId);
+    if (!form) return false;
+    const arr = form.get('authorizations') as FormArray;
+    return group.permissions.every((perm: any) => arr.value.includes(perm.key));
+  }
+
+  isSomeGroupSelected(personId: string, group: any): boolean {
+    const form = this.createAccessForms.get(personId);
+    if (!form) return false;
+    const arr = form.get('authorizations') as FormArray;
+    const checkedCount = group.permissions.filter((perm: any) => arr.value.includes(perm.key)).length;
+    return checkedCount > 0 && checkedCount < group.permissions.length;
+  }
+
+  toggleAllGroup(personId: string, group: any, event: Event): void {
+    const form = this.createAccessForms.get(personId);
+    if (!form) return;
+    const arr = form.get('authorizations') as FormArray;
+    const checked = (event.target as HTMLInputElement).checked;
+
+    group.permissions.forEach((perm: any) => {
+      const idx = arr.value.indexOf(perm.key);
+      if (checked) {
+        if (idx === -1) {
+          arr.push(new FormControl(perm.key));
+        }
+      } else {
+        if (idx !== -1) {
+          arr.removeAt(idx);
+        }
+      }
+    });
+  }
+
   saveAccess(person: Person): void {
     const form = this.createAccessForms.get(person.personId);
     if (!form || form.invalid) {
