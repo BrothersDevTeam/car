@@ -35,17 +35,22 @@
           }
 
           @if (searchPeopleResults.length > 0) {
-            <div class="search-results-panel mat-elevation-z4">
+            <div class="search-results-panel">
+              <div class="results-header">
+                <span class="results-title">Pessoas Encontradas</span>
+                <span class="results-count">{{ searchPeopleResults.length }}</span>
+              </div>
               <mat-list>
                 @for (p of searchPeopleResults; track p.personId) {
                   <mat-list-item (click)="selectPersonToPromote(p)" class="search-item">
-                    <span matListItemTitle>{{ p.name }}</span>
-                    <span matListItemLine>
-                      {{ p.cpf || p.email }} | Perfil:
-                      {{ getRelationshipLabel(p.relationship) }}
+                    <mat-icon matListItemIcon class="search-item-avatar-icon">person</mat-icon>
+                    <span matListItemTitle class="search-item-title">{{ p.name }}</span>
+                    <span matListItemLine class="search-item-meta">
+                      {{ p.cpf || p.email }} • Perfil:
+                      <span class="badge-role">{{ getRelationshipLabel(p.relationship) }}</span>
                     </span>
                     <div matListItemMeta>
-                      <button mat-icon-button color="primary">
+                      <button mat-icon-button class="add-btn" color="primary" matTooltip="Adicionar à equipe">
                         <mat-icon>person_add</mat-icon>
                       </button>
                     </div>
