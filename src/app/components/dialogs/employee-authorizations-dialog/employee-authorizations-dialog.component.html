@@ -26,13 +26,8 @@
             <div class="perm-checkboxes">
               @for (auth of module.authorizations; track auth.key) {
                 <label class="perm-checkbox-label">
-                  <input
-                    type="checkbox"
-                    [checked]="hasAuth(auth.key)"
-                    (change)="onToggleAuth(auth.key)"
-                  />
-                  <span class="custom-checkbox"></span>
-                  <span class="label-text">{{ auth.label }}</span>
+                  <input type="checkbox" [checked]="hasAuth(auth.key)" (change)="onToggleAuth(auth.key)" />
+                  {{ auth.label }}
                 </label>
               }
             </div>

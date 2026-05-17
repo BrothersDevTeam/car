@@ -59,12 +59,13 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
 
   getTranslatedModule(moduleStr: string): string {
     const translations: Record<string, string> = {
-      VEHICLE: 'Veículo',
-      PERSON: 'Pessoa',
-      STORE: 'Loja',
-      NFE: 'Notas Fiscais',
-      USER: 'Usuário',
-      AUTH: 'Autorizações',
+      VENDA: 'Vendas',
+      VEHICLE: 'Veículos',
+      PERSON: 'Clientes',
+      STORE: 'Configurações de Loja',
+      NFE: 'Notas Fiscais (NFe)',
+      USER: 'Usuários do Sistema',
+      AUTH: 'Controle de Permissões',
     };
     return translations[moduleStr] || moduleStr;
   }
@@ -88,6 +89,8 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
         const isRoot = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
         const rootOnlyKeys = [Authorizations.ROOT_ADMIN];
 
+        const moduleOrder = ['VENDA', 'VEHICLE', 'PERSON', 'NFE', 'STORE', 'USER', 'AUTH'];
+
         this.modules = Object.keys(response)
           .map((module) => {
             let auths = response[module];
@@ -99,7 +102,8 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
               authorizations: auths,
             };
           })
-          .filter((m) => m.authorizations.length > 0);
+          .filter((m) => m.authorizations.length > 0)
+          .sort((a, b) => moduleOrder.indexOf(a.module) - moduleOrder.indexOf(b.module));
 
         // 2. Carrega as permissões atuais do usuário (apenas se for necessário)
         this.http
@@ -125,7 +129,6 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
       },
     });
   }
-
 
   hasAuth(key: string): boolean {
     return this.selectedAuths.has(key);

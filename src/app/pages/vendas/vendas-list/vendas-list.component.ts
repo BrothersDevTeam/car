@@ -136,7 +136,9 @@ export class VendasListComponent implements OnInit, OnDestroy {
       key: 'nfe',
       header: '',
       showNfeIcon: (row) =>
-        this.authService.hasAuthority(Authorizations.EMITIR_NFE_STORE) && row.vendaStatus === VendaStatus.ATIVA && !row.nfeId,
+        this.authService.hasAuthority(Authorizations.EMITIR_NFE_STORE) &&
+        row.vendaStatus === VendaStatus.ATIVA &&
+        !row.nfeId,
     },
     {
       key: 'delete',
