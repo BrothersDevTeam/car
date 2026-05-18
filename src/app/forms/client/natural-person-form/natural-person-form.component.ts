@@ -39,9 +39,10 @@ import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
 import { AuthService } from '@services/auth/auth.service';
 import { StoreContextService } from '@services/store-context.service';
+import { RelationshipService } from '@services/relationship.service';
+import { RelationshipResponse } from '@interfaces/relationship';
 
 import { removeEmptyPropertiesFromObject } from '../../../utils/removeEmptyPropertiesFromObject';
-import { RelationshipTypes } from '../../../enums/relationshipTypes';
 import { extractErrorMessage } from '@utils/error-utils';
 import { CanComponentDeactivate } from '../../../guards/unsaved-changes.guard';
 import { Authorizations } from '../../../enums/authorizations';
@@ -131,25 +132,12 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   protected selectedDraftId: string | null = null;
 
   /**
-   * Controla o estado do checkbox "Cadastrar como funcionário"
-   *
-   * @property {boolean} isEmployee - Indica se a pessoa será cadastrada como funcionário
-   * @default false - Por padrão, toda pessoa é cadastrada como CLIENTE
-   *
-   * @description
-   * Esta propriedade está vinculada ao checkbox do template e controla
-   * automaticamente o valor do campo 'relationshipTypes' no formulário.
-   * - Quando false: relationshipTypes = [CLIENTE]
-   * - Quando true: relationshipTypes = [FUNCIONARIO]
+   * Lista de relacionamentos/cargos disponíveis carregados da API
    */
-  protected isEmployee = false;
+  protected relationships: RelationshipResponse[] = [];
 
   /**
    * Formulário reativo para cadastro/edição de pessoa física
-   *
-   * IMPORTANTE: relationship agora é controlado pelo checkbox 'isEmployee'
-   * - Por padrão: [CLIENTE]
-   * - Quando checkbox marcado: [FUNCIONARIO]
    */
   protected form = this.formBuilderService.group({
     name: ['', Validators.required],
@@ -162,9 +150,8 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     active: [true],
     storeId: [''],
     legalEntity: [false],
-    relationship: this.formBuilderService.control<RelationshipTypes>(RelationshipTypes.CLIENTE, {
-      validators: [Validators.required],
-    }),
+    relationshipId: ['', Validators.required],
+    isEmployee: [false],
   });
 
   constructor(
@@ -173,6 +160,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     private actionsService: ActionsService,
     private authService: AuthService,
     private formDraftService: FormDraftService,
+    private relationshipService: RelationshipService,
   ) {}
 
   /**
@@ -278,7 +266,12 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
           rg: this.form.value.rg?.replace(/\D/g, '') || '',
           rgIssuer: '',
           crc: '',
-          relationship: this.form.value.relationship as RelationshipTypes,
+          relationshipId: this.form.value.relationshipId || undefined,
+          isEmployee: this.form.value.isEmployee || false,
+          relationship: {
+            relationshipId: this.form.value.relationshipId || '',
+            name: ''
+          } as any
         };
 
         const formValue: CreateNaturalPerson = baseData;
@@ -588,49 +581,9 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     }
   }
 
-  /**
-   * Verifica se existe rascunho salvo e pergunta se deseja carregar
-   */
-  private checkForDrafts(): void {
-    if (this.dataForm?.personId) {
-      return;
-    }
-
-    // Converte personId de string para number
-    const personId = this.dataForm?.personId ? Number(this.dataForm.personId) : undefined;
-
-    const draft = this.formDraftService.getDraft<any>(this.FORM_TYPE, personId);
-
-    if (draft) {
-      const loadDraft = confirm(
-        `Foi encontrado um rascunho salvo em ${draft.lastModified.toLocaleString()}.\n\nDeseja carregar este rascunho?`,
-      );
-
-      if (loadDraft) {
-        this.form.patchValue(draft.data);
-
-        const relationship = draft.data.relationship;
-        this.isEmployee =
-          relationship === RelationshipTypes.GERENTE ||
-          relationship === RelationshipTypes.VENDEDOR ||
-          relationship === RelationshipTypes.PROPRIETARIO;
-
-        this.toastrService.success('Rascunho carregado com sucesso');
-        console.log('[checkForDrafts] Rascunho carregado:', draft);
-      } else {
-        this.formDraftService.removeDraft(this.FORM_TYPE);
-        console.log('[checkForDrafts] Rascunho removido');
-      }
-    }
-  }
+  
 
   ngOnInit() {
-    this.subscriptions.add(
-      this.form.get('relationship')!.valueChanges.subscribe(() => {
-        this.updateConditionalValidators();
-      }),
-    );
-
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
         const hasChanges = this.hasUnsavedChanges();
@@ -640,7 +593,8 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     );
 
     this.loadAvailableDrafts();
-    // this.checkForDrafts(); // Removido verificação automática pois agora é selecionável
+    this.loadRelationships();
+    this.setupRelationshipChangeListener();
 
     setTimeout(() => {
       this.captureInitialFormValue();
@@ -654,9 +608,94 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     );
   }
 
+  private loadRelationships() {
+    this.relationshipService.getAll().subscribe({
+      next: (data) => {
+        this.relationships = data;
+        
+        // Agora que os relacionamentos estão carregados, aplica o patch value para edição ou novo cadastro
+        this.applyRelationshipToForm();
+      },
+      error: (err) => {
+        this.toastrService.error('Erro ao buscar cargos e relacionamentos.');
+        console.error(err);
+      }
+    });
+  }
+
+  private applyRelationshipToForm() {
+    if (this.dataForm) {
+      let relId = '';
+      let isEmp = !!this.dataForm.isEmployee;
+      
+      const rel = this.dataForm.relationship;
+      if (rel) {
+        if (typeof rel === 'object' && rel.relationshipId) {
+          relId = rel.relationshipId;
+          const relNameUpper = rel.name.toUpperCase();
+          if (['PROPRIETARIO', 'GERENTE', 'VENDEDOR'].includes(relNameUpper)) {
+            isEmp = true;
+          }
+        } else if (typeof rel === 'string') {
+          const found = this.relationships.find(r => r.name.toUpperCase() === (rel as string).toUpperCase());
+          if (found) {
+            relId = found.relationshipId;
+            const relNameUpper = found.name.toUpperCase();
+            if (['PROPRIETARIO', 'GERENTE', 'VENDEDOR'].includes(relNameUpper)) {
+              isEmp = true;
+            }
+          }
+        }
+      }
+      
+      this.form.patchValue({
+        relationshipId: relId,
+        isEmployee: isEmp
+      });
+      
+      // Controla habilitação do toggle
+      this.manageEmployeeToggleState(relId);
+    } else {
+      // Novo cadastro -> seta CLIENTE como padrão
+      const clienteRel = this.relationships.find(r => r.name.toUpperCase() === 'CLIENTE');
+      if (clienteRel) {
+        this.form.patchValue({
+          relationshipId: clienteRel.relationshipId,
+          isEmployee: false
+        });
+        this.form.get('isEmployee')?.disable();
+      }
+    }
+  }
+
+  private manageEmployeeToggleState(relId: string) {
+    const selectedRel = this.relationships.find(r => r.relationshipId === relId);
+    if (selectedRel) {
+      const relNameUpper = selectedRel.name.toUpperCase();
+      if (['PROPRIETARIO', 'GERENTE', 'VENDEDOR'].includes(relNameUpper)) {
+        this.form.get('isEmployee')?.setValue(true);
+        this.form.get('isEmployee')?.disable();
+      } else if (relNameUpper === 'CLIENTE') {
+        this.form.get('isEmployee')?.setValue(false);
+        this.form.get('isEmployee')?.disable();
+      } else {
+        this.form.get('isEmployee')?.enable();
+      }
+    }
+  }
+
+  private setupRelationshipChangeListener() {
+    this.subscriptions.add(
+      this.form.get('relationshipId')!.valueChanges.subscribe((relId) => {
+        if (relId) {
+          this.manageEmployeeToggleState(relId);
+        }
+      })
+    );
+  }
+
   private updateConditionalValidators() {
-    // Método mantido vazio para compatibilidade se necessário em refatorações futuras,
-    // mas a lógica de campos de usuário foi removida.
+    // Método mantido vazio para compatibilidade se necessário em refatorações futuras
   }
 
   ngOnDestroy(): void {
@@ -667,20 +706,12 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
       console.log('[natural-person-form] dataForm recebido:', this.dataForm);
-      const relationship = this.dataForm.relationship || RelationshipTypes.CLIENTE;
-      this.isEmployee =
-        relationship === RelationshipTypes.GERENTE ||
-        relationship === RelationshipTypes.VENDEDOR ||
-        relationship === RelationshipTypes.PROPRIETARIO;
-
-      console.log('[natural-person-form] isEmployee setado para:', this.isEmployee);
 
       setTimeout(() => {
         if (!this.dataForm) return;
 
         this.form.patchValue({
           name: this.dataForm.name || '',
-          relationship: relationship || RelationshipTypes.CLIENTE,
           nickName: this.dataForm.nickName || '',
           email: this.dataForm.email || '',
           phone: this.dataForm.phone || '',
@@ -689,8 +720,12 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
           rgIssuer: this.dataForm.rgIssuer || '',
         });
 
+        // Se a lista de relacionamentos já estiver carregada, aplica imediatamente
+        if (this.relationships.length > 0) {
+          this.applyRelationshipToForm();
+        }
+
         console.log('[natural-person-form] Formulário após patchValue:', this.form.value);
-        console.log('[natural-person-form] relationship após patchValue:', this.form.get('relationship')?.value);
       }, 200);
     }
 
@@ -704,7 +739,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
    * Carrega os dados de um rascunho no formulário
    */
   private loadDraftData(draft: FormDraft): void {
-    // CRITICAL: Define o selectedDraftId ANTES de tudo
     this.selectedDraftId = draft.id;
     console.log('[loadDraftData] selectedDraftId definido para:', draft.id);
 
@@ -724,16 +758,11 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
 
     this.form.patchValue(draft.data);
 
-    const relationship = draft.data.relationship;
-    this.isEmployee =
-      relationship === RelationshipTypes.GERENTE ||
-      relationship === RelationshipTypes.VENDEDOR ||
-      relationship === RelationshipTypes.PROPRIETARIO;
+    if (this.relationships.length > 0) {
+      this.applyRelationshipToForm();
+    }
 
     this.toastrService.success(`Rascunho "${draft.draftName || 'sem nome'}" carregado`);
-
-    console.log('[loadDraftData] Rascunho carregado:', draft);
-    console.log('[loadDraftData] Modo de edição:', !!draft.data._editingId);
 
     setTimeout(() => {
       this.captureInitialFormValue();
@@ -787,7 +816,12 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       rg: this.form.value.rg?.replace(/\D/g, '') || '',
       rgIssuer: '',
       crc: '',
-      relationship: this.form.value.relationship as RelationshipTypes,
+      relationshipId: this.form.value.relationshipId || undefined,
+      isEmployee: this.form.value.isEmployee || false,
+      relationship: {
+        relationshipId: this.form.value.relationshipId || '',
+        name: ''
+      } as any
     };
 
     const formValue: CreateNaturalPerson = baseData;
@@ -892,15 +926,18 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     this.form.reset();
 
     this.submitted = false;
-
-    this.isEmployee = false;
     this.isSaving = false;
+
+    const clienteRel = this.relationships.find(r => r.name.toUpperCase() === 'CLIENTE');
 
     this.form.patchValue({
       active: true,
       legalEntity: false,
-      relationship: RelationshipTypes.CLIENTE,
+      relationshipId: clienteRel ? clienteRel.relationshipId : '',
+      isEmployee: false
     });
+
+    this.form.get('isEmployee')?.disable();
 
     setTimeout(() => {
       this.captureInitialFormValue();

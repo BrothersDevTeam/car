@@ -1,4 +1,4 @@
-import { RelationshipTypes } from '../enums/relationshipTypes';
+import { RelationshipResponse } from './relationship';
 
 // Interface para Role do usuário
 export interface Role {
@@ -35,7 +35,9 @@ export interface Person {
   im?: string;
   crc?: string;
   active: boolean;
-  relationship: RelationshipTypes;
+  relationship: RelationshipResponse;
+  relationshipId?: string;
+  isEmployee: boolean;
   username?: string;
   password?: string;
   roleName?: string;

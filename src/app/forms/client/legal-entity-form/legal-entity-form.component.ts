@@ -277,7 +277,11 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
           storeId,
           legalEntity: true as const,
           crc: this.form.value.crc || '',
-          relationship: this.form.value.relationship as RelationshipTypes,
+          relationship: {
+            name: 'CLIENTE',
+            relationshipId: ''
+          } as any,
+          isEmployee: false
         };
 
         const formValue: CreateLegalEntity = baseData;
@@ -470,17 +474,12 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
       console.log('[legal-entity-form] dataForm recebido:', this.dataForm);
       console.log('[legal-entity-form] relationship do banco:', this.dataForm.relationship);
 
-      const relationship = this.dataForm.relationship || RelationshipTypes.CLIENTE;
-
-      console.log('[legal-entity-form] relationship mapeado:', relationship);
-
       /**
        * Aumentado o timeout para garantir sincronização com as opções
        */
       setTimeout(() => {
         this.form.patchValue({
           name: this.dataForm!.name || '',
-          relationship: relationship,
           nickName: this.dataForm!.nickName || '',
           email: this.dataForm!.email || '',
           phone: this.dataForm!.phone || '',
@@ -488,8 +487,9 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
           ie: this.dataForm!.ie || '',
         });
 
+        this.form.get('relationship')?.setValue(RelationshipTypes.CLIENTE);
+
         console.log('[legal-entity-form] Formulário após patchValue:', this.form.value);
-        console.log('[legal-entity-form] relationship após patchValue:', this.form.get('relationship')?.value);
       }, 200);
     }
   }
@@ -534,7 +534,11 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
       storeId,
       legalEntity: true as const,
       crc: this.form.value.crc || '',
-      relationship: this.form.value.relationship as RelationshipTypes,
+      relationship: {
+        name: 'CLIENTE',
+        relationshipId: ''
+      } as any,
+      isEmployee: false
     };
 
     const formValue: CreateLegalEntity = baseData;

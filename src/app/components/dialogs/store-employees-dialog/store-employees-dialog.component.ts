@@ -284,8 +284,12 @@ export class StoreEmployeesDialogComponent implements OnInit {
     }
 
     // Se for CLIENTE, sugere VENDEDOR por padrão para o fluxo de promoção
-    if (person.relationship === RelationshipTypes.CLIENTE) {
-      person.relationship = RelationshipTypes.VENDEDOR;
+    const relName = person.relationship?.name?.toUpperCase() || '';
+    if (relName === 'CLIENTE') {
+      person.relationship = {
+        name: 'VENDEDOR',
+        relationshipId: ''
+      } as any;
     }
 
     // Adiciona a pessoa temporariamente à lista para permitir criar acesso
@@ -329,14 +333,15 @@ export class StoreEmployeesDialogComponent implements OnInit {
     });
   }
 
-  getRelationshipLabel(rel: RelationshipTypes | string): string {
+  getRelationshipLabel(rel: any): string {
+    const relStr = typeof rel === 'object' ? (rel?.name || '') : rel;
     const labels: Record<string, string> = {
       GERENTE: 'Gerente',
       VENDEDOR: 'Vendedor',
       PROPRIETARIO: 'Proprietário',
       CLIENTE: 'Cliente',
     };
-    return labels[rel] || rel;
+    return labels[relStr.toUpperCase()] || relStr;
   }
 
   // ─────────────────────────────────────────
@@ -385,9 +390,10 @@ export class StoreEmployeesDialogComponent implements OnInit {
     authArray.clear();
 
     let defaults: string[] = [];
-    if (person.relationship === RelationshipTypes.GERENTE) {
+    const relName = person.relationship?.name?.toUpperCase() || '';
+    if (relName === 'GERENTE') {
       defaults = PRESET_GERENTE;
-    } else if (person.relationship === RelationshipTypes.VENDEDOR) {
+    } else if (relName === 'VENDEDOR') {
       defaults = PRESET_VENDEDOR;
     }
 
@@ -464,7 +470,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
     const payload = {
       username: form.value.username,
       password: form.value.password,
-      relationship: person.relationship,
+      relationship: person.relationship?.name?.toUpperCase() || '',
       authorizations: form.value.authorizations as string[],
     };
 
@@ -523,12 +529,16 @@ export class StoreEmployeesDialogComponent implements OnInit {
   // ─────────────────────────────────────────
 
   changeRelationship(person: Person, newType: RelationshipTypes): void {
-    if (person.relationship === newType) return;
+    const currentRelName = person.relationship?.name?.toUpperCase() || '';
+    if (currentRelName === newType.toUpperCase()) return;
 
     // Se a pessoa ainda não tem usuário (está no fluxo de promoção), apenas altera localmente
     // e atualiza os presets do form se estiver aberto.
     if (!person.hasUser) {
-      person.relationship = newType;
+      person.relationship = {
+        name: newType,
+        relationshipId: ''
+      } as any;
       const form = this.createAccessForms.get(person.personId);
       if (form) {
         this.applyPreset(person, form);

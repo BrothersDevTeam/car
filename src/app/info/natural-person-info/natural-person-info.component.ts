@@ -118,8 +118,8 @@ export class NaturalPersonInfoComponent implements OnInit {
     return parts[0][0].toUpperCase();
   }
 
-  getRelationshipIcon(type: string): string {
-    const t = type?.toUpperCase();
+  getRelationshipIcon(type: any): string {
+    const t = (typeof type === 'object' ? type?.name : type)?.toUpperCase();
     if (t === 'CLIENTE') return 'person';
     if (t === 'VENDEDOR') return 'sell';
     if (t === 'GERENTE') return 'manage_accounts';

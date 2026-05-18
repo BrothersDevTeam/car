@@ -99,6 +99,29 @@
         mask="(00) 00000-0000"
       />
     </div>
+
+    <!-- Layout: Cargo/Vínculo + Checkbox de Funcionário -->
+    <div class="form-row-2cols" style="align-items: center; margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <mat-form-field appearance="outline" class="relationship-select-field" style="width: 100%; margin-bottom: -1.25em;">
+        <mat-label>Vínculo / Cargo *</mat-label>
+        <mat-select formControlName="relationshipId">
+          @for (rel of relationships; track rel.relationshipId) {
+            <mat-option [value]="rel.relationshipId">
+              {{ rel.name }}
+            </mat-option>
+          }
+        </mat-select>
+        @if (form.get('relationshipId')?.invalid && (form.get('relationshipId')?.touched || submitted)) {
+          <mat-error>O cargo/vínculo é obrigatório</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="employee-checkbox-container" style="display: flex; align-items: center; height: 56px; padding-left: 8px;">
+        <mat-checkbox formControlName="isEmployee" color="primary">
+          É funcionário da loja?
+        </mat-checkbox>
+      </div>
+    </div>
   </app-wrapper-card>
 
   <!-- Botão de submit -->

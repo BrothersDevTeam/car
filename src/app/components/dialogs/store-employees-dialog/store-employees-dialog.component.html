@@ -85,17 +85,17 @@
                   [disabled]="
                     !canManageAccess ||
                     updatingRelationshipFor === person.personId ||
-                    person.relationship === RelationshipTypes.PROPRIETARIO
+                    person.relationship?.name?.toUpperCase() === 'PROPRIETARIO'
                   "
-                  [class.chip-manager]="person.relationship === RelationshipTypes.GERENTE"
-                  [class.chip-seller]="person.relationship === RelationshipTypes.VENDEDOR"
-                  [class.chip-owner]="person.relationship === RelationshipTypes.PROPRIETARIO"
+                  [class.chip-manager]="person.relationship?.name?.toUpperCase() === 'GERENTE'"
+                  [class.chip-seller]="person.relationship?.name?.toUpperCase() === 'VENDEDOR'"
+                  [class.chip-owner]="person.relationship?.name?.toUpperCase() === 'PROPRIETARIO'"
                 >
                   @if (updatingRelationshipFor === person.personId) {
                     <mat-spinner diameter="12" class="chip-spinner"></mat-spinner>
                   } @else {
                     {{ getRelationshipLabel(person.relationship) }}
-                    @if (canManageAccess && person.relationship !== RelationshipTypes.PROPRIETARIO) {
+                    @if (canManageAccess && person.relationship?.name?.toUpperCase() !== 'PROPRIETARIO') {
                       <mat-icon class="chip-arrow">arrow_drop_down</mat-icon>
                     }
                   }
@@ -103,14 +103,14 @@
 
                 <mat-menu #roleMenu="matMenu">
                   <button mat-menu-item (click)="changeRelationship(person, RelationshipTypes.GERENTE)">
-                    <mat-icon [color]="person.relationship === RelationshipTypes.GERENTE ? 'primary' : ''">
-                      {{ person.relationship === RelationshipTypes.GERENTE ? 'check' : 'badge' }}
+                    <mat-icon [color]="person.relationship?.name?.toUpperCase() === 'GERENTE' ? 'primary' : ''">
+                      {{ person.relationship?.name?.toUpperCase() === 'GERENTE' ? 'check' : 'badge' }}
                     </mat-icon>
                     <span>Gerente</span>
                   </button>
                   <button mat-menu-item (click)="changeRelationship(person, RelationshipTypes.VENDEDOR)">
-                    <mat-icon [color]="person.relationship === RelationshipTypes.VENDEDOR ? 'primary' : ''">
-                      {{ person.relationship === RelationshipTypes.VENDEDOR ? 'check' : 'person' }}
+                    <mat-icon [color]="person.relationship?.name?.toUpperCase() === 'VENDEDOR' ? 'primary' : ''">
+                      {{ person.relationship?.name?.toUpperCase() === 'VENDEDOR' ? 'check' : 'person' }}
                     </mat-icon>
                     <span>Vendedor</span>
                   </button>
@@ -166,7 +166,7 @@
                 }
 
                 <!-- Funcionário SEM acesso: botão de criar -->
-                @if (!person.hasUser && person.relationship !== RelationshipTypes.PROPRIETARIO) {
+                @if (!person.hasUser && person.relationship?.name?.toUpperCase() !== 'PROPRIETARIO') {
                   <button
                     mat-raised-button
                     color="primary"

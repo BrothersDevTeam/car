@@ -4,7 +4,6 @@ import { inject, OnInit, signal, Component, OnDestroy, ViewChild } from '@angula
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, debounceTime, Observable, of, Subject, Subscription, filter } from 'rxjs';
-import { RelationshipTypes } from '../../enums/relationshipTypes';
 import { Authorizations } from '../../enums/authorizations';
 import { CanComponentDeactivate } from '@guards/unsaved-changes.guard';
 
@@ -164,20 +163,21 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
       key: 'select',
       header: '',
       showCheckbox: (row: Person) => {
-        const loggedUserRelationship = this.authService.getPersonRelationship();
+        const loggedUserRelationship = this.authService.getPersonRelationship()?.toUpperCase();
+        const rowRelName = row.relationship?.name?.toUpperCase() || '';
 
         // Proprietário não pode excluir outro proprietário (e consequentemente ele mesmo)
         if (
-          loggedUserRelationship === RelationshipTypes.PROPRIETARIO &&
-          row.relationship === RelationshipTypes.PROPRIETARIO
+          loggedUserRelationship === 'PROPRIETARIO' &&
+          rowRelName === 'PROPRIETARIO'
         ) {
           return false;
         }
 
         // Gerente não pode excluir outro gerente nem proprietário
         if (
-          loggedUserRelationship === RelationshipTypes.GERENTE &&
-          (row.relationship === RelationshipTypes.GERENTE || row.relationship === RelationshipTypes.PROPRIETARIO)
+          loggedUserRelationship === 'GERENTE' &&
+          (rowRelName === 'GERENTE' || rowRelName === 'PROPRIETARIO')
         ) {
           return false;
         }
@@ -201,17 +201,18 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
       key: 'relationship',
       header: 'Vínculo',
       format: (value: any, row: any) => {
-        const relationship = row.relationship as RelationshipTypes;
+        const relationshipName = row.relationship?.name;
+        if (!relationshipName) return '-';
 
         // Mapeia diretamente o campo relationship para um label human-readable
-        const labels: Partial<Record<RelationshipTypes, string>> = {
-          [RelationshipTypes.PROPRIETARIO]: 'Proprietário',
-          [RelationshipTypes.GERENTE]: 'Gerente',
-          [RelationshipTypes.VENDEDOR]: 'Vendedor',
-          [RelationshipTypes.CLIENTE]: 'Cliente',
+        const labels: Record<string, string> = {
+          'PROPRIETARIO': 'Proprietário',
+          'GERENTE': 'Gerente',
+          'VENDEDOR': 'Vendedor',
+          'CLIENTE': 'Cliente',
         };
 
-        return labels[relationship] ?? '-';
+        return labels[relationshipName.toUpperCase()] ?? relationshipName;
       },
     },
     {
@@ -249,20 +250,21 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
           return false;
         }
 
-        const loggedUserRelationship = this.authService.getPersonRelationship();
+        const loggedUserRelationship = this.authService.getPersonRelationship()?.toUpperCase();
+        const rowRelName = row.relationship?.name?.toUpperCase() || '';
 
         // Proprietário não pode excluir outro proprietário (e consequentemente ele mesmo)
         if (
-          loggedUserRelationship === RelationshipTypes.PROPRIETARIO &&
-          row.relationship === RelationshipTypes.PROPRIETARIO
+          loggedUserRelationship === 'PROPRIETARIO' &&
+          rowRelName === 'PROPRIETARIO'
         ) {
           return false;
         }
 
         // Gerente não pode excluir outro gerente nem proprietário
         if (
-          loggedUserRelationship === RelationshipTypes.GERENTE &&
-          (row.relationship === RelationshipTypes.GERENTE || row.relationship === RelationshipTypes.PROPRIETARIO)
+          loggedUserRelationship === 'GERENTE' &&
+          (rowRelName === 'GERENTE' || rowRelName === 'PROPRIETARIO')
         ) {
           return false;
         }
