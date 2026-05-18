@@ -1,0 +1,15 @@
+.relationship-form-dialog {
+  min-width: 320px;
+  padding: 8px;
+
+  .relationship-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+}

@@ -1,0 +1,22 @@
+<div class="relationship-form-dialog">
+  <h2 mat-dialog-title>{{ data.title }}</h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="relationshipForm" class="relationship-form">
+      <mat-form-field appearance="outline" class="full-width" style="width: 100%; margin-top: 8px;">
+        <mat-label>Nome do Cargo / Vínculo *</mat-label>
+        <input matInput formControlName="name" placeholder="Ex: Fornecedor, Mecânico, Supervisor" maxlength="50" />
+        @if (relationshipForm.get('name')?.invalid && relationshipForm.get('name')?.touched) {
+          <mat-error>{{ getErrorMessage('name') }}</mat-error>
+        }
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" type="button">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" type="button" [disabled]="relationshipForm.invalid">
+      Criar
+    </button>
+  </mat-dialog-actions>
+</div>

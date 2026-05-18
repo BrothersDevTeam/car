@@ -27,6 +27,8 @@ import {
   SaveDraftDialogComponent,
   SaveDraftDialogResult,
 } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
+import { RelationshipFormDialogComponent } from '@components/dialogs/relationship-form-dialog/relationship-form-dialog.component';
+import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 
 import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 import { Observable, of, Subscription } from 'rxjs';
@@ -960,5 +962,92 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
         console.warn('[focusUsernameField] ViewChild usernameInput não está disponível');
       }
     }, 100);
+  }
+
+  getSelectedRelationshipName(): string {
+    const relId = this.form.get('relationshipId')?.value;
+    const rel = this.relationships.find(r => r.relationshipId === relId);
+    return rel ? rel.name : '';
+  }
+
+  openAddRelationshipDialog(event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const dialogRef = this.dialog.open(RelationshipFormDialogComponent, {
+      data: { title: 'Adicionar Novo Vínculo / Cargo' },
+      width: '400px',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result && result.name) {
+        const storeId = this.storeContextService.currentStoreId;
+        if (!storeId) {
+          this.toastrService.error('Loja não identificada. Faça login novamente.');
+          return;
+        }
+
+        this.relationshipService.create(storeId, { name: result.name }).subscribe({
+          next: (newRel) => {
+            this.toastrService.success('Vínculo criado com sucesso!');
+            this.relationshipService.getAll().subscribe((data) => {
+              this.relationships = data.filter(r => {
+                const isProprietario = r.name.toUpperCase() === 'PROPRIETARIO';
+                if (!isProprietario) return true;
+                const currentRelName = this.dataForm?.relationship?.name || '';
+                return !!this.dataForm && currentRelName.toUpperCase() === 'PROPRIETARIO';
+              });
+              this.form.patchValue({ relationshipId: newRel.relationshipId });
+            });
+          },
+          error: (err) => {
+            const msg = extractErrorMessage(err, 'Erro ao criar vínculo');
+            this.toastrService.error(msg);
+            console.error(err);
+          }
+        });
+      }
+    });
+  }
+
+  deleteRelationship(rel: RelationshipResponse, event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Excluir Vínculo / Cargo',
+        message: `Tem certeza que deseja excluir o cargo <strong>${rel.name}</strong>? Esta ação não poderá ser desfeita.`,
+        confirmText: 'Excluir',
+        cancelText: 'Cancelar',
+        type: 'danger',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.relationshipService.delete(rel.relationshipId).subscribe({
+          next: () => {
+            this.toastrService.success('Vínculo excluído com sucesso!');
+            if (this.form.get('relationshipId')?.value === rel.relationshipId) {
+              this.form.patchValue({ relationshipId: '' });
+            }
+            this.relationshipService.getAll().subscribe((data) => {
+              this.relationships = data.filter(r => {
+                const isProprietario = r.name.toUpperCase() === 'PROPRIETARIO';
+                if (!isProprietario) return true;
+                const currentRelName = this.dataForm?.relationship?.name || '';
+                return !!this.dataForm && currentRelName.toUpperCase() === 'PROPRIETARIO';
+              });
+            });
+          },
+          error: (err) => {
+            const msg = extractErrorMessage(err, 'Erro ao excluir vínculo');
+            this.toastrService.error(msg);
+            console.error(err);
+          }
+        });
+      }
+    });
   }
 }
