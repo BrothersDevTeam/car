@@ -14,7 +14,7 @@
       <div class="badge-group">
         <span class="relationship-badge shadow-sm">
           <mat-icon>{{ getRelationshipIcon(person.relationship) }}</mat-icon>
-          {{ person.relationship }}
+          {{ person.relationship?.name || person.relationship }}
         </span>
         @if (person.storeName) {
           <span class="store-badge shadow-sm">

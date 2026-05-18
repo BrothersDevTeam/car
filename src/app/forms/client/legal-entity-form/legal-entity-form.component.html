@@ -93,7 +93,10 @@
       Layout: Inscrição Estadual + CRC (2 campos em uma linha - 50% cada)
       Documentos secundários agrupados
     -->
-    <div class="form-row-2cols">
+    <!-- 
+      Layout: Inscrição Estadual + Indicador de IE (2 campos em uma linha)
+    -->
+    <div class="form-row-2cols" style="align-items: center; margin-bottom: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
       <app-primary-input
         formControlName="ie"
         label="Inscrição Estadual"
@@ -102,6 +105,42 @@
         placeholder="Nº da IE"
       />
 
+      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -1.25em;">
+        <mat-label>Indicador de IE</mat-label>
+        <mat-select formControlName="indicadorIe">
+          <mat-option value="">-- Selecione o Indicador --</mat-option>
+          <mat-option value="1">1 - Contribuinte ICMS</mat-option>
+          <mat-option value="2">2 - Contribuinte Isento</mat-option>
+          <mat-option value="9">9 - Não Contribuinte</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- 
+      Layout: Inscrição Municipal + Inscrição SUFRAMA (2 campos em uma linha)
+    -->
+    <div class="form-row-2cols">
+      <app-primary-input
+        formControlName="im"
+        label="Inscrição Municipal"
+        inputName="im"
+        type="text"
+        placeholder="Nº da Inscrição Municipal"
+      />
+
+      <app-primary-input
+        formControlName="isuf"
+        label="Inscrição SUFRAMA"
+        inputName="isuf"
+        type="text"
+        placeholder="Nº da IE SUFRAMA se aplicável"
+      />
+    </div>
+
+    <!-- 
+      Layout: CRC (se aplicável)
+    -->
+    <div class="form-row-2cols">
       <app-primary-input
         formControlName="crc"
         label="CRC (se aplicável)"
@@ -109,6 +148,7 @@
         type="text"
         placeholder="Nº do CRC"
       />
+      <div></div> <!-- Espaço vazio para manter a proporção de 2 colunas -->
     </div>
 
     <!-- 

@@ -76,6 +76,37 @@
         [error]="form.get('cpf')?.invalid && (form.get('cpf')?.touched || submitted)"
       />
     </div>
+
+    <!-- Layout: RG + Órgão Emissor -->
+    <div class="form-row-2cols">
+      <app-primary-input
+        formControlName="rg"
+        label="RG"
+        inputName="rg"
+        type="text"
+        placeholder="Digite o RG"
+      />
+
+      <app-primary-input
+        formControlName="rgIssuer"
+        label="Órgão Emissor"
+        inputName="rgIssuer"
+        type="text"
+        placeholder="Ex: SSP/SP"
+      />
+    </div>
+
+    <!-- Layout: ID Estrangeiro -->
+    <div class="form-row-2cols">
+      <app-primary-input
+        formControlName="idEstrangeiro"
+        label="ID Estrangeiro"
+        inputName="idEstrangeiro"
+        type="text"
+        placeholder="Digite o ID de estrangeiro se aplicável"
+      />
+      <div></div> <!-- Espaço vazio para manter a proporção de 2 colunas -->
+    </div>
     <!-- 
       Layout: Email + Celular (2 campos em uma linha - 50% cada)
       Dados de contato agrupados

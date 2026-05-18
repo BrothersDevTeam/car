@@ -605,7 +605,22 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
   }
 
   onRowClick(person: Person) {
-    this.handleSelectedPerson(person);
+    if (person.personId) {
+      this.clientListLoading.set(true);
+      this.personService.getById(person.personId).subscribe({
+        next: (fullPerson) => {
+          this.clientListLoading.set(false);
+          this.handleSelectedPerson(fullPerson);
+        },
+        error: (err) => {
+          this.clientListLoading.set(false);
+          this.toastr.error('Erro ao carregar os detalhes da pessoa.');
+          console.error(err);
+        }
+      });
+    } else {
+      this.handleSelectedPerson(person);
+    }
   }
 
   handleOpenForm() {
@@ -643,9 +658,31 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
 
   handleEdit(person?: Person) {
     if (!this.storeContextService.validateStoreSelection()) return;
-    if (person) this.selectedPerson = person;
-    this.openInfo.set(false);
-    this.openForm.set(true);
+
+    if (person && person.personId) {
+      this.clientListLoading.set(true);
+      this.personService.getById(person.personId).subscribe({
+        next: (fullPerson) => {
+          this.clientListLoading.set(false);
+          this.selectedPerson = fullPerson;
+          this.openInfo.set(false);
+          this.openForm.set(true);
+        },
+        error: (err) => {
+          this.clientListLoading.set(false);
+          this.toastr.error('Erro ao carregar os dados para edição.');
+          console.error(err);
+        }
+      });
+    } else if (this.selectedPerson && this.selectedPerson.personId) {
+      // Se clicou em editar a partir da gaveta de informações (onde selectedPerson já está completo)
+      this.openInfo.set(false);
+      this.openForm.set(true);
+    } else {
+      if (person) this.selectedPerson = person;
+      this.openInfo.set(false);
+      this.openForm.set(true);
+    }
   }
 
   handleDelete(person: Person) {

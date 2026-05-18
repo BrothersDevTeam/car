@@ -149,6 +149,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     cpf: [''],
     rg: [''],
     rgIssuer: [''],
+    idEstrangeiro: [''],
     active: [true],
     storeId: [''],
     legalEntity: [false],
@@ -722,6 +723,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
           cpf: this.dataForm.cpf || '',
           rg: this.dataForm.rg || '',
           rgIssuer: this.dataForm.rgIssuer || '',
+          idEstrangeiro: this.dataForm.idEstrangeiro || '',
         });
 
         // Se a lista de relacionamentos já estiver carregada, aplica imediatamente
@@ -817,8 +819,9 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       phone: this.form.value.phone?.replace(/\D/g, '') || '',
       nickName: this.form.value.nickName || '',
       legalEntity: false as const,
-      rg: this.form.value.rg?.replace(/\D/g, '') || '',
-      rgIssuer: '',
+      rg: this.form.value.rg || '',
+      rgIssuer: this.form.value.rgIssuer || '',
+      idEstrangeiro: this.form.value.idEstrangeiro || '',
       crc: '',
       relationshipId: this.form.value.relationshipId || undefined,
       isEmployee: this.form.value.isEmployee || false
