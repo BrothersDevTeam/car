@@ -42,6 +42,8 @@ import { PersonService } from '@services/person.service';
 import { ActionsService } from '@services/actions.service';
 import { FormDraftService, FormDraft } from '@services/form-draft.service';
 import { StoreContextService } from '@services/store-context.service';
+import { RelationshipService } from '@services/relationship.service';
+import { RelationshipResponse } from '@interfaces/relationship';
 
 @Component({
   selector: 'app-legal-entity-form',
@@ -111,10 +113,12 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
   protected selectedDraftId: string | null = null;
 
   /**
+   * Lista de relacionamentos/cargos disponíveis carregados da API
+   */
+  protected relationships: RelationshipResponse[] = [];
+
+  /**
    * Formulário reativo para cadastro/edição de pessoa jurídica
-   *
-   * IMPORTANTE: relationshipTypes começa VAZIO e só recebe valor padrão
-   * [CLIENTE] se estiver CRIANDO uma nova pessoa (não editando).
    */
   protected form = this.formBuilderService.group({
     name: [this.dataForm?.name || '', Validators.required],
@@ -127,9 +131,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     active: [true],
     storeId: [''],
     legalEntity: [true],
-    relationship: this.formBuilderService.control<RelationshipTypes>(RelationshipTypes.CLIENTE, {
-      validators: [Validators.required],
-    }),
+    relationshipId: ['', Validators.required],
   });
 
   constructor(
@@ -137,18 +139,12 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     private toastrService: ToastrService,
     private actionsService: ActionsService,
     private formDraftService: FormDraftService,
+    private relationshipService: RelationshipService,
   ) {}
 
   ngOnInit() {
-    /**
-     * Define o valor padrão de relationshipTypes apenas se NÃO estiver editando
-     */
-    if (!this.dataForm) {
-      this.form.get('relationship')?.setValue(RelationshipTypes.CLIENTE);
-    }
-
     this.subscriptions.add(
-      this.form.get('relationship')!.valueChanges.subscribe(() => {
+      this.form.get('relationshipId')!.valueChanges.subscribe(() => {
         this.updateConditionalValidators();
       }),
     );
@@ -162,10 +158,59 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     );
 
     this.loadAvailableDrafts();
+    this.loadRelationships();
 
     setTimeout(() => {
       this.captureInitialFormValue();
     }, 500);
+  }
+
+  private loadRelationships() {
+    this.relationshipService.getAll().subscribe({
+      next: (data) => {
+        // Para Pessoa Jurídica, filtramos os cargos de funcionários físicos (PROPRIETARIO, GERENTE, VENDEDOR).
+        // Apenas vínculos corporativos/gerais como CLIENTE ou FORNECEDOR devem aparecer!
+        this.relationships = data.filter(r => {
+          const nameUpper = r.name.toUpperCase();
+          return !['PROPRIETARIO', 'GERENTE', 'VENDEDOR'].includes(nameUpper);
+        });
+        
+        // Aplica o patch value para edição ou novo cadastro
+        this.applyRelationshipToForm();
+      },
+      error: (err) => {
+        this.toastrService.error('Erro ao buscar cargos e relacionamentos.');
+        console.error(err);
+      }
+    });
+  }
+
+  private applyRelationshipToForm() {
+    if (this.dataForm) {
+      let relId = '';
+      const rel = this.dataForm.relationship;
+      if (rel) {
+        if (typeof rel === 'object' && rel.relationshipId) {
+          relId = rel.relationshipId;
+        } else if (typeof rel === 'string') {
+          const found = this.relationships.find(r => r.name.toUpperCase() === (rel as string).toUpperCase());
+          if (found) {
+            relId = found.relationshipId;
+          }
+        }
+      }
+      this.form.patchValue({
+        relationshipId: relId
+      });
+    } else {
+      // Novo cadastro -> seta CLIENTE como padrão
+      const clienteRel = this.relationships.find(r => r.name.toUpperCase() === 'CLIENTE');
+      if (clienteRel) {
+        this.form.patchValue({
+          relationshipId: clienteRel.relationshipId
+        });
+      }
+    }
   }
 
   private updateConditionalValidators() {
@@ -277,10 +322,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
           storeId,
           legalEntity: true as const,
           crc: this.form.value.crc || '',
-          relationship: {
-            name: 'CLIENTE',
-            relationshipId: ''
-          } as any,
+          relationshipId: this.form.value.relationshipId || undefined,
           isEmployee: false
         };
 
@@ -422,7 +464,27 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
   private loadDraftData(draft: FormDraft): void {
     if (!draft || !draft.data) return;
 
+    this.selectedDraftId = draft.id;
+
+    if (this.dataForm) {
+      this.dataForm = {
+        ...this.dataForm,
+        personId: draft.data._editingId,
+        ...draft.data,
+      } as any;
+    } else {
+      this.dataForm = {
+        personId: draft.data._editingId,
+        ...draft.data,
+      } as any;
+    }
+
     this.form.patchValue(draft.data);
+
+    if (this.relationships.length > 0) {
+      this.applyRelationshipToForm();
+    }
+
     this.toastrService.success('Rascunho carregado com sucesso');
 
     setTimeout(() => {
@@ -466,17 +528,12 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
 
   /**
    * Detecta mudanças no @Input dataForm (quando está editando)
-   *
-   * IMPORTANTE: O backend envia 'relationships', mapeamos para 'relationshipTypes'!
    */
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
       console.log('[legal-entity-form] dataForm recebido:', this.dataForm);
       console.log('[legal-entity-form] relationship do banco:', this.dataForm.relationship);
 
-      /**
-       * Aumentado o timeout para garantir sincronização com as opções
-       */
       setTimeout(() => {
         this.form.patchValue({
           name: this.dataForm!.name || '',
@@ -485,9 +542,12 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
           phone: this.dataForm!.phone || '',
           cnpj: this.dataForm!.cnpj || '',
           ie: this.dataForm!.ie || '',
+          crc: this.dataForm!.crc || '',
         });
 
-        this.form.get('relationship')?.setValue(RelationshipTypes.CLIENTE);
+        if (this.relationships.length > 0) {
+          this.applyRelationshipToForm();
+        }
 
         console.log('[legal-entity-form] Formulário após patchValue:', this.form.value);
       }, 200);
@@ -534,10 +594,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
       storeId,
       legalEntity: true as const,
       crc: this.form.value.crc || '',
-      relationship: {
-        name: 'CLIENTE',
-        relationshipId: ''
-      } as any,
+      relationshipId: this.form.value.relationshipId || undefined,
       isEmployee: false
     };
 
@@ -577,7 +634,13 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     this.form.reset();
     this.submitted = false;
 
-    this.form.get('relationship')?.setValue(RelationshipTypes.CLIENTE);
+    // Novo cadastro -> seta CLIENTE como padrão
+    const clienteRel = this.relationships.find(r => r.name.toUpperCase() === 'CLIENTE');
+    if (clienteRel) {
+      this.form.patchValue({
+        relationshipId: clienteRel.relationshipId
+      });
+    }
 
     this.form.patchValue({
       active: true,

@@ -35,7 +35,7 @@ export interface Person {
   im?: string;
   crc?: string;
   active: boolean;
-  relationship: RelationshipResponse;
+  relationship?: RelationshipResponse;
   relationshipId?: string;
   isEmployee: boolean;
   username?: string;

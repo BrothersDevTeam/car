@@ -265,13 +265,8 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
           legalEntity: false as const,
           rg: this.form.value.rg?.replace(/\D/g, '') || '',
           rgIssuer: '',
-          crc: '',
           relationshipId: this.form.value.relationshipId || undefined,
-          isEmployee: this.form.value.isEmployee || false,
-          relationship: {
-            relationshipId: this.form.value.relationshipId || '',
-            name: ''
-          } as any
+          isEmployee: this.form.value.isEmployee || false
         };
 
         const formValue: CreateNaturalPerson = baseData;
@@ -611,7 +606,14 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   private loadRelationships() {
     this.relationshipService.getAll().subscribe({
       next: (data) => {
-        this.relationships = data;
+        // Oculta a opção 'PROPRIETARIO' no select de criação/edição comum.
+        // Só mantém se estiver em modo edição de um registro que já possua esse cargo.
+        this.relationships = data.filter(r => {
+          const isProprietario = r.name.toUpperCase() === 'PROPRIETARIO';
+          if (!isProprietario) return true;
+          const currentRelName = this.dataForm?.relationship?.name || '';
+          return !!this.dataForm && currentRelName.toUpperCase() === 'PROPRIETARIO';
+        });
         
         // Agora que os relacionamentos estão carregados, aplica o patch value para edição ou novo cadastro
         this.applyRelationshipToForm();
@@ -817,11 +819,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       rgIssuer: '',
       crc: '',
       relationshipId: this.form.value.relationshipId || undefined,
-      isEmployee: this.form.value.isEmployee || false,
-      relationship: {
-        relationshipId: this.form.value.relationshipId || '',
-        name: ''
-      } as any
+      isEmployee: this.form.value.isEmployee || false
     };
 
     const formValue: CreateNaturalPerson = baseData;
