@@ -3,7 +3,7 @@
 
   <mat-dialog-content>
     <form [formGroup]="relationshipForm" class="relationship-form">
-      <mat-form-field appearance="outline" class="full-width" style="width: 100%; margin-top: 8px;">
+      <mat-form-field appearance="outline" class="full-width" style="width: 100%; margin-top: 8px">
         <mat-label>Nome do Cargo / Vínculo *</mat-label>
         <input matInput formControlName="name" placeholder="Ex: Fornecedor, Mecânico, Supervisor" maxlength="50" />
         @if (relationshipForm.get('name')?.invalid && relationshipForm.get('name')?.touched) {

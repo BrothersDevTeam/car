@@ -513,7 +513,7 @@ export class StoreFormDialogComponent implements OnInit {
         } else {
           this.submitError = 'Erro ao editar loja. Tente novamente.';
         }
-      }
+      },
     });
   }
 }

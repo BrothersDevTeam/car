@@ -104,7 +104,9 @@
                 <mat-menu #roleMenu="matMenu">
                   @for (rel of relationships; track rel.relationshipId) {
                     <button mat-menu-item (click)="changeRelationship(person, rel)">
-                      <mat-icon [color]="person.relationship?.name?.toUpperCase() === rel.name.toUpperCase() ? 'primary' : ''">
+                      <mat-icon
+                        [color]="person.relationship?.name?.toUpperCase() === rel.name.toUpperCase() ? 'primary' : ''"
+                      >
                         {{ person.relationship?.name?.toUpperCase() === rel.name.toUpperCase() ? 'check' : 'badge' }}
                       </mat-icon>
                       <span>{{ getRelationshipLabel(rel) }}</span>
@@ -229,27 +231,71 @@
 
                   <!-- Permissões com preset aplicado -->
                   <div class="permissions-section">
-                    <h5 class="perm-title">
-                      Permissões de Acesso
-                      <span class="perm-hint">
-                        Pré-selecionadas com base no perfil "{{ getRelationshipLabel(person.relationship) }}"
-                      </span>
-                    </h5>
+                    <div
+                      class="permissions-header-row"
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        margin-bottom: 16px;
+                        gap: 16px;
+                        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+                        padding-bottom: 8px;
+                      "
+                    >
+                      <h5 class="perm-title" style="margin: 0; display: flex; flex-direction: column">
+                        Permissões de Acesso
+                        <span
+                          class="perm-hint"
+                          style="
+                            font-size: 11px;
+                            color: var(--text-secondary, #666);
+                            font-weight: normal;
+                            margin-top: 2px;
+                          "
+                        >
+                          Defina as autorizações granulares para este funcionário
+                        </span>
+                      </h5>
+
+                      @if (getEmployeesWithAccess(person.personId).length > 0) {
+                        <mat-form-field
+                          appearance="outline"
+                          style="width: 320px; font-size: 12px; margin-bottom: -1.25em"
+                        >
+                          <mat-label>Copiar permissões de outro funcionário...</mat-label>
+                          <mat-select (selectionChange)="copyPermissions(person.personId, $event.value)">
+                            @for (emp of getEmployeesWithAccess(person.personId); track emp.personId) {
+                              <mat-option [value]="emp">
+                                {{ emp.name }} ({{ getRelationshipLabel(emp.relationship) }})
+                              </mat-option>
+                            }
+                          </mat-select>
+                          <mat-icon
+                            matSuffix
+                            style="color: var(--primary-color, #2196f3); font-size: 18px; width: 18px; height: 18px"
+                          >
+                            content_copy
+                          </mat-icon>
+                        </mat-form-field>
+                      }
+                    </div>
 
                     <div class="perm-groups">
                       @for (group of authGroups; track group.name) {
                         <div class="perm-group">
-                           <span class="perm-group-title">
-                             <label class="group-title-label">
-                               <input
-                                 type="checkbox"
-                                 [checked]="isAllGroupSelected(person.personId, group)"
-                                 [indeterminate]="isSomeGroupSelected(person.personId, group)"
-                                 (change)="toggleAllGroup(person.personId, group, $event)"
-                               />
-                               {{ group.name }}
-                             </label>
-                           </span>
+                          <span class="perm-group-title">
+                            <label class="group-title-label">
+                              <input
+                                type="checkbox"
+                                [checked]="isAllGroupSelected(person.personId, group)"
+                                [indeterminate]="isSomeGroupSelected(person.personId, group)"
+                                (change)="toggleAllGroup(person.personId, group, $event)"
+                              />
+                              {{ group.name }}
+                            </label>
+                          </span>
                           <div class="perm-checkboxes">
                             @for (perm of group.permissions; track perm.key) {
                               <label class="perm-checkbox-label">

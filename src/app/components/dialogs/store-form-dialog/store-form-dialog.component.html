@@ -24,7 +24,11 @@
 
   @if (data.mode === 'edit') {
     <!-- ========== FORMULÁRIO DE EDIÇÃO DIRETO ========== -->
-    <form [formGroup]="storeForm" class="step-form edit-mode-form" style="display: flex; flex-direction: column; gap: 16px; padding: 8px 4px;">
+    <form
+      [formGroup]="storeForm"
+      class="step-form edit-mode-form"
+      style="display: flex; flex-direction: column; gap: 16px; padding: 8px 4px"
+    >
       <p class="step-description">
         <mat-icon>info</mat-icon>
         Altere os dados básicos da loja e salve para aplicar as modificações.
@@ -351,12 +355,7 @@
   <button mat-button (click)="onCancel()" [disabled]="isSubmitting">Cancelar</button>
 
   @if (data.mode === 'edit') {
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="onSubmit()"
-      [disabled]="!storeForm.valid || isSubmitting"
-    >
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!storeForm.valid || isSubmitting">
       @if (isSubmitting) {
         <span class="button-content">
           <mat-spinner diameter="20"></mat-spinner>

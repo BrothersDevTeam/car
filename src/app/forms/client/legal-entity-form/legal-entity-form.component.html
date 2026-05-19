@@ -96,7 +96,10 @@
     <!-- 
       Layout: Inscrição Estadual + Indicador de IE (2 campos em uma linha)
     -->
-    <div class="form-row-2cols" style="align-items: center; margin-bottom: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+    <div
+      class="form-row-2cols"
+      style="align-items: center; margin-bottom: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px"
+    >
       <app-primary-input
         formControlName="ie"
         label="Inscrição Estadual"
@@ -105,7 +108,7 @@
         placeholder="Nº da IE"
       />
 
-      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -1.25em;">
+      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -1.25em">
         <mat-label>Indicador de IE</mat-label>
         <mat-select formControlName="indicadorIe">
           <mat-option value="">-- Selecione o Indicador --</mat-option>
@@ -148,7 +151,8 @@
         type="text"
         placeholder="Nº do CRC"
       />
-      <div></div> <!-- Espaço vazio para manter a proporção de 2 colunas -->
+      <div></div>
+      <!-- Espaço vazio para manter a proporção de 2 colunas -->
     </div>
 
     <!-- 
@@ -176,8 +180,15 @@
     </div>
 
     <!-- Layout: Cargo/Vínculo -->
-    <div class="form-row-2cols" style="align-items: center; margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-      <mat-form-field appearance="outline" class="relationship-select-field" style="width: 100%; margin-bottom: -1.25em;">
+    <div
+      class="form-row-2cols"
+      style="align-items: center; margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px"
+    >
+      <mat-form-field
+        appearance="outline"
+        class="relationship-select-field"
+        style="width: 100%; margin-bottom: -1.25em"
+      >
         <mat-label>Vínculo / Cargo *</mat-label>
         <mat-select formControlName="relationshipId">
           <mat-select-trigger>
@@ -185,25 +196,43 @@
           </mat-select-trigger>
           @for (rel of relationships; track rel.relationshipId) {
             <mat-option [value]="rel.relationshipId">
-              <div style="display: flex; align-items: center; width: 100%;">
+              <div style="display: flex; align-items: center; width: 100%">
                 <span>{{ rel.name }}</span>
                 @if (!rel.isGlobal) {
                   <button
                     type="button"
                     mat-icon-button
                     color="warn"
-                    style="position: absolute; right: 44px; top: 50%; transform: translateY(-50%); height: 32px; width: 32px; display: flex; align-items: center; justify-content: center; min-width: 0; z-index: 10;"
+                    style="
+                      position: absolute;
+                      right: 44px;
+                      top: 50%;
+                      transform: translateY(-50%);
+                      height: 32px;
+                      width: 32px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      min-width: 0;
+                      z-index: 10;
+                    "
                     (click)="deleteRelationship(rel, $event)"
                     matTooltip="Excluir Cargo"
                   >
-                    <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete_outline</mat-icon>
+                    <mat-icon style="font-size: 18px; width: 18px; height: 18px">delete_outline</mat-icon>
                   </button>
                 }
               </div>
             </mat-option>
           }
         </mat-select>
-        <button type="button" mat-icon-button matSuffix (click)="openAddRelationshipDialog($event)" matTooltip="Adicionar Novo Vínculo/Cargo">
+        <button
+          type="button"
+          mat-icon-button
+          matSuffix
+          (click)="openAddRelationshipDialog($event)"
+          matTooltip="Adicionar Novo Vínculo/Cargo"
+        >
           <mat-icon>add</mat-icon>
         </button>
         @if (form.get('relationshipId')?.invalid && (form.get('relationshipId')?.touched || submitted)) {

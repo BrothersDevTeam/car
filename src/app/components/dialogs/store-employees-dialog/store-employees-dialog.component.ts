@@ -14,6 +14,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatSelectModule } from '@angular/material/select';
+import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { debounceTime, distinctUntilChanged, switchMap, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -200,6 +202,7 @@ const PRESET_VENDEDOR: string[] = [
     MatCheckboxModule,
     MatExpansionModule,
     MatMenuModule,
+    MatSelectModule,
   ],
   templateUrl: './store-employees-dialog.component.html',
   styleUrls: ['./store-employees-dialog.component.scss'],
@@ -233,6 +236,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
     private dialog: MatDialog,
     private fb: FormBuilder,
     private toastr: ToastrService,
+    private http: HttpClient,
     public dialogRef: MatDialogRef<StoreEmployeesDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: StoreEmployeesDialogData,
   ) {}
@@ -327,6 +331,23 @@ export class StoreEmployeesDialogComponent implements OnInit {
     this.employeeService.getPaginatedEmployees(0, 100, params).subscribe({
       next: (response) => {
         this.employees = response.content;
+
+        // Carrega as permissões de cada funcionário que tem acesso cadastrado para permitir cópia
+        this.employees.forEach((emp) => {
+          if (emp.hasUser) {
+            this.http.get<{ authorizations: string[] }>(`/api/persons/${emp.personId}/authorizations`).subscribe({
+              next: (res) => {
+                if (res && res.authorizations) {
+                  emp.authorizations = res.authorizations;
+                }
+              },
+              error: (err) => {
+                console.error(`Erro ao carregar permissões de ${emp.name}:`, err);
+              },
+            });
+          }
+        });
+
         this.loading = false;
       },
       error: (err) => {
@@ -587,6 +608,33 @@ export class StoreEmployeesDialogComponent implements OnInit {
         this.loadEmployees();
       }
     });
+  }
+
+  getEmployeesWithAccess(excludePersonId: string): Person[] {
+    return this.employees.filter(
+      (e) =>
+        e.personId !== excludePersonId &&
+        e.hasUser &&
+        e.authorizations &&
+        e.authorizations.length > 0 &&
+        e.relationship?.name?.toUpperCase() !== 'PROPRIETARIO',
+    );
+  }
+
+  copyPermissions(personId: string, sourcePerson: Person): void {
+    const form = this.createAccessForms.get(personId);
+    if (!form) return;
+
+    const authArray = form.get('authorizations') as FormArray;
+    authArray.clear();
+
+    if (sourcePerson.authorizations) {
+      sourcePerson.authorizations.forEach((auth) => {
+        authArray.push(new FormControl(auth));
+      });
+    }
+
+    this.toastr.success(`Permissões copiadas com sucesso de ${sourcePerson.name}!`);
   }
 
   close(): void {

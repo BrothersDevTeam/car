@@ -175,18 +175,18 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
       next: (data) => {
         // Para Pessoa Jurídica, filtramos os cargos de funcionários físicos (PROPRIETARIO, GERENTE, VENDEDOR).
         // Apenas vínculos corporativos/gerais como CLIENTE ou FORNECEDOR devem aparecer!
-        this.relationships = data.filter(r => {
+        this.relationships = data.filter((r) => {
           const nameUpper = r.name.toUpperCase();
           return !['PROPRIETARIO', 'GERENTE', 'VENDEDOR'].includes(nameUpper);
         });
-        
+
         // Aplica o patch value para edição ou novo cadastro
         this.applyRelationshipToForm();
       },
       error: (err) => {
         this.toastrService.error('Erro ao buscar cargos e relacionamentos.');
         console.error(err);
-      }
+      },
     });
   }
 
@@ -198,21 +198,21 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
         if (typeof rel === 'object' && rel.relationshipId) {
           relId = rel.relationshipId;
         } else if (typeof rel === 'string') {
-          const found = this.relationships.find(r => r.name.toUpperCase() === (rel as string).toUpperCase());
+          const found = this.relationships.find((r) => r.name.toUpperCase() === (rel as string).toUpperCase());
           if (found) {
             relId = found.relationshipId;
           }
         }
       }
       this.form.patchValue({
-        relationshipId: relId
+        relationshipId: relId,
       });
     } else {
       // Novo cadastro -> seta CLIENTE como padrão
-      const clienteRel = this.relationships.find(r => r.name.toUpperCase() === 'CLIENTE');
+      const clienteRel = this.relationships.find((r) => r.name.toUpperCase() === 'CLIENTE');
       if (clienteRel) {
         this.form.patchValue({
-          relationshipId: clienteRel.relationshipId
+          relationshipId: clienteRel.relationshipId,
         });
       }
     }
@@ -328,7 +328,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
           legalEntity: true as const,
           crc: this.form.value.crc || '',
           relationshipId: this.form.value.relationshipId || undefined,
-          isEmployee: false
+          isEmployee: false,
         };
 
         const formValue: CreateLegalEntity = baseData;
@@ -606,7 +606,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
       legalEntity: true as const,
       crc: this.form.value.crc || '',
       relationshipId: this.form.value.relationshipId || undefined,
-      isEmployee: false
+      isEmployee: false,
     };
 
     const formValue: CreateLegalEntity = baseData;
@@ -646,10 +646,10 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     this.submitted = false;
 
     // Novo cadastro -> seta CLIENTE como padrão
-    const clienteRel = this.relationships.find(r => r.name.toUpperCase() === 'CLIENTE');
+    const clienteRel = this.relationships.find((r) => r.name.toUpperCase() === 'CLIENTE');
     if (clienteRel) {
       this.form.patchValue({
-        relationshipId: clienteRel.relationshipId
+        relationshipId: clienteRel.relationshipId,
       });
     }
 
@@ -661,7 +661,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
 
   getSelectedRelationshipName(): string {
     const relId = this.form.get('relationshipId')?.value;
-    const rel = this.relationships.find(r => r.relationshipId === relId);
+    const rel = this.relationships.find((r) => r.relationshipId === relId);
     return rel ? rel.name : '';
   }
 
@@ -686,7 +686,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
           next: (newRel) => {
             this.toastrService.success('Vínculo criado com sucesso!');
             this.relationshipService.getAll().subscribe((data) => {
-              this.relationships = data.filter(r => {
+              this.relationships = data.filter((r) => {
                 const nameUpper = r.name.toUpperCase();
                 return !['PROPRIETARIO', 'GERENTE', 'VENDEDOR'].includes(nameUpper);
               });
@@ -697,7 +697,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
             const msg = extractErrorMessage(err, 'Erro ao criar vínculo');
             this.toastrService.error(msg);
             console.error(err);
-          }
+          },
         });
       }
     });
@@ -726,7 +726,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
               this.form.patchValue({ relationshipId: '' });
             }
             this.relationshipService.getAll().subscribe((data) => {
-              this.relationships = data.filter(r => {
+              this.relationships = data.filter((r) => {
                 const nameUpper = r.name.toUpperCase();
                 return !['PROPRIETARIO', 'GERENTE', 'VENDEDOR'].includes(nameUpper);
               });
@@ -736,7 +736,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
             const msg = extractErrorMessage(err, 'Erro ao excluir vínculo');
             this.toastrService.error(msg);
             console.error(err);
-          }
+          },
         });
       }
     });

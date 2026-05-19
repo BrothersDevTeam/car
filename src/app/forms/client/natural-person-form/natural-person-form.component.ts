@@ -270,7 +270,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
           rg: formRawValue.rg?.replace(/\D/g, '') || '',
           rgIssuer: '',
           relationshipId: formRawValue.relationshipId || undefined,
-          isEmployee: !!formRawValue.isEmployee
+          isEmployee: !!formRawValue.isEmployee,
         };
 
         const formValue: CreateNaturalPerson = baseData;
@@ -580,8 +580,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     }
   }
 
-  
-
   ngOnInit() {
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
@@ -612,20 +610,20 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       next: (data) => {
         // Oculta a opção 'PROPRIETARIO' no select de criação/edição comum.
         // Só mantém se estiver em modo edição de um registro que já possua esse cargo.
-        this.relationships = data.filter(r => {
+        this.relationships = data.filter((r) => {
           const isProprietario = r.name.toUpperCase() === 'PROPRIETARIO';
           if (!isProprietario) return true;
           const currentRelName = this.dataForm?.relationship?.name || '';
           return !!this.dataForm && currentRelName.toUpperCase() === 'PROPRIETARIO';
         });
-        
+
         // Agora que os relacionamentos estão carregados, aplica o patch value para edição ou novo cadastro
         this.applyRelationshipToForm();
       },
       error: (err) => {
         this.toastrService.error('Erro ao buscar cargos e relacionamentos.');
         console.error(err);
-      }
+      },
     });
   }
 
@@ -633,7 +631,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     if (this.dataForm) {
       let relId = '';
       let isEmp = !!this.dataForm.isEmployee;
-      
+
       const rel = this.dataForm.relationship;
       if (rel) {
         if (typeof rel === 'object' && rel.relationshipId) {
@@ -643,7 +641,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
             isEmp = true;
           }
         } else if (typeof rel === 'string') {
-          const found = this.relationships.find(r => r.name.toUpperCase() === (rel as string).toUpperCase());
+          const found = this.relationships.find((r) => r.name.toUpperCase() === (rel as string).toUpperCase());
           if (found) {
             relId = found.relationshipId;
             const relNameUpper = found.name.toUpperCase();
@@ -653,21 +651,21 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
           }
         }
       }
-      
+
       this.form.patchValue({
         relationshipId: relId,
-        isEmployee: isEmp
+        isEmployee: isEmp,
       });
-      
+
       // Controla habilitação do toggle
       this.manageEmployeeToggleState(relId);
     } else {
       // Novo cadastro -> seta CLIENTE como padrão
-      const clienteRel = this.relationships.find(r => r.name.toUpperCase() === 'CLIENTE');
+      const clienteRel = this.relationships.find((r) => r.name.toUpperCase() === 'CLIENTE');
       if (clienteRel) {
         this.form.patchValue({
           relationshipId: clienteRel.relationshipId,
-          isEmployee: false
+          isEmployee: false,
         });
         this.form.get('isEmployee')?.disable();
       }
@@ -675,7 +673,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   }
 
   private manageEmployeeToggleState(relId: string) {
-    const selectedRel = this.relationships.find(r => r.relationshipId === relId);
+    const selectedRel = this.relationships.find((r) => r.relationshipId === relId);
     if (selectedRel) {
       const relNameUpper = selectedRel.name.toUpperCase();
       if (['PROPRIETARIO', 'GERENTE', 'VENDEDOR'].includes(relNameUpper)) {
@@ -696,7 +694,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
         if (relId) {
           this.manageEmployeeToggleState(relId);
         }
-      })
+      }),
     );
   }
 
@@ -826,7 +824,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       idEstrangeiro: formRawValue.idEstrangeiro || '',
       crc: '',
       relationshipId: formRawValue.relationshipId || undefined,
-      isEmployee: !!formRawValue.isEmployee
+      isEmployee: !!formRawValue.isEmployee,
     };
 
     const formValue: CreateNaturalPerson = baseData;
@@ -933,13 +931,13 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     this.submitted = false;
     this.isSaving = false;
 
-    const clienteRel = this.relationships.find(r => r.name.toUpperCase() === 'CLIENTE');
+    const clienteRel = this.relationships.find((r) => r.name.toUpperCase() === 'CLIENTE');
 
     this.form.patchValue({
       active: true,
       legalEntity: false,
       relationshipId: clienteRel ? clienteRel.relationshipId : '',
-      isEmployee: false
+      isEmployee: false,
     });
 
     this.form.get('isEmployee')?.disable();
@@ -971,7 +969,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
 
   getSelectedRelationshipName(): string {
     const relId = this.form.get('relationshipId')?.value;
-    const rel = this.relationships.find(r => r.relationshipId === relId);
+    const rel = this.relationships.find((r) => r.relationshipId === relId);
     return rel ? rel.name : '';
   }
 
@@ -996,7 +994,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
           next: (newRel) => {
             this.toastrService.success('Vínculo criado com sucesso!');
             this.relationshipService.getAll().subscribe((data) => {
-              this.relationships = data.filter(r => {
+              this.relationships = data.filter((r) => {
                 const isProprietario = r.name.toUpperCase() === 'PROPRIETARIO';
                 if (!isProprietario) return true;
                 const currentRelName = this.dataForm?.relationship?.name || '';
@@ -1009,7 +1007,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
             const msg = extractErrorMessage(err, 'Erro ao criar vínculo');
             this.toastrService.error(msg);
             console.error(err);
-          }
+          },
         });
       }
     });
@@ -1038,7 +1036,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
               this.form.patchValue({ relationshipId: '' });
             }
             this.relationshipService.getAll().subscribe((data) => {
-              this.relationships = data.filter(r => {
+              this.relationships = data.filter((r) => {
                 const isProprietario = r.name.toUpperCase() === 'PROPRIETARIO';
                 if (!isProprietario) return true;
                 const currentRelName = this.dataForm?.relationship?.name || '';
@@ -1050,7 +1048,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
             const msg = extractErrorMessage(err, 'Erro ao excluir vínculo');
             this.toastrService.error(msg);
             console.error(err);
-          }
+          },
         });
       }
     });

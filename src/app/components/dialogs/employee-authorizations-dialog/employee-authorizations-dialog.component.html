@@ -19,6 +19,36 @@
     </div>
   } @else {
     <div class="permissions-section">
+      <!-- Cópia Inteligente de Permissões -->
+      @if (otherEmployees.length > 0) {
+        <div
+          class="copy-permissions-bar"
+          style="
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+          "
+        >
+          <mat-form-field appearance="outline" style="width: 340px; font-size: 13px; margin-bottom: -1.25em">
+            <mat-label>Copiar permissões de outro funcionário...</mat-label>
+            <mat-select (selectionChange)="copyPermissionsFrom($event.value)">
+              @for (emp of otherEmployees; track emp.personId) {
+                <mat-option [value]="emp">{{ emp.name }} ({{ getRelationshipLabel(emp.relationship) }})</mat-option>
+              }
+            </mat-select>
+            <mat-icon
+              matSuffix
+              style="color: var(--primary-color, #2196f3); font-size: 18px; width: 18px; height: 18px"
+            >
+              content_copy
+            </mat-icon>
+          </mat-form-field>
+        </div>
+      }
+
       <div class="perm-groups">
         @for (module of modules; track module.module) {
           <div class="perm-group">

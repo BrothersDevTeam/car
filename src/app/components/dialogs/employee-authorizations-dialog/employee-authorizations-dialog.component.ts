@@ -10,6 +10,8 @@ import { HttpClient } from '@angular/common/http';
 import { Person } from '@interfaces/person';
 import { Store } from '@interfaces/store';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { AuthService } from '@services/auth/auth.service';
 import { Authorizations } from '@enums/authorizations';
 
@@ -39,6 +41,8 @@ interface ModuleAuthorizations {
     MatCheckboxModule,
     MatProgressSpinnerModule,
     MatDividerModule,
+    MatFormFieldModule,
+    MatSelectModule,
   ],
   templateUrl: './employee-authorizations-dialog.component.html',
   styleUrls: ['./employee-authorizations-dialog.component.scss'],
@@ -48,6 +52,7 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
   selectedAuths = new Set<string>();
   loading = true;
   saving = false;
+  otherEmployees: Person[] = [];
 
   constructor(
     private http: HttpClient,
@@ -100,6 +105,7 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAuthorizations();
+    this.loadOtherEmployees();
   }
 
   loadAuthorizations(): void {
@@ -172,6 +178,56 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
         this.snackBar.open(err.error?.message || 'Erro ao salvar permissões', 'Fechar', { duration: 3000 });
       },
     });
+  }
+
+  loadOtherEmployees(): void {
+    const storeId = this.data.store?.storeId;
+    if (!storeId) return;
+
+    this.http.get<{ content: Person[] }>(`/api/persons/employees?storeId=${storeId}&size=100`).subscribe({
+      next: (response) => {
+        if (response && response.content) {
+          const list = response.content.filter(
+            (e) =>
+              e.personId !== this.data.person.personId &&
+              e.hasUser &&
+              e.relationship?.name?.toUpperCase() !== 'PROPRIETARIO',
+          );
+          this.otherEmployees = list;
+
+          // Carrega em background as permissões para cada um
+          list.forEach((emp) => {
+            this.http.get<{ authorizations: string[] }>(`/api/persons/${emp.personId}/authorizations`).subscribe({
+              next: (res) => {
+                if (res && res.authorizations) {
+                  emp.authorizations = res.authorizations;
+                }
+              },
+              error: (err) => console.error(err),
+            });
+          });
+        }
+      },
+      error: (err) => console.error('Erro ao carregar equipe para cópia:', err),
+    });
+  }
+
+  copyPermissionsFrom(sourcePerson: Person): void {
+    if (!sourcePerson.authorizations) return;
+    this.selectedAuths.clear();
+    sourcePerson.authorizations.forEach((auth) => this.selectedAuths.add(auth));
+    this.snackBar.open(`Permissões copiadas com sucesso de ${sourcePerson.name}!`, 'Fechar', { duration: 3000 });
+  }
+
+  getRelationshipLabel(rel: any): string {
+    const relStr = typeof rel === 'object' ? rel?.name || '' : rel;
+    const labels: Record<string, string> = {
+      GERENTE: 'Gerente',
+      VENDEDOR: 'Vendedor',
+      PROPRIETARIO: 'Proprietário',
+      CLIENTE: 'Cliente',
+    };
+    return labels[relStr.toUpperCase()] || relStr;
   }
 
   close(): void {

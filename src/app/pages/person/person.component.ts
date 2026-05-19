@@ -167,18 +167,12 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
         const rowRelName = row.relationship?.name?.toUpperCase() || '';
 
         // Proprietário não pode excluir outro proprietário (e consequentemente ele mesmo)
-        if (
-          loggedUserRelationship === 'PROPRIETARIO' &&
-          rowRelName === 'PROPRIETARIO'
-        ) {
+        if (loggedUserRelationship === 'PROPRIETARIO' && rowRelName === 'PROPRIETARIO') {
           return false;
         }
 
         // Gerente não pode excluir outro gerente nem proprietário
-        if (
-          loggedUserRelationship === 'GERENTE' &&
-          (rowRelName === 'GERENTE' || rowRelName === 'PROPRIETARIO')
-        ) {
+        if (loggedUserRelationship === 'GERENTE' && (rowRelName === 'GERENTE' || rowRelName === 'PROPRIETARIO')) {
           return false;
         }
 
@@ -206,10 +200,10 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
 
         // Mapeia diretamente o campo relationship para um label human-readable
         const labels: Record<string, string> = {
-          'PROPRIETARIO': 'Proprietário',
-          'GERENTE': 'Gerente',
-          'VENDEDOR': 'Vendedor',
-          'CLIENTE': 'Cliente',
+          PROPRIETARIO: 'Proprietário',
+          GERENTE: 'Gerente',
+          VENDEDOR: 'Vendedor',
+          CLIENTE: 'Cliente',
         };
 
         return labels[relationshipName.toUpperCase()] ?? relationshipName;
@@ -254,18 +248,12 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
         const rowRelName = row.relationship?.name?.toUpperCase() || '';
 
         // Proprietário não pode excluir outro proprietário (e consequentemente ele mesmo)
-        if (
-          loggedUserRelationship === 'PROPRIETARIO' &&
-          rowRelName === 'PROPRIETARIO'
-        ) {
+        if (loggedUserRelationship === 'PROPRIETARIO' && rowRelName === 'PROPRIETARIO') {
           return false;
         }
 
         // Gerente não pode excluir outro gerente nem proprietário
-        if (
-          loggedUserRelationship === 'GERENTE' &&
-          (rowRelName === 'GERENTE' || rowRelName === 'PROPRIETARIO')
-        ) {
+        if (loggedUserRelationship === 'GERENTE' && (rowRelName === 'GERENTE' || rowRelName === 'PROPRIETARIO')) {
           return false;
         }
 
@@ -616,7 +604,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
           this.clientListLoading.set(false);
           this.toastr.error('Erro ao carregar os detalhes da pessoa.');
           console.error(err);
-        }
+        },
       });
     } else {
       this.handleSelectedPerson(person);
@@ -672,7 +660,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
           this.clientListLoading.set(false);
           this.toastr.error('Erro ao carregar os dados para edição.');
           console.error(err);
-        }
+        },
       });
     } else if (this.selectedPerson && this.selectedPerson.personId) {
       // Se clicou em editar a partir da gaveta de informações (onde selectedPerson já está completo)
