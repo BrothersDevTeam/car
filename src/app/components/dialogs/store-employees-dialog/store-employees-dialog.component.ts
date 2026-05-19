@@ -159,7 +159,6 @@ const PRESET_GERENTE: string[] = [
   Authorizations.CREATE_VENDA_STORE,
   Authorizations.EDIT_VENDA_STORE,
   Authorizations.CANCEL_VENDA_STORE,
-  Authorizations.SYNC_FOCUSNFE,
 ];
 
 const PRESET_VENDEDOR: string[] = [
@@ -293,7 +292,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
     if (relName === 'CLIENTE') {
       person.relationship = {
         name: 'VENDEDOR',
-        relationshipId: ''
+        relationshipId: '',
       } as any;
     }
 
@@ -351,7 +350,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
   }
 
   getRelationshipLabel(rel: any): string {
-    const relStr = typeof rel === 'object' ? (rel?.name || '') : rel;
+    const relStr = typeof rel === 'object' ? rel?.name || '' : rel;
     const labels: Record<string, string> = {
       GERENTE: 'Gerente',
       VENDEDOR: 'Vendedor',
@@ -386,9 +385,6 @@ export class StoreEmployeesDialogComponent implements OnInit {
 
     this.createAccessForms.set(id, form);
     this.creatingAccessFor = id;
-
-    // Aplica presets conforme o perfil
-    setTimeout(() => this.applyPreset(person, form));
   }
 
   private passwordMatchValidator(control: any) {
@@ -553,10 +549,6 @@ export class StoreEmployeesDialogComponent implements OnInit {
     // apenas altera localmente e atualiza os presets do formulário aberto em tela.
     if (this.creatingAccessFor === person.personId && !person.hasUser) {
       person.relationship = rel;
-      const form = this.createAccessForms.get(person.personId);
-      if (form) {
-        this.applyPreset(person, form);
-      }
       return;
     }
 
