@@ -21,8 +21,10 @@ import { of } from 'rxjs';
 import { EmployeeService } from '@services/employee.service';
 import { PersonService } from '@services/person.service';
 import { AuthService } from '@services/auth/auth.service';
+import { RelationshipService } from '@services/relationship.service';
 import { Person } from '@interfaces/person';
 import { Store } from '@interfaces/store';
+import { RelationshipResponse } from '@interfaces/relationship';
 import { Authorizations } from '@enums/authorizations';
 import { RelationshipTypes } from '../../../enums/relationshipTypes';
 import { EmployeeAuthorizationsDialogComponent } from '../employee-authorizations-dialog/employee-authorizations-dialog.component';
@@ -205,6 +207,7 @@ const PRESET_VENDEDOR: string[] = [
 })
 export class StoreEmployeesDialogComponent implements OnInit {
   employees: Person[] = [];
+  relationships: RelationshipResponse[] = [];
   loading = true;
   error = false;
 
@@ -227,6 +230,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
     private employeeService: EmployeeService,
     private personService: PersonService,
     private authService: AuthService,
+    private relationshipService: RelationshipService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private toastr: ToastrService,
@@ -236,6 +240,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadEmployees();
+    this.loadRelationships();
     this.setupPersonSearch();
   }
 
@@ -329,6 +334,18 @@ export class StoreEmployeesDialogComponent implements OnInit {
         console.error('Erro ao carregar funcionários:', err);
         this.error = true;
         this.loading = false;
+      },
+    });
+  }
+
+  loadRelationships(): void {
+    this.relationshipService.getAll().subscribe({
+      next: (data) => {
+        // Filtrar PROPRIETARIO para evitar atribuí-lo manualmente a funcionários comuns
+        this.relationships = data.filter((r) => r.name.toUpperCase() !== 'PROPRIETARIO');
+      },
+      error: (err) => {
+        console.error('Erro ao carregar relacionamentos:', err);
       },
     });
   }
@@ -528,17 +545,14 @@ export class StoreEmployeesDialogComponent implements OnInit {
   // ALTERAÇÃO DE CARGO (RELATIONSHIP)
   // ─────────────────────────────────────────
 
-  changeRelationship(person: Person, newType: RelationshipTypes): void {
+  changeRelationship(person: Person, rel: RelationshipResponse): void {
     const currentRelName = person.relationship?.name?.toUpperCase() || '';
-    if (currentRelName === newType.toUpperCase()) return;
+    if (currentRelName === rel.name.toUpperCase()) return;
 
-    // Se a pessoa ainda não tem usuário (está no fluxo de promoção), apenas altera localmente
-    // e atualiza os presets do form se estiver aberto.
-    if (!person.hasUser) {
-      person.relationship = {
-        name: newType,
-        relationshipId: ''
-      } as any;
+    // Se estiver ativamente no painel de criação de acesso para esta pessoa localmente (e ela não tem usuário),
+    // apenas altera localmente e atualiza os presets do formulário aberto em tela.
+    if (this.creatingAccessFor === person.personId && !person.hasUser) {
+      person.relationship = rel;
       const form = this.createAccessForms.get(person.personId);
       if (form) {
         this.applyPreset(person, form);
@@ -548,9 +562,9 @@ export class StoreEmployeesDialogComponent implements OnInit {
 
     this.updatingRelationshipFor = person.personId;
 
-    this.employeeService.updateRelationship(person.personId, newType).subscribe({
+    this.employeeService.updateRelationship(person.personId, rel.relationshipId).subscribe({
       next: () => {
-        this.toastr.success(`Cargo de ${person.name} alterado para ${this.getRelationshipLabel(newType)}`);
+        this.toastr.success(`Cargo de ${person.name} alterado para ${this.getRelationshipLabel(rel)}`);
         this.updatingRelationshipFor = null;
         this.loadEmployees();
       },

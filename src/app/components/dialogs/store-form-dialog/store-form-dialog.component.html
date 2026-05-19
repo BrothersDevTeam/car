@@ -22,284 +22,371 @@
     </div>
   }
 
-  <!-- Stepper com 3 etapas -->
-  <mat-stepper orientation="vertical" linear #stepper>
-    <!-- ========== STEP 1: DADOS DA LOJA ========== -->
-    <mat-step [stepControl]="storeForm" label="Dados da Loja">
-      <form [formGroup]="storeForm" class="step-form">
-        <p class="step-description">
-          <mat-icon>info</mat-icon>
-          Informe os dados da empresa cliente que será cadastrada no sistema
-        </p>
+  @if (data.mode === 'edit') {
+    <!-- ========== FORMULÁRIO DE EDIÇÃO DIRETO ========== -->
+    <form [formGroup]="storeForm" class="step-form edit-mode-form" style="display: flex; flex-direction: column; gap: 16px; padding: 8px 4px;">
+      <p class="step-description">
+        <mat-icon>info</mat-icon>
+        Altere os dados básicos da loja e salve para aplicar as modificações.
+      </p>
 
-        <!-- Razão Social -->
-        <app-primary-input
-          formControlName="name"
-          label="Razão Social *"
-          inputName="storeName"
-          type="text"
-          placeholder="Ex: Revenda de Veículos LTDA"
-          maxlength="50"
-          [error]="storeForm.get('name')?.invalid && storeForm.get('name')?.touched"
-        />
+      <!-- Razão Social -->
+      <app-primary-input
+        formControlName="name"
+        label="Razão Social *"
+        inputName="storeName"
+        type="text"
+        placeholder="Ex: Revenda de Veículos LTDA"
+        maxlength="50"
+        [error]="storeForm.get('name')?.invalid && storeForm.get('name')?.touched"
+      />
 
-        <!-- Nome Fantasia -->
-        <app-primary-input
-          formControlName="tradeName"
-          label="Nome Fantasia (Opcional)"
-          inputName="storeTradeName"
-          type="text"
-          placeholder="Ex: Auto Premium"
-          maxlength="50"
-        />
+      <!-- Nome Fantasia -->
+      <app-primary-input
+        formControlName="tradeName"
+        label="Nome Fantasia (Opcional)"
+        inputName="storeTradeName"
+        type="text"
+        placeholder="Ex: Auto Premium"
+        maxlength="50"
+      />
 
-        <!-- CNPJ -->
-        <app-primary-input
-          formControlName="cnpj"
-          label="CNPJ *"
-          inputName="storeCnpj"
-          type="text"
-          placeholder="00.000.000/0000-00"
-          mask="00.000.000/0000-00"
-          [uppercase]="false"
-          [error]="storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched"
-        />
+      <!-- CNPJ -->
+      <app-primary-input
+        formControlName="cnpj"
+        label="CNPJ *"
+        inputName="storeCnpj"
+        type="text"
+        placeholder="00.000.000/0000-00"
+        mask="00.000.000/0000-00"
+        [uppercase]="false"
+        [error]="storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched"
+      />
 
-        <!-- Email -->
-        <app-primary-input
-          formControlName="email"
-          label="Email *"
-          inputName="storeEmail"
-          type="email"
-          placeholder="contato@empresa.com.br"
-          maxlength="50"
-          [uppercase]="false"
-          [error]="storeForm.get('email')?.invalid && storeForm.get('email')?.touched"
-        />
+      <!-- Email -->
+      <app-primary-input
+        formControlName="email"
+        label="Email *"
+        inputName="storeEmail"
+        type="email"
+        placeholder="contato@empresa.com.br"
+        maxlength="50"
+        [uppercase]="false"
+        [error]="storeForm.get('email')?.invalid && storeForm.get('email')?.touched"
+      />
 
-        <!-- Telefone -->
-        <app-primary-input
-          formControlName="phoneNumber"
-          label="Telefone (Opcional)"
-          inputName="storePhone"
-          type="tel"
-          placeholder="(00) 0000-0000"
-          mask="(00) 0000-0000||(00) 0 0000-0000"
-          [uppercase]="false"
-        />
+      <!-- Telefone -->
+      <app-primary-input
+        formControlName="phoneNumber"
+        label="Telefone (Opcional)"
+        inputName="storePhone"
+        type="tel"
+        placeholder="(00) 0000-0000"
+        mask="(00) 0000-0000||(00) 0 0000-0000"
+        [uppercase]="false"
+      />
+    </form>
+  } @else {
+    <!-- Stepper com 3 etapas -->
+    <mat-stepper orientation="vertical" linear #stepper>
+      <!-- ========== STEP 1: DADOS DA LOJA ========== -->
+      <mat-step [stepControl]="storeForm" label="Dados da Loja">
+        <form [formGroup]="storeForm" class="step-form">
+          <p class="step-description">
+            <mat-icon>info</mat-icon>
+            Informe os dados da empresa cliente que será cadastrada no sistema
+          </p>
 
-        <!-- Botões do Step 1 -->
-        <div class="step-actions">
-          <button mat-button matStepperNext [disabled]="!storeForm.valid">
-            Próximo
-            <mat-icon>arrow_forward</mat-icon>
-          </button>
-        </div>
-      </form>
-    </mat-step>
-
-    <!-- ========== STEP 2: DADOS DO PROPRIETÁRIO ========== -->
-    <mat-step [stepControl]="personForm" label="Dados do Proprietário">
-      <form [formGroup]="personForm" class="step-form">
-        <p class="step-description">
-          <mat-icon>info</mat-icon>
-          Informe os dados do proprietário da loja (pessoa que terá acesso administrativo)
-        </p>
-
-        <!-- Tipo de Pessoa -->
-        <div class="checkbox-field">
-          <mat-checkbox formControlName="legalEntity">Pessoa Jurídica (empresa)</mat-checkbox>
-          <span class="hint">Deixe desmarcado para Pessoa Física</span>
-        </div>
-
-        <!-- Nome -->
-        <app-primary-input
-          formControlName="name"
-          label="Nome Completo / Razão Social *"
-          inputName="personName"
-          type="text"
-          placeholder="Nome completo do proprietário"
-          maxlength="50"
-          [error]="personForm.get('name')?.invalid && personForm.get('name')?.touched"
-        />
-
-        <!-- Apelido -->
-        <app-primary-input
-          formControlName="nickName"
-          label="Apelido / Nome Fantasia (Opcional)"
-          inputName="personNickName"
-          type="text"
-          placeholder="Como prefere ser chamado"
-          maxlength="50"
-        />
-
-        <!-- CPF (apenas se Pessoa Física) -->
-        @if (!personForm.get('legalEntity')?.value) {
+          <!-- Razão Social -->
           <app-primary-input
-            formControlName="cpf"
-            label="CPF *"
-            inputName="personCpf"
+            formControlName="name"
+            label="Razão Social *"
+            inputName="storeName"
             type="text"
-            placeholder="000.000.000-00"
-            mask="000.000.000-00"
-            [uppercase]="false"
-            [error]="personForm.get('cpf')?.invalid && personForm.get('cpf')?.touched"
+            placeholder="Ex: Revenda de Veículos LTDA"
+            maxlength="50"
+            [error]="storeForm.get('name')?.invalid && storeForm.get('name')?.touched"
           />
 
-          <!-- RG e Órgão Emissor (apenas se Pessoa Física) -->
-          <div class="row">
-            <app-primary-input
-              formControlName="rg"
-              label="RG (Opcional)"
-              inputName="personRg"
-              type="text"
-              placeholder="000000000"
-              maxlength="14"
-              [uppercase]="false"
-            />
+          <!-- Nome Fantasia -->
+          <app-primary-input
+            formControlName="tradeName"
+            label="Nome Fantasia (Opcional)"
+            inputName="storeTradeName"
+            type="text"
+            placeholder="Ex: Auto Premium"
+            maxlength="50"
+          />
 
-            <app-primary-input
-              formControlName="rgIssuer"
-              label="Órgão Emissor (Opcional)"
-              inputName="personRgIssuer"
-              type="text"
-              placeholder="SSP/SP"
-              maxlength="14"
-            />
-          </div>
-        }
-
-        <!-- CNPJ (apenas se Pessoa Jurídica) -->
-        @if (personForm.get('legalEntity')?.value) {
+          <!-- CNPJ -->
           <app-primary-input
             formControlName="cnpj"
             label="CNPJ *"
-            inputName="personCnpj"
+            inputName="storeCnpj"
             type="text"
             placeholder="00.000.000/0000-00"
             mask="00.000.000/0000-00"
             [uppercase]="false"
-            [error]="personForm.get('cnpj')?.invalid && personForm.get('cnpj')?.touched"
+            [error]="storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched"
           />
-        }
 
-        <!-- Email -->
-        <app-primary-input
-          formControlName="email"
-          label="Email *"
-          inputName="personEmail"
-          type="email"
-          placeholder="email@exemplo.com.br"
-          maxlength="255"
-          [uppercase]="false"
-          [error]="personForm.get('email')?.invalid && personForm.get('email')?.touched"
-        />
+          <!-- Email -->
+          <app-primary-input
+            formControlName="email"
+            label="Email *"
+            inputName="storeEmail"
+            type="email"
+            placeholder="contato@empresa.com.br"
+            maxlength="50"
+            [uppercase]="false"
+            [error]="storeForm.get('email')?.invalid && storeForm.get('email')?.touched"
+          />
 
-        <!-- Telefone -->
-        <app-primary-input
-          formControlName="phone"
-          label="Telefone (Opcional)"
-          inputName="personPhone"
-          type="tel"
-          placeholder="(00) 0000-0000"
-          mask="(00) 0000-0000||(00) 0 0000-0000"
-          [uppercase]="false"
-        />
+          <!-- Telefone -->
+          <app-primary-input
+            formControlName="phoneNumber"
+            label="Telefone (Opcional)"
+            inputName="storePhone"
+            type="tel"
+            placeholder="(00) 0000-0000"
+            mask="(00) 0000-0000||(00) 0 0000-0000"
+            [uppercase]="false"
+          />
 
-        <!-- Botões do Step 2 -->
-        <div class="step-actions">
-          <button mat-button matStepperPrevious>
-            <mat-icon>arrow_back</mat-icon>
-            Voltar
-          </button>
-          <button mat-button matStepperNext [disabled]="!personForm.valid">
-            Próximo
-            <mat-icon>arrow_forward</mat-icon>
-          </button>
-        </div>
-      </form>
-    </mat-step>
+          <!-- Botões do Step 1 -->
+          <div class="step-actions">
+            <button mat-button matStepperNext [disabled]="!storeForm.valid">
+              Próximo
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </form>
+      </mat-step>
 
-    <!-- ========== STEP 3: DADOS DE ACESSO ========== -->
-    <mat-step [stepControl]="accessForm" label="Dados de Acesso">
-      <form [formGroup]="accessForm" class="step-form">
-        <p class="step-description">
-          <mat-icon>info</mat-icon>
-          Defina o usuário e senha para acesso ao sistema
-        </p>
+      <!-- ========== STEP 2: DADOS DO PROPRIETÁRIO ========== -->
+      <mat-step [stepControl]="personForm" label="Dados do Proprietário">
+        <form [formGroup]="personForm" class="step-form">
+          <p class="step-description">
+            <mat-icon>info</mat-icon>
+            Informe os dados do proprietário da loja (pessoa que terá acesso administrativo)
+          </p>
 
-        <!-- Username -->
-        <app-primary-input
-          formControlName="username"
-          label="Nome de Usuário *"
-          inputName="username"
-          type="text"
-          placeholder="usuario.sistema"
-          maxlength="50"
-          [uppercase]="false"
-          [error]="accessForm.get('username')?.invalid && accessForm.get('username')?.touched"
-        />
+          <!-- Tipo de Pessoa -->
+          <div class="checkbox-field">
+            <mat-checkbox formControlName="legalEntity">Pessoa Jurídica (empresa)</mat-checkbox>
+            <span class="hint">Deixe desmarcado para Pessoa Física</span>
+          </div>
 
-        <!-- Senha -->
-        <app-primary-input
-          formControlName="password"
-          label="Senha *"
-          inputName="password"
-          type="password"
-          placeholder="••••••••"
-          maxlength="20"
-          [uppercase]="false"
-          [error]="accessForm.get('password')?.invalid && accessForm.get('password')?.touched"
-        />
+          <!-- Nome -->
+          <app-primary-input
+            formControlName="name"
+            label="Nome Completo / Razão Social *"
+            inputName="personName"
+            type="text"
+            placeholder="Nome completo do proprietário"
+            maxlength="50"
+            [error]="personForm.get('name')?.invalid && personForm.get('name')?.touched"
+          />
 
-        <!-- Confirmar Senha -->
-        <app-primary-input
-          formControlName="confirmPassword"
-          label="Confirmar Senha *"
-          inputName="confirmPassword"
-          type="password"
-          placeholder="••••••••"
-          maxlength="20"
-          [uppercase]="false"
-          [error]="accessForm.get('confirmPassword')?.touched && !passwordsMatch()"
-        />
+          <!-- Apelido -->
+          <app-primary-input
+            formControlName="nickName"
+            label="Apelido / Nome Fantasia (Opcional)"
+            inputName="personNickName"
+            type="text"
+            placeholder="Como prefere ser chamado"
+            maxlength="50"
+          />
 
-        @if (accessForm.get('confirmPassword')?.touched && !passwordsMatch()) {
-          <p class="error-message">As senhas não conferem</p>
-        }
+          <!-- CPF (apenas se Pessoa Física) -->
+          @if (!personForm.get('legalEntity')?.value) {
+            <app-primary-input
+              formControlName="cpf"
+              label="CPF *"
+              inputName="personCpf"
+              type="text"
+              placeholder="000.000.000-00"
+              mask="000.000.000-00"
+              [uppercase]="false"
+              [error]="personForm.get('cpf')?.invalid && personForm.get('cpf')?.touched"
+            />
 
-        <!-- Botões do Step 3 -->
-        <div class="step-actions">
-          <button mat-button matStepperPrevious>
-            <mat-icon>arrow_back</mat-icon>
-            Voltar
-          </button>
-        </div>
-      </form>
-    </mat-step>
-  </mat-stepper>
+            <!-- RG e Órgão Emissor (apenas se Pessoa Física) -->
+            <div class="row">
+              <app-primary-input
+                formControlName="rg"
+                label="RG (Opcional)"
+                inputName="personRg"
+                type="text"
+                placeholder="000000000"
+                maxlength="14"
+                [uppercase]="false"
+              />
+
+              <app-primary-input
+                formControlName="rgIssuer"
+                label="Órgão Emissor (Opcional)"
+                inputName="personRgIssuer"
+                type="text"
+                placeholder="SSP/SP"
+                maxlength="14"
+              />
+            </div>
+          }
+
+          <!-- CNPJ (apenas se Pessoa Jurídica) -->
+          @if (personForm.get('legalEntity')?.value) {
+            <app-primary-input
+              formControlName="cnpj"
+              label="CNPJ *"
+              inputName="personCnpj"
+              type="text"
+              placeholder="00.000.000/0000-00"
+              mask="00.000.000/0000-00"
+              [uppercase]="false"
+              [error]="personForm.get('cnpj')?.invalid && personForm.get('cnpj')?.touched"
+            />
+          }
+
+          <!-- Email -->
+          <app-primary-input
+            formControlName="email"
+            label="Email *"
+            inputName="personEmail"
+            type="email"
+            placeholder="email@exemplo.com.br"
+            maxlength="255"
+            [uppercase]="false"
+            [error]="personForm.get('email')?.invalid && personForm.get('email')?.touched"
+          />
+
+          <!-- Telefone -->
+          <app-primary-input
+            formControlName="phone"
+            label="Telefone (Opcional)"
+            inputName="personPhone"
+            type="tel"
+            placeholder="(00) 0000-0000"
+            mask="(00) 0000-0000||(00) 0 0000-0000"
+            [uppercase]="false"
+          />
+
+          <!-- Botões do Step 2 -->
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>
+              <mat-icon>arrow_back</mat-icon>
+              Voltar
+            </button>
+            <button mat-button matStepperNext [disabled]="!personForm.valid">
+              Próximo
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- ========== STEP 3: DADOS DE ACESSO ========== -->
+      <mat-step [stepControl]="accessForm" label="Dados de Acesso">
+        <form [formGroup]="accessForm" class="step-form">
+          <p class="step-description">
+            <mat-icon>info</mat-icon>
+            Defina o usuário e senha para acesso ao sistema
+          </p>
+
+          <!-- Username -->
+          <app-primary-input
+            formControlName="username"
+            label="Nome de Usuário *"
+            inputName="username"
+            type="text"
+            placeholder="usuario.sistema"
+            maxlength="50"
+            [uppercase]="false"
+            [error]="accessForm.get('username')?.invalid && accessForm.get('username')?.touched"
+          />
+
+          <!-- Senha -->
+          <app-primary-input
+            formControlName="password"
+            label="Senha *"
+            inputName="password"
+            type="password"
+            placeholder="••••••••"
+            maxlength="20"
+            [uppercase]="false"
+            [error]="accessForm.get('password')?.invalid && accessForm.get('password')?.touched"
+          />
+
+          <!-- Confirmar Senha -->
+          <app-primary-input
+            formControlName="confirmPassword"
+            label="Confirmar Senha *"
+            inputName="confirmPassword"
+            type="password"
+            placeholder="••••••••"
+            maxlength="20"
+            [uppercase]="false"
+            [error]="accessForm.get('confirmPassword')?.touched && !passwordsMatch()"
+          />
+
+          @if (accessForm.get('confirmPassword')?.touched && !passwordsMatch()) {
+            <p class="error-message">As senhas não conferem</p>
+          }
+
+          <!-- Botões do Step 3 -->
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>
+              <mat-icon>arrow_back</mat-icon>
+              Voltar
+            </button>
+          </div>
+        </form>
+      </mat-step>
+    </mat-stepper>
+  }
 </mat-dialog-content>
 
 <!-- Botões de ação finais -->
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()" [disabled]="isSubmitting">Cancelar</button>
 
-  <button
-    mat-raised-button
-    color="primary"
-    (click)="onSubmit()"
-    [disabled]="!storeForm.valid || !personForm.valid || !accessForm.valid || !passwordsMatch() || isSubmitting"
-  >
-    @if (isSubmitting) {
-      <span class="button-content">
-        <mat-spinner diameter="20"></mat-spinner>
-        <span>Cadastrando...</span>
-      </span>
-    } @else {
-      <span class="button-content">
-        <mat-icon>save</mat-icon>
-        <span>Cadastrar Loja</span>
-      </span>
-    }
-  </button>
+  @if (data.mode === 'edit') {
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="!storeForm.valid || isSubmitting"
+    >
+      @if (isSubmitting) {
+        <span class="button-content">
+          <mat-spinner diameter="20"></mat-spinner>
+          <span>Salvando...</span>
+        </span>
+      } @else {
+        <span class="button-content">
+          <mat-icon>save</mat-icon>
+          <span>Salvar Alterações</span>
+        </span>
+      }
+    </button>
+  } @else {
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="!storeForm.valid || !personForm.valid || !accessForm.valid || !passwordsMatch() || isSubmitting"
+    >
+      @if (isSubmitting) {
+        <span class="button-content">
+          <mat-spinner diameter="20"></mat-spinner>
+          <span>Cadastrando...</span>
+        </span>
+      } @else {
+        <span class="button-content">
+          <mat-icon>save</mat-icon>
+          <span>Cadastrar Loja</span>
+        </span>
+      }
+    </button>
+  }
 </mat-dialog-actions>

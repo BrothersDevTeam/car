@@ -72,11 +72,11 @@ export class EmployeeService {
    * Altera o tipo de vínculo (relationship) de um funcionário.
    * Endpoint: PUT /api/employees/{personId}/relationship?type=...
    */
-  updateRelationship(personId: string, type: string): Observable<any> {
+  updateRelationship(personId: string, relationshipId: string): Observable<any> {
     return this.http.put<any>(
       `${this.employeeApiUrl}/${personId}/relationship`,
       {},
-      { params: new HttpParams().set('type', type) },
+      { params: new HttpParams().set('relationshipId', relationshipId) },
     );
   }
 }

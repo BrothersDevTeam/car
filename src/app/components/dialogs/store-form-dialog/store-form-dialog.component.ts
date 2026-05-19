@@ -24,6 +24,7 @@ export interface StoreFormDialogData {
   title: string;
   mode: 'create' | 'edit';
   isCarAdmin?: boolean; // Define se usa endpoint de MATRIZ ou FILIAL
+  store?: Store; // Para passar os dados na edição
 }
 
 /**
@@ -91,6 +92,15 @@ export class StoreFormDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForms();
+    if (this.data.mode === 'edit' && this.data.store) {
+      this.storeForm.patchValue({
+        name: this.data.store.name,
+        tradeName: this.data.store.tradeName,
+        cnpj: this.data.store.cnpj,
+        email: this.data.store.email,
+        phoneNumber: this.data.store.phone,
+      });
+    }
   }
 
   /**
@@ -183,6 +193,11 @@ export class StoreFormDialogComponent implements OnInit {
    * 4. Retorna sucesso e fecha dialog
    */
   onSubmit(): void {
+    if (this.data.mode === 'edit') {
+      this.submitEdit();
+      return;
+    }
+
     // Valida todos os formulários
     if (!this.storeForm.valid || !this.personForm.valid || !this.accessForm.valid) {
       this.markAllAsTouched();
@@ -452,5 +467,53 @@ export class StoreFormDialogComponent implements OnInit {
     }
 
     return '';
+  }
+
+  private submitEdit(): void {
+    if (!this.storeForm.valid) {
+      Object.keys(this.storeForm.controls).forEach((key) => {
+        this.storeForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.submitError = null;
+
+    let storePayload;
+    try {
+      storePayload = this.prepareStorePayload();
+    } catch (error: any) {
+      this.submitError = error.message || 'Erro ao preparar dados da loja';
+      this.isSubmitting = false;
+      return;
+    }
+
+    console.log('🔧 Editando loja ID:', this.data.store?.storeId);
+    console.log('📦 Payload de edição:', storePayload);
+
+    const updateObservable = this.data.isCarAdmin
+      ? this.storeService.updateMainStore(this.data.store!.storeId!, storePayload)
+      : this.storeService.update(this.data.store!.storeId!, storePayload);
+
+    updateObservable.subscribe({
+      next: (updatedStore) => {
+        console.log('✅ Loja editada com sucesso:', updatedStore);
+        this.isSubmitting = false;
+        this.storeService.notifyStoreUpdated();
+        this.dialogRef.close(updatedStore);
+      },
+      error: (error) => {
+        console.error('❌ Erro na edição:', error);
+        this.isSubmitting = false;
+        if (error.error?.message) {
+          this.submitError = error.error.message;
+        } else if (error.status === 400) {
+          this.submitError = 'Dados inválidos. Verifique os campos e tente novamente.';
+        } else {
+          this.submitError = 'Erro ao editar loja. Tente novamente.';
+        }
+      }
+    });
   }
 }

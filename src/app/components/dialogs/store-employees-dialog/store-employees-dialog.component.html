@@ -102,18 +102,14 @@
                 </button>
 
                 <mat-menu #roleMenu="matMenu">
-                  <button mat-menu-item (click)="changeRelationship(person, RelationshipTypes.GERENTE)">
-                    <mat-icon [color]="person.relationship?.name?.toUpperCase() === 'GERENTE' ? 'primary' : ''">
-                      {{ person.relationship?.name?.toUpperCase() === 'GERENTE' ? 'check' : 'badge' }}
-                    </mat-icon>
-                    <span>Gerente</span>
-                  </button>
-                  <button mat-menu-item (click)="changeRelationship(person, RelationshipTypes.VENDEDOR)">
-                    <mat-icon [color]="person.relationship?.name?.toUpperCase() === 'VENDEDOR' ? 'primary' : ''">
-                      {{ person.relationship?.name?.toUpperCase() === 'VENDEDOR' ? 'check' : 'person' }}
-                    </mat-icon>
-                    <span>Vendedor</span>
-                  </button>
+                  @for (rel of relationships; track rel.relationshipId) {
+                    <button mat-menu-item (click)="changeRelationship(person, rel)">
+                      <mat-icon [color]="person.relationship?.name?.toUpperCase() === rel.name.toUpperCase() ? 'primary' : ''">
+                        {{ person.relationship?.name?.toUpperCase() === rel.name.toUpperCase() ? 'check' : 'badge' }}
+                      </mat-icon>
+                      <span>{{ getRelationshipLabel(rel) }}</span>
+                    </button>
+                  }
                 </mat-menu>
 
                 @if (person.hasUser) {

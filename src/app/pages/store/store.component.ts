@@ -163,7 +163,23 @@ export class StoreComponent implements OnInit {
   }
 
   onEditStore(store: Store): void {
-    console.log('🔧 Editar loja:', store);
+    const dialogRef = this.dialog.open(StoreFormDialogComponent, {
+      width: '700px',
+      disableClose: true,
+      data: {
+        title: 'Editar Dados da Loja',
+        mode: 'edit',
+        isCarAdmin: this.isCarAdmin,
+        store: store,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((updatedStore: Store | null) => {
+      if (updatedStore) {
+        console.log('✅ Loja editada com sucesso!');
+        this.loadStores();
+      }
+    });
   }
 
   onDeleteStore(store: Store): void {

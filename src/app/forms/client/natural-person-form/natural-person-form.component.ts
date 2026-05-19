@@ -257,19 +257,20 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
           return;
         }
 
+        const formRawValue = this.form.getRawValue();
         const baseData = {
-          name: this.form.value.name || '',
+          name: formRawValue.name || '',
           storeId,
-          cpf: this.form.value.cpf?.replace(/\D/g, '') || '',
+          cpf: formRawValue.cpf?.replace(/\D/g, '') || '',
           active: true as const,
-          email: this.form.value.email || '',
-          phone: this.form.value.phone?.replace(/\D/g, '') || '',
-          nickName: this.form.value.nickName || '',
+          email: formRawValue.email || '',
+          phone: formRawValue.phone?.replace(/\D/g, '') || '',
+          nickName: formRawValue.nickName || '',
           legalEntity: false as const,
-          rg: this.form.value.rg?.replace(/\D/g, '') || '',
+          rg: formRawValue.rg?.replace(/\D/g, '') || '',
           rgIssuer: '',
-          relationshipId: this.form.value.relationshipId || undefined,
-          isEmployee: this.form.value.isEmployee || false
+          relationshipId: formRawValue.relationshipId || undefined,
+          isEmployee: !!formRawValue.isEmployee
         };
 
         const formValue: CreateNaturalPerson = baseData;
@@ -810,21 +811,22 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       return;
     }
 
+    const formRawValue = this.form.getRawValue();
     const baseData = {
-      name: this.form.value.name || '',
+      name: formRawValue.name || '',
       storeId,
-      cpf: this.form.value.cpf?.replace(/\D/g, '') || '',
+      cpf: formRawValue.cpf?.replace(/\D/g, '') || '',
       active: true as const,
-      email: this.form.value.email || '',
-      phone: this.form.value.phone?.replace(/\D/g, '') || '',
-      nickName: this.form.value.nickName || '',
+      email: formRawValue.email || '',
+      phone: formRawValue.phone?.replace(/\D/g, '') || '',
+      nickName: formRawValue.nickName || '',
       legalEntity: false as const,
-      rg: this.form.value.rg || '',
-      rgIssuer: this.form.value.rgIssuer || '',
-      idEstrangeiro: this.form.value.idEstrangeiro || '',
+      rg: formRawValue.rg || '',
+      rgIssuer: formRawValue.rgIssuer || '',
+      idEstrangeiro: formRawValue.idEstrangeiro || '',
       crc: '',
-      relationshipId: this.form.value.relationshipId || undefined,
-      isEmployee: this.form.value.isEmployee || false
+      relationshipId: formRawValue.relationshipId || undefined,
+      isEmployee: !!formRawValue.isEmployee
     };
 
     const formValue: CreateNaturalPerson = baseData;
