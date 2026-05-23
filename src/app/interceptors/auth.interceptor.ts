@@ -1,21 +1,18 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = sessionStorage.getItem('car-token');
-
-  // Não adicionar token para a API da FIPE (externa)
-  if (req.url.includes('parallelum.com.br')) {
+  // Não adicionar cookies para APIs de terceiros
+  if (req.url.includes('parallelum.com.br') || req.url.includes('focusnfe.com.br')) {
     return next(req);
   }
 
-  if (token) {
-    const clonedRequest = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return next(clonedRequest);
+  let reqConfig: any = {};
+  
+  // Habilita envio do Cookie HttpOnly gerado pelo backend
+  if (req.url.startsWith('/api')) {
+    reqConfig.withCredentials = true;
   }
 
-  return next(req);
+  const clonedRequest = req.clone(reqConfig);
+  return next(clonedRequest);
 };

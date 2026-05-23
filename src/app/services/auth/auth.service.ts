@@ -50,6 +50,13 @@ export class AuthService {
   }
 
   logout() {
+    this.httpClient.post('/api/auth/logout', {}, { withCredentials: true }).subscribe({
+      next: () => this.executeLogoutCleanup(),
+      error: () => this.executeLogoutCleanup(),
+    });
+  }
+
+  private executeLogoutCleanup() {
     // Abaixo limpamos os caches de estado em memória (serviços singletons no Angular)
     // para evitar que dados da loja/sessão anterior fiquem presentes no próximo login.
     try {
