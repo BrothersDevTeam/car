@@ -104,6 +104,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
   isCarAdmin: boolean = false;
   selectedPeople: Person[] = []; // Stores selected rows
   pendingAddressDraftId: string | null = null;
+  selectedTabIndex: number = 0;
 
   // Configurações dinâmicas para o Empty State baseadas no tipo de relacionamento
   private readonly emptyStateConfigs: Record<string, { icon: string; title: string; description: string }> = {
@@ -513,6 +514,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
     this.selectedPerson = null;
     this.selectedDraft = null;
     this.pendingAddressDraftId = null;
+    this.selectedTabIndex = 0;
     this.actionsService.hasFormChanges.set(false);
   }
 
@@ -615,6 +617,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
     if (!this.storeContextService.validateStoreSelection()) return;
     this.selectedPerson = null;
     this.selectedDraft = null;
+    this.selectedTabIndex = 0;
     this.openForm.set(true);
   }
 
@@ -652,9 +655,8 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
       this.personService.getById(person.personId).subscribe({
         next: (fullPerson) => {
           this.clientListLoading.set(false);
-          this.selectedPerson = fullPerson;
-          this.openInfo.set(false);
-          this.openForm.set(true);
+          this.selectedTabIndex = fullPerson.legalEntity ? 1 : 0;
+          this.checkDraftAndEdit(fullPerson);
         },
         error: (err) => {
           this.clientListLoading.set(false);
@@ -665,10 +667,53 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
     } else if (this.selectedPerson && this.selectedPerson.personId) {
       // Se clicou em editar a partir da gaveta de informações (onde selectedPerson já está completo)
       this.openInfo.set(false);
-      this.openForm.set(true);
+      this.selectedTabIndex = this.selectedPerson.legalEntity ? 1 : 0;
+      this.checkDraftAndEdit(this.selectedPerson);
     } else {
       if (person) this.selectedPerson = person;
+      this.selectedDraft = null;
+      this.selectedTabIndex = (person || this.selectedPerson)?.legalEntity ? 1 : 0;
       this.openInfo.set(false);
+      this.openForm.set(true);
+    }
+  }
+
+  private checkDraftAndEdit(fullPerson: Person) {
+    const formType = fullPerson.legalEntity ? 'pessoa-juridica' : 'pessoa-fisica';
+    const draft = this.formDraftService.getDraft(formType, fullPerson.personId);
+
+    if (draft) {
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: '450px',
+        disableClose: true,
+        data: {
+          title: 'Rascunho de Edição Encontrado',
+          message: `Existe um rascunho de edição salvo para <strong>${fullPerson.name}</strong>. Deseja continuar a edição a partir do rascunho ou descartar o rascunho e iniciar uma nova edição?`,
+          confirmText: 'Continuar Edição',
+          cancelText: 'Descartar Rascunho',
+          icon: 'history',
+          type: 'warning',
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((useDraft) => {
+        if (useDraft) {
+          this.selectedPerson = fullPerson;
+          this.selectedDraft = draft;
+          this.selectedTabIndex = fullPerson.legalEntity ? 1 : 0;
+          this.openForm.set(true);
+        } else {
+          this.formDraftService.removeDraft(formType, fullPerson.personId);
+          this.selectedPerson = fullPerson;
+          this.selectedDraft = null;
+          this.selectedTabIndex = fullPerson.legalEntity ? 1 : 0;
+          this.openForm.set(true);
+        }
+      });
+    } else {
+      this.selectedPerson = fullPerson;
+      this.selectedDraft = null;
+      this.selectedTabIndex = fullPerson.legalEntity ? 1 : 0;
       this.openForm.set(true);
     }
   }
@@ -762,6 +807,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
     this.loadPersonList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
     this.openForm.set(false);
     this.openInfo.set(false);
+    this.selectedTabIndex = 0;
     this.selectedPerson = null;
     this.selectedDraft = undefined; // Force placeholder
     this.actionsService.hasFormChanges.set(false);

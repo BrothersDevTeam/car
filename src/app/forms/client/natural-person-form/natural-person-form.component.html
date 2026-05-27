@@ -1,219 +1,156 @@
 <form [formGroup]="form" (keydown.enter)="onEnter($event)">
   <!-- Seção Premium de Rascunhos -->
   @if (availableDrafts.length > 0 && !dataForm) {
-    <div class="drafts-section">
-      <mat-card class="draft-card">
-        <mat-card-header>
-          <mat-icon mat-card-avatar>history</mat-icon>
-          <mat-card-title>Cadastros em andamento</mat-card-title>
-          <mat-card-subtitle>Você possui rascunhos salvos para este perfil.</mat-card-subtitle>
-        </mat-card-header>
+  <div class="drafts-section">
+    <mat-card class="draft-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>history</mat-icon>
+        <mat-card-title>Cadastros em andamento</mat-card-title>
+        <mat-card-subtitle>Você possui rascunhos salvos para este perfil.</mat-card-subtitle>
+      </mat-card-header>
 
-        <mat-card-content>
-          <div class="draft-selector-container">
-            <mat-form-field appearance="outline" class="draft-select-field">
-              <mat-label>Selecione um rascunho para continuar</mat-label>
-              <mat-select [(value)]="selectedDraftId" (selectionChange)="onDraftSelected($event)">
-                <mat-option [value]="null">-- Iniciar novo cadastro --</mat-option>
-                @for (draft of availableDrafts; track draft.id) {
-                  <mat-option [value]="draft.id" class="draft-option-item">
-                    <div class="draft-option-content">
-                      <div class="draft-info">
-                        <span class="draft-name">
-                          {{ draft.draftName || 'Sem nome' }}
-                        </span>
-                        <span class="draft-date">
-                          {{ formatDraftDate(draft.lastModified) }}
-                        </span>
-                      </div>
-                      <button
-                        mat-icon-button
-                        class="delete-draft-btn"
-                        (click)="deleteDraft(draft.id, $event)"
-                        matTooltip="Excluir rascunho"
-                      >
-                        <mat-icon>delete_outline</mat-icon>
-                      </button>
-                    </div>
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
+      <mat-card-content>
+        <div class="draft-selector-container">
+          <mat-form-field appearance="outline" class="draft-select-field">
+            <mat-label>Selecione um rascunho para continuar ou inicie um novo cadastro</mat-label>
+            <mat-select [(value)]="selectedDraftId" (selectionChange)="onDraftSelected($event)">
+              <mat-option value="new">-- Iniciar novo cadastro --</mat-option>
+              @for (draft of availableDrafts; track draft.id) {
+              <mat-option [value]="draft.id" class="draft-option-item">
+                <div class="draft-option-content">
+                  <div class="draft-info">
+                    <span class="draft-name">
+                      {{ draft.draftName || 'Sem nome' }}
+                    </span>
+                    <span class="draft-date">
+                      {{ formatDraftDate(draft.lastModified) }}
+                    </span>
+                  </div>
+                  <button mat-icon-button class="delete-draft-btn" (click)="deleteDraft(draft.id, $event)"
+                    matTooltip="Excluir rascunho">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
   }
 
+  @if (showFormFields) {
   <!-- Seção: Dados Pessoais -->
   <app-wrapper-card title="Dados pessoais">
     <!-- Campo de Nome (ocupa 100% da largura) -->
-    <app-primary-input
-      formControlName="name"
-      label="Nome completo *"
-      inputName="name"
-      type="text"
-      [error]="form.get('name')?.invalid && (form.get('name')?.touched || submitted)"
-    />
+    <app-primary-input formControlName="name" label="Nome completo *" inputName="name" type="text"
+      [error]="form.get('name')?.invalid && (form.get('name')?.touched || submitted)" />
 
     <div class="form-row-2cols">
-      <app-primary-input
-        formControlName="nickName"
-        label="Apelido"
-        inputName="nickName"
-        type="text"
-        placeholder="Como deseja ser chamado?"
-      />
+      <app-primary-input formControlName="nickName" label="Apelido" inputName="nickName" type="text"
+        placeholder="Como deseja ser chamado?" />
 
-      <app-primary-input
-        formControlName="cpf"
-        label="CPF"
-        inputName="cpf"
-        type="text"
-        placeholder="000.000.000-00"
-        mask="000.000.000-00"
-        appCpfValidator
-        [error]="form.get('cpf')?.invalid && (form.get('cpf')?.touched || submitted)"
-      />
+      <app-primary-input formControlName="cpf" label="CPF" inputName="cpf" type="text" placeholder="000.000.000-00"
+        mask="000.000.000-00" appCpfValidator
+        [error]="form.get('cpf')?.invalid && (form.get('cpf')?.touched || submitted)" />
     </div>
 
     <!-- Layout: RG + Órgão Emissor -->
     <div class="form-row-2cols">
       <app-primary-input formControlName="rg" label="RG" inputName="rg" type="text" placeholder="Digite o RG" />
 
-      <app-primary-input
-        formControlName="rgIssuer"
-        label="Órgão Emissor"
-        inputName="rgIssuer"
-        type="text"
-        placeholder="Ex: SSP/SP"
-      />
+      <app-primary-input formControlName="rgIssuer" label="Órgão Emissor" inputName="rgIssuer" type="text"
+        placeholder="Ex: SSP/SP" />
     </div>
 
     <!-- Layout: ID Estrangeiro -->
     <div class="form-row-2cols">
-      <app-primary-input
-        formControlName="idEstrangeiro"
-        label="ID Estrangeiro"
-        inputName="idEstrangeiro"
-        type="text"
-        placeholder="Digite o ID de estrangeiro se aplicável"
-      />
+      <app-primary-input formControlName="idEstrangeiro" label="ID Estrangeiro" inputName="idEstrangeiro" type="text"
+        placeholder="Digite o ID de estrangeiro se aplicável" />
       <div></div>
       <!-- Espaço vazio para manter a proporção de 2 colunas -->
     </div>
     <!-- 
-      Layout: Email + Celular (2 campos em uma linha - 50% cada)
-      Dados de contato agrupados
-    -->
+        Layout: Email + Celular (2 campos em uma linha - 50% cada)
+        Dados de contato agrupados
+      -->
     <div class="form-row-2cols">
-      <app-primary-input
-        formControlName="email"
-        label="Email"
-        inputName="email"
-        type="email"
+      <app-primary-input formControlName="email" label="Email" inputName="email" type="email"
         placeholder="exemplo@email.com"
-        [error]="form.get('email')?.invalid && (form.get('email')?.touched || submitted)"
-      />
+        [error]="form.get('email')?.invalid && (form.get('email')?.touched || submitted)" />
 
-      <app-primary-input
-        formControlName="phone"
-        label="Celular"
-        inputName="phone"
-        type="tel"
-        placeholder="(00) 00000-0000"
-        mask="(00) 00000-0000"
-      />
+      <app-primary-input formControlName="phone" label="Celular" inputName="phone" type="tel"
+        placeholder="(00) 00000-0000" mask="(00) 00000-0000" />
     </div>
 
     <!-- Layout: Cargo/Vínculo + Checkbox de Funcionário -->
-    <div
-      class="form-row-2cols"
-      style="align-items: center; margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px"
-    >
-      <mat-form-field
-        appearance="outline"
-        class="relationship-select-field"
-        style="width: 100%; margin-bottom: -1.25em"
-      >
+    <div class="form-row-2cols"
+      style="align-items: center; margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+      <mat-form-field appearance="outline" class="relationship-select-field"
+        style="width: 100%; margin-bottom: -1.25em">
         <mat-label>Vínculo / Cargo *</mat-label>
         <mat-select formControlName="relationshipId">
           <mat-select-trigger>
             {{ getSelectedRelationshipName() }}
           </mat-select-trigger>
           @for (rel of relationships; track rel.relationshipId) {
-            <mat-option [value]="rel.relationshipId">
-              <div style="display: flex; align-items: center; width: 100%">
-                <span>{{ rel.name }}</span>
-                @if (!rel.isGlobal) {
-                  <button
-                    type="button"
-                    mat-icon-button
-                    color="warn"
-                    style="
-                      position: absolute;
-                      right: 44px;
-                      top: 50%;
-                      transform: translateY(-50%);
-                      height: 32px;
-                      width: 32px;
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      min-width: 0;
-                      z-index: 10;
-                    "
-                    (click)="deleteRelationship(rel, $event)"
-                    matTooltip="Excluir Cargo"
-                  >
-                    <mat-icon style="font-size: 18px; width: 18px; height: 18px">delete_outline</mat-icon>
-                  </button>
-                }
-              </div>
-            </mat-option>
+          <mat-option [value]="rel.relationshipId">
+            <div style="display: flex; align-items: center; width: 100%">
+              <span>{{ rel.name }}</span>
+              @if (!rel.isGlobal) {
+              <button type="button" mat-icon-button color="warn" style="
+                        position: absolute;
+                        right: 44px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        height: 32px;
+                        width: 32px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-width: 0;
+                        z-index: 10;
+                      " (click)="deleteRelationship(rel, $event)" matTooltip="Excluir Cargo">
+                <mat-icon style="font-size: 18px; width: 18px; height: 18px">delete_outline</mat-icon>
+              </button>
+              }
+            </div>
+          </mat-option>
           }
         </mat-select>
-        <button
-          type="button"
-          mat-icon-button
-          matSuffix
-          (click)="openAddRelationshipDialog($event)"
-          matTooltip="Adicionar Novo Vínculo/Cargo"
-        >
+        <button type="button" mat-icon-button matSuffix (click)="openAddRelationshipDialog($event)"
+          matTooltip="Adicionar Novo Vínculo/Cargo">
           <mat-icon>add</mat-icon>
         </button>
         @if (form.get('relationshipId')?.invalid && (form.get('relationshipId')?.touched || submitted)) {
-          <mat-error>O cargo/vínculo é obrigatório</mat-error>
+        <mat-error>O cargo/vínculo é obrigatório</mat-error>
         }
       </mat-form-field>
 
-      <div
-        class="employee-checkbox-container"
-        style="display: flex; align-items: center; height: 56px; padding-left: 8px"
-      >
+      <div class="employee-checkbox-container"
+        style="display: flex; align-items: center; height: 56px; padding-left: 8px">
         <mat-checkbox formControlName="isEmployee" color="primary">É funcionário da loja?</mat-checkbox>
       </div>
     </div>
   </app-wrapper-card>
 
   <!-- Botão de submit -->
-  <div class="form-actions">
-    @if (form.dirty) {
-      <button mat-stroked-button type="button" color="primary" (click)="openSaveDraftDialog()" [disabled]="isSaving">
-        <mat-icon>save_as</mat-icon>
-        Salvar Rascunho
-      </button>
-    }
-
-    <button
-      mat-raised-button
-      type="button"
-      class="submit-btn"
-      (click)="onSubmit()"
-      [disabled]="isSaving || (!form.dirty && !selectedDraftId)"
-      #submitButton
-    >
+  <div class="form-actions" style="display: flex; gap: 16px; align-items: center;">
+    <button mat-raised-button type="button" class="submit-btn" (click)="onSubmit()" [disabled]="isSaveButtonDisabled"
+      #submitButton style="flex: 1;">
       Salvar
     </button>
+
+    <!-- Salvar Rascunho (Ícone discreto) -->
+    @if (canShowDraftButton) {
+    <button mat-icon-button type="button" color="primary" (click)="openSaveDraftDialog()" [disabled]="isSaving"
+      matTooltip="Salvar Rascunho"
+      style="flex: 0 0 auto !important; width: 48px !important; height: 48px !important; min-width: 48px !important;">
+      <mat-icon style="margin: 0 !important;">save_as</mat-icon>
+    </button>
+    }
   </div>
+  }
 </form>

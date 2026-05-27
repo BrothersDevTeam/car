@@ -1,6 +1,6 @@
 import { NgxMaskDirective } from 'ngx-mask';
 import { FormsModule } from '@angular/forms';
-import { Component, forwardRef, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Component, forwardRef, Input, Output, EventEmitter, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 
@@ -52,6 +52,8 @@ type InputTypes = 'text' | 'email' | 'password' | 'number' | 'tel' | 'date' | 'd
   styleUrl: './primary-input.component.scss',
 })
 export class PrimaryInputComponent implements ControlValueAccessor {
+  @ViewChild('inputElement', { static: false }) inputElement?: ElementRef<HTMLInputElement>;
+
   /**
    * Tipo do input HTML
    * @default 'text'
@@ -156,10 +158,25 @@ export class PrimaryInputComponent implements ControlValueAccessor {
    * mas o backend deve fazer validação e sanitização adequadas.
    */
   onModelChange(value: string): void {
+    const inputEl = this.inputElement?.nativeElement;
+    let selectionStart = inputEl ? inputEl.selectionStart : null;
+    let selectionEnd = inputEl ? inputEl.selectionEnd : null;
+
     // Se uppercase está habilitado E o tipo não é password, converte para maiúsculas
-    if (this.uppercase && this.type !== 'password') {
-      value = value.toUpperCase();
-      // Atualiza o valor interno do componente
+    if (this.uppercase && this.type !== 'password' && value) {
+      const upperValue = value.toUpperCase();
+      
+      if (this.value !== upperValue) {
+        this.value = upperValue;
+        
+        if (inputEl && selectionStart !== null && selectionEnd !== null) {
+          setTimeout(() => {
+            inputEl.setSelectionRange(selectionStart, selectionEnd);
+          });
+        }
+      }
+      value = upperValue;
+    } else {
       this.value = value;
     }
 
