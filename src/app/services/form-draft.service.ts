@@ -86,7 +86,9 @@ export class FormDraftService {
     // Para novos, a chave precisa ser única também
     const key = entityId ? this.getStorageKey(formType, entityId) : `${this.STORAGE_PREFIX}${draftId}`;
 
-    localStorage.setItem(key, JSON.stringify(draft));
+    const serialized = JSON.stringify(draft);
+    const encrypted = this.encrypt(serialized);
+    localStorage.setItem(key, encrypted);
 
     // Notifica que houve mudança nos rascunhos
     this.draftsChanged$.next();
@@ -110,7 +112,15 @@ export class FormDraftService {
     }
 
     try {
-      const draft: FormDraft<T> = JSON.parse(stored);
+      let decrypted: string;
+      try {
+        decrypted = this.decrypt(stored);
+      } catch (e) {
+        // Fallback: se o rascunho anterior for texto simples (antigo), decodifica como está
+        decrypted = stored;
+      }
+      
+      const draft: FormDraft<T> = JSON.parse(decrypted);
       // Converte a string de data de volta para objeto Date
       draft.lastModified = new Date(draft.lastModified);
       return draft;
@@ -176,7 +186,13 @@ export class FormDraftService {
         const stored = localStorage.getItem(key);
         if (stored) {
           try {
-            const draft: FormDraft = JSON.parse(stored);
+            let decrypted: string;
+            try {
+              decrypted = this.decrypt(stored);
+            } catch (e) {
+              decrypted = stored;
+            }
+            const draft: FormDraft = JSON.parse(decrypted);
             draft.lastModified = new Date(draft.lastModified);
             drafts.push(draft);
           } catch (error) {
@@ -236,5 +252,49 @@ export class FormDraftService {
    */
   private getStorageKey(formType: string, entityId?: string | number): string {
     return entityId ? `${this.STORAGE_PREFIX}${formType}_${entityId}` : `${this.STORAGE_PREFIX}${formType}_new`;
+  }
+
+  /**
+   * Criptografa/ofusca uma string de rascunho usando uma cifra XOR leve + Base64 UTF-8 seguro
+   */
+  private encrypt(text: string): string {
+    const key = 'car_project_draft_secret_key_2026';
+    const encoder = new TextEncoder();
+    const textBytes = encoder.encode(text);
+    const keyBytes = encoder.encode(key);
+    
+    const encryptedBytes = new Uint8Array(textBytes.length);
+    for (let i = 0; i < textBytes.length; i++) {
+      encryptedBytes[i] = textBytes[i] ^ keyBytes[i % keyBytes.length];
+    }
+    
+    let binaryString = '';
+    for (let i = 0; i < encryptedBytes.length; i++) {
+      binaryString += String.fromCharCode(encryptedBytes[i]);
+    }
+    return btoa(binaryString);
+  }
+
+  /**
+   * Descriptografa/desofusca uma string codificada em Base64 + XOR
+   */
+  private decrypt(encodedText: string): string {
+    const key = 'car_project_draft_secret_key_2026';
+    const binaryString = atob(encodedText);
+    const encryptedBytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      encryptedBytes[i] = binaryString.charCodeAt(i);
+    }
+    
+    const encoder = new TextEncoder();
+    const keyBytes = encoder.encode(key);
+    
+    const decryptedBytes = new Uint8Array(encryptedBytes.length);
+    for (let i = 0; i < encryptedBytes.length; i++) {
+      decryptedBytes[i] = encryptedBytes[i] ^ keyBytes[i % keyBytes.length];
+    }
+    
+    const decoder = new TextDecoder();
+    return decoder.decode(decryptedBytes);
   }
 }

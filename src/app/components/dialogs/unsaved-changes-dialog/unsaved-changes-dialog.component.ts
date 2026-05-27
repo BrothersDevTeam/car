@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { SaveDraftDialogComponent, SaveDraftDialogResult } from '../save-draft-dialog/save-draft-dialog.component';
 
 /**
@@ -49,7 +50,7 @@ export interface UnsavedChangesDialogData {
 @Component({
   selector: 'app-unsaved-changes-dialog',
   standalone: true,
-  imports: [MatDialogModule, MatButtonModule, MatIconModule],
+  imports: [MatDialogModule, MatButtonModule, MatIconModule, MatTooltipModule],
   template: `
     <div class="dialog-container">
       <!-- Cabeçalho com ícone de aviso -->
@@ -75,18 +76,32 @@ export interface UnsavedChangesDialogData {
 
       <!-- Rodapé com botões de ação -->
       <mat-dialog-actions align="end">
-        <!-- Botão Salvar: salva completo (só aparece se canSave = true) -->
-        @if (data.canSave) {
-          <button mat-raised-button color="primary" (click)="onSave()" class="save-button">Salvar</button>
-        }
+        <!-- Salvar e Salvar Rascunho na mesma linha -->
+        <div class="save-actions-row">
+          @if (data.canSave) {
+            <button mat-raised-button color="primary" (click)="onSave()" class="save-button">Salvar</button>
+          }
 
-        <!-- Botão Salvar Rascunho: salva localmente -->
-        @if (!data.hideDraftOption) {
-          <button mat-stroked-button color="primary" (click)="onSaveDraft()" class="draft-button">
-            <mat-icon>save_as</mat-icon>
-            Salvar Rascunho
-          </button>
-        }
+          @if (!data.hideDraftOption) {
+            @if (data.canSave) {
+              <button
+                mat-icon-button
+                type="button"
+                color="primary"
+                (click)="onSaveDraft()"
+                matTooltip="Salvar Rascunho"
+                class="draft-icon-button"
+              >
+                <mat-icon>save_as</mat-icon>
+              </button>
+            } @else {
+              <button mat-stroked-button color="primary" (click)="onSaveDraft()" class="draft-full-button">
+                <mat-icon>save_as</mat-icon>
+                Salvar Rascunho
+              </button>
+            }
+          }
+        </div>
 
         <!-- Botão Não Salvar: descarta mudanças -->
         <button mat-stroked-button color="warn" (click)="onDiscard()" class="discard-button">
@@ -206,11 +221,57 @@ export interface UnsavedChangesDialogData {
           }
         }
 
-        .draft-button {
-          mat-icon {
-            font-size: 20px;
-            width: 20px;
-            height: 20px;
+        .save-actions-row {
+          display: flex;
+          gap: 12px;
+          width: 100%;
+          align-items: center;
+
+          .save-button {
+            flex: 1;
+            margin: 0 !important;
+          }
+
+          .draft-icon-button {
+            flex: 0 0 auto !important;
+            width: 44px !important;
+            height: 44px !important;
+            min-width: 44px !important;
+            border: 1px solid var(--primary-color, #2196f3) !important;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color, #2196f3);
+            margin: 0 !important;
+            padding: 0 !important;
+
+            &:hover {
+              background-color: rgba(33, 150, 243, 0.04);
+              transform: scale(1.05);
+            }
+
+            mat-icon {
+              font-size: 20px;
+              width: 20px;
+              height: 20px;
+              margin: 0 !important;
+            }
+          }
+
+          .draft-full-button {
+            width: 100%;
+            height: 44px;
+            margin: 0 !important;
+
+            &:hover {
+              transform: scale(1.02);
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            mat-icon {
+              margin-right: 8px;
+            }
           }
         }
       }

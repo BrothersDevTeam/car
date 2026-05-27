@@ -32,6 +32,12 @@ form {
   .submit-btn {
     background-color: var(--primary-color);
     color: white;
+
+    &:disabled {
+      background-color: rgba(0, 0, 0, 0.12) !important;
+      color: rgba(0, 0, 0, 0.38) !important;
+      cursor: not-allowed;
+    }
   }
 
   // Botão de busca de CEP

@@ -104,13 +104,17 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
    * Armazena o valor inicial do formulário para comparação
    * Usado para detectar se houve mudanças não salvas
    */
-  private initialFormValue: string = '';
+  private initialFormValue: any = null;
 
   /**
    * Flag que indica se o formulário está sendo salvo
    * Evita verificação de mudanças durante salvamento
    */
   protected isSaving = false;
+  protected isInitializing = false;
+  private dataFormPatched = false;
+  private lastSavedDraftValue: any = null;
+  protected showFormFields = false;
 
   /**
    * Define os campos obrigatórios do formulário
@@ -166,6 +170,35 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     private relationshipService: RelationshipService,
   ) {}
 
+  private checkAndEndInitialization() {
+    const relationshipsReady = this.relationships.length > 0;
+    const dataFormReady = !this.dataForm || this.dataFormPatched;
+
+    if (relationshipsReady && dataFormReady) {
+      this.isInitializing = false;
+
+      if (!this.lastSavedDraftValue) {
+        this.lastSavedDraftValue = this.form.getRawValue();
+      }
+
+      const hasActiveDraft = !!this.draft || !!this.selectedDraftId;
+      const isEditMode = !!this.dataForm && !!this.dataForm.name;
+
+      if (hasActiveDraft && isEditMode) {
+        this.form.markAsDirty();
+        this.actionsService.hasFormChanges.set(true);
+        this.formChanged.emit(true);
+        console.log('[checkAndEndInitialization] Edição baseada em rascunho: form mantido como dirty');
+      } else {
+        this.form.markAsPristine();
+        const hasChanges = this.hasUnsavedChanges();
+        this.actionsService.hasFormChanges.set(hasChanges);
+        this.formChanged.emit(hasChanges);
+        console.log('[checkAndEndInitialization] Form finalizado como pristine');
+      }
+    }
+  }
+
   /**
    * Implementação da interface CanComponentDeactivate
    * Verifica se há mudanças não salvas comparando com valor inicial
@@ -173,7 +206,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
    * @returns true se há mudanças, false caso contrário
    */
   hasUnsavedChanges(): boolean {
-    if (this.isSaving) {
+    if (this.isSaving || this.isInitializing) {
       return false;
     }
 
@@ -182,15 +215,107 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       return false;
     }
 
-    if (!this.initialFormValue) {
-      return false;
+    // Se for edição
+    if (this.dataForm) {
+      return this.hasChangesComparedTo(this.dataForm);
     }
 
-    const currentValue = JSON.stringify(this.form.value);
-    const hasChanges = currentValue !== this.initialFormValue;
+    // Se for novo cadastro
+    const clienteRel = this.relationships.find((r) => r.name.toUpperCase() === 'CLIENTE');
+    const defaultSource = {
+      active: true,
+      isEmployee: false,
+      relationshipId: clienteRel?.relationshipId || '',
+    };
+    return this.hasChangesComparedTo(defaultSource);
+  }
 
-    console.log('[hasUnsavedChanges] Tem mudanças?', hasChanges);
-    return hasChanges;
+  private hasChangesComparedTo(source: any): boolean {
+    const formValue = this.form.getRawValue() as any;
+
+    const normalize = (val: any, isNumericField = false): string | null => {
+      if (val === null || val === undefined) return null;
+      let str = val.toString().trim();
+      if (isNumericField) {
+        str = str.replace(/\D/g, '');
+      }
+      return str === '' ? null : str;
+    };
+
+    const fieldsToCompare: { formField: string; sourceField: string | ((s: any) => any) }[] = [
+      { formField: 'name', sourceField: 'name' },
+      { formField: 'nickName', sourceField: 'nickName' },
+      { formField: 'email', sourceField: 'email' },
+      { formField: 'phone', sourceField: 'phone' },
+      { formField: 'cpf', sourceField: 'cpf' },
+      { formField: 'rg', sourceField: 'rg' },
+      { formField: 'rgIssuer', sourceField: 'rgIssuer' },
+      { formField: 'idEstrangeiro', sourceField: 'idEstrangeiro' },
+      { formField: 'active', sourceField: 'active' },
+      {
+        formField: 'relationshipId',
+        sourceField: (s) => s.relationshipId || s.relationship?.relationshipId,
+      },
+      { formField: 'isEmployee', sourceField: 'isEmployee' },
+    ];
+
+    for (const field of fieldsToCompare) {
+      const fVal = formValue[field.formField];
+      let sVal = typeof field.sourceField === 'function'
+        ? field.sourceField(source)
+        : source[field.sourceField];
+
+      // Se o campo for booleano
+      if (typeof fVal === 'boolean' || typeof sVal === 'boolean') {
+        const boolF = !!fVal;
+        const boolS = !!sVal;
+        if (boolF !== boolS) {
+          console.log(`[dirty-check] Mudança no booleano ${field.formField}: ${boolF} !== ${boolS}`);
+          return true;
+        }
+        continue;
+      }
+
+      const isNumeric = ['phone', 'cpf'].includes(field.formField);
+      const normF = normalize(fVal, isNumeric);
+      const normS = normalize(sVal, isNumeric);
+
+      if (normF !== normS) {
+        console.log(`[dirty-check] Mudança no campo ${field.formField}: '${normF}' !== '${normS}'`);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  get isSaveButtonDisabled(): boolean {
+    if (this.isSaving || this.isInitializing) {
+      return true;
+    }
+    
+    const hasActiveDraft = !!this.draft || !!this.selectedDraftId;
+    const isEditMode = !!this.dataForm && !!this.dataForm.personId;
+
+    if (isEditMode) {
+      if (hasActiveDraft) {
+        return !this.form.valid;
+      }
+      return !this.hasUnsavedChanges();
+    }
+    return !this.form.valid;
+  }
+
+  hasChangesComparedToDraft(): boolean {
+    const source = this.lastSavedDraftValue;
+    if (!source) {
+      return this.hasUnsavedChanges();
+    }
+    return this.hasChangesComparedTo(source);
+  }
+
+  get canShowDraftButton(): boolean {
+    return !this.isSaving && !this.isInitializing && this.form.dirty && this.hasChangesComparedToDraft();
   }
 
   /**
@@ -289,7 +414,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
                 this.formDraftService.removeDraftById(draftIdToDelete);
               } else {
                 // Fallback: Remove pelo personId
-                const personId = Number(this.dataForm!.personId);
+                const personId = this.dataForm!.personId;
                 this.formDraftService.removeDraft(this.FORM_TYPE, personId);
               }
 
@@ -364,7 +489,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     existingDraftId?: string,
     closeAfterSave: boolean = true,
   ): void {
-    const personId = this.dataForm?.personId ? Number(this.dataForm.personId) : undefined;
+    const personId = this.dataForm?.personId || undefined;
 
     // Se temos um ID de rascunho existente (seja passado explicitamente ou via unique ID strategy)
     // O service vai lidar com a criação ou atualização.
@@ -412,7 +537,8 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
 
     // CRITICAL FIX: SEMPRE atualiza o ID do rascunho selecionado
     this.selectedDraftId = draftId;
-    console.log('[saveLocalDraft] selectedDraftId atualizado para:', draftId);
+    this.lastSavedDraftValue = this.form.getRawValue();
+    console.log('[saveLocalDraft] selectedDraftId e lastSavedDraftValue atualizados');
 
     if (!silent) {
       this.toastrService.info('Rascunho salvo localmente');
@@ -496,7 +622,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
    * Usado para detectar mudanças não salvas
    */
   private captureInitialFormValue(): void {
-    this.initialFormValue = JSON.stringify(this.form.value);
+    this.initialFormValue = this.form.value;
     console.log('[captureInitialFormValue] Valor inicial capturado');
   }
 
@@ -506,6 +632,11 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   private loadAvailableDrafts(): void {
     this.availableDrafts = this.formDraftService.getDraftsByType(this.FORM_TYPE);
     console.log('[loadAvailableDrafts] Rascunhos carregados:', this.availableDrafts.length);
+    if (this.availableDrafts.length === 0) {
+      this.showFormFields = true;
+    } else if (this.dataForm || this.draft || this.selectedDraftId) {
+      this.showFormFields = true;
+    }
   }
 
   /**
@@ -513,11 +644,12 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
    */
   protected onDraftSelected(event: any): void {
     const draftId = event.value;
+    this.showFormFields = true;
 
-    if (!draftId) {
+    if (draftId === 'new') {
       // Usuário escolheu "Iniciar novo cadastro"
       this.resetForm();
-      this.selectedDraftId = null;
+      this.selectedDraftId = 'new';
       return;
     }
 
@@ -551,6 +683,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     if (this.selectedDraftId === draftId) {
       this.resetForm();
       this.selectedDraftId = null;
+      this.showFormFields = this.availableDrafts.length === 0;
     }
 
     this.toastrService.success('Rascunho excluído');
@@ -581,6 +714,10 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   }
 
   ngOnInit() {
+    this.isInitializing = true;
+    this.dataFormPatched = false;
+    this.showFormFields = !!this.dataForm || !!this.draft;
+
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
         const hasChanges = this.hasUnsavedChanges();
@@ -595,6 +732,10 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
 
     setTimeout(() => {
       this.captureInitialFormValue();
+      if (!this.dataForm) {
+        this.dataFormPatched = true;
+        this.checkAndEndInitialization();
+      }
     }, 500);
 
     // Inscreve para atualizar lista quando rascunhos mudarem
@@ -619,36 +760,39 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
 
         // Agora que os relacionamentos estão carregados, aplica o patch value para edição ou novo cadastro
         this.applyRelationshipToForm();
+        this.checkAndEndInitialization();
       },
       error: (err) => {
         this.toastrService.error('Erro ao buscar cargos e relacionamentos.');
         console.error(err);
+        this.checkAndEndInitialization();
       },
     });
   }
 
   private applyRelationshipToForm() {
     if (this.dataForm) {
-      let relId = '';
+      let relId = this.dataForm.relationshipId || '';
       let isEmp = !!this.dataForm.isEmployee;
 
       const rel = this.dataForm.relationship;
       if (rel) {
         if (typeof rel === 'object' && rel.relationshipId) {
           relId = rel.relationshipId;
-          const relNameUpper = rel.name.toUpperCase();
-          if (['PROPRIETARIO', 'GERENTE', 'VENDEDOR'].includes(relNameUpper)) {
-            isEmp = true;
-          }
         } else if (typeof rel === 'string') {
           const found = this.relationships.find((r) => r.name.toUpperCase() === (rel as string).toUpperCase());
           if (found) {
             relId = found.relationshipId;
-            const relNameUpper = found.name.toUpperCase();
-            if (['PROPRIETARIO', 'GERENTE', 'VENDEDOR'].includes(relNameUpper)) {
-              isEmp = true;
-            }
           }
+        }
+      }
+
+      // Agora que temos o relId final, buscamos na lista de relacionamentos para validar regras de funcionário
+      const selectedRel = this.relationships.find((r) => r.relationshipId === relId);
+      if (selectedRel) {
+        const relNameUpper = selectedRel.name.toUpperCase();
+        if (['PROPRIETARIO', 'GERENTE', 'VENDEDOR'].includes(relNameUpper)) {
+          isEmp = true;
         }
       }
 
@@ -708,29 +852,40 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    const hasActiveDraft = !!this.draft || !!this.selectedDraftId;
+
     if (changes['dataForm'] && this.dataForm) {
       console.log('[natural-person-form] dataForm recebido:', this.dataForm);
+      this.isInitializing = true;
+      this.dataFormPatched = false;
 
       setTimeout(() => {
         if (!this.dataForm) return;
 
-        this.form.patchValue({
-          name: this.dataForm.name || '',
-          nickName: this.dataForm.nickName || '',
-          email: this.dataForm.email || '',
-          phone: this.dataForm.phone || '',
-          cpf: this.dataForm.cpf || '',
-          rg: this.dataForm.rg || '',
-          rgIssuer: this.dataForm.rgIssuer || '',
-          idEstrangeiro: this.dataForm.idEstrangeiro || '',
-        });
+        if (!hasActiveDraft) {
+          this.form.patchValue({
+            name: this.dataForm.name || '',
+            nickName: this.dataForm.nickName || '',
+            email: this.dataForm.email || '',
+            phone: this.dataForm.phone || '',
+            cpf: this.dataForm.cpf || '',
+            rg: this.dataForm.rg || '',
+            rgIssuer: this.dataForm.rgIssuer || '',
+            idEstrangeiro: this.dataForm.idEstrangeiro || '',
+            active: this.dataForm.active !== false,
+            storeId: this.dataForm.storeId || '',
+            legalEntity: this.dataForm.legalEntity || false,
+          });
 
-        // Se a lista de relacionamentos já estiver carregada, aplica imediatamente
-        if (this.relationships.length > 0) {
-          this.applyRelationshipToForm();
+          if (this.relationships.length > 0) {
+            this.applyRelationshipToForm();
+          }
         }
 
-        console.log('[natural-person-form] Formulário após patchValue:', this.form.value);
+        this.dataFormPatched = true;
+        this.checkAndEndInitialization();
+
+        console.log('[natural-person-form] Formulário após patchValue de inicialização:', this.form.value);
       }, 200);
     }
 
@@ -747,17 +902,11 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     this.selectedDraftId = draft.id;
     console.log('[loadDraftData] selectedDraftId definido para:', draft.id);
 
-    // Restaura o dataForm para indicar modo de edição
-    if (this.dataForm) {
-      this.dataForm = {
-        ...this.dataForm,
-        personId: draft.data._editingId,
-        ...draft.data,
-      } as any;
-    } else {
+    // Se já temos dataForm (aberto a partir de Editar na listagem), preservamos o original do banco!
+    // Se não temos dataForm (aberto a partir de rascunhos gerais do topo):
+    if (!this.dataForm && draft.data._editingId) {
       this.dataForm = {
         personId: draft.data._editingId,
-        ...draft.data,
       } as any;
     }
 
@@ -769,12 +918,26 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
 
     this.toastrService.success(`Rascunho "${draft.draftName || 'sem nome'}" carregado`);
 
+    // Armazena o estado do rascunho para controle do botão de salvar rascunho
+    this.lastSavedDraftValue = this.form.getRawValue();
+
     setTimeout(() => {
       this.captureInitialFormValue();
-      this.form.markAsPristine();
-      this.actionsService.hasFormChanges.set(false);
-      console.log('[loadDraftData] Formulário marcado como pristine');
-    }, 500);
+      
+      // Se for uma edição e temos o dataForm original do banco, 
+      // o formulário deve ser considerado dirty/alterado em relação ao banco!
+      if (this.dataForm && this.dataForm.name) {
+        this.form.markAsDirty();
+        this.actionsService.hasFormChanges.set(true);
+        this.formChanged.emit(true);
+        console.log('[loadDraftData] Edição baseada em rascunho: formulário marcado como dirty');
+      } else {
+        this.form.markAsPristine();
+        this.actionsService.hasFormChanges.set(false);
+        this.formChanged.emit(false);
+        console.log('[loadDraftData] Cadastro/rascunho geral: formulário marcado como pristine');
+      }
+    }, 200);
   }
 
   onEnter(event: Event): void {
@@ -832,12 +995,22 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     console.log('Dados a serem enviados:', formValue);
 
     if (this.dataForm?.personId) {
+      // Captura o ID do rascunho ANTES da requisição
+      const draftIdToDelete = this.selectedDraftId || this.draft?.id;
+
       this.personService.update(formValue, this.dataForm.personId).subscribe({
         next: () => {
           this.toastrService.success('Atualização feita com sucesso');
-          // Converte personId para o tipo correto antes de passar
-          const personId = Number(this.dataForm!.personId);
-          this.formDraftService.removeDraft(this.FORM_TYPE, personId);
+
+          // Remove pelo ID específico do rascunho se houver
+          if (draftIdToDelete) {
+            this.formDraftService.removeDraftById(draftIdToDelete);
+          } else {
+            // Fallback: Remove pelo personId
+            const personId = this.dataForm!.personId;
+            this.formDraftService.removeDraft(this.FORM_TYPE, personId);
+          }
+
           this.formSubmitted.emit();
           this.isSaving = false;
         },
