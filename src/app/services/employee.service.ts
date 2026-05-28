@@ -53,7 +53,7 @@ export class EmployeeService {
    */
   createUserForPerson(
     personId: string,
-    data: { username: string; password: string; authorizations: string[] },
+    data: { email: string; password: string; authorizations: string[] },
   ): Observable<any> {
     return this.http.post<any>(`${this.employeeApiUrl}/${personId}/create-user`, data);
   }

@@ -396,7 +396,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
     // Cria o form e aplica preset baseado no perfil da pessoa
     const form = this.fb.group(
       {
-        username: ['', [Validators.required, Validators.minLength(3)]],
+        email: ['', [Validators.required, Validators.email]],
         password: ['', [Validators.required, Validators.minLength(6)]],
         confirmPassword: ['', [Validators.required]],
         authorizations: this.fb.array<string>([]),
@@ -502,7 +502,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
     this.savingAccessFor = person.personId;
 
     const payload = {
-      username: form.value.username,
+      email: form.value.email,
       password: form.value.password,
       relationship: person.relationship?.name?.toUpperCase() || '',
       authorizations: form.value.authorizations as string[],

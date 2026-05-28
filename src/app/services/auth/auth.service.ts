@@ -33,7 +33,7 @@ export class AuthService {
   login(email: string, password: string) {
     return this.httpClient
       .post<LoginResponse>(this.apiUrl, {
-        username: email,
+        email,
         password,
       })
       .pipe(

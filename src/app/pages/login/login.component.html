@@ -17,13 +17,13 @@
         <form [formGroup]="loginForm" (keydown.enter)="submit()">
           <div class="input-group">
             <app-primary-input
-              formControlName="username"
-              inputName="username"
+              formControlName="email"
+              inputName="email"
               type="text"
-              placeholder="USUÁRIO"
+              placeholder="E-MAIL"
               [uppercase]="false"
             >
-              <mat-icon>person_outline</mat-icon>
+              <mat-icon>mail_outline</mat-icon>
             </app-primary-input>
           </div>
 

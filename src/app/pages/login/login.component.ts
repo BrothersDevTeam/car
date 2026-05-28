@@ -31,7 +31,7 @@ export class LoginComponent {
     private httpClient: HttpClient,
   ) {
     this.loginForm = new FormGroup({
-      username: new FormControl('', [Validators.required]),
+      email: new FormControl('', [Validators.required]),
       password: new FormControl('', [Validators.required, Validators.minLength(4)]),
     });
 
@@ -48,7 +48,7 @@ export class LoginComponent {
   @Output('navigate') onNavigate = new EventEmitter();
 
   submit() {
-    this.authService.login(this.loginForm.value.username, this.loginForm.value.password).subscribe({
+    this.authService.login(this.loginForm.value.email, this.loginForm.value.password).subscribe({
       next: () => this.toastrService.success('Login feito com sucesso'),
       error: () => this.toastrService.error('Erro inesperado! Tente novamente mais tarde'),
     });
