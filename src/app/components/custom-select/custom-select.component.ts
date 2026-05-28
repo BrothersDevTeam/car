@@ -72,6 +72,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
     private toastrService: ToastrService,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef,
+    private elementRef: ElementRef,
   ) {}
 
   ngOnInit() {
@@ -160,6 +161,18 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
           this.searchInput.nativeElement.focus();
         }
       }, 100);
+
+      // Rola suavemente para garantir que o dropdown e o respiro fiquem visíveis na tela
+      // Aguarda 320ms para a animação do scaleY do menu se completar
+      setTimeout(() => {
+        const dropdownElement = this.elementRef.nativeElement.querySelector('.dropdown-menu');
+        if (dropdownElement) {
+          dropdownElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+          });
+        }
+      }, 320);
     }
   }
 

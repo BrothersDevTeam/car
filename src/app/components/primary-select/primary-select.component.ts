@@ -1,4 +1,4 @@
-import { Component, forwardRef, Input, HostListener, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, forwardRef, Input, HostListener, OnInit, OnChanges, SimpleChanges, ElementRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RelationshipTypes } from '../../enums/relationshipTypes';
@@ -132,7 +132,7 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
    */
   onTouched: any = () => {};
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private elementRef: ElementRef) {}
 
   ngOnInit() {
     this.loadOptions();
@@ -239,6 +239,17 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
       // Reseta o foco ao abrir
       this.focusedOptionIndex = -1;
       this.onTouched();
+
+      // Rola suavemente para garantir que todo o dropdown fique visível na tela
+      setTimeout(() => {
+        const dropdownElement = this.elementRef.nativeElement.querySelector('.dropdown-options');
+        if (dropdownElement) {
+          dropdownElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+          });
+        }
+      }, 100); // 100ms garante que o DOM foi renderizado e o dropdown está posicionado
     }
   }
 
@@ -310,7 +321,8 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
     if (this.allowMultiple && Array.isArray(this.value)) {
       return this.value.includes(optionVal);
     }
-    return this.value === optionVal;
+    const val = Array.isArray(this.value) ? this.value[0] : this.value;
+    return val === optionVal;
   }
 
   /**
@@ -361,14 +373,15 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
       return display;
     }
 
-    const option = this.options.find((opt) => this.getOptionValue(opt) === this.value);
+    const val = Array.isArray(this.value) ? this.value[0] : this.value;
+    const option = this.options.find((opt) => this.getOptionValue(opt) === val);
 
-    const display = option ? this.getOptionLabel(option) : this.value;
+    const display = option ? this.getOptionLabel(option) : val;
 
     // Log quando não encontra a opção
-    if (!option && this.value) {
+    if (!option && val) {
       console.warn(`[primary-select ${this.inputName}] Opção não encontrada para valor:`, {
-        value: this.value,
+        value: val,
         options: this.options,
         display,
       });
@@ -636,7 +649,7 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
     if (this.allowMultiple) {
       this.value = Array.isArray(value) ? value : [];
     } else {
-      this.value = value;
+      this.value = Array.isArray(value) ? value[0] : value;
     }
 
     console.log(`[primary-select ${this.inputName}] Valor interno setado:`, this.value);

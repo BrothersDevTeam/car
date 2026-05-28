@@ -455,10 +455,13 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit() {
     // Carrega opções de tipos de combustível do enum
-    this.fuelTypesOptions = Object.values(FuelTypes).map((fuelType) => ({
-      value: fuelType,
-      label: FuelTypesLabels[fuelType],
-    }));
+    this.fuelTypesOptions = Object.keys(FuelTypes).map((key) => {
+      const enumValue = FuelTypes[key as keyof typeof FuelTypes];
+      return {
+        value: key,
+        label: FuelTypesLabels[enumValue],
+      };
+    });
 
     // Monitora mudanças no formulário
     this.form.valueChanges.subscribe(() => {
