@@ -28,13 +28,19 @@
                 (selectionChange)="handleDraftSelection($event.value)"
                 placeholder="Selecione um rascunho"
               >
-                <mat-option [value]="null">-- Iniciar novo cadastro --</mat-option>
+                <mat-option [value]="null" class="new-draft-option">
+                  <mat-icon style="margin-right: 8px; color: white;">add_circle_outline</mat-icon>
+                  Iniciar novo cadastro
+                </mat-option>
                 @for (draft of availableDrafts; track draft.id) {
                   <mat-option [value]="draft">
                     <div class="draft-option-content">
                       <div class="draft-info">
                         <span class="draft-name">
                           {{ draft.draftName || 'Rascunho sem nome' }}
+                          @if (draft.createdBy) {
+                            <small class="draft-author" style="opacity: 0.7; font-size: 0.85em;"> (por {{ draft.createdBy }})</small>
+                          }
                         </span>
                         <span class="draft-date">
                           Salvo em:

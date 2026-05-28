@@ -14,13 +14,19 @@
             <mat-form-field appearance="outline" class="draft-select-field">
               <mat-label>Selecione um rascunho para continuar</mat-label>
               <mat-select [(value)]="selectedDraftId" (selectionChange)="onDraftSelected($event)">
-                <mat-option value="new">-- Iniciar novo cadastro --</mat-option>
+                <mat-option value="new" class="new-draft-option">
+                  <mat-icon style="margin-right: 8px; color: white;">add_circle_outline</mat-icon>
+                  Iniciar novo cadastro
+                </mat-option>
                 @for (draft of availableDrafts; track draft.id) {
                   <mat-option [value]="draft.id" class="draft-option-item">
                     <div class="draft-option-content">
                       <div class="draft-info">
                         <span class="draft-name">
                           {{ draft.draftName || 'Sem nome' }}
+                          @if (draft.createdBy) {
+                            <small class="draft-author" style="opacity: 0.7; font-size: 0.85em;"> (por {{ draft.createdBy }})</small>
+                          }
                         </span>
                         <span class="draft-date">
                           {{ formatDraftDate(draft.lastModified) }}
