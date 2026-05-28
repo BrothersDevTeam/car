@@ -10,3 +10,48 @@
 .font-nasalization {
   font-family: 'Nasalization', sans-serif;
 }
+
+// Estilo premium para a opção de iniciar novo cadastro no mat-select
+.new-draft-option {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  margin: 6px 8px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  line-height: 40px !important;
+  transition: all 0.2s ease-in-out !important;
+  display: flex !important;
+  align-items: center !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+
+  &:hover {
+    background-color: var(--primary-color-dark) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  // Ajusta cor do mat-icon
+  mat-icon {
+    color: white !important;
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin-right: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  // Sobrescreve o container interno do MDC Option para alinhar
+  .mdc-list-item__primary-text {
+    color: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+  }
+}

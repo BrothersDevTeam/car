@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { AuthService } from './auth/auth.service';
 
 /**
  * Interface que define a estrutura de um rascunho de formulário
@@ -21,6 +22,10 @@ export interface FormDraft<T = any> {
   status: 'em-preenchimento' | 'completo';
   /** ID da entidade (se for edição) - Aceita string ou number */
   entityId?: string | number;
+  /** Nome do vendedor/funcionário que salvou o rascunho */
+  createdBy?: string;
+  /** Nome de usuário/login do vendedor/funcionário que salvou o rascunho */
+  createdByUsername?: string;
 }
 
 /**
@@ -52,7 +57,10 @@ export class FormDraftService {
   /** Subject que notifica quando há mudanças nos rascunhos */
   private draftsChanged$ = new BehaviorSubject<void>(undefined);
 
-  constructor(private toastr: ToastrService) {
+  constructor(
+    private toastr: ToastrService,
+    private authService: AuthService,
+  ) {
     // Limpar rascunhos antigos (mais de 7 dias) na inicialização
     this.cleanOldDrafts();
   }
@@ -80,6 +88,8 @@ export class FormDraftService {
       lastModified: new Date(),
       status: 'em-preenchimento',
       entityId,
+      createdBy: this.authService.getPersonName() || undefined,
+      createdByUsername: this.authService.getUsername() || undefined,
     };
 
     // Salva no localStorage
