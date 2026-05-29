@@ -1,6 +1,8 @@
 import { Component, forwardRef, Input, HostListener, OnInit, OnChanges, SimpleChanges, ElementRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
 import { RelationshipTypes } from '../../enums/relationshipTypes';
 import { AuthService } from '@services/auth/auth.service';
 
@@ -50,7 +52,7 @@ export interface SelectOption {
  */
 @Component({
   selector: 'app-primary-select',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, MatIcon],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -106,6 +108,32 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
   @Input() optionLabel: string | ((item: any) => string) = 'label';
 
   /**
+   * Habilita campo de busca rápida no dropdown
+   */
+  @Input() showSearch: boolean = false;
+
+  /**
+   * Habilita a visualização das opções em múltiplas colunas (grid)
+   */
+  @Input() useColumns: boolean = false;
+
+  /**
+   * Altura máxima do container de opções em telas grandes (ex: '400px', '500px')
+   * @default '400px'
+   */
+  @Input() maxHeight: string = '400px';
+
+  /**
+   * Termo de busca digitado pelo usuário
+   */
+  searchTerm: string = '';
+
+  /**
+   * Array filtrado das opções para exibição
+   */
+  filteredOptions: any[] = [];
+
+  /**
    * Valor(es) selecionado(s) atualmente
    * Pode ser um único valor ou array dependendo de allowMultiple
    */
@@ -136,6 +164,7 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
 
   ngOnInit() {
     this.loadOptions();
+    this.filteredOptions = [...this.options];
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -179,6 +208,8 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
       this.options = this.getRelationshipTypeOptions();
       console.log('[primary-select] Opções carregadas do enum:', this.options);
     }
+
+    this.filteredOptions = [...this.options];
 
     /**
      * Se não tinha opções antes e agora tem, E já existe um valor,
@@ -236,11 +267,24 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
     this.isOpen = !this.isOpen;
 
     if (this.isOpen) {
-      // Reseta o foco ao abrir
+      // Reseta o foco e busca ao abrir
       this.focusedOptionIndex = -1;
+      this.searchTerm = '';
+      this.filteredOptions = [...this.options];
       this.onTouched();
 
-      // Rola suavemente para garantir que todo o dropdown fique visível na tela
+      // Foca no input de busca se estiver habilitado
+      if (this.showSearch) {
+        setTimeout(() => {
+          const searchInputEl = this.elementRef.nativeElement.querySelector('.search-input');
+          if (searchInputEl) {
+            searchInputEl.focus();
+          }
+        }, 150);
+      }
+
+      // Rola suavemente para garantir que o dropdown e o respiro fiquem visíveis na tela
+      // Aguarda 320ms para a renderização completa e posicionamento do DOM
       setTimeout(() => {
         const dropdownElement = this.elementRef.nativeElement.querySelector('.dropdown-options');
         if (dropdownElement) {
@@ -249,8 +293,34 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
             block: 'nearest',
           });
         }
-      }, 100); // 100ms garante que o DOM foi renderizado e o dropdown está posicionado
+      }, 320);
     }
+  }
+
+  /**
+   * Filtra opções baseado no termo de busca
+   */
+  onSearch(): void {
+    const term = this.searchTerm.toLowerCase().trim();
+
+    if (!term) {
+      this.filteredOptions = [...this.options];
+      return;
+    }
+
+    this.filteredOptions = this.options.filter((option) =>
+      this.getOptionLabel(option).toLowerCase().includes(term)
+    );
+    this.focusedOptionIndex = -1; // Reseta o foco ao filtrar
+  }
+
+  /**
+   * Limpa o campo de busca
+   */
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.filteredOptions = [...this.options];
+    this.focusedOptionIndex = -1;
   }
 
   /**
@@ -444,6 +514,9 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
    */
   @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
+    const target = event.target as HTMLElement;
+    const isSearchInput = target && target.classList && target.classList.contains('search-input');
+
     // Só processa eventos de teclado se o dropdown estiver aberto
     if (!this.isOpen) {
       // Permite abrir com Enter ou Espaço
@@ -471,11 +544,15 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
 
       case ' ':
       case 'Spacebar': // Para navegadores mais antigos
+        if (isSearchInput) {
+          // Permite digitar espaços no campo de busca sem acionar a seleção da lista
+          break;
+        }
         // ESPAÇO: Seleciona/desseleciona a opção focada
         event.preventDefault();
         event.stopPropagation();
-        if (this.focusedOptionIndex >= 0 && this.focusedOptionIndex < this.options.length) {
-          const focusedOption = this.options[this.focusedOptionIndex];
+        if (this.focusedOptionIndex >= 0 && this.focusedOptionIndex < this.filteredOptions.length) {
+          const focusedOption = this.filteredOptions[this.focusedOptionIndex];
           this.toggleOption(focusedOption);
         }
         break;
@@ -484,8 +561,8 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
         // ENTER: Seleciona (e fecha se single select)
         event.preventDefault();
         event.stopPropagation();
-        if (this.focusedOptionIndex >= 0 && this.focusedOptionIndex < this.options.length) {
-          const focusedOption = this.options[this.focusedOptionIndex];
+        if (this.focusedOptionIndex >= 0 && this.focusedOptionIndex < this.filteredOptions.length) {
+          const focusedOption = this.filteredOptions[this.focusedOptionIndex];
           if (this.allowMultiple) {
             this.toggleOption(focusedOption);
           } else {
@@ -505,6 +582,10 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
         break;
 
       case 'Home':
+        if (isSearchInput) {
+          // Permite mover o cursor para o início do texto na busca
+          break;
+        }
         // HOME: Vai para a primeira opção
         event.preventDefault();
         event.stopPropagation();
@@ -512,10 +593,14 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
         break;
 
       case 'End':
+        if (isSearchInput) {
+          // Permite mover o cursor para o final do texto na busca
+          break;
+        }
         // END: Vai para a última opção
         event.preventDefault();
         event.stopPropagation();
-        this.focusedOptionIndex = this.options.length - 1;
+        this.focusedOptionIndex = this.filteredOptions.length - 1;
         break;
 
       case 'Tab':
@@ -542,12 +627,12 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
    * @private
    */
   private focusNextOption(): void {
-    if (this.options.length === 0) return;
+    if (this.filteredOptions.length === 0) return;
 
     if (this.focusedOptionIndex < 0) {
       // Nenhuma opção focada, foca a primeira
       this.focusedOptionIndex = 0;
-    } else if (this.focusedOptionIndex < this.options.length - 1) {
+    } else if (this.focusedOptionIndex < this.filteredOptions.length - 1) {
       // Move para a próxima
       this.focusedOptionIndex++;
     } else {
@@ -569,17 +654,17 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
    * @private
    */
   private focusPreviousOption(): void {
-    if (this.options.length === 0) return;
+    if (this.filteredOptions.length === 0) return;
 
     if (this.focusedOptionIndex < 0) {
       // Nenhuma opção focada, foca a última
-      this.focusedOptionIndex = this.options.length - 1;
+      this.focusedOptionIndex = this.filteredOptions.length - 1;
     } else if (this.focusedOptionIndex > 0) {
       // Move para a anterior
       this.focusedOptionIndex--;
     } else {
       // Está na primeira, vai para a última (wrap-around)
-      this.focusedOptionIndex = this.options.length - 1;
+      this.focusedOptionIndex = this.filteredOptions.length - 1;
     }
 
     this.scrollToFocusedOption();

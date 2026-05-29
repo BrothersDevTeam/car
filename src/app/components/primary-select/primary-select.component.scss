@@ -111,29 +111,131 @@
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         z-index: 1000;
-        max-height: 250px;
-        overflow-y: auto;
         margin-top: 4px;
         border: 1px solid rgba(0, 0, 0, 0.1);
-        scroll-margin-bottom: 48px; // Respiro de espaçamento na parte inferior ao rolar automaticamente
+        overflow: hidden;
+        scroll-margin-bottom: 48px; // Respiro de espaçamento na parte inferior ao rolar a tela do navegador automaticamente
 
-        /**
-         * Customização da scrollbar para melhor UX
-         */
-        &::-webkit-scrollbar {
-          width: 8px;
+        /* Campo de busca rápida no topo do dropdown */
+        .search-container {
+          display: flex;
+          align-items: center;
+          padding: 8px 12px;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+          background-color: var(--gray-secondary-bg);
+          position: sticky;
+          top: 0;
+          z-index: 1;
+          gap: 8px;
+
+          .search-icon {
+            color: var(--primary-color);
+            font-size: 20px;
+            margin-right: 4px;
+            position: static;
+            flex-shrink: 0;
+          }
+
+          .search-input-wrapper {
+            flex: 1;
+            display: flex;
+          }
+
+          .search-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid transparent;
+            border-radius: 6px;
+            outline: none;
+            color: var(--text-color);
+            font-size: 14px;
+            padding: 8px 12px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            width: 100%;
+
+            &::placeholder {
+              color: var(--text-color-light);
+              opacity: 0.6;
+              font-weight: 400;
+            }
+
+            &:focus {
+              background: var(--gray-secondary-bg);
+              border-color: var(--primary-color);
+              box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+            }
+          }
+
+          .clear-icon {
+            color: var(--text-color-light);
+            opacity: 0.7;
+            font-size: 20px;
+            cursor: pointer;
+            position: static;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            padding: 4px;
+            border-radius: 50%;
+
+            &:hover {
+              transform: scale(1.1);
+              color: var(--error-color);
+              background-color: rgba(var(--error-color-rgb), 0.1);
+            }
+          }
         }
 
-        &::-webkit-scrollbar-track {
-          background: transparent;
-        }
+        /* Container que rola a lista de opções */
+        .options-list-container {
+          max-height: 400px;
+          overflow-y: auto;
+          scroll-margin-bottom: 48px;
 
-        &::-webkit-scrollbar-thumb {
-          background: rgba(0, 0, 0, 0.2);
-          border-radius: 4px;
+          &::-webkit-scrollbar {
+            width: 8px;
+          }
 
-          &:hover {
-            background: rgba(0, 0, 0, 0.3);
+          &::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+
+            &:hover {
+              background: rgba(0, 0, 0, 0.3);
+            }
+          }
+
+          /* Layout multi-colunas para telas grandes */
+          &.grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            padding: 4px;
+            gap: 4px;
+
+            .option-item {
+              border-radius: 6px !important; // Cantos arredondados individuais por card no grid
+              margin: 0;
+            }
+
+            @media (min-width: 768px) {
+              grid-template-columns: repeat(2, 1fr); // 2 colunas
+            }
+            @media (min-width: 1200px) {
+              grid-template-columns: repeat(3, 1fr); // 3 colunas em telas bem grandes
+            }
+          }
+
+          .no-results {
+            padding: 24px;
+            text-align: center;
+            color: var(--text-color-light);
+            font-style: italic;
+            font-size: 14px;
+            user-select: none;
           }
         }
 
@@ -305,11 +407,13 @@
   .input-wrapper {
     .input-content {
       .dropdown-options {
-        /**
-         * Em mobile, reduz um pouco a altura máxima
-         * para não ocupar toda a tela
-         */
-        max-height: 200px;
+        .options-list-container {
+          /**
+           * Em mobile, reduz um pouco a altura máxima
+           * do container de opções para não ocupar toda a tela
+           */
+          max-height: 200px !important;
+        }
 
         .option-item {
           /**

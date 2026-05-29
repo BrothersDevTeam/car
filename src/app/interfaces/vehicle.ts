@@ -3,6 +3,7 @@ import { VehicleCategory } from '../enums/vehicleCategoryTypes';
 import { VehicleSpecies } from '../enums/vehicleSpeciesTypes';
 import { VehicleType } from '../enums/vehicleType';
 import { Person } from './person';
+import { Optional } from './optional';
 
 /**
  * Interfaces de Resumo para otimização de payload (T-8)
@@ -88,6 +89,8 @@ export interface Vehicle {
   nfeHistory?: NfeSummary[];
   salesHistory?: VendaSummary[];
   purchaseHistory?: CompraSummary[];
+  optionals?: Optional[];
+  optionalIds?: string[];
 }
 
 /**

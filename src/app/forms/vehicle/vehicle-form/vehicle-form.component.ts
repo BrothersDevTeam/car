@@ -47,6 +47,7 @@ import { FuelTypes, FuelTypesLabels } from '../../../enums/fuelTypes';
 
 import { VehicleService } from '@services/vehicle.service';
 import { ColorService } from '@services/color.service';
+import { OptionalService } from '@services/optional.service';
 import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
 import { DateInputComponent } from '@components/date-input/date-input.component';
 import { PersonService } from '@services/person.service';
@@ -122,6 +123,9 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   // Opções de tipos de combustível
   fuelTypesOptions: { value: string; label: string }[] = [];
 
+  // Opções de opcionais
+  optionalsOptions: { value: string; label: string }[] = [];
+
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
   private storeContextService = inject(StoreContextService);
@@ -188,6 +192,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     category: [''],
     features: [''],
     fuelTypes: [[]], // Array de FuelTypes
+    optionalIds: [[]], // Array de Opcionais (UUIDs)
     origin: ['NACIONAL'],
     valorCompra: [''],
     dataCompra: [''],
@@ -207,6 +212,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     private colorService: ColorService,
     private personService: PersonService,
     private toastrService: ToastrService,
+    private optionalService: OptionalService,
   ) {}
 
   hasUnsavedChanges(): boolean {
@@ -500,6 +506,21 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Carrega cores do backend
     this.loadColors();
 
+    // Carrega opcionais disponíveis do backend
+    this.optionalService.getAvailableOptionals().subscribe({
+      next: (response) => {
+        console.log('Opcionais disponíveis carregados:', response);
+        this.optionalsOptions = response.map((opt) => ({
+          value: opt.optionalId,
+          label: opt.name,
+        }));
+      },
+      error: (error) => {
+        console.error('Erro ao carregar opcionais:', error);
+        this.toastrService.error('Erro ao carregar opcionais disponíveis');
+      },
+    });
+
     // Busca rascunhos disponíveis
     this.checkForDrafts();
 
@@ -641,6 +662,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       category: this.dataForm!.category || '',
       features: this.dataForm!.features || '',
       fuelTypes: this.dataForm!.fuelTypes || [], // Tipos de combustível
+      optionalIds: this.dataForm!.optionals ? this.dataForm!.optionals.map((opt) => opt.optionalId) : [], // Opcionais do veículo
       origin: this.dataForm!.origin || 'NACIONAL',
       valorCompra: this.dataForm!.valorCompra || '',
       dataCompra: this.dataForm!.dataCompra || '',
@@ -755,6 +777,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       features: formValues.features || '',
       origin: formValues.origin || 'NACIONAL',
       fuelTypes: this.mapFuelTypeToBackend(formValues.fuelTypes),
+      optionalIds: formValues.optionalIds || [], // Envia a lista de IDs de opcionais selecionados
       valorCompra: formValues.valorCompra?.toString() || '',
       supplierId: formValues.supplier?.id || null,
       dataCompra: formValues.dataCompra || '',

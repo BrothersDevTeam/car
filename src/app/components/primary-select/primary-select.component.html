@@ -49,72 +49,109 @@
           role="listbox"
           [id]="'dropdown-' + inputName"
           [attr.aria-multiselectable]="allowMultiple"
+          [class.has-search]="showSearch"
         >
-          <!-- 
-            MODO MÚLTIPLO: Checkboxes
-            Permite selecionar várias opções
-          -->
-          @if (allowMultiple) {
-            @for (option of options; track $index) {
-              <div
-                class="option-item"
-                [class.selected]="isSelected(option)"
-                [class.keyboard-focused]="isFocused($index)"
-                (click)="toggleOption(option)"
-                role="option"
-                [attr.aria-selected]="isSelected(option)"
-                [attr.tabindex]="-1"
-              >
-                <!-- 
-                  Checkbox visual
-                  O click é tratado no div pai para melhor UX
-                -->
+          <!-- Campo de busca rápida se showSearch for true -->
+          @if (showSearch) {
+            <div class="search-container" (click)="$event.stopPropagation()">
+              <mat-icon class="search-icon">search</mat-icon>
+              <div class="search-input-wrapper">
                 <input
-                  type="checkbox"
-                  [checked]="isSelected(option)"
-                  (click)="$event.stopPropagation()"
-                  tabindex="-1"
-                  [attr.aria-hidden]="true"
+                  type="text"
+                  class="search-input"
+                  [(ngModel)]="searchTerm"
+                  (input)="onSearch()"
+                  placeholder="Digite para buscar..."
+                  (keydown.enter)="$event.preventDefault()"
+                  aria-label="Campo de busca"
                 />
-                <span>{{ getOptionLabel(option) }}</span>
-
-                <!-- 
-                  Indicador visual de foco do teclado
-                  Ajuda o usuário a ver qual opção está focada
-                -->
-                @if (isFocused($index)) {
-                  <span class="keyboard-focus-indicator" aria-hidden="true">◄</span>
-                }
               </div>
-            }
+              @if (searchTerm) {
+                <mat-icon class="clear-icon" (click)="clearSearch()" aria-label="Limpar busca" role="button" tabindex="0">
+                  close
+                </mat-icon>
+              }
+            </div>
           }
 
-          <!-- 
-            MODO ÚNICO: Seleção simples
-            Apenas uma opção pode ser selecionada
-          -->
-          @else {
-            @for (option of options; track $index) {
-              <div
-                class="option-item"
-                [class.selected]="isSelected(option)"
-                [class.keyboard-focused]="isFocused($index)"
-                (click)="selectSingleOption(option)"
-                role="option"
-                [attr.aria-selected]="isSelected(option)"
-                [attr.tabindex]="-1"
-              >
-                <span>{{ getOptionLabel(option) }}</span>
+          <!-- Lista de opções rolável -->
+          <div class="options-list-container" [class.grid-layout]="useColumns" [style.maxHeight]="maxHeight">
+            <!-- 
+              MODO MÚLTIPLO: Checkboxes
+              Permite selecionar várias opções
+            -->
+            @if (allowMultiple) {
+              @for (option of filteredOptions; track $index) {
+                <div
+                  class="option-item"
+                  [class.selected]="isSelected(option)"
+                  [class.keyboard-focused]="isFocused($index)"
+                  (click)="toggleOption(option)"
+                  role="option"
+                  [attr.aria-selected]="isSelected(option)"
+                  [attr.tabindex]="-1"
+                >
+                  <!-- 
+                    Checkbox visual
+                    O click é tratado no div pai para melhor UX
+                  -->
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(option)"
+                    (click)="$event.stopPropagation()"
+                    tabindex="-1"
+                    [attr.aria-hidden]="true"
+                  />
+                  <span>{{ getOptionLabel(option) }}</span>
 
-                <!-- 
-                  Indicador visual de foco do teclado
-                -->
-                @if (isFocused($index)) {
-                  <span class="keyboard-focus-indicator" aria-hidden="true">◄</span>
-                }
-              </div>
+                  <!-- 
+                    Indicador visual de foco do teclado
+                    Ajuda o usuário a ver qual opção está focada
+                  -->
+                  @if (isFocused($index)) {
+                    <span class="keyboard-focus-indicator" aria-hidden="true">◄</span>
+                  }
+                </div>
+              }
+              @if (filteredOptions.length === 0) {
+                <div class="no-results">
+                  <span>Nenhum resultado encontrado</span>
+                </div>
+              }
             }
-          }
+
+            <!-- 
+              MODO ÚNICO: Seleção simples
+              Apenas uma opção pode ser selecionada
+            -->
+            @else {
+              @for (option of filteredOptions; track $index) {
+                <div
+                  class="option-item"
+                  [class.selected]="isSelected(option)"
+                  [class.keyboard-focused]="isFocused($index)"
+                  (click)="selectSingleOption(option)"
+                  role="option"
+                  [attr.aria-selected]="isSelected(option)"
+                  [attr.tabindex]="-1"
+                >
+                  <span>{{ getOptionLabel(option) }}</span>
+
+                  <!-- 
+                    Indicador visual de foco do teclado
+                  -->
+                  @if (isFocused($index)) {
+                    <span class="keyboard-focus-indicator" aria-hidden="true">◄</span>
+                  }
+                </div>
+              }
+              @if (filteredOptions.length === 0) {
+                <div class="no-results">
+                  <span>Nenhum resultado encontrado</span>
+                </div>
+              }
+            }
+          </div>
         </div>
       }
 
