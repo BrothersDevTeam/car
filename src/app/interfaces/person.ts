@@ -44,6 +44,7 @@ export interface Person {
   roleNames?: string[]; // Arrays dos roles do user para exibição
   authorizations?: string[]; // Permissions (Claims) do user
   userId?: string;
+  userEmail?: string;
   user?: User; // User associado (para funcionários)
   hasUser?: boolean;
 }

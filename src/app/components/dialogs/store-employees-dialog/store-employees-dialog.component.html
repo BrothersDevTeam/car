@@ -8,237 +8,207 @@
 
 <mat-dialog-content>
   @if (loading) {
-    <div class="loading-state">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p>Carregando funcionários...</p>
-    </div>
+  <div class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Carregando funcionários...</p>
+  </div>
   } @else if (error) {
-    <div class="error-state">
-      <mat-icon color="warn">error</mat-icon>
-      <p>Ocorreu um erro ao carregar os funcionários.</p>
-    </div>
+  <div class="error-state">
+    <mat-icon color="warn">error</mat-icon>
+    <p>Ocorreu um erro ao carregar os funcionários.</p>
+  </div>
   } @else {
-    <div class="employees-management">
-      <!-- Busca para adicionar novo funcionário da base -->
-      @if (canManageAccess) {
-        <div class="add-employee-section">
-          <mat-form-field appearance="outline" class="search-field">
-            <mat-label>Pesquisar pessoa para adicionar à equipe...</mat-label>
-            <input matInput [formControl]="personSearchControl" placeholder="Digite nome, CPF ou email" />
-            <mat-icon matSuffix>person_search</mat-icon>
-          </mat-form-field>
+  <div class="employees-management">
+    <!-- Busca para adicionar novo funcionário da base -->
+    @if (canManageAccess) {
+    <div class="add-employee-section">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Pesquisar pessoa para adicionar à equipe...</mat-label>
+        <input matInput [formControl]="personSearchControl" placeholder="Digite nome, CPF ou email" />
+        <mat-icon matSuffix>person_search</mat-icon>
+      </mat-form-field>
 
-          @if (searchingPeople) {
-            <div class="search-loading">
-              <mat-spinner diameter="20"></mat-spinner>
-            </div>
-          }
-
-          @if (searchPeopleResults.length > 0) {
-            <div class="search-results-panel">
-              <div class="results-header">
-                <span class="results-title">Pessoas Encontradas</span>
-                <span class="results-count">{{ searchPeopleResults.length }}</span>
-              </div>
-              <mat-list>
-                @for (p of searchPeopleResults; track p.personId) {
-                  <mat-list-item (click)="selectPersonToPromote(p)" class="search-item">
-                    <mat-icon matListItemIcon class="search-item-avatar-icon">person</mat-icon>
-                    <span matListItemTitle class="search-item-title">{{ p.name }}</span>
-                    <span matListItemLine class="search-item-meta">
-                      {{ p.cpf || p.email }} • Perfil:
-                      <span class="badge-role">{{ getRelationshipLabel(p.relationship) }}</span>
-                    </span>
-                    <div matListItemMeta>
-                      <button mat-icon-button class="add-btn" color="primary" matTooltip="Adicionar à equipe">
-                        <mat-icon>person_add</mat-icon>
-                      </button>
-                    </div>
-                  </mat-list-item>
-                }
-              </mat-list>
-            </div>
-          }
-        </div>
+      @if (searchingPeople) {
+      <div class="search-loading">
+        <mat-spinner diameter="20"></mat-spinner>
+      </div>
       }
 
-      <div class="employees-list">
-        @for (person of employees; track person.personId) {
-          <div class="employee-card" [class.no-access]="!person.hasUser">
-            <!-- Cabeçalho do funcionário -->
-            <div class="employee-header">
-              <div class="employee-avatar">
-                <mat-icon>
-                  {{ person.hasUser ? 'person' : 'person_off' }}
-                </mat-icon>
-              </div>
-              <div class="employee-info">
-                <span class="employee-name">{{ person.name }}</span>
-                <span class="employee-meta">
-                  {{ person.email || 'Sem e-mail' }}
-                </span>
-              </div>
-              <div class="employee-tags">
-                <button
-                  class="role-chip-btn"
-                  [matMenuTriggerFor]="roleMenu"
-                  [disabled]="
+      @if (searchPeopleResults.length > 0) {
+      <div class="search-results-panel">
+        <div class="results-header">
+          <span class="results-title">Pessoas Encontradas</span>
+          <span class="results-count">{{ searchPeopleResults.length }}</span>
+        </div>
+        <mat-list>
+          @for (p of searchPeopleResults; track p.personId) {
+          <mat-list-item (click)="selectPersonToPromote(p)" class="search-item">
+            <mat-icon matListItemIcon class="search-item-avatar-icon">person</mat-icon>
+            <span matListItemTitle class="search-item-title">{{ p.name }}</span>
+            <span matListItemLine class="search-item-meta">
+              {{ p.cpf || p.email }} • Perfil:
+              <span class="badge-role">{{ getRelationshipLabel(p.relationship) }}</span>
+            </span>
+            <div matListItemMeta>
+              <button mat-icon-button class="add-btn" color="primary" matTooltip="Adicionar à equipe">
+                <mat-icon>person_add</mat-icon>
+              </button>
+            </div>
+          </mat-list-item>
+          }
+        </mat-list>
+      </div>
+      }
+    </div>
+    }
+
+    <div class="employees-list">
+      @for (person of employees; track person.personId) {
+      <div class="employee-card" [class.no-access]="!person.hasUser">
+        <!-- Cabeçalho do funcionário -->
+        <div class="employee-header">
+          <div class="employee-avatar">
+            <mat-icon>
+              {{ person.hasUser ? 'person' : 'person_off' }}
+            </mat-icon>
+          </div>
+          <div class="employee-info">
+            <span class="employee-name">{{ person.name }}</span>
+            <span class="employee-meta">
+              {{ person.userEmail || person.email || 'Sem e-mail' }}
+            </span>
+          </div>
+          <div class="employee-tags">
+            <button class="role-chip-btn" [matMenuTriggerFor]="roleMenu" [disabled]="
                     !canManageAccess ||
                     updatingRelationshipFor === person.personId ||
                     person.relationship?.name?.toUpperCase() === 'PROPRIETARIO'
-                  "
-                  [class.chip-manager]="person.relationship?.name?.toUpperCase() === 'GERENTE'"
-                  [class.chip-seller]="person.relationship?.name?.toUpperCase() === 'VENDEDOR'"
-                  [class.chip-owner]="person.relationship?.name?.toUpperCase() === 'PROPRIETARIO'"
-                >
-                  @if (updatingRelationshipFor === person.personId) {
-                    <mat-spinner diameter="12" class="chip-spinner"></mat-spinner>
-                  } @else {
-                    {{ getRelationshipLabel(person.relationship) }}
-                    @if (canManageAccess && person.relationship?.name?.toUpperCase() !== 'PROPRIETARIO') {
-                      <mat-icon class="chip-arrow">arrow_drop_down</mat-icon>
-                    }
-                  }
-                </button>
+                  " [class.chip-manager]="person.relationship?.name?.toUpperCase() === 'GERENTE'"
+              [class.chip-seller]="person.relationship?.name?.toUpperCase() === 'VENDEDOR'"
+              [class.chip-owner]="person.relationship?.name?.toUpperCase() === 'PROPRIETARIO'">
+              @if (updatingRelationshipFor === person.personId) {
+              <mat-spinner diameter="12" class="chip-spinner"></mat-spinner>
+              } @else {
+              {{ getRelationshipLabel(person.relationship) }}
+              @if (canManageAccess && person.relationship?.name?.toUpperCase() !== 'PROPRIETARIO') {
+              <mat-icon class="chip-arrow">arrow_drop_down</mat-icon>
+              }
+              }
+            </button>
 
-                <mat-menu #roleMenu="matMenu">
-                  @for (rel of relationships; track rel.relationshipId) {
-                    <button mat-menu-item (click)="changeRelationship(person, rel)">
-                      <mat-icon
-                        [color]="person.relationship?.name?.toUpperCase() === rel.name.toUpperCase() ? 'primary' : ''"
-                      >
-                        {{ person.relationship?.name?.toUpperCase() === rel.name.toUpperCase() ? 'check' : 'badge' }}
-                      </mat-icon>
-                      <span>{{ getRelationshipLabel(rel) }}</span>
-                    </button>
-                  }
-                </mat-menu>
+            <mat-menu #roleMenu="matMenu">
+              @for (rel of relationships; track rel.relationshipId) {
+              <button mat-menu-item (click)="changeRelationship(person, rel)">
+                <mat-icon
+                  [color]="person.relationship?.name?.toUpperCase() === rel.name.toUpperCase() ? 'primary' : ''">
+                  {{ person.relationship?.name?.toUpperCase() === rel.name.toUpperCase() ? 'check' : 'badge' }}
+                </mat-icon>
+                <span>{{ getRelationshipLabel(rel) }}</span>
+              </button>
+              }
+            </mat-menu>
 
-                @if (person.hasUser) {
-                  <span class="access-chip has-access">
-                    <mat-icon>lock_open</mat-icon>
-                    Com Acesso
-                  </span>
-                } @else {
-                  <span class="access-chip no-access-chip">
-                    <mat-icon>lock</mat-icon>
-                    Sem Acesso
-                  </span>
+            @if (person.hasUser) {
+            <span class="access-chip has-access">
+              <mat-icon>lock_open</mat-icon>
+              Com Acesso
+            </span>
+            } @else {
+            <span class="access-chip no-access-chip">
+              <mat-icon>lock</mat-icon>
+              Sem Acesso
+            </span>
+            }
+          </div>
+        </div>
+
+        <!-- Ações -->
+        @if (canManageAccess) {
+        <div class="employee-actions">
+          <!-- Funcionário COM acesso: botão de permissões + revogar -->
+          @if (person.hasUser) {
+          <button mat-stroked-button color="primary" (click)="openAuthorizationsDialog(person)"
+            matTooltip="Gerenciar permissões granulares do funcionário">
+            <mat-icon>security</mat-icon>
+            Permissões
+          </button>
+          <button mat-stroked-button color="warn" (click)="revokeAccess(person)"
+            [disabled]="revokingAccessFor === person.personId"
+            matTooltip="Remover acesso ao sistema (a pessoa permanece cadastrada)">
+            @if (revokingAccessFor === person.personId) {
+            <ng-container>
+              <mat-spinner diameter="16" class="btn-spinner"></mat-spinner>
+              Aguarde...
+            </ng-container>
+            } @else {
+            <ng-container>
+              <mat-icon>person_remove</mat-icon>
+              Revogar Acesso
+            </ng-container>
+            }
+          </button>
+          }
+
+          <!-- Funcionário SEM acesso: botão de criar -->
+          @if (!person.hasUser && (person.relationship?.name?.toUpperCase() !== 'PROPRIETARIO' || isRootAdmin)) {
+          <button mat-raised-button color="primary" (click)="toggleCreateAccess(person)"
+            matTooltip="Criar login de acesso ao sistema para este funcionário">
+            <mat-icon>
+              {{ creatingAccessFor === person.personId ? 'expand_less' : 'person_add' }}
+            </mat-icon>
+            {{ creatingAccessFor === person.personId ? 'Cancelar' : 'Criar Acesso' }}
+          </button>
+          }
+        </div>
+        }
+
+        <!-- Formulário expansível de criação de acesso -->
+        @if (creatingAccessFor === person.personId) {
+        <div class="create-access-panel">
+          <h4 class="panel-title">
+            <mat-icon>vpn_key</mat-icon>
+            Criar Acesso para {{ person.name }}
+          </h4>
+
+          <form [formGroup]="getForm(person.personId)">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="field-full">
+                <mat-label>E-mail de Acesso</mat-label>
+                <input matInput formControlName="email" placeholder="ex: joaozinho@email.com" autocomplete="off" />
+                @if (getForm(person.personId).get('email')?.hasError('required')) {
+                <mat-error>Obrigatório</mat-error>
                 }
-              </div>
+                @if (getForm(person.personId).get('email')?.hasError('email')) {
+                <mat-error>E-mail inválido</mat-error>
+                }
+              </mat-form-field>
             </div>
 
-            <!-- Ações -->
-            @if (canManageAccess) {
-              <div class="employee-actions">
-                <!-- Funcionário COM acesso: botão de permissões + revogar -->
-                @if (person.hasUser) {
-                  <button
-                    mat-stroked-button
-                    color="primary"
-                    (click)="openAuthorizationsDialog(person)"
-                    matTooltip="Gerenciar permissões granulares do funcionário"
-                  >
-                    <mat-icon>security</mat-icon>
-                    Permissões
-                  </button>
-                  <button
-                    mat-stroked-button
-                    color="warn"
-                    (click)="revokeAccess(person)"
-                    [disabled]="revokingAccessFor === person.personId"
-                    matTooltip="Remover acesso ao sistema (a pessoa permanece cadastrada)"
-                  >
-                    @if (revokingAccessFor === person.personId) {
-                      <ng-container>
-                        <mat-spinner diameter="16" class="btn-spinner"></mat-spinner>
-                        Aguarde...
-                      </ng-container>
-                    } @else {
-                      <ng-container>
-                        <mat-icon>person_remove</mat-icon>
-                        Revogar Acesso
-                      </ng-container>
-                    }
-                  </button>
+            <div class="form-row-2">
+              <mat-form-field appearance="outline">
+                <mat-label>Senha</mat-label>
+                <input matInput type="password" formControlName="password" placeholder="Mínimo 6 caracteres"
+                  autocomplete="new-password" />
+                @if (getForm(person.personId).get('password')?.hasError('required')) {
+                <mat-error>Obrigatório</mat-error>
                 }
-
-                <!-- Funcionário SEM acesso: botão de criar -->
-                @if (!person.hasUser && (person.relationship?.name?.toUpperCase() !== 'PROPRIETARIO' || isRootAdmin)) {
-                  <button
-                    mat-raised-button
-                    color="primary"
-                    (click)="toggleCreateAccess(person)"
-                    matTooltip="Criar login de acesso ao sistema para este funcionário"
-                  >
-                    <mat-icon>
-                      {{ creatingAccessFor === person.personId ? 'expand_less' : 'person_add' }}
-                    </mat-icon>
-                    {{ creatingAccessFor === person.personId ? 'Cancelar' : 'Criar Acesso' }}
-                  </button>
+                @if (getForm(person.personId).get('password')?.hasError('minlength')) {
+                <mat-error>Mínimo 6 caracteres</mat-error>
                 }
-              </div>
-            }
+              </mat-form-field>
 
-            <!-- Formulário expansível de criação de acesso -->
-            @if (creatingAccessFor === person.personId) {
-              <div class="create-access-panel">
-                <h4 class="panel-title">
-                  <mat-icon>vpn_key</mat-icon>
-                  Criar Acesso para {{ person.name }}
-                </h4>
+              <mat-form-field appearance="outline">
+                <mat-label>Confirmar Senha</mat-label>
+                <input matInput type="password" formControlName="confirmPassword" autocomplete="new-password" />
+                @if (getForm(person.personId).errors?.['passwordMismatch']) {
+                <mat-error>As senhas não coincidem</mat-error>
+                }
+              </mat-form-field>
+            </div>
 
-                <form [formGroup]="getForm(person.personId)">
-                  <div class="form-row">
-                    <mat-form-field appearance="outline" class="field-full">
-                      <mat-label>E-mail de Acesso</mat-label>
-                      <input
-                        matInput
-                        formControlName="email"
-                        placeholder="ex: joao.silva@email.com"
-                        autocomplete="off"
-                      />
-                      @if (getForm(person.personId).get('email')?.hasError('required')) {
-                        <mat-error>Obrigatório</mat-error>
-                      }
-                      @if (getForm(person.personId).get('email')?.hasError('email')) {
-                        <mat-error>E-mail inválido</mat-error>
-                      }
-                    </mat-form-field>
-                  </div>
-
-                  <div class="form-row-2">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Senha</mat-label>
-                      <input
-                        matInput
-                        type="password"
-                        formControlName="password"
-                        placeholder="Mínimo 6 caracteres"
-                        autocomplete="new-password"
-                      />
-                      @if (getForm(person.personId).get('password')?.hasError('required')) {
-                        <mat-error>Obrigatório</mat-error>
-                      }
-                      @if (getForm(person.personId).get('password')?.hasError('minlength')) {
-                        <mat-error>Mínimo 6 caracteres</mat-error>
-                      }
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Confirmar Senha</mat-label>
-                      <input matInput type="password" formControlName="confirmPassword" autocomplete="new-password" />
-                      @if (getForm(person.personId).errors?.['passwordMismatch']) {
-                        <mat-error>As senhas não coincidem</mat-error>
-                      }
-                    </mat-form-field>
-                  </div>
-
-                  <!-- Permissões com preset aplicado -->
-                  <div class="permissions-section">
-                    <div
-                      class="permissions-header-row"
-                      style="
+            <!-- Permissões com preset aplicado -->
+            <div class="permissions-section">
+              <div class="permissions-header-row" style="
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
@@ -247,107 +217,87 @@
                         gap: 16px;
                         border-bottom: 1px solid rgba(0, 0, 0, 0.08);
                         padding-bottom: 8px;
-                      "
-                    >
-                      <h5 class="perm-title" style="margin: 0; display: flex; flex-direction: column">
-                        Permissões de Acesso
-                        <span
-                          class="perm-hint"
-                          style="
+                      ">
+                <h5 class="perm-title" style="margin: 0; display: flex; flex-direction: column">
+                  Permissões de Acesso
+                  <span class="perm-hint" style="
                             font-size: 11px;
                             color: var(--text-secondary, #666);
                             font-weight: normal;
                             margin-top: 2px;
-                          "
-                        >
-                          Defina as autorizações granulares para este funcionário
-                        </span>
-                      </h5>
+                          ">
+                    Defina as autorizações granulares para este funcionário
+                  </span>
+                </h5>
 
-                      @if (getEmployeesWithAccess(person.personId).length > 0) {
-                        <mat-form-field
-                          appearance="outline"
-                          style="width: 320px; font-size: 12px; margin-bottom: -1.25em"
-                        >
-                          <mat-label>Copiar permissões de outro funcionário...</mat-label>
-                          <mat-select (selectionChange)="copyPermissions(person.personId, $event.value)">
-                            @for (emp of getEmployeesWithAccess(person.personId); track emp.personId) {
-                              <mat-option [value]="emp">
-                                {{ emp.name }} ({{ getRelationshipLabel(emp.relationship) }})
-                              </mat-option>
-                            }
-                          </mat-select>
-                          <mat-icon
-                            matSuffix
-                            style="color: var(--primary-color, #2196f3); font-size: 18px; width: 18px; height: 18px"
-                          >
-                            content_copy
-                          </mat-icon>
-                        </mat-form-field>
-                      }
-                    </div>
-
-                    <div class="perm-groups">
-                      @for (group of authGroups; track group.name) {
-                        <div class="perm-group">
-                          <span class="perm-group-title">
-                            <label class="group-title-label">
-                              <input
-                                type="checkbox"
-                                [checked]="isAllGroupSelected(person.personId, group)"
-                                [indeterminate]="isSomeGroupSelected(person.personId, group)"
-                                (change)="toggleAllGroup(person.personId, group, $event)"
-                              />
-                              {{ group.name }}
-                            </label>
-                          </span>
-                          <div class="perm-checkboxes">
-                            @for (perm of group.permissions; track perm.key) {
-                              <label class="perm-checkbox-label">
-                                <input
-                                  type="checkbox"
-                                  [checked]="isAuthorized(person.personId, perm.key)"
-                                  (change)="togglePermission(person.personId, perm.key)"
-                                />
-                                {{ perm.label }}
-                              </label>
-                            }
-                          </div>
-                        </div>
-                      }
-                    </div>
-                  </div>
-
-                  <div class="panel-actions">
-                    <button mat-button type="button" (click)="creatingAccessFor = null">Cancelar</button>
-                    <button
-                      mat-raised-button
-                      color="primary"
-                      type="button"
-                      (click)="saveAccess(person)"
-                      [disabled]="getForm(person.personId).invalid || savingAccessFor === person.personId"
-                    >
-                      @if (savingAccessFor === person.personId) {
-                        <ng-container>
-                          <mat-spinner diameter="18" class="btn-spinner"></mat-spinner>
-                          Salvando...
-                        </ng-container>
-                      } @else {
-                        <ng-container>
-                          <mat-icon>save</mat-icon>
-                          Salvar Acesso
-                        </ng-container>
-                      }
-                    </button>
-                  </div>
-                </form>
+                @if (getEmployeesWithAccess(person.personId).length > 0) {
+                <mat-form-field appearance="outline" style="width: 320px; font-size: 12px; margin-bottom: -1.25em">
+                  <mat-label>Copiar permissões de outro funcionário...</mat-label>
+                  <mat-select (selectionChange)="copyPermissions(person.personId, $event.value)">
+                    @for (emp of getEmployeesWithAccess(person.personId); track emp.personId) {
+                    <mat-option [value]="emp">
+                      {{ emp.name }} ({{ getRelationshipLabel(emp.relationship) }})
+                    </mat-option>
+                    }
+                  </mat-select>
+                  <mat-icon matSuffix
+                    style="color: var(--primary-color, #2196f3); font-size: 18px; width: 18px; height: 18px">
+                    content_copy
+                  </mat-icon>
+                </mat-form-field>
+                }
               </div>
-            }
-          </div>
-          <mat-divider></mat-divider>
+
+              <div class="perm-groups">
+                @for (group of authGroups; track group.name) {
+                <div class="perm-group">
+                  <span class="perm-group-title">
+                    <label class="group-title-label">
+                      <input type="checkbox" [checked]="isAllGroupSelected(person.personId, group)"
+                        [indeterminate]="isSomeGroupSelected(person.personId, group)"
+                        (change)="toggleAllGroup(person.personId, group, $event)" />
+                      {{ group.name }}
+                    </label>
+                  </span>
+                  <div class="perm-checkboxes">
+                    @for (perm of group.permissions; track perm.key) {
+                    <label class="perm-checkbox-label">
+                      <input type="checkbox" [checked]="isAuthorized(person.personId, perm.key)"
+                        (change)="togglePermission(person.personId, perm.key)" />
+                      {{ perm.label }}
+                    </label>
+                    }
+                  </div>
+                </div>
+                }
+              </div>
+            </div>
+
+            <div class="panel-actions">
+              <button mat-button type="button" (click)="creatingAccessFor = null">Cancelar</button>
+              <button mat-raised-button color="primary" type="button" (click)="saveAccess(person)"
+                [disabled]="getForm(person.personId).invalid || savingAccessFor === person.personId">
+                @if (savingAccessFor === person.personId) {
+                <ng-container>
+                  <mat-spinner diameter="18" class="btn-spinner"></mat-spinner>
+                  Salvando...
+                </ng-container>
+                } @else {
+                <ng-container>
+                  <mat-icon>save</mat-icon>
+                  Salvar Acesso
+                </ng-container>
+                }
+              </button>
+            </div>
+          </form>
+        </div>
         }
       </div>
+      <mat-divider></mat-divider>
+      }
     </div>
+  </div>
   }
 </mat-dialog-content>
 

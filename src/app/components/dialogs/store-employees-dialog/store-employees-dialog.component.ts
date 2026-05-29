@@ -332,23 +332,6 @@ export class StoreEmployeesDialogComponent implements OnInit {
     this.employeeService.getPaginatedEmployees(0, 100, params).subscribe({
       next: (response) => {
         this.employees = response.content;
-
-        // Carrega as permissões de cada funcionário que tem acesso cadastrado para permitir cópia
-        this.employees.forEach((emp) => {
-          if (emp.hasUser) {
-            this.http.get<{ authorizations: string[] }>(`/api/persons/${emp.personId}/authorizations`).subscribe({
-              next: (res) => {
-                if (res && res.authorizations) {
-                  emp.authorizations = res.authorizations;
-                }
-              },
-              error: (err) => {
-                console.error(`Erro ao carregar permissões de ${emp.name}:`, err);
-              },
-            });
-          }
-        });
-
         this.loading = false;
       },
       error: (err) => {
@@ -629,8 +612,6 @@ export class StoreEmployeesDialogComponent implements OnInit {
       (e) =>
         e.personId !== excludePersonId &&
         e.hasUser &&
-        e.authorizations &&
-        e.authorizations.length > 0 &&
         e.relationship?.name?.toUpperCase() !== 'PROPRIETARIO',
     );
   }
@@ -639,16 +620,24 @@ export class StoreEmployeesDialogComponent implements OnInit {
     const form = this.createAccessForms.get(personId);
     if (!form) return;
 
-    const authArray = form.get('authorizations') as FormArray;
-    authArray.clear();
+    this.http.get<{ authorizations: string[] }>(`/api/persons/${sourcePerson.personId}/authorizations`).subscribe({
+      next: (res) => {
+        const authArray = form.get('authorizations') as FormArray;
+        authArray.clear();
 
-    if (sourcePerson.authorizations) {
-      sourcePerson.authorizations.forEach((auth) => {
-        authArray.push(new FormControl(auth));
-      });
-    }
+        if (res && res.authorizations) {
+          res.authorizations.forEach((auth) => {
+            authArray.push(new FormControl(auth));
+          });
+        }
 
-    this.toastr.success(`Permissões copiadas com sucesso de ${sourcePerson.name}!`);
+        this.toastr.success(`Permissões copiadas com sucesso de ${sourcePerson.name}!`);
+      },
+      error: (err) => {
+        console.error('Erro ao buscar permissões para cópia:', err);
+        this.toastr.error('Erro ao buscar permissões do funcionário selecionado.');
+      }
+    });
   }
 
   close(): void {
