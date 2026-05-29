@@ -31,7 +31,7 @@ export class LoginComponent {
     private httpClient: HttpClient,
   ) {
     this.loginForm = new FormGroup({
-      username: new FormControl('', [Validators.required]),
+      email: new FormControl('', [Validators.required]),
       password: new FormControl('', [Validators.required, Validators.minLength(4)]),
     });
 
@@ -48,7 +48,7 @@ export class LoginComponent {
   @Output('navigate') onNavigate = new EventEmitter();
 
   submit() {
-    this.authService.login(this.loginForm.value.username, this.loginForm.value.password).subscribe({
+    this.authService.login(this.loginForm.value.email, this.loginForm.value.password).subscribe({
       next: () => this.toastrService.success('Login feito com sucesso'),
       error: () => this.toastrService.error('Erro inesperado! Tente novamente mais tarde'),
     });
@@ -59,33 +59,11 @@ export class LoginComponent {
   }
 
   // --- Recovery Logic ---
-  // valid states: 'LOGIN', 'SELECTION', 'FORGOT_PASSWORD', 'FORGOT_USERNAME'
-  viewState = signal<'LOGIN' | 'SELECTION' | 'FORGOT_PASSWORD' | 'FORGOT_USERNAME'>('LOGIN');
+  // valid states: 'LOGIN', 'FORGOT_PASSWORD'
+  viewState = signal<'LOGIN' | 'FORGOT_PASSWORD'>('LOGIN');
 
-  setViewState(state: 'LOGIN' | 'SELECTION' | 'FORGOT_PASSWORD' | 'FORGOT_USERNAME') {
+  setViewState(state: 'LOGIN' | 'FORGOT_PASSWORD') {
     this.viewState.set(state);
-  }
-
-  submitForgotUsername() {
-    if (this.forgotPasswordForm.invalid) return;
-
-    this.httpClient
-      .post(
-        '/api/auth/forgot-username',
-        {
-          email: this.forgotPasswordForm.value.email,
-        },
-        { responseType: 'text' },
-      )
-      .subscribe({
-        next: () => {
-          this.toastrService.success('Nome de usuário enviado para seu email! Verifique sua caixa de entrada.');
-          this.setViewState('LOGIN');
-        },
-        error: (err) => {
-          this.toastrService.error(err.error || 'Erro ao recuperar usuário. Verifique o email.');
-        },
-      });
   }
 
   submitForgotPassword() {
@@ -114,13 +92,7 @@ export class LoginComponent {
   isLogin() {
     return this.viewState() === 'LOGIN';
   }
-  isSelection() {
-    return this.viewState() === 'SELECTION';
-  }
   isForgotPassword() {
     return this.viewState() === 'FORGOT_PASSWORD';
-  }
-  isForgotUsername() {
-    return this.viewState() === 'FORGOT_USERNAME';
   }
 }

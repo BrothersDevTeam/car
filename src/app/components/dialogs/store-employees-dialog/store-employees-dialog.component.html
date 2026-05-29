@@ -191,13 +191,13 @@
                 <form [formGroup]="getForm(person.personId)">
                   <div class="form-row">
                     <mat-form-field appearance="outline" class="field-full">
-                      <mat-label>Nome de usuário</mat-label>
-                      <input matInput formControlName="username" placeholder="ex: joao.silva" autocomplete="off" />
-                      @if (getForm(person.personId).get('username')?.hasError('required')) {
+                      <mat-label>E-mail de Acesso</mat-label>
+                      <input matInput formControlName="email" placeholder="ex: joao.silva@email.com" autocomplete="off" />
+                      @if (getForm(person.personId).get('email')?.hasError('required')) {
                         <mat-error>Obrigatório</mat-error>
                       }
-                      @if (getForm(person.personId).get('username')?.hasError('minlength')) {
-                        <mat-error>Mínimo 3 caracteres</mat-error>
+                      @if (getForm(person.personId).get('email')?.hasError('email')) {
+                        <mat-error>E-mail inválido</mat-error>
                       }
                     </mat-form-field>
                   </div>
