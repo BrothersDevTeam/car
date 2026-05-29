@@ -164,7 +164,7 @@
                 }
 
                 <!-- Funcionário SEM acesso: botão de criar -->
-                @if (!person.hasUser && person.relationship?.name?.toUpperCase() !== 'PROPRIETARIO') {
+                @if (!person.hasUser && (person.relationship?.name?.toUpperCase() !== 'PROPRIETARIO' || isRootAdmin)) {
                   <button
                     mat-raised-button
                     color="primary"

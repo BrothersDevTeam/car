@@ -30,6 +30,7 @@ import { RelationshipResponse } from '@interfaces/relationship';
 import { Authorizations } from '@enums/authorizations';
 import { RelationshipTypes } from '../../../enums/relationshipTypes';
 import { EmployeeAuthorizationsDialogComponent } from '../employee-authorizations-dialog/employee-authorizations-dialog.component';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 export interface StoreEmployeesDialogData {
   store: Store;
@@ -536,25 +537,38 @@ export class StoreEmployeesDialogComponent implements OnInit {
     }
 
     const userId = person.user?.userId ?? person.userId!;
-    const confirmed = confirm(
-      `Tem certeza que deseja remover o acesso ao sistema de "${person.name}"?\n\nA pessoa continuará cadastrada, mas não poderá mais fazer login.`,
-    );
-    if (!confirmed) return;
 
-    this.revokingAccessFor = person.personId;
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      disableClose: true,
+      data: {
+        title: 'Confirmar Revogação de Acesso',
+        message: `Tem certeza que deseja remover o acesso ao sistema de <strong>"${person.name}"</strong>?<br><br>A pessoa continuará cadastrada, mas não poderá mais fazer login.`,
+        confirmText: 'Sim, Revogar',
+        cancelText: 'Cancelar',
+        icon: 'person_remove',
+        type: 'danger',
+      },
+    });
 
-    this.employeeService.unlinkUser(userId).subscribe({
-      next: () => {
-        this.toastr.success(`Acesso de ${person.name} revogado com sucesso.`);
-        this.revokingAccessFor = null;
-        this.loadEmployees();
-      },
-      error: (err) => {
-        console.error('Erro ao revogar acesso:', err);
-        const msg = err.error?.message || err.error || 'Erro ao revogar acesso';
-        this.toastr.error(typeof msg === 'string' ? msg : 'Erro ao revogar acesso');
-        this.revokingAccessFor = null;
-      },
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (!confirmed) return;
+
+      this.revokingAccessFor = person.personId;
+
+      this.employeeService.unlinkUser(userId).subscribe({
+        next: () => {
+          this.toastr.success(`Acesso de ${person.name} revogado com sucesso.`);
+          this.revokingAccessFor = null;
+          this.loadEmployees();
+        },
+        error: (err) => {
+          console.error('Erro ao revogar acesso:', err);
+          const msg = err.error?.message || err.error || 'Erro ao revogar acesso';
+          this.toastr.error(typeof msg === 'string' ? msg : 'Erro ao revogar acesso');
+          this.revokingAccessFor = null;
+        },
+      });
     });
   }
 
