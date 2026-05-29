@@ -332,9 +332,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
 
     for (const field of fieldsToCompare) {
       const fVal = formValue[field.formField];
-      let sVal = typeof field.sourceField === 'function'
-        ? field.sourceField(source)
-        : source[field.sourceField];
+      let sVal = typeof field.sourceField === 'function' ? field.sourceField(source) : source[field.sourceField];
 
       // Se o campo for booleano
       if (typeof fVal === 'boolean' || typeof sVal === 'boolean') {
@@ -364,7 +362,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     if (this.isSaving || this.isInitializing) {
       return true;
     }
-    
+
     const hasActiveDraft = !!this.draft || !!this.selectedDraftId;
     const isEditMode = !!this.dataForm && !!this.dataForm.personId;
 
@@ -636,8 +634,8 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
 
     setTimeout(() => {
       this.captureInitialFormValue();
-      
-      // Se for uma edição e temos o dataForm original do banco, 
+
+      // Se for uma edição e temos o dataForm original do banco,
       // o formulário deve ser considerado dirty/alterado em relação ao banco!
       if (this.dataForm && this.dataForm.name) {
         this.form.markAsDirty();

@@ -192,7 +192,12 @@
                   <div class="form-row">
                     <mat-form-field appearance="outline" class="field-full">
                       <mat-label>E-mail de Acesso</mat-label>
-                      <input matInput formControlName="email" placeholder="ex: joao.silva@email.com" autocomplete="off" />
+                      <input
+                        matInput
+                        formControlName="email"
+                        placeholder="ex: joao.silva@email.com"
+                        autocomplete="off"
+                      />
                       @if (getForm(person.personId).get('email')?.hasError('required')) {
                         <mat-error>Obrigatório</mat-error>
                       }

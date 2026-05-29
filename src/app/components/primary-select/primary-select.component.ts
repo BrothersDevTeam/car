@@ -1,4 +1,13 @@
-import { Component, forwardRef, Input, HostListener, OnInit, OnChanges, SimpleChanges, ElementRef } from '@angular/core';
+import {
+  Component,
+  forwardRef,
+  Input,
+  HostListener,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  ElementRef,
+} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -160,7 +169,10 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
    */
   onTouched: any = () => {};
 
-  constructor(private authService: AuthService, private elementRef: ElementRef) {}
+  constructor(
+    private authService: AuthService,
+    private elementRef: ElementRef,
+  ) {}
 
   ngOnInit() {
     this.loadOptions();
@@ -308,9 +320,7 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
       return;
     }
 
-    this.filteredOptions = this.options.filter((option) =>
-      this.getOptionLabel(option).toLowerCase().includes(term)
-    );
+    this.filteredOptions = this.options.filter((option) => this.getOptionLabel(option).toLowerCase().includes(term));
     this.focusedOptionIndex = -1; // Reseta o foco ao filtrar
   }
 

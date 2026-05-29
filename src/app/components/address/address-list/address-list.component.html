@@ -22,13 +22,14 @@
         panelClass="header-draft-panel"
       >
         <mat-option [value]="null" class="new-draft-option">
-          <mat-icon style="margin-right: 8px; color: white;">add_circle_outline</mat-icon>
+          <mat-icon style="margin-right: 8px; color: white">add_circle_outline</mat-icon>
           Iniciar novo cadastro
         </mat-option>
         <mat-option *ngFor="let draft of availableDrafts" [value]="draft" class="draft-option-item">
           <span class="draft-text">
             {{ draft.draftName || 'Sem nome' }}
-            <ng-container *ngIf="draft.createdBy"> (por {{ draft.createdBy }})</ng-container> -
+            <ng-container *ngIf="draft.createdBy">(por {{ draft.createdBy }})</ng-container>
+            -
             {{ draft.lastModified | date: 'dd/MM HH:mm' }}
           </span>
           <button mat-icon-button (click)="removeDraft(draft, $event)" matTooltip="Excluir rascunho">

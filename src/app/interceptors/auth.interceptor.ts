@@ -7,7 +7,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   let reqConfig: any = {};
-  
+
   // Habilita envio do Cookie HttpOnly gerado pelo backend
   if (req.url.startsWith('/api')) {
     reqConfig.withCredentials = true;

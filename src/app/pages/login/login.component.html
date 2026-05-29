@@ -16,15 +16,25 @@
       <ng-container *ngIf="isLogin()">
         <form [formGroup]="loginForm" (keydown.enter)="submit()">
           <div class="input-group">
-            <app-primary-input formControlName="email" inputName="email" type="text" placeholder="E-MAIL"
-              [uppercase]="false">
+            <app-primary-input
+              formControlName="email"
+              inputName="email"
+              type="text"
+              placeholder="E-MAIL"
+              [uppercase]="false"
+            >
               <mat-icon>mail_outline</mat-icon>
             </app-primary-input>
           </div>
 
           <div class="input-group">
-            <app-primary-input formControlName="password" inputName="password"
-              [type]="passwordVisible() ? 'text' : 'password'" placeholder="SENHA" [uppercase]="false">
+            <app-primary-input
+              formControlName="password"
+              inputName="password"
+              [type]="passwordVisible() ? 'text' : 'password'"
+              placeholder="SENHA"
+              [uppercase]="false"
+            >
               <mat-icon (click)="togglePasswordVisibility()" style="cursor: pointer">
                 {{ passwordVisible() ? 'visibility' : 'visibility_off' }}
               </mat-icon>
@@ -37,13 +47,15 @@
 
           <div class="form-footer" style="flex-direction: column; align-items: flex-end; gap: 5px">
             <!-- Removed checkbox as per my understanding it wasn't requested or functional yet, or I can keep it but adjust layout -->
-            <div style="
+            <div
+              style="
                 width: 100%;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 margin-bottom: 5px;
-              ">
+              "
+            >
               <label class="checkbox-container">
                 <input type="checkbox" />
                 <span class="checkmark"></span>
@@ -70,8 +82,13 @@
           </div>
 
           <div class="input-group">
-            <app-primary-input formControlName="email" inputName="email" type="email" placeholder="SEU EMAIL"
-              [uppercase]="false">
+            <app-primary-input
+              formControlName="email"
+              inputName="email"
+              type="email"
+              placeholder="SEU EMAIL"
+              [uppercase]="false"
+            >
               <mat-icon>email</mat-icon>
             </app-primary-input>
           </div>
@@ -83,7 +100,6 @@
           </div>
         </form>
       </ng-container>
-
     </section>
   </div>
 </main>

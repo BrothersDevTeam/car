@@ -15,7 +15,7 @@
               <mat-label>Selecione um rascunho para continuar</mat-label>
               <mat-select [(value)]="selectedDraftId" (selectionChange)="onDraftSelected($event)">
                 <mat-option value="new" class="new-draft-option">
-                  <mat-icon style="margin-right: 8px; color: white;">add_circle_outline</mat-icon>
+                  <mat-icon style="margin-right: 8px; color: white">add_circle_outline</mat-icon>
                   Iniciar novo cadastro
                 </mat-option>
                 @for (draft of availableDrafts; track draft.id) {
@@ -25,7 +25,9 @@
                         <span class="draft-name">
                           {{ draft.draftName || 'Sem nome' }}
                           @if (draft.createdBy) {
-                            <small class="draft-author" style="opacity: 0.7; font-size: 0.85em;"> (por {{ draft.createdBy }})</small>
+                            <small class="draft-author" style="opacity: 0.7; font-size: 0.85em">
+                              (por {{ draft.createdBy }})
+                            </small>
                           }
                         </span>
                         <span class="draft-date">
@@ -249,7 +251,7 @@
       </div>
     </app-wrapper-card>
 
-    <div class="form-actions" style="display: flex; gap: 16px; align-items: center;">
+    <div class="form-actions" style="display: flex; gap: 16px; align-items: center">
       <button
         mat-raised-button
         type="button"
@@ -257,7 +259,7 @@
         (click)="onSubmit()"
         [disabled]="isSaveButtonDisabled"
         #submitButton
-        style="flex: 1;"
+        style="flex: 1"
       >
         Salvar
       </button>
@@ -271,9 +273,9 @@
           (click)="saveLocalDraft(false, undefined, undefined, true)"
           [disabled]="isSaving"
           matTooltip="Salvar Rascunho"
-          style="flex: 0 0 auto !important; width: 48px !important; height: 48px !important; min-width: 48px !important;"
+          style="flex: 0 0 auto !important; width: 48px !important; height: 48px !important; min-width: 48px !important"
         >
-          <mat-icon style="margin: 0 !important;">save_as</mat-icon>
+          <mat-icon style="margin: 0 !important">save_as</mat-icon>
         </button>
       }
     </div>

@@ -129,7 +129,7 @@ export class FormDraftService {
         // Fallback: se o rascunho anterior for texto simples (antigo), decodifica como está
         decrypted = stored;
       }
-      
+
       const draft: FormDraft<T> = JSON.parse(decrypted);
       // Converte a string de data de volta para objeto Date
       draft.lastModified = new Date(draft.lastModified);
@@ -272,12 +272,12 @@ export class FormDraftService {
     const encoder = new TextEncoder();
     const textBytes = encoder.encode(text);
     const keyBytes = encoder.encode(key);
-    
+
     const encryptedBytes = new Uint8Array(textBytes.length);
     for (let i = 0; i < textBytes.length; i++) {
       encryptedBytes[i] = textBytes[i] ^ keyBytes[i % keyBytes.length];
     }
-    
+
     let binaryString = '';
     for (let i = 0; i < encryptedBytes.length; i++) {
       binaryString += String.fromCharCode(encryptedBytes[i]);
@@ -295,15 +295,15 @@ export class FormDraftService {
     for (let i = 0; i < binaryString.length; i++) {
       encryptedBytes[i] = binaryString.charCodeAt(i);
     }
-    
+
     const encoder = new TextEncoder();
     const keyBytes = encoder.encode(key);
-    
+
     const decryptedBytes = new Uint8Array(encryptedBytes.length);
     for (let i = 0; i < encryptedBytes.length; i++) {
       decryptedBytes[i] = encryptedBytes[i] ^ keyBytes[i % keyBytes.length];
     }
-    
+
     const decoder = new TextDecoder();
     return decoder.decode(decryptedBytes);
   }

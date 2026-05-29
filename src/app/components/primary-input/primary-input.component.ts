@@ -1,6 +1,15 @@
 import { NgxMaskDirective } from 'ngx-mask';
 import { FormsModule } from '@angular/forms';
-import { Component, forwardRef, Input, Output, EventEmitter, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import {
+  Component,
+  forwardRef,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectorRef,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 
@@ -165,10 +174,10 @@ export class PrimaryInputComponent implements ControlValueAccessor {
     // Se uppercase está habilitado E o tipo não é password, converte para maiúsculas
     if (this.uppercase && this.type !== 'password' && value) {
       const upperValue = value.toUpperCase();
-      
+
       if (this.value !== upperValue) {
         this.value = upperValue;
-        
+
         if (inputEl && selectionStart !== null && selectionEnd !== null) {
           setTimeout(() => {
             inputEl.setSelectionRange(selectionStart, selectionEnd);
