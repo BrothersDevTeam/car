@@ -115,6 +115,10 @@
     font-size: 14px;
     color: var(--color-text-secondary);
   }
+
+  mat-checkbox {
+    width: fit-content;
+  }
 }
 
 .sync-button {

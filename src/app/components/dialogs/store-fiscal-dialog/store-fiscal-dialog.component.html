@@ -23,7 +23,15 @@
 
       <div class="form-row">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Regime Tributário</mat-label>
+          <mat-label style="display: flex; align-items: center; gap: 4px;">
+            Regime Tributário
+            <mat-icon
+              style="font-size: 16px; width: 16px; height: 16px; cursor: help"
+              matTooltip="Lucro Presumido: comum devido à Equiparação a Consignação (tributação sobre a margem de lucro). Simples Nacional: comum para micro/pequenas. A escolha altera como a emissão de nota é montada."
+              matTooltipClass="custom-tooltip"
+              matTooltipPosition="right"
+            >info_outline</mat-icon>
+          </mat-label>
           <mat-select formControlName="parametroFiscalRegimeTributario">
             @for (regime of regimes; track regime.value) {
               <mat-option [value]="regime.value">{{ regime.label }}</mat-option>
@@ -76,13 +84,19 @@
 
       <div class="checkbox-group">
         <h4>Opções de Emissão</h4>
-        <mat-checkbox formControlName="parametroFiscalHabilitaNfe">Habilitar NFe</mat-checkbox>
-        <mat-checkbox formControlName="parametroFiscalHabilitaNfce">Habilitar NFC-e</mat-checkbox>
-        <mat-checkbox formControlName="parametroFiscalCalculoAutomaticoImpostos">
+        <mat-checkbox formControlName="parametroFiscalHabilitaNfe" matTooltip="Obrigatório para registrar entradas e saídas de veículos." matTooltipClass="custom-tooltip" matTooltipPosition="right">
+          Habilitar NFe
+        </mat-checkbox>
+        <mat-checkbox formControlName="parametroFiscalHabilitaNfce" matTooltip="Cupom fiscal eletrônico. Usado para vendas de balcão (ex: acessórios/peças), e não para venda do veículo em si." matTooltipClass="custom-tooltip" matTooltipPosition="right">
+          Habilitar NFC-e
+        </mat-checkbox>
+        <mat-checkbox formControlName="parametroFiscalCalculoAutomaticoImpostos" matTooltip="Fundamental para aplicar a redução na base de cálculo de ICMS para veículos usados automaticamente (calculado pelo sistema)." matTooltipClass="custom-tooltip" matTooltipPosition="right">
           Cálculo Automático de Impostos
         </mat-checkbox>
-        <mat-checkbox formControlName="parametroFiscalUtilizarCreditoIcms">Utilizar Crédito de ICMS</mat-checkbox>
-        <mat-checkbox formControlName="parametroFiscalUtilizarCreditoPisCofins">
+        <mat-checkbox formControlName="parametroFiscalUtilizarCreditoIcms" matTooltip="Usado na compra de carros de fornecedores tributados (se o estado não vedar). Lojas do Simples Nacional não usam." matTooltipClass="custom-tooltip" matTooltipPosition="right">
+          Utilizar Crédito de ICMS
+        </mat-checkbox>
+        <mat-checkbox formControlName="parametroFiscalUtilizarCreditoPisCofins" matTooltip="Aplicável apenas para lojas no Lucro Real (Não cumulativo). Lojas no Presumido ou Simples não devem marcar." matTooltipClass="custom-tooltip" matTooltipPosition="right">
           Utilizar Crédito PIS/COFINS
         </mat-checkbox>
       </div>

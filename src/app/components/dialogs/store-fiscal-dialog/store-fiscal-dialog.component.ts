@@ -12,6 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 // Services
 import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fiscal.service';
@@ -32,6 +33,7 @@ import { Store } from '@interfaces/store';
     MatCheckboxModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
   ],
   templateUrl: './store-fiscal-dialog.component.html',
   styleUrl: './store-fiscal-dialog.component.scss',
