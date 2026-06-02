@@ -19,7 +19,7 @@ export interface ParametroFiscal {
   parametroFiscalUtilizarCreditoPisCofins?: boolean;
   parametroFiscalObservacoes?: string;
   parametroFiscalHabilitaNfe?: boolean;
-  parametroFiscalHabilitaNfce?: boolean;
+
 
   // Certificado
   parametroFiscalCertificadoBase64?: string;

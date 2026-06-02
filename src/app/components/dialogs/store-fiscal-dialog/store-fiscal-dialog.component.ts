@@ -72,7 +72,6 @@ export class StoreFiscalDialogComponent implements OnInit {
       parametroFiscalUtilizarCreditoIcms: [false],
       parametroFiscalUtilizarCreditoPisCofins: [false],
       parametroFiscalHabilitaNfe: [true],
-      parametroFiscalHabilitaNfce: [false],
       parametroFiscalSenhaCertificado: [''],
       parametroFiscalCertificadoBase64: [''],
       parametroFiscalCadastradoFocusNfe: [{ value: false, disabled: true }],
