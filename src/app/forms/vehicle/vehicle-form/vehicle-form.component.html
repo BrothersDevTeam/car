@@ -1,58 +1,60 @@
 <div class="form-container">
   <!-- Seção de Rascunhos -->
-  @if (availableDrafts.length > 0) {
+  @if (availableDrafts.length > 0 && !dataForm) {
     <div class="drafts-section">
-      <mat-card class="draft-card shadow-elegant">
+      <mat-card class="draft-card">
         <mat-card-header>
           <mat-icon mat-card-avatar>history</mat-icon>
           <mat-card-title>Veículos em andamento</mat-card-title>
-          <mat-card-subtitle>Continue preenchendo de onde parou</mat-card-subtitle>
+          <mat-card-subtitle>Você possui rascunhos salvos para este perfil.</mat-card-subtitle>
         </mat-card-header>
+
         <mat-card-content>
-          <mat-form-field appearance="outline" class="draft-select-field">
-            <mat-label>Continuar preenchimento</mat-label>
-            <mat-select
-              [value]="selectedDraft"
-              (selectionChange)="handleDraftSelection($event.value)"
-              placeholder="Selecione um rascunho"
-            >
-              <mat-option [value]="null" class="new-draft-option">
-                <mat-icon style="margin-right: 8px; color: white">add_circle_outline</mat-icon>
-                Iniciar novo cadastro
-              </mat-option>
-              @for (draft of availableDrafts; track draft.id) {
-                <mat-option [value]="draft">
-                  <div class="draft-option-content">
-                    <div class="draft-info">
-                      <span class="draft-name">
-                        {{ draft.draftName || 'Rascunho sem nome' }}
-                        @if (draft.createdBy) {
-                          <small class="draft-author" style="opacity: 0.7; font-size: 0.85em">
-                            (por {{ draft.createdBy }})
-                          </small>
-                        }
-                      </span>
-                      <span class="draft-date">Salvo em: {{ draft.lastModified | date: 'dd/MM/yyyy HH:mm' }}</span>
-                    </div>
-                    <button
-                      mat-icon-button
-                      color="warn"
-                      (click)="removeDraft(draft, $event)"
-                      matTooltip="Excluir rascunho"
-                    >
-                      <mat-icon>delete_outline</mat-icon>
-                    </button>
-                  </div>
+          <div class="draft-selector-container">
+            <mat-form-field appearance="outline" class="draft-select-field">
+              <mat-label>Selecione um rascunho para continuar ou inicie um novo cadastro</mat-label>
+              <mat-select [(value)]="selectedDraftId" (selectionChange)="handleDraftSelection($event.value)">
+                <mat-option value="new" class="new-draft-option">
+                  <mat-icon style="margin-right: 8px; color: white">add_circle_outline</mat-icon>
+                  Iniciar novo cadastro
                 </mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+                @for (draft of availableDrafts; track draft.id) {
+                  <mat-option [value]="draft.id" class="draft-option-item">
+                    <div class="draft-option-content">
+                      <div class="draft-info">
+                        <span class="draft-name">
+                          {{ draft.draftName || 'Sem nome' }}
+                          @if (draft.createdBy) {
+                            <small class="draft-author" style="opacity: 0.7; font-size: 0.85em">
+                              (por {{ draft.createdBy }})
+                            </small>
+                          }
+                        </span>
+                        <span class="draft-date">
+                          {{ formatDraftDate(draft.lastModified) }}
+                        </span>
+                      </div>
+                      <button
+                        mat-icon-button
+                        class="delete-draft-btn"
+                        (click)="removeDraft(draft.id, $event)"
+                        matTooltip="Excluir rascunho"
+                      >
+                        <mat-icon>delete_outline</mat-icon>
+                      </button>
+                    </div>
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
         </mat-card-content>
       </mat-card>
     </div>
   }
 
-  <form [formGroup]="form" (keydown.enter)="onEnter($event)" class="modern-form">
+  @if (showFormFields) {
+    <form [formGroup]="form" (keydown.enter)="onEnter($event)" class="modern-form">
     @if (dataForm?.plate) {
       <div class="form-header-title">
         <mat-icon>directions_car</mat-icon>
@@ -229,6 +231,21 @@
                 maxHeight="500px"
               ></app-primary-select>
             </div>
+
+            @if (getSelectedOptionals().length > 0) {
+              <div class="selected-optionals-container animate-fade-in">
+                <mat-chip-set>
+                  @for (opt of getSelectedOptionals(); track opt.value) {
+                    <mat-chip-row (removed)="removeOptional(opt.value)" class="optional-chip">
+                      {{ opt.label }}
+                      <button matChipRemove aria-label="Remover">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    </mat-chip-row>
+                  }
+                </mat-chip-set>
+              </div>
+            }
           </section>
 
           <!-- Grupo: Documentação e Motor -->
@@ -355,6 +372,7 @@
       </button>
     </div>
   </form>
+  }
 </div>
 
 <!-- Drawer para criar/editar pessoa -->

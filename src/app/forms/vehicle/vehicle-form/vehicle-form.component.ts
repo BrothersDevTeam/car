@@ -32,6 +32,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatChipsModule } from '@angular/material/chips';
 
 import { ToastrService } from 'ngx-toastr';
 import { distinctUntilChanged, Subscription, of, Observable } from 'rxjs';
@@ -81,6 +82,7 @@ import { ActionsService } from '@services/actions.service';
     MatInputModule,
     MatFormFieldModule,
     MatButtonToggleModule,
+    MatChipsModule,
   ],
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',
@@ -93,6 +95,8 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   // Gestão de Rascunhos
   availableDrafts: FormDraft[] = [];
   selectedDraft: FormDraft | null = null;
+  showFormFields = false;
+  selectedDraftId: string | null = null;
   private formDraftService = inject(FormDraftService);
   private actionsService = inject(ActionsService);
   private router = inject(Router);
@@ -251,20 +255,39 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   private checkForDrafts() {
     this.availableDrafts = this.formDraftService.getDraftsByType(this.FORM_TYPE);
+    if (this.availableDrafts.length === 0) {
+      this.showFormFields = true;
+    } else if (this.dataForm || this.selectedDraftId) {
+      this.showFormFields = true;
+    }
   }
 
-  handleDraftSelection(draft: FormDraft | null) {
-    if (!draft) {
+  handleDraftSelection(draftId: string | null) {
+    this.showFormFields = true;
+    if (!draftId || draftId === 'new') {
+      this.selectedDraftId = 'new';
       this.selectedDraft = null;
       this.form.reset({
         origin: 'NACIONAL',
         fuelTypes: [],
       });
+      this.modelControl.reset();
+      this.fipeYearControl.reset();
+      this.years = [];
+      this.selectModelDisabled.set(true);
+      this.selectYearDisabled.set(true);
       this.initialFormValue = JSON.stringify(this.form.value);
       return;
     }
 
+    const draft = this.availableDrafts.find((d) => d.id === draftId);
+    if (!draft) {
+      console.error('[handleDraftSelection] Rascunho não encontrado:', draftId);
+      return;
+    }
+
     this.selectedDraft = draft;
+    this.selectedDraftId = draft.id;
     // Para veículos, o patchValue resolve a maioria, mas precisamos
     // garantir que o estado de marca/modelo carregue corretamente
     this.isFillingForm = true;
@@ -284,14 +307,35 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     this.actionsService.hasFormChanges.set(false);
   }
 
-  removeDraft(draft: FormDraft, event: MouseEvent) {
-    event.stopPropagation();
+  removeDraft(draftId: string, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    const draft = this.availableDrafts.find((d) => d.id === draftId);
+    if (!draft) {
+      return;
+    }
+
     this.formDraftService.removeDraftById(draft.id);
     this.checkForDrafts();
 
-    if (this.selectedDraft?.id === draft.id) {
+    if (this.selectedDraftId === draftId) {
+      this.form.reset({
+        origin: 'NACIONAL',
+        fuelTypes: [],
+      });
+      this.modelControl.reset();
+      this.fipeYearControl.reset();
+      this.years = [];
+      this.selectModelDisabled.set(true);
+      this.selectYearDisabled.set(true);
       this.selectedDraft = null;
+      this.selectedDraftId = null;
+      this.showFormFields = this.availableDrafts.length === 0;
     }
+
+    this.toastrService.success('Rascunho excluído');
   }
 
   // Método auxiliar para mapear o tipo de veículo do formulário para o tipo da API FIPE
@@ -522,6 +566,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     // Busca rascunhos disponíveis
+    this.showFormFields = !!this.dataForm;
     this.checkForDrafts();
 
     // Inicializa o valor inicial do formulário
@@ -597,6 +642,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
+      this.showFormFields = true;
       // Reset da flag quando recebe novo dataForm
       this.formFilled = false;
       // Tenta preencher o formulário (só executa se brands e colors já foram carregados)
@@ -793,6 +839,8 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
         delete payload[key];
       }
     });
+
+    console.log('Payload final enviado para o backend:', payload);
 
     // Cria ou atualiza o veículo
     if (this.dataForm?.vehicleId) {
@@ -1004,5 +1052,37 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
     const normalizedMatch = Object.keys(FuelTypes).find((key) => key === normalized);
     return normalizedMatch ? [normalizedMatch] : [];
+  }
+
+  protected formatDraftDate(date: Date): string {
+    const now = new Date();
+    const diffMs = now.getTime() - new Date(date).getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) {
+      return 'agora mesmo';
+    } else if (diffMins < 60) {
+      return `há ${diffMins} min${diffMins > 1 ? 's' : ''}`;
+    } else if (diffHours < 24) {
+      return `há ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+    } else if (diffDays < 7) {
+      return `há ${diffDays} dia${diffDays > 1 ? 's' : ''}`;
+    } else {
+      return new Date(date).toLocaleDateString('pt-BR');
+    }
+  }
+
+  getSelectedOptionals(): { value: string; label: string }[] {
+    const selectedIds = this.form.get('optionalIds')?.value || [];
+    return this.optionalsOptions.filter((opt) => selectedIds.includes(opt.value));
+  }
+
+  removeOptional(optionalId: string) {
+    const selectedIds = this.form.get('optionalIds')?.value || [];
+    const newIds = selectedIds.filter((id: string) => id !== optionalId);
+    this.form.get('optionalIds')?.setValue(newIds);
+    this.form.get('optionalIds')?.markAsDirty();
   }
 }

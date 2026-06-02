@@ -104,7 +104,7 @@
                   <input
                     type="checkbox"
                     [checked]="isSelected(option)"
-                    (click)="$event.stopPropagation()"
+                    (click)="toggleOption(option); $event.stopPropagation()"
                     tabindex="-1"
                     [attr.aria-hidden]="true"
                   />
