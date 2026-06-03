@@ -427,7 +427,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
         next: (response) => {
           this.years = response.map((ano) => ({
             id: ano.codigo,
-            name: ano.nome,
+            name: ano.nome.replace('32000', 'Zero KM'),
           }));
           this.selectYearDisabled.set(false);
           this.loadingYears.set(false);
