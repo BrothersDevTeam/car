@@ -91,8 +91,63 @@
       />
     </form>
   } @else {
-    <!-- Stepper com 3 etapas -->
-    <mat-stepper orientation="vertical" linear #stepper (selectionChange)="onStepChange($event)">
+    <!-- Seção Premium de Rascunhos -->
+    @if (availableDrafts.length > 0 && data.mode === 'create') {
+      <div class="drafts-section" style="margin-bottom: 16px;">
+        <mat-card class="draft-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>history</mat-icon>
+            <mat-card-title>Cadastros em andamento</mat-card-title>
+            <mat-card-subtitle>Você possui rascunhos salvos para este perfil.</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content style="padding: 16px 0 0 0;">
+            <div class="draft-selector-container">
+              <mat-form-field appearance="outline" class="draft-select-field" style="width: 100%;">
+                <mat-label>Selecione um rascunho para continuar ou inicie um novo cadastro</mat-label>
+                <mat-select [(value)]="selectedDraftId" (selectionChange)="onDraftSelected($event)">
+                  <mat-option value="new" class="new-draft-option">
+                    <mat-icon style="margin-right: 8px; color: white">add_circle_outline</mat-icon>
+                    Iniciar novo cadastro
+                  </mat-option>
+                  @for (draft of availableDrafts; track draft.id) {
+                    <mat-option [value]="draft.id" class="draft-option-item">
+                      <div class="draft-option-content" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div class="draft-info" style="display: flex; flex-direction: column;">
+                          <span class="draft-name" style="font-weight: 500;">
+                            {{ draft.draftName || 'Sem nome' }}
+                            @if (draft.createdBy) {
+                              <small class="draft-author" style="opacity: 0.7; font-size: 0.85em">
+                                (por {{ draft.createdBy }})
+                              </small>
+                            }
+                          </span>
+                          <span class="draft-date" style="font-size: 0.8em; opacity: 0.6;">
+                            {{ formatDraftDate(draft.lastModified) }}
+                          </span>
+                        </div>
+                        <button
+                          mat-icon-button
+                          class="delete-draft-btn"
+                          (click)="deleteDraft(draft.id, $event)"
+                          matTooltip="Excluir rascunho"
+                        >
+                          <mat-icon>delete_outline</mat-icon>
+                        </button>
+                      </div>
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    }
+
+    @if (showFormFields) {
+      <!-- Stepper com 3 etapas -->
+      <mat-stepper orientation="vertical" linear #stepper (selectionChange)="onStepChange($event)">
       <!-- ========== STEP 1: DADOS DA LOJA ========== -->
       <mat-step [stepControl]="storeForm" label="Dados da Loja">
         <form [formGroup]="storeForm" class="step-form">
@@ -347,12 +402,13 @@
         </form>
       </mat-step>
     </mat-stepper>
+    }
   }
 </mat-dialog-content>
 
 <!-- Botões de ação finais -->
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()" [disabled]="isSubmitting">Cancelar</button>
+  <button mat-stroked-button class="btn-cancel" (click)="onCancel()" [disabled]="isSubmitting">Cancelar</button>
 
   @if (data.mode === 'edit') {
     <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!storeForm.valid || isSubmitting">
@@ -387,5 +443,19 @@
         </span>
       }
     </button>
+
+    <!-- Salvar Rascunho (Ícone discreto) -->
+    @if (canShowDraftButton) {
+      <button
+        mat-icon-button
+        type="button"
+        color="primary"
+        (click)="openSaveDraftDialog()"
+        [disabled]="isSubmitting"
+        matTooltip="Salvar Rascunho"
+      >
+        <mat-icon>save_as</mat-icon>
+      </button>
+    }
   }
 </mat-dialog-actions>
