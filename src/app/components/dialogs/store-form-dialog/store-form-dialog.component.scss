@@ -171,22 +171,62 @@ mat-stepper {
 mat-dialog-actions {
   padding: 1rem 1.5rem;
   border-top: 1px solid rgba(0, 0, 0, 0.12);
-  gap: 0.5rem;
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
 
-  button {
+  button[mat-stroked-button], button[mat-raised-button] {
+    flex: 1;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
+    height: 44px;
 
     // Container para conteúdo do botão (necessário para @if/@else do Angular)
     .button-content {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 0.5rem;
     }
 
     mat-spinner {
       margin-right: 0.5rem;
+    }
+  }
+
+  .btn-cancel {
+    border: 1px solid #1976d2 !important;
+    color: #1976d2 !important;
+    background-color: transparent !important;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+      background-color: #e3f2fd !important;
+    }
+
+    &:disabled {
+      border-color: rgba(0, 0, 0, 0.12) !important;
+      color: rgba(0, 0, 0, 0.26) !important;
+      background-color: transparent !important;
+    }
+  }
+
+  button[mat-icon-button] {
+    flex: 0 0 auto !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+    margin-left: 0.5rem;
+
+    mat-icon {
+      margin: 0 !important;
     }
   }
 }

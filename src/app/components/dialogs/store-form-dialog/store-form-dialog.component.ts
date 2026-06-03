@@ -7,12 +7,18 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@interfaces/store';
 import { StoreService } from '@services/store.service';
 import { PersonService } from '@services/person.service';
 import { StoreContextService } from '@services/store-context.service';
+import { FormDraftService, FormDraft } from '@services/form-draft.service';
+import { ToastrService } from 'ngx-toastr';
+import { SaveDraftDialogComponent, SaveDraftDialogResult } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
+import { MatCardModule } from '@angular/material/card';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PrimaryInputComponent } from '../../primary-input/primary-input.component';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { of, throwError } from 'rxjs';
@@ -65,6 +71,9 @@ export interface StoreFormDialogData {
     MatIconModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
+    MatCardModule,
+    MatSelectModule,
+    MatTooltipModule,
     PrimaryInputComponent, // Componente de input customizado
   ],
   providers: [],
@@ -76,6 +85,14 @@ export class StoreFormDialogComponent implements OnInit {
   storeForm!: FormGroup; // Step 1: Dados da Loja
   personForm!: FormGroup; // Step 2: Dados do Proprietário
   accessForm!: FormGroup; // Step 3: Dados de Acesso
+
+  readonly FORM_TYPE = 'store';
+
+  availableDrafts: FormDraft[] = [];
+  selectedDraftId: string | null = null;
+  lastSavedDraftValue: any = null;
+  initialFormValues: any = null;
+  showFormFields = false;
 
   // Estados de carregamento e erro
   isSubmitting = false;
@@ -89,6 +106,9 @@ export class StoreFormDialogComponent implements OnInit {
     public dialogRef: MatDialogRef<StoreFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: StoreFormDialogData,
     private elementRef: ElementRef,
+    private formDraftService: FormDraftService,
+    private dialog: MatDialog,
+    private toastrService: ToastrService,
   ) {}
 
   ngOnInit(): void {
@@ -101,7 +121,31 @@ export class StoreFormDialogComponent implements OnInit {
         email: this.data.store.email,
         phoneNumber: this.data.store.phone,
       });
+      this.showFormFields = true;
+    } else {
+      this.loadAvailableDrafts();
+
+      // Monitora mudanças nos formulários para controlar o estado dirty e hasChanges
+      const formsChanges = () => {
+        this.captureInitialFormValue();
+      };
+
+      this.storeForm.valueChanges.subscribe(formsChanges);
+      this.personForm.valueChanges.subscribe(formsChanges);
+      this.accessForm.valueChanges.subscribe(formsChanges);
+
+      // Captura o estado inicial vazio
+      setTimeout(() => {
+        this.captureInitialFormValue();
+      }, 500);
     }
+
+    // Inscreve para atualizar a lista de rascunhos se houver mudanças no localStorage
+    this.formDraftService.draftsChanges.subscribe(() => {
+      if (this.data.mode === 'create') {
+        this.loadAvailableDrafts();
+      }
+    });
   }
 
   /**
@@ -117,6 +161,218 @@ export class StoreFormDialogComponent implements OnInit {
         });
       }
     }, 250);
+  }
+
+  private getCurrentFormValue(): any {
+    return {
+      store: this.storeForm.value,
+      person: this.personForm.value,
+      access: this.accessForm.value,
+    };
+  }
+
+  private captureInitialFormValue(): void {
+    if (!this.initialFormValues) {
+      this.initialFormValues = this.getCurrentFormValue();
+    }
+  }
+
+  hasUnsavedChanges(): boolean {
+    if (!this.initialFormValues) return false;
+    const current = JSON.stringify(this.getCurrentFormValue());
+    const initial = JSON.stringify(this.initialFormValues);
+    return current !== initial;
+  }
+
+  hasChangesComparedToDraft(): boolean {
+    const source = this.lastSavedDraftValue;
+    if (!source) {
+      return this.hasUnsavedChanges();
+    }
+    const current = JSON.stringify(this.getCurrentFormValue());
+    const lastSaved = JSON.stringify(source);
+    return current !== lastSaved;
+  }
+
+  get canShowDraftButton(): boolean {
+    if (this.data.mode !== 'create') return false;
+    const isDirty = this.storeForm.dirty || this.personForm.dirty || this.accessForm.dirty;
+    return !this.isSubmitting && isDirty && this.hasChangesComparedToDraft();
+  }
+
+  private loadAvailableDrafts(): void {
+    this.availableDrafts = this.formDraftService.getDraftsByType(this.FORM_TYPE);
+    if (this.availableDrafts.length === 0) {
+      this.showFormFields = true;
+    } else if (this.selectedDraftId) {
+      this.showFormFields = true;
+    } else {
+      this.showFormFields = false;
+    }
+  }
+
+  onDraftSelected(event: any): void {
+    const draftId = event.value;
+    this.showFormFields = true;
+
+    if (draftId === 'new') {
+      this.resetForms();
+      this.selectedDraftId = 'new';
+      return;
+    }
+
+    const draft = this.availableDrafts.find((d) => d.id === draftId);
+    if (!draft) {
+      return;
+    }
+
+    this.loadDraftData(draft);
+  }
+
+  private loadDraftData(draft: FormDraft): void {
+    this.selectedDraftId = draft.id;
+    if (draft.data) {
+      if (draft.data.store) this.storeForm.patchValue(draft.data.store);
+      if (draft.data.person) this.personForm.patchValue(draft.data.person);
+      if (draft.data.access) this.accessForm.patchValue(draft.data.access);
+    }
+
+    this.toastrService.success(`Rascunho "${draft.draftName || 'sem nome'}" carregado`);
+    this.lastSavedDraftValue = this.getCurrentFormValue();
+
+    // Marca os formulários como dirty
+    setTimeout(() => {
+      this.captureInitialFormValue();
+      this.storeForm.markAsDirty();
+      this.personForm.markAsDirty();
+      this.accessForm.markAsDirty();
+    }, 200);
+  }
+
+  saveLocalDraft(
+    silent: boolean = false,
+    draftName?: string,
+    existingDraftId?: string,
+    closeAfterSave: boolean = true,
+  ): void {
+    let effectiveEntityId = undefined;
+
+    if (existingDraftId) {
+      const prefix = `${this.FORM_TYPE}_`;
+      if (existingDraftId.startsWith(prefix)) {
+        effectiveEntityId = existingDraftId.replace(prefix, '') as any;
+      }
+    }
+
+    const draftData = this.getCurrentFormValue();
+    const draftId = this.formDraftService.saveDraft(this.FORM_TYPE, draftData, effectiveEntityId, draftName);
+
+    this.selectedDraftId = draftId;
+    this.lastSavedDraftValue = this.getCurrentFormValue();
+
+    if (!silent) {
+      this.toastrService.info('Rascunho salvo localmente');
+    }
+
+    if (closeAfterSave) {
+      this.dialogRef.close(null);
+    } else {
+      this.storeForm.markAsPristine();
+      this.personForm.markAsPristine();
+      this.accessForm.markAsPristine();
+      this.captureInitialFormValue();
+    }
+  }
+
+  openSaveDraftDialog(): void {
+    if (this.selectedDraftId && this.selectedDraftId !== 'new') {
+      const currentDraft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);
+      if (currentDraft) {
+        this.saveLocalDraft(
+          false,
+          currentDraft.draftName,
+          this.selectedDraftId,
+          true,
+        );
+        return;
+      }
+    }
+
+    const suggestedName = this.storeForm.value.name || `Loja em ${new Date().toLocaleString()}`;
+
+    const dialogRef = this.dialog.open(SaveDraftDialogComponent, {
+      data: {
+        title: 'Salvar Rascunho',
+        suggestedName,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result: SaveDraftDialogResult) => {
+      if (result && result.confirmed) {
+        const nameExists = this.availableDrafts.some((d) => d.draftName === result.draftName);
+
+        if (nameExists) {
+          this.toastrService.error('Já existe um rascunho com este nome. Por favor, escolha outro.', 'Nome Duplicado');
+          this.openSaveDraftDialog();
+          return;
+        }
+
+        this.saveLocalDraft(false, result.draftName, undefined, true);
+      }
+    });
+  }
+
+  deleteDraft(draftId: string, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    const draft = this.availableDrafts.find((d) => d.id === draftId);
+    if (!draft) {
+      return;
+    }
+
+    this.formDraftService.removeDraftById(draft.id);
+    this.loadAvailableDrafts();
+
+    if (this.selectedDraftId === draftId) {
+      this.resetForms();
+      this.selectedDraftId = null;
+      this.showFormFields = this.availableDrafts.length === 0;
+    }
+
+    this.toastrService.success('Rascunho excluído');
+  }
+
+  private resetForms(): void {
+    this.storeForm.reset();
+    this.personForm.reset({
+      legalEntity: false,
+    });
+    this.accessForm.reset();
+    this.updatePersonDocumentValidation(false);
+    this.initialFormValues = null;
+    this.captureInitialFormValue();
+  }
+
+  formatDraftDate(date: Date): string {
+    const now = new Date();
+    const diffMs = now.getTime() - new Date(date).getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) {
+      return 'agora mesmo';
+    } else if (diffMins < 60) {
+      return `há ${diffMins} min${diffMins > 1 ? 's' : ''}`;
+    } else if (diffHours < 24) {
+      return `há ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+    } else if (diffDays < 7) {
+      return `há ${diffDays} dia${diffDays > 1 ? 's' : ''}`;
+    } else {
+      return new Date(date).toLocaleDateString('pt-BR');
+    }
   }
 
   /**
@@ -360,6 +616,12 @@ export class StoreFormDialogComponent implements OnInit {
           this.isSubmitting = false;
           // Notifica o sistema que uma nova loja foi adicionada
           this.storeService.notifyStoreUpdated();
+
+          // Remove o rascunho ativo se aplicável
+          if (this.selectedDraftId && this.selectedDraftId !== 'new') {
+            this.formDraftService.removeDraftById(this.selectedDraftId);
+          }
+
           // Fecha dialog e retorna a store criada
           this.dialogRef.close(createdStore);
         },
