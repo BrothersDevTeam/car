@@ -190,8 +190,7 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
           const list = response.content.filter(
             (e) =>
               e.personId !== this.data.person.personId &&
-              e.hasUser &&
-              e.relationship?.name?.toUpperCase() !== 'PROPRIETARIO',
+              e.hasUser,
           );
           this.otherEmployees = list;
 

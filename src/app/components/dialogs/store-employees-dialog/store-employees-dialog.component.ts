@@ -611,8 +611,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
     return this.employees.filter(
       (e) =>
         e.personId !== excludePersonId &&
-        e.hasUser &&
-        e.relationship?.name?.toUpperCase() !== 'PROPRIETARIO',
+        e.hasUser,
     );
   }
 

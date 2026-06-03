@@ -33,18 +33,18 @@
           "
         >
           <mat-form-field appearance="outline" style="width: 340px; font-size: 13px; margin-bottom: -1.25em">
-            <mat-label>Copiar permissões de outro funcionário...</mat-label>
+            <mat-icon
+              matPrefix
+              style="color: var(--primary-color, #2196f3); font-size: 18px; width: 18px; height: 18px; margin-right: 8px; margin-left: 4px"
+            >
+              content_copy
+            </mat-icon>
+            <mat-label>Copiar permissões de...</mat-label>
             <mat-select (selectionChange)="copyPermissionsFrom($event.value)">
               @for (emp of otherEmployees; track emp.personId) {
                 <mat-option [value]="emp">{{ emp.name }} ({{ getRelationshipLabel(emp.relationship) }})</mat-option>
               }
             </mat-select>
-            <mat-icon
-              matSuffix
-              style="color: var(--primary-color, #2196f3); font-size: 18px; width: 18px; height: 18px"
-            >
-              content_copy
-            </mat-icon>
           </mat-form-field>
         </div>
       }
