@@ -1,80 +1,86 @@
-<h2 mat-dialog-title>{{ getDialogTitle() }}</h2>
+<h2 mat-dialog-title>Gerenciar Sócios e Proprietários</h2>
 
 <mat-dialog-content>
-  @if (loading) {
-    <div class="loading-container">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p>Carregando pessoas...</p>
-    </div>
-  } @else if (error) {
-    <div class="error-container">
-      <p>Erro ao carregar pessoas. Tente novamente.</p>
-    </div>
-  } @else if (persons.length === 0) {
-    <div class="empty-container">
-      <p>Nenhuma pessoa ativa cadastrada nesta loja.</p>
-      <p class="hint">Cadastre uma pessoa primeiro para vinculá-la como proprietária.</p>
-    </div>
-  } @else {
-    <form [formGroup]="ownerForm" class="owner-form">
-      <div class="info-box">
-        <p>
-          <strong>Loja:</strong>
-          {{ data.store.name }}
-        </p>
-        @if (mode === 'update' && currentOwner) {
-          <div class="current-owner-info">
-            <p><strong>Proprietário Atual:</strong></p>
-            <p class="owner-name">{{ currentOwner.name }}</p>
-            <p class="owner-doc">
-              {{ currentOwner.legalEntity ? 'CNPJ' : 'CPF' }}:
-              {{ currentOwner.legalEntity ? currentOwner.cnpj : currentOwner.cpf }}
-            </p>
+  <div class="store-info-header">
+    <p><strong>Loja:</strong> {{ store.name }}</p>
+  </div>
+
+  <div class="owners-section">
+    <h3>Sócios / Proprietários Atuais</h3>
+    
+    @if (!store.owners || store.owners.length === 0) {
+      <div class="no-owners-msg">
+        <mat-icon>group_off</mat-icon>
+        <p>Nenhum sócio ou proprietário vinculado a esta loja.</p>
+      </div>
+    } @else {
+      <div class="owners-list">
+        @for (owner of store.owners; track owner.personId) {
+          <div class="owner-item">
+            <div class="owner-avatar">
+              <mat-icon>person</mat-icon>
+            </div>
+            <div class="owner-details">
+              <span class="owner-name">{{ owner.name }}</span>
+              <span class="owner-doc">
+                {{ owner.legalEntity ? 'CNPJ' : 'CPF' }}: {{ owner.legalEntity ? owner.cnpj : owner.cpf }}
+              </span>
+            </div>
+            <button mat-icon-button color="warn" (click)="onRemoveOwner(owner.personId)" [disabled]="submitting" matTooltip="Remover este proprietário">
+              <mat-icon>delete</mat-icon>
+            </button>
           </div>
         }
       </div>
+    }
+  </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>
-          {{ mode === 'update' ? 'Selecione o novo proprietário' : 'Selecione a pessoa' }}
-        </mat-label>
-        <mat-select formControlName="personId">
-          @for (person of persons; track person.personId) {
-            <mat-option [value]="person.personId" [disabled]="isCurrentOwner(person.personId)">
-              {{ getPersonDisplay(person) }}
-              @if (isCurrentOwner(person.personId)) {
-                <span class="current-badge">(Atual)</span>
-              }
-            </mat-option>
-          }
-        </mat-select>
-        @if (ownerForm.get('personId')?.invalid && ownerForm.get('personId')?.touched) {
-          <mat-error>Selecione uma pessoa</mat-error>
-        }
-      </mat-form-field>
+  <mat-divider class="dialog-divider"></mat-divider>
 
-      <div class="hint-text">
-        @if (mode === 'update') {
-          <p>
-            🔄 Você está prestes a
-            <strong>alterar</strong>
-            o proprietário desta loja.
-          </p>
-          <p>💼 O proprietário antigo permanecerá como Person normal na loja.</p>
-          <p>ℹ️ Operação permitida apenas para CAR_ADMIN.</p>
-        } @else {
-          <p>💡 Apenas pessoas ativas desta loja podem ser vinculadas como proprietárias.</p>
-        }
+  <div class="add-owner-section">
+    <h3>Vincular Novo Sócio / Proprietário</h3>
+
+    @if (loading) {
+      <div class="loading-container">
+        <mat-spinner diameter="30"></mat-spinner>
+        <p>Carregando pessoas da loja...</p>
       </div>
-    </form>
-  }
+    } @else if (error) {
+      <div class="error-container">
+        <p>Erro ao carregar pessoas. Tente novamente.</p>
+      </div>
+    } @else if (persons.length === 0) {
+      <div class="empty-container">
+        <p>Não há outras pessoas ativas disponíveis para vinculação.</p>
+        <p class="hint">Cadastre uma nova pessoa (com acesso ao sistema) na tela de pessoas antes de vinculá-la como proprietária.</p>
+      </div>
+    } @else {
+      <form [formGroup]="ownerForm" class="add-owner-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="select-field">
+            <mat-label>Selecione a pessoa</mat-label>
+            <mat-select formControlName="personId">
+              @for (person of persons; track person.personId) {
+                <mat-option [value]="person.personId">
+                  {{ getPersonDisplay(person) }}
+                </mat-option>
+              }
+            </mat-select>
+            @if (ownerForm.get('personId')?.invalid && ownerForm.get('personId')?.touched) {
+              <mat-error>Selecione uma pessoa</mat-error>
+            }
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" class="add-btn" (click)="onAddOwner()" [disabled]="ownerForm.invalid || submitting">
+            <mat-icon>person_add</mat-icon>
+            Adicionar Sócio
+          </button>
+        </div>
+      </form>
+    }
+  </div>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancelar</button>
-  @if (!loading && !error && persons.length > 0) {
-    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="ownerForm.invalid">
-      {{ getActionButtonText() }}
-    </button>
-  }
+  <button mat-raised-button (click)="onClose()" [disabled]="submitting">Fechar</button>
 </mat-dialog-actions>

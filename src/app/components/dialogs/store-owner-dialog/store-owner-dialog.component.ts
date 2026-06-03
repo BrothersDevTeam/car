@@ -8,13 +8,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
 import { Store } from '@interfaces/store';
 import { Person } from '@interfaces/person';
 import { PersonService } from '@services/person.service';
+import { StoreService } from '@services/store.service';
 
 export interface StoreOwnerDialogData {
   store: Store;
-  mode?: 'set' | 'update'; // 'set' = vincular primeira vez, 'update' = trocar proprietário
 }
 
 @Component({
@@ -30,6 +31,7 @@ export interface StoreOwnerDialogData {
     MatButtonModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    MatDividerModule,
   ],
   templateUrl: './store-owner-dialog.component.html',
   styleUrls: ['./store-owner-dialog.component.scss'],
@@ -43,42 +45,27 @@ export class StoreOwnerDialogComponent implements OnInit {
   private searchTimeout: any;
   isCarAdmin = false;
 
-  /**
-   * Modo de operação do dialog:
-   * - 'set': Vincular proprietário pela primeira vez (loja sem owner)
-   * - 'update': Alterar proprietário existente (loja já tem owner)
-   */
-  mode: 'set' | 'update' = 'set';
-
-  /**
-   * Proprietário atual da loja (quando mode = 'update')
-   */
-  currentOwner: Person | null = null;
+  store!: Store;
+  hasChanges = false;
+  submitting = false;
 
   constructor(
     private fb: FormBuilder,
     private personService: PersonService,
+    private storeService: StoreService,
     public dialogRef: MatDialogRef<StoreOwnerDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: StoreOwnerDialogData,
   ) {}
 
   ngOnInit(): void {
-    // Determina o modo baseado na presença de owner na loja
-    this.mode = this.data.mode || (this.data.store.owner ? 'update' : 'set');
-
-    // Se for modo update e tiver owner, guarda referência
-    if (this.mode === 'update' && this.data.store.owner) {
-      this.currentOwner = typeof this.data.store.owner === 'object' ? this.data.store.owner : null;
-    }
-
-    this.initForm();
+    this.store = { ...this.data.store };
     this.initForm();
     this.checkForCarAdmin();
     this.loadPersons();
+    this.refreshStoreDetails();
 
     // Subscribe to search changes with debounce
     this.searchControl.valueChanges.subscribe((value) => {
-      // Debounce manual simplificado ou usar rxJS (vou usar timeout simples para nao importar mais coisas)
       if (this.searchTimeout) clearTimeout(this.searchTimeout);
       this.searchTimeout = setTimeout(() => {
         this.loadPersons(value || '');
@@ -88,7 +75,6 @@ export class StoreOwnerDialogComponent implements OnInit {
 
   checkForCarAdmin() {
     this.isCarAdmin = this.personService.hasRole('ROLE_CAR_ADMIN');
-    console.log('👑 StoreOwnerDialog - isCarAdmin:', this.isCarAdmin);
   }
 
   private initForm(): void {
@@ -97,31 +83,39 @@ export class StoreOwnerDialogComponent implements OnInit {
     });
   }
 
+  private refreshStoreDetails(): void {
+    if (!this.store.storeId) return;
+
+    this.storeService.getById(this.store.storeId).subscribe({
+      next: (updatedStore) => {
+        this.store = updatedStore;
+      },
+      error: (err) => {
+        console.error('Erro ao atualizar detalhes da loja:', err);
+      }
+    });
+  }
+
   private loadPersons(search: string = ''): void {
     this.loading = true;
     this.error = false;
 
     const params: any = {
-      includeInactive: true, // Traz inativos para vermos se existe
+      includeInactive: false, // Só faz sentido adicionar donos ATIVOS
     };
 
-    // Se tiver busca, usa o parametro de busca global
     if (search) {
       params['search'] = search;
     }
 
-    // Se NAO for CAR_ADMIN, filtra pela loja atual.
-    // Se for CAR_ADMIN, não envia storeId para ver todos (global).
     if (!this.isCarAdmin) {
-      params['storeId'] = this.data.store.storeId;
+      params['storeId'] = this.store.storeId;
     }
-
-    console.log('🔍 Buscando pessoas. Search:', search, 'StoreId:', params['storeId'], 'IsCarAdmin:', this.isCarAdmin);
 
     this.personService.getPaginatedData(0, 100, params).subscribe({
       next: (response) => {
-        console.log('✅ Pessoas encontradas:', response.content.length);
-        this.persons = response.content;
+        // Filtra para remover quem já é proprietário desta loja
+        this.persons = response.content.filter(p => !this.isStoreOwner(p.personId!));
         this.loading = false;
       },
       error: (err) => {
@@ -132,25 +126,8 @@ export class StoreOwnerDialogComponent implements OnInit {
     });
   }
 
-  /**
-   * Retorna o título do dialog baseado no modo
-   */
-  getDialogTitle(): string {
-    return this.mode === 'update' ? 'Alterar Proprietário' : 'Vincular Proprietário';
-  }
-
-  /**
-   * Retorna o texto do botão de ação baseado no modo
-   */
-  getActionButtonText(): string {
-    return this.mode === 'update' ? 'Alterar Proprietário' : 'Vincular Proprietário';
-  }
-
-  /**
-   * Verifica se a Person selecionada é o proprietário atual
-   */
-  isCurrentOwner(personId: string): boolean {
-    return this.currentOwner?.personId === personId;
+  isStoreOwner(personId: string): boolean {
+    return !!this.store.owners?.some(o => o.personId === personId);
   }
 
   getPersonDisplay(person: Person): string {
@@ -160,12 +137,8 @@ export class StoreOwnerDialogComponent implements OnInit {
     return `${person.name} - ${type}: ${doc} (${accessStatus})`;
   }
 
-  onCancel(): void {
-    this.dialogRef.close(null);
-  }
-
-  onSubmit(): void {
-    if (this.ownerForm.valid) {
+  onAddOwner(): void {
+    if (this.ownerForm.valid && this.store.storeId) {
       const selectedPersonId = this.ownerForm.value.personId;
       const selectedPerson = this.persons.find((p) => p.personId === selectedPersonId);
 
@@ -176,7 +149,46 @@ export class StoreOwnerDialogComponent implements OnInit {
         return;
       }
 
-      this.dialogRef.close(selectedPersonId);
+      this.submitting = true;
+      this.storeService.setStoreOwner(this.store.storeId, selectedPersonId).subscribe({
+        next: (updatedStore) => {
+          this.store = updatedStore;
+          this.hasChanges = true;
+          this.submitting = false;
+          this.ownerForm.reset();
+          this.loadPersons(); // recarrega a lista para filtrar o recém adicionado
+          alert('Sócio/Proprietário adicionado com sucesso!');
+        },
+        error: (err) => {
+          console.error('Erro ao adicionar proprietário:', err);
+          alert(err.error || 'Erro ao adicionar proprietário');
+          this.submitting = false;
+        }
+      });
     }
+  }
+
+  onRemoveOwner(personId: string): void {
+    if (confirm('Tem certeza de que deseja remover este sócio/proprietário da loja?')) {
+      this.submitting = true;
+      this.storeService.removeOwner(this.store.storeId!, personId).subscribe({
+        next: (updatedStore) => {
+          this.store = updatedStore;
+          this.hasChanges = true;
+          this.submitting = false;
+          this.loadPersons();
+          alert('Sócio/Proprietário removido com sucesso!');
+        },
+        error: (err) => {
+          console.error('Erro ao remover proprietário:', err);
+          alert(err.error || 'Erro ao remover proprietário');
+          this.submitting = false;
+        }
+      });
+    }
+  }
+
+  onClose(): void {
+    this.dialogRef.close(this.hasChanges);
   }
 }

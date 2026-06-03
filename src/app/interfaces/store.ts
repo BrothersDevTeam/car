@@ -11,7 +11,7 @@ export interface Store {
   storeType: StoreType;
   storeStatus: StoreStatus;
   imageUrl?: string;
-  owner?: string | any;
+  owners?: any[];
   createdAt?: string;
   updatedAt?: string;
   createdBy?: string;
