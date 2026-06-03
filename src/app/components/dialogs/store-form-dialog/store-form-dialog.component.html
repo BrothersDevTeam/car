@@ -411,7 +411,7 @@
   <button mat-stroked-button class="btn-cancel" (click)="onCancel()" [disabled]="isSubmitting">Cancelar</button>
 
   @if (data.mode === 'edit') {
-    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!storeForm.valid || isSubmitting">
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!storeForm.valid || !hasUnsavedChanges() || isSubmitting">
       @if (isSubmitting) {
         <span class="button-content">
           <mat-spinner diameter="20"></mat-spinner>

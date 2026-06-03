@@ -122,6 +122,16 @@ export class StoreFormDialogComponent implements OnInit {
         phoneNumber: this.data.store.phone,
       });
       this.showFormFields = true;
+
+      // Monitora mudanças no formulário no modo de edição
+      this.storeForm.valueChanges.subscribe(() => {
+        this.captureInitialFormValue();
+      });
+
+      // Captura o estado inicial da edição (após aplicar os dados da loja)
+      setTimeout(() => {
+        this.captureInitialFormValue();
+      }, 100);
     } else {
       this.loadAvailableDrafts();
 
@@ -177,10 +187,31 @@ export class StoreFormDialogComponent implements OnInit {
     }
   }
 
+  private normalizeValue(value: any): any {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      return trimmed === '' ? null : trimmed;
+    }
+    if (Array.isArray(value)) {
+      return value.map(item => this.normalizeValue(item));
+    }
+    if (typeof value === 'object') {
+      const normalized: any = {};
+      for (const key of Object.keys(value)) {
+        normalized[key] = this.normalizeValue(value[key]);
+      }
+      return normalized;
+    }
+    return value;
+  }
+
   hasUnsavedChanges(): boolean {
     if (!this.initialFormValues) return false;
-    const current = JSON.stringify(this.getCurrentFormValue());
-    const initial = JSON.stringify(this.initialFormValues);
+    const current = JSON.stringify(this.normalizeValue(this.getCurrentFormValue()));
+    const initial = JSON.stringify(this.normalizeValue(this.initialFormValues));
     return current !== initial;
   }
 
@@ -189,8 +220,8 @@ export class StoreFormDialogComponent implements OnInit {
     if (!source) {
       return this.hasUnsavedChanges();
     }
-    const current = JSON.stringify(this.getCurrentFormValue());
-    const lastSaved = JSON.stringify(source);
+    const current = JSON.stringify(this.normalizeValue(this.getCurrentFormValue()));
+    const lastSaved = JSON.stringify(this.normalizeValue(source));
     return current !== lastSaved;
   }
 
