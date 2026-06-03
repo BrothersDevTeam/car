@@ -217,7 +217,7 @@
                   <label>Vínculo</label>
                   <span>
                     <mat-chip class="chip-small">
-                      {{ proprietario.relationship }}
+                      {{ proprietario.relationship?.name || proprietario.relationship || '-' }}
                     </mat-chip>
                   </span>
                 </div>
