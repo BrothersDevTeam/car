@@ -92,7 +92,7 @@
     </form>
   } @else {
     <!-- Stepper com 3 etapas -->
-    <mat-stepper orientation="vertical" linear #stepper>
+    <mat-stepper orientation="vertical" linear #stepper (selectionChange)="onStepChange($event)">
       <!-- ========== STEP 1: DADOS DA LOJA ========== -->
       <mat-step [stepControl]="storeForm" label="Dados da Loja">
         <form [formGroup]="storeForm" class="step-form">

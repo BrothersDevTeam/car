@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -88,6 +88,7 @@ export class StoreFormDialogComponent implements OnInit {
     private storeContextService: StoreContextService,
     public dialogRef: MatDialogRef<StoreFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: StoreFormDialogData,
+    private elementRef: ElementRef,
   ) {}
 
   ngOnInit(): void {
@@ -101,6 +102,21 @@ export class StoreFormDialogComponent implements OnInit {
         phoneNumber: this.data.store.phone,
       });
     }
+  }
+
+  /**
+   * Move o scroll do diálogo para o passo ativo ao mudar de etapa
+   */
+  onStepChange(event: any): void {
+    setTimeout(() => {
+      const stepHeaders = this.elementRef.nativeElement.querySelectorAll('.mat-step-header');
+      if (stepHeaders && stepHeaders[event.selectedIndex]) {
+        stepHeaders[event.selectedIndex].scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    }, 250);
   }
 
   /**
