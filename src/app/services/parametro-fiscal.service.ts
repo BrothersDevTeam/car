@@ -27,6 +27,10 @@ export interface ParametroFiscal {
 
   // Controle interno Focus NFe (Apenas leitura)
   parametroFiscalCadastradoFocusNfe?: boolean;
+
+  // Próximo número e Ambiente
+  parametroFiscalProximoNumeroNfe?: number;
+  parametroFiscalEmHomologacao?: boolean;
 }
 
 @Injectable({

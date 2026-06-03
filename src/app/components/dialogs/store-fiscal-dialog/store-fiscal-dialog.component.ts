@@ -75,6 +75,8 @@ export class StoreFiscalDialogComponent implements OnInit {
       parametroFiscalSenhaCertificado: [''],
       parametroFiscalCertificadoBase64: [''],
       parametroFiscalCadastradoFocusNfe: [{ value: false, disabled: true }],
+      parametroFiscalProximoNumeroNfe: [1, [Validators.required, Validators.min(1)]],
+      parametroFiscalEmHomologacao: [true],
     });
   }
 

@@ -73,10 +73,31 @@
         <input matInput type="password" formControlName="parametroFiscalSenhaCertificado"
           placeholder="Deixe em branco se já estiver salva e não quiser trocar" />
       </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label style="display: flex; align-items: center; gap: 4px;">
+          Próximo Número NFe
+          <mat-icon style="font-size: 16px; width: 16px; height: 16px; cursor: help"
+            matTooltip="Define a numeração da próxima nota fiscal que será emitida. O sistema irá autoincrementar a partir deste valor a cada emissão bem-sucedida."
+            matTooltipClass="custom-tooltip" matTooltipPosition="right">info_outline</mat-icon>
+        </mat-label>
+        <input matInput type="number" formControlName="parametroFiscalProximoNumeroNfe" placeholder="Ex: 1" min="1" />
+        @if (form.controls['parametroFiscalProximoNumeroNfe'].hasError('required')) {
+        <mat-error>Próximo número é obrigatório</mat-error>
+        }
+        @if (form.controls['parametroFiscalProximoNumeroNfe'].hasError('min')) {
+        <mat-error>O número mínimo é 1</mat-error>
+        }
+      </mat-form-field>
     </div>
 
     <div class="checkbox-group">
       <h4>Opções de Emissão</h4>
+      <mat-checkbox formControlName="parametroFiscalEmHomologacao"
+        matTooltip="Se marcado, as notas serão emitidas sem valor fiscal para fins de testes. Desmarque para emitir notas reais (Produção)."
+        matTooltipClass="custom-tooltip" matTooltipPosition="right">
+        Ambiente de Homologação (Testes)
+      </mat-checkbox>
       <mat-checkbox formControlName="parametroFiscalHabilitaNfe"
         matTooltip="Obrigatório para registrar entradas e saídas de veículos." matTooltipClass="custom-tooltip"
         matTooltipPosition="right">
