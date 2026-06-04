@@ -150,7 +150,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     nickName: [''],
     email: ['', [Validators.email]],
     phone: [''],
-    cpf: [''],
+    cpf: ['', [Validators.required, Validators.minLength(11), Validators.maxLength(11)]],
     rg: [''],
     rgIssuer: [''],
     idEstrangeiro: [''],

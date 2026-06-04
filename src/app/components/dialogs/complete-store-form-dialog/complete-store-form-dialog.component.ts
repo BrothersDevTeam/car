@@ -58,7 +58,7 @@ export class CompleteStoreFormDialogComponent implements OnInit {
     this.ownerForm = this.fb.group({
       legalEntity: [false, Validators.required],
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-      cpf: [''],
+      cpf: ['', [Validators.required, Validators.minLength(11)]],
       cnpj: [''],
       email: ['', [Validators.email, Validators.maxLength(100)]],
       phone: ['', [Validators.maxLength(14)]],

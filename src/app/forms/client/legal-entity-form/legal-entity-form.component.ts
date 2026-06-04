@@ -131,7 +131,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     nickName: [''],
     email: ['', [Validators.email]],
     phone: [''],
-    cnpj: [''],
+    cnpj: ['', [Validators.required, Validators.minLength(14), Validators.maxLength(14)]],
     ie: [''],
     indicadorIe: [''],
     isuf: [''],
