@@ -295,7 +295,7 @@ export class StoreFormDialogComponent implements OnInit {
       }
     }
 
-    const draftData = this.getCurrentFormValue();
+    const draftData = this.normalizeValue(this.getCurrentFormValue());
     const draftId = this.formDraftService.saveDraft(this.FORM_TYPE, draftData, effectiveEntityId, draftName);
 
     this.selectedDraftId = draftId;
@@ -329,7 +329,10 @@ export class StoreFormDialogComponent implements OnInit {
       }
     }
 
-    const suggestedName = this.storeForm.value.name || `Loja em ${new Date().toLocaleString()}`;
+    const rawName = this.storeForm.value.name;
+    const suggestedName = (rawName && typeof rawName === 'string' && rawName.trim())
+      ? rawName.trim()
+      : `Loja em ${new Date().toLocaleString()}`;
 
     const dialogRef = this.dialog.open(SaveDraftDialogComponent, {
       data: {

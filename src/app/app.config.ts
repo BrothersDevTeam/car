@@ -14,13 +14,14 @@ import { provideToastr } from 'ngx-toastr';
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import { loadingInterceptor } from './interceptors/loading.interceptor';
+import { trimInterceptor } from './interceptors/trim.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideAnimationsAsync(),
-    provideHttpClient(withInterceptors([loadingInterceptor, authInterceptor])),
+    provideHttpClient(withInterceptors([loadingInterceptor, authInterceptor, trimInterceptor])),
     provideAnimations(),
     /**
      * Configuração do Toastr (Sistema de Notificações Toast)
