@@ -80,4 +80,5 @@ export interface BusinessHistory {
   totalSold: number;
   purchaseCount: number;
   saleCount: number;
+  hasOfficialNfe: boolean;
 }

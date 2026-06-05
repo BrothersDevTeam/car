@@ -71,6 +71,9 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   private subscriptions = new Subscription();
   submitted = false;
 
+
+  hasOfficialNfe = false;
+
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
   private storeContextService = inject(StoreContextService);
@@ -369,6 +372,10 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       return of(false);
     }
 
+    return this.executeSave(isDraft);
+  }
+
+  private executeSave(isDraft: boolean): Observable<boolean> {
     return new Observable((observer) => {
       try {
         const storeId = this.storeContextService.currentStoreId;
@@ -470,6 +477,68 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
         observer.complete();
       }
     });
+  }
+
+  onCpfBlur(): void {
+    const rawCpf = this.form.get('cpf')?.value;
+    const cleanCpf = rawCpf?.replace(/\D/g, '') || '';
+
+    // Se for novo cadastro (ou se o CPF do input for diferente do dataForm carregado)
+    const isNew = !this.dataForm?.personId;
+    const isCpfChanged = !isNew && cleanCpf !== (this.dataForm?.cpf?.replace(/\D/g, '') || '');
+
+    if (cleanCpf.length === 11 && (isNew || isCpfChanged)) {
+      this.personService.getPaginatedData(0, 10, { cpf: cleanCpf, includeInactive: true }).subscribe({
+        next: (response) => {
+          if (response.content && response.content.length > 0) {
+            const person = response.content[0];
+            if (person.active === false) {
+              this.toastrService.info('Cadastro inativo encontrado. Dados recuperados para reativação.');
+
+              // Popula o formulário com dados antigos
+              this.form.patchValue({
+                name: person.name || '',
+                nickName: person.nickName || '',
+                email: person.email || '',
+                phone: person.phone || '',
+                cpf: person.cpf || '',
+                rg: person.rg || '',
+                rgIssuer: person.rgIssuer || '',
+                idEstrangeiro: person.idEstrangeiro || '',
+                active: true, // Força reativação como true
+                storeId: person.storeId || '',
+                legalEntity: person.legalEntity || false,
+                relationshipId: person.relationshipId || person.relationship?.relationshipId || '',
+              });
+
+              // Define o dataForm para o formulário reconhecer como edição (e fazer PUT com o personId)
+              this.dataForm = person;
+              this.dataFormPatched = true;
+
+              // Como é edição de um registro com histórico, recarrega o histórico
+              this.personService.getBusinessHistory(person.personId).subscribe({
+                next: (history) => {
+
+                  this.hasOfficialNfe = !!history.hasOfficialNfe;
+                  this.checkCpfDisableState();
+                },
+              });
+            }
+          }
+        },
+        error: (err) => {
+          console.error('Erro ao buscar CPF inativo:', err);
+        },
+      });
+    }
+  }
+
+  checkCpfDisableState(): void {
+    if (this.hasOfficialNfe) {
+      this.form.get('cpf')?.disable();
+    } else {
+      this.form.get('cpf')?.enable();
+    }
   }
 
   /**
@@ -716,6 +785,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     this.dataFormPatched = false;
     this.showFormFields = !!this.dataForm || !!this.draft;
 
+
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
         const hasChanges = this.hasUnsavedChanges();
@@ -852,39 +922,58 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   ngOnChanges(changes: SimpleChanges) {
     const hasActiveDraft = !!this.draft || !!this.selectedDraftId;
 
-    if (changes['dataForm'] && this.dataForm) {
-      console.log('[natural-person-form] dataForm recebido:', this.dataForm);
-      this.isInitializing = true;
-      this.dataFormPatched = false;
+    if (changes['dataForm']) {
+      if (this.dataForm) {
+        console.log('[natural-person-form] dataForm recebido:', this.dataForm);
+        this.isInitializing = true;
+        this.dataFormPatched = false;
 
-      setTimeout(() => {
-        if (!this.dataForm) return;
+        setTimeout(() => {
+          if (!this.dataForm) return;
 
-        if (!hasActiveDraft) {
-          this.form.patchValue({
-            name: this.dataForm.name || '',
-            nickName: this.dataForm.nickName || '',
-            email: this.dataForm.email || '',
-            phone: this.dataForm.phone || '',
-            cpf: this.dataForm.cpf || '',
-            rg: this.dataForm.rg || '',
-            rgIssuer: this.dataForm.rgIssuer || '',
-            idEstrangeiro: this.dataForm.idEstrangeiro || '',
-            active: this.dataForm.active !== false,
-            storeId: this.dataForm.storeId || '',
-            legalEntity: this.dataForm.legalEntity || false,
-          });
+          if (!hasActiveDraft) {
+            this.form.patchValue({
+              name: this.dataForm.name || '',
+              nickName: this.dataForm.nickName || '',
+              email: this.dataForm.email || '',
+              phone: this.dataForm.phone || '',
+              cpf: this.dataForm.cpf || '',
+              rg: this.dataForm.rg || '',
+              rgIssuer: this.dataForm.rgIssuer || '',
+              idEstrangeiro: this.dataForm.idEstrangeiro || '',
+              active: this.dataForm.active !== false,
+              storeId: this.dataForm.storeId || '',
+              legalEntity: this.dataForm.legalEntity || false,
+            });
 
-          if (this.relationships.length > 0) {
-            this.applyRelationshipToForm();
+            if (this.relationships.length > 0) {
+              this.applyRelationshipToForm();
+            }
           }
-        }
 
-        this.dataFormPatched = true;
-        this.checkAndEndInitialization();
+          this.dataFormPatched = true;
+          this.checkAndEndInitialization();
 
-        console.log('[natural-person-form] Formulário após patchValue de inicialização:', this.form.value);
-      }, 200);
+          if (this.dataForm.personId) {
+            this.personService.getBusinessHistory(this.dataForm.personId).subscribe({
+              next: (history) => {
+
+                this.hasOfficialNfe = !!history.hasOfficialNfe;
+                this.checkCpfDisableState();
+              },
+              error: (err) => {
+                console.error('Erro ao buscar histórico:', err);
+              }
+            });
+          }
+
+          console.log('[natural-person-form] Formulário após patchValue de inicialização:', this.form.value);
+        }, 200);
+      } else {
+
+        this.hasOfficialNfe = false;
+        this.form.get('cpf')?.enable();
+      }
     }
 
     if (changes['draft'] && this.draft) {
@@ -1101,6 +1190,9 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
 
     this.submitted = false;
     this.isSaving = false;
+
+    this.hasOfficialNfe = false;
+    this.form.get('cpf')?.enable();
 
     const clienteRel = this.relationships.find((r) => r.name.toUpperCase() === 'CLIENTE');
 

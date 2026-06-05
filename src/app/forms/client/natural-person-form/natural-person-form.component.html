@@ -82,6 +82,8 @@
           placeholder="000.000.000-00"
           mask="000.000.000-00"
           appCpfValidator
+          (blur)="onCpfBlur()"
+          [matTooltip]="hasOfficialNfe ? 'Este campo não pode ser editado pois este cadastro possui NF-e Autorizada/Cancelada. Para corrigir, realize um novo cadastro.' : ''"
           [error]="form.get('cpf')?.invalid && (form.get('cpf')?.touched || submitted)"
         />
       </div>

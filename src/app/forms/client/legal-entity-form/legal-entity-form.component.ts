@@ -45,6 +45,8 @@ import { ActionsService } from '@services/actions.service';
 import { FormDraftService, FormDraft } from '@services/form-draft.service';
 import { StoreContextService } from '@services/store-context.service';
 import { RelationshipService } from '@services/relationship.service';
+import { AuthService } from '@services/auth/auth.service';
+import { Authorizations } from '../../../enums/authorizations';
 import { RelationshipResponse } from '@interfaces/relationship';
 
 @Component({
@@ -68,6 +70,9 @@ import { RelationshipResponse } from '@interfaces/relationship';
 export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, CanComponentDeactivate {
   private subscriptions = new Subscription();
   submitted = false;
+
+
+  hasOfficialNfe = false;
 
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
@@ -149,6 +154,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     private actionsService: ActionsService,
     private formDraftService: FormDraftService,
     private relationshipService: RelationshipService,
+    private authService: AuthService,
   ) {}
 
   private checkAndEndInitialization() {
@@ -184,6 +190,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     this.isInitializing = true;
     this.dataFormPatched = false;
     this.showFormFields = !!this.dataForm || !!this.draft;
+
 
     this.subscriptions.add(
       this.form.get('relationshipId')!.valueChanges.subscribe(() => {
@@ -440,6 +447,10 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
       return of(false);
     }
 
+    return this.executeSave(isDraft);
+  }
+
+  private executeSave(isDraft: boolean): Observable<boolean> {
     return new Observable((observer) => {
       try {
         const storeId = this.storeContextService.currentStoreId;
@@ -451,18 +462,19 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
           return;
         }
 
+        const formRawValue = this.form.getRawValue();
         const baseData = {
-          name: this.form.value.name || '',
-          nickName: this.form.value.nickName || '',
-          cnpj: this.form.value.cnpj?.replace(/\D/g, '') || '',
-          ie: this.form.value.ie || '',
+          name: formRawValue.name || '',
+          nickName: formRawValue.nickName || '',
+          cnpj: formRawValue.cnpj?.replace(/\D/g, '') || '',
+          ie: formRawValue.ie || '',
           active: true as const,
-          email: this.form.value.email || '',
-          phone: this.form.value.phone?.replace(/\D/g, '') || '',
+          email: formRawValue.email || '',
+          phone: formRawValue.phone?.replace(/\D/g, '') || '',
           storeId,
           legalEntity: true as const,
-          crc: this.form.value.crc || '',
-          relationshipId: this.form.value.relationshipId || undefined,
+          crc: formRawValue.crc || '',
+          relationshipId: formRawValue.relationshipId || undefined,
           isEmployee: false,
         };
 
@@ -515,6 +527,70 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
         observer.complete();
       }
     });
+  }
+
+  onCnpjBlur(): void {
+    const rawCnpj = this.form.get('cnpj')?.value;
+    const cleanCnpj = rawCnpj?.replace(/\D/g, '') || '';
+
+    // Se for novo cadastro (ou se o CNPJ do input for diferente do dataForm carregado)
+    const isNew = !this.dataForm?.personId;
+    const isCnpjChanged = !isNew && cleanCnpj !== (this.dataForm?.cnpj?.replace(/\D/g, '') || '');
+
+    if (cleanCnpj.length === 14 && (isNew || isCnpjChanged)) {
+      this.personService.getPaginatedData(0, 10, { cnpj: cleanCnpj, includeInactive: true }).subscribe({
+        next: (response) => {
+          if (response.content && response.content.length > 0) {
+            const person = response.content[0];
+            if (person.active === false) {
+              this.toastrService.info('Cadastro inativo encontrado. Dados recuperados para reativação.');
+
+              // Popula o formulário com dados antigos
+              this.form.patchValue({
+                name: person.name || '',
+                nickName: person.nickName || '',
+                email: person.email || '',
+                phone: person.phone || '',
+                cnpj: person.cnpj || '',
+                ie: person.ie || '',
+                indicadorIe: person.indicadorIe || '',
+                isuf: person.isuf || '',
+                im: person.im || '',
+                crc: person.crc || '',
+                active: true, // Força reativação como true
+                storeId: person.storeId || '',
+                legalEntity: person.legalEntity || true,
+                relationshipId: person.relationshipId || person.relationship?.relationshipId || '',
+              });
+
+              // Define o dataForm para o formulário reconhecer como edição (e fazer PUT com o personId)
+              this.dataForm = person;
+              this.dataFormPatched = true;
+
+              // Como é edição de um registro com histórico, recarrega o histórico
+              this.personService.getBusinessHistory(person.personId).subscribe({
+                next: (history) => {
+
+                  this.hasOfficialNfe = !!history.hasOfficialNfe;
+                  this.checkCnpjDisableState();
+                },
+              });
+            }
+          }
+        },
+        error: (err) => {
+          console.error('Erro ao buscar CNPJ inativo:', err);
+        },
+      });
+    }
+  }
+
+  checkCnpjDisableState(): void {
+    if (this.hasOfficialNfe) {
+      this.form.get('cnpj')?.disable();
+    } else {
+      this.form.get('cnpj')?.enable();
+    }
   }
 
   saveLocalDraft(
@@ -689,42 +765,61 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
   ngOnChanges(changes: SimpleChanges) {
     const hasActiveDraft = !!this.draft || !!this.selectedDraftId;
 
-    if (changes['dataForm'] && this.dataForm) {
-      console.log('[legal-entity-form] dataForm recebido:', this.dataForm);
-      console.log('[legal-entity-form] relationship do banco:', this.dataForm.relationship);
-      this.isInitializing = true;
-      this.dataFormPatched = false;
+    if (changes['dataForm']) {
+      if (this.dataForm) {
+        console.log('[legal-entity-form] dataForm recebido:', this.dataForm);
+        console.log('[legal-entity-form] relationship do banco:', this.dataForm.relationship);
+        this.isInitializing = true;
+        this.dataFormPatched = false;
 
-      setTimeout(() => {
-        if (!this.dataForm) return;
+        setTimeout(() => {
+          if (!this.dataForm) return;
 
-        if (!hasActiveDraft) {
-          this.form.patchValue({
-            name: this.dataForm.name || '',
-            nickName: this.dataForm.nickName || '',
-            email: this.dataForm.email || '',
-            phone: this.dataForm.phone || '',
-            cnpj: this.dataForm.cnpj || '',
-            ie: this.dataForm.ie || '',
-            indicadorIe: this.dataForm.indicadorIe || '',
-            isuf: this.dataForm.isuf || '',
-            im: this.dataForm.im || '',
-            crc: this.dataForm.crc || '',
-            active: this.dataForm.active !== false,
-            storeId: this.dataForm.storeId || '',
-            legalEntity: this.dataForm.legalEntity || true,
-          });
+          if (!hasActiveDraft) {
+            this.form.patchValue({
+              name: this.dataForm.name || '',
+              nickName: this.dataForm.nickName || '',
+              email: this.dataForm.email || '',
+              phone: this.dataForm.phone || '',
+              cnpj: this.dataForm.cnpj || '',
+              ie: this.dataForm.ie || '',
+              indicadorIe: this.dataForm.indicadorIe || '',
+              isuf: this.dataForm.isuf || '',
+              im: this.dataForm.im || '',
+              crc: this.dataForm.crc || '',
+              active: this.dataForm.active !== false,
+              storeId: this.dataForm.storeId || '',
+              legalEntity: this.dataForm.legalEntity || true,
+            });
 
-          if (this.relationships.length > 0) {
-            this.applyRelationshipToForm();
+            if (this.relationships.length > 0) {
+              this.applyRelationshipToForm();
+            }
           }
-        }
 
-        this.dataFormPatched = true;
-        this.checkAndEndInitialization();
+          this.dataFormPatched = true;
+          this.checkAndEndInitialization();
 
-        console.log('[legal-entity-form] Formulário após patchValue:', this.form.value);
-      }, 200);
+          if (this.dataForm.personId) {
+            this.personService.getBusinessHistory(this.dataForm.personId).subscribe({
+              next: (history) => {
+
+                this.hasOfficialNfe = !!history.hasOfficialNfe;
+                this.checkCnpjDisableState();
+              },
+              error: (err) => {
+                console.error('Erro ao buscar histórico:', err);
+              }
+            });
+          }
+
+          console.log('[legal-entity-form] Formulário após patchValue:', this.form.value);
+        }, 200);
+      } else {
+
+        this.hasOfficialNfe = false;
+        this.form.get('cnpj')?.enable();
+      }
     }
 
     if (changes['draft'] && this.draft) {
@@ -840,6 +935,8 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
   private resetForm() {
     this.form.reset();
     this.submitted = false;
+
+    this.hasOfficialNfe = false;
 
     // Novo cadastro -> seta CLIENTE como padrão
     const clienteRel = this.relationships.find((r) => r.name.toUpperCase() === 'CLIENTE');
