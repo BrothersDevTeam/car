@@ -139,6 +139,15 @@ export class NfeService {
     );
   }
 
+  consultarNfe(id: string) {
+    return this.http.post<any>(`${this.apiUrl}/${id}/consultar`, {}).pipe(
+      tap((response) => {
+        console.log('Consulta de NFe solicitada com sucesso!', response);
+        this.clearCache();
+      })
+    );
+  }
+
   generatePurchaseNfe(vehicleId: string): Observable<any> {
     return this.http
       .post<any>(`/api/vehicles/${vehicleId}/gerar-rascunho-compra`, {})

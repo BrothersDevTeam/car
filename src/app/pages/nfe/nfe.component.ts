@@ -1,4 +1,4 @@
-import { catchError, debounceTime, of, Subject, Subscription } from 'rxjs';
+import { catchError, debounceTime, forkJoin, of, Subject, Subscription } from 'rxjs';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -597,6 +597,48 @@ export class NfeComponent {
             this.toastr.error('Erro ao emitir a carta de correção.');
           }
         });
+      }
+    });
+  }
+
+  onConsultarNfe() {
+    if (!this.storeContextService.validateStoreSelection()) return;
+
+    let toConsultIds: string[] = [];
+
+    if (this.selectedRows && this.selectedRows.length > 0) {
+      toConsultIds = this.selectedRows
+        .filter(nfe => nfe.nfeId)
+        .map(nfe => nfe.nfeId as string);
+    } else {
+      if (this.nfePaginatedList && this.nfePaginatedList.content) {
+        toConsultIds = this.nfePaginatedList.content
+          .filter(nfe => nfe.nfeStatus === 'processando' && nfe.nfeId)
+          .map(nfe => nfe.nfeId as string);
+      }
+    }
+
+    if (toConsultIds.length === 0) {
+      this.toastr.info('Nenhuma NFe para consultar no momento.');
+      return;
+    }
+
+    this.nfeListLoading.set(true);
+
+    const requests = toConsultIds.map(id => this.nfeService.consultarNfe(id));
+
+    forkJoin(requests).subscribe({
+      next: () => {
+        this.nfeListLoading.set(false);
+        this.selectedRows = [];
+        this.toastr.success(`${toConsultIds.length} NFe(s) consultada(s) e atualizada(s) com sucesso.`);
+        this.loadNfeList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
+      },
+      error: (err) => {
+        this.nfeListLoading.set(false);
+        this.toastr.error('Ocorreu um erro ao consultar o status das NFes.');
+        console.error(err);
+        this.loadNfeList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
       }
     });
   }
