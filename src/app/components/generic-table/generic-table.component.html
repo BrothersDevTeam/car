@@ -108,9 +108,11 @@
                             mat-menu-item
                             [disabled]="action.disabled && action.disabled(element)"
                             (click)="action.action(element)"
+                            [class.menu-action-warn]="action.color === 'warn'"
+                            class="custom-menu-item"
                           >
-                            <mat-icon [color]="action.color || 'primary'">{{ action.icon }}</mat-icon>
-                            <span>{{ action.label }}</span>
+                            <mat-icon class="menu-action-icon">{{ action.icon }}</mat-icon>
+                            <span class="menu-action-label">{{ action.label }}</span>
                           </button>
                         }
                       }

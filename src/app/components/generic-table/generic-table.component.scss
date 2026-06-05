@@ -386,3 +386,76 @@ app-pagination {
 .mat-mdc-row {
   overflow: visible !important;
 }
+
+/* ESTILIZAÇÃO DO MENU DE AÇÕES - PREMIUM & MODERNO */
+::ng-deep {
+  .mat-mdc-menu-panel {
+    border-radius: 10px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid #f1f5f9 !important;
+    background-color: #ffffff !important;
+    padding: 4px !important;
+  }
+
+  .custom-menu-item {
+    min-height: 40px !important;
+    height: 40px !important;
+    padding: 0 12px !important;
+    border-radius: 6px !important;
+    margin: 2px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    transition: all 0.2s ease !important;
+
+    .menu-action-icon {
+      font-size: 16px !important;
+      width: 16px !important;
+      height: 16px !important;
+      margin-right: 10px !important;
+      color: #64748b !important;
+      transition: color 0.2s ease !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    .menu-action-label {
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      color: #334155 !important;
+      transition: color 0.2s ease !important;
+    }
+
+    &:hover {
+      background-color: #f8fafc !important;
+
+      .menu-action-icon {
+        color: #0f172a !important;
+      }
+      .menu-action-label {
+        color: #0f172a !important;
+      }
+    }
+
+    &.menu-action-warn {
+      .menu-action-icon {
+        color: #f87171 !important; /* Vermelho moderno e suave */
+      }
+      .menu-action-label {
+        color: #ef4444 !important; /* Vermelho moderno e suave */
+        font-weight: 600 !important;
+      }
+
+      &:hover {
+        background-color: #fef2f2 !important; /* Fundo vermelho bem sutil */
+
+        .menu-action-icon {
+          color: #dc2626 !important;
+        }
+        .menu-action-label {
+          color: #b91c1c !important;
+        }
+      }
+    }
+  }
+}
