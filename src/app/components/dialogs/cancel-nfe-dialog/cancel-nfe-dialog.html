@@ -1,0 +1,19 @@
+<h2 mat-dialog-title>Cancelar NFe</h2>
+
+<mat-dialog-content>
+  <p>Tem certeza que deseja cancelar esta NFe? Informe o motivo abaixo (mínimo de 15 caracteres).</p>
+  <form [formGroup]="form" class="dialog-form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Justificativa de Cancelamento</mat-label>
+      <textarea matInput formControlName="justificativa" rows="4" placeholder="Ex: Erro no preenchimento do valor do produto."></textarea>
+      <mat-error *ngIf="form.get('justificativa')?.hasError('required')">A justificativa é obrigatória.</mat-error>
+      <mat-error *ngIf="form.get('justificativa')?.hasError('minlength')">A justificativa deve ter no mínimo 15 caracteres.</mat-error>
+      <mat-error *ngIf="form.get('justificativa')?.hasError('maxlength')">A justificativa deve ter no máximo 255 caracteres.</mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Voltar</button>
+  <button mat-flat-button color="warn" (click)="submit()" [disabled]="form.invalid">Confirmar Cancelamento</button>
+</mat-dialog-actions>

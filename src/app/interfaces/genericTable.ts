@@ -35,4 +35,13 @@ export interface ColumnConfig<T> {
     hidden?: (row: T) => boolean;
     disabled?: (row: T) => boolean;
   }[];
+  // Ações em formato de menu (três pontinhos)
+  menuActions?: {
+    label: string;
+    icon: string;
+    color?: string;
+    action: (row: T) => void;
+    hidden?: (row: T) => boolean;
+    disabled?: (row: T) => boolean;
+  }[];
 }

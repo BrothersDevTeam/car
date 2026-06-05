@@ -18,6 +18,9 @@ import { ContentHeaderComponent } from '@components/content-header/content-heade
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { UnsavedChangesDialogComponent } from '@components/dialogs/unsaved-changes-dialog/unsaved-changes-dialog.component';
 import { EmptyStateComponent } from '@components/empty-state/empty-state.component';
+import { CancelNfeDialog } from '@components/dialogs/cancel-nfe-dialog/cancel-nfe-dialog';
+import { CceNfeDialog } from '@components/dialogs/cce-nfe-dialog/cce-nfe-dialog';
+import { InutilizarNumeracaoDialog } from '@components/dialogs/inutilizar-numeracao-dialog/inutilizar-numeracao-dialog';
 
 import { NfeSaidaFormComponent } from '../../forms/nfe/nfe-saida-form/nfe-saida-form.component';
 import { NfeEntradaFormComponent } from '../../forms/nfe/nfe-entrada-form/nfe-entrada-form.component';
@@ -155,10 +158,31 @@ export class NfeComponent {
       showEditIcon: (row) => row.nfeStatus === 'rascunho',
     },
     {
-      key: 'delete',
+      key: 'acoes',
       header: '',
-      // Mostra o botão de deletar apenas para NFes em rascunho
-      showDeleteIcon: (row) => row.nfeStatus === 'rascunho',
+      menuActions: [
+        {
+          label: 'Excluir NFe',
+          icon: 'delete',
+          color: 'warn',
+          action: (row: Nfe) => this.handleDelete(row),
+          hidden: (row: Nfe) => row.nfeStatus !== 'rascunho',
+        },
+        {
+          label: 'Cancelar NFe',
+          icon: 'cancel',
+          color: 'warn',
+          action: (row: Nfe) => this.onCancelarNfe(row),
+          hidden: (row: Nfe) => row.nfeStatus !== 'autorizado',
+        },
+        {
+          label: 'Carta de Correção',
+          icon: 'edit_note',
+          color: 'primary',
+          action: (row: Nfe) => this.onEmitirCce(row),
+          hidden: (row: Nfe) => row.nfeStatus !== 'autorizado',
+        }
+      ]
     },
   ];
 
@@ -496,6 +520,114 @@ export class NfeComponent {
         } else {
           this.saidaFormRef?.onSubmit();
         }
+      }
+    });
+  }
+
+  handleDelete(nfe: Nfe) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {
+        title: 'Excluir Rascunho de NFe',
+        message: `Tem certeza que deseja excluir o rascunho da NFe de <strong>${nfe.nfeNaturezaOperacao}</strong> referente ao identificador <strong>${nfe.productIdentifier || 'N/A'}</strong>? Esta ação não pode ser desfeita.`,
+        confirmText: 'Excluir',
+        cancelText: 'Cancelar',
+        icon: 'delete_forever',
+        type: 'danger'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true && nfe.nfeId) {
+        this.nfeListLoading.set(true);
+        this.nfeService.delete(nfe.nfeId).subscribe({
+          next: () => {
+            this.nfeListLoading.set(false);
+            this.toastr.success('NFe excluída com sucesso.');
+            this.loadNfeList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
+          },
+          error: () => {
+            this.nfeListLoading.set(false);
+            this.toastr.error('Erro ao excluir NFe.');
+          }
+        });
+      }
+    });
+  }
+
+  onCancelarNfe(nfe: Nfe) {
+    const dialogRef = this.dialog.open(CancelNfeDialog, {
+      width: '450px',
+    });
+
+    dialogRef.afterClosed().subscribe(justificativa => {
+      if (justificativa && nfe.nfeId) {
+        this.nfeListLoading.set(true);
+        this.nfeService.cancelarNfe(nfe.nfeId, justificativa).subscribe({
+          next: () => {
+            this.nfeListLoading.set(false);
+            this.toastr.success('NFe cancelada com sucesso.');
+            this.loadNfeList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
+          },
+          error: () => {
+            this.nfeListLoading.set(false);
+            this.toastr.error('Erro ao cancelar a NFe.');
+          }
+        });
+      }
+    });
+  }
+
+  onEmitirCce(nfe: Nfe) {
+    const dialogRef = this.dialog.open(CceNfeDialog, {
+      width: '450px',
+    });
+
+    dialogRef.afterClosed().subscribe(correcao => {
+      if (correcao && nfe.nfeId) {
+        this.nfeListLoading.set(true);
+        this.nfeService.cartaCorrecaoNfe(nfe.nfeId, correcao).subscribe({
+          next: () => {
+            this.nfeListLoading.set(false);
+            this.toastr.success('Carta de correção emitida com sucesso.');
+            this.loadNfeList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
+          },
+          error: () => {
+            this.nfeListLoading.set(false);
+            this.toastr.error('Erro ao emitir a carta de correção.');
+          }
+        });
+      }
+    });
+  }
+
+  onInutilizarNumeracao() {
+    if (!this.storeContextService.validateStoreSelection()) return;
+    const storeId = this.selectedStoreId;
+
+    if (!storeId) {
+      this.toastr.error('Nenhuma loja selecionada.');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(InutilizarNumeracaoDialog, {
+      width: '500px',
+    });
+
+    dialogRef.afterClosed().subscribe(data => {
+      if (data) {
+        this.nfeListLoading.set(true);
+        this.nfeService.inutilizarNumeracao(storeId, data.numeroInicial, data.numeroFinal, data.justificativa).subscribe({
+          next: () => {
+            this.nfeListLoading.set(false);
+            this.toastr.success('Numeração inutilizada com sucesso.');
+            this.loadNfeList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
+          },
+          error: () => {
+            this.nfeListLoading.set(false);
+            this.toastr.error('Erro ao inutilizar a numeração.');
+          }
+        });
       }
     });
   }

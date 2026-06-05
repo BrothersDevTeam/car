@@ -92,6 +92,30 @@
                       }
                     }
                   </div>
+                } @else if (column.menuActions) {
+                  <div class="column-actions">
+                    <button
+                      mat-icon-button
+                      [matMenuTriggerFor]="menu"
+                      (click)="$event.stopPropagation()"
+                    >
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                      @for (action of column.menuActions; track action) {
+                        @if (!action.hidden || !action.hidden(element)) {
+                          <button
+                            mat-menu-item
+                            [disabled]="action.disabled && action.disabled(element)"
+                            (click)="action.action(element)"
+                          >
+                            <mat-icon [color]="action.color || 'primary'">{{ action.icon }}</mat-icon>
+                            <span>{{ action.label }}</span>
+                          </button>
+                        }
+                      }
+                    </mat-menu>
+                  </div>
                 } @else if (column.badgeConfig) {
                   <!-- Badge personalizada quando badgeConfig está definido -->
                   @let badgeKey = getNestedValue(element, column.key);

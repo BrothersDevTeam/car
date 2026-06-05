@@ -7,6 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
 import { NgClass, NgIf } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { PaginationComponent } from '@components/pagination/pagination.component';
 
@@ -25,6 +26,7 @@ import type { PaginationResponse } from '@interfaces/pagination';
     NgIf,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatMenuModule
   ],
   templateUrl: './generic-table.component.html',
   styleUrl: './generic-table.component.scss',

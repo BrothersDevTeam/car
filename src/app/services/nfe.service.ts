@@ -112,6 +112,33 @@ export class NfeService {
     );
   }
 
+  cancelarNfe(id: string, justificativa: string) {
+    return this.http.post<any>(`${this.apiUrl}/${id}/cancelar`, { justificativa }).pipe(
+      tap((response) => {
+        console.log('NFe cancelada com sucesso!', response);
+        this.clearCache();
+      })
+    );
+  }
+
+  cartaCorrecaoNfe(id: string, correcao: string) {
+    return this.http.post<any>(`${this.apiUrl}/${id}/carta-correcao`, { correcao }).pipe(
+      tap((response) => {
+        console.log('Carta de correção enviada com sucesso!', response);
+        this.clearCache();
+      })
+    );
+  }
+
+  inutilizarNumeracao(storeId: string, numeroInicial: number, numeroFinal: number, justificativa: string) {
+    return this.http.post<any>(`${this.apiUrl}/inutilizacao/${storeId}`, { numeroInicial, numeroFinal, justificativa }).pipe(
+      tap((response) => {
+        console.log('Inutilização solicitada com sucesso!', response);
+        this.clearCache();
+      })
+    );
+  }
+
   generatePurchaseNfe(vehicleId: string): Observable<any> {
     return this.http
       .post<any>(`/api/vehicles/${vehicleId}/gerar-rascunho-compra`, {})

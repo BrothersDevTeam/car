@@ -1,0 +1,17 @@
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.warning-text {
+  color: #ff9800;
+  font-size: 0.9em;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
