@@ -330,46 +330,6 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  /**
-   * Deleta um item
-   */
-  deleteItem(option: { id: string; name: string }, event: Event) {
-    event.stopPropagation();
-
-    const service = this.serviceMap[this.listType];
-
-    if (!service) {
-      console.error(`Serviço não encontrado para o tipo: ${this.listType}`);
-      return;
-    }
-
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.typeListTexts[this.listType].delete + ` ${option.name}`,
-        message: this.typeListTexts[this.listType].deleteMessage,
-        confirmText: 'Deletar',
-        cancelText: 'Cancelar',
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((confirm) => {
-      if (confirm) {
-        service.delete(option.id).subscribe({
-          next: () => {
-            this.options = this.options.filter((item) => item.id !== option.id);
-            this.filteredOptions = [...this.options];
-            this.toastrService.success(this.typeListTexts[this.listType].successDeleteMessage);
-            this.itemChanged.emit();
-          },
-          error: (error: any) => {
-            console.error('Erro ao deletar:', error);
-            this.toastrService.error(`Erro ao deletar ${this.listType}. Tente novamente.`);
-          },
-        });
-      }
-    });
-  }
 
   /**
    * Abre o dialog específico para Brand

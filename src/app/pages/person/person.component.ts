@@ -237,29 +237,37 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
         this.authService.hasAuthority(Authorizations.EDIT_PERSON_STORE),
     },
     {
-      key: 'delete',
+      key: 'acoes',
       header: '',
-      showDeleteIcon: (row: Person) => {
-        // Exibe o botão de exclusão apenas para quem tem autorização granular de excluir pessoas
-        if (!this.authService.hasAuthority(Authorizations.DELETE_PERSON_STORE)) {
-          return false;
+      menuActions: [
+        {
+          label: 'Excluir',
+          icon: 'delete',
+          color: 'warn',
+          action: (row: Person) => this.handleDelete(row),
+          hidden: (row: Person) => {
+            // Esconde o botão de exclusão se não tiver autorização granular de excluir pessoas
+            if (!this.authService.hasAuthority(Authorizations.DELETE_PERSON_STORE)) {
+              return true;
+            }
+
+            const loggedUserRelationship = this.authService.getPersonRelationship()?.toUpperCase();
+            const rowRelName = row.relationship?.name?.toUpperCase() || '';
+
+            // Proprietário não pode excluir outro proprietário (e consequentemente ele mesmo)
+            if (loggedUserRelationship === 'PROPRIETARIO' && rowRelName === 'PROPRIETARIO') {
+              return true;
+            }
+
+            // Gerente não pode excluir outro gerente nem proprietário
+            if (loggedUserRelationship === 'GERENTE' && (rowRelName === 'GERENTE' || rowRelName === 'PROPRIETARIO')) {
+              return true;
+            }
+
+            return false;
+          },
         }
-
-        const loggedUserRelationship = this.authService.getPersonRelationship()?.toUpperCase();
-        const rowRelName = row.relationship?.name?.toUpperCase() || '';
-
-        // Proprietário não pode excluir outro proprietário (e consequentemente ele mesmo)
-        if (loggedUserRelationship === 'PROPRIETARIO' && rowRelName === 'PROPRIETARIO') {
-          return false;
-        }
-
-        // Gerente não pode excluir outro gerente nem proprietário
-        if (loggedUserRelationship === 'GERENTE' && (rowRelName === 'GERENTE' || rowRelName === 'PROPRIETARIO')) {
-          return false;
-        }
-
-        return true;
-      },
+      ]
     },
   ];
 
