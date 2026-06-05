@@ -138,7 +138,7 @@ export class VehicleComponent implements CanComponentDeactivate {
       header: 'Ações NFe',
       actions: [
         {
-          label: 'Emitir NFe de Compra',
+          label: 'Gerar NFe de Compra',
           icon: 'receipt_long',
           color: 'primary',
           action: (row) => this.gerarNfeCompra(row),
