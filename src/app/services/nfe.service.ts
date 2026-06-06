@@ -117,7 +117,7 @@ export class NfeService {
       tap((response) => {
         console.log('NFe cancelada com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 
@@ -126,17 +126,19 @@ export class NfeService {
       tap((response) => {
         console.log('Carta de correção enviada com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 
   inutilizarNumeracao(storeId: string, numeroInicial: number, numeroFinal: number, justificativa: string) {
-    return this.http.post<any>(`${this.apiUrl}/inutilizacao/${storeId}`, { numeroInicial, numeroFinal, justificativa }).pipe(
-      tap((response) => {
-        console.log('Inutilização solicitada com sucesso!', response);
-        this.clearCache();
-      })
-    );
+    return this.http
+      .post<any>(`${this.apiUrl}/inutilizacao/${storeId}`, { numeroInicial, numeroFinal, justificativa })
+      .pipe(
+        tap((response) => {
+          console.log('Inutilização solicitada com sucesso!', response);
+          this.clearCache();
+        }),
+      );
   }
 
   consultarNfe(id: string) {
@@ -144,7 +146,7 @@ export class NfeService {
       tap((response) => {
         console.log('Consulta de NFe solicitada com sucesso!', response);
         this.clearCache();
-      })
+      }),
     );
   }
 

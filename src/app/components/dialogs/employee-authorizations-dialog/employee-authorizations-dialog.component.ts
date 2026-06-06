@@ -187,11 +187,7 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
     this.http.get<{ content: Person[] }>(`/api/persons/employees?storeId=${storeId}&size=100`).subscribe({
       next: (response) => {
         if (response && response.content) {
-          const list = response.content.filter(
-            (e) =>
-              e.personId !== this.data.person.personId &&
-              e.hasUser,
-          );
+          const list = response.content.filter((e) => e.personId !== this.data.person.personId && e.hasUser);
           this.otherEmployees = list;
 
           // Carrega em background as permissões para cada um

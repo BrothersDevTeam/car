@@ -71,7 +71,6 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
   private subscriptions = new Subscription();
   submitted = false;
 
-
   hasOfficialNfe = false;
 
   readonly dialog = inject(MatDialog);
@@ -190,7 +189,6 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     this.isInitializing = true;
     this.dataFormPatched = false;
     this.showFormFields = !!this.dataForm || !!this.draft;
-
 
     this.subscriptions.add(
       this.form.get('relationshipId')!.valueChanges.subscribe(() => {
@@ -570,7 +568,6 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
               // Como é edição de um registro com histórico, recarrega o histórico
               this.personService.getBusinessHistory(person.personId).subscribe({
                 next: (history) => {
-
                   this.hasOfficialNfe = !!history.hasOfficialNfe;
                   this.checkCnpjDisableState();
                 },
@@ -803,20 +800,18 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
           if (this.dataForm.personId) {
             this.personService.getBusinessHistory(this.dataForm.personId).subscribe({
               next: (history) => {
-
                 this.hasOfficialNfe = !!history.hasOfficialNfe;
                 this.checkCnpjDisableState();
               },
               error: (err) => {
                 console.error('Erro ao buscar histórico:', err);
-              }
+              },
             });
           }
 
           console.log('[legal-entity-form] Formulário após patchValue:', this.form.value);
         }, 200);
       } else {
-
         this.hasOfficialNfe = false;
         this.form.get('cnpj')?.enable();
       }

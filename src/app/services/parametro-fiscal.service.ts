@@ -20,7 +20,6 @@ export interface ParametroFiscal {
   parametroFiscalObservacoes?: string;
   parametroFiscalHabilitaNfe?: boolean;
 
-
   // Certificado
   parametroFiscalCertificadoBase64?: string;
   parametroFiscalSenhaCertificado?: string;

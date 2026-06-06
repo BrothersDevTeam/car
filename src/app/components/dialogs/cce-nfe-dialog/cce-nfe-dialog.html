@@ -1,14 +1,22 @@
 <h2 mat-dialog-title>Emitir Carta de Correção (CCe)</h2>
 
 <mat-dialog-content>
-  <p class="warning-text">A Carta de Correção é permitida para sanar erros em campos específicos, desde que o erro não esteja relacionado com: as variáveis que determinam o valor do imposto; dados cadastrais que impliquem mudança de remetente ou do destinatário; e a data de emissão ou de saída.</p>
+  <p class="warning-text">
+    A Carta de Correção é permitida para sanar erros em campos específicos, desde que o erro não esteja relacionado com:
+    as variáveis que determinam o valor do imposto; dados cadastrais que impliquem mudança de remetente ou do
+    destinatário; e a data de emissão ou de saída.
+  </p>
   <form [formGroup]="form" class="dialog-form" (ngSubmit)="submit()">
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Texto da Correção</mat-label>
       <textarea matInput formControlName="correcao" rows="4" placeholder="Informe a correção a ser feita..."></textarea>
       <mat-error *ngIf="form.get('correcao')?.hasError('required')">O texto da correção é obrigatório.</mat-error>
-      <mat-error *ngIf="form.get('correcao')?.hasError('minlength')">O texto deve ter no mínimo 15 caracteres.</mat-error>
-      <mat-error *ngIf="form.get('correcao')?.hasError('maxlength')">O texto deve ter no máximo 1000 caracteres.</mat-error>
+      <mat-error *ngIf="form.get('correcao')?.hasError('minlength')">
+        O texto deve ter no mínimo 15 caracteres.
+      </mat-error>
+      <mat-error *ngIf="form.get('correcao')?.hasError('maxlength')">
+        O texto deve ter no máximo 1000 caracteres.
+      </mat-error>
     </mat-form-field>
   </form>
 </mat-dialog-content>

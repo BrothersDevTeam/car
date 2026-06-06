@@ -181,8 +181,8 @@ export class NfeComponent {
           color: 'primary',
           action: (row: Nfe) => this.onEmitirCce(row),
           hidden: (row: Nfe) => row.nfeStatus !== 'autorizado',
-        }
-      ]
+        },
+      ],
     },
   ];
 
@@ -546,11 +546,11 @@ export class NfeComponent {
         confirmText: 'Excluir',
         cancelText: 'Cancelar',
         icon: 'delete_forever',
-        type: 'danger'
-      }
+        type: 'danger',
+      },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result === true && nfe.nfeId) {
         this.nfeListLoading.set(true);
         this.nfeService.delete(nfe.nfeId).subscribe({
@@ -562,7 +562,7 @@ export class NfeComponent {
           error: () => {
             this.nfeListLoading.set(false);
             this.toastr.error('Erro ao excluir NFe.');
-          }
+          },
         });
       }
     });
@@ -573,7 +573,7 @@ export class NfeComponent {
       width: '450px',
     });
 
-    dialogRef.afterClosed().subscribe(justificativa => {
+    dialogRef.afterClosed().subscribe((justificativa) => {
       if (justificativa && nfe.nfeId) {
         this.nfeListLoading.set(true);
         this.nfeService.cancelarNfe(nfe.nfeId, justificativa).subscribe({
@@ -585,7 +585,7 @@ export class NfeComponent {
           error: () => {
             this.nfeListLoading.set(false);
             this.toastr.error('Erro ao cancelar a NFe.');
-          }
+          },
         });
       }
     });
@@ -596,7 +596,7 @@ export class NfeComponent {
       width: '450px',
     });
 
-    dialogRef.afterClosed().subscribe(correcao => {
+    dialogRef.afterClosed().subscribe((correcao) => {
       if (correcao && nfe.nfeId) {
         this.nfeListLoading.set(true);
         this.nfeService.cartaCorrecaoNfe(nfe.nfeId, correcao).subscribe({
@@ -608,7 +608,7 @@ export class NfeComponent {
           error: () => {
             this.nfeListLoading.set(false);
             this.toastr.error('Erro ao emitir a carta de correção.');
-          }
+          },
         });
       }
     });
@@ -620,14 +620,12 @@ export class NfeComponent {
     let toConsultIds: string[] = [];
 
     if (this.selectedRows && this.selectedRows.length > 0) {
-      toConsultIds = this.selectedRows
-        .filter(nfe => nfe.nfeId)
-        .map(nfe => nfe.nfeId as string);
+      toConsultIds = this.selectedRows.filter((nfe) => nfe.nfeId).map((nfe) => nfe.nfeId as string);
     } else {
       if (this.nfePaginatedList && this.nfePaginatedList.content) {
         toConsultIds = this.nfePaginatedList.content
-          .filter(nfe => nfe.nfeStatus === 'processando' && nfe.nfeId)
-          .map(nfe => nfe.nfeId as string);
+          .filter((nfe) => nfe.nfeStatus === 'processando' && nfe.nfeId)
+          .map((nfe) => nfe.nfeId as string);
       }
     }
 
@@ -638,7 +636,7 @@ export class NfeComponent {
 
     this.nfeListLoading.set(true);
 
-    const requests = toConsultIds.map(id => this.nfeService.consultarNfe(id));
+    const requests = toConsultIds.map((id) => this.nfeService.consultarNfe(id));
 
     forkJoin(requests).subscribe({
       next: () => {
@@ -652,7 +650,7 @@ export class NfeComponent {
         this.toastr.error('Ocorreu um erro ao consultar o status das NFes.');
         console.error(err);
         this.loadNfeList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
-      }
+      },
     });
   }
 
@@ -669,20 +667,22 @@ export class NfeComponent {
       width: '500px',
     });
 
-    dialogRef.afterClosed().subscribe(data => {
+    dialogRef.afterClosed().subscribe((data) => {
       if (data) {
         this.nfeListLoading.set(true);
-        this.nfeService.inutilizarNumeracao(storeId, data.numeroInicial, data.numeroFinal, data.justificativa).subscribe({
-          next: () => {
-            this.nfeListLoading.set(false);
-            this.toastr.success('Numeração inutilizada com sucesso.');
-            this.loadNfeList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
-          },
-          error: () => {
-            this.nfeListLoading.set(false);
-            this.toastr.error('Erro ao inutilizar a numeração.');
-          }
-        });
+        this.nfeService
+          .inutilizarNumeracao(storeId, data.numeroInicial, data.numeroFinal, data.justificativa)
+          .subscribe({
+            next: () => {
+              this.nfeListLoading.set(false);
+              this.toastr.success('Numeração inutilizada com sucesso.');
+              this.loadNfeList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
+            },
+            error: () => {
+              this.nfeListLoading.set(false);
+              this.toastr.error('Erro ao inutilizar a numeração.');
+            },
+          });
       }
     });
   }

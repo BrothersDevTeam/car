@@ -535,7 +535,7 @@
   .info-grid {
     gap: 20px;
   }
-  
+
   .volumes-container {
     margin-top: 28px;
     border-top: 1px dashed #cbd5e1;
@@ -583,10 +583,10 @@
       .info-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 16px;
-        
+
         .info-item {
           gap: 4px;
-          
+
           label {
             font-size: 0.65rem;
           }
@@ -709,7 +709,7 @@
       justify-content: center;
     }
   }
-  
+
   .section-transporte .volumes-container .volumes-grid {
     grid-template-columns: 1fr;
   }
@@ -755,4 +755,3 @@
     }
   }
 }
-

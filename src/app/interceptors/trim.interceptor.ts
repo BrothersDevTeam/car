@@ -24,7 +24,7 @@ function trimStringProperties(obj: any): any {
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(item => trimStringProperties(item));
+    return obj.map((item) => trimStringProperties(item));
   }
 
   if (isPlainObject(obj)) {
@@ -44,12 +44,12 @@ function trimStringProperties(obj: any): any {
  */
 export const trimInterceptor: HttpInterceptorFn = (req, next) => {
   const isWriteMethod = ['POST', 'PUT', 'PATCH'].includes(req.method);
-  
+
   if (isWriteMethod && req.body) {
     const trimmedBody = trimStringProperties(req.body);
     const clonedRequest = req.clone({ body: trimmedBody });
     return next(clonedRequest);
   }
-  
+
   return next(req);
 };

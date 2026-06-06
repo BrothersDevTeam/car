@@ -1,18 +1,21 @@
 <h2 mat-dialog-title>Inutilizar Numeração de NFe</h2>
 
 <mat-dialog-content>
-  <p>Informe a faixa de numeração que deseja inutilizar e o motivo. Atenção: Esta ação é irreversível e informará à SEFAZ que estes números não serão utilizados.</p>
+  <p>
+    Informe a faixa de numeração que deseja inutilizar e o motivo. Atenção: Esta ação é irreversível e informará à SEFAZ
+    que estes números não serão utilizados.
+  </p>
   <form [formGroup]="form" class="dialog-form" (ngSubmit)="submit()">
     <div class="row">
       <mat-form-field appearance="outline" class="half-width">
         <mat-label>Número Inicial</mat-label>
-        <input matInput type="number" formControlName="numeroInicial" placeholder="Ex: 15" min="1">
+        <input matInput type="number" formControlName="numeroInicial" placeholder="Ex: 15" min="1" />
         <mat-error *ngIf="form.get('numeroInicial')?.hasError('required')">Campo obrigatório.</mat-error>
       </mat-form-field>
-      
+
       <mat-form-field appearance="outline" class="half-width">
         <mat-label>Número Final</mat-label>
-        <input matInput type="number" formControlName="numeroFinal" placeholder="Ex: 15" min="1">
+        <input matInput type="number" formControlName="numeroFinal" placeholder="Ex: 15" min="1" />
         <mat-error *ngIf="form.get('numeroFinal')?.hasError('required')">Campo obrigatório.</mat-error>
         <mat-error *ngIf="form.get('numeroFinal')?.hasError('min')">Deve ser maior ou igual ao inicial.</mat-error>
       </mat-form-field>
@@ -22,7 +25,9 @@
       <mat-label>Justificativa</mat-label>
       <textarea matInput formControlName="justificativa" rows="3" placeholder="Motivo da inutilização..."></textarea>
       <mat-error *ngIf="form.get('justificativa')?.hasError('required')">A justificativa é obrigatória.</mat-error>
-      <mat-error *ngIf="form.get('justificativa')?.hasError('minlength')">A justificativa deve ter no mínimo 15 caracteres.</mat-error>
+      <mat-error *ngIf="form.get('justificativa')?.hasError('minlength')">
+        A justificativa deve ter no mínimo 15 caracteres.
+      </mat-error>
     </mat-form-field>
   </form>
 </mat-dialog-content>

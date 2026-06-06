@@ -25,7 +25,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatIconModule
+    MatIconModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './cancel-nfe-dialog.html',
@@ -36,7 +36,7 @@ export class CancelNfeDialog {
 
   constructor(
     private fb: FormBuilder,
-    public dialogRef: MatDialogRef<CancelNfeDialog>
+    public dialogRef: MatDialogRef<CancelNfeDialog>,
   ) {
     this.form = this.fb.group({
       justificativa: ['', [Validators.required, Validators.minLength(15), Validators.maxLength(255)]],

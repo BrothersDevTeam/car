@@ -8,9 +8,8 @@ describe('CancelNfeDialog', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CancelNfeDialog]
-    })
-    .compileComponents();
+      imports: [CancelNfeDialog],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CancelNfeDialog);
     component = fixture.componentInstance;

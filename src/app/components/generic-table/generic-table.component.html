@@ -94,11 +94,7 @@
                   </div>
                 } @else if (column.menuActions) {
                   <div class="column-actions">
-                    <button
-                      mat-icon-button
-                      [matMenuTriggerFor]="menu"
-                      (click)="$event.stopPropagation()"
-                    >
+                    <button mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
                       <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #menu="matMenu">

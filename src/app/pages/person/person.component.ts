@@ -266,8 +266,8 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
 
             return false;
           },
-        }
-      ]
+        },
+      ],
     },
   ];
 

@@ -15,7 +15,10 @@ import { PersonService } from '@services/person.service';
 import { StoreContextService } from '@services/store-context.service';
 import { FormDraftService, FormDraft } from '@services/form-draft.service';
 import { ToastrService } from 'ngx-toastr';
-import { SaveDraftDialogComponent, SaveDraftDialogResult } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
+import {
+  SaveDraftDialogComponent,
+  SaveDraftDialogResult,
+} from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -162,98 +165,102 @@ export class StoreFormDialogComponent implements OnInit {
     });
 
     // Validação de CNPJ em tempo real com debounce
-    this.storeForm.get('cnpj')?.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      switchMap((cnpj) => {
-        if (!cnpj) return of(false);
-        const cleanCnpj = cnpj.replace(/\D/g, '');
-        if (cleanCnpj.length !== 14) return of(false);
-        return this.storeService.checkCnpjExists(cleanCnpj).pipe(
-          catchError(() => of(false))
-        );
-      })
-    ).subscribe((exists) => {
-      const control = this.storeForm.get('cnpj');
-      if (exists) {
-        control?.setErrors({ uniqueCnpj: true });
-      } else {
-        if (control?.hasError('uniqueCnpj')) {
-          const errors = { ...control.errors };
-          delete errors['uniqueCnpj'];
-          control.setErrors(Object.keys(errors).length ? errors : null);
+    this.storeForm
+      .get('cnpj')
+      ?.valueChanges.pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap((cnpj) => {
+          if (!cnpj) return of(false);
+          const cleanCnpj = cnpj.replace(/\D/g, '');
+          if (cleanCnpj.length !== 14) return of(false);
+          return this.storeService.checkCnpjExists(cleanCnpj).pipe(catchError(() => of(false)));
+        }),
+      )
+      .subscribe((exists) => {
+        const control = this.storeForm.get('cnpj');
+        if (exists) {
+          control?.setErrors({ uniqueCnpj: true });
+        } else {
+          if (control?.hasError('uniqueCnpj')) {
+            const errors = { ...control.errors };
+            delete errors['uniqueCnpj'];
+            control.setErrors(Object.keys(errors).length ? errors : null);
+          }
         }
-      }
-    });
+      });
 
     // Validação de E-mail de Usuário em tempo real com debounce
-    this.accessForm.get('username')?.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      switchMap((email) => {
-        if (!email || !email.includes('@') || email.length < 5) return of(false);
-        return this.personService.checkUserEmailExists(email).pipe(
-          catchError(() => of(false))
-        );
-      })
-    ).subscribe((exists) => {
-      const control = this.accessForm.get('username');
-      if (exists) {
-        control?.setErrors({ uniqueEmail: true });
-      } else {
-        if (control?.hasError('uniqueEmail')) {
-          const errors = { ...control.errors };
-          delete errors['uniqueEmail'];
-          control.setErrors(Object.keys(errors).length ? errors : null);
+    this.accessForm
+      .get('username')
+      ?.valueChanges.pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap((email) => {
+          if (!email || !email.includes('@') || email.length < 5) return of(false);
+          return this.personService.checkUserEmailExists(email).pipe(catchError(() => of(false)));
+        }),
+      )
+      .subscribe((exists) => {
+        const control = this.accessForm.get('username');
+        if (exists) {
+          control?.setErrors({ uniqueEmail: true });
+        } else {
+          if (control?.hasError('uniqueEmail')) {
+            const errors = { ...control.errors };
+            delete errors['uniqueEmail'];
+            control.setErrors(Object.keys(errors).length ? errors : null);
+          }
         }
-      }
-    });
+      });
 
     // Validação de Razão Social em tempo real com debounce
-    this.storeForm.get('name')?.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      switchMap((name) => {
-        if (!name || name.length < 3) return of(false);
-        return this.storeService.checkNameExists(name).pipe(
-          catchError(() => of(false))
-        );
-      })
-    ).subscribe((exists) => {
-      const control = this.storeForm.get('name');
-      if (exists) {
-        control?.setErrors({ uniqueName: true });
-      } else {
-        if (control?.hasError('uniqueName')) {
-          const errors = { ...control.errors };
-          delete errors['uniqueName'];
-          control.setErrors(Object.keys(errors).length ? errors : null);
+    this.storeForm
+      .get('name')
+      ?.valueChanges.pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap((name) => {
+          if (!name || name.length < 3) return of(false);
+          return this.storeService.checkNameExists(name).pipe(catchError(() => of(false)));
+        }),
+      )
+      .subscribe((exists) => {
+        const control = this.storeForm.get('name');
+        if (exists) {
+          control?.setErrors({ uniqueName: true });
+        } else {
+          if (control?.hasError('uniqueName')) {
+            const errors = { ...control.errors };
+            delete errors['uniqueName'];
+            control.setErrors(Object.keys(errors).length ? errors : null);
+          }
         }
-      }
-    });
+      });
 
     // Validação de E-mail da Loja em tempo real com debounce
-    this.storeForm.get('email')?.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      switchMap((email) => {
-        if (!email || !email.includes('@') || email.length < 5) return of(false);
-        return this.storeService.checkEmailExists(email).pipe(
-          catchError(() => of(false))
-        );
-      })
-    ).subscribe((exists) => {
-      const control = this.storeForm.get('email');
-      if (exists) {
-        control?.setErrors({ uniqueStoreEmail: true });
-      } else {
-        if (control?.hasError('uniqueStoreEmail')) {
-          const errors = { ...control.errors };
-          delete errors['uniqueStoreEmail'];
-          control.setErrors(Object.keys(errors).length ? errors : null);
+    this.storeForm
+      .get('email')
+      ?.valueChanges.pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap((email) => {
+          if (!email || !email.includes('@') || email.length < 5) return of(false);
+          return this.storeService.checkEmailExists(email).pipe(catchError(() => of(false)));
+        }),
+      )
+      .subscribe((exists) => {
+        const control = this.storeForm.get('email');
+        if (exists) {
+          control?.setErrors({ uniqueStoreEmail: true });
+        } else {
+          if (control?.hasError('uniqueStoreEmail')) {
+            const errors = { ...control.errors };
+            delete errors['uniqueStoreEmail'];
+            control.setErrors(Object.keys(errors).length ? errors : null);
+          }
         }
-      }
-    });
+      });
   }
 
   /**
@@ -294,7 +301,7 @@ export class StoreFormDialogComponent implements OnInit {
       return trimmed === '' ? null : trimmed;
     }
     if (Array.isArray(value)) {
-      return value.map(item => this.normalizeValue(item));
+      return value.map((item) => this.normalizeValue(item));
     }
     if (typeof value === 'object') {
       const normalized: any = {};
@@ -417,20 +424,16 @@ export class StoreFormDialogComponent implements OnInit {
     if (this.selectedDraftId && this.selectedDraftId !== 'new') {
       const currentDraft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);
       if (currentDraft) {
-        this.saveLocalDraft(
-          false,
-          currentDraft.draftName,
-          this.selectedDraftId,
-          true,
-        );
+        this.saveLocalDraft(false, currentDraft.draftName, this.selectedDraftId, true);
         return;
       }
     }
 
     const rawName = this.storeForm.value.name;
-    const suggestedName = (rawName && typeof rawName === 'string' && rawName.trim())
-      ? rawName.trim()
-      : `Loja em ${new Date().toLocaleString()}`;
+    const suggestedName =
+      rawName && typeof rawName === 'string' && rawName.trim()
+        ? rawName.trim()
+        : `Loja em ${new Date().toLocaleString()}`;
 
     const dialogRef = this.dialog.open(SaveDraftDialogComponent, {
       data: {
@@ -638,17 +641,17 @@ export class StoreFormDialogComponent implements OnInit {
       ? of(this.createdStoreInstance)
       : (this.data.isCarAdmin
           ? this.storeService.createMainStore(storePayload) // CAR_ADMIN → POST /stores/mainstore
-          : this.storeService.createBranch(storePayload) // ADMIN → POST /stores
-        ).pipe(
-          tap((createdStore: Store) => {
-            this.createdStoreInstance = createdStore;
-            console.log('✅ Store criada e salva no estado:', createdStore);
-          })
-        );
+          : this.storeService.createBranch(storePayload)
+        ) // ADMIN → POST /stores
+          .pipe(
+            tap((createdStore: Store) => {
+              this.createdStoreInstance = createdStore;
+              console.log('✅ Store criada e salva no estado:', createdStore);
+            }),
+          );
 
     createStoreObservable
       .pipe(
-
         // PASSO 2: Criar Person com o storeId
         switchMap((createdStore: Store) => {
           // Valida se storeId existe
@@ -722,9 +725,7 @@ export class StoreFormDialogComponent implements OnInit {
 
           // Trata array de erros de validação (Spring Boot @Valid)
           if (Array.isArray(error.error)) {
-            const messages = error.error
-              .map((err: any) => err.defaultMessage)
-              .filter(Boolean);
+            const messages = error.error.map((err: any) => err.defaultMessage).filter(Boolean);
             if (messages.length > 0) {
               extractedErrorMessage = messages.join(' | ');
             }
@@ -764,7 +765,7 @@ export class StoreFormDialogComponent implements OnInit {
             this.toastrService.error(cleanMessage, 'Erro no Cadastro', {
               timeOut: 5000,
               progressBar: true,
-              closeButton: true
+              closeButton: true,
             });
           }
 
@@ -859,7 +860,7 @@ export class StoreFormDialogComponent implements OnInit {
       userEmail: accessValue.username,
       password: accessValue.password,
       relationshipId: 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d',
-      isEmployee: true
+      isEmployee: true,
     };
   }
 

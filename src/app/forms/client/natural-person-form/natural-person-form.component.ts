@@ -71,7 +71,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   private subscriptions = new Subscription();
   submitted = false;
 
-
   hasOfficialNfe = false;
 
   readonly dialog = inject(MatDialog);
@@ -518,7 +517,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
               // Como é edição de um registro com histórico, recarrega o histórico
               this.personService.getBusinessHistory(person.personId).subscribe({
                 next: (history) => {
-
                   this.hasOfficialNfe = !!history.hasOfficialNfe;
                   this.checkCpfDisableState();
                 },
@@ -785,7 +783,6 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     this.dataFormPatched = false;
     this.showFormFields = !!this.dataForm || !!this.draft;
 
-
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
         const hasChanges = this.hasUnsavedChanges();
@@ -957,20 +954,18 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
           if (this.dataForm.personId) {
             this.personService.getBusinessHistory(this.dataForm.personId).subscribe({
               next: (history) => {
-
                 this.hasOfficialNfe = !!history.hasOfficialNfe;
                 this.checkCpfDisableState();
               },
               error: (err) => {
                 console.error('Erro ao buscar histórico:', err);
-              }
+              },
             });
           }
 
           console.log('[natural-person-form] Formulário após patchValue de inicialização:', this.form.value);
         }, 200);
       } else {
-
         this.hasOfficialNfe = false;
         this.form.get('cpf')?.enable();
       }

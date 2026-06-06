@@ -1,125 +1,154 @@
 <h2 mat-dialog-title class="dialog-title">Configuração Fiscal</h2>
 <mat-dialog-content>
   @if (loading) {
-  <div class="loading-container">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p>Carregando parâmetros...</p>
-  </div>
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Carregando parâmetros...</p>
+    </div>
   } @else {
-  <form [formGroup]="form" class="fiscal-form">
-    <div class="status-banner" [ngClass]="{ 'is-synced': isSync, 'not-synced': !isSync }">
-      <mat-icon>{{ isSync ? 'check_circle' : 'error_outline' }}</mat-icon>
-      <div class="status-text">
-        <h3>Sincronização Fiscal</h3>
-        <p>
-          {{
-          isSync
-          ? 'A loja está perfeitamente integrada e pronta para emitir Notas Fiscais.'
-          : 'A loja não possui integração com o emissor fiscal Focus NFe. Preencha os dados e clique em "Sincronizar".'
-          }}
-        </p>
+    <form [formGroup]="form" class="fiscal-form">
+      <div class="status-banner" [ngClass]="{ 'is-synced': isSync, 'not-synced': !isSync }">
+        <mat-icon>{{ isSync ? 'check_circle' : 'error_outline' }}</mat-icon>
+        <div class="status-text">
+          <h3>Sincronização Fiscal</h3>
+          <p>
+            {{
+              isSync
+                ? 'A loja está perfeitamente integrada e pronta para emitir Notas Fiscais.'
+                : 'A loja não possui integração com o emissor fiscal Focus NFe. Preencha os dados e clique em "Sincronizar".'
+            }}
+          </p>
+        </div>
       </div>
-    </div>
 
-    <div class="form-row">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label style="display: flex; align-items: center; gap: 4px;">
-          Regime Tributário
-          <mat-icon style="font-size: 16px; width: 16px; height: 16px; cursor: help"
-            matTooltip="Lucro Presumido: comum devido à Equiparação a Consignação (tributação sobre a margem de lucro). Simples Nacional: comum para micro/pequenas. A escolha altera como a emissão de nota é montada."
-            matTooltipClass="custom-tooltip" matTooltipPosition="right">info_outline</mat-icon>
-        </mat-label>
-        <mat-select formControlName="parametroFiscalRegimeTributario">
-          @for (regime of regimes; track regime.value) {
-          <mat-option [value]="regime.value">{{ regime.label }}</mat-option>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label style="display: flex; align-items: center; gap: 4px">
+            Regime Tributário
+            <mat-icon
+              style="font-size: 16px; width: 16px; height: 16px; cursor: help"
+              matTooltip="Lucro Presumido: comum devido à Equiparação a Consignação (tributação sobre a margem de lucro). Simples Nacional: comum para micro/pequenas. A escolha altera como a emissão de nota é montada."
+              matTooltipClass="custom-tooltip"
+              matTooltipPosition="right"
+            >
+              info_outline
+            </mat-icon>
+          </mat-label>
+          <mat-select formControlName="parametroFiscalRegimeTributario">
+            @for (regime of regimes; track regime.value) {
+              <mat-option [value]="regime.value">{{ regime.label }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls['parametroFiscalRegimeTributario'].hasError('required')) {
+            <mat-error>Regime Tributário é obrigatório</mat-error>
           }
-        </mat-select>
-        @if (form.controls['parametroFiscalRegimeTributario'].hasError('required')) {
-        <mat-error>Regime Tributário é obrigatório</mat-error>
-        }
-      </mat-form-field>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Inscrição Estadual</mat-label>
-        <input matInput formControlName="parametroFiscalInscricaoEstadual" placeholder="Ex: 123456789" />
-        @if (form.controls['parametroFiscalInscricaoEstadual'].hasError('required')) {
-        <mat-error>Inscrição Estadual é obrigatória</mat-error>
-        }
-      </mat-form-field>
-    </div>
-
-    <div class="form-row file-upload-row">
-      <div class="file-info">
-        <mat-label class="file-label">Certificado Digital (.pfx):</mat-label>
-        <span class="file-name">
-          {{
-          selectedFileName ||
-          (hasExistingConfig && form.get('parametroFiscalCertificadoBase64')?.value
-          ? 'Certificado já cadastrado no servidor'
-          : 'Nenhum arquivo...')
-          }}
-        </span>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Inscrição Estadual</mat-label>
+          <input matInput formControlName="parametroFiscalInscricaoEstadual" placeholder="Ex: 123456789" />
+          @if (form.controls['parametroFiscalInscricaoEstadual'].hasError('required')) {
+            <mat-error>Inscrição Estadual é obrigatória</mat-error>
+          }
+        </mat-form-field>
       </div>
-      <button mat-stroked-button color="primary" type="button" (click)="fileInput.click()">
-        <mat-icon>upload_file</mat-icon>
-        Escolher Arquivo
-      </button>
-      <input type="file" #fileInput accept=".pfx" (change)="onFileSelected($event)" style="display: none" />
-    </div>
 
-    <div class="form-row mt-3">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Senha do Certificado Digital</mat-label>
-        <input matInput type="password" formControlName="parametroFiscalSenhaCertificado"
-          placeholder="Deixe em branco se já estiver salva e não quiser trocar" />
-      </mat-form-field>
+      <div class="form-row file-upload-row">
+        <div class="file-info">
+          <mat-label class="file-label">Certificado Digital (.pfx):</mat-label>
+          <span class="file-name">
+            {{
+              selectedFileName ||
+                (hasExistingConfig && form.get('parametroFiscalCertificadoBase64')?.value
+                  ? 'Certificado já cadastrado no servidor'
+                  : 'Nenhum arquivo...')
+            }}
+          </span>
+        </div>
+        <button mat-stroked-button color="primary" type="button" (click)="fileInput.click()">
+          <mat-icon>upload_file</mat-icon>
+          Escolher Arquivo
+        </button>
+        <input type="file" #fileInput accept=".pfx" (change)="onFileSelected($event)" style="display: none" />
+      </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label style="display: flex; align-items: center; gap: 4px;">
-          Próximo Número NFe
-          <mat-icon style="font-size: 16px; width: 16px; height: 16px; cursor: help"
-            matTooltip="Define a numeração da próxima nota fiscal que será emitida. O sistema irá autoincrementar a partir deste valor a cada emissão bem-sucedida."
-            matTooltipClass="custom-tooltip" matTooltipPosition="right">info_outline</mat-icon>
-        </mat-label>
-        <input matInput type="number" formControlName="parametroFiscalProximoNumeroNfe" placeholder="Ex: 1" min="1" />
-        @if (form.controls['parametroFiscalProximoNumeroNfe'].hasError('required')) {
-        <mat-error>Próximo número é obrigatório</mat-error>
-        }
-        @if (form.controls['parametroFiscalProximoNumeroNfe'].hasError('min')) {
-        <mat-error>O número mínimo é 1</mat-error>
-        }
-      </mat-form-field>
-    </div>
+      <div class="form-row mt-3">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Senha do Certificado Digital</mat-label>
+          <input
+            matInput
+            type="password"
+            formControlName="parametroFiscalSenhaCertificado"
+            placeholder="Deixe em branco se já estiver salva e não quiser trocar"
+          />
+        </mat-form-field>
 
-    <div class="checkbox-group">
-      <h4>Opções de Emissão</h4>
-      <mat-checkbox formControlName="parametroFiscalEmHomologacao"
-        matTooltip="Se marcado, as notas serão emitidas sem valor fiscal para fins de testes. Desmarque para emitir notas reais (Produção)."
-        matTooltipClass="custom-tooltip" matTooltipPosition="right">
-        Ambiente de Homologação (Testes)
-      </mat-checkbox>
-      <mat-checkbox formControlName="parametroFiscalHabilitaNfe"
-        matTooltip="Obrigatório para registrar entradas e saídas de veículos." matTooltipClass="custom-tooltip"
-        matTooltipPosition="right">
-        Habilitar NFe
-      </mat-checkbox>
-      <mat-checkbox formControlName="parametroFiscalCalculoAutomaticoImpostos"
-        matTooltip="Fundamental para aplicar a redução na base de cálculo de ICMS para veículos usados automaticamente (calculado pelo sistema)."
-        matTooltipClass="custom-tooltip" matTooltipPosition="right">
-        Cálculo Automático de Impostos
-      </mat-checkbox>
-      <mat-checkbox formControlName="parametroFiscalUtilizarCreditoIcms"
-        matTooltip="Usado na compra de carros de fornecedores tributados (se o estado não vedar). Lojas do Simples Nacional não usam."
-        matTooltipClass="custom-tooltip" matTooltipPosition="right">
-        Utilizar Crédito de ICMS
-      </mat-checkbox>
-      <mat-checkbox formControlName="parametroFiscalUtilizarCreditoPisCofins"
-        matTooltip="Aplicável apenas para lojas no Lucro Real (Não cumulativo). Lojas no Presumido ou Simples não devem marcar."
-        matTooltipClass="custom-tooltip" matTooltipPosition="right">
-        Utilizar Crédito PIS/COFINS
-      </mat-checkbox>
-    </div>
-  </form>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label style="display: flex; align-items: center; gap: 4px">
+            Próximo Número NFe
+            <mat-icon
+              style="font-size: 16px; width: 16px; height: 16px; cursor: help"
+              matTooltip="Define a numeração da próxima nota fiscal que será emitida. O sistema irá autoincrementar a partir deste valor a cada emissão bem-sucedida."
+              matTooltipClass="custom-tooltip"
+              matTooltipPosition="right"
+            >
+              info_outline
+            </mat-icon>
+          </mat-label>
+          <input matInput type="number" formControlName="parametroFiscalProximoNumeroNfe" placeholder="Ex: 1" min="1" />
+          @if (form.controls['parametroFiscalProximoNumeroNfe'].hasError('required')) {
+            <mat-error>Próximo número é obrigatório</mat-error>
+          }
+          @if (form.controls['parametroFiscalProximoNumeroNfe'].hasError('min')) {
+            <mat-error>O número mínimo é 1</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="checkbox-group">
+        <h4>Opções de Emissão</h4>
+        <mat-checkbox
+          formControlName="parametroFiscalEmHomologacao"
+          matTooltip="Se marcado, as notas serão emitidas sem valor fiscal para fins de testes. Desmarque para emitir notas reais (Produção)."
+          matTooltipClass="custom-tooltip"
+          matTooltipPosition="right"
+        >
+          Ambiente de Homologação (Testes)
+        </mat-checkbox>
+        <mat-checkbox
+          formControlName="parametroFiscalHabilitaNfe"
+          matTooltip="Obrigatório para registrar entradas e saídas de veículos."
+          matTooltipClass="custom-tooltip"
+          matTooltipPosition="right"
+        >
+          Habilitar NFe
+        </mat-checkbox>
+        <mat-checkbox
+          formControlName="parametroFiscalCalculoAutomaticoImpostos"
+          matTooltip="Fundamental para aplicar a redução na base de cálculo de ICMS para veículos usados automaticamente (calculado pelo sistema)."
+          matTooltipClass="custom-tooltip"
+          matTooltipPosition="right"
+        >
+          Cálculo Automático de Impostos
+        </mat-checkbox>
+        <mat-checkbox
+          formControlName="parametroFiscalUtilizarCreditoIcms"
+          matTooltip="Usado na compra de carros de fornecedores tributados (se o estado não vedar). Lojas do Simples Nacional não usam."
+          matTooltipClass="custom-tooltip"
+          matTooltipPosition="right"
+        >
+          Utilizar Crédito de ICMS
+        </mat-checkbox>
+        <mat-checkbox
+          formControlName="parametroFiscalUtilizarCreditoPisCofins"
+          matTooltip="Aplicável apenas para lojas no Lucro Real (Não cumulativo). Lojas no Presumido ou Simples não devem marcar."
+          matTooltipClass="custom-tooltip"
+          matTooltipPosition="right"
+        >
+          Utilizar Crédito PIS/COFINS
+        </mat-checkbox>
+      </div>
+    </form>
   }
 </mat-dialog-content>
 
@@ -128,16 +157,20 @@
   <button mat-flat-button color="primary" (click)="onSave()" [disabled]="saving || syncing || form.invalid">
     {{ saving ? 'Salvando...' : 'Salvar Parâmetros' }}
   </button>
-  <button mat-flat-button class="sync-button" (click)="onSyncFocusNfe()"
-    [disabled]="saving || syncing || !hasExistingConfig">
+  <button
+    mat-flat-button
+    class="sync-button"
+    (click)="onSyncFocusNfe()"
+    [disabled]="saving || syncing || !hasExistingConfig"
+  >
     @if (syncing) {
-    <mat-spinner diameter="20"></mat-spinner>
+      <mat-spinner diameter="20"></mat-spinner>
     }
     @if (!syncing) {
-    <mat-icon>sync</mat-icon>
+      <mat-icon>sync</mat-icon>
     }
     @if (!syncing) {
-    Sincronizar loja Focus NFe
+      Sincronizar loja Focus NFe
     }
   </button>
 </mat-dialog-actions>

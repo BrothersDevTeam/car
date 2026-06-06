@@ -176,7 +176,8 @@ mat-dialog-actions {
   width: 100%;
   box-sizing: border-box;
 
-  button[mat-stroked-button], button[mat-raised-button] {
+  button[mat-stroked-button],
+  button[mat-raised-button] {
     flex: 1;
     display: flex;
     align-items: center;

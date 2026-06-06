@@ -8,9 +8,8 @@ describe('CceNfeDialog', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CceNfeDialog]
-    })
-    .compileComponents();
+      imports: [CceNfeDialog],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CceNfeDialog);
     component = fixture.componentInstance;

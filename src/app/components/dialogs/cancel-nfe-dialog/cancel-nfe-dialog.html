@@ -5,10 +5,19 @@
   <form [formGroup]="form" class="dialog-form" (ngSubmit)="submit()">
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Justificativa de Cancelamento</mat-label>
-      <textarea matInput formControlName="justificativa" rows="4" placeholder="Ex: Erro no preenchimento do valor do produto."></textarea>
+      <textarea
+        matInput
+        formControlName="justificativa"
+        rows="4"
+        placeholder="Ex: Erro no preenchimento do valor do produto."
+      ></textarea>
       <mat-error *ngIf="form.get('justificativa')?.hasError('required')">A justificativa é obrigatória.</mat-error>
-      <mat-error *ngIf="form.get('justificativa')?.hasError('minlength')">A justificativa deve ter no mínimo 15 caracteres.</mat-error>
-      <mat-error *ngIf="form.get('justificativa')?.hasError('maxlength')">A justificativa deve ter no máximo 255 caracteres.</mat-error>
+      <mat-error *ngIf="form.get('justificativa')?.hasError('minlength')">
+        A justificativa deve ter no mínimo 15 caracteres.
+      </mat-error>
+      <mat-error *ngIf="form.get('justificativa')?.hasError('maxlength')">
+        A justificativa deve ter no máximo 255 caracteres.
+      </mat-error>
     </mat-form-field>
   </form>
 </mat-dialog-content>

@@ -25,7 +25,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatIconModule
+    MatIconModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './cce-nfe-dialog.html',
@@ -36,7 +36,7 @@ export class CceNfeDialog {
 
   constructor(
     private fb: FormBuilder,
-    public dialogRef: MatDialogRef<CceNfeDialog>
+    public dialogRef: MatDialogRef<CceNfeDialog>,
   ) {
     this.form = this.fb.group({
       correcao: ['', [Validators.required, Validators.minLength(15), Validators.maxLength(1000)]],

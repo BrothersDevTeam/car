@@ -330,7 +330,6 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-
   /**
    * Abre o dialog específico para Brand
    */

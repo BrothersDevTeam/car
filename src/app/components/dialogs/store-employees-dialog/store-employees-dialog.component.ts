@@ -608,11 +608,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
   }
 
   getEmployeesWithAccess(excludePersonId: string): Person[] {
-    return this.employees.filter(
-      (e) =>
-        e.personId !== excludePersonId &&
-        e.hasUser,
-    );
+    return this.employees.filter((e) => e.personId !== excludePersonId && e.hasUser);
   }
 
   copyPermissions(personId: string, sourcePerson: Person): void {
@@ -635,7 +631,7 @@ export class StoreEmployeesDialogComponent implements OnInit {
       error: (err) => {
         console.error('Erro ao buscar permissões para cópia:', err);
         this.toastr.error('Erro ao buscar permissões do funcionário selecionado.');
-      }
+      },
     });
   }
 

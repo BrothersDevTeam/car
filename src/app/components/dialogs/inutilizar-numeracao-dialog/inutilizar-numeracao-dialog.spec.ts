@@ -8,9 +8,8 @@ describe('InutilizarNumeracaoDialog', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [InutilizarNumeracaoDialog]
-    })
-    .compileComponents();
+      imports: [InutilizarNumeracaoDialog],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(InutilizarNumeracaoDialog);
     component = fixture.componentInstance;

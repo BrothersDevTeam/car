@@ -2,12 +2,15 @@
 
 <mat-dialog-content>
   <div class="store-info-header">
-    <p><strong>Loja:</strong> {{ store.name }}</p>
+    <p>
+      <strong>Loja:</strong>
+      {{ store.name }}
+    </p>
   </div>
 
   <div class="owners-section">
     <h3>Sócios / Proprietários Atuais</h3>
-    
+
     @if (!store.owners || store.owners.length === 0) {
       <div class="no-owners-msg">
         <mat-icon>group_off</mat-icon>
@@ -26,7 +29,13 @@
                 {{ owner.legalEntity ? 'CNPJ' : 'CPF' }}: {{ owner.legalEntity ? owner.cnpj : owner.cpf }}
               </span>
             </div>
-            <button mat-icon-button color="warn" (click)="onRemoveOwner(owner.personId)" [disabled]="submitting" matTooltip="Remover este proprietário">
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="onRemoveOwner(owner.personId)"
+              [disabled]="submitting"
+              matTooltip="Remover este proprietário"
+            >
               <mat-icon>delete</mat-icon>
             </button>
           </div>
@@ -52,7 +61,9 @@
     } @else if (persons.length === 0) {
       <div class="empty-container">
         <p>Não há outras pessoas ativas disponíveis para vinculação.</p>
-        <p class="hint">Cadastre uma nova pessoa (com acesso ao sistema) na tela de pessoas antes de vinculá-la como proprietária.</p>
+        <p class="hint">
+          Cadastre uma nova pessoa (com acesso ao sistema) na tela de pessoas antes de vinculá-la como proprietária.
+        </p>
       </div>
     } @else {
       <form [formGroup]="ownerForm" class="add-owner-form">
@@ -71,7 +82,13 @@
             }
           </mat-form-field>
 
-          <button mat-raised-button color="primary" class="add-btn" (click)="onAddOwner()" [disabled]="ownerForm.invalid || submitting">
+          <button
+            mat-raised-button
+            color="primary"
+            class="add-btn"
+            (click)="onAddOwner()"
+            [disabled]="ownerForm.invalid || submitting"
+          >
             <mat-icon>person_add</mat-icon>
             Adicionar Sócio
           </button>

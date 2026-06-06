@@ -391,7 +391,9 @@ app-pagination {
 ::ng-deep {
   .mat-mdc-menu-panel {
     border-radius: 10px !important;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+    box-shadow:
+      0 10px 25px -5px rgba(0, 0, 0, 0.05),
+      0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
     border: 1px solid #f1f5f9 !important;
     background-color: #ffffff !important;
     padding: 4px !important;

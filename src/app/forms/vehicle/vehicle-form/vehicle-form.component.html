@@ -55,323 +55,323 @@
 
   @if (showFormFields) {
     <form [formGroup]="form" (keydown.enter)="onEnter($event)" class="modern-form">
-    @if (dataForm?.plate) {
-      <div class="form-header-title">
-        <mat-icon>directions_car</mat-icon>
-        <h2>
-          Veículo Placa:
-          <span>{{ dataForm!.plate }}</span>
-        </h2>
-      </div>
-    }
-
-    <mat-tab-group
-      [selectedIndex]="selectedTabIndex()"
-      (selectedIndexChange)="selectedTabIndex.set($event)"
-      animationDuration="500ms"
-      class="modern-tab-group"
-    >
-      <!-- Aba 1: Dados do Veículo -->
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">directions_car</mat-icon>
-          @if (submitted && !!form.get('plate')?.invalid) {
-            <mat-icon color="warn" class="error-indicator">error</mat-icon>
-          }
-          <span>Veículo</span>
-        </ng-template>
-
-        <div class="tab-content">
-          <!-- Grupo: Identificação Básica -->
-          <section class="form-section">
-            <div class="section-title">
-              <mat-icon>info</mat-icon>
-              <h3>Identificação Básica</h3>
-            </div>
-
-            <div class="form-grid grid-3-cols align-items-end">
-              <div class="field-container">
-                <label class="modern-label">Origem do Veículo</label>
-                <mat-button-toggle-group
-                  formControlName="origin"
-                  aria-label="Origem do Veículo"
-                  class="premium-toggle-group"
-                >
-                  <mat-button-toggle value="NACIONAL">
-                    <mat-icon>flag</mat-icon>
-                    Nacional
-                  </mat-button-toggle>
-                  <mat-button-toggle value="IMPORTADO">
-                    <mat-icon>public</mat-icon>
-                    Importado
-                  </mat-button-toggle>
-                </mat-button-toggle-group>
-              </div>
-
-              <app-primary-select
-                formControlName="vehicleType"
-                label="Tipo de Veículo"
-                [options]="vehicleTypeOptions"
-                optionLabel="label"
-                optionValue="value"
-              ></app-primary-select>
-
-              <app-primary-input
-                formControlName="plate"
-                label="Placa*"
-                mask="AAA-AAAA"
-                placeholder="ABC-1234"
-                [error]="!!(form.get('plate')?.invalid && (form.get('plate')?.touched || submitted))"
-              />
-            </div>
-          </section>
-
-          <!-- Grupo: Marca e Modelo -->
-          <section class="form-section">
-            <div class="section-title">
-              <mat-icon>category</mat-icon>
-              <h3>Marca e Modelo</h3>
-            </div>
-
-            <div class="form-grid">
-              <app-custom-select
-                listType="person"
-                label="Proprietário"
-                [options]="persons"
-                [control]="ownerControl"
-                (onCreateNew)="onCreateNewPerson()"
-                (onEdit)="onEditPerson($event)"
-              ></app-custom-select>
-
-              <app-custom-select
-                listType="brand"
-                label="Marca"
-                [options]="brands"
-                [control]="brandControl"
-                (itemChanged)="loadBrands()"
-              ></app-custom-select>
-
-              <app-custom-select
-                listType="model"
-                label="Modelo"
-                [options]="models"
-                [control]="modelControl"
-                [placeholder]="selectModelDisabled() ? 'Selecione uma marca primeiro' : 'Selecione um modelo'"
-                [disabled]="selectModelDisabled() || loadingModels()"
-                (itemChanged)="loadModels()"
-              ></app-custom-select>
-
-              <app-custom-select
-                listType="model"
-                label="Ano/Versão (FIPE)"
-                [options]="years"
-                [control]="fipeYearControl"
-                [placeholder]="selectYearDisabled() ? 'Selecione um modelo primeiro' : 'Selecione o ano/versão'"
-                [disabled]="selectYearDisabled() || loadingYears()"
-              ></app-custom-select>
-            </div>
-
-            @if (loadingDetails()) {
-              <div class="loading-overlay">
-                <span class="loader-sm"></span>
-                <span>Buscando detalhes na FIPE...</span>
-              </div>
-            }
-          </section>
-
-          <!-- Grupo: Especificações Técnicas -->
-          <section class="form-section">
-            <div class="section-title">
-              <mat-icon>settings</mat-icon>
-              <h3>Especificações Técnicas</h3>
-            </div>
-
-            <div class="form-grid grid-3">
-              <app-custom-select
-                listType="color"
-                label="Cor"
-                [options]="colors"
-                [control]="colorControl"
-                (itemChanged)="loadColors()"
-              ></app-custom-select>
-
-              <app-primary-select
-                formControlName="fuelTypes"
-                label="Combustível"
-                [options]="fuelTypesOptions"
-                optionValue="value"
-                optionLabel="label"
-              ></app-primary-select>
-
-              <app-primary-input formControlName="vehicleYear" label="Ano Fabr." mask="0000" />
-              <app-primary-input formControlName="modelYear" label="Ano Modelo" mask="0000" />
-              <app-primary-input formControlName="km" label="KM Atual" />
-              <app-primary-input formControlName="doors" label="Portas" />
-            </div>
-          </section>
-
-          <!-- Grupo: Opcionais do Veículo -->
-          <section class="form-section">
-            <div class="section-title">
-              <mat-icon>check_box</mat-icon>
-              <h3>Opcionais do Veículo</h3>
-            </div>
-
-            <div class="form-grid">
-              <app-primary-select
-                formControlName="optionalIds"
-                label="Opcionais"
-                placeholder="Selecione os opcionais do veículo"
-                [options]="optionalsOptions"
-                optionValue="value"
-                optionLabel="label"
-                [allowMultiple]="true"
-                [showSearch]="true"
-                [useColumns]="true"
-                maxHeight="500px"
-              ></app-primary-select>
-            </div>
-
-            @if (getSelectedOptionals().length > 0) {
-              <div class="selected-optionals-container animate-fade-in">
-                <mat-chip-set>
-                  @for (opt of getSelectedOptionals(); track opt.value) {
-                    <mat-chip-row (removed)="removeOptional(opt.value)" class="optional-chip">
-                      {{ opt.label }}
-                      <button matChipRemove aria-label="Remover">
-                        <mat-icon>cancel</mat-icon>
-                      </button>
-                    </mat-chip-row>
-                  }
-                </mat-chip-set>
-              </div>
-            }
-          </section>
-
-          <!-- Grupo: Documentação e Motor -->
-          <section class="form-section">
-            <div class="section-title">
-              <mat-icon>description</mat-icon>
-              <h3>Documentação e Motor</h3>
-            </div>
-
-            <div class="form-grid">
-              <app-primary-input formControlName="chassis" label="Chassi" mask="AAAAAAAAAAAAAAAAA" />
-              <app-primary-input formControlName="renavam" label="Renavam" />
-              <app-primary-input formControlName="engineNumber" label="Nº do Motor" />
-              <app-primary-input formControlName="engineDisplacement" label="Cilindrada" />
-              <app-primary-input formControlName="horsepower" label="Potência (CV)" />
-
-              <app-primary-select
-                formControlName="species"
-                label="Espécie"
-                [options]="speciesOptions"
-                optionLabel="label"
-                optionValue="value"
-              ></app-primary-select>
-
-              <app-primary-select
-                formControlName="category"
-                label="Categoria"
-                [options]="categoryOptions"
-                optionLabel="label"
-                optionValue="value"
-              ></app-primary-select>
-
-              <app-primary-input formControlName="features" label="Características" class="full-row" />
-            </div>
-          </section>
+      @if (dataForm?.plate) {
+        <div class="form-header-title">
+          <mat-icon>directions_car</mat-icon>
+          <h2>
+            Veículo Placa:
+            <span>{{ dataForm!.plate }}</span>
+          </h2>
         </div>
-      </mat-tab>
+      }
 
-      <!-- Aba 2: Dados Gerais (Negócio) -->
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">attach_money</mat-icon>
-          <span>Dados Gerais</span>
-        </ng-template>
+      <mat-tab-group
+        [selectedIndex]="selectedTabIndex()"
+        (selectedIndexChange)="selectedTabIndex.set($event)"
+        animationDuration="500ms"
+        class="modern-tab-group"
+      >
+        <!-- Aba 1: Dados do Veículo -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">directions_car</mat-icon>
+            @if (submitted && !!form.get('plate')?.invalid) {
+              <mat-icon color="warn" class="error-indicator">error</mat-icon>
+            }
+            <span>Veículo</span>
+          </ng-template>
 
-        <div class="tab-content">
-          <section class="form-section">
-            <div class="section-title">
-              <mat-icon>shopping_cart</mat-icon>
-              <h3>Informações de Aquisição</h3>
-            </div>
+          <div class="tab-content">
+            <!-- Grupo: Identificação Básica -->
+            <section class="form-section">
+              <div class="section-title">
+                <mat-icon>info</mat-icon>
+                <h3>Identificação Básica</h3>
+              </div>
 
-            <div class="vertical-form-stack">
-              <div class="field-container">
-                <label class="modern-label">Informações do Fornecedor</label>
+              <div class="form-grid grid-3-cols align-items-end">
+                <div class="field-container">
+                  <label class="modern-label">Origem do Veículo</label>
+                  <mat-button-toggle-group
+                    formControlName="origin"
+                    aria-label="Origem do Veículo"
+                    class="premium-toggle-group"
+                  >
+                    <mat-button-toggle value="NACIONAL">
+                      <mat-icon>flag</mat-icon>
+                      Nacional
+                    </mat-button-toggle>
+                    <mat-button-toggle value="IMPORTADO">
+                      <mat-icon>public</mat-icon>
+                      Importado
+                    </mat-button-toggle>
+                  </mat-button-toggle-group>
+                </div>
+
+                <app-primary-select
+                  formControlName="vehicleType"
+                  label="Tipo de Veículo"
+                  [options]="vehicleTypeOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                ></app-primary-select>
+
+                <app-primary-input
+                  formControlName="plate"
+                  label="Placa*"
+                  mask="AAA-AAAA"
+                  placeholder="ABC-1234"
+                  [error]="!!(form.get('plate')?.invalid && (form.get('plate')?.touched || submitted))"
+                />
+              </div>
+            </section>
+
+            <!-- Grupo: Marca e Modelo -->
+            <section class="form-section">
+              <div class="section-title">
+                <mat-icon>category</mat-icon>
+                <h3>Marca e Modelo</h3>
+              </div>
+
+              <div class="form-grid">
                 <app-custom-select
                   listType="person"
-                  label="Selecione o fornecedor"
+                  label="Proprietário"
                   [options]="persons"
-                  [control]="supplierControl"
-                  placeholder="Buscar por nome ou CPF/CNPJ..."
+                  [control]="ownerControl"
                   (onCreateNew)="onCreateNewPerson()"
                   (onEdit)="onEditPerson($event)"
                 ></app-custom-select>
+
+                <app-custom-select
+                  listType="brand"
+                  label="Marca"
+                  [options]="brands"
+                  [control]="brandControl"
+                  (itemChanged)="loadBrands()"
+                ></app-custom-select>
+
+                <app-custom-select
+                  listType="model"
+                  label="Modelo"
+                  [options]="models"
+                  [control]="modelControl"
+                  [placeholder]="selectModelDisabled() ? 'Selecione uma marca primeiro' : 'Selecione um modelo'"
+                  [disabled]="selectModelDisabled() || loadingModels()"
+                  (itemChanged)="loadModels()"
+                ></app-custom-select>
+
+                <app-custom-select
+                  listType="model"
+                  label="Ano/Versão (FIPE)"
+                  [options]="years"
+                  [control]="fipeYearControl"
+                  [placeholder]="selectYearDisabled() ? 'Selecione um modelo primeiro' : 'Selecione o ano/versão'"
+                  [disabled]="selectYearDisabled() || loadingYears()"
+                ></app-custom-select>
               </div>
 
-              <div class="date-row">
-                <app-date-input formControlName="dataCompra" label="Data da Compra"></app-date-input>
+              @if (loadingDetails()) {
+                <div class="loading-overlay">
+                  <span class="loader-sm"></span>
+                  <span>Buscando detalhes na FIPE...</span>
+                </div>
+              }
+            </section>
+
+            <!-- Grupo: Especificações Técnicas -->
+            <section class="form-section">
+              <div class="section-title">
+                <mat-icon>settings</mat-icon>
+                <h3>Especificações Técnicas</h3>
               </div>
 
-              <div class="financial-card-stack">
+              <div class="form-grid grid-3">
+                <app-custom-select
+                  listType="color"
+                  label="Cor"
+                  [options]="colors"
+                  [control]="colorControl"
+                  (itemChanged)="loadColors()"
+                ></app-custom-select>
+
+                <app-primary-select
+                  formControlName="fuelTypes"
+                  label="Combustível"
+                  [options]="fuelTypesOptions"
+                  optionValue="value"
+                  optionLabel="label"
+                ></app-primary-select>
+
+                <app-primary-input formControlName="vehicleYear" label="Ano Fabr." mask="0000" />
+                <app-primary-input formControlName="modelYear" label="Ano Modelo" mask="0000" />
+                <app-primary-input formControlName="km" label="KM Atual" />
+                <app-primary-input formControlName="doors" label="Portas" />
+              </div>
+            </section>
+
+            <!-- Grupo: Opcionais do Veículo -->
+            <section class="form-section">
+              <div class="section-title">
+                <mat-icon>check_box</mat-icon>
+                <h3>Opcionais do Veículo</h3>
+              </div>
+
+              <div class="form-grid">
+                <app-primary-select
+                  formControlName="optionalIds"
+                  label="Opcionais"
+                  placeholder="Selecione os opcionais do veículo"
+                  [options]="optionalsOptions"
+                  optionValue="value"
+                  optionLabel="label"
+                  [allowMultiple]="true"
+                  [showSearch]="true"
+                  [useColumns]="true"
+                  maxHeight="500px"
+                ></app-primary-select>
+              </div>
+
+              @if (getSelectedOptionals().length > 0) {
+                <div class="selected-optionals-container animate-fade-in">
+                  <mat-chip-set>
+                    @for (opt of getSelectedOptionals(); track opt.value) {
+                      <mat-chip-row (removed)="removeOptional(opt.value)" class="optional-chip">
+                        {{ opt.label }}
+                        <button matChipRemove aria-label="Remover">
+                          <mat-icon>cancel</mat-icon>
+                        </button>
+                      </mat-chip-row>
+                    }
+                  </mat-chip-set>
+                </div>
+              }
+            </section>
+
+            <!-- Grupo: Documentação e Motor -->
+            <section class="form-section">
+              <div class="section-title">
+                <mat-icon>description</mat-icon>
+                <h3>Documentação e Motor</h3>
+              </div>
+
+              <div class="form-grid">
+                <app-primary-input formControlName="chassis" label="Chassi" mask="AAAAAAAAAAAAAAAAA" />
+                <app-primary-input formControlName="renavam" label="Renavam" />
+                <app-primary-input formControlName="engineNumber" label="Nº do Motor" />
+                <app-primary-input formControlName="engineDisplacement" label="Cilindrada" />
+                <app-primary-input formControlName="horsepower" label="Potência (CV)" />
+
+                <app-primary-select
+                  formControlName="species"
+                  label="Espécie"
+                  [options]="speciesOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                ></app-primary-select>
+
+                <app-primary-select
+                  formControlName="category"
+                  label="Categoria"
+                  [options]="categoryOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                ></app-primary-select>
+
+                <app-primary-input formControlName="features" label="Características" class="full-row" />
+              </div>
+            </section>
+          </div>
+        </mat-tab>
+
+        <!-- Aba 2: Dados Gerais (Negócio) -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">attach_money</mat-icon>
+            <span>Dados Gerais</span>
+          </ng-template>
+
+          <div class="tab-content">
+            <section class="form-section">
+              <div class="section-title">
+                <mat-icon>shopping_cart</mat-icon>
+                <h3>Informações de Aquisição</h3>
+              </div>
+
+              <div class="vertical-form-stack">
                 <div class="field-container">
-                  <label class="modern-label">Custo de Aquisição</label>
-                  <span class="helper-text">Preço pago pelo veículo para cálculo de margem</span>
-                  <app-currency-input formControlName="valorCompra" label="Valor de Compra"></app-currency-input>
+                  <label class="modern-label">Informações do Fornecedor</label>
+                  <app-custom-select
+                    listType="person"
+                    label="Selecione o fornecedor"
+                    [options]="persons"
+                    [control]="supplierControl"
+                    placeholder="Buscar por nome ou CPF/CNPJ..."
+                    (onCreateNew)="onCreateNewPerson()"
+                    (onEdit)="onEditPerson($event)"
+                  ></app-custom-select>
                 </div>
 
-                <div class="field-container">
-                  <label class="modern-label">Preço de Venda Sugerido</label>
-                  <span class="helper-text">Valor base para anúncios e vitrine</span>
-                  <app-currency-input formControlName="valorVenda" label="Preço de Venda"></app-currency-input>
+                <div class="date-row">
+                  <app-date-input formControlName="dataCompra" label="Data da Compra"></app-date-input>
+                </div>
+
+                <div class="financial-card-stack">
+                  <div class="field-container">
+                    <label class="modern-label">Custo de Aquisição</label>
+                    <span class="helper-text">Preço pago pelo veículo para cálculo de margem</span>
+                    <app-currency-input formControlName="valorCompra" label="Valor de Compra"></app-currency-input>
+                  </div>
+
+                  <div class="field-container">
+                    <label class="modern-label">Preço de Venda Sugerido</label>
+                    <span class="helper-text">Valor base para anúncios e vitrine</span>
+                    <app-currency-input formControlName="valorVenda" label="Preço de Venda"></app-currency-input>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <section class="form-section">
-            <div class="section-title">
-              <mat-icon>event</mat-icon>
-              <h3>Logística</h3>
-            </div>
-            <div class="form-grid">
-              <app-date-input formControlName="entryDate" label="Data de Entrada"></app-date-input>
-              <app-date-input formControlName="exitDate" label="Data de Saída"></app-date-input>
-            </div>
-          </section>
+            <section class="form-section">
+              <div class="section-title">
+                <mat-icon>event</mat-icon>
+                <h3>Logística</h3>
+              </div>
+              <div class="form-grid">
+                <app-date-input formControlName="entryDate" label="Data de Entrada"></app-date-input>
+                <app-date-input formControlName="exitDate" label="Data de Saída"></app-date-input>
+              </div>
+            </section>
 
-          <section class="form-section">
-            <div class="section-title">
-              <mat-icon>notes</mat-icon>
-              <h3>Observações</h3>
-            </div>
-            <div class="full-row">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Observações Internas</mat-label>
-                <textarea
-                  matInput
-                  formControlName="observation"
-                  rows="4"
-                  placeholder="Detalhes importantes..."
-                ></textarea>
-              </mat-form-field>
-            </div>
-          </section>
-        </div>
-      </mat-tab>
-    </mat-tab-group>
+            <section class="form-section">
+              <div class="section-title">
+                <mat-icon>notes</mat-icon>
+                <h3>Observações</h3>
+              </div>
+              <div class="full-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Observações Internas</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="observation"
+                    rows="4"
+                    placeholder="Detalhes importantes..."
+                  ></textarea>
+                </mat-form-field>
+              </div>
+            </section>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
 
-    <!-- Botão de submit -->
-    <div class="form-actions">
-      <button mat-flat-button color="primary" class="submit-btn-premium shadow-elegant" (click)="onSubmit()">
-        <mat-icon>{{ dataForm?.plate ? 'save' : 'add_circle' }}</mat-icon>
-        {{ dataForm?.plate ? 'Salvar Alterações' : 'Cadastrar Veículo' }}
-      </button>
-    </div>
-  </form>
+      <!-- Botão de submit -->
+      <div class="form-actions">
+        <button mat-flat-button color="primary" class="submit-btn-premium shadow-elegant" (click)="onSubmit()">
+          <mat-icon>{{ dataForm?.plate ? 'save' : 'add_circle' }}</mat-icon>
+          {{ dataForm?.plate ? 'Salvar Alterações' : 'Cadastrar Veículo' }}
+        </button>
+      </div>
+    </form>
   }
 </div>
 

@@ -87,7 +87,11 @@
           mask="00.000.000/0000-00"
           appCnpjValidator
           (blur)="onCnpjBlur()"
-          [matTooltip]="hasOfficialNfe ? 'Este campo não pode ser editado pois este cadastro possui NF-e Autorizada/Cancelada. Para corrigir, realize um novo cadastro.' : ''"
+          [matTooltip]="
+            hasOfficialNfe
+              ? 'Este campo não pode ser editado pois este cadastro possui NF-e Autorizada/Cancelada. Para corrigir, realize um novo cadastro.'
+              : ''
+          "
           [error]="form.get('cnpj')?.invalid && (form.get('cnpj')?.touched || submitted)"
         />
 

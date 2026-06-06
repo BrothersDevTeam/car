@@ -92,7 +92,7 @@ export class StoreOwnerDialogComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao atualizar detalhes da loja:', err);
-      }
+      },
     });
   }
 
@@ -115,7 +115,7 @@ export class StoreOwnerDialogComponent implements OnInit {
     this.personService.getPaginatedData(0, 100, params).subscribe({
       next: (response) => {
         // Filtra para remover quem já é proprietário desta loja
-        this.persons = response.content.filter(p => !this.isStoreOwner(p.personId!));
+        this.persons = response.content.filter((p) => !this.isStoreOwner(p.personId!));
         this.loading = false;
       },
       error: (err) => {
@@ -127,7 +127,7 @@ export class StoreOwnerDialogComponent implements OnInit {
   }
 
   isStoreOwner(personId: string): boolean {
-    return !!this.store.owners?.some(o => o.personId === personId);
+    return !!this.store.owners?.some((o) => o.personId === personId);
   }
 
   getPersonDisplay(person: Person): string {
@@ -163,7 +163,7 @@ export class StoreOwnerDialogComponent implements OnInit {
           console.error('Erro ao adicionar proprietário:', err);
           alert(err.error || 'Erro ao adicionar proprietário');
           this.submitting = false;
-        }
+        },
       });
     }
   }
@@ -183,7 +183,7 @@ export class StoreOwnerDialogComponent implements OnInit {
           console.error('Erro ao remover proprietário:', err);
           alert(err.error || 'Erro ao remover proprietário');
           this.submitting = false;
-        }
+        },
       });
     }
   }

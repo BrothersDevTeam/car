@@ -25,7 +25,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatIconModule
+    MatIconModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './inutilizar-numeracao-dialog.html',
@@ -36,7 +36,7 @@ export class InutilizarNumeracaoDialog {
 
   constructor(
     private fb: FormBuilder,
-    public dialogRef: MatDialogRef<InutilizarNumeracaoDialog>
+    public dialogRef: MatDialogRef<InutilizarNumeracaoDialog>,
   ) {
     this.form = this.fb.group({
       numeroInicial: [null, [Validators.required, Validators.min(1)]],

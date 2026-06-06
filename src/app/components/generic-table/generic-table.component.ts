@@ -26,7 +26,7 @@ import type { PaginationResponse } from '@interfaces/pagination';
     NgIf,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatMenuModule
+    MatMenuModule,
   ],
   templateUrl: './generic-table.component.html',
   styleUrl: './generic-table.component.scss',
