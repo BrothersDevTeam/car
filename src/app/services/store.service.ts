@@ -123,4 +123,20 @@ export class StoreService {
   removeOwner(storeId: string, personId: string): Observable<Store> {
     return this.http.delete<Store>(`${this.apiUrl}/${storeId}/owner/${personId}`);
   }
+
+  checkCnpjExists(cnpj: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/exists/cnpj/${cnpj}`);
+  }
+
+  checkNameExists(name: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/exists/name/${encodeURIComponent(name)}`);
+  }
+
+  checkTradeNameExists(tradeName: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/exists/tradename/${encodeURIComponent(tradeName)}`);
+  }
+
+  checkEmailExists(email: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/exists/email/${encodeURIComponent(email)}`);
+  }
 }

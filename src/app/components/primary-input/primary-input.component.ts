@@ -91,6 +91,11 @@ export class PrimaryInputComponent implements ControlValueAccessor {
   @Input() error?: boolean = false;
 
   /**
+   * Mensagem de erro customizada para o campo
+   */
+  @Input() errorMessage?: string;
+
+  /**
    * Máscara a ser aplicada no input (formato ngx-mask)
    * @example "000.000.000-00" para CPF
    * @example "(00) 00000-0000" para telefone

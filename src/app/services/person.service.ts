@@ -224,4 +224,8 @@ export class PersonService {
   getBusinessHistory(personId: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${personId}/business-history`).pipe(first());
   }
+
+  checkUserEmailExists(email: string): Observable<boolean> {
+    return this.http.get<boolean>(`/api/users/exists/email/${email}`);
+  }
 }

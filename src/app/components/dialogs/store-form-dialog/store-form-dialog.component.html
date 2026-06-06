@@ -43,6 +43,7 @@
         placeholder="Ex: Revenda de Veículos LTDA"
         maxlength="50"
         [error]="storeForm.get('name')?.invalid && storeForm.get('name')?.touched"
+        [errorMessage]="getNameErrorMessage()"
       />
 
       <!-- Nome Fantasia -->
@@ -77,6 +78,7 @@
         maxlength="50"
         [uppercase]="false"
         [error]="storeForm.get('email')?.invalid && storeForm.get('email')?.touched"
+        [errorMessage]="getStoreEmailErrorMessage()"
       />
 
       <!-- Telefone -->
@@ -165,6 +167,7 @@
             placeholder="Ex: Revenda de Veículos LTDA"
             maxlength="50"
             [error]="storeForm.get('name')?.invalid && storeForm.get('name')?.touched"
+            [errorMessage]="getNameErrorMessage()"
           />
 
           <!-- Nome Fantasia -->
@@ -187,6 +190,7 @@
             mask="00.000.000/0000-00"
             [uppercase]="false"
             [error]="storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched"
+            [errorMessage]="getCnpjErrorMessage()"
           />
 
           <!-- Email -->
@@ -199,6 +203,7 @@
             maxlength="50"
             [uppercase]="false"
             [error]="storeForm.get('email')?.invalid && storeForm.get('email')?.touched"
+            [errorMessage]="getStoreEmailErrorMessage()"
           />
 
           <!-- Telefone -->
@@ -355,13 +360,14 @@
           <!-- Username -->
           <app-primary-input
             formControlName="username"
-            label="Nome de Usuário *"
+            label="E-mail de Usuário *"
             inputName="username"
-            type="text"
-            placeholder="usuario.sistema"
+            type="email"
+            placeholder="exemplo@email.com"
             maxlength="50"
             [uppercase]="false"
             [error]="accessForm.get('username')?.invalid && accessForm.get('username')?.touched"
+            [errorMessage]="getUsernameErrorMessage()"
           />
 
           <!-- Senha -->

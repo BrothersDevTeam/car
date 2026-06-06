@@ -51,7 +51,7 @@
       Geralmente controlado pelas validações do FormControl
     -->
     @if (error) {
-      <p class="invalid-field-message">Campo inválido</p>
+      <p class="invalid-field-message">{{ errorMessage || 'Campo inválido' }}</p>
     }
   </div>
 </div>

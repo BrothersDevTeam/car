@@ -20,7 +20,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PrimaryInputComponent } from '../../primary-input/primary-input.component';
-import { catchError, switchMap, tap } from 'rxjs/operators';
+import { catchError, switchMap, tap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { of, throwError } from 'rxjs';
 
 /**
@@ -97,6 +97,7 @@ export class StoreFormDialogComponent implements OnInit {
   // Estados de carregamento e erro
   isSubmitting = false;
   submitError: string | null = null;
+  createdStoreInstance: Store | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -140,7 +141,10 @@ export class StoreFormDialogComponent implements OnInit {
         this.captureInitialFormValue();
       };
 
-      this.storeForm.valueChanges.subscribe(formsChanges);
+      this.storeForm.valueChanges.subscribe(() => {
+        formsChanges();
+        this.createdStoreInstance = null;
+      });
       this.personForm.valueChanges.subscribe(formsChanges);
       this.accessForm.valueChanges.subscribe(formsChanges);
 
@@ -154,6 +158,100 @@ export class StoreFormDialogComponent implements OnInit {
     this.formDraftService.draftsChanges.subscribe(() => {
       if (this.data.mode === 'create') {
         this.loadAvailableDrafts();
+      }
+    });
+
+    // Validação de CNPJ em tempo real com debounce
+    this.storeForm.get('cnpj')?.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      switchMap((cnpj) => {
+        if (!cnpj) return of(false);
+        const cleanCnpj = cnpj.replace(/\D/g, '');
+        if (cleanCnpj.length !== 14) return of(false);
+        return this.storeService.checkCnpjExists(cleanCnpj).pipe(
+          catchError(() => of(false))
+        );
+      })
+    ).subscribe((exists) => {
+      const control = this.storeForm.get('cnpj');
+      if (exists) {
+        control?.setErrors({ uniqueCnpj: true });
+      } else {
+        if (control?.hasError('uniqueCnpj')) {
+          const errors = { ...control.errors };
+          delete errors['uniqueCnpj'];
+          control.setErrors(Object.keys(errors).length ? errors : null);
+        }
+      }
+    });
+
+    // Validação de E-mail de Usuário em tempo real com debounce
+    this.accessForm.get('username')?.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      switchMap((email) => {
+        if (!email || !email.includes('@') || email.length < 5) return of(false);
+        return this.personService.checkUserEmailExists(email).pipe(
+          catchError(() => of(false))
+        );
+      })
+    ).subscribe((exists) => {
+      const control = this.accessForm.get('username');
+      if (exists) {
+        control?.setErrors({ uniqueEmail: true });
+      } else {
+        if (control?.hasError('uniqueEmail')) {
+          const errors = { ...control.errors };
+          delete errors['uniqueEmail'];
+          control.setErrors(Object.keys(errors).length ? errors : null);
+        }
+      }
+    });
+
+    // Validação de Razão Social em tempo real com debounce
+    this.storeForm.get('name')?.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      switchMap((name) => {
+        if (!name || name.length < 3) return of(false);
+        return this.storeService.checkNameExists(name).pipe(
+          catchError(() => of(false))
+        );
+      })
+    ).subscribe((exists) => {
+      const control = this.storeForm.get('name');
+      if (exists) {
+        control?.setErrors({ uniqueName: true });
+      } else {
+        if (control?.hasError('uniqueName')) {
+          const errors = { ...control.errors };
+          delete errors['uniqueName'];
+          control.setErrors(Object.keys(errors).length ? errors : null);
+        }
+      }
+    });
+
+    // Validação de E-mail da Loja em tempo real com debounce
+    this.storeForm.get('email')?.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      switchMap((email) => {
+        if (!email || !email.includes('@') || email.length < 5) return of(false);
+        return this.storeService.checkEmailExists(email).pipe(
+          catchError(() => of(false))
+        );
+      })
+    ).subscribe((exists) => {
+      const control = this.storeForm.get('email');
+      if (exists) {
+        control?.setErrors({ uniqueStoreEmail: true });
+      } else {
+        if (control?.hasError('uniqueStoreEmail')) {
+          const errors = { ...control.errors };
+          delete errors['uniqueStoreEmail'];
+          control.setErrors(Object.keys(errors).length ? errors : null);
+        }
       }
     });
   }
@@ -386,6 +484,7 @@ export class StoreFormDialogComponent implements OnInit {
     this.accessForm.reset();
     this.updatePersonDocumentValidation(false);
     this.initialFormValues = null;
+    this.createdStoreInstance = null;
     this.captureInitialFormValue();
   }
 
@@ -534,17 +633,21 @@ export class StoreFormDialogComponent implements OnInit {
     console.log('🎯 Tipo de cadastro:', this.data.isCarAdmin ? 'MATRIZ' : 'FILIAL');
     console.log('📦 Payload que será enviado:', JSON.stringify(storePayload, null, 2));
 
-    // PASSO 1: Criar Store (MATRIZ ou FILIAL baseado na role)
-    const createStoreObservable = this.data.isCarAdmin
-      ? this.storeService.createMainStore(storePayload) // CAR_ADMIN → POST /stores/mainstore
-      : this.storeService.createBranch(storePayload); // ADMIN → POST /stores
+    // PASSO 1: Criar Store (MATRIZ ou FILIAL baseado na role) ou usar a instância criada em tentativa anterior
+    const createStoreObservable = this.createdStoreInstance
+      ? of(this.createdStoreInstance)
+      : (this.data.isCarAdmin
+          ? this.storeService.createMainStore(storePayload) // CAR_ADMIN → POST /stores/mainstore
+          : this.storeService.createBranch(storePayload) // ADMIN → POST /stores
+        ).pipe(
+          tap((createdStore: Store) => {
+            this.createdStoreInstance = createdStore;
+            console.log('✅ Store criada e salva no estado:', createdStore);
+          })
+        );
 
     createStoreObservable
       .pipe(
-        // Captura o storeId retornado
-        tap((createdStore: Store) => {
-          console.log('✅ Store criada:', createdStore);
-        }),
 
         // PASSO 2: Criar Person com o storeId
         switchMap((createdStore: Store) => {
@@ -615,8 +718,22 @@ export class StoreFormDialogComponent implements OnInit {
           console.error('❌ Erro no cadastro:', error);
           this.isSubmitting = false;
 
+          let extractedErrorMessage = '';
+
+          // Trata array de erros de validação (Spring Boot @Valid)
+          if (Array.isArray(error.error)) {
+            const messages = error.error
+              .map((err: any) => err.defaultMessage)
+              .filter(Boolean);
+            if (messages.length > 0) {
+              extractedErrorMessage = messages.join(' | ');
+            }
+          }
+
           // Mensagem de erro amigável baseada no tipo de erro
-          if (error.error?.message) {
+          if (extractedErrorMessage) {
+            this.submitError = extractedErrorMessage;
+          } else if (error.error?.message) {
             this.submitError = error.error.message;
           } else if (error.status === 400) {
             this.submitError = 'Dados inválidos. Verifique os campos e tente novamente.';
@@ -639,6 +756,16 @@ export class StoreFormDialogComponent implements OnInit {
             }
           } else {
             this.submitError = 'Erro ao cadastrar loja. Tente novamente.';
+          }
+
+          // Feedback visual via Toastr (notificação flutuante para evitar problemas de scroll)
+          if (this.submitError) {
+            const cleanMessage = this.submitError.replace(/^[❌\s]+/, '');
+            this.toastrService.error(cleanMessage, 'Erro no Cadastro', {
+              timeOut: 5000,
+              progressBar: true,
+              closeButton: true
+            });
           }
 
           return throwError(() => error);
@@ -729,10 +856,10 @@ export class StoreFormDialogComponent implements OnInit {
       im: null,
       crc: null,
       active: true,
-      username: accessValue.username,
+      userEmail: accessValue.username,
       password: accessValue.password,
-      roleName: 'ROLE_ADMIN', // Proprietário sempre é ADMIN da loja
-      relationship: 'PROPRIETARIO', // Define como proprietário
+      relationshipId: 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d',
+      isEmployee: true
     };
   }
 
@@ -750,6 +877,50 @@ export class StoreFormDialogComponent implements OnInit {
     Object.keys(this.accessForm.controls).forEach((key) => {
       this.accessForm.get(key)?.markAsTouched();
     });
+  }
+
+  /**
+   * Retorna mensagem de erro customizada para o CNPJ da loja
+   */
+  getCnpjErrorMessage(): string {
+    const control = this.storeForm.get('cnpj');
+    if (control?.hasError('required')) return 'Este campo é obrigatório';
+    if (control?.hasError('minlength') || control?.hasError('maxlength')) return 'O CNPJ deve ter 14 dígitos';
+    if (control?.hasError('uniqueCnpj')) return 'CNPJ já cadastrado no sistema';
+    return '';
+  }
+
+  /**
+   * Retorna mensagem de erro customizada para o e-mail de acesso
+   */
+  getUsernameErrorMessage(): string {
+    const control = this.accessForm.get('username');
+    if (control?.hasError('required')) return 'Este campo é obrigatório';
+    if (control?.hasError('minlength')) return 'Mínimo de 3 caracteres';
+    if (control?.hasError('uniqueEmail')) return 'E-mail de usuário já cadastrado';
+    return '';
+  }
+
+  /**
+   * Retorna mensagem de erro customizada para a Razão Social
+   */
+  getNameErrorMessage(): string {
+    const control = this.storeForm.get('name');
+    if (control?.hasError('required')) return 'Este campo é obrigatório';
+    if (control?.hasError('minlength')) return 'Mínimo de 3 caracteres';
+    if (control?.hasError('uniqueName')) return 'Razão Social já cadastrada no sistema';
+    return '';
+  }
+
+  /**
+   * Retorna mensagem de erro customizada para o e-mail da loja
+   */
+  getStoreEmailErrorMessage(): string {
+    const control = this.storeForm.get('email');
+    if (control?.hasError('required')) return 'Este campo é obrigatório';
+    if (control?.hasError('email')) return 'Formato de e-mail inválido';
+    if (control?.hasError('uniqueStoreEmail')) return 'E-mail da loja já cadastrado';
+    return '';
   }
 
   /**
