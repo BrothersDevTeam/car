@@ -123,6 +123,22 @@
                   placeholder="ABC-1234"
                   [error]="!!(form.get('plate')?.invalid && (form.get('plate')?.touched || submitted))"
                 />
+
+                <app-primary-select
+                  formControlName="species"
+                  label="Espécie"
+                  [options]="speciesOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                ></app-primary-select>
+
+                <app-primary-select
+                  formControlName="category"
+                  label="Categoria"
+                  [options]="categoryOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                ></app-primary-select>
               </div>
             </section>
 
@@ -211,7 +227,7 @@
             </section>
 
             <!-- Grupo: Opcionais do Veículo -->
-            <section class="form-section">
+            <section class="form-section optionals-section">
               <div class="section-title">
                 <mat-icon>check_box</mat-icon>
                 <h3>Opcionais do Veículo</h3>
@@ -261,23 +277,6 @@
                 <app-primary-input formControlName="engineNumber" label="Nº do Motor" />
                 <app-primary-input formControlName="engineDisplacement" label="Cilindrada" />
                 <app-primary-input formControlName="horsepower" label="Potência (CV)" />
-
-                <app-primary-select
-                  formControlName="species"
-                  label="Espécie"
-                  [options]="speciesOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                ></app-primary-select>
-
-                <app-primary-select
-                  formControlName="category"
-                  label="Categoria"
-                  [options]="categoryOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                ></app-primary-select>
-
                 <app-primary-input formControlName="features" label="Características" class="full-row" />
               </div>
             </section>
