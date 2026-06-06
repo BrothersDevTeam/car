@@ -271,8 +271,11 @@ export class StoreComponent implements OnInit {
       if (createdStore) {
         console.log('✅ Loja, proprietário e usuário criados com sucesso!');
         if (this.isCarAdmin) {
-          // Redefine a seleção global para "Toda a Rede" para exibir a nova Matriz cadastrada na listagem geral
-          this.storeContextService.setStoreId(null);
+          if (this.storeContextService.currentStoreId === null) {
+            this.loadStores();
+          } else {
+            this.storeContextService.setStoreId(null);
+          }
         } else {
           this.loadStores();
         }
