@@ -92,7 +92,7 @@
   }
 
   @if (openInfo()) {
-  <app-drawer (closeDrawer)="handleCloseDrawer()">
+  <app-drawer class="nfe-info-drawer" (closeDrawer)="handleCloseDrawer()">
     @if (selectedNfe) {
     <!-- Cabeçalho do Drawer: título + botão editar -->
     <div class="nfe-drawer-header">
@@ -114,7 +114,7 @@
     </div>
 
     <!-- ======= SEÇÃO 1: DADOS GERAIS ======= -->
-    <div class="nfe-section">
+    <div class="nfe-section section-dados-gerais">
       <h3 class="section-title">
         <mat-icon>receipt_long</mat-icon>
         Dados Gerais
@@ -156,6 +156,22 @@
             {{ selectedNfe.createdAt ? (selectedNfe.createdAt | date: 'dd/MM/yyyy HH:mm') : '—' }}
           </span>
         </div>
+        <div class="info-item">
+          <label>Finalidade da Emissão</label>
+          <span>{{ getFinalidadeEmissaoLabel(selectedNfe.nfeFinalidadeEmissao) }}</span>
+        </div>
+        <div class="info-item">
+          <label>Consumidor Final</label>
+          <span>{{ getConsumidorFinalLabel(selectedNfe.nfeConsumidorFinal, selectedNfe.nfeTipoDocumento) }}</span>
+        </div>
+        <div class="info-item">
+          <label>Presença do Comprador</label>
+          <span>{{ getPresencaCompradorLabel(selectedNfe.nfePresencaComprador) }}</span>
+        </div>
+        <div class="info-item">
+          <label>Indicador de Intermediário</label>
+          <span>{{ getIndicadorIntermediarioLabel(selectedNfe.nfeIndicadorIntermediario) }}</span>
+        </div>
         @if (selectedNfe.nfeChave) {
         <div class="info-item full-width">
           <label>Chave de Acesso</label>
@@ -181,7 +197,7 @@
     </div>
 
     <!-- ======= SEÇÃO 2: VALORES ======= -->
-    <div class="nfe-section">
+    <div class="nfe-section section-valores">
       <h3 class="section-title">
         <mat-icon>monetization_on</mat-icon>
         Valores
@@ -191,6 +207,12 @@
           <label>Valor Total</label>
           <span class="valor-destaque">R$ {{ nfeValorTotalCalculado }}</span>
         </div>
+        @if (selectedNfe.nfeIcmsBaseCalculo) {
+        <div class="info-item">
+          <label>Base Calc. ICMS</label>
+          <span>R$ {{ selectedNfe.nfeIcmsBaseCalculo }}</span>
+        </div>
+        }
         @if (selectedNfe.nfeValorFrete) {
         <div class="info-item">
           <label>Valor do Frete</label>
@@ -232,7 +254,7 @@
 
     <!-- ======= SEÇÃO 3: EMITENTE ======= -->
     @if (selectedNfe.nfeEmitente) {
-    <div class="nfe-section">
+    <div class="nfe-section section-emitente">
       <h3 class="section-title">
         <mat-icon>store</mat-icon>
         Emitente
@@ -314,7 +336,7 @@
 
     <!-- ======= SEÇÃO 4: DESTINATÁRIO ======= -->
     @if (selectedNfe.nfeDestinatario) {
-    <div class="nfe-section">
+    <div class="nfe-section section-destinatario">
       <h3 class="section-title">
         <mat-icon>person_pin</mat-icon>
         Destinatário
@@ -386,9 +408,133 @@
     </div>
     }
 
+    <!-- ======= SEÇÃO: TRANSPORTE ======= -->
+    @if (selectedNfe.nfeTransporte) {
+    <div class="nfe-section section-transporte">
+      <h3 class="section-title">
+        <mat-icon>local_shipping</mat-icon>
+        Transporte
+      </h3>
+      <div class="info-grid">
+        <div class="info-item full-width">
+          <label>Modalidade do Frete</label>
+          <span>{{ getModalidadeFreteLabel(selectedNfe.nfeTransporte.modalidadeFrete) }}</span>
+        </div>
+
+        <!-- Dados da Transportadora -->
+        @if (selectedNfe.nfeTransporte.transportadora) {
+        @if (selectedNfe.nfeTransporte.transportadora.transportadoraNome) {
+        <div class="info-item full-width">
+          <label>Transportadora (Nome/Razão Social)</label>
+          <span>{{ selectedNfe.nfeTransporte.transportadora.transportadoraNome }}</span>
+        </div>
+        }
+        @if (selectedNfe.nfeTransporte.transportadora.transportadoraCnpj) {
+        <div class="info-item">
+          <label>CNPJ da Transportadora</label>
+          <span>{{ selectedNfe.nfeTransporte.transportadora.transportadoraCnpj }}</span>
+        </div>
+        }
+        @if (selectedNfe.nfeTransporte.transportadora.transportadoraCpf) {
+        <div class="info-item">
+          <label>CPF da Transportadora</label>
+          <span>{{ selectedNfe.nfeTransporte.transportadora.transportadoraCpf }}</span>
+        </div>
+        }
+        @if (selectedNfe.nfeTransporte.transportadora.transportadoraIe) {
+        <div class="info-item">
+          <label>Inscrição Estadual</label>
+          <span>{{ selectedNfe.nfeTransporte.transportadora.transportadoraIe }}</span>
+        </div>
+        }
+        @if (selectedNfe.nfeTransporte.transportadora.transportadoraLogradouro) {
+        <div class="info-item full-width">
+          <label>Endereço da Transportadora</label>
+          <span>
+            {{ selectedNfe.nfeTransporte.transportadora.transportadoraLogradouro }}
+            @if (selectedNfe.nfeTransporte.transportadora.transportadoraMunicipio) {
+            — {{ selectedNfe.nfeTransporte.transportadora.transportadoraMunicipio }}/{{
+            selectedNfe.nfeTransporte.transportadora.transportadoraUf }}
+            }
+          </span>
+        </div>
+        }
+        }
+
+        <!-- Dados do Veículo -->
+        @if (selectedNfe.nfeTransporte.transporte) {
+        @if (selectedNfe.nfeTransporte.transporte.transportePlaca) {
+        <div class="info-item">
+          <label>Placa do Veículo</label>
+          <span>{{ selectedNfe.nfeTransporte.transporte.transportePlaca }}</span>
+        </div>
+        }
+        @if (selectedNfe.nfeTransporte.transporte.transporteUf) {
+        <div class="info-item">
+          <label>UF do Veículo</label>
+          <span>{{ selectedNfe.nfeTransporte.transporte.transporteUf }}</span>
+        </div>
+        }
+        @if (selectedNfe.nfeTransporte.transporte.transporteRntc) {
+        <div class="info-item">
+          <label>RNTC (Transportador)</label>
+          <span>{{ selectedNfe.nfeTransporte.transporte.transporteRntc }}</span>
+        </div>
+        }
+        }
+      </div>
+
+      <!-- Volumes do Transporte -->
+      @if (selectedNfe.nfeTransporte.volumes && selectedNfe.nfeTransporte.volumes.length > 0) {
+      <div class="volumes-container">
+        <div class="volumes-title">Volumes Transportados ({{ selectedNfe.nfeTransporte.volumes.length }})</div>
+        <div class="volumes-grid">
+          @for (volume of selectedNfe.nfeTransporte.volumes; track $index) {
+          <div class="volume-card">
+            <div class="volume-header">Volume {{ $index + 1 }}</div>
+            <div class="info-grid">
+              @if (volume.volumeQuantidade) {
+              <div class="info-item">
+                <label>Quantidade</label>
+                <span>{{ volume.volumeQuantidade }}</span>
+              </div>
+              }
+              @if (volume.volumeEspecie) {
+              <div class="info-item">
+                <label>Espécie</label>
+                <span>{{ volume.volumeEspecie }}</span>
+              </div>
+              }
+              @if (volume.volumeMarca) {
+              <div class="info-item">
+                <label>Marca</label>
+                <span>{{ volume.volumeMarca }}</span>
+              </div>
+              }
+              @if (volume.volumePesoLiquido) {
+              <div class="info-item">
+                <label>Peso Líquido</label>
+                <span>{{ volume.volumePesoLiquido }} kg</span>
+              </div>
+              }
+              @if (volume.volumePesoBruto) {
+              <div class="info-item">
+                <label>Peso Bruto</label>
+                <span>{{ volume.volumePesoBruto }} kg</span>
+              </div>
+              }
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+    }
+
     <!-- ======= SEÇÃO 5: ITENS DA NFe ======= -->
     @if (selectedNfe.nfeItens && selectedNfe.nfeItens.length > 0) {
-    <div class="nfe-section">
+    <div class="nfe-section section-itens">
       <h3 class="section-title">
         <mat-icon>inventory_2</mat-icon>
         Itens da NFe
@@ -487,7 +633,7 @@
   }
   <!-- === ANTIGRAVITY END ==== -->
   @if (openForm()) {
-  <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
+  <app-drawer class="nfe-form-drawer" (closeDrawer)="handleConfirmationCloseDrawer()">
     <mat-tab-group [selectedIndex]="selectedTabIndex()">
       <mat-tab label="NFe Entrada">
         <ng-template matTabContent>

@@ -377,9 +377,22 @@ export class NfeComponent {
       });
   }
 
-  handleSelectedNfe(nfe: Nfe) {
-    this.selectedNfe = nfe;
-    this.openInfo.set(true);
+  handleSelectedNfe(nfeSummary: Nfe) {
+    if (!nfeSummary.nfeId) return;
+
+    this.nfeListLoading.set(true);
+    this.nfeService.getById(nfeSummary.nfeId).subscribe({
+      next: (fullNfe) => {
+        this.selectedNfe = fullNfe;
+        this.openInfo.set(true);
+        this.nfeListLoading.set(false);
+      },
+      error: (err) => {
+        this.toastr.error('Erro ao carregar detalhes da NFe.');
+        console.error(err);
+        this.nfeListLoading.set(false);
+      },
+    });
   }
 
   onRowClick(nfe: Nfe) {
@@ -702,5 +715,56 @@ export class NfeComponent {
     const desconto = parseFloat(this.selectedNfe.nfeValorDesconto || '0');
 
     return this.formatCurrency(produtos + frete + seguro + outras - desconto);
+  }
+
+  getFinalidadeEmissaoLabel(value?: string): string {
+    const finalidades: Record<string, string> = {
+      '1': '1 - Normal',
+      '2': '2 - Complementar',
+      '3': '3 - Devolução de Mercadoria',
+      '4': '4 - Ajuste',
+    };
+    return value ? finalidades[value] || value : '—';
+  }
+
+  getConsumidorFinalLabel(value?: string, tipoDocumento?: string): string {
+    const consumidores: Record<string, string> = {
+      '0': '0 - Normal',
+      '1': '1 - Consumidor Final',
+    };
+    return value ? consumidores[value] || value : '—';
+  }
+
+  getPresencaCompradorLabel(value?: string): string {
+    const presencas: Record<string, string> = {
+      '0': '0 - Não se aplica',
+      '1': '1 - Operação presencial',
+      '2': '2 - Operação não presencial, Internet',
+      '3': '3 - Operação não presencial, Teleatendimento',
+      '4': '4 - NFC-e com entrega a domicílio',
+      '5': '5 - Operação presencial, fora do estabelecimento',
+      '9': '9 - Operação não presencial, outros',
+    };
+    return value ? presencas[value] || value : '—';
+  }
+
+  getIndicadorIntermediarioLabel(value?: string): string {
+    const indicadores: Record<string, string> = {
+      '0': '0 - Sem intermediário (venda direta)',
+      '1': '1 - Em site/plataforma de terceiros (marketplace)',
+    };
+    return value ? indicadores[value] || value : '—';
+  }
+
+  getModalidadeFreteLabel(value?: string): string {
+    const modalidades: Record<string, string> = {
+      '0': '0 - Contratação por conta do Remetente (CIF)',
+      '1': '1 - Contratação por conta do Destinatário (FOB)',
+      '2': '2 - Contratação por conta de Terceiros',
+      '3': '3 - Transporte Próprio por conta do Remetente',
+      '4': '4 - Transporte Próprio por conta do Destinatário',
+      '9': '9 - Sem Ocorrência de Transporte',
+    };
+    return value ? modalidades[value] || value : '—';
   }
 }
