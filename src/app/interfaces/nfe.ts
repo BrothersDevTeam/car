@@ -87,6 +87,13 @@ export interface Nfe {
   nfeValorPis?: string;
   nfeValorCofins?: string;
   nfeValorTotalTributos?: string;
+
+  // === Campos de Envio FocusNFe (Novos) ===
+  nfeFinalidadeEmissao?: string;
+  nfeConsumidorFinal?: string;
+  nfePresencaComprador?: string;
+  nfeIndicadorIntermediario?: string;
+  nfeTransporte?: any;
 }
 
 export enum NaturezaOperacao {

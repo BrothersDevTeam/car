@@ -28,6 +28,46 @@
     ></app-primary-select>
   </div>
 
+  <div class="section-title">Parâmetros de Emissão</div>
+  <div class="tax-row three-cols">
+    <app-primary-select
+      [label]="'Finalidade da Emissão*'"
+      [options]="finalidadesEmissao"
+      formControlName="nfeFinalidadeEmissao"
+      placeholder="Selecione a Finalidade"
+    ></app-primary-select>
+
+    <app-primary-select
+      [label]="'Consumidor Final*'"
+      [options]="consumidoresFinais"
+      formControlName="nfeConsumidorFinal"
+      placeholder="Selecione a Opção"
+    ></app-primary-select>
+
+    <app-primary-select
+      [label]="'Modalidade do Frete*'"
+      [options]="modalidadesFrete"
+      formControlName="modalidadeFrete"
+      placeholder="Selecione a Modalidade"
+    ></app-primary-select>
+  </div>
+
+  <div class="tax-row">
+    <app-primary-select
+      [label]="'Presença do Comprador*'"
+      [options]="presencasComprador"
+      formControlName="nfePresencaComprador"
+      placeholder="Selecione a Presença"
+    ></app-primary-select>
+
+    <app-primary-select
+      [label]="'Indicador de Intermediário*'"
+      [options]="indicadoresIntermediario"
+      formControlName="nfeIndicadorIntermediario"
+      placeholder="Selecione o Intermediário"
+    ></app-primary-select>
+  </div>
+
   <div class="section-title">Itens da NFe</div>
 
   <div class="radio-button-group m-b-16">

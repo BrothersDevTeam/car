@@ -23,6 +23,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 
 import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
@@ -61,6 +62,7 @@ import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fis
     MatExpansionModule,
     MatInputModule,
     MatFormFieldModule,
+    MatSelectModule,
     CustomSelectComponent,
     DrawerComponent,
     NaturalPersonFormComponent,
@@ -113,6 +115,42 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     },
   ];
 
+  finalidadesEmissao = [
+    { value: '1', label: '1 - Normal' },
+    { value: '2', label: '2 - Complementar' },
+    { value: '3', label: '3 - Devolução de Mercadoria' },
+    { value: '4', label: '4 - Ajuste' },
+  ];
+
+  consumidoresFinais = [
+    { value: '0', label: '0 - Normal' },
+    { value: '1', label: '1 - Consumidor Final' },
+  ];
+
+  presencasComprador = [
+    { value: '0', label: '0 - Não se aplica' },
+    { value: '1', label: '1 - Operação presencial' },
+    { value: '2', label: '2 - Operação não presencial, Internet' },
+    { value: '3', label: '3 - Operação não presencial, Teleatendimento' },
+    { value: '4', label: '4 - NFC-e com entrega a domicílio' },
+    { value: '5', label: '5 - Operação presencial, fora do estabelecimento' },
+    { value: '9', label: '9 - Operação não presencial, outros' },
+  ];
+
+  indicadoresIntermediario = [
+    { value: '0', label: '0 - Sem intermediário (venda direta)' },
+    { value: '1', label: '1 - Em site/plataforma de terceiros (marketplace)' },
+  ];
+
+  modalidadesFrete = [
+    { value: '0', label: '0 - Contratação por conta do Remetente (CIF)' },
+    { value: '1', label: '1 - Contratação por conta do Destinatário (FOB)' },
+    { value: '2', label: '2 - Contratação por conta de Terceiros' },
+    { value: '3', label: '3 - Transporte Próprio por conta do Remetente' },
+    { value: '4', label: '4 - Transporte Próprio por conta do Destinatário' },
+    { value: '9', label: '9 - Sem Ocorrência de Transporte' },
+  ];
+
   readonly dialog = inject(MatDialog);
   private formBuilderService = inject(FormBuilder);
   private storeContextService = inject(StoreContextService);
@@ -147,6 +185,11 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     nfePreenchimentoManualImpostos: [false],
     itemTipo: ['veiculo'], // 'veiculo' ou 'produto'
     nfeItens: this.formBuilderService.array([]),
+    nfeFinalidadeEmissao: ['1', Validators.required],
+    nfeConsumidorFinal: ['1', Validators.required],
+    nfePresencaComprador: ['1', Validators.required],
+    nfeIndicadorIntermediario: ['0', Validators.required],
+    modalidadeFrete: ['9', Validators.required],
   });
 
   constructor() {}
@@ -397,6 +440,11 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
       },
       nfeNaturezaOperacao: this.dataForm.nfeNaturezaOperacao || '',
       nfePreenchimentoManualImpostos: this.dataForm.nfeCalcularImpostosAutomaticamente === false,
+      nfeFinalidadeEmissao: this.dataForm.nfeFinalidadeEmissao || '1',
+      nfeConsumidorFinal: this.dataForm.nfeConsumidorFinal || '1',
+      nfePresencaComprador: this.dataForm.nfePresencaComprador || '1',
+      nfeIndicadorIntermediario: this.dataForm.nfeIndicadorIntermediario || '0',
+      modalidadeFrete: this.dataForm.nfeTransporte?.modalidadeFrete || '9',
     });
   }
 
@@ -465,6 +513,13 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
       nfeTipoDocumento: '1', // Saída
       nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
       nfeCalcularImpostosAutomaticamente: !this.form.value.nfePreenchimentoManualImpostos,
+      nfeFinalidadeEmissao: this.form.value.nfeFinalidadeEmissao,
+      nfeConsumidorFinal: this.form.value.nfeConsumidorFinal,
+      nfePresencaComprador: this.form.value.nfePresencaComprador,
+      nfeIndicadorIntermediario: this.form.value.nfeIndicadorIntermediario,
+      nfeTransporte: {
+        modalidadeFrete: this.form.value.modalidadeFrete,
+      },
     };
 
     if (this.dataForm?.nfeId) {

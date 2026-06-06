@@ -113,20 +113,6 @@ form {
       width: 100%;
     }
 
-    .tax-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
-
-      &.three-cols {
-        grid-template-columns: 1fr 1fr 1fr;
-      }
-
-      mat-form-field {
-        width: 100%;
-      }
-    }
-
     // Estilização da área de Tributação Manual dentro do card
     .manual-tax-grid {
       margin-top: 1rem;
@@ -151,6 +137,20 @@ form {
           margin-top: 1.5rem;
         }
       }
+    }
+  }
+
+  .tax-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+
+    &.three-cols {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    mat-form-field {
+      width: 100%;
     }
   }
 
