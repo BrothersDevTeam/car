@@ -152,15 +152,16 @@ export class NfeComponent {
       showCheckbox: (row) => true,
     },
     {
-      key: 'edit',
-      header: '',
-      // Mostra o botão de editar apenas para NFes em rascunho
-      showEditIcon: (row) => row.nfeStatus === 'rascunho',
-    },
-    {
       key: 'acoes',
       header: '',
       menuActions: [
+        {
+          label: 'Editar NFe',
+          icon: 'edit',
+          color: 'primary',
+          action: (row: Nfe) => this.handleEdit(row),
+          hidden: (row: Nfe) => row.nfeStatus !== 'rascunho',
+        },
         {
           label: 'Excluir NFe',
           icon: 'delete',

@@ -155,14 +155,22 @@ export class VehicleComponent implements CanComponentDeactivate {
       },
     },
     {
-      key: 'edit',
+      key: 'acoes',
       header: '',
-      showEditIcon: (row) => true,
-    },
-    {
-      key: 'delete',
-      header: '',
-      showDeleteIcon: (row) => true,
+      menuActions: [
+        {
+          label: 'Editar Veículo',
+          icon: 'edit',
+          color: 'primary',
+          action: (row: VehicleList) => this.handleEdit(row),
+        },
+        {
+          label: 'Excluir Veículo',
+          icon: 'delete',
+          color: 'warn',
+          action: (row: VehicleList) => this.handleDelete(row),
+        },
+      ],
     },
   ];
 

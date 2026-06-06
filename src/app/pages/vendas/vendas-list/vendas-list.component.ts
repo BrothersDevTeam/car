@@ -127,24 +127,38 @@ export class VendasListComponent implements OnInit, OnDestroy {
       },
     },
     {
-      key: 'edit',
+      key: 'acoes',
       header: '',
-      showEditIcon: (row) =>
-        this.authService.hasAuthority(Authorizations.EDIT_VENDA_STORE) && row.vendaStatus !== VendaStatus.CANCELADA,
-    },
-    {
-      key: 'nfe',
-      header: '',
-      showNfeIcon: (row) =>
-        this.authService.hasAuthority(Authorizations.EMITIR_NFE_STORE) &&
-        row.vendaStatus === VendaStatus.ATIVA &&
-        !row.nfeId,
-    },
-    {
-      key: 'delete',
-      header: '',
-      showDeleteIcon: (row) =>
-        this.authService.hasAuthority(Authorizations.CANCEL_VENDA_STORE) && row.vendaStatus !== VendaStatus.CANCELADA,
+      menuActions: [
+        {
+          label: 'Editar Venda',
+          icon: 'edit',
+          color: 'primary',
+          action: (row: VendaResponseDto) => this.handleEdit(row),
+          hidden: (row: VendaResponseDto) =>
+            !this.authService.hasAuthority(Authorizations.EDIT_VENDA_STORE) ||
+            row.vendaStatus === VendaStatus.CANCELADA,
+        },
+        {
+          label: 'Gerar NFe',
+          icon: 'receipt',
+          color: 'primary',
+          action: (row: VendaResponseDto) => this.handleEmitirNfe(row),
+          hidden: (row: VendaResponseDto) =>
+            !this.authService.hasAuthority(Authorizations.EMITIR_NFE_STORE) ||
+            row.vendaStatus !== VendaStatus.ATIVA ||
+            !!row.nfeId,
+        },
+        {
+          label: 'Cancelar Venda',
+          icon: 'delete',
+          color: 'warn',
+          action: (row: VendaResponseDto) => this.handleDelete(row),
+          hidden: (row: VendaResponseDto) =>
+            !this.authService.hasAuthority(Authorizations.CANCEL_VENDA_STORE) ||
+            row.vendaStatus === VendaStatus.CANCELADA,
+        },
+      ],
     },
   ];
 

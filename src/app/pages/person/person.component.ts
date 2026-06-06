@@ -230,16 +230,16 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
       },
     },
     {
-      key: 'edit',
-      header: '',
-      showEditIcon: () =>
-        // Exibe o botão de edição apenas para quem tem autorização granular de editar pessoas
-        this.authService.hasAuthority(Authorizations.EDIT_PERSON_STORE),
-    },
-    {
       key: 'acoes',
       header: '',
       menuActions: [
+        {
+          label: 'Editar',
+          icon: 'edit',
+          color: 'primary',
+          action: (row: Person) => this.handleEdit(row),
+          hidden: (row: Person) => !this.authService.hasAuthority(Authorizations.EDIT_PERSON_STORE),
+        },
         {
           label: 'Excluir',
           icon: 'delete',
