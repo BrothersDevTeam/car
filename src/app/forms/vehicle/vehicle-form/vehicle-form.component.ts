@@ -17,7 +17,7 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -33,6 +33,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 import { ToastrService } from 'ngx-toastr';
 import { distinctUntilChanged, Subscription, of, Observable } from 'rxjs';
@@ -87,6 +89,8 @@ import {
     MatFormFieldModule,
     MatButtonToggleModule,
     MatChipsModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   templateUrl: './vehicle-form.component.html',
   styleUrl: './vehicle-form.component.scss',
@@ -206,16 +210,61 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     fuelTypes: [[]], // Array de FuelTypes
     optionalIds: [[]], // Array de Opcionais (UUIDs)
     origin: ['NACIONAL'],
+    tipoEntrada: ['COMPRA'],
     valorCompra: [''],
     dataCompra: [''],
     valorVenda: [''],
     observation: [''],
     entryDate: [''],
     exitDate: [''],
-  });
+    pagamentosCompra: this.formBuilderService.array([]),
+  }, { validators: [purchasePaymentsValidator] });
 
   public get vehicleForm(): FormGroup {
     return this.form;
+  }
+
+  get pagamentosCompra() {
+    return this.form.get('pagamentosCompra') as FormArray;
+  }
+
+  get showFinanceiroTab(): boolean {
+    const tipoEntrada = this.form.get('tipoEntrada')?.value;
+    const valorCompra = this.form.get('valorCompra')?.value;
+    if (tipoEntrada !== 'COMPRA' || !valorCompra) return false;
+    
+    const cleaned = valorCompra.toString().replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+    const parsed = parseFloat(cleaned);
+    return !isNaN(parsed) && parsed > 0;
+  }
+
+  createPagamentoFormGroup(data?: any): FormGroup {
+    return this.formBuilderService.group({
+      formaPagamento: [data?.formaPagamento || 'PIX', Validators.required],
+      valor: [data?.valor || 0, [Validators.required, Validators.min(0.01)]],
+      vencimento: [data?.vencimento ? new Date(data.vencimento) : new Date(), Validators.required],
+      descricao: [data?.descricao || ''],
+      tipo: [data?.tipo || 'P']
+    });
+  }
+
+  addPagamento() {
+    this.pagamentosCompra.push(this.createPagamentoFormGroup());
+    this.form.markAsDirty();
+  }
+
+  removePagamento(index: number) {
+    this.pagamentosCompra.removeAt(index);
+    this.form.markAsDirty();
+  }
+
+  private formatDateToISO(date: Date | string): string {
+    const d = date instanceof Date ? date : new Date(date);
+    if (isNaN(d.getTime())) return '';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   constructor(
@@ -455,13 +504,21 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           origin: formValues.origin || 'NACIONAL',
           fuelTypes: this.mapFuelTypeToBackend(formValues.fuelTypes),
           optionalIds: formValues.optionalIds || [],
+          tipoEntrada: formValues.tipoEntrada || 'COMPRA',
           valorCompra: formValues.valorCompra?.toString() || '',
           supplierId: formValues.supplier?.id || null,
-          dataCompra: formValues.dataCompra || '',
+          dataCompra: formValues.dataCompra ? this.formatDateToISO(formValues.dataCompra) : '',
           valorVenda: formValues.valorVenda?.toString() || '',
           observation: formValues.observation || '',
           entryDate: formValues.entryDate || '',
           exitDate: formValues.exitDate || '',
+          pagamentosCompra: formValues.tipoEntrada === 'COMPRA' ? (formValues.pagamentosCompra || []).map((p: any) => ({
+            formaPagamento: p.formaPagamento,
+            descricao: p.descricao,
+            valor: p.valor,
+            vencimento: this.formatDateToISO(p.vencimento),
+            tipo: p.tipo || 'P'
+          })) : [],
         };
 
         Object.keys(payload).forEach((key) => {
@@ -582,6 +639,15 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
     this.isFillingForm = true;
     this.form.patchValue(draft.data);
+    
+    if (draft.data.pagamentosCompra && Array.isArray(draft.data.pagamentosCompra)) {
+      const paymentsArray = this.form.get('pagamentosCompra') as FormArray;
+      paymentsArray.clear();
+      draft.data.pagamentosCompra.forEach((payment: any) => {
+        paymentsArray.push(this.createPagamentoFormGroup(payment));
+      });
+    }
+    
     this.isFillingForm = false;
 
     if (draft.data?.brand?.id) {
@@ -1025,6 +1091,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       fuelTypes: this.dataForm!.fuelTypes || [], // Tipos de combustível
       optionalIds: this.dataForm!.optionals ? this.dataForm!.optionals.map((opt) => opt.optionalId) : [], // Opcionais do veículo
       origin: this.dataForm!.origin || 'NACIONAL',
+      tipoEntrada: this.dataForm!.tipoEntrada || 'COMPRA',
       valorCompra: this.dataForm!.valorCompra || '',
       dataCompra: this.dataForm!.dataCompra || '',
       valorVenda: this.dataForm!.valorVenda || '',
@@ -1032,6 +1099,18 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       entryDate: this.dataForm!.entryDate ? this.dataForm!.entryDate.toString().substring(0, 16) : '',
       exitDate: this.dataForm!.exitDate ? this.dataForm!.exitDate.toString().substring(0, 16) : '',
     });
+
+    const paymentsArray = this.form.get('pagamentosCompra') as FormArray;
+    paymentsArray.clear();
+    if (this.dataForm?.purchaseHistory && this.dataForm.purchaseHistory.length > 0) {
+      const lastPurchase = this.dataForm.purchaseHistory[0];
+      if (lastPurchase.pagamentos && lastPurchase.pagamentos.length > 0) {
+        lastPurchase.pagamentos.forEach((pay: any) => {
+          paymentsArray.push(this.createPagamentoFormGroup(pay));
+        });
+      }
+    }
+
     this.isFillingForm = false;
 
     // Marca que o formulário foi preenchido
@@ -1105,16 +1184,20 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       const controls = this.form.controls;
 
       if (controls['plate'].invalid) invalidFields.push('Placa');
+      if (this.form.hasError('supplierRequired')) invalidFields.push('Fornecedor');
+      if (this.form.hasError('paymentsMismatch')) invalidFields.push('Financeiro (Soma das parcelas deve ser igual ao Valor de Compra)');
 
       this.toastrService.warning(`Campos obrigatórios pendentes: ${invalidFields.join(', ')}`);
 
-      // Se houver erro na aba "Veículo", volta para ela (índice 0)
-      const hasVehicleErrors = controls['plate'].invalid;
-
-      if (hasVehicleErrors) {
+      // Determina para qual aba navegar dependendo dos erros
+      if (controls['plate'].invalid) {
         this.selectedTabIndex.set(0);
+      } else if (this.form.hasError('supplierRequired')) {
+        this.selectedTabIndex.set(1);
+      } else if (this.form.hasError('paymentsMismatch')) {
+        this.selectedTabIndex.set(2);
       } else {
-        this.selectedTabIndex.set(1); // Vai para "Dados Gerais" se o erro for lá
+        this.selectedTabIndex.set(1);
       }
 
       return;
@@ -1360,4 +1443,46 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       });
     }
   }
+}
+
+function purchasePaymentsValidator(control: AbstractControl): ValidationErrors | null {
+  const tipoEntrada = control.get('tipoEntrada')?.value;
+  const valorCompraStr = control.get('valorCompra')?.value;
+  const pagamentos = control.get('pagamentosCompra') as FormArray;
+  const supplierId = control.get('supplier')?.get('id')?.value;
+
+  const errors: ValidationErrors = {};
+  let hasErrors = false;
+
+  if (tipoEntrada === 'COMPRA') {
+    if (!supplierId) {
+      errors['supplierRequired'] = true;
+      hasErrors = true;
+    }
+
+    if (valorCompraStr) {
+      const valorCompra = parseFloat(valorCompraStr.toString().replace(/\s/g, '').replace(/\./g, '').replace(',', '.'));
+      if (valorCompra > 0) {
+        if (!pagamentos || pagamentos.length === 0) {
+          errors['paymentsMismatch'] = true;
+          hasErrors = true;
+        } else {
+          let total = 0;
+          for (const group of pagamentos.controls) {
+            const valorParcelaVal = group.get('valor')?.value;
+            if (valorParcelaVal) {
+              total += parseFloat(valorParcelaVal.toString().replace(/\s/g, '').replace(/\./g, '').replace(',', '.'));
+            }
+          }
+          const diff = Math.abs(total - valorCompra);
+          if (diff > 0.01) {
+            errors['paymentsMismatch'] = true;
+            hasErrors = true;
+          }
+        }
+      }
+    }
+  }
+
+  return hasErrors ? errors : null;
 }

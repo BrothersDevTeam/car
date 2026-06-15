@@ -233,6 +233,128 @@
         </div>
       </mat-tab>
 
+      <!-- ABA: DADOS DA COMPRA -->
+      @if (vehicle.purchaseHistory && vehicle.purchaseHistory.length > 0) {
+        <mat-tab label="Compra">
+          <div class="tab-body">
+            <!-- Seção Resumo Financeiro da Compra -->
+            <div class="info-section animate-fade-in">
+              <h2 class="section-title">
+                <mat-icon>shopping_cart</mat-icon>
+                Resumo da Compra
+              </h2>
+              <div class="value-cards">
+                <div class="value-card buy">
+                  <span class="card-label">Custo de Aquisição</span>
+                  <span class="card-value">
+                    {{ vehicle.purchaseHistory[0].valorCompra | currency: 'BRL' }}
+                  </span>
+                </div>
+                <div class="value-card">
+                  <span class="card-label">Data da Compra</span>
+                  <span class="card-value" style="font-size: 20px; font-weight: 500; color: #202124;">
+                    {{ (vehicle.purchaseHistory[0].dataCompra | date: 'dd/MM/yyyy') || '-' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dados do Fornecedor -->
+            <div class="info-section">
+              <h2 class="section-title">
+                <mat-icon>store</mat-icon>
+                Fornecedor
+              </h2>
+              @if (fornecedor) {
+                <div class="owner-card">
+                  <div class="owner-header">
+                    <div class="owner-avatar">
+                      <mat-icon>
+                        {{ fornecedor.legalEntity ? 'business' : 'person' }}
+                      </mat-icon>
+                    </div>
+                    <div class="owner-name-info">
+                      <h3 class="clickable-link" (click)="navigateToPerson(fornecedor.personId)">
+                        {{ fornecedor.name }}
+                        <mat-icon>open_in_new</mat-icon>
+                      </h3>
+                      <p>{{ fornecedor.email || 'Sem e-mail cadastrado' }}</p>
+                    </div>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="owner-details">
+                    <div class="info-item">
+                      <label>{{ fornecedor.legalEntity ? 'CNPJ' : 'CPF' }}</label>
+                      <span>{{ fornecedor.cnpj || fornecedor.cpf || '-' }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Telefone</label>
+                      <span>{{ fornecedor.phone || '-' }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Vínculo</label>
+                      <span>
+                        <mat-chip class="chip-small">
+                          {{ fornecedor.relationship?.name || fornecedor.relationship || 'FORNECEDOR' }}
+                        </mat-chip>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <div class="owner-card">
+                  <div class="owner-header">
+                    <div class="owner-avatar">
+                      <mat-icon>person</mat-icon>
+                    </div>
+                    <div class="owner-name-info">
+                      <h3 [class.clickable-link]="vehicle.purchaseHistory[0].supplierId" (click)="navigateToPerson(vehicle.purchaseHistory[0].supplierId)">
+                        {{ vehicle.purchaseHistory[0].supplierName || 'Fornecedor não informado' }}
+                        @if (vehicle.purchaseHistory[0].supplierId) {
+                          <mat-icon>open_in_new</mat-icon>
+                        }
+                      </h3>
+                      <p>Dados detalhados do cadastro do fornecedor indisponíveis</p>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Cronograma de Pagamento -->
+            @if (vehicle.purchaseHistory[0].pagamentos && vehicle.purchaseHistory[0].pagamentos.length > 0) {
+              <div class="info-section">
+                <h2 class="section-title">
+                  <mat-icon>account_balance_wallet</mat-icon>
+                  Cronograma de Pagamento
+                </h2>
+                <div class="history-list">
+                  @for (pag of vehicle.purchaseHistory[0].pagamentos; track pag.compraPagamentoId || $index) {
+                    <div class="history-item history-buy">
+                      <div class="history-icon-col">
+                        <mat-icon>payments</mat-icon>
+                      </div>
+                      <div class="history-date">
+                        {{ pag.vencimento | date: 'dd/MM/yyyy' }}
+                      </div>
+                      <div class="history-desc">
+                        <strong>{{ pag.formaPagamento }}</strong>
+                        <p class="m-0 text-muted small">
+                          {{ pag.descricao || 'Sem descrição' }}
+                        </p>
+                      </div>
+                      <div class="history-value val-negativo">
+                        {{ pag.valor | currency: 'BRL' }}
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </mat-tab>
+      }
+
       <!-- ABA: HISTÓRICO UNIFICADO -->
       @if (historyTimeline.length > 0) {
         <mat-tab label="Histórico">

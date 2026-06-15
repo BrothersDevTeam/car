@@ -42,12 +42,22 @@ export interface VendaSummary {
   buyerId?: string;
 }
 
+export interface CompraPagamentoSummary {
+  compraPagamentoId?: string;
+  formaPagamento: string;
+  descricao?: string;
+  valor: number;
+  vencimento: string | Date;
+  tipo?: string;
+}
+
 export interface CompraSummary {
   compraId: string;
   dataCompra?: string;
   valorCompra?: number;
   supplierName?: string;
   supplierId?: string;
+  pagamentos?: CompraPagamentoSummary[];
 }
 
 /**
@@ -86,6 +96,7 @@ export interface Vehicle {
   entryDate?: string;
   exitDate?: string;
   status?: string;
+  tipoEntrada?: string;
   nfeHistory?: NfeSummary[];
   salesHistory?: VendaSummary[];
   purchaseHistory?: CompraSummary[];
