@@ -167,31 +167,34 @@
       </label>
     </div>
 
-    <!-- Botões -->
-    <div class="form-actions">
-      <button type="button" mat-stroked-button (click)="onCancel()" class="btn-cancel">
-        <mat-icon>close</mat-icon>
-        Cancelar
-      </button>
-
-      @if (form.dirty) {
-        <button mat-stroked-button type="button" color="primary" (click)="openSaveDraftDialog()" [disabled]="isSaving">
-          <mat-icon>save_as</mat-icon>
-          Salvar Rascunho
-        </button>
-      }
-
+    <!-- Botão de submit e rascunho -->
+    <div class="form-actions" style="display: flex; gap: 16px; align-items: center; width: 100%">
       <button
         type="submit"
         mat-raised-button
-        color="primary"
-        [disabled]="isSaving || (!form.dirty && !selectedDraftId)"
-        class="btn-submit"
+        class="submit-btn"
+        [disabled]="isSaveButtonDisabled"
         #submitButton
+        style="flex: 1"
       >
         <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
         {{ isEditMode ? 'Atualizar' : 'Salvar' }}
       </button>
+
+      <!-- Salvar Rascunho (Ícone discreto) -->
+      @if (canShowDraftButton) {
+        <button
+          mat-icon-button
+          type="button"
+          color="primary"
+          (click)="openSaveDraftDialog()"
+          [disabled]="isSaving"
+          matTooltip="Salvar Rascunho"
+          style="flex: 0 0 auto !important; width: 48px !important; height: 48px !important; min-width: 48px !important"
+        >
+          <mat-icon style="margin: 0 !important">save_as</mat-icon>
+        </button>
+      }
     </div>
   </form>
 </app-wrapper-card>

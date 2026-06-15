@@ -364,12 +364,34 @@
         </mat-tab>
       </mat-tab-group>
 
-      <!-- Botão de submit -->
-      <div class="form-actions">
-        <button mat-flat-button color="primary" class="submit-btn-premium shadow-elegant" (click)="onSubmit()">
+      <!-- Botão de submit e rascunho -->
+      <div class="form-actions" style="display: flex; gap: 16px; align-items: center; width: 100%">
+        <button
+          mat-raised-button
+          class="submit-btn"
+          (click)="onSubmit()"
+          [disabled]="isSaveButtonDisabled"
+          #submitButton
+          style="flex: 1"
+        >
           <mat-icon>{{ dataForm?.plate ? 'save' : 'add_circle' }}</mat-icon>
           {{ dataForm?.plate ? 'Salvar Alterações' : 'Cadastrar Veículo' }}
         </button>
+
+        <!-- Salvar Rascunho (Ícone discreto) -->
+        @if (canShowDraftButton) {
+          <button
+            mat-icon-button
+            type="button"
+            color="primary"
+            (click)="openSaveDraftDialog()"
+            [disabled]="isSaving"
+            matTooltip="Salvar Rascunho"
+            style="flex: 0 0 auto !important; width: 48px !important; height: 48px !important; min-width: 48px !important"
+          >
+            <mat-icon style="margin: 0 !important">save_as</mat-icon>
+          </button>
+        }
       </div>
     </form>
   }

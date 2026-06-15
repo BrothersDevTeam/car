@@ -35,6 +35,7 @@ import type { Vehicle, VehicleForm, VehicleList } from '@interfaces/vehicle';
 import { VehicleService } from '@services/vehicle.service';
 import { ActionsService } from '@services/actions.service';
 import { CanComponentDeactivate } from '@guards/unsaved-changes.guard';
+import { FormDraftService, FormDraft } from '@services/form-draft.service';
 
 @Component({
   selector: 'app-vehicle',
@@ -68,6 +69,8 @@ export class VehicleComponent implements CanComponentDeactivate {
 
   vehiclePaginatedList: PaginationResponse<VehicleList> | null = null;
   selectedVehicle: VehicleForm | null = null;
+  selectedDraft: FormDraft | null = null;
+  private formDraftService = inject(FormDraftService);
   searchValue: string = '';
   selectedStoreId: string | null = null;
   selectedStatus: 'DISPONIVEL' | 'VENDIDO' | 'TODOS' = 'TODOS';
@@ -297,6 +300,7 @@ export class VehicleComponent implements CanComponentDeactivate {
     this.openForm.set(false);
     this.openInfo.set(false);
     this.selectedVehicle = null;
+    this.selectedDraft = null;
     this.actionsService.hasFormChanges.set(false);
   }
 
@@ -391,6 +395,42 @@ export class VehicleComponent implements CanComponentDeactivate {
     this.loadVehicleList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize);
   }
 
+  private checkDraftAndEdit(fullVehicle: VehicleForm) {
+    const draft = this.formDraftService.getDraft('vehicle', fullVehicle.vehicleId);
+
+    if (draft) {
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: '450px',
+        disableClose: true,
+        data: {
+          title: 'Rascunho de Edição Encontrado',
+          message: `Existe um rascunho de edição salvo para o veículo <strong>${fullVehicle.plate || ''}</strong>. Deseja continuar a edição a partir do rascunho ou descartar o rascunho e iniciar uma nova edição?`,
+          confirmText: 'Continuar Edição',
+          cancelText: 'Descartar Rascunho',
+          icon: 'history',
+          type: 'warning',
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((useDraft) => {
+        if (useDraft) {
+          this.selectedVehicle = fullVehicle;
+          this.selectedDraft = draft;
+          this.openForm.set(true);
+        } else {
+          this.formDraftService.removeDraft('vehicle', fullVehicle.vehicleId);
+          this.selectedVehicle = fullVehicle;
+          this.selectedDraft = null;
+          this.openForm.set(true);
+        }
+      });
+    } else {
+      this.selectedVehicle = fullVehicle;
+      this.selectedDraft = null;
+      this.openForm.set(true);
+    }
+  }
+
   /**
    * Método handleEdit aceita tanto Vehicle quanto VehicleForm
    * Quando vem da tabela (editClick), recebe Vehicle
@@ -403,25 +443,26 @@ export class VehicleComponent implements CanComponentDeactivate {
       // É VehicleList (veio da tabela), precisa buscar o completo
       this.vehicleService.getById(vehicle.vehicleId!).subscribe({
         next: (fullVehicle) => {
-          this.selectedVehicle = this.vehicleToForm(fullVehicle);
+          const formVal = this.vehicleToForm(fullVehicle);
           this.openInfo.set(false);
-          this.openForm.set(true);
+          this.checkDraftAndEdit(formVal);
         },
         error: (err) => this.toastr.error('Erro ao carregar veículo para edição'),
       });
       return;
     }
 
+    let formVal: VehicleForm;
     // Se for Vehicle (tem propriedade owner do tipo Person), converte
     if ('owner' in vehicle && vehicle.owner && typeof vehicle.owner === 'object') {
-      this.selectedVehicle = this.vehicleToForm(vehicle as Vehicle);
+      formVal = this.vehicleToForm(vehicle as Vehicle);
     } else {
       // Já é VehicleForm ou já tem o formato correto
-      this.selectedVehicle = vehicle as VehicleForm;
+      formVal = vehicle as VehicleForm;
     }
 
     this.openInfo.set(false);
-    this.openForm.set(true);
+    this.checkDraftAndEdit(formVal);
   }
 
   onFormSubmitted() {
@@ -429,6 +470,7 @@ export class VehicleComponent implements CanComponentDeactivate {
     this.openForm.set(false);
     this.openInfo.set(false);
     this.selectedVehicle = null;
+    this.selectedDraft = null;
     this.actionsService.hasFormChanges.set(false);
   }
 
@@ -529,14 +571,14 @@ export class VehicleComponent implements CanComponentDeactivate {
     return this.vehicleFormRef.saveForm(isDraft);
   }
 
-  saveLocalDraft(silent?: boolean, name?: string): void {
+  saveLocalDraft(silent?: boolean, name?: string, existingDraftId?: string): void {
     if (this.vehicleFormRef) {
-      this.vehicleFormRef.saveLocalDraft(silent, name);
+      this.vehicleFormRef.saveLocalDraft(silent, name, existingDraftId);
     }
   }
 
   openDialog() {
-    const canSave = this.vehicleFormRef?.vehicleForm?.valid ?? false;
+    const canSave = this.canSaveForm();
 
     const dialogRef = this.dialog.open(UnsavedChangesDialogComponent, {
       width: '450px',
@@ -550,7 +592,7 @@ export class VehicleComponent implements CanComponentDeactivate {
       },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe((result: string | undefined) => {
       if (!result || result === 'cancel') return;
 
       if (result === 'discard') {
@@ -559,12 +601,18 @@ export class VehicleComponent implements CanComponentDeactivate {
       }
 
       if (result === 'save' && canSave) {
-        this.vehicleFormRef?.onSubmit();
+        this.saveForm(false).subscribe((success: boolean) => {
+          if (success) {
+            this.onFormSubmitted();
+          }
+        });
+        return;
       }
 
-      if (typeof result === 'string' && result.startsWith('draft:')) {
-        const draftName = result.split(':')[1];
-        this.vehicleFormRef?.saveLocalDraft(true, draftName);
+      if (result.startsWith('draft:')) {
+        const draftName = result.substring(6); // Remove 'draft:'
+        const existingDraftId = this.selectedDraft?.id;
+        this.saveLocalDraft(false, draftName, existingDraftId);
         this.handleCloseDrawer();
       }
     });
