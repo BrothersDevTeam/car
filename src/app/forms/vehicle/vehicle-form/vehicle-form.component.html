@@ -229,6 +229,8 @@
                   [showSearch]="true"
                   [useColumns]="true"
                   maxHeight="500px"
+                  [showAddButton]="true"
+                  (onCreateNew)="onCreateNewOptional($event)"
                 ></app-primary-select>
               </div>
 

@@ -2,6 +2,8 @@ import {
   Component,
   forwardRef,
   Input,
+  Output,
+  EventEmitter,
   HostListener,
   OnInit,
   OnChanges,
@@ -12,6 +14,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RelationshipTypes } from '../../enums/relationshipTypes';
 import { AuthService } from '@services/auth/auth.service';
 
@@ -61,7 +64,7 @@ export interface SelectOption {
  */
 @Component({
   selector: 'app-primary-select',
-  imports: [CommonModule, FormsModule, MatIcon],
+  imports: [CommonModule, FormsModule, MatIcon, MatTooltipModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -131,6 +134,16 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
    * @default '400px'
    */
   @Input() maxHeight: string = '400px';
+
+  /**
+   * Exibe botão de adicionar nova opção ao lado do dropdown
+   */
+  @Input() showAddButton: boolean = false;
+
+  /**
+   * Emite evento quando o botão de adicionar nova opção é clicado, passando o nome da nova opção
+   */
+  @Output() onCreateNew = new EventEmitter<string>();
 
   /**
    * Termo de busca digitado pelo usuário
@@ -331,6 +344,25 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
     this.searchTerm = '';
     this.filteredOptions = [...this.options];
     this.focusedOptionIndex = -1;
+  }
+
+  /**
+   * Verifica se o termo digitado na busca possui correspondência exata na lista
+   */
+  hasExactMatch(): boolean {
+    if (!this.searchTerm) return true;
+    const term = this.searchTerm.toLowerCase().trim();
+    return this.options.some((option) => this.getOptionLabel(option).toLowerCase().trim() === term);
+  }
+
+  /**
+   * Trata o clique no botão de adição emitindo o termo digitado
+   */
+  onAddButtonClick() {
+    if (this.searchTerm && this.searchTerm.trim()) {
+      this.onCreateNew.emit(this.searchTerm.trim());
+      this.clearSearch();
+    }
   }
 
   /**

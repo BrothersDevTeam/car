@@ -1325,4 +1325,39 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     this.form.get('optionalIds')?.setValue(newIds);
     this.form.get('optionalIds')?.markAsDirty();
   }
+
+  onCreateNewOptional(newOptionalName: string) {
+    if (newOptionalName && newOptionalName.trim()) {
+      const payload = {
+        name: newOptionalName.trim(),
+        storeId: this.storeContextService.currentStoreId,
+        isGlobal: false,
+      };
+
+      this.optionalService.create(payload).subscribe({
+        next: (response) => {
+          this.toastrService.success('Opcional adicionado com sucesso!');
+          
+          // Recarrega a lista de opcionais do backend
+          this.optionalService.getAvailableOptionals().subscribe({
+            next: (available) => {
+              this.optionalsOptions = available.map((opt) => ({
+                value: opt.optionalId,
+                label: opt.name,
+              }));
+              
+              // Seleciona automaticamente o opcional recém-criado
+              const currentSelection = this.form.get('optionalIds')?.value || [];
+              this.form.get('optionalIds')?.setValue([...currentSelection, response.optionalId]);
+              this.form.get('optionalIds')?.markAsDirty();
+            }
+          });
+        },
+        error: (error) => {
+          console.error('Erro ao criar opcional:', error);
+          this.toastrService.error('Erro ao adicionar opcional. Tente novamente.');
+        }
+      });
+    }
+  }
 }

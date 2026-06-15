@@ -77,6 +77,15 @@
                   close
                 </mat-icon>
               }
+              @if (showAddButton && searchTerm && !hasExactMatch()) {
+                <button
+                  type="button"
+                  class="add-search-btn"
+                  (click)="onAddButtonClick()"
+                >
+                  Adicionar
+                </button>
+              }
             </div>
           }
 
@@ -122,6 +131,15 @@
               @if (filteredOptions.length === 0) {
                 <div class="no-results">
                   <span>Nenhum resultado encontrado</span>
+                  @if (showAddButton && searchTerm) {
+                    <button
+                      type="button"
+                      class="add-no-results-btn"
+                      (click)="onAddButtonClick()"
+                    >
+                      Adicionar "{{ searchTerm }}"
+                    </button>
+                  }
                 </div>
               }
             }
@@ -154,6 +172,15 @@
               @if (filteredOptions.length === 0) {
                 <div class="no-results">
                   <span>Nenhum resultado encontrado</span>
+                  @if (showAddButton && searchTerm) {
+                    <button
+                      type="button"
+                      class="add-no-results-btn"
+                      (click)="onAddButtonClick()"
+                    >
+                      Adicionar "{{ searchTerm }}"
+                    </button>
+                  }
                 </div>
               }
             }
