@@ -181,38 +181,39 @@
       }
     }
 
+    // ITEM DE INFORMAÇÃO
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      label {
+        font-size: 12px;
+        color: #70757a;
+        font-weight: 500;
+      }
+
+      span {
+        font-size: 15px;
+        color: #202124;
+        font-weight: 500;
+
+        &.mono {
+          font-family: 'Roboto Mono', monospace;
+          font-size: 13px;
+        }
+      }
+
+      &.full-width {
+        grid-column: 1 / -1;
+      }
+    }
+
     // GRID DE INFO
     .info-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       gap: 20px;
-
-      .info-item {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-
-        label {
-          font-size: 12px;
-          color: #70757a;
-          font-weight: 500;
-        }
-
-        span {
-          font-size: 15px;
-          color: #202124;
-          font-weight: 500;
-
-          &.mono {
-            font-family: 'Roboto Mono', monospace;
-            font-size: 13px;
-          }
-        }
-
-        &.full-width {
-          grid-column: 1 / -1;
-        }
-      }
     }
 
     // BOX DE OBSERVAÇÃO
