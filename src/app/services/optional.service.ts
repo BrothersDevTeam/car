@@ -15,4 +15,8 @@ export class OptionalService {
   getAvailableOptionals(): Observable<Optional[]> {
     return this.http.get<Optional[]>(`${this.apiUrl}/available`).pipe(first());
   }
+
+  create(payload: { name: string; storeId: string | null; isGlobal: boolean }): Observable<Optional> {
+    return this.http.post<Optional>(this.apiUrl, payload).pipe(first());
+  }
 }

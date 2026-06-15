@@ -92,6 +92,8 @@ export class AddressFormComponent implements OnInit, OnChanges, CanComponentDeac
    * Evita verificação de mudanças durante salvamento
    */
   protected isSaving = false;
+  protected isInitializing = false;
+  private lastSavedDraftValue: any = null;
 
   /**
    * Define os campos obrigatórios do formulário
@@ -140,6 +142,7 @@ export class AddressFormComponent implements OnInit, OnChanges, CanComponentDeac
   }
 
   ngOnInit() {
+    this.isInitializing = true;
     console.log('📋 ngOnInit - address recebido:', this.address);
     this.loadFormData();
 
@@ -186,6 +189,10 @@ export class AddressFormComponent implements OnInit, OnChanges, CanComponentDeac
     // Captura valor inicial após tudo estar carregado
     setTimeout(() => {
       this.captureInitialFormValue();
+      if (!this.lastSavedDraftValue) {
+        this.lastSavedDraftValue = this.form.getRawValue();
+      }
+      this.isInitializing = false;
     }, 500);
   }
 
@@ -236,6 +243,7 @@ export class AddressFormComponent implements OnInit, OnChanges, CanComponentDeac
       this.captureInitialFormValue();
       this.form.markAsPristine();
       this.actionsService.hasFormChanges.set(false);
+      this.lastSavedDraftValue = this.form.getRawValue();
     }, 100);
 
     console.log('✅ Formulário após patchValue:', this.form.value);
@@ -243,6 +251,64 @@ export class AddressFormComponent implements OnInit, OnChanges, CanComponentDeac
 
   get isEditMode(): boolean {
     return !!this.address?.addressId;
+  }
+
+  get isSaveButtonDisabled(): boolean {
+    if (this.isSaving || this.isInitializing) {
+      return true;
+    }
+
+    const hasActiveDraft = !!this.selectedDraftId;
+    const isEditMode = this.isEditMode;
+
+    if (isEditMode) {
+      if (hasActiveDraft) {
+        return !this.form.valid;
+      }
+      return !this.hasUnsavedChanges();
+    }
+    return !this.form.valid;
+  }
+
+  hasChangesComparedToDraft(): boolean {
+    const source = this.lastSavedDraftValue;
+    if (!source) {
+      return this.hasUnsavedChanges();
+    }
+    return this.hasChangesComparedTo(source);
+  }
+
+  hasChangesComparedTo(source: any): boolean {
+    const formValue = this.form.getRawValue();
+
+    const normalize = (val: any): string | null => {
+      if (val === null || val === undefined) return null;
+      const str = val.toString().trim();
+      return str === '' ? null : str;
+    };
+
+    const fields = [
+      'addressType', 'cep', 'street', 'number', 'complement', 'neighborhood', 'city', 'state'
+    ];
+
+    for (const field of fields) {
+      if (normalize(formValue[field]) !== normalize(source[field])) {
+        return true;
+      }
+    }
+
+    const booleans = ['mainAddress', 'active'];
+    for (const boolField of booleans) {
+      if (!!formValue[boolField] !== !!source[boolField]) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  get canShowDraftButton(): boolean {
+    return !this.isSaving && !this.isInitializing && this.form.dirty && this.hasChangesComparedToDraft();
   }
 
   onCepBlur() {
@@ -489,6 +555,7 @@ export class AddressFormComponent implements OnInit, OnChanges, CanComponentDeac
 
     // SEMPRE atualiza o ID do rascunho selecionado
     this.selectedDraftId = draftId;
+    this.lastSavedDraftValue = this.form.getRawValue();
     console.log('[saveLocalDraft] selectedDraftId atualizado para:', draftId);
 
     if (!silent) {
@@ -591,6 +658,7 @@ export class AddressFormComponent implements OnInit, OnChanges, CanComponentDeac
     setTimeout(() => {
       this.captureInitialFormValue();
       this.form.markAsPristine();
+      this.lastSavedDraftValue = this.form.getRawValue();
     }, 200);
   }
 

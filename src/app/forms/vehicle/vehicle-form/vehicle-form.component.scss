@@ -2,6 +2,7 @@
   padding: 1.5rem;
   max-width: 900px;
   margin: 0 auto;
+  overflow-x: hidden;
 }
 
 .modern-form {
@@ -356,25 +357,20 @@
   border-top: 1px solid #f1f5f9;
 }
 
-.submit-btn-premium {
-  padding: 0.75rem 2.5rem !important;
-  height: 52px !important;
-  border-radius: 12px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.5px !important;
+.submit-btn {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  height: 48px !important;
   font-size: 1rem !important;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease !important;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 35px rgba(37, 99, 235, 0.25);
+  &:disabled {
+    background-color: rgba(0, 0, 0, 0.12) !important;
+    color: rgba(0, 0, 0, 0.38) !important;
+    cursor: not-allowed;
   }
 
   mat-icon {
-    margin-right: 10px;
+    margin-right: 8px;
   }
 }
 
@@ -522,7 +518,7 @@
     grid-template-columns: 1fr;
   }
 
-  .submit-btn-premium {
+  .submit-btn {
     width: 100%;
   }
 }

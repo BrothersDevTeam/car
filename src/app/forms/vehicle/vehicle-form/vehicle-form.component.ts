@@ -56,6 +56,10 @@ import { FipeService } from '@services/fipe.service';
 import { StoreContextService } from '@services/store-context.service';
 import { FormDraftService, FormDraft } from '@services/form-draft.service';
 import { ActionsService } from '@services/actions.service';
+import {
+  SaveDraftDialogComponent,
+  SaveDraftDialogResult,
+} from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -97,6 +101,9 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   selectedDraft: FormDraft | null = null;
   showFormFields = false;
   selectedDraftId: string | null = null;
+  isSaving = false;
+  isInitializing = false;
+  private lastSavedDraftValue: any = null;
   private formDraftService = inject(FormDraftService);
   private actionsService = inject(ActionsService);
   private router = inject(Router);
@@ -143,6 +150,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   vehicleTypeOptions = VEHICLE_TYPE_OPTIONS;
 
   @Input() dataForm: VehicleForm | null = null;
+  @Input() draft: FormDraft | null | undefined = null;
   @Output() formSubmitted = new EventEmitter<void>();
   @Output() formChanged = new EventEmitter<boolean>();
 
@@ -220,44 +228,319 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   ) {}
 
   hasUnsavedChanges(): boolean {
-    if (!this.initialFormValue) return false;
-    const currentValue = JSON.stringify(this.form.value);
-    return currentValue !== this.initialFormValue;
+    if (this.isSaving || this.isInitializing) {
+      return false;
+    }
+
+    if (this.form.pristine) {
+      return false;
+    }
+
+    if (this.dataForm) {
+      return this.hasChangesComparedTo(this.dataForm);
+    }
+
+    const defaultSource = {
+      origin: 'NACIONAL',
+      fuelTypes: [],
+      optionalIds: [],
+    };
+    return this.hasChangesComparedTo(defaultSource);
   }
 
   canSaveForm(): boolean {
+    if (this.form.valid) {
+      return true;
+    }
     const raw = this.form.value;
     return !!(raw.plate || raw.brand?.name || raw.model?.name);
   }
 
-  saveForm(isDraft: boolean): Observable<boolean> {
-    if (isDraft) {
-      this.saveLocalDraft();
-      return of(true);
+  get isSaveButtonDisabled(): boolean {
+    if (this.isSaving || this.isInitializing) {
+      return true;
     }
-    this.onSubmit();
-    return of(true);
+
+    const hasActiveDraft = !!this.draft || !!this.selectedDraftId;
+    const isEditMode = !!this.dataForm && !!this.dataForm.vehicleId;
+
+    if (isEditMode) {
+      if (hasActiveDraft) {
+        return !this.form.valid;
+      }
+      return !this.hasUnsavedChanges();
+    }
+    return !this.form.valid;
   }
 
-  saveLocalDraft(silent: boolean = false, name?: string): void {
-    const draftName = name || `Veículo em ${new Date().toLocaleString()}`;
+  hasChangesComparedToDraft(): boolean {
+    const source = this.lastSavedDraftValue;
+    if (!source) {
+      return this.hasUnsavedChanges();
+    }
+    return this.hasChangesComparedTo(source);
+  }
 
-    this.formDraftService.saveDraft(this.FORM_TYPE, this.form.value, this.dataForm?.vehicleId || undefined, draftName);
+  hasChangesComparedTo(source: any): boolean {
+    const formValue = this.form.getRawValue();
 
-    this.initialFormValue = JSON.stringify(this.form.value);
-    this.actionsService.hasFormChanges.set(false);
-    this.form.markAsPristine();
+    const normalize = (val: any): string | null => {
+      if (val === null || val === undefined) return null;
+      const str = val.toString().trim();
+      return str === '' ? null : str;
+    };
+
+    const fields = [
+      'plate', 'origin', 'vehicleType', 'vehicleYear', 'modelYear', 'km', 'doors',
+      'chassis', 'renavam', 'engineNumber', 'engineDisplacement', 'horsepower',
+      'species', 'category', 'features', 'observation', 'dataCompra', 'entryDate', 'exitDate'
+    ];
+
+    for (const field of fields) {
+      if (normalize(formValue[field]) !== normalize(source[field])) {
+        return true;
+      }
+    }
+
+    const nestedObjects = ['owner', 'supplier', 'brand', 'model', 'fipeYear', 'color'];
+    for (const obj of nestedObjects) {
+      const formObj = formValue[obj] || {};
+      const sourceObj = source[obj] || {};
+      if (normalize(formObj.id) !== normalize(sourceObj.id) || normalize(formObj.name) !== normalize(sourceObj.name)) {
+        return true;
+      }
+    }
+
+    const arrays = ['fuelTypes', 'optionalIds'];
+    for (const arrField of arrays) {
+      const formArr = Array.isArray(formValue[arrField]) ? formValue[arrField] : [];
+      const sourceArr = Array.isArray(source[arrField]) ? source[arrField] : [];
+      if (formArr.length !== sourceArr.length) {
+        return true;
+      }
+      const sortedForm = [...formArr].sort();
+      const sortedSource = [...sourceArr].sort();
+      for (let i = 0; i < sortedForm.length; i++) {
+        if (sortedForm[i] !== sortedSource[i]) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  get canShowDraftButton(): boolean {
+    return !this.isSaving && !this.isInitializing && this.form.dirty && this.hasChangesComparedToDraft();
+  }
+
+  openSaveDraftDialog() {
+    if (this.selectedDraftId) {
+      const currentDraft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);
+      if (currentDraft) {
+        this.saveLocalDraft(
+          false,
+          currentDraft.draftName,
+          this.selectedDraftId,
+          true,
+        );
+        return;
+      }
+    }
+
+    const suggestedName = this.form.value.plate || `Rascunho ${new Date().toLocaleString()}`;
+
+    const dialogRef = this.dialog.open(SaveDraftDialogComponent, {
+      data: {
+        title: 'Salvar Rascunho',
+        suggestedName,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result: SaveDraftDialogResult) => {
+      if (result && result.confirmed) {
+        const nameExists = this.availableDrafts.some((d) => d.draftName === result.draftName);
+
+        if (nameExists) {
+          this.toastrService.error('Já existe um rascunho com este nome. Por favor, escolha outro.', 'Nome Duplicado');
+          this.openSaveDraftDialog();
+          return;
+        }
+
+        this.saveLocalDraft(false, result.draftName, undefined, true);
+      }
+    });
+  }
+
+  saveLocalDraft(
+    silent: boolean = false,
+    draftName?: string,
+    existingDraftId?: string | null,
+    closeAfterSave: boolean = true,
+  ): void {
+    const vehicleId = this.dataForm?.vehicleId || undefined;
+    let effectiveEntityId = vehicleId;
+
+    if (!effectiveEntityId && existingDraftId) {
+      const prefix = `${this.FORM_TYPE}_`;
+      if (existingDraftId.startsWith(prefix)) {
+        effectiveEntityId = existingDraftId.replace(prefix, '') as any;
+      }
+    }
+
+    const draftData = {
+      ...this.form.value,
+      _editingId: this.dataForm?.vehicleId,
+    };
+
+    const draftId = this.formDraftService.saveDraft(this.FORM_TYPE, draftData, effectiveEntityId, draftName);
+
+    this.selectedDraftId = draftId;
+    this.lastSavedDraftValue = this.form.getRawValue();
 
     if (!silent) {
       this.toastrService.info('Rascunho salvo localmente');
     }
+
+    if (!closeAfterSave) {
+      this.form.markAsPristine();
+      this.actionsService.hasFormChanges.set(false);
+
+      setTimeout(() => {
+        this.initialFormValue = JSON.stringify(this.form.value);
+      }, 100);
+    }
+
+    if (closeAfterSave) {
+      this.formSubmitted.emit();
+    }
+  }
+
+  saveForm(isDraft: boolean): Observable<boolean> {
+    this.isSaving = true;
+
+    if (isDraft) {
+      this.saveLocalDraft(false, undefined, this.selectedDraftId, true);
+      this.isSaving = false;
+      return of(true);
+    }
+
+    return this.executeSave();
+  }
+
+  private executeSave(): Observable<boolean> {
+    return new Observable((observer) => {
+      try {
+        const formValues = this.form.getRawValue();
+        const payload: any = {
+          storeId: this.storeContextService.currentStoreId,
+          ownerId: formValues.owner?.id || null,
+          plate: formValues.plate,
+          brand: formValues.brand?.name || '',
+          model: formValues.model?.name || '',
+          vehicleYear: formValues.vehicleYear || '',
+          modelYear: formValues.modelYear || '',
+          color: formValues.color?.name || '',
+          chassis: formValues.chassis || '',
+          renavam: formValues.renavam || '',
+          doors: formValues.doors || '',
+          horsepower: formValues.horsepower || '',
+          engineDisplacement: formValues.engineDisplacement || '',
+          engineNumber: formValues.engineNumber || '',
+          km: formValues.km || '',
+          vehicleType: formValues.vehicleType || '',
+          species: formValues.species || '',
+          category: formValues.category || '',
+          features: formValues.features || '',
+          origin: formValues.origin || 'NACIONAL',
+          fuelTypes: this.mapFuelTypeToBackend(formValues.fuelTypes),
+          optionalIds: formValues.optionalIds || [],
+          valorCompra: formValues.valorCompra?.toString() || '',
+          supplierId: formValues.supplier?.id || null,
+          dataCompra: formValues.dataCompra || '',
+          valorVenda: formValues.valorVenda?.toString() || '',
+          observation: formValues.observation || '',
+          entryDate: formValues.entryDate || '',
+          exitDate: formValues.exitDate || '',
+        };
+
+        Object.keys(payload).forEach((key) => {
+          if (payload[key] === '' || payload[key] === null || payload[key] === undefined) {
+            delete payload[key];
+          }
+        });
+
+        if (this.dataForm?.vehicleId) {
+          const draftIdToDelete = this.selectedDraftId;
+
+          this.vehicleService.update({ ...payload, vehicleId: this.dataForm.vehicleId }).subscribe({
+            next: () => {
+              this.toastrService.success('Veículo atualizado com sucesso');
+
+              if (draftIdToDelete) {
+                this.formDraftService.removeDraftById(draftIdToDelete);
+              } else {
+                this.formDraftService.removeDraft(this.FORM_TYPE, this.dataForm?.vehicleId);
+              }
+
+              this.initialFormValue = JSON.stringify(this.form.value);
+              this.actionsService.hasFormChanges.set(false);
+              this.isSaving = false;
+              observer.next(true);
+              observer.complete();
+            },
+            error: (error) => {
+              console.error('Erro ao atualizar:', error);
+              const msg = extractErrorMessage(error, 'Erro ao atualizar veículo');
+              this.toastrService.error(msg);
+              this.isSaving = false;
+              observer.next(false);
+              observer.complete();
+            },
+          });
+        } else {
+          const draftIdToDelete = this.selectedDraftId || this.draft?.id;
+
+          this.vehicleService.create(payload).subscribe({
+            next: () => {
+              this.toastrService.success('Veículo cadastrado com sucesso');
+
+              if (draftIdToDelete) {
+                this.formDraftService.removeDraftById(draftIdToDelete);
+              } else {
+                this.formDraftService.removeDraft(this.FORM_TYPE);
+              }
+
+              this.initialFormValue = JSON.stringify(this.form.value);
+              this.actionsService.hasFormChanges.set(false);
+              this.isSaving = false;
+              observer.next(true);
+              observer.complete();
+            },
+            error: (error) => {
+              console.error('Erro ao cadastrar:', error);
+              const msg = extractErrorMessage(error, 'Erro ao cadastrar veículo');
+              this.toastrService.error(msg);
+              this.isSaving = false;
+              observer.next(false);
+              observer.complete();
+            },
+          });
+        }
+      } catch (error) {
+        console.error('[executeSave] Erro ao salvar:', error);
+        this.isSaving = false;
+        observer.next(false);
+        observer.complete();
+      }
+    });
   }
 
   private checkForDrafts() {
     this.availableDrafts = this.formDraftService.getDraftsByType(this.FORM_TYPE);
     if (this.availableDrafts.length === 0) {
       this.showFormFields = true;
-    } else if (this.dataForm || this.selectedDraftId) {
+    } else if (this.dataForm || this.selectedDraftId || this.draft) {
       this.showFormFields = true;
     }
   }
@@ -277,6 +560,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       this.selectModelDisabled.set(true);
       this.selectYearDisabled.set(true);
       this.initialFormValue = JSON.stringify(this.form.value);
+      this.lastSavedDraftValue = this.form.getRawValue();
       return;
     }
 
@@ -288,21 +572,27 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
     this.selectedDraft = draft;
     this.selectedDraftId = draft.id;
-    // Para veículos, o patchValue resolve a maioria, mas precisamos
-    // garantir que o estado de marca/modelo carregue corretamente
+
+    // Se o rascunho contém ID de edição e não temos dataForm definido, recria a referência do dataForm
+    if (!this.dataForm && draft.data?._editingId) {
+      this.dataForm = {
+        vehicleId: draft.data._editingId,
+      } as any;
+    }
+
     this.isFillingForm = true;
     this.form.patchValue(draft.data);
     this.isFillingForm = false;
 
-    // Recarregar cascatas baseadas no rascunho
-    if (draft.data.brand?.id) {
+    if (draft.data?.brand?.id) {
       this.loadModels();
     }
-    if (draft.data.model?.id) {
+    if (draft.data?.model?.id) {
       this.loadYears();
     }
 
     this.initialFormValue = JSON.stringify(this.form.value);
+    this.lastSavedDraftValue = this.form.getRawValue();
     this.toastrService.success('Rascunho carregado com sucesso');
     this.actionsService.hasFormChanges.set(false);
   }
@@ -504,6 +794,8 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit() {
+    this.isInitializing = true;
+
     // Carrega opções de tipos de combustível do enum
     this.fuelTypesOptions = Object.keys(FuelTypes).map((key) => {
       const enumValue = FuelTypes[key as keyof typeof FuelTypes];
@@ -514,10 +806,13 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     // Monitora mudanças no formulário
-    this.form.valueChanges.subscribe(() => {
-      const isDirty = this.form.dirty;
-      this.formChanged.emit(isDirty);
-    });
+    this.subscriptions.add(
+      this.form.valueChanges.subscribe(() => {
+        const hasChanges = this.hasUnsavedChanges();
+        this.actionsService.hasFormChanges.set(hasChanges);
+        this.formChanged.emit(hasChanges);
+      })
+    );
 
     // Carrega marcas do backend
     this.loadBrands();
@@ -566,7 +861,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     // Busca rascunhos disponíveis
-    this.showFormFields = !!this.dataForm;
+    this.showFormFields = !!this.dataForm || !!this.draft;
     this.checkForDrafts();
 
     // Inicializa o valor inicial do formulário
@@ -634,6 +929,20 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           }
         }),
     );
+
+    setTimeout(() => {
+      this.isInitializing = false;
+      if (!this.lastSavedDraftValue) {
+        this.lastSavedDraftValue = this.form.getRawValue();
+      }
+    }, 500);
+
+    // Inscreve para atualizar lista quando rascunhos mudarem
+    this.subscriptions.add(
+      this.formDraftService.draftsChanges.subscribe(() => {
+        this.checkForDrafts();
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -647,6 +956,10 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       this.formFilled = false;
       // Tenta preencher o formulário (só executa se brands e colors já foram carregados)
       this.tryFillFormOnEdit();
+    }
+
+    if (changes['draft'] && this.draft) {
+      this.handleDraftSelection(this.draft.id);
     }
   }
 
@@ -672,27 +985,29 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
+    this.isInitializing = true;
+
     // Para edição, busca a marca pelo nome
     // FIPE retorna nomes em maiúsculo ou formato específico, pode precisar de normalização de comparação
-    const selectedBrand = this.brands.find((b) => b.name.toLowerCase() === (this.dataForm!.brand || '').toLowerCase());
+    const selectedBrand = this.brands.find((b) => b.name.toLowerCase() === (this.dataForm?.brand || '').toLowerCase());
 
     // Para edição, busca a cor pelo nome
-    const selectedColor = this.colors.find((c) => c.name === (this.dataForm!.color || ''));
+    const selectedColor = this.colors.find((c) => c.name === (this.dataForm?.color || ''));
 
     // Preenche o formulário com os dados do veículo
     this.isFillingForm = true;
     this.form.patchValue({
-      plate: this.dataForm!.plate || '',
-      owner: this.dataForm!.ownerId
-        ? { id: this.dataForm!.ownerId, name: this.dataForm!.ownerName || 'Proprietário não identificado' }
+      plate: this.dataForm?.plate || '',
+      owner: this.dataForm?.ownerId
+        ? { id: this.dataForm.ownerId, name: this.dataForm.ownerName || 'Proprietário não identificado' }
         : { id: '', name: '' },
-      supplier: this.dataForm!.supplierId
-        ? { id: this.dataForm!.supplierId, name: this.dataForm!.supplierName || 'Fornecedor não identificado' }
+      supplier: this.dataForm?.supplierId
+        ? { id: this.dataForm.supplierId, name: this.dataForm.supplierName || 'Fornecedor não identificado' }
         : { id: '', name: '' },
       brand: selectedBrand
         ? { id: selectedBrand.id, name: selectedBrand.name }
-        : { id: '', name: this.dataForm!.brand || '' }, // Fallback se não encontrar ID
-      model: { id: '', name: this.dataForm!.model || '' },
+        : { id: '', name: this.dataForm?.brand || '' }, // Fallback se não encontrar ID
+      model: { id: '', name: this.dataForm?.model || '' },
       vehicleYear: this.dataForm!.vehicleYear || '',
       modelYear: this.dataForm!.modelYear || '',
       color: selectedColor ? { id: selectedColor.id, name: selectedColor.name } : { id: '', name: '' },
@@ -737,7 +1052,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
           // Após carregar os modelos, busca o modelo selecionado
           const selectedModel = this.models.find(
-            (m) => m.name.toLowerCase() === (this.dataForm!.model || '').toLowerCase(),
+            (m) => m.name.toLowerCase() === (this.dataForm?.model || '').toLowerCase(),
           );
 
           if (selectedModel) {
@@ -747,13 +1062,21 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
             });
             // Opcional: Carregar anos se o modelo for encontrado
           }
+
+          this.isInitializing = false;
+          this.lastSavedDraftValue = this.form.getRawValue();
         },
         error: (error) => {
           console.error('Erro ao carregar modelos:', error);
           this.selectModelDisabled.set(true);
           this.loadingModels.set(false);
+          this.isInitializing = false;
+          this.lastSavedDraftValue = this.form.getRawValue();
         },
       });
+    } else {
+      this.isInitializing = false;
+      this.lastSavedDraftValue = this.form.getRawValue();
     }
   }
 
@@ -797,94 +1120,11 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    const formValues = this.form.value;
-    console.log('Valores do formulário:', formValues);
-
-    // Monta o payload para o backend (brand, model e color são Strings)
-    const payload: any = {
-      storeId: this.storeContextService.currentStoreId,
-      ownerId: formValues.owner?.id || null, // ID do proprietário (UUID)
-      plate: formValues.plate,
-      brand: formValues.brand?.name || '', // Nome da marca (String)
-      model: formValues.model?.name || '', // Nome do modelo (String)
-      vehicleYear: formValues.vehicleYear || '',
-      modelYear: formValues.modelYear || '',
-      color: formValues.color?.name || '', // Nome da cor (String)
-      chassis: formValues.chassis || '',
-      renavam: formValues.renavam || '',
-      doors: formValues.doors || '',
-      horsepower: formValues.horsepower || '',
-      engineDisplacement: formValues.engineDisplacement || '',
-      engineNumber: formValues.engineNumber || '',
-      km: formValues.km || '',
-      vehicleType: formValues.vehicleType || '',
-      species: formValues.species || '',
-      category: formValues.category || '',
-      features: formValues.features || '',
-      origin: formValues.origin || 'NACIONAL',
-      fuelTypes: this.mapFuelTypeToBackend(formValues.fuelTypes),
-      optionalIds: formValues.optionalIds || [], // Envia a lista de IDs de opcionais selecionados
-      valorCompra: formValues.valorCompra?.toString() || '',
-      supplierId: formValues.supplier?.id || null,
-      dataCompra: formValues.dataCompra || '',
-      valorVenda: formValues.valorVenda?.toString() || '',
-      observation: formValues.observation || '',
-      entryDate: formValues.entryDate || '',
-      exitDate: formValues.exitDate || '',
-    };
-
-    // Remove campos vazios, EXCETO color que pode ser string vazia
-    Object.keys(payload).forEach((key) => {
-      if (payload[key] === '' || payload[key] === null || payload[key] === undefined) {
-        delete payload[key];
+    this.saveForm(false).subscribe((success) => {
+      if (success) {
+        this.formSubmitted.emit();
       }
     });
-
-    console.log('Payload final enviado para o backend:', payload);
-
-    // Cria ou atualiza o veículo
-    if (this.dataForm?.vehicleId) {
-      this.vehicleService.update({ ...payload, vehicleId: this.dataForm.vehicleId }).subscribe({
-        next: () => {
-          this.toastrService.success('Veículo atualizado com sucesso');
-
-          // Limpa rascunhos
-          if (this.selectedDraft) {
-            this.formDraftService.removeDraftById(this.selectedDraft.id);
-          }
-          this.formDraftService.removeDraft(this.FORM_TYPE, this.dataForm?.vehicleId);
-
-          this.initialFormValue = JSON.stringify(this.form.value);
-          this.actionsService.hasFormChanges.set(false);
-          this.formSubmitted.emit();
-        },
-        error: (error) => {
-          console.error('Erro ao atualizar:', error);
-          const msg = extractErrorMessage(error, 'Erro ao atualizar veículo');
-          this.toastrService.error(msg);
-        },
-      });
-    } else {
-      this.vehicleService.create(payload).subscribe({
-        next: () => {
-          this.toastrService.success('Veículo cadastrado com sucesso');
-
-          // Limpa rascunhos
-          if (this.selectedDraft) {
-            this.formDraftService.removeDraftById(this.selectedDraft.id);
-          }
-
-          this.initialFormValue = JSON.stringify(this.form.value);
-          this.actionsService.hasFormChanges.set(false);
-          this.formSubmitted.emit();
-        },
-        error: (error) => {
-          console.error('Erro ao cadastrar:', error);
-          const msg = extractErrorMessage(error, 'Erro ao cadastrar veículo');
-          this.toastrService.error(msg);
-        },
-      });
-    }
   }
 
   onDelete() {
@@ -1084,5 +1324,40 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     const newIds = selectedIds.filter((id: string) => id !== optionalId);
     this.form.get('optionalIds')?.setValue(newIds);
     this.form.get('optionalIds')?.markAsDirty();
+  }
+
+  onCreateNewOptional(newOptionalName: string) {
+    if (newOptionalName && newOptionalName.trim()) {
+      const payload = {
+        name: newOptionalName.trim(),
+        storeId: this.storeContextService.currentStoreId,
+        isGlobal: false,
+      };
+
+      this.optionalService.create(payload).subscribe({
+        next: (response) => {
+          this.toastrService.success('Opcional adicionado com sucesso!');
+          
+          // Recarrega a lista de opcionais do backend
+          this.optionalService.getAvailableOptionals().subscribe({
+            next: (available) => {
+              this.optionalsOptions = available.map((opt) => ({
+                value: opt.optionalId,
+                label: opt.name,
+              }));
+              
+              // Seleciona automaticamente o opcional recém-criado
+              const currentSelection = this.form.get('optionalIds')?.value || [];
+              this.form.get('optionalIds')?.setValue([...currentSelection, response.optionalId]);
+              this.form.get('optionalIds')?.markAsDirty();
+            }
+          });
+        },
+        error: (error) => {
+          console.error('Erro ao criar opcional:', error);
+          this.toastrService.error('Erro ao adicionar opcional. Tente novamente.');
+        }
+      });
+    }
   }
 }
