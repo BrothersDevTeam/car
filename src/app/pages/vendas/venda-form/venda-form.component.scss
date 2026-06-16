@@ -224,12 +224,21 @@ mat-form-field {
 .form-actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 16px;
   padding: 16px 0 48px;
+  width: 100%;
 
   button {
     padding: 0 32px;
     height: 48px;
+  }
+
+  button[mat-icon-button] {
+    padding: 0 !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
   }
 }
 

@@ -1,8 +1,8 @@
 <form [formGroup]="form" (keydown.enter)="onEnter($event)">
   <!-- Seção Premium de Rascunhos -->
   @if (availableDrafts.length > 0 && !dataForm) {
-    <div class="drafts-section">
-      <mat-card class="draft-card">
+    <div class="drafts-section" (click)="draftSelectorClicked = true">
+      <mat-card class="draft-card" [class.highlight-pulse]="!draftSelectorClicked">
         <mat-card-header>
           <mat-icon mat-card-avatar>history</mat-icon>
           <mat-card-title>Cadastros em andamento</mat-card-title>

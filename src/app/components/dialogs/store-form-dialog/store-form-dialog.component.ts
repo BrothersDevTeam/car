@@ -91,6 +91,7 @@ export class StoreFormDialogComponent implements OnInit {
 
   readonly FORM_TYPE = 'store';
 
+  draftSelectorClicked = false;
   availableDrafts: FormDraft[] = [];
   selectedDraftId: string | null = null;
   lastSavedDraftValue: any = null;

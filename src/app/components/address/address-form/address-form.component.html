@@ -6,7 +6,7 @@
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="address-form">
     <!-- Combobox de Rascunhos -->
     @if (availableDrafts.length > 0 && !isEditMode) {
-      <div class="drafts-section">
+      <div class="drafts-section" (click)="draftSelectorClicked = true" [class.highlight-pulse]="!draftSelectorClicked">
         <div class="drafts-header">
           <mat-icon>drafts</mat-icon>
           <span>Cadastros em andamento</span>

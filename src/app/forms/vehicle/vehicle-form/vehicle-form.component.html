@@ -1,8 +1,8 @@
 <div class="form-container">
   <!-- Seção de Rascunhos -->
   @if (availableDrafts.length > 0 && !dataForm) {
-    <div class="drafts-section">
-      <mat-card class="draft-card">
+    <div class="drafts-section" (click)="draftSelectorClicked = true">
+      <mat-card class="draft-card" [class.highlight-pulse]="!draftSelectorClicked">
         <mat-card-header>
           <mat-icon mat-card-avatar>history</mat-icon>
           <mat-card-title>Veículos em andamento</mat-card-title>

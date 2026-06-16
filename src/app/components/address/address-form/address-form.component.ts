@@ -112,6 +112,11 @@ export class AddressFormComponent implements OnInit, OnChanges, CanComponentDeac
   protected availableDrafts: FormDraft[] = [];
 
   /**
+   * Indica se o usuário já clicou/interagiu com o seletor de rascunhos
+   */
+  protected draftSelectorClicked = false;
+
+  /**
    * ID do rascunho selecionado no combobox
    */
   protected selectedDraftId: string | null = null;

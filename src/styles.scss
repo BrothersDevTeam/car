@@ -72,3 +72,109 @@
   max-width: 280px !important;
   font-family: inherit !important;
 }
+
+// Animação de pulsação suave com brilho e escala leve para rascunhos em andamento
+@keyframes draftPulse {
+  0% {
+    border-color: rgba(59, 122, 184, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 0 0 0 rgba(59, 122, 184, 0.15);
+    transform: scale(1);
+  }
+  50% {
+    border-color: rgba(59, 122, 184, 0.8) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 0 14px 3px rgba(59, 122, 184, 0.35);
+    transform: scale(1.006);
+  }
+  100% {
+    border-color: rgba(59, 122, 184, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 0 0 0 rgba(59, 122, 184, 0.15);
+    transform: scale(1);
+  }
+}
+
+.highlight-pulse {
+  animation: draftPulse 2.5s infinite ease-in-out !important;
+  border: 1px solid var(--primary-color) !important;
+  transition: all 0.3s ease-in-out !important;
+}
+
+// ========== ESTILO PREMIUM E UNIFICADO PARA RASCUNHOS EM ANDAMENTO ==========
+.drafts-section {
+  margin-bottom: 32px !important;
+  
+  // Garante que se for apenas div (ex: endereço), a borda de 16px seja aplicada
+  border-radius: 16px !important;
+
+  // Para elementos de rascunhos que não usam mat-card (como endereço)
+  &:not(:has(.draft-card)) {
+    border: 1px solid rgba(59, 122, 184, 0.18) !important;
+    background: linear-gradient(135deg, rgba(59, 122, 184, 0.08) 0%, rgba(59, 122, 184, 0.03) 100%) !important;
+    padding: 16px !important;
+  }
+
+  .draft-card {
+    border-radius: 16px !important;
+    border: 1px solid rgba(59, 122, 184, 0.18) !important;
+    background: linear-gradient(135deg, rgba(59, 122, 184, 0.08) 0%, rgba(59, 122, 184, 0.03) 100%) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+    overflow: hidden !important;
+    display: block !important;
+
+    mat-card-header {
+      margin-bottom: 20px !important;
+      padding: 16px 16px 0 !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 16px !important;
+
+      mat-icon[mat-card-avatar] {
+        background-color: white !important;
+        color: var(--primary-color) !important;
+        padding: 10px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 10px rgba(59, 122, 184, 0.15) !important;
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 24px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0 !important;
+      }
+
+      mat-card-title {
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        color: var(--text-color) !important;
+        letter-spacing: -0.02em !important;
+        margin: 0 !important;
+      }
+
+      mat-card-subtitle {
+        color: #64748b !important;
+        font-size: 0.85rem !important;
+        margin: 0 !important;
+      }
+    }
+
+    mat-card-content {
+      padding: 0 16px 16px !important;
+    }
+
+    .draft-selector-container {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+
+      .draft-select-field {
+        flex: 1 !important;
+        width: 100% !important;
+
+        .mat-mdc-form-field-subscript-wrapper {
+          display: none !important;
+        }
+      }
+    }
+  }
+}

@@ -101,6 +101,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   readonly FORM_TYPE = 'vehicle';
 
   // Gestão de Rascunhos
+  draftSelectorClicked = false;
   availableDrafts: FormDraft[] = [];
   selectedDraft: FormDraft | null = null;
   showFormFields = false;

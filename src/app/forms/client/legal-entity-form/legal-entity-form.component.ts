@@ -113,6 +113,11 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
   @Output() formChanged = new EventEmitter<boolean>();
 
   /**
+   * Indica se o usuário já clicou/interagiu com o seletor de rascunhos
+   */
+  protected draftSelectorClicked = false;
+
+  /**
    * Lista de rascunhos disponíveis para este tipo de formulário
    */
   protected availableDrafts: FormDraft[] = [];

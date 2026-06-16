@@ -130,6 +130,11 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   private readonly FORM_TYPE = 'pessoa-fisica';
 
   /**
+   * Indica se o usuário já clicou/interagiu com o seletor de rascunhos
+   */
+  protected draftSelectorClicked = false;
+
+  /**
    * Lista de rascunhos disponíveis para este tipo de formulário
    */
   protected availableDrafts: any[] = [];

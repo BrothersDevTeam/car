@@ -28,9 +28,13 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
+import {
+  SaveDraftDialogComponent,
+  SaveDraftDialogResult,
+} from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -94,10 +98,13 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
 
   private initialFormValue: string = '';
   private readonly FORM_TYPE = 'venda';
+  private lastSavedDraftValue: any = null;
   private subscriptions = new Subscription();
 
+  draftSelectorClicked = false;
   availableDrafts: FormDraft[] = [];
   selectedDraft: FormDraft | null = null;
+  showFormFields = false;
 
   // Formulário Reativo
   vendaForm: FormGroup;
@@ -124,6 +131,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
     private toastr: ToastrService,
     private formDraftService: FormDraftService,
     private actionsService: ActionsService,
+    private dialog: MatDialog,
   ) {
     this.vendaForm = this.fb.group({
       vehicle: this.fb.group({
@@ -173,6 +181,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
     // Carrega o valor inicial para detectar mudanças
     setTimeout(() => {
       this.initialFormValue = JSON.stringify(this.vendaForm.value);
+      this.lastSavedDraftValue = this.vendaForm.value;
       this.checkForDrafts();
     }, 500);
 
@@ -299,6 +308,36 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
     return hasChanges;
   }
 
+  hasChangesComparedToDraft(): boolean {
+    if (!this.lastSavedDraftValue) {
+      return this.hasUnsavedChanges();
+    }
+    const current = JSON.stringify(this.vendaForm.value);
+    const draft = JSON.stringify(this.lastSavedDraftValue);
+    return current !== draft;
+  }
+
+  get canShowDraftButton(): boolean {
+    return !this.isSaving && !this.loading() && this.vendaForm.dirty && this.hasChangesComparedToDraft();
+  }
+
+  get isSaveButtonDisabled(): boolean {
+    if (this.isSaving || this.loading() || this.isSubmitting()) {
+      return true;
+    }
+
+    const hasActiveDraft = !!this.selectedDraft;
+    const isEditMode = this.isEdit;
+
+    if (isEditMode) {
+      if (hasActiveDraft) {
+        return !this.vendaForm.valid;
+      }
+      return !this.hasUnsavedChanges();
+    }
+    return !this.vendaForm.valid;
+  }
+
   canSaveForm(): boolean {
     // Para rascunho local, permitimos salvar se houver qualquer dado relevante
     const raw = this.vendaForm.value;
@@ -314,19 +353,42 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
     return of(true);
   }
 
-  saveLocalDraft(silent: boolean = false, name?: string): void {
+  saveLocalDraft(
+    silent: boolean = false,
+    draftName?: string,
+    existingDraftId?: string,
+    closeAfterSave: boolean = false,
+  ): void {
     this.isSaving = true;
-    const draftName = name || `Venda em ${new Date().toLocaleString()}`;
+    const name = draftName || `Venda em ${new Date().toLocaleString()}`;
+
+    let effectiveEntityId = this.vendaId || undefined;
+
+    if (!effectiveEntityId && existingDraftId) {
+      const prefix = `${this.FORM_TYPE}_`;
+      if (existingDraftId.startsWith(prefix)) {
+        effectiveEntityId = existingDraftId.replace(prefix, '') as any;
+      }
+    }
 
     const draftData = {
       ...this.vendaForm.value,
       avalistasDetails: this.selectedAvalistas,
     };
 
-    this.formDraftService.saveDraft(this.FORM_TYPE, draftData, this.vendaId || undefined, draftName);
+    const draftId = this.formDraftService.saveDraft(this.FORM_TYPE, draftData, effectiveEntityId, name);
 
-    // Resetamos o estado de mudanças para permitir a navegação fluida
+    this.selectedDraft = {
+      id: draftId,
+      formType: this.FORM_TYPE,
+      data: draftData,
+      draftName: name,
+      lastModified: new Date(),
+      status: 'em-preenchimento',
+    };
+
     this.initialFormValue = JSON.stringify(this.vendaForm.value);
+    this.lastSavedDraftValue = this.vendaForm.value;
     this.actionsService.hasFormChanges.set(false);
     this.vendaForm.markAsPristine();
 
@@ -335,22 +397,74 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
     }
 
     this.isSaving = false;
+
+    if (closeAfterSave) {
+      this.goBack();
+    }
+  }
+
+  openSaveDraftDialog() {
+    if (this.selectedDraft) {
+      this.saveLocalDraft(
+        false,
+        this.selectedDraft.draftName,
+        this.selectedDraft.id,
+        false
+      );
+      return;
+    }
+
+    const suggestedName = `Venda em ${new Date().toLocaleString()}`;
+
+    const dialogRef = this.dialog.open(SaveDraftDialogComponent, {
+      data: {
+        title: 'Salvar Rascunho',
+        suggestedName,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result: SaveDraftDialogResult) => {
+      if (result && result.confirmed) {
+        const nameExists = this.availableDrafts.some((d) => d.draftName === result.draftName);
+
+        if (nameExists) {
+          this.toastr.error('Já existe um rascunho com este nome. Por favor, escolha outro.', 'Nome Duplicado');
+          this.openSaveDraftDialog();
+          return;
+        }
+
+        this.saveLocalDraft(false, result.draftName, undefined, false);
+        this.checkForDrafts();
+      }
+    });
   }
 
   private checkForDrafts() {
     this.availableDrafts = this.formDraftService.getDraftsByType(this.FORM_TYPE);
     console.log('[checkForDrafts] Rascunhos encontrados:', this.availableDrafts);
+    if (this.availableDrafts.length === 0) {
+      this.showFormFields = true;
+    } else if (this.isEdit || this.selectedDraft) {
+      this.showFormFields = true;
+    }
   }
 
   handleDraftSelection(draft: FormDraft | null) {
+    this.showFormFields = true;
     if (!draft) {
       this.selectedDraft = null;
+      this.selectedAvalistas = [];
       this.vendaForm.reset({
-        saleDate: new Date(),
-        items: [],
-        payments: [],
+        dataVenda: new Date(),
+        valor: 0,
+        valorFinal: 0,
+        observacao: '',
       });
+      (this.vendaForm.get('pagamentos') as FormArray).clear();
+      (this.vendaForm.get('avalistasIds') as FormArray).clear();
+      this.addPagamento();
       this.initialFormValue = JSON.stringify(this.vendaForm.value);
+      this.lastSavedDraftValue = this.vendaForm.value;
       this.actionsService.hasFormChanges.set(false);
       return;
     }
@@ -392,6 +506,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
     this.vendaForm.get('avalistaSearchControl')?.setValue('', { emitEvent: false });
 
     this.initialFormValue = JSON.stringify(this.vendaForm.value);
+    this.lastSavedDraftValue = this.vendaForm.value;
     this.toastr.success('Rascunho carregado com sucesso');
     this.actionsService.hasFormChanges.set(false);
   }
@@ -403,6 +518,10 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
 
     if (this.selectedDraft?.id === draft.id) {
       this.selectedDraft = null;
+    }
+
+    if (this.availableDrafts.length === 0) {
+      this.showFormFields = true;
     }
 
     this.toastr.info('Rascunho excluído');
