@@ -665,17 +665,26 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /**
+   * Remove acentos de uma string para busca insensível a diacríticos
+   */
+  private removeAccents(str: string): string {
+    return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+  }
+
+  /**
    * Filtra opções baseado no termo de busca
    */
   onSearch(): void {
-    const term = this.searchTerm.toLowerCase().trim();
+    const term = this.removeAccents(this.searchTerm.toLowerCase().trim());
 
     if (!term) {
       this.filteredOptions = [...this.options];
       return;
     }
 
-    this.filteredOptions = this.options.filter((option) => option.name.toLowerCase().includes(term));
+    this.filteredOptions = this.options.filter((option) =>
+      this.removeAccents(option.name.toLowerCase()).includes(term)
+    );
   }
 
   /**

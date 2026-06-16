@@ -323,17 +323,26 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
   }
 
   /**
+   * Remove acentos de uma string para busca insensível a diacríticos
+   */
+  private removeAccents(str: string): string {
+    return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+  }
+
+  /**
    * Filtra opções baseado no termo de busca
    */
   onSearch(): void {
-    const term = this.searchTerm.toLowerCase().trim();
+    const term = this.removeAccents(this.searchTerm.toLowerCase().trim());
 
     if (!term) {
       this.filteredOptions = [...this.options];
       return;
     }
 
-    this.filteredOptions = this.options.filter((option) => this.getOptionLabel(option).toLowerCase().includes(term));
+    this.filteredOptions = this.options.filter((option) =>
+      this.removeAccents(this.getOptionLabel(option).toLowerCase()).includes(term)
+    );
     this.focusedOptionIndex = -1; // Reseta o foco ao filtrar
   }
 
@@ -351,8 +360,8 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
    */
   hasExactMatch(): boolean {
     if (!this.searchTerm) return true;
-    const term = this.searchTerm.toLowerCase().trim();
-    return this.options.some((option) => this.getOptionLabel(option).toLowerCase().trim() === term);
+    const term = this.removeAccents(this.searchTerm.toLowerCase().trim());
+    return this.options.some((option) => this.removeAccents(this.getOptionLabel(option).toLowerCase().trim()) === term);
   }
 
   /**
