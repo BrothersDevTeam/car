@@ -34,7 +34,17 @@ export interface CanComponentDeactivate {
    * @param silent Se true, não exibe toast de sucesso
    * @param name Nome opcional para o rascunho
    */
+  /**
+   * Salva um rascunho local do formulário no localStorage
+   * @param silent Se true, não exibe toast de sucesso
+   * @param name Nome opcional para o rascunho
+   */
   saveLocalDraft(silent?: boolean, name?: string): void;
+
+  /** Nome do rascunho atual, se houver */
+  currentDraftName?: string;
+  /** Nome sugerido para um novo rascunho */
+  suggestedDraftName?: string;
 }
 
 /**
@@ -64,6 +74,8 @@ export const unsavedChangesGuard: CanDeactivateFn<CanComponentDeactivate> = (
       message: canSave
         ? 'Deseja salvar as alterações antes de sair?'
         : 'Há campos obrigatórios não preenchidos. Deseja salvar um rascunho para continuar depois?',
+      currentDraftName: component.currentDraftName,
+      suggestedDraftName: component.suggestedDraftName,
     },
   });
 

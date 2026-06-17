@@ -476,8 +476,8 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
         message: canSave
           ? 'Deseja salvar as alterações antes de sair?'
           : 'Há campos obrigatórios não preenchidos. Deseja salvar um rascunho para continuar depois?',
-        currentDraftName: this.selectedDraft?.draftName,
-        suggestedDraftName, // Passa o nome sugerido
+        currentDraftName: (formComponent as any).currentDraftName,
+        suggestedDraftName: (formComponent as any).suggestedDraftName || suggestedDraftName, // Passa o nome sugerido
       },
     });
 
@@ -507,7 +507,8 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
       if (result.startsWith('draft:')) {
         const draftName = result.substring(6); // Remove 'draft:'
         // Passa o ID do rascunho existente para garantir atualização
-        const existingDraftId = this.selectedDraft?.id;
+        const selectedDraftId = (formComponent as any).selectedDraftId;
+        const existingDraftId = (selectedDraftId && selectedDraftId !== 'new') ? selectedDraftId : undefined;
 
         (formComponent as any).saveLocalDraft(false, draftName, existingDraftId);
         this.handleCloseDrawer();

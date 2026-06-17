@@ -597,6 +597,8 @@ export class VehicleComponent implements CanComponentDeactivate {
           ? 'Deseja salvar as alterações do veículo antes de sair?'
           : 'Há campos obrigatórios não preenchidos ou inválidos. Deseja descartar as alterações?',
         hideDraftOption: false,
+        currentDraftName: this.vehicleFormRef?.currentDraftName,
+        suggestedDraftName: this.vehicleFormRef?.suggestedDraftName,
       },
     });
 
@@ -619,7 +621,8 @@ export class VehicleComponent implements CanComponentDeactivate {
 
       if (result.startsWith('draft:')) {
         const draftName = result.substring(6); // Remove 'draft:'
-        const existingDraftId = this.selectedDraft?.id;
+        const selectedDraftId = this.vehicleFormRef?.selectedDraftId;
+        const existingDraftId = (selectedDraftId && selectedDraftId !== 'new') ? selectedDraftId : undefined;
         this.saveLocalDraft(false, draftName, existingDraftId);
         this.handleCloseDrawer();
       }

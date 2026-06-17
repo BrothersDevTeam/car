@@ -321,6 +321,14 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
     return !this.isSaving && !this.loading() && this.vendaForm.dirty && this.hasChangesComparedToDraft();
   }
 
+  get currentDraftName(): string | undefined {
+    return this.selectedDraft?.draftName;
+  }
+
+  get suggestedDraftName(): string {
+    return `Venda em ${new Date().toLocaleString()}`;
+  }
+
   get isSaveButtonDisabled(): boolean {
     if (this.isSaving || this.loading() || this.isSubmitting()) {
       return true;

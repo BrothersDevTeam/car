@@ -323,6 +323,18 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     return !this.isSaving && !this.isInitializing && this.form.dirty && this.hasChangesComparedToDraft();
   }
 
+  get currentDraftName(): string | undefined {
+    if (this.selectedDraftId) {
+      const draft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);
+      return draft?.draftName;
+    }
+    return undefined;
+  }
+
+  get suggestedDraftName(): string {
+    return this.form.value.name || `Rascunho ${new Date().toLocaleString()}`;
+  }
+
   /**
    * Implementação da interface CanComponentDeactivate
    * Verifica se todos os campos obrigatórios estão preenchidos
@@ -577,8 +589,9 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     // Se já estamos editando um rascunho (selectedDraftId), PRECISAMOS extrair o timestamp/sufixo dele.
 
     let effectiveEntityId = personId;
+    const actualDraftId = existingDraftId || this.selectedDraftId;
 
-    if (!effectiveEntityId && existingDraftId) {
+    if (!effectiveEntityId && actualDraftId) {
       // Se estamos editando um rascunho de NOVO CADASTRO (sem personId),
       // O ID do rascunho é algo como "pessoa-fisica_new_123456789"
       // O service espera "new_123456789" (ou similar) no parametro entityId?
@@ -592,8 +605,8 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
 
       // Formato: formType_SUFIXO
       const prefix = `${this.FORM_TYPE}_`;
-      if (existingDraftId.startsWith(prefix)) {
-        effectiveEntityId = existingDraftId.replace(prefix, '') as any;
+      if (actualDraftId.startsWith(prefix)) {
+        effectiveEntityId = actualDraftId.replace(prefix, '') as any;
       }
     }
 

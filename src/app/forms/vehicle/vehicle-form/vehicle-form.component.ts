@@ -384,6 +384,14 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     return !this.isSaving && !this.isInitializing && this.form.dirty && this.hasChangesComparedToDraft();
   }
 
+  get currentDraftName(): string | undefined {
+    return this.selectedDraft?.draftName;
+  }
+
+  get suggestedDraftName(): string {
+    return this.form.value.plate || `Rascunho ${new Date().toLocaleString()}`;
+  }
+
   openSaveDraftDialog() {
     if (this.selectedDraftId) {
       const currentDraft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);

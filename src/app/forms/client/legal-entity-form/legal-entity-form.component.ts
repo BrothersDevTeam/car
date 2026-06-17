@@ -397,6 +397,18 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     return !this.isSaving && !this.isInitializing && this.form.dirty && this.hasChangesComparedToDraft();
   }
 
+  get currentDraftName(): string | undefined {
+    if (this.selectedDraftId) {
+      const draft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);
+      return draft?.draftName;
+    }
+    return undefined;
+  }
+
+  get suggestedDraftName(): string {
+    return this.form.value.name || `Rascunho ${new Date().toLocaleString()}`;
+  }
+
   /**
    * Implementação da interface CanComponentDeactivate
    * Verifica se todos os campos obrigatórios estão preenchidos
@@ -601,13 +613,25 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     existingDraftId?: string,
     closeAfterSave: boolean = true,
   ): void {
+    const personId = this.dataForm?.personId || undefined;
+    const actualDraftId = existingDraftId || this.selectedDraftId;
+
+    let effectiveEntityId = personId;
+
+    if (!effectiveEntityId && actualDraftId) {
+      const prefix = `${this.FORM_TYPE}_`;
+      if (actualDraftId.startsWith(prefix)) {
+        effectiveEntityId = actualDraftId.replace(prefix, '') as any;
+      }
+    }
+
     // Prepara os dados do rascunho incluindo ID de edição se aplicável
     const draftData = {
       ...this.form.value,
       _editingId: this.dataForm?.personId, // Preserva o ID se estiver editando
     };
 
-    const draftId = this.formDraftService.saveDraft(this.FORM_TYPE, draftData, this.dataForm?.personId, draftName);
+    const draftId = this.formDraftService.saveDraft(this.FORM_TYPE, draftData, effectiveEntityId, draftName);
 
     // Atualiza o ID do rascunho selecionado
     this.selectedDraftId = draftId;
