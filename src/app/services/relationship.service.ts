@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { first, Observable } from 'rxjs';
+import { first, Observable, Subject, tap } from 'rxjs';
 import { RelationshipResponse, RelationshipRequest } from '@interfaces/relationship';
 
 @Injectable({
@@ -8,6 +8,9 @@ import { RelationshipResponse, RelationshipRequest } from '@interfaces/relations
 })
 export class RelationshipService {
   private readonly apiUrl: string = '/api/relationships';
+
+  // Canal para notificar componentes de que a lista de relacionamentos mudou
+  public readonly relationshipsUpdated$ = new Subject<void>();
 
   constructor(private http: HttpClient) {}
 
@@ -29,20 +32,29 @@ export class RelationshipService {
    * Cadastra um novo relacionamento para uma loja específica
    */
   create(storeId: string, data: RelationshipRequest): Observable<RelationshipResponse> {
-    return this.http.post<RelationshipResponse>(`${this.apiUrl}/store/${storeId}`, data).pipe(first());
+    return this.http.post<RelationshipResponse>(`${this.apiUrl}/store/${storeId}`, data).pipe(
+      tap(() => this.relationshipsUpdated$.next()),
+      first()
+    );
   }
 
   /**
    * Atualiza um relacionamento existente
    */
   update(id: string, data: RelationshipRequest): Observable<RelationshipResponse> {
-    return this.http.put<RelationshipResponse>(`${this.apiUrl}/${id}`, data).pipe(first());
+    return this.http.put<RelationshipResponse>(`${this.apiUrl}/${id}`, data).pipe(
+      tap(() => this.relationshipsUpdated$.next()),
+      first()
+    );
   }
 
   /**
    * Exclui um relacionamento
    */
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(first());
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => this.relationshipsUpdated$.next()),
+      first()
+    );
   }
 }

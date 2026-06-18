@@ -219,6 +219,13 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
         this.checkAndEndInitialization();
       }
     }, 500);
+
+    // Inscreve para atualizar lista quando relacionamentos mudarem (sincronização reativa PF/PJ)
+    this.subscriptions.add(
+      this.relationshipService.relationshipsUpdated$.subscribe(() => {
+        this.loadRelationships();
+      }),
+    );
   }
 
   private loadRelationships() {

@@ -827,6 +827,13 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
         this.loadAvailableDrafts();
       }),
     );
+
+    // Inscreve para atualizar lista quando relacionamentos mudarem (sincronização reativa PF/PJ)
+    this.subscriptions.add(
+      this.relationshipService.relationshipsUpdated$.subscribe(() => {
+        this.loadRelationships();
+      }),
+    );
   }
 
   private loadRelationships() {
