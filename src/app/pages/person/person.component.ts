@@ -958,7 +958,8 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
   private getActiveFormComponent(): any {
     // Se o formulário principal está aberto
     if (this.openForm()) {
-      if (this.selectedPerson?.legalEntity) {
+      const isLegalEntity = this.selectedPerson ? this.selectedPerson.legalEntity : (this.selectedTabIndex === 1);
+      if (isLegalEntity) {
         return this.legalEntityForm || null;
       }
       return this.naturalPersonForm || null;
@@ -966,7 +967,8 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
 
     // Se a tela de info está aberta (possível edição de endereço)
     if (this.openInfo()) {
-      if (this.selectedPerson?.legalEntity) {
+      const isLegalEntity = this.selectedPerson ? this.selectedPerson.legalEntity : (this.selectedTabIndex === 1);
+      if (isLegalEntity) {
         return this.legalEntityInfo?.getActiveFormComponent();
       }
       return this.naturalPersonInfo?.getActiveFormComponent();

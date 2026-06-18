@@ -28,6 +28,7 @@ import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.comp
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 import { RelationshipFormDialogComponent } from '@components/dialogs/relationship-form-dialog/relationship-form-dialog.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
+import { SaveDraftDialogComponent, SaveDraftDialogResult } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 
 import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
 
@@ -658,6 +659,49 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
       this.actionsService.hasFormChanges.set(false);
       setTimeout(() => this.captureInitialFormValue(), 100);
     }
+  }
+
+  /**
+   * Abre o diálogo para salvar rascunho ou atualiza o existente
+   */
+  openSaveDraftDialog() {
+    // 1. Se já tem um rascunho selecionado, atualiza direto
+    if (this.selectedDraftId) {
+      const currentDraft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);
+      if (currentDraft) {
+        this.saveLocalDraft(
+          false,
+          currentDraft.draftName,
+          this.selectedDraftId,
+          true
+        );
+        return;
+      }
+    }
+
+    // 2. Se é novo, abre diálogo para nomear
+    const suggestedName = this.form.value.name || `Rascunho ${new Date().toLocaleString()}`;
+
+    const dialogRef = this.dialog.open(SaveDraftDialogComponent, {
+      data: {
+        title: 'Salvar Rascunho',
+        suggestedName,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result: SaveDraftDialogResult) => {
+      if (result && result.confirmed) {
+        const nameExists = this.availableDrafts.some((d) => d.draftName === result.draftName);
+
+        if (nameExists) {
+          this.toastrService.error('Já existe um rascunho com este nome. Por favor, escolha outro.', 'Nome Duplicado');
+          this.openSaveDraftDialog();
+          return;
+        }
+
+        this.saveLocalDraft(false, result.draftName, undefined, true);
+      }
+    });
   }
 
   /**
