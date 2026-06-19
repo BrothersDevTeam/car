@@ -4,7 +4,7 @@
   </span>
 
   <div class="dropdown-container">
-    <button class="dropdown-button" (click)="toggleDropdown()">
+    <button type="button" class="dropdown-button" (click)="toggleDropdown()">
       {{ selectedOption?.name || placeholder }}
       <span class="dropdown-arrow"></span>
       <span class="vertical-bar"></span>
@@ -46,7 +46,7 @@
             <li (click)="selectOption(option)">
               <span>{{ option.name }}</span>
               <div class="select_list_buttons">
-                <button class="edit-button" (click)="editItem(option, $event)">✏️</button>
+                <button type="button" class="edit-button" (click)="editItem(option, $event)">✏️</button>
               </div>
             </li>
           }

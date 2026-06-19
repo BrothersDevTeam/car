@@ -13,6 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
+import { MatMenuModule } from '@angular/material/menu';
 import { ToastrService } from 'ngx-toastr';
 import { CostCenterService } from '@services/cost-center.service';
 import { ICostCenter } from '@interfaces/cost-center';
@@ -32,6 +33,7 @@ import { ICostCenter } from '@interfaces/cost-center';
     MatInputModule,
     MatIconModule,
     MatTableModule,
+    MatMenuModule,
   ],
   template: `
     <h2 mat-dialog-title class="dialog-title">
@@ -77,14 +79,29 @@ import { ICostCenter } from '@interfaces/cost-center';
           </ng-container>
 
           <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef style="width: 100px;">Ações</th>
+            <th mat-header-cell *matHeaderCellDef style="width: 80px;">Ações</th>
             <td mat-cell *matCellDef="let cc">
-              <button mat-icon-button color="primary" (click)="startEdit(cc)" matTooltip="Editar">
-                <mat-icon>edit</mat-icon>
+              <button type="button" mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()" aria-label="Ações">
+                <mat-icon>more_vert</mat-icon>
               </button>
-              <button mat-icon-button color="warn" (click)="deleteCostCenter(cc)" matTooltip="Excluir">
-                <mat-icon>delete</mat-icon>
-              </button>
+              <mat-menu #menu="matMenu">
+                <button
+                  mat-menu-item
+                  (click)="startEdit(cc)"
+                  class="custom-menu-item"
+                >
+                  <mat-icon class="menu-action-icon">edit</mat-icon>
+                  <span class="menu-action-label">Editar</span>
+                </button>
+                <button
+                  mat-menu-item
+                  (click)="deleteCostCenter(cc)"
+                  class="custom-menu-item menu-action-warn"
+                >
+                  <mat-icon class="menu-action-icon">delete</mat-icon>
+                  <span class="menu-action-label">Excluir</span>
+                </button>
+              </mat-menu>
             </td>
           </ng-container>
 

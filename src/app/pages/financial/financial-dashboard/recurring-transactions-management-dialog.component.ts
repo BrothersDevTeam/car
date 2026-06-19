@@ -15,6 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 import { ToastrService } from 'ngx-toastr';
 import { RecurringTransactionService } from '@services/recurring-transaction.service';
 import { CostCenterService } from '@services/cost-center.service';
@@ -38,6 +39,7 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
     MatIconModule,
     MatTableModule,
     MatTooltipModule,
+    MatMenuModule,
     CustomSelectComponent,
   ],
   template: `
@@ -85,22 +87,31 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
               <td mat-cell *matCellDef="let r">Dia {{ r.dueDay }}</td>
             </ng-container>
 
-            <!-- Próxima Geração -->
-            <ng-container matColumnDef="nextGenerationDate">
-              <th mat-header-cell *matHeaderCellDef>Próx. Geração</th>
-              <td mat-cell *matCellDef="let r">{{ r.nextGenerationDate | date:'dd/MM/yyyy':'UTC' }}</td>
-            </ng-container>
-
             <!-- Ações -->
             <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef style="width: 100px;">Ações</th>
+              <th mat-header-cell *matHeaderCellDef style="width: 80px;">Ações</th>
               <td mat-cell *matCellDef="let r">
-                <button mat-icon-button color="primary" (click)="startEdit(r)" matTooltip="Editar">
-                  <mat-icon>edit</mat-icon>
+                <button type="button" mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()" aria-label="Ações">
+                  <mat-icon>more_vert</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="deleteRecurring(r)" matTooltip="Excluir">
-                  <mat-icon>delete</mat-icon>
-                </button>
+                <mat-menu #menu="matMenu">
+                  <button
+                    mat-menu-item
+                    (click)="startEdit(r)"
+                    class="custom-menu-item"
+                  >
+                    <mat-icon class="menu-action-icon">edit</mat-icon>
+                    <span class="menu-action-label">Editar</span>
+                  </button>
+                  <button
+                    mat-menu-item
+                    (click)="deleteRecurring(r)"
+                    class="custom-menu-item menu-action-warn"
+                  >
+                    <mat-icon class="menu-action-icon">delete</mat-icon>
+                    <span class="menu-action-label">Excluir</span>
+                  </button>
+                </mat-menu>
               </td>
             </ng-container>
 
@@ -325,7 +336,7 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
   costCenters: { id: string; name: string }[] = [];
   editingId: string | null = null;
   viewMode: 'list' | 'form' = 'list';
-  displayedColumns: string[] = ['description', 'amount', 'dueDay', 'nextGenerationDate', 'actions'];
+  displayedColumns: string[] = ['description', 'amount', 'dueDay', 'actions'];
 
   constructor(
     private fb: FormBuilder,
