@@ -17,6 +17,13 @@ import { MatMenuModule } from '@angular/material/menu';
 import { ToastrService } from 'ngx-toastr';
 import { CostCenterService } from '@services/cost-center.service';
 import { ICostCenter } from '@interfaces/cost-center';
+import { ErrorStateMatcher } from '@angular/material/core';
+
+class CustomErrorStateMatcher implements ErrorStateMatcher {
+  isErrorState(control: any | null, form: any | null): boolean {
+    return !!(control && control.invalid && (control.dirty || (form && form.submitted)));
+  }
+}
 
 @Component({
   selector: 'app-cost-centers-management-dialog',
@@ -46,8 +53,8 @@ import { ICostCenter } from '@interfaces/cost-center';
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="cost-center-form">
         <mat-form-field appearance="outline" class="flex-grow">
           <mat-label>Nome do Centro de Custo</mat-label>
-          <input matInput formControlName="name" placeholder="Ex: Administrativo, Oficina..." />
-          <mat-error *ngIf="form.get('name')?.hasError('required')">O nome é obrigatório</mat-error>
+          <input matInput formControlName="name" [errorStateMatcher]="matcher" placeholder="Ex: Administrativo, Oficina..." />
+          <mat-error *ngIf="form.get('name')?.hasError('required') && (form.get('name')?.dirty || form.get('name')?.touched)">O nome é obrigatório</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="flex-grow">
@@ -139,7 +146,7 @@ import { ICostCenter } from '@interfaces/cost-center';
     .cost-center-form {
       display: flex;
       gap: 12px;
-      align-items: center;
+      align-items: flex-start;
       width: 100%;
       flex-wrap: wrap;
       background: rgba(0, 0, 0, 0.02);
@@ -156,6 +163,7 @@ import { ICostCenter } from '@interfaces/cost-center';
       display: flex;
       align-items: center;
       gap: 4px;
+      margin-top: 4px;
     }
     .table-wrapper {
       max-height: 250px;
@@ -181,6 +189,7 @@ export class CostCentersManagementDialogComponent implements OnInit {
   costCenters: ICostCenter[] = [];
   editingId: string | null = null;
   displayedColumns: string[] = ['name', 'description', 'actions'];
+  readonly matcher = new CustomErrorStateMatcher();
 
   constructor(
     private fb: FormBuilder,
@@ -225,7 +234,8 @@ export class CostCentersManagementDialogComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.toastr.error('Erro ao atualizar Centro de Custo.', 'Erro');
+          const msg = err.error?.errorMessage || 'Erro ao atualizar Centro de Custo.';
+          this.toastr.error(msg, 'Erro');
         }
       });
     } else {
@@ -238,7 +248,8 @@ export class CostCentersManagementDialogComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.toastr.error('Erro ao criar Centro de Custo.', 'Erro');
+          const msg = err.error?.errorMessage || 'Erro ao criar Centro de Custo.';
+          this.toastr.error(msg, 'Erro');
         }
       });
     }

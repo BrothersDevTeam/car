@@ -25,7 +25,6 @@ import { FinancialSummary, FinancialTransaction } from '@interfaces/financial';
 import { ManualTransactionDialogComponent } from './manual-transaction-dialog.component';
 import { CostCentersManagementDialogComponent } from './cost-centers-management-dialog.component';
 import { RecurringTransactionsManagementDialogComponent } from './recurring-transactions-management-dialog.component';
-import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
 
 @Component({
   selector: 'app-financial-dashboard',
@@ -45,7 +44,6 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
     MatDialogModule,
     MatTooltipModule,
     ContentHeaderComponent,
-    CustomSelectComponent,
   ],
   templateUrl: './financial-dashboard.component.html',
   styleUrl: './financial-dashboard.component.scss',
@@ -101,10 +99,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       type: [''],
       status: [''],
       description: [''],
-      costCenter: this.fb.group({
-        id: [''],
-        name: ['Todos'],
-      }),
+      costCenterId: [''],
     });
 
     // Escuta mudança global de loja
@@ -170,7 +165,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       type: rawFilters.type,
       status: rawFilters.status,
       description: rawFilters.description,
-      costCenterId: rawFilters.costCenter?.id || undefined,
+      costCenterId: rawFilters.costCenterId || undefined,
       storeId: this.selectedStoreId || undefined,
     };
 

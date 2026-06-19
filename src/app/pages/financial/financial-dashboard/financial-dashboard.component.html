@@ -129,14 +129,14 @@
           </mat-select>
         </mat-form-field>
 
-        <app-custom-select
-          listType="cost_center"
-          label="Centro de Custo"
-          [options]="costCenters"
-          [control]="$any(filterForm.get('costCenter'))"
-          placeholder="Todos"
-          class="filter-field"
-        ></app-custom-select>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Centro de Custo</mat-label>
+          <mat-select formControlName="costCenterId">
+            @for (cc of costCenters; track cc.id) {
+              <mat-option [value]="cc.id">{{ cc.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
 
         <mat-form-field appearance="outline" class="filter-field search-field">
           <mat-label>Buscar por descrição...</mat-label>
