@@ -4,6 +4,14 @@
     [btn_label]="hasCreatePermission ? 'Novo Lançamento' : ''"
     fontIcon="add"
     (onClick)="openManualTransactionModal()">
+    <button
+      mat-stroked-button
+      color="primary"
+      style="margin-right: 12px; height: 48px;"
+      (click)="openCostCentersManagementModal()">
+      <mat-icon>business</mat-icon>
+      <span>Centros de Custo</span>
+    </button>
   </app-content-header>
 
   <!-- Resumo de Caixa -->
@@ -147,9 +155,17 @@
               <th mat-header-cell *matHeaderCellDef>Descrição</th>
               <td mat-cell *matCellDef="let t" class="description-cell">
                 <span class="d-block font-weight-500">{{ t.description }}</span>
-                @if (t.totalInstallments > 1) {
-                  <span class="parcela-badge">Parcela {{ t.installmentNumber }}/{{ t.totalInstallments }}</span>
-                }
+                <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px; flex-wrap: wrap;">
+                  @if (t.totalInstallments > 1) {
+                    <span class="parcela-badge">Parcela {{ t.installmentNumber }}/{{ t.totalInstallments }}</span>
+                  }
+                  @if (t.costCenter) {
+                    <span class="cost-center-badge" style="background: rgba(25, 118, 210, 0.1); color: #1976d2; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px;">
+                      <mat-icon style="font-size: 12px; width: 12px; height: 12px; margin: 0;">label</mat-icon>
+                      {{ t.costCenter.name }}
+                    </span>
+                  }
+                </div>
               </td>
             </ng-container>
 

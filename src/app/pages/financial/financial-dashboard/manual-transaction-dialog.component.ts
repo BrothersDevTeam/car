@@ -14,6 +14,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
+import { CostCenterService } from '@services/cost-center.service';
 
 @Component({
   selector: 'app-manual-transaction-dialog',
@@ -30,6 +32,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatInputModule,
     MatSelectModule,
     MatIconModule,
+    CustomSelectComponent,
   ],
   template: `
     <h2 mat-dialog-title class="dialog-title">
@@ -71,6 +74,17 @@ import { MatIconModule } from '@angular/material/icon';
             <input matInput type="date" formControlName="dueDate" />
             <mat-error *ngIf="form.get('dueDate')?.hasError('required')">A data de vencimento é obrigatória</mat-error>
           </mat-form-field>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 8px;">
+          <app-custom-select
+            listType="cost_center"
+            label="Centro de Custo"
+            [options]="costCenters"
+            [control]="$any(form.get('costCenter'))"
+            placeholder="Selecione o centro de custo"
+            class="flex-grow"
+          ></app-custom-select>
         </div>
 
         <div class="form-row">
@@ -119,13 +133,18 @@ import { MatIconModule } from '@angular/material/icon';
       padding: 16px 24px;
       gap: 8px;
     }
+    ::ng-deep app-custom-select {
+      width: 100%;
+    }
   `]
 })
 export class ManualTransactionDialogComponent implements OnInit {
   form!: FormGroup;
+  costCenters: { id: string; name: string }[] = [];
 
   constructor(
     private fb: FormBuilder,
+    private costCenterService: CostCenterService,
     public dialogRef: MatDialogRef<ManualTransactionDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { storeId: string }
   ) {}
@@ -138,13 +157,39 @@ export class ManualTransactionDialogComponent implements OnInit {
       dueDate: [today, [Validators.required]],
       description: ['', [Validators.required]],
       installments: [1, [Validators.min(1)]],
-      storeId: [this.data.storeId]
+      storeId: [this.data.storeId],
+      costCenter: this.fb.group({
+        id: [''],
+        name: ['']
+      })
+    });
+
+    this.loadCostCenters();
+  }
+
+  loadCostCenters(): void {
+    this.costCenterService.getAllCostCenters(this.data.storeId).subscribe({
+      next: (response) => {
+        this.costCenters = response.content.map(cc => ({
+          id: cc.costCenterId,
+          name: cc.name
+        }));
+      },
+      error: (err) => {
+        console.error('Error loading cost centers', err);
+      }
     });
   }
 
   onSubmit(): void {
     if (this.form.valid) {
-      this.dialogRef.close(this.form.value);
+      const rawValue = this.form.value;
+      const payload = {
+        ...rawValue,
+        costCenterId: rawValue.costCenter?.id || null
+      };
+      delete payload.costCenter;
+      this.dialogRef.close(payload);
     }
   }
 }

@@ -22,6 +22,7 @@ import { StoreContextService } from '@services/store-context.service';
 import { Authorizations } from '../../../enums/authorizations';
 import { FinancialSummary, FinancialTransaction } from '@interfaces/financial';
 import { ManualTransactionDialogComponent } from './manual-transaction-dialog.component';
+import { CostCentersManagementDialogComponent } from './cost-centers-management-dialog.component';
 
 @Component({
   selector: 'app-financial-dashboard',
@@ -200,6 +201,21 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
           },
         });
       }
+    });
+  }
+
+  openCostCentersManagementModal(): void {
+    if (!this.storeContextService.validateStoreSelection()) {
+      return;
+    }
+    const storeId = this.storeContextService.currentStoreId!;
+    const dialogRef = this.dialog.open(CostCentersManagementDialogComponent, {
+      width: '600px',
+      data: { storeId },
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.loadTransactions();
     });
   }
 

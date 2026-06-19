@@ -1,3 +1,5 @@
+import { ICostCenter } from './cost-center';
+
 export type TransactionType = 'INCOME' | 'EXPENSE';
 export type TransactionOrigin = 'MANUAL' | 'VEHICLE_SALE' | 'VEHICLE_PURCHASE';
 export type TransactionStatus = 'PENDING' | 'PAID' | 'CANCELLED';
@@ -15,6 +17,7 @@ export interface FinancialTransaction {
   totalInstallments: number;
   referenceId?: string;
   description?: string;
+  costCenter?: ICostCenter;
   createdAt: string;
   updatedAt: string;
   createdBy: string;
@@ -28,6 +31,7 @@ export interface FinancialTransactionRecord {
   description: string;
   storeId: string;
   installments?: number;
+  costCenterId?: string;
 }
 
 export interface FinancialSummary {

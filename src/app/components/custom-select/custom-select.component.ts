@@ -30,6 +30,7 @@ import { ModelService } from '@services/model.service';
 import { ColorService } from '@services/color.service';
 import { PersonService } from '@services/person.service';
 import { VehicleService } from '@services/vehicle.service';
+import { CostCenterService } from '@services/cost-center.service';
 
 @Component({
   selector: 'app-custom-select',
@@ -41,7 +42,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
   @Input() label: string = 'Selecione uma opção';
   @Input() options: { id: string; name: string }[] = [];
   @Input() control!: FormControl | FormGroup;
-  @Input() listType!: 'brand' | 'model' | 'color' | 'person' | 'vehicle';
+  @Input() listType!: 'brand' | 'model' | 'color' | 'person' | 'vehicle' | 'cost_center';
   @Input() selectedBrand: { id: string; name: string } = { id: '', name: '' };
   @Input() matTooltip: string = '';
   @Input() placeholder: string = '';
@@ -69,6 +70,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
     private colorService: ColorService,
     private personService: PersonService,
     private vehicleService: VehicleService,
+    private costCenterService: CostCenterService,
     private toastrService: ToastrService,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef,
@@ -82,6 +84,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       color: this.colorService,
       person: this.personService,
       vehicle: this.vehicleService,
+      cost_center: this.costCenterService,
     };
 
     if (this.control) {
@@ -258,6 +261,17 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       successUpdateMessage: 'Veículo editado com sucesso!',
       successDeleteMessage: 'Veículo deletado com sucesso!',
       errorMessage: 'Erro ao adicionar veículo. Tente novamente.',
+    },
+    cost_center: {
+      create: 'Adicionar novo Centro de Custo',
+      update: 'Editar Centro de Custo',
+      delete: 'Deletar Centro de Custo',
+      message: 'Digite o nome do Centro de Custo',
+      deleteMessage: 'Você tem certeza que deseja deletar este Centro de Custo?',
+      successCreateMessage: 'Centro de Custo adicionado com sucesso!',
+      successUpdateMessage: 'Centro de Custo editado com sucesso!',
+      successDeleteMessage: 'Centro de Custo deletado com sucesso!',
+      errorMessage: 'Erro ao adicionar Centro de Custo. Tente novamente.',
     },
   };
 
