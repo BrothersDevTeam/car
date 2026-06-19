@@ -1,0 +1,234 @@
+<main>
+  <app-content-header
+    title="Fluxo de Caixa"
+    [btn_label]="hasCreatePermission ? 'Novo Lançamento' : ''"
+    fontIcon="add"
+    (onClick)="openManualTransactionModal()">
+  </app-content-header>
+
+  <!-- Resumo de Caixa -->
+  @if (loadingSummary) {
+    <div class="loader-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (summary) {
+    <div class="summary-grid">
+      <!-- Saldo Atual -->
+      <mat-card class="summary-card balance-card" [class.negative]="summary.currentBalance < 0">
+        <mat-card-header>
+          <div mat-card-avatar class="card-icon">
+            <mat-icon>account_balance_wallet</mat-icon>
+          </div>
+          <mat-card-title>Saldo Atual em Caixa</mat-card-title>
+          <mat-card-subtitle>Apenas lançamentos pagos</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <h2 class="metric-value">{{ summary.currentBalance | currency:'BRL':'symbol':'1.2-2' }}</h2>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- A Receber (Previsto) -->
+      <mat-card class="summary-card income-pending-card">
+        <mat-card-header>
+          <div mat-card-avatar class="card-icon">
+            <mat-icon>insights</mat-icon>
+          </div>
+          <mat-card-title>Contas a Receber</mat-card-title>
+          <mat-card-subtitle>Entradas pendentes</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <h2 class="metric-value">{{ summary.pendingIncome | currency:'BRL':'symbol':'1.2-2' }}</h2>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- A Pagar (Previsto) -->
+      <mat-card class="summary-card expense-pending-card">
+        <mat-card-header>
+          <div mat-card-avatar class="card-icon">
+            <mat-icon>money_off</mat-icon>
+          </div>
+          <mat-card-title>Contas a Pagar</mat-card-title>
+          <mat-card-subtitle>Saídas pendentes</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <h2 class="metric-value">{{ summary.pendingExpense | currency:'BRL':'symbol':'1.2-2' }}</h2>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Total Recebido -->
+      <mat-card class="summary-card income-paid-card">
+        <mat-card-header>
+          <div mat-card-avatar class="card-icon">
+            <mat-icon>trending_up</mat-icon>
+          </div>
+          <mat-card-title>Total Recebido</mat-card-title>
+          <mat-card-subtitle>Receitas liquidadas</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <h2 class="metric-value">{{ summary.totalPaidIncome | currency:'BRL':'symbol':'1.2-2' }}</h2>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Total Pago -->
+      <mat-card class="summary-card expense-paid-card">
+        <mat-card-header>
+          <div mat-card-avatar class="card-icon">
+            <mat-icon>trending_down</mat-icon>
+          </div>
+          <mat-card-title>Total Pago</mat-card-title>
+          <mat-card-subtitle>Despesas liquidadas</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <h2 class="metric-value">{{ summary.totalPaidExpense | currency:'BRL':'symbol':'1.2-2' }}</h2>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+
+  <!-- Painel de Filtros e Tabela -->
+  <mat-card class="table-card">
+    <mat-card-header class="table-header">
+      <mat-card-title>Histórico de Transações</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Filtros -->
+      <form [formGroup]="filterForm" class="filter-row">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Tipo</mat-label>
+          <mat-select formControlName="type">
+            <mat-option value="">Todos</mat-option>
+            <mat-option value="INCOME">Entrada (Receita)</mat-option>
+            <mat-option value="EXPENSE">Saída (Despesa)</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="">Todos</mat-option>
+            <mat-option value="PENDING">Pendente</mat-option>
+            <mat-option value="PAID">Pago / Liquidado</mat-option>
+            <mat-option value="CANCELLED">Cancelado</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field search-field">
+          <mat-label>Buscar por descrição...</mat-label>
+          <input matInput formControlName="description" placeholder="Ex: Conta, Venda, Onix..." />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </form>
+
+      <!-- Tabela -->
+      @if (loadingTransactions) {
+        <div class="loader-container min-height-200">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table mat-table [dataSource]="transactions" class="mat-elevation-z0 w-100">
+            <!-- Vencimento -->
+            <ng-container matColumnDef="dueDate">
+              <th mat-header-cell *matHeaderCellDef>Vencimento</th>
+              <td mat-cell *matCellDef="let t">{{ t.dueDate | date:'dd/MM/yyyy':'UTC' }}</td>
+            </ng-container>
+
+            <!-- Pagamento -->
+            <ng-container matColumnDef="paymentDate">
+              <th mat-header-cell *matHeaderCellDef>Pagamento</th>
+              <td mat-cell *matCellDef="let t">
+                {{ t.paymentDate ? (t.paymentDate | date:'dd/MM/yyyy HH:mm') : '-' }}
+              </td>
+            </ng-container>
+
+            <!-- Descrição -->
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef>Descrição</th>
+              <td mat-cell *matCellDef="let t" class="description-cell">
+                <span class="d-block font-weight-500">{{ t.description }}</span>
+                @if (t.totalInstallments > 1) {
+                  <span class="parcela-badge">Parcela {{ t.installmentNumber }}/{{ t.totalInstallments }}</span>
+                }
+              </td>
+            </ng-container>
+
+            <!-- Origem -->
+            <ng-container matColumnDef="origin">
+              <th mat-header-cell *matHeaderCellDef>Origem</th>
+              <td mat-cell *matCellDef="let t">
+                <div class="icon-label-cell">
+                  <mat-icon class="origin-icon" [matTooltip]="getOriginLabel(t.origin)">
+                    {{ getOriginIcon(t.origin) }}
+                  </mat-icon>
+                  <span class="origin-label">{{ getOriginLabel(t.origin) }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Tipo -->
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Tipo</th>
+              <td mat-cell *matCellDef="let t">
+                <span class="type-badge" [class.income]="t.type === 'INCOME'" [class.expense]="t.type === 'EXPENSE'">
+                  {{ t.type === 'INCOME' ? 'Entrada' : 'Saída' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Valor -->
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>Valor</th>
+              <td mat-cell *matCellDef="let t" [class.text-income]="t.type === 'INCOME'" [class.text-expense]="t.type === 'EXPENSE'" class="font-weight-600">
+                {{ t.type === 'INCOME' ? '+' : '-' }}{{ t.amount | currency:'BRL':'symbol':'1.2-2' }}
+              </td>
+            </ng-container>
+
+            <!-- Status -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let t">
+                <span class="status-badge" [class.pending]="t.status === 'PENDING'" [class.paid]="t.status === 'PAID'" [class.cancelled]="t.status === 'CANCELLED'">
+                  {{ t.status === 'PENDING' ? 'Pendente' : t.status === 'PAID' ? 'Pago' : 'Cancelado' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Ações -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Ações</th>
+              <td mat-cell *matCellDef="let t">
+                @if (t.status === 'PENDING') {
+                  <button mat-icon-button color="primary" [disabled]="!hasEditPermission" (click)="liquidar(t)" matTooltip="Liquidar / Marcar como Pago">
+                    <mat-icon>check_circle</mat-icon>
+                  </button>
+                } @else {
+                  -
+                }
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+
+          @if (transactions.length === 0) {
+            <div class="empty-state">
+              <mat-icon>info_outline</mat-icon>
+              <p>Nenhuma transação encontrada para os filtros selecionados.</p>
+            </div>
+          }
+        </div>
+
+        <mat-paginator
+          [length]="totalElements"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex"
+          [pageSizeOptions]="[5, 10, 20, 50]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      }
+    </mat-card-content>
+  </mat-card>
+</main>

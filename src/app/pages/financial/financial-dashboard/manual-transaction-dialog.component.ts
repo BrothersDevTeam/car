@@ -1,0 +1,150 @@
+import { Component, Inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+
+@Component({
+  selector: 'app-manual-transaction-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogTitle,
+    MatDialogContent,
+    MatDialogActions,
+    MatDialogClose,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+  ],
+  template: `
+    <h2 mat-dialog-title class="dialog-title">
+      <mat-icon>add_chart</mat-icon>
+      <span>Novo Lançamento Manual</span>
+    </h2>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <mat-dialog-content class="dialog-content">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex-grow">
+            <mat-label>Tipo de Lançamento</mat-label>
+            <mat-select formControlName="type">
+              <mat-option value="INCOME">Receita / Entrada</mat-option>
+              <mat-option value="EXPENSE">Despesa / Saída</mat-option>
+            </mat-select>
+            <mat-error *ngIf="form.get('type')?.hasError('required')">O tipo é obrigatório</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex-grow">
+            <mat-label>Valor (R$)</mat-label>
+            <input matInput type="number" formControlName="amount" placeholder="0,00" step="0.01" min="0.01" />
+            <mat-error *ngIf="form.get('amount')?.hasError('required')">O valor é obrigatório</mat-error>
+            <mat-error *ngIf="form.get('amount')?.hasError('min')">O valor deve ser maior que zero</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="flex-grow">
+            <mat-label>Parcelas</mat-label>
+            <input matInput type="number" formControlName="installments" placeholder="1" min="1" step="1" />
+            <mat-error *ngIf="form.get('installments')?.hasError('min')">Mínimo de 1 parcela</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex-grow">
+            <mat-label>Data de Vencimento</mat-label>
+            <input matInput type="date" formControlName="dueDate" />
+            <mat-error *ngIf="form.get('dueDate')?.hasError('required')">A data de vencimento é obrigatória</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex-grow">
+            <mat-label>Descrição</mat-label>
+            <textarea matInput formControlName="description" placeholder="Ex: Conta de luz, Retirada de sócio, etc." rows="3"></textarea>
+            <mat-error *ngIf="form.get('description')?.hasError('required')">A descrição é obrigatória</mat-error>
+          </mat-form-field>
+        </div>
+      </mat-dialog-content>
+
+      <mat-dialog-actions align="end" class="dialog-actions">
+        <button mat-button type="button" mat-dialog-close>Cancelar</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Salvar</button>
+      </mat-dialog-actions>
+    </form>
+  `,
+  styles: [`
+    .dialog-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--mat-sys-primary, #1976d2);
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .dialog-content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 320px;
+      max-width: 500px;
+      padding-top: 8px !important;
+    }
+    .form-row {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    .flex-grow {
+      flex: 1;
+      min-width: 150px;
+    }
+    .dialog-actions {
+      padding: 16px 24px;
+      gap: 8px;
+    }
+  `]
+})
+export class ManualTransactionDialogComponent implements OnInit {
+  form!: FormGroup;
+
+  constructor(
+    private fb: FormBuilder,
+    public dialogRef: MatDialogRef<ManualTransactionDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { storeId: string }
+  ) {}
+
+  ngOnInit(): void {
+    const today = new Date().toISOString().substring(0, 10);
+    this.form = this.fb.group({
+      amount: [null, [Validators.required, Validators.min(0.01)]],
+      type: ['EXPENSE', [Validators.required]],
+      dueDate: [today, [Validators.required]],
+      description: ['', [Validators.required]],
+      installments: [1, [Validators.min(1)]],
+      storeId: [this.data.storeId]
+    });
+  }
+
+  onSubmit(): void {
+    if (this.form.valid) {
+      this.dialogRef.close(this.form.value);
+    }
+  }
+}

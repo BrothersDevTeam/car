@@ -68,4 +68,14 @@ export enum Authorizations {
 
   // INTEGRATIONS
   SYNC_FOCUSNFE = 'focusnfe:sync',
+
+  // FINANCIAL
+  READ_FINANCIAL_STORE = 'read:financial:store',
+  READ_FINANCIAL_NETWORK = 'read:financial:network',
+  CREATE_FINANCIAL_STORE = 'create:financial:store',
+  CREATE_FINANCIAL_NETWORK = 'create:financial:network',
+  EDIT_FINANCIAL_STORE = 'edit:financial:store',
+  EDIT_FINANCIAL_NETWORK = 'edit:financial:network',
+  DELETE_FINANCIAL_STORE = 'delete:financial:store',
+  DELETE_FINANCIAL_NETWORK = 'delete:financial:network',
 }

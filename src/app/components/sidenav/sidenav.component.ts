@@ -112,6 +112,19 @@ export class SideNavComponent {
       });
     }
 
+    // Financeiro
+    if (
+      this.authService.hasAuthority(Authorizations.READ_FINANCIAL_STORE) ||
+      this.authService.hasAuthority(Authorizations.READ_FINANCIAL_NETWORK) ||
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
+    ) {
+      baseMenu.push({
+        icon: 'attach_money',
+        label: 'Financeiro',
+        route: '/financial',
+      });
+    }
+
     // Dashboard (exclusivo ROOT_ADMIN)
     if (this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
       baseMenu.unshift({
