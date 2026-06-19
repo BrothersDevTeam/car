@@ -313,3 +313,44 @@ main {
     font-size: 0.95rem;
   }
 }
+
+::ng-deep app-custom-select.filter-field {
+  flex: 1;
+  min-width: 180px;
+  
+  .custom-dropdown {
+    margin-top: 0 !important;
+    
+    .label {
+      font-size: 0.75rem;
+      color: var(--mat-sys-on-surface-variant, #666);
+      margin-bottom: 2px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .dropdown-button {
+      height: 56px;
+      border: 1px solid var(--mat-sys-outline, #79747e);
+      border-radius: 4px;
+      background-color: transparent;
+      padding: 0 16px;
+      font-size: 1rem;
+      color: var(--mat-sys-on-surface, #1c1b1f);
+      
+      &:focus {
+        border-color: var(--mat-sys-primary, #6750a4);
+        box-shadow: none;
+      }
+    }
+
+    .dropdown-arrow {
+      margin-right: 0px;
+    }
+
+    .dropdown-container > mat-icon {
+      display: none !important;
+    }
+  }
+}

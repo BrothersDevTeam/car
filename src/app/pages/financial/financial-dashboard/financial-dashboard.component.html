@@ -8,6 +8,14 @@
       mat-stroked-button
       color="primary"
       style="margin-right: 12px; height: 48px;"
+      (click)="openRecurringTransactionsManagementModal()">
+      <mat-icon>autorenew</mat-icon>
+      <span>Despesas Recorrentes</span>
+    </button>
+    <button
+      mat-stroked-button
+      color="primary"
+      style="margin-right: 12px; height: 48px;"
       (click)="openCostCentersManagementModal()">
       <mat-icon>business</mat-icon>
       <span>Centros de Custo</span>
@@ -120,6 +128,15 @@
             <mat-option value="CANCELLED">Cancelado</mat-option>
           </mat-select>
         </mat-form-field>
+
+        <app-custom-select
+          listType="cost_center"
+          label="Centro de Custo"
+          [options]="costCenters"
+          [control]="$any(filterForm.get('costCenter'))"
+          placeholder="Todos"
+          class="filter-field"
+        ></app-custom-select>
 
         <mat-form-field appearance="outline" class="filter-field search-field">
           <mat-label>Buscar por descrição...</mat-label>

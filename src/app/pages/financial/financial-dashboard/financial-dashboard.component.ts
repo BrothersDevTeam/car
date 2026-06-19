@@ -19,10 +19,13 @@ import { ContentHeaderComponent } from '@components/content-header/content-heade
 import { FinancialService } from '@services/financial.service';
 import { AuthService } from '@services/auth/auth.service';
 import { StoreContextService } from '@services/store-context.service';
+import { CostCenterService } from '@services/cost-center.service';
 import { Authorizations } from '../../../enums/authorizations';
 import { FinancialSummary, FinancialTransaction } from '@interfaces/financial';
 import { ManualTransactionDialogComponent } from './manual-transaction-dialog.component';
 import { CostCentersManagementDialogComponent } from './cost-centers-management-dialog.component';
+import { RecurringTransactionsManagementDialogComponent } from './recurring-transactions-management-dialog.component';
+import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
 
 @Component({
   selector: 'app-financial-dashboard',
@@ -42,6 +45,7 @@ import { CostCentersManagementDialogComponent } from './cost-centers-management-
     MatDialogModule,
     MatTooltipModule,
     ContentHeaderComponent,
+    CustomSelectComponent,
   ],
   templateUrl: './financial-dashboard.component.html',
   styleUrl: './financial-dashboard.component.scss',
@@ -51,6 +55,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
   private financialService = inject(FinancialService);
   private authService = inject(AuthService);
   private storeContextService = inject(StoreContextService);
+  private costCenterService = inject(CostCenterService);
   private toastr = inject(ToastrService);
   private dialog = inject(MatDialog);
 
@@ -63,6 +68,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
   // Dados
   summary: FinancialSummary | null = null;
   transactions: FinancialTransaction[] = [];
+  costCenters: { id: string; name: string }[] = [];
   
   // Tabela e Paginação
   displayedColumns: string[] = [
@@ -95,6 +101,10 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       type: [''],
       status: [''],
       description: [''],
+      costCenter: this.fb.group({
+        id: [''],
+        name: ['Todos'],
+      }),
     });
 
     // Escuta mudança global de loja
@@ -102,6 +112,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       this.storeContextService.currentStoreId$.subscribe((storeId) => {
         this.selectedStoreId = storeId;
         this.pageIndex = 0; // reseta paginação
+        this.loadCostCenters();
         this.loadSummary();
         this.loadTransactions();
       })
@@ -131,10 +142,35 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadCostCenters(): void {
+    if (!this.selectedStoreId) {
+      this.costCenters = [];
+      return;
+    }
+    this.costCenterService.getAllCostCenters(this.selectedStoreId).subscribe({
+      next: (response) => {
+        this.costCenters = [
+          { id: '', name: 'Todos' },
+          ...response.content.map((cc) => ({
+            id: cc.costCenterId,
+            name: cc.name,
+          })),
+        ];
+      },
+      error: (err) => {
+        console.error('Error loading cost centers', err);
+      },
+    });
+  }
+
   loadTransactions(): void {
     this.loadingTransactions = true;
+    const rawFilters = this.filterForm.value;
     const filters = {
-      ...this.filterForm.value,
+      type: rawFilters.type,
+      status: rawFilters.status,
+      description: rawFilters.description,
+      costCenterId: rawFilters.costCenter?.id || undefined,
       storeId: this.selectedStoreId || undefined,
     };
 
@@ -219,11 +255,28 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  openRecurringTransactionsManagementModal(): void {
+    if (!this.storeContextService.validateStoreSelection()) {
+      return;
+    }
+    const storeId = this.storeContextService.currentStoreId!;
+    const dialogRef = this.dialog.open(RecurringTransactionsManagementDialogComponent, {
+      width: '800px',
+      data: { storeId },
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.loadSummary();
+      this.loadTransactions();
+    });
+  }
+
   getOriginLabel(origin: string): string {
     switch (origin) {
       case 'MANUAL': return 'Manual';
       case 'VEHICLE_SALE': return 'Venda de Veículo';
       case 'VEHICLE_PURCHASE': return 'Compra de Veículo';
+      case 'RECURRING': return 'Recorrente';
       default: return origin;
     }
   }
@@ -233,6 +286,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       case 'MANUAL': return 'edit_note';
       case 'VEHICLE_SALE': return 'shopping_cart';
       case 'VEHICLE_PURCHASE': return 'local_shipping';
+      case 'RECURRING': return 'autorenew';
       default: return 'help';
     }
   }

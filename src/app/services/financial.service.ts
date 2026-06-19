@@ -28,7 +28,7 @@ export class FinancialService {
   getTransactions(
     pageIndex: number,
     pageSize: number,
-    searchParams?: { type?: string; origin?: string; status?: string; description?: string; storeId?: string },
+    searchParams?: { type?: string; origin?: string; status?: string; description?: string; storeId?: string; costCenterId?: string },
   ): Observable<PaginationResponse<FinancialTransaction>> {
     const currentStoreId = searchParams?.storeId || this.storeContextService.currentStoreId;
     let url = `${this.apiUrl}/transactions?page=${pageIndex}&size=${pageSize}`;
@@ -47,6 +47,9 @@ export class FinancialService {
     }
     if (searchParams?.description?.trim()) {
       url += `&description=${encodeURIComponent(searchParams.description.trim())}`;
+    }
+    if (searchParams?.costCenterId) {
+      url += `&costCenterId=${encodeURIComponent(searchParams.costCenterId)}`;
     }
 
     return this.http.get<PaginationResponse<FinancialTransaction>>(url).pipe(first());
