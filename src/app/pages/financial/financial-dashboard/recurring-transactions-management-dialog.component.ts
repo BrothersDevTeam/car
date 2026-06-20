@@ -458,7 +458,7 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
   }
 
   deleteRecurring(item: IRecurringTransaction): void {
-    if (confirm(`Deseja realmente excluir a recorrência "${item.description}"? (Isso não apagará as parcelas já geradas)`)) {
+    if (confirm(`Deseja realmente excluir a recorrência "${item.description}"? Isso removerá permanentemente a regra e todas as parcelas pendentes ou canceladas associadas. Transações já pagas serão preservadas e impedirão a exclusão.`)) {
       this.recurringService.delete(item.recurringTransactionId).subscribe({
         next: () => {
           this.toastr.success('Recorrência excluída com sucesso!', 'Sucesso');
@@ -466,7 +466,8 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.toastr.error('Erro ao excluir recorrência.', 'Erro');
+          const errMsg = err?.error?.errorMessage || 'Erro ao excluir recorrência.';
+          this.toastr.error(errMsg, 'Erro');
         }
       });
     }

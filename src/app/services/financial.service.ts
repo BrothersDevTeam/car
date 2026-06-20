@@ -62,4 +62,16 @@ export class FinancialService {
   markAsPaid(id: string): Observable<FinancialTransaction> {
     return this.http.put<FinancialTransaction>(`${this.apiUrl}/transactions/${id}/pay`, {}).pipe(first());
   }
+
+  cancelTransaction(id: string): Observable<FinancialTransaction> {
+    return this.http.put<FinancialTransaction>(`${this.apiUrl}/transactions/${id}/cancel`, {}).pipe(first());
+  }
+
+  updateTransaction(id: string, data: FinancialTransactionRecord): Observable<FinancialTransaction> {
+    return this.http.put<FinancialTransaction>(`${this.apiUrl}/transactions/${id}`, data).pipe(first());
+  }
+
+  reactivateTransaction(id: string): Observable<FinancialTransaction> {
+    return this.http.put<FinancialTransaction>(`${this.apiUrl}/transactions/${id}/reactivate`, {}).pipe(first());
+  }
 }

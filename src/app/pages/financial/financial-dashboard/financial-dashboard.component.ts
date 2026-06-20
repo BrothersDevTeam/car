@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 import { Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
@@ -43,6 +44,7 @@ import { RecurringTransactionsManagementDialogComponent } from './recurring-tran
     MatFormFieldModule,
     MatDialogModule,
     MatTooltipModule,
+    MatMenuModule,
     ContentHeaderComponent,
   ],
   templateUrl: './financial-dashboard.component.html',
@@ -232,6 +234,71 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
           },
         });
       }
+    });
+  }
+
+  openEditTransactionModal(transaction: FinancialTransaction): void {
+    if (!this.storeContextService.validateStoreSelection()) {
+      return;
+    }
+    const storeId = this.storeContextService.currentStoreId!;
+    const dialogRef = this.dialog.open(ManualTransactionDialogComponent, {
+      width: '450px',
+      data: { storeId, transaction },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.financialService.updateTransaction(transaction.financialTransactionId, result).subscribe({
+          next: () => {
+            this.toastr.success('Lançamento atualizado com sucesso!', 'Sucesso');
+            this.loadSummary();
+            this.loadTransactions();
+          },
+          error: (err) => {
+            console.error('Error updating transaction', err);
+            this.toastr.error('Erro ao atualizar lançamento.', 'Erro');
+          },
+        });
+      }
+    });
+  }
+
+  cancelarLancamento(transaction: FinancialTransaction): void {
+    if (!confirm(`Deseja realmente cancelar o lançamento "${transaction.description}"?`)) {
+      return;
+    }
+    this.financialService.cancelTransaction(transaction.financialTransactionId).subscribe({
+      next: () => {
+        this.toastr.success('Lançamento cancelado com sucesso!', 'Sucesso');
+        this.loadSummary();
+        this.loadTransactions();
+      },
+      error: (err) => {
+        console.error('Error cancelling transaction', err);
+        this.toastr.error('Erro ao cancelar lançamento.', 'Erro');
+      },
+    });
+  }
+
+  reativarLancamento(transaction: FinancialTransaction): void {
+    if (!this.hasEditPermission) {
+      this.toastr.warning('Você não tem permissão para reativar lançamentos.', 'Acesso Negado');
+      return;
+    }
+    if (!confirm(`Deseja realmente reativar o lançamento "${transaction.description}"?`)) {
+      return;
+    }
+    this.financialService.reactivateTransaction(transaction.financialTransactionId).subscribe({
+      next: () => {
+        this.toastr.success('Lançamento reativado com sucesso!', 'Sucesso');
+        this.loadSummary();
+        this.loadTransactions();
+      },
+      error: (err) => {
+        console.error('Error reactivating transaction', err);
+        this.toastr.error('Erro ao reativar lançamento.', 'Erro');
+      },
     });
   }
 

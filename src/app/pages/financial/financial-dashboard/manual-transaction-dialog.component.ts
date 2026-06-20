@@ -36,8 +36,8 @@ import { CostCenterService } from '@services/cost-center.service';
   ],
   template: `
     <h2 mat-dialog-title class="dialog-title">
-      <mat-icon>add_chart</mat-icon>
-      <span>Novo Lançamento Manual</span>
+      <mat-icon>{{ data.transaction ? 'edit' : 'add_chart' }}</mat-icon>
+      <span>{{ data.transaction ? 'Editar Lançamento' : 'Novo Lançamento Manual' }}</span>
     </h2>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -61,11 +61,13 @@ import { CostCenterService } from '@services/cost-center.service';
             <mat-error *ngIf="form.get('amount')?.hasError('min')">O valor deve ser maior que zero</mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="flex-grow">
-            <mat-label>Parcelas</mat-label>
-            <input matInput type="number" formControlName="installments" placeholder="1" min="1" step="1" />
-            <mat-error *ngIf="form.get('installments')?.hasError('min')">Mínimo de 1 parcela</mat-error>
-          </mat-form-field>
+          @if (!data.transaction) {
+            <mat-form-field appearance="outline" class="flex-grow">
+              <mat-label>Parcelas</mat-label>
+              <input matInput type="number" formControlName="installments" placeholder="1" min="1" step="1" />
+              <mat-error *ngIf="form.get('installments')?.hasError('min')">Mínimo de 1 parcela</mat-error>
+            </mat-form-field>
+          }
         </div>
 
         <div class="form-row">
@@ -146,21 +148,36 @@ export class ManualTransactionDialogComponent implements OnInit {
     private fb: FormBuilder,
     private costCenterService: CostCenterService,
     public dialogRef: MatDialogRef<ManualTransactionDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { storeId: string }
+    @Inject(MAT_DIALOG_DATA) public data: { storeId: string; transaction?: any }
   ) {}
 
   ngOnInit(): void {
     const today = new Date().toISOString().substring(0, 10);
+    const isEdit = !!this.data.transaction;
+
+    const initialAmount = isEdit ? this.data.transaction.amount : null;
+    const initialType = isEdit ? this.data.transaction.type : 'EXPENSE';
+    const initialDueDate = isEdit && typeof this.data.transaction.dueDate === 'string'
+      ? this.data.transaction.dueDate.substring(0, 10)
+      : today;
+    const initialDescription = isEdit ? this.data.transaction.description : '';
+    const initialCostCenterId = isEdit && this.data.transaction.costCenter
+      ? this.data.transaction.costCenter.costCenterId
+      : '';
+    const initialCostCenterName = isEdit && this.data.transaction.costCenter
+      ? this.data.transaction.costCenter.name
+      : '';
+
     this.form = this.fb.group({
-      amount: [null, [Validators.required, Validators.min(0.01)]],
-      type: ['EXPENSE', [Validators.required]],
-      dueDate: [today, [Validators.required]],
-      description: ['', [Validators.required]],
-      installments: [1, [Validators.min(1)]],
+      amount: [initialAmount, [Validators.required, Validators.min(0.01)]],
+      type: [{ value: initialType, disabled: isEdit }, [Validators.required]],
+      dueDate: [initialDueDate, [Validators.required]],
+      description: [initialDescription, [Validators.required]],
+      installments: [1, isEdit ? [] : [Validators.min(1)]],
       storeId: [this.data.storeId],
       costCenter: this.fb.group({
-        id: [''],
-        name: ['']
+        id: [initialCostCenterId],
+        name: [initialCostCenterName]
       })
     });
 
@@ -183,7 +200,7 @@ export class ManualTransactionDialogComponent implements OnInit {
 
   onSubmit(): void {
     if (this.form.valid) {
-      const rawValue = this.form.value;
+      const rawValue = this.form.getRawValue();
       const payload = {
         ...rawValue,
         costCenterId: rawValue.costCenter?.id || null
