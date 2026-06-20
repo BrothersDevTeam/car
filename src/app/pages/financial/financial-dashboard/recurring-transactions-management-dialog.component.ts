@@ -303,9 +303,12 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
         padding-bottom: 10px !important;
         min-height: 48px !important;
       }
+      ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+        display: none !important;
+      }
     }
     .search-field {
-      width: 200px;
+      width: 280px;
     }
     .status-field {
       width: 120px;
@@ -358,6 +361,7 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
     .table-wrapper {
       max-height: 350px;
       overflow-y: auto;
+      overflow-x: auto;
       border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 4px;
     }
@@ -421,6 +425,30 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
     }
     ::ng-deep app-custom-select {
       width: 100%;
+    }
+    @media (max-width: 768px) {
+      .dialog-content {
+        min-width: unset !important;
+        width: 100% !important;
+      }
+      .list-header {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 12px;
+      }
+      .filter-row {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 8px;
+      }
+      .search-field, .status-field, .cost-center-field {
+        width: 100% !important;
+      }
+      .btn-create {
+        width: 100%;
+        align-self: auto !important;
+        margin-top: 8px;
+      }
     }
   `]
 })
