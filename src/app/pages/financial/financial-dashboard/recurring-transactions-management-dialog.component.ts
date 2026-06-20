@@ -52,8 +52,36 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
       <!-- MODO LISTA -->
       <ng-container *ngIf="viewMode === 'list'">
         <div class="list-header">
-          <span class="subtitle">Despesas ou receitas recorrentes geradas mensalmente</span>
-          <button mat-raised-button color="primary" (click)="startCreate()">
+          <div class="header-left-section">
+            <span class="subtitle">Despesas ou receitas recorrentes geradas mensalmente</span>
+            <div class="filter-row">
+              <mat-form-field appearance="outline" class="filter-field search-field">
+                <mat-label>Buscar por descrição...</mat-label>
+                <input matInput [value]="filterDescription" (input)="onDescriptionInput($event)" placeholder="Ex: Telnet, telefone..." />
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field status-field">
+                <mat-label>Status</mat-label>
+                <mat-select [(value)]="filterStatus" (selectionChange)="onFilterChange()">
+                  <mat-option value="">Todos</mat-option>
+                  <mat-option value="ACTIVE">Ativos</mat-option>
+                  <mat-option value="INACTIVE">Inativos</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field cost-center-field">
+                <mat-label>Centro de Custo</mat-label>
+                <mat-select [(value)]="filterCostCenterId" (selectionChange)="onFilterChange()">
+                  <mat-option value="">Todos</mat-option>
+                  @for (cc of costCenters; track cc.id) {
+                    <mat-option [value]="cc.id">{{ cc.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <button mat-raised-button color="primary" (click)="startCreate()" class="btn-create">
             <mat-icon>add</mat-icon>
             Nova Recorrência
           </button>
@@ -85,6 +113,16 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
             <ng-container matColumnDef="dueDay">
               <th mat-header-cell *matHeaderCellDef>Dia Venc.</th>
               <td mat-cell *matCellDef="let r">Dia {{ r.dueDay }}</td>
+            </ng-container>
+
+            <!-- Status -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let r">
+                <span class="status-badge" [class.active]="r.status === 'ACTIVE'" [class.inactive]="r.status === 'INACTIVE'">
+                  {{ r.status === 'ACTIVE' ? 'Ativo' : 'Inativo' }}
+                </span>
+              </td>
             </ng-container>
 
             <!-- Ações -->
@@ -228,15 +266,56 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
     .list-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      gap: 12px;
+      align-items: flex-end;
+      margin-bottom: 16px;
+      gap: 16px;
       flex-wrap: wrap;
-
+    }
+    .header-left-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-grow: 1;
+      
       .subtitle {
         font-size: 0.85rem;
         color: rgba(0, 0, 0, 0.6);
       }
+    }
+    .filter-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-field {
+      margin: 0;
+      
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        height: 48px !important;
+      }
+      ::ng-deep .mat-mdc-form-field-flex {
+        height: 48px !important;
+        align-items: center !important;
+      }
+      ::ng-deep .mat-mdc-form-field-infix {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+        min-height: 48px !important;
+      }
+    }
+    .search-field {
+      width: 200px;
+    }
+    .status-field {
+      width: 120px;
+    }
+    .cost-center-field {
+      width: 160px;
+    }
+    .btn-create {
+      height: 48px;
+      align-self: flex-end;
     }
     .form-header {
       display: flex;
@@ -281,6 +360,21 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
       overflow-y: auto;
       border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 4px;
+    }
+    .status-badge {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .status-badge.active {
+      background-color: rgba(46, 125, 50, 0.1);
+      color: #2e7d32;
+    }
+    .status-badge.inactive {
+      background-color: rgba(0, 0, 0, 0.06);
+      color: rgba(0, 0, 0, 0.54);
     }
     .w-100 {
       width: 100%;
@@ -336,7 +430,10 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
   costCenters: { id: string; name: string }[] = [];
   editingId: string | null = null;
   viewMode: 'list' | 'form' = 'list';
-  displayedColumns: string[] = ['description', 'amount', 'dueDay', 'actions'];
+  filterStatus = '';
+  filterDescription = '';
+  filterCostCenterId = '';
+  displayedColumns: string[] = ['description', 'amount', 'dueDay', 'status', 'actions'];
 
   constructor(
     private fb: FormBuilder,
@@ -378,12 +475,34 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
   }
 
   loadRecurringTransactions(): void {
-    this.recurringService.getRecurringTransactions(0, 100, { storeId: this.data.storeId }).subscribe({
+    const filters: { storeId: string; status?: string; description?: string; costCenterId?: string } = {
+      storeId: this.data.storeId
+    };
+    if (this.filterStatus) {
+      filters.status = this.filterStatus;
+    }
+    if (this.filterDescription?.trim()) {
+      filters.description = this.filterDescription.trim();
+    }
+    if (this.filterCostCenterId) {
+      filters.costCenterId = this.filterCostCenterId;
+    }
+    this.recurringService.getRecurringTransactions(0, 100, filters).subscribe({
       next: (response) => {
         this.recurringTransactions = response.content;
       },
       error: (err) => console.error('Error loading recurring transactions', err)
     });
+  }
+
+  onFilterChange(): void {
+    this.loadRecurringTransactions();
+  }
+
+  onDescriptionInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.filterDescription = value;
+    this.onFilterChange();
   }
 
   loadCostCenters(): void {
