@@ -375,7 +375,10 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
     }
     const storeId = this.storeContextService.currentStoreId!;
     const dialogRef = this.dialog.open(CostCentersManagementDialogComponent, {
-      width: '600px',
+      width: '90%',
+      maxWidth: '850px',
+      height: '80%',
+      maxHeight: '90vh',
       data: { storeId },
     });
 

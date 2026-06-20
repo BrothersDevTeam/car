@@ -16,6 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
 import { CostCenterService } from '@services/cost-center.service';
+import { ICostCenter } from '@interfaces/cost-center';
 
 @Component({
   selector: 'app-manual-transaction-dialog',
@@ -193,15 +194,32 @@ export class ManualTransactionDialogComponent implements OnInit {
     const costCenterType = type === 'INCOME' ? 'REVENUE' : 'EXPENSE';
     this.costCenterService.getAllCostCenters(this.data.storeId, costCenterType).subscribe({
       next: (response) => {
-        this.costCenters = response.content.map(cc => ({
-          id: cc.costCenterId,
-          name: cc.name
-        }));
+        this.costCenters = this.formatCostCenterHierarchy(response.content);
       },
       error: (err) => {
         console.error('Error loading cost centers', err);
       }
     });
+  }
+
+  private formatCostCenterHierarchy(costCenters: ICostCenter[]): { id: string; name: string }[] {
+    const ccMap = new Map<string, ICostCenter>();
+    costCenters.forEach(cc => ccMap.set(cc.costCenterId, cc));
+
+    const getHierarchyName = (cc: ICostCenter): string => {
+      const parts: string[] = [];
+      let current: ICostCenter | undefined = cc;
+      while (current) {
+        parts.unshift(current.name);
+        current = current.parentId ? ccMap.get(current.parentId) : undefined;
+      }
+      return parts.join(' / ');
+    };
+
+    return costCenters.map(cc => ({
+      id: cc.costCenterId,
+      name: getHierarchyName(cc)
+    }));
   }
 
   onSubmit(): void {
