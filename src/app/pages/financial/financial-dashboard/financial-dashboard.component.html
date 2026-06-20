@@ -20,6 +20,15 @@
       <mat-icon>business</mat-icon>
       <span>Centros de Custo</span>
     </button>
+    <button
+      mat-stroked-button
+      color="primary"
+      style="margin-right: 12px; height: 48px;"
+      [disabled]="!hasEditPermission"
+      (click)="openStoreSettingsModal()">
+      <mat-icon>settings</mat-icon>
+      <span>Configurar Juros/Multa</span>
+    </button>
   </app-content-header>
 
   <!-- Resumo de Caixa -->
@@ -124,6 +133,7 @@
           <mat-select formControlName="status">
             <mat-option value="">Todos</mat-option>
             <mat-option value="PENDING">Pendente</mat-option>
+            <mat-option value="PARTIALLY_PAID">Pago Parcialmente</mat-option>
             <mat-option value="PAID">Pago / Liquidado</mat-option>
             <mat-option value="CANCELLED">Cancelado</mat-option>
           </mat-select>
@@ -213,7 +223,15 @@
             <ng-container matColumnDef="amount">
               <th mat-header-cell *matHeaderCellDef>Valor</th>
               <td mat-cell *matCellDef="let t" [class.text-income]="t.type === 'INCOME'" [class.text-expense]="t.type === 'EXPENSE'" class="font-weight-600">
-                {{ t.type === 'INCOME' ? '+' : '-' }}{{ t.amount | currency:'BRL':'symbol':'1.2-2' }}
+                <span class="d-block">{{ t.type === 'INCOME' ? '+' : '-' }}{{ t.amount | currency:'BRL':'symbol':'1.2-2' }}</span>
+                @if (t.status === 'PARTIALLY_PAID') {
+                  <span class="d-block text-muted" style="font-size: 0.75rem; font-weight: normal; margin-top: 2px;">
+                    Pago: {{ t.totalPaid | currency:'BRL' }}
+                  </span>
+                  <span class="d-block text-warn" style="font-size: 0.75rem; font-weight: normal; color: #e65100;">
+                    Falta: {{ t.balanceDue | currency:'BRL' }}
+                  </span>
+                }
               </td>
             </ng-container>
 
@@ -221,8 +239,12 @@
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>
               <td mat-cell *matCellDef="let t">
-                <span class="status-badge" [class.pending]="t.status === 'PENDING'" [class.paid]="t.status === 'PAID'" [class.cancelled]="t.status === 'CANCELLED'">
-                  {{ t.status === 'PENDING' ? 'Pendente' : t.status === 'PAID' ? 'Pago' : 'Cancelado' }}
+                <span class="status-badge" 
+                      [class.pending]="t.status === 'PENDING'" 
+                      [class.paid]="t.status === 'PAID'" 
+                      [class.cancelled]="t.status === 'CANCELLED'"
+                      [class.partial]="t.status === 'PARTIALLY_PAID'">
+                  {{ t.status === 'PENDING' ? 'Pendente' : t.status === 'PAID' ? 'Pago' : t.status === 'CANCELLED' ? 'Cancelado' : 'Pago Parcial' }}
                 </span>
               </td>
             </ng-container>
@@ -231,56 +253,79 @@
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef style="width: 80px;">Ações</th>
               <td mat-cell *matCellDef="let t">
-                @if (t.status === 'PENDING' || t.status === 'CANCELLED') {
-                  <button
-                    type="button"
-                    mat-icon-button
-                    [matMenuTriggerFor]="menu"
-                    [disabled]="!hasEditPermission"
-                    aria-label="Ações">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #menu="matMenu">
-                    @if (t.status === 'PENDING') {
-                      <button
-                        mat-menu-item
-                        (click)="liquidar(t)"
-                        class="custom-menu-item"
-                      >
-                        <mat-icon class="menu-action-icon" style="color: #2e7d32;">check_circle</mat-icon>
-                        <span class="menu-action-label">Liquidar (Pago)</span>
-                      </button>
-                      <button
-                        mat-menu-item
-                        (click)="openEditTransactionModal(t)"
-                        class="custom-menu-item"
-                      >
-                        <mat-icon class="menu-action-icon" style="color: #1976d2;">edit</mat-icon>
-                        <span class="menu-action-label">Editar</span>
-                      </button>
-                      <button
-                        mat-menu-item
-                        (click)="cancelarLancamento(t)"
-                        class="custom-menu-item menu-action-warn"
-                      >
-                        <mat-icon class="menu-action-icon" style="color: #c62828;">cancel</mat-icon>
-                        <span class="menu-action-label">Cancelar</span>
-                      </button>
-                    }
-                    @if (t.status === 'CANCELLED') {
-                      <button
-                        mat-menu-item
-                        (click)="reativarLancamento(t)"
-                        class="custom-menu-item"
-                      >
-                        <mat-icon class="menu-action-icon" style="color: #1976d2;">refresh</mat-icon>
-                        <span class="menu-action-label">Reativar</span>
-                      </button>
-                    }
-                  </mat-menu>
-                } @else {
-                  -
-                }
+                <button
+                  type="button"
+                  mat-icon-button
+                  [matMenuTriggerFor]="menu"
+                  aria-label="Ações">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                  <!-- Se PENDENTE ou PAGO PARCIAL -->
+                  @if (t.status === 'PENDING' || t.status === 'PARTIALLY_PAID') {
+                    <button
+                      mat-menu-item
+                      [disabled]="!hasEditPermission"
+                      (click)="openPaymentModal(t)"
+                      class="custom-menu-item"
+                    >
+                      <mat-icon class="menu-action-icon" style="color: #2e7d32;">payments</mat-icon>
+                      <span class="menu-action-label">Registrar Pagamento</span>
+                    </button>
+                    <button
+                      mat-menu-item
+                      [disabled]="!hasEditPermission"
+                      (click)="liquidar(t)"
+                      class="custom-menu-item"
+                    >
+                      <mat-icon class="menu-action-icon" style="color: #43a047;">check_circle</mat-icon>
+                      <span class="menu-action-label">Quitar Lançamento</span>
+                    </button>
+                    <button
+                      mat-menu-item
+                      [disabled]="!hasEditPermission"
+                      (click)="openEditTransactionModal(t)"
+                      class="custom-menu-item"
+                    >
+                      <mat-icon class="menu-action-icon" style="color: #1976d2;">edit</mat-icon>
+                      <span class="menu-action-label">Editar</span>
+                    </button>
+                    <button
+                      mat-menu-item
+                      [disabled]="!hasEditPermission"
+                      (click)="cancelarLancamento(t)"
+                      class="custom-menu-item menu-action-warn"
+                    >
+                      <mat-icon class="menu-action-icon" style="color: #c62828;">cancel</mat-icon>
+                      <span class="menu-action-label">Cancelar</span>
+                    </button>
+                  }
+                  
+                  <!-- Ver Histórico se tiver qualquer pagamento -->
+                  @if (t.totalPaid > 0) {
+                    <button
+                      mat-menu-item
+                      (click)="openPaymentsHistoryModal(t)"
+                      class="custom-menu-item"
+                    >
+                      <mat-icon class="menu-action-icon" style="color: #00897b;">history</mat-icon>
+                      <span class="menu-action-label">Histórico de Pagos</span>
+                    </button>
+                  }
+
+                  <!-- Cancelada -->
+                  @if (t.status === 'CANCELLED') {
+                    <button
+                      mat-menu-item
+                      [disabled]="!hasEditPermission"
+                      (click)="reativarLancamento(t)"
+                      class="custom-menu-item"
+                    >
+                      <mat-icon class="menu-action-icon" style="color: #1976d2;">refresh</mat-icon>
+                      <span class="menu-action-label">Reativar</span>
+                    </button>
+                  }
+                </mat-menu>
               </td>
             </ng-container>
 

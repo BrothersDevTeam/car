@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, first } from 'rxjs';
-import { FinancialSummary, FinancialTransaction, FinancialTransactionRecord } from '@interfaces/financial';
+import {
+  FinancialSummary,
+  FinancialTransaction,
+  FinancialTransactionRecord,
+  FinancialTransactionPaymentRequest,
+  FinancialTransactionPayment,
+  StoreSettings
+} from '@interfaces/financial';
 import { PaginationResponse } from '@interfaces/pagination';
 import { StoreContextService } from './store-context.service';
 
@@ -61,6 +68,22 @@ export class FinancialService {
 
   markAsPaid(id: string): Observable<FinancialTransaction> {
     return this.http.put<FinancialTransaction>(`${this.apiUrl}/transactions/${id}/pay`, {}).pipe(first());
+  }
+
+  payTransaction(id: string, payment: FinancialTransactionPaymentRequest): Observable<FinancialTransaction> {
+    return this.http.post<FinancialTransaction>(`${this.apiUrl}/transactions/${id}/payments`, payment).pipe(first());
+  }
+
+  getPayments(id: string): Observable<FinancialTransactionPayment[]> {
+    return this.http.get<FinancialTransactionPayment[]>(`${this.apiUrl}/transactions/${id}/payments`).pipe(first());
+  }
+
+  getStoreSettings(storeId: string): Observable<StoreSettings> {
+    return this.http.get<StoreSettings>(`${this.apiUrl}/stores/${storeId}/settings`).pipe(first());
+  }
+
+  updateStoreSettings(storeId: string, settings: StoreSettings): Observable<StoreSettings> {
+    return this.http.put<StoreSettings>(`${this.apiUrl}/stores/${storeId}/settings`, settings).pipe(first());
   }
 
   cancelTransaction(id: string): Observable<FinancialTransaction> {

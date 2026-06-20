@@ -181,11 +181,17 @@ export class ManualTransactionDialogComponent implements OnInit {
       })
     });
 
+    this.form.get('type')?.valueChanges.subscribe(() => {
+      this.loadCostCenters();
+    });
+
     this.loadCostCenters();
   }
 
   loadCostCenters(): void {
-    this.costCenterService.getAllCostCenters(this.data.storeId).subscribe({
+    const type = this.form.get('type')?.value;
+    const costCenterType = type === 'INCOME' ? 'REVENUE' : 'EXPENSE';
+    this.costCenterService.getAllCostCenters(this.data.storeId, costCenterType).subscribe({
       next: (response) => {
         this.costCenters = response.content.map(cc => ({
           id: cc.costCenterId,

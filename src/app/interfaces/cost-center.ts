@@ -3,6 +3,8 @@ export interface ICostCenter {
   storeId: string;
   name: string;
   description?: string;
+  type: 'EXPENSE' | 'REVENUE';
+  parentId?: string;
   createdAt: string;
   updatedAt: string;
   createdBy: string;
@@ -12,5 +14,8 @@ export interface ICostCenter {
 export interface ICostCenterRecord {
   name: string;
   description?: string;
+  type: 'EXPENSE' | 'REVENUE';
+  parentId?: string;
   storeId: string;
 }
+

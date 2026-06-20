@@ -19,7 +19,7 @@ export class CostCenterService {
   getCostCenters(
     pageIndex: number,
     pageSize: number,
-    searchParams?: { name?: string; storeId?: string },
+    searchParams?: { name?: string; storeId?: string; type?: 'EXPENSE' | 'REVENUE' },
   ): Observable<PaginationResponse<ICostCenter>> {
     const currentStoreId = searchParams?.storeId || this.storeContextService.currentStoreId;
     let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
@@ -30,12 +30,15 @@ export class CostCenterService {
     if (searchParams?.name?.trim()) {
       url += `&name=${encodeURIComponent(searchParams.name.trim())}`;
     }
+    if (searchParams?.type) {
+      url += `&type=${encodeURIComponent(searchParams.type)}`;
+    }
 
     return this.http.get<PaginationResponse<ICostCenter>>(url).pipe(first());
   }
 
-  getAllCostCenters(storeId?: string): Observable<PaginationResponse<ICostCenter>> {
-    return this.getCostCenters(0, 9999, { storeId });
+  getAllCostCenters(storeId?: string, type?: 'EXPENSE' | 'REVENUE'): Observable<PaginationResponse<ICostCenter>> {
+    return this.getCostCenters(0, 9999, { storeId, type });
   }
 
   createCostCenter(data: ICostCenterRecord): Observable<ICostCenter> {
@@ -54,6 +57,7 @@ export class CostCenterService {
   create(data: { description: string }): Observable<any> {
     return this.createCostCenter({
       name: data.description,
+      type: 'EXPENSE', // Fallback padrão
       storeId: this.storeContextService.currentStoreId!
     }).pipe(
       map(res => ({
@@ -66,6 +70,7 @@ export class CostCenterService {
   update(data: { id: string; description: string }): Observable<any> {
     return this.updateCostCenter(data.id, {
       name: data.description,
+      type: 'EXPENSE', // Mantém o tipo existente ou padrão
       storeId: this.storeContextService.currentStoreId!
     }).pipe(
       map(res => ({

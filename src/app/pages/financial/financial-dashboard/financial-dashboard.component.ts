@@ -26,6 +26,9 @@ import { FinancialSummary, FinancialTransaction } from '@interfaces/financial';
 import { ManualTransactionDialogComponent } from './manual-transaction-dialog.component';
 import { CostCentersManagementDialogComponent } from './cost-centers-management-dialog.component';
 import { RecurringTransactionsManagementDialogComponent } from './recurring-transactions-management-dialog.component';
+import { TransactionPaymentDialogComponent } from './transaction-payment-dialog.component';
+import { TransactionPaymentsHistoryDialogComponent } from './transaction-payments-history-dialog.component';
+import { StoreSettingsDialogComponent } from './store-settings-dialog.component';
 
 @Component({
   selector: 'app-financial-dashboard',
@@ -148,16 +151,43 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.costCenters = [
           { id: '', name: 'Todos' },
-          ...response.content.map((cc) => ({
-            id: cc.costCenterId,
-            name: cc.name,
-          })),
+          ...this.formatCostCentersForSelect(response.content)
         ];
       },
       error: (err) => {
         console.error('Error loading cost centers', err);
       },
     });
+  }
+
+  private formatCostCentersForSelect(list: any[]): { id: string; name: string }[] {
+    const roots = list.filter(cc => !cc.parentId);
+    const result: { id: string; name: string }[] = [];
+
+    const traverse = (node: any, depth: number) => {
+      const prefix = '— '.repeat(depth);
+      const typeLabel = node.type === 'REVENUE' ? ' (Receita)' : ' (Despesa)';
+      result.push({
+        id: node.costCenterId,
+        name: prefix + node.name + typeLabel
+      });
+      const children = list.filter(cc => cc.parentId === node.costCenterId);
+      children.forEach(child => traverse(child, depth + 1));
+    };
+
+    roots.forEach(root => traverse(root, 0));
+
+    // Órfãos se houver
+    list.forEach(node => {
+      if (!result.some(r => r.id === node.costCenterId)) {
+        result.push({
+          id: node.costCenterId,
+          name: node.name + (node.type === 'REVENUE' ? ' (Receita)' : ' (Despesa)')
+        });
+      }
+    });
+
+    return result;
   }
 
   loadTransactions(): void {
@@ -207,6 +237,43 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
         console.error('Error marking transaction as paid', err);
         this.toastr.error('Erro ao liquidar pagamento.', 'Erro');
       },
+    });
+  }
+
+  openPaymentModal(transaction: FinancialTransaction): void {
+    if (!this.hasEditPermission) {
+      this.toastr.warning('Você não tem permissão para registrar pagamentos.', 'Acesso Negado');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(TransactionPaymentDialogComponent, {
+      width: '500px',
+      data: { transaction },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadSummary();
+        this.loadTransactions();
+      }
+    });
+  }
+
+  openPaymentsHistoryModal(transaction: FinancialTransaction): void {
+    this.dialog.open(TransactionPaymentsHistoryDialogComponent, {
+      width: '700px',
+      data: { transaction },
+    });
+  }
+
+  openStoreSettingsModal(): void {
+    if (!this.storeContextService.validateStoreSelection()) {
+      return;
+    }
+    const storeId = this.storeContextService.currentStoreId!;
+    this.dialog.open(StoreSettingsDialogComponent, {
+      width: '450px',
+      data: { storeId },
     });
   }
 

@@ -224,7 +224,7 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
             <app-custom-select
               listType="cost_center"
               label="Centro de Custo"
-              [options]="costCenters"
+              [options]="formCostCenters"
               [control]="$any(form.get('costCenter'))"
               placeholder="Selecione o centro de custo"
               class="flex-grow"
@@ -428,6 +428,7 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
   form!: FormGroup;
   recurringTransactions: IRecurringTransaction[] = [];
   costCenters: { id: string; name: string }[] = [];
+  formCostCenters: { id: string; name: string }[] = [];
   editingId: string | null = null;
   viewMode: 'list' | 'form' = 'list';
   filterStatus = '';
@@ -464,6 +465,10 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
         name: ['']
       })
     });
+
+    this.form.get('type')?.valueChanges.subscribe(() => {
+      this.loadCostCentersForForm();
+    });
   }
 
   setViewMode(mode: 'list' | 'form'): void {
@@ -471,6 +476,8 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
     if (mode === 'list') {
       this.editingId = null;
       this.initForm();
+    } else if (mode === 'form') {
+      this.loadCostCentersForForm();
     }
   }
 
@@ -514,6 +521,20 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
         }));
       },
       error: (err) => console.error('Error loading cost centers', err)
+    });
+  }
+
+  loadCostCentersForForm(): void {
+    const type = this.form.get('type')?.value;
+    const costCenterType = type === 'INCOME' ? 'REVENUE' : 'EXPENSE';
+    this.costCenterService.getAllCostCenters(this.data.storeId, costCenterType).subscribe({
+      next: (response) => {
+        this.formCostCenters = response.content.map(cc => ({
+          id: cc.costCenterId,
+          name: cc.name
+        }));
+      },
+      error: (err) => console.error('Error loading cost centers for form', err)
     });
   }
 
