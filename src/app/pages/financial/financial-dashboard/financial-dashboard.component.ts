@@ -246,6 +246,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
     });
 
     dialogRef.afterClosed().subscribe(() => {
+      this.loadCostCenters();
       this.loadTransactions();
     });
   }
@@ -261,6 +262,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
     });
 
     dialogRef.afterClosed().subscribe(() => {
+      this.loadCostCenters();
       this.loadSummary();
       this.loadTransactions();
     });
