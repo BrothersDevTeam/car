@@ -697,7 +697,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.filteredOptions = this.options.filter((option) =>
-      this.removeAccents(option.name.toLowerCase()).includes(term)
+      this.removeAccents(option.name.toLowerCase()).includes(term),
     );
   }
 

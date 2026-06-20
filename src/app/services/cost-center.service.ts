@@ -58,12 +58,12 @@ export class CostCenterService {
     return this.createCostCenter({
       name: data.description,
       type: 'EXPENSE', // Fallback padrão
-      storeId: this.storeContextService.currentStoreId!
+      storeId: this.storeContextService.currentStoreId!,
     }).pipe(
-      map(res => ({
+      map((res) => ({
         id: res.costCenterId,
-        description: res.name
-      }))
+        description: res.name,
+      })),
     );
   }
 
@@ -71,12 +71,12 @@ export class CostCenterService {
     return this.updateCostCenter(data.id, {
       name: data.description,
       type: 'EXPENSE', // Mantém o tipo existente ou padrão
-      storeId: this.storeContextService.currentStoreId!
+      storeId: this.storeContextService.currentStoreId!,
     }).pipe(
-      map(res => ({
+      map((res) => ({
         id: res.costCenterId,
-        description: res.name
-      }))
+        description: res.name,
+      })),
     );
   }
 

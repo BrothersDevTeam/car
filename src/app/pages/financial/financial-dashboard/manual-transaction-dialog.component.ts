@@ -93,7 +93,12 @@ import { ICostCenter } from '@interfaces/cost-center';
         <div class="form-row">
           <mat-form-field appearance="outline" class="flex-grow">
             <mat-label>Descrição</mat-label>
-            <textarea matInput formControlName="description" placeholder="Ex: Conta de luz, Retirada de sócio, etc." rows="3"></textarea>
+            <textarea
+              matInput
+              formControlName="description"
+              placeholder="Ex: Conta de luz, Retirada de sócio, etc."
+              rows="3"
+            ></textarea>
             <mat-error *ngIf="form.get('description')?.hasError('required')">A descrição é obrigatória</mat-error>
           </mat-form-field>
         </div>
@@ -105,41 +110,43 @@ import { ICostCenter } from '@interfaces/cost-center';
       </mat-dialog-actions>
     </form>
   `,
-  styles: [`
-    .dialog-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--mat-sys-primary, #1976d2);
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
-    .dialog-content {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      min-width: 320px;
-      max-width: 500px;
-      padding-top: 8px !important;
-    }
-    .form-row {
-      display: flex;
-      gap: 12px;
-      width: 100%;
-      flex-wrap: wrap;
-    }
-    .flex-grow {
-      flex: 1;
-      min-width: 150px;
-    }
-    .dialog-actions {
-      padding: 16px 24px;
-      gap: 8px;
-    }
-    ::ng-deep app-custom-select {
-      width: 100%;
-    }
-  `]
+  styles: [
+    `
+      .dialog-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--mat-sys-primary, #1976d2);
+        font-weight: 600;
+        margin-bottom: 16px;
+      }
+      .dialog-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 320px;
+        max-width: 500px;
+        padding-top: 8px !important;
+      }
+      .form-row {
+        display: flex;
+        gap: 12px;
+        width: 100%;
+        flex-wrap: wrap;
+      }
+      .flex-grow {
+        flex: 1;
+        min-width: 150px;
+      }
+      .dialog-actions {
+        padding: 16px 24px;
+        gap: 8px;
+      }
+      ::ng-deep app-custom-select {
+        width: 100%;
+      }
+    `,
+  ],
 })
 export class ManualTransactionDialogComponent implements OnInit {
   form!: FormGroup;
@@ -149,7 +156,7 @@ export class ManualTransactionDialogComponent implements OnInit {
     private fb: FormBuilder,
     private costCenterService: CostCenterService,
     public dialogRef: MatDialogRef<ManualTransactionDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { storeId: string; transaction?: any }
+    @Inject(MAT_DIALOG_DATA) public data: { storeId: string; transaction?: any },
   ) {}
 
   ngOnInit(): void {
@@ -158,16 +165,15 @@ export class ManualTransactionDialogComponent implements OnInit {
 
     const initialAmount = isEdit ? this.data.transaction.amount : null;
     const initialType = isEdit ? this.data.transaction.type : 'EXPENSE';
-    const initialDueDate = isEdit && typeof this.data.transaction.dueDate === 'string'
-      ? this.data.transaction.dueDate.substring(0, 10)
-      : today;
+    const initialDueDate =
+      isEdit && typeof this.data.transaction.dueDate === 'string'
+        ? this.data.transaction.dueDate.substring(0, 10)
+        : today;
     const initialDescription = isEdit ? this.data.transaction.description : '';
-    const initialCostCenterId = isEdit && this.data.transaction.costCenter
-      ? this.data.transaction.costCenter.costCenterId
-      : '';
-    const initialCostCenterName = isEdit && this.data.transaction.costCenter
-      ? this.data.transaction.costCenter.name
-      : '';
+    const initialCostCenterId =
+      isEdit && this.data.transaction.costCenter ? this.data.transaction.costCenter.costCenterId : '';
+    const initialCostCenterName =
+      isEdit && this.data.transaction.costCenter ? this.data.transaction.costCenter.name : '';
 
     this.form = this.fb.group({
       amount: [initialAmount, [Validators.required, Validators.min(0.01)]],
@@ -178,8 +184,8 @@ export class ManualTransactionDialogComponent implements OnInit {
       storeId: [this.data.storeId],
       costCenter: this.fb.group({
         id: [initialCostCenterId],
-        name: [initialCostCenterName]
-      })
+        name: [initialCostCenterName],
+      }),
     });
 
     this.form.get('type')?.valueChanges.subscribe(() => {
@@ -198,13 +204,13 @@ export class ManualTransactionDialogComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading cost centers', err);
-      }
+      },
     });
   }
 
   private formatCostCenterHierarchy(costCenters: ICostCenter[]): { id: string; name: string }[] {
     const ccMap = new Map<string, ICostCenter>();
-    costCenters.forEach(cc => ccMap.set(cc.costCenterId, cc));
+    costCenters.forEach((cc) => ccMap.set(cc.costCenterId, cc));
 
     const getHierarchyName = (cc: ICostCenter): string => {
       const parts: string[] = [];
@@ -216,9 +222,9 @@ export class ManualTransactionDialogComponent implements OnInit {
       return parts.join(' / ');
     };
 
-    return costCenters.map(cc => ({
+    return costCenters.map((cc) => ({
       id: cc.costCenterId,
-      name: getHierarchyName(cc)
+      name: getHierarchyName(cc),
     }));
   }
 
@@ -227,7 +233,7 @@ export class ManualTransactionDialogComponent implements OnInit {
       const rawValue = this.form.getRawValue();
       const payload = {
         ...rawValue,
-        costCenterId: rawValue.costCenter?.id || null
+        costCenterId: rawValue.costCenter?.id || null,
       };
       delete payload.costCenter;
       this.dialogRef.close(payload);

@@ -78,13 +78,7 @@
                 </mat-icon>
               }
               @if (showAddButton && searchTerm && !hasExactMatch()) {
-                <button
-                  type="button"
-                  class="add-search-btn"
-                  (click)="onAddButtonClick()"
-                >
-                  Adicionar
-                </button>
+                <button type="button" class="add-search-btn" (click)="onAddButtonClick()">Adicionar</button>
               }
             </div>
           }
@@ -132,11 +126,7 @@
                 <div class="no-results">
                   <span>Nenhum resultado encontrado</span>
                   @if (showAddButton && searchTerm) {
-                    <button
-                      type="button"
-                      class="add-no-results-btn"
-                      (click)="onAddButtonClick()"
-                    >
+                    <button type="button" class="add-no-results-btn" (click)="onAddButtonClick()">
                       Adicionar "{{ searchTerm }}"
                     </button>
                   }
@@ -173,11 +163,7 @@
                 <div class="no-results">
                   <span>Nenhum resultado encontrado</span>
                   @if (showAddButton && searchTerm) {
-                    <button
-                      type="button"
-                      class="add-no-results-btn"
-                      (click)="onAddButtonClick()"
-                    >
+                    <button type="button" class="add-no-results-btn" (click)="onAddButtonClick()">
                       Adicionar "{{ searchTerm }}"
                     </button>
                   }

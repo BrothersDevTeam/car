@@ -40,7 +40,9 @@ main {
 }
 
 .summary-card {
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
   border-radius: 12px;
   overflow: hidden;
   border-top: 4px solid #ccc;
@@ -100,13 +102,17 @@ main {
   border-top-color: #2e7d32; // Green
   .card-icon {
     background-color: rgba(46, 125, 50, 0.1);
-    mat-icon { color: #2e7d32; }
+    mat-icon {
+      color: #2e7d32;
+    }
   }
   &.negative {
     border-top-color: #c62828; // Red
     .card-icon {
       background-color: rgba(198, 40, 40, 0.1);
-      mat-icon { color: #c62828; }
+      mat-icon {
+        color: #c62828;
+      }
     }
     .metric-value {
       color: #c62828;
@@ -118,7 +124,9 @@ main {
   border-top-color: #1565c0; // Blue
   .card-icon {
     background-color: rgba(21, 101, 192, 0.1);
-    mat-icon { color: #1565c0; }
+    mat-icon {
+      color: #1565c0;
+    }
   }
 }
 
@@ -126,7 +134,9 @@ main {
   border-top-color: #ef6c00; // Orange
   .card-icon {
     background-color: rgba(239, 108, 0, 0.1);
-    mat-icon { color: #ef6c00; }
+    mat-icon {
+      color: #ef6c00;
+    }
   }
 }
 
@@ -134,7 +144,9 @@ main {
   border-top-color: #00838f; // Teal
   .card-icon {
     background-color: rgba(0, 131, 143, 0.1);
-    mat-icon { color: #00838f; }
+    mat-icon {
+      color: #00838f;
+    }
   }
 }
 
@@ -142,7 +154,9 @@ main {
   border-top-color: #ad1457; // Pink
   .card-icon {
     background-color: rgba(173, 20, 87, 0.1);
-    mat-icon { color: #ad1457; }
+    mat-icon {
+      color: #ad1457;
+    }
   }
 }
 
@@ -321,10 +335,10 @@ main {
 ::ng-deep app-custom-select.filter-field {
   flex: 1;
   min-width: 180px;
-  
+
   .custom-dropdown {
     margin-top: 0 !important;
-    
+
     .label {
       font-size: 0.75rem;
       color: var(--mat-sys-on-surface-variant, #666);
@@ -342,7 +356,7 @@ main {
       padding: 0 16px;
       font-size: 1rem;
       color: var(--mat-sys-on-surface, #1c1b1f);
-      
+
       &:focus {
         border-color: var(--mat-sys-primary, #6750a4);
         box-shadow: none;

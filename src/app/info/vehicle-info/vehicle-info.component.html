@@ -252,7 +252,7 @@
                 </div>
                 <div class="value-card">
                   <span class="card-label">Data da Compra</span>
-                  <span class="card-value" style="font-size: 20px; font-weight: 500; color: #202124;">
+                  <span class="card-value" style="font-size: 20px; font-weight: 500; color: #202124">
                     {{ (vehicle.purchaseHistory[0].dataCompra | date: 'dd/MM/yyyy') || '-' }}
                   </span>
                 </div>
@@ -308,7 +308,10 @@
                       <mat-icon>person</mat-icon>
                     </div>
                     <div class="owner-name-info">
-                      <h3 [class.clickable-link]="vehicle.purchaseHistory[0].supplierId" (click)="navigateToPerson(vehicle.purchaseHistory[0].supplierId)">
+                      <h3
+                        [class.clickable-link]="vehicle.purchaseHistory[0].supplierId"
+                        (click)="navigateToPerson(vehicle.purchaseHistory[0].supplierId)"
+                      >
                         {{ vehicle.purchaseHistory[0].supplierName || 'Fornecedor não informado' }}
                         @if (vehicle.purchaseHistory[0].supplierId) {
                           <mat-icon>open_in_new</mat-icon>

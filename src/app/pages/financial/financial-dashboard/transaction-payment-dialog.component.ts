@@ -33,12 +33,24 @@ import { ToastrService } from 'ngx-toastr';
     <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
       <mat-dialog-content class="dialog-content">
         <div class="transaction-info">
-          <p><strong>Descrição:</strong> {{ data.transaction.description }}</p>
-          <p><strong>Valor Lançamento:</strong> {{ data.transaction.amount | currency:'BRL' }}</p>
+          <p>
+            <strong>Descrição:</strong>
+            {{ data.transaction.description }}
+          </p>
+          <p>
+            <strong>Valor Lançamento:</strong>
+            {{ data.transaction.amount | currency: 'BRL' }}
+          </p>
           @if (data.transaction.totalPaid > 0) {
-            <p><strong>Total Pago Anteriormente:</strong> {{ data.transaction.totalPaid | currency:'BRL' }}</p>
+            <p>
+              <strong>Total Pago Anteriormente:</strong>
+              {{ data.transaction.totalPaid | currency: 'BRL' }}
+            </p>
           }
-          <p><strong>Saldo Devedor Atual:</strong> <span class="text-danger">{{ data.transaction.balanceDue | currency:'BRL' }}</span></p>
+          <p>
+            <strong>Saldo Devedor Atual:</strong>
+            <span class="text-danger">{{ data.transaction.balanceDue | currency: 'BRL' }}</span>
+          </p>
           @if (daysOverdue > 0) {
             <div class="overdue-warning">
               <mat-icon>warning</mat-icon>
@@ -105,7 +117,10 @@ import { ToastrService } from 'ngx-toastr';
         </div>
 
         <div class="payment-summary">
-          <p><strong>Total Cobrado (Com acréscimos/descontos):</strong> {{ totalPaymentWithCharges | currency:'BRL' }}</p>
+          <p>
+            <strong>Total Cobrado (Com acréscimos/descontos):</strong>
+            {{ totalPaymentWithCharges | currency: 'BRL' }}
+          </p>
         </div>
       </mat-dialog-content>
 
@@ -121,67 +136,69 @@ import { ToastrService } from 'ngx-toastr';
       </mat-dialog-actions>
     </form>
   `,
-  styles: [`
-    .dialog-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .dialog-content {
-      padding-top: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .transaction-info {
-      background: #f5f5f5;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      p {
-        margin: 4px 0;
+  styles: [
+    `
+      .dialog-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
       }
-    }
-    .overdue-warning {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 8px;
-      color: #e65100;
-      background: #fff3e0;
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
+      .dialog-content {
+        padding-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
       }
-    }
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .payment-summary {
-      background: rgba(25, 118, 210, 0.05);
-      border-left: 4px solid #1976d2;
-      padding: 12px 16px;
-      border-radius: 4px;
-      margin-top: 8px;
-      p {
-        margin: 0;
-        font-size: 1rem;
+      .transaction-info {
+        background: #f5f5f5;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        p {
+          margin: 4px 0;
+        }
       }
-    }
-    .dialog-actions {
-      padding: 16px 24px;
-    }
-    .w-100 {
-      width: 100%;
-    }
-  `]
+      .overdue-warning {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        color: #e65100;
+        background: #fff3e0;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .payment-summary {
+        background: rgba(25, 118, 210, 0.05);
+        border-left: 4px solid #1976d2;
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin-top: 8px;
+        p {
+          margin: 0;
+          font-size: 1rem;
+        }
+      }
+      .dialog-actions {
+        padding: 16px 24px;
+      }
+      .w-100 {
+        width: 100%;
+      }
+    `,
+  ],
 })
 export class TransactionPaymentDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -207,11 +224,7 @@ export class TransactionPaymentDialogComponent implements OnInit {
     today.setHours(0, 0, 0, 0);
 
     const dueDateParts = this.data.transaction.dueDate.split('-');
-    const dueDate = new Date(
-      parseInt(dueDateParts[0]),
-      parseInt(dueDateParts[1]) - 1,
-      parseInt(dueDateParts[2])
-    );
+    const dueDate = new Date(parseInt(dueDateParts[0]), parseInt(dueDateParts[1]) - 1, parseInt(dueDateParts[2]));
     dueDate.setHours(0, 0, 0, 0);
 
     if (today > dueDate) {
@@ -234,9 +247,9 @@ export class TransactionPaymentDialogComponent implements OnInit {
         if (this.daysOverdue > 0) {
           const balance = this.data.transaction.balanceDue;
           const penalty = (balance * settings.penaltyPercentage) / 100;
-          
+
           // Juros diários = (monthlyInterestPercentage / 30) / 100
-          const dailyRate = (settings.interestPercentageMonthly / 30) / 100;
+          const dailyRate = settings.interestPercentageMonthly / 30 / 100;
           const interest = balance * dailyRate * this.daysOverdue;
 
           this.paymentForm.patchValue({
@@ -247,7 +260,7 @@ export class TransactionPaymentDialogComponent implements OnInit {
       },
       error: (err) => {
         console.warn('Could not load store settings for interest calculations. Using default values.', err);
-      }
+      },
     });
 
     // Atualiza validadores dinamicamente se multas/juros forem alterados
@@ -273,18 +286,14 @@ export class TransactionPaymentDialogComponent implements OnInit {
     // O valor pago não pode exceder o saldo devedor mais acréscimos menos descontos
     const maxAllowed = this.data.transaction.balanceDue;
     if (amountPaidControl) {
-      amountPaidControl.setValidators([
-        Validators.required,
-        Validators.min(0.01),
-        Validators.max(maxAllowed)
-      ]);
+      amountPaidControl.setValidators([Validators.required, Validators.min(0.01), Validators.max(maxAllowed)]);
     }
   }
 
   private getLocalDateTimeString(): string {
     const now = new Date();
     const tzOffset = now.getTimezoneOffset() * 60000;
-    const localISOTime = (new Date(Date.now() - tzOffset)).toISOString().slice(0, 16);
+    const localISOTime = new Date(Date.now() - tzOffset).toISOString().slice(0, 16);
     return localISOTime;
   }
 
@@ -312,7 +321,7 @@ export class TransactionPaymentDialogComponent implements OnInit {
         console.error('Error paying transaction', err);
         this.toastr.error('Erro ao registrar o pagamento.', 'Erro');
         this.submitting = false;
-      }
+      },
     });
   }
 }

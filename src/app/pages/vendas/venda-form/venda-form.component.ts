@@ -413,12 +413,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
 
   openSaveDraftDialog() {
     if (this.selectedDraft) {
-      this.saveLocalDraft(
-        false,
-        this.selectedDraft.draftName,
-        this.selectedDraft.id,
-        false
-      );
+      this.saveLocalDraft(false, this.selectedDraft.draftName, this.selectedDraft.id, false);
       return;
     }
 

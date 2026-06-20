@@ -341,7 +341,7 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
     }
 
     this.filteredOptions = this.options.filter((option) =>
-      this.removeAccents(this.getOptionLabel(option).toLowerCase()).includes(term)
+      this.removeAccents(this.getOptionLabel(option).toLowerCase()).includes(term),
     );
     this.focusedOptionIndex = -1; // Reseta o foco ao filtrar
   }

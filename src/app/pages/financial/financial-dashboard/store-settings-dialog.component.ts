@@ -57,7 +57,13 @@ import { ToastrService } from 'ngx-toastr';
             <!-- Porcentagem de Juros Mensais -->
             <mat-form-field appearance="outline" class="w-100">
               <mat-label>Juros de Mora Mensal (%)</mat-label>
-              <input matInput type="number" step="0.01" formControlName="interestPercentageMonthly" placeholder="1.00" />
+              <input
+                matInput
+                type="number"
+                step="0.01"
+                formControlName="interestPercentageMonthly"
+                placeholder="1.00"
+              />
               @if (settingsForm.get('interestPercentageMonthly')?.hasError('required')) {
                 <mat-error>Juros mensais são obrigatórios</mat-error>
               }
@@ -81,40 +87,42 @@ import { ToastrService } from 'ngx-toastr';
       </form>
     }
   `,
-  styles: [`
-    .dialog-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .dialog-content {
-      padding-top: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      min-width: 400px;
-    }
-    .description-text {
-      color: #666;
-      font-size: 0.9rem;
-      margin-bottom: 8px;
-    }
-    .form-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .loader-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 48px;
-    }
-    .w-100 {
-      width: 100%;
-    }
-  `]
+  styles: [
+    `
+      .dialog-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .dialog-content {
+        padding-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-width: 400px;
+      }
+      .description-text {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+      }
+      .form-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .loader-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 48px;
+      }
+      .w-100 {
+        width: 100%;
+      }
+    `,
+  ],
 })
 export class StoreSettingsDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -145,11 +153,11 @@ export class StoreSettingsDialogComponent implements OnInit {
         console.error('Error loading store settings', err);
         // Se der 404 ou erro, podemos inicializar com valores padrão (2% multa, 1% juros)
         this.settingsForm = this.fb.group({
-          penaltyPercentage: [2.00, [Validators.required, Validators.min(0)]],
-          interestPercentageMonthly: [1.00, [Validators.required, Validators.min(0)]],
+          penaltyPercentage: [2.0, [Validators.required, Validators.min(0)]],
+          interestPercentageMonthly: [1.0, [Validators.required, Validators.min(0)]],
         });
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -172,7 +180,7 @@ export class StoreSettingsDialogComponent implements OnInit {
         console.error('Error updating store settings', err);
         this.toastr.error('Erro ao salvar as configurações.', 'Erro');
         this.submitting = false;
-      }
+      },
     });
   }
 }

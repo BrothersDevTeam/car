@@ -292,9 +292,7 @@ export class AddressFormComponent implements OnInit, OnChanges, CanComponentDeac
       return str === '' ? null : str;
     };
 
-    const fields = [
-      'addressType', 'cep', 'street', 'number', 'complement', 'neighborhood', 'city', 'state'
-    ];
+    const fields = ['addressType', 'cep', 'street', 'number', 'complement', 'neighborhood', 'city', 'state'];
 
     for (const field of fields) {
       if (normalize(formValue[field]) !== normalize(source[field])) {

@@ -72,7 +72,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
   summary: FinancialSummary | null = null;
   transactions: FinancialTransaction[] = [];
   costCenters: { id: string; name: string }[] = [];
-  
+
   // Tabela e Paginação
   displayedColumns: string[] = [
     'dueDate',
@@ -115,7 +115,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
         this.loadCostCenters();
         this.loadSummary();
         this.loadTransactions();
-      })
+      }),
     );
 
     // Escuta filtros
@@ -123,7 +123,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       this.filterForm.valueChanges.subscribe(() => {
         this.pageIndex = 0;
         this.loadTransactions();
-      })
+      }),
     );
   }
 
@@ -149,10 +149,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
     }
     this.costCenterService.getAllCostCenters(this.selectedStoreId).subscribe({
       next: (response) => {
-        this.costCenters = [
-          { id: '', name: 'Todos' },
-          ...this.formatCostCentersForSelect(response.content)
-        ];
+        this.costCenters = [{ id: '', name: 'Todos' }, ...this.formatCostCentersForSelect(response.content)];
       },
       error: (err) => {
         console.error('Error loading cost centers', err);
@@ -161,7 +158,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
   }
 
   private formatCostCentersForSelect(list: any[]): { id: string; name: string }[] {
-    const roots = list.filter(cc => !cc.parentId);
+    const roots = list.filter((cc) => !cc.parentId);
     const result: { id: string; name: string }[] = [];
 
     const traverse = (node: any, depth: number) => {
@@ -169,20 +166,20 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       const typeLabel = node.type === 'REVENUE' ? ' (Receita)' : ' (Despesa)';
       result.push({
         id: node.costCenterId,
-        name: prefix + node.name + typeLabel
+        name: prefix + node.name + typeLabel,
       });
-      const children = list.filter(cc => cc.parentId === node.costCenterId);
-      children.forEach(child => traverse(child, depth + 1));
+      const children = list.filter((cc) => cc.parentId === node.costCenterId);
+      children.forEach((child) => traverse(child, depth + 1));
     };
 
-    roots.forEach(root => traverse(root, 0));
+    roots.forEach((root) => traverse(root, 0));
 
     // Órfãos se houver
-    list.forEach(node => {
-      if (!result.some(r => r.id === node.costCenterId)) {
+    list.forEach((node) => {
+      if (!result.some((r) => r.id === node.costCenterId)) {
         result.push({
           id: node.costCenterId,
-          name: node.name + (node.type === 'REVENUE' ? ' (Receita)' : ' (Despesa)')
+          name: node.name + (node.type === 'REVENUE' ? ' (Receita)' : ' (Despesa)'),
         });
       }
     });
@@ -407,21 +404,31 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
 
   getOriginLabel(origin: string): string {
     switch (origin) {
-      case 'MANUAL': return 'Manual';
-      case 'VEHICLE_SALE': return 'Venda de Veículo';
-      case 'VEHICLE_PURCHASE': return 'Compra de Veículo';
-      case 'RECURRING': return 'Recorrente';
-      default: return origin;
+      case 'MANUAL':
+        return 'Manual';
+      case 'VEHICLE_SALE':
+        return 'Venda de Veículo';
+      case 'VEHICLE_PURCHASE':
+        return 'Compra de Veículo';
+      case 'RECURRING':
+        return 'Recorrente';
+      default:
+        return origin;
     }
   }
 
   getOriginIcon(origin: string): string {
     switch (origin) {
-      case 'MANUAL': return 'edit_note';
-      case 'VEHICLE_SALE': return 'shopping_cart';
-      case 'VEHICLE_PURCHASE': return 'local_shipping';
-      case 'RECURRING': return 'autorenew';
-      default: return 'help';
+      case 'MANUAL':
+        return 'edit_note';
+      case 'VEHICLE_SALE':
+        return 'shopping_cart';
+      case 'VEHICLE_PURCHASE':
+        return 'local_shipping';
+      case 'RECURRING':
+        return 'autorenew';
+      default:
+        return 'help';
     }
   }
 

@@ -290,7 +290,7 @@
           <ng-template mat-tab-label>
             <mat-icon class="tab-icon">attach_money</mat-icon>
             @if (submitted && form.hasError('supplierRequired')) {
-              <mat-icon color="warn" class="error-indicator" style="color: #f44336; margin-left: 4px;">error</mat-icon>
+              <mat-icon color="warn" class="error-indicator" style="color: #f44336; margin-left: 4px">error</mat-icon>
             }
             <span>Dados Gerais</span>
           </ng-template>
@@ -324,7 +324,13 @@
                 <div class="field-container">
                   <label class="modern-label">
                     Informações do Fornecedor
-                    <span class="required-asterisk" *ngIf="form.get('tipoEntrada')?.value === 'COMPRA'" style="color: #f44336;">*</span>
+                    <span
+                      class="required-asterisk"
+                      *ngIf="form.get('tipoEntrada')?.value === 'COMPRA'"
+                      style="color: #f44336"
+                    >
+                      *
+                    </span>
                   </label>
                   <app-custom-select
                     listType="person"
@@ -335,7 +341,11 @@
                     (onCreateNew)="onCreateNewPerson()"
                     (onEdit)="onEditPerson($event)"
                   ></app-custom-select>
-                  <span class="error-message animate-fade-in" *ngIf="submitted && form.hasError('supplierRequired')" style="color: #f44336; font-size: 12px; margin-top: 4px; display: block;">
+                  <span
+                    class="error-message animate-fade-in"
+                    *ngIf="submitted && form.hasError('supplierRequired')"
+                    style="color: #f44336; font-size: 12px; margin-top: 4px; display: block"
+                  >
                     O fornecedor é obrigatório quando o tipo de entrada for 'Compra'.
                   </span>
                 </div>
@@ -397,33 +407,65 @@
             <ng-template mat-tab-label>
               <mat-icon class="tab-icon">account_balance_wallet</mat-icon>
               @if (submitted && form.hasError('paymentsMismatch')) {
-                <mat-icon color="warn" class="error-indicator" style="color: #f44336; margin-left: 4px;">error</mat-icon>
+                <mat-icon color="warn" class="error-indicator" style="color: #f44336; margin-left: 4px">error</mat-icon>
               }
               <span>Financeiro</span>
             </ng-template>
 
             <div class="tab-content">
-              <mat-card class="form-section" style="border: none; box-shadow: none; background: transparent;">
-                <mat-card-header class="header-with-action" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                  <mat-card-title style="font-size: 18px; font-weight: 500; color: #202124;">Cronograma de Pagamentos</mat-card-title>
+              <mat-card class="form-section" style="border: none; box-shadow: none; background: transparent">
+                <mat-card-header
+                  class="header-with-action"
+                  style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px"
+                >
+                  <mat-card-title style="font-size: 18px; font-weight: 500; color: #202124">
+                    Cronograma de Pagamentos
+                  </mat-card-title>
                   <button type="button" mat-flat-button color="primary" (click)="addPagamento()">
                     <mat-icon>add</mat-icon>
                     Adicionar Pagamento
                   </button>
                 </mat-card-header>
 
-                <mat-card-content style="padding: 0;">
+                <mat-card-content style="padding: 0">
                   @if (form.hasError('paymentsMismatch')) {
-                    <div class="validation-warning animate-fade-in" style="margin-bottom: 16px; padding: 12px; background: #fbe9e7; color: #d84315; border-radius: 8px; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500;">
-                      <mat-icon style="color: #d84315;">warning</mat-icon>
+                    <div
+                      class="validation-warning animate-fade-in"
+                      style="
+                        margin-bottom: 16px;
+                        padding: 12px;
+                        background: #fbe9e7;
+                        color: #d84315;
+                        border-radius: 8px;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        font-size: 14px;
+                        font-weight: 500;
+                      "
+                    >
+                      <mat-icon style="color: #d84315">warning</mat-icon>
                       <span>A soma dos pagamentos deve ser exatamente igual ao Valor de Compra do veículo.</span>
                     </div>
                   }
 
                   <div formArrayName="pagamentosCompra" class="pagamentos-list">
                     @for (pag of pagamentosCompra.controls; track $index) {
-                      <div [formGroupName]="$index" class="pagamento-item" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; position: relative; padding: 16px; border: 1px solid #dadce0; border-radius: 8px; background: #ffffff;">
-                        
+                      <div
+                        [formGroupName]="$index"
+                        class="pagamento-item"
+                        style="
+                          display: grid;
+                          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                          gap: 16px;
+                          margin-bottom: 24px;
+                          position: relative;
+                          padding: 16px;
+                          border: 1px solid #dadce0;
+                          border-radius: 8px;
+                          background: #ffffff;
+                        "
+                      >
                         <mat-form-field appearance="outline">
                           <mat-label>Forma de Pagamento</mat-label>
                           <mat-select formControlName="formaPagamento">
@@ -451,7 +493,7 @@
                           <mat-datepicker #vencPicker></mat-datepicker>
                         </mat-form-field>
 
-                        <div style="display: flex; align-items: center; justify-content: flex-end;">
+                        <div style="display: flex; align-items: center; justify-content: flex-end">
                           @if (pagamentosCompra.length > 1) {
                             <button
                               type="button"
@@ -465,11 +507,14 @@
                           }
                         </div>
 
-                        <mat-form-field appearance="outline" style="grid-column: 1 / -1; margin-top: -12px;">
+                        <mat-form-field appearance="outline" style="grid-column: 1 / -1; margin-top: -12px">
                           <mat-label>Descrição / Detalhes do Pagamento</mat-label>
-                          <input matInput formControlName="descricao" placeholder="Ex: Banco, n° do cheque, comprovante..." />
+                          <input
+                            matInput
+                            formControlName="descricao"
+                            placeholder="Ex: Banco, n° do cheque, comprovante..."
+                          />
                         </mat-form-field>
-                        
                       </div>
                     }
                   </div>
@@ -503,7 +548,12 @@
             (click)="openSaveDraftDialog()"
             [disabled]="isSaving"
             matTooltip="Salvar Rascunho"
-            style="flex: 0 0 auto !important; width: 48px !important; height: 48px !important; min-width: 48px !important"
+            style="
+              flex: 0 0 auto !important;
+              width: 48px !important;
+              height: 48px !important;
+              min-width: 48px !important;
+            "
           >
             <mat-icon style="margin: 0 !important">save_as</mat-icon>
           </button>

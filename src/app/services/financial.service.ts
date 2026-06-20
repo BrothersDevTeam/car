@@ -7,7 +7,7 @@ import {
   FinancialTransactionRecord,
   FinancialTransactionPaymentRequest,
   FinancialTransactionPayment,
-  StoreSettings
+  StoreSettings,
 } from '@interfaces/financial';
 import { PaginationResponse } from '@interfaces/pagination';
 import { StoreContextService } from './store-context.service';
@@ -35,7 +35,14 @@ export class FinancialService {
   getTransactions(
     pageIndex: number,
     pageSize: number,
-    searchParams?: { type?: string; origin?: string; status?: string; description?: string; storeId?: string; costCenterId?: string },
+    searchParams?: {
+      type?: string;
+      origin?: string;
+      status?: string;
+      description?: string;
+      storeId?: string;
+      costCenterId?: string;
+    },
   ): Observable<PaginationResponse<FinancialTransaction>> {
     const currentStoreId = searchParams?.storeId || this.storeContextService.currentStoreId;
     let url = `${this.apiUrl}/transactions?page=${pageIndex}&size=${pageSize}`;

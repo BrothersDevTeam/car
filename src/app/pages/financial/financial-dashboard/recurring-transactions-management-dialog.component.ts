@@ -58,7 +58,12 @@ import { ICostCenter } from '@interfaces/cost-center';
             <div class="filter-row">
               <mat-form-field appearance="outline" class="filter-field search-field">
                 <mat-label>Buscar por descrição...</mat-label>
-                <input matInput [value]="filterDescription" (input)="onDescriptionInput($event)" placeholder="Ex: Telnet, telefone..." />
+                <input
+                  matInput
+                  [value]="filterDescription"
+                  (input)="onDescriptionInput($event)"
+                  placeholder="Ex: Telnet, telefone..."
+                />
                 <mat-icon matSuffix>search</mat-icon>
               </mat-form-field>
 
@@ -105,8 +110,14 @@ import { ICostCenter } from '@interfaces/cost-center';
             <!-- Valor -->
             <ng-container matColumnDef="amount">
               <th mat-header-cell *matHeaderCellDef>Valor</th>
-              <td mat-cell *matCellDef="let r" [class.income]="r.type === 'INCOME'" [class.expense]="r.type === 'EXPENSE'" class="font-weight-600">
-                {{ r.amount | currency:'BRL':'symbol':'1.2-2' }}
+              <td
+                mat-cell
+                *matCellDef="let r"
+                [class.income]="r.type === 'INCOME'"
+                [class.expense]="r.type === 'EXPENSE'"
+                class="font-weight-600"
+              >
+                {{ r.amount | currency: 'BRL' : 'symbol' : '1.2-2' }}
               </td>
             </ng-container>
 
@@ -120,7 +131,11 @@ import { ICostCenter } from '@interfaces/cost-center';
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>
               <td mat-cell *matCellDef="let r">
-                <span class="status-badge" [class.active]="r.status === 'ACTIVE'" [class.inactive]="r.status === 'INACTIVE'">
+                <span
+                  class="status-badge"
+                  [class.active]="r.status === 'ACTIVE'"
+                  [class.inactive]="r.status === 'INACTIVE'"
+                >
                   {{ r.status === 'ACTIVE' ? 'Ativo' : 'Inativo' }}
                 </span>
               </td>
@@ -130,23 +145,21 @@ import { ICostCenter } from '@interfaces/cost-center';
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef style="width: 80px;">Ações</th>
               <td mat-cell *matCellDef="let r">
-                <button type="button" mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()" aria-label="Ações">
+                <button
+                  type="button"
+                  mat-icon-button
+                  [matMenuTriggerFor]="menu"
+                  (click)="$event.stopPropagation()"
+                  aria-label="Ações"
+                >
                   <mat-icon>more_vert</mat-icon>
                 </button>
                 <mat-menu #menu="matMenu">
-                  <button
-                    mat-menu-item
-                    (click)="startEdit(r)"
-                    class="custom-menu-item"
-                  >
+                  <button mat-menu-item (click)="startEdit(r)" class="custom-menu-item">
                     <mat-icon class="menu-action-icon">edit</mat-icon>
                     <span class="menu-action-label">Editar</span>
                   </button>
-                  <button
-                    mat-menu-item
-                    (click)="deleteRecurring(r)"
-                    class="custom-menu-item menu-action-warn"
-                  >
+                  <button mat-menu-item (click)="deleteRecurring(r)" class="custom-menu-item menu-action-warn">
                     <mat-icon class="menu-action-icon">delete</mat-icon>
                     <span class="menu-action-label">Excluir</span>
                   </button>
@@ -155,7 +168,7 @@ import { ICostCenter } from '@interfaces/cost-center';
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
           </table>
 
           <div *ngIf="recurringTransactions.length === 0" class="empty-state">
@@ -206,7 +219,9 @@ import { ICostCenter } from '@interfaces/cost-center';
               <mat-label>Dia de Vencimento</mat-label>
               <input matInput type="number" formControlName="dueDay" placeholder="Ex: 10" min="1" max="31" step="1" />
               <mat-error *ngIf="form.get('dueDay')?.hasError('required')">O dia é obrigatório</mat-error>
-              <mat-error *ngIf="form.get('dueDay')?.hasError('min') || form.get('dueDay')?.hasError('max')">Dia inválido (1 a 31)</mat-error>
+              <mat-error *ngIf="form.get('dueDay')?.hasError('min') || form.get('dueDay')?.hasError('max')">
+                Dia inválido (1 a 31)
+              </mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="flex-grow">
@@ -247,211 +262,215 @@ import { ICostCenter } from '@interfaces/cost-center';
       <button mat-raised-button mat-dialog-close color="accent">Fechar</button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .dialog-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--mat-sys-primary, #1976d2);
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    .dialog-content {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      min-width: 600px;
-      max-width: 800px;
-      padding-top: 8px !important;
-    }
-    .list-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 16px;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .header-left-section {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex-grow: 1;
-      
-      .subtitle {
-        font-size: 0.85rem;
-        color: rgba(0, 0, 0, 0.6);
-      }
-    }
-    .filter-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .filter-field {
-      margin: 0;
-      
-      ::ng-deep .mat-mdc-text-field-wrapper {
-        height: 48px !important;
-      }
-      ::ng-deep .mat-mdc-form-field-flex {
-        height: 48px !important;
-        align-items: center !important;
-      }
-      ::ng-deep .mat-mdc-form-field-infix {
-        padding-top: 10px !important;
-        padding-bottom: 10px !important;
-        min-height: 48px !important;
-      }
-      ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-        display: none !important;
-      }
-    }
-    .search-field {
-      width: 280px;
-    }
-    .status-field {
-      width: 120px;
-    }
-    .cost-center-field {
-      width: 160px;
-    }
-    .btn-create {
-      height: 48px;
-      align-self: flex-end;
-    }
-    .form-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 12px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-      padding-bottom: 8px;
-
-      h3 {
-        margin: 0;
+  styles: [
+    `
+      .dialog-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--mat-sys-primary, #1976d2);
         font-weight: 600;
+        margin-bottom: 8px;
       }
-    }
-    .recurring-form {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: rgba(0, 0, 0, 0.01);
-      padding: 16px;
-      border-radius: 8px;
-      border: 1px solid rgba(0, 0, 0, 0.04);
-    }
-    .form-row {
-      display: flex;
-      gap: 12px;
-      width: 100%;
-      flex-wrap: wrap;
-    }
-    .form-actions-row {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 8px;
-    }
-    .flex-grow {
-      flex: 1;
-      min-width: 180px;
-    }
-    .table-wrapper {
-      max-height: 350px;
-      overflow-y: auto;
-      overflow-x: auto;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 4px;
-    }
-    .status-badge {
-      font-size: 0.72rem;
-      padding: 3px 8px;
-      border-radius: 12px;
-      font-weight: 600;
-      display: inline-block;
-    }
-    .status-badge.active {
-      background-color: rgba(46, 125, 50, 0.1);
-      color: #2e7d32;
-    }
-    .status-badge.inactive {
-      background-color: rgba(0, 0, 0, 0.06);
-      color: rgba(0, 0, 0, 0.54);
-    }
-    .w-100 {
-      width: 100%;
-    }
-    .cc-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 2px;
-      font-size: 0.75rem;
-      background: rgba(25, 118, 210, 0.08);
-      color: #1976d2;
-      padding: 1px 6px;
-      border-radius: 4px;
-      margin-top: 4px;
-      font-weight: 500;
-      max-width: fit-content;
-
-      mat-icon {
-        font-size: 11px;
-        width: 11px;
-        height: 11px;
-        margin: 0;
-      }
-    }
-    .font-weight-500 {
-      font-weight: 500;
-    }
-    .font-weight-600 {
-      font-weight: 600;
-    }
-    .income {
-      color: #2e7d32;
-    }
-    .expense {
-      color: #c62828;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 32px;
-      color: rgba(0, 0, 0, 0.5);
-    }
-    .dialog-actions {
-      padding: 12px 24px;
-    }
-    ::ng-deep app-custom-select {
-      width: 100%;
-    }
-    @media (max-width: 768px) {
       .dialog-content {
-        min-width: unset !important;
-        width: 100% !important;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-width: 600px;
+        max-width: 800px;
+        padding-top: 8px !important;
       }
       .list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 16px;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .header-left-section {
+        display: flex;
         flex-direction: column;
-        align-items: stretch !important;
-        gap: 12px;
+        gap: 8px;
+        flex-grow: 1;
+
+        .subtitle {
+          font-size: 0.85rem;
+          color: rgba(0, 0, 0, 0.6);
+        }
       }
       .filter-row {
-        flex-direction: column;
-        align-items: stretch !important;
-        gap: 8px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
       }
-      .search-field, .status-field, .cost-center-field {
-        width: 100% !important;
+      .filter-field {
+        margin: 0;
+
+        ::ng-deep .mat-mdc-text-field-wrapper {
+          height: 48px !important;
+        }
+        ::ng-deep .mat-mdc-form-field-flex {
+          height: 48px !important;
+          align-items: center !important;
+        }
+        ::ng-deep .mat-mdc-form-field-infix {
+          padding-top: 10px !important;
+          padding-bottom: 10px !important;
+          min-height: 48px !important;
+        }
+        ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+          display: none !important;
+        }
+      }
+      .search-field {
+        width: 280px;
+      }
+      .status-field {
+        width: 120px;
+      }
+      .cost-center-field {
+        width: 160px;
       }
       .btn-create {
+        height: 48px;
+        align-self: flex-end;
+      }
+      .form-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        padding-bottom: 8px;
+
+        h3 {
+          margin: 0;
+          font-weight: 600;
+        }
+      }
+      .recurring-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: rgba(0, 0, 0, 0.01);
+        padding: 16px;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+      }
+      .form-row {
+        display: flex;
+        gap: 12px;
         width: 100%;
-        align-self: auto !important;
+        flex-wrap: wrap;
+      }
+      .form-actions-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
         margin-top: 8px;
       }
-    }
-  `]
+      .flex-grow {
+        flex: 1;
+        min-width: 180px;
+      }
+      .table-wrapper {
+        max-height: 350px;
+        overflow-y: auto;
+        overflow-x: auto;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 4px;
+      }
+      .status-badge {
+        font-size: 0.72rem;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-weight: 600;
+        display: inline-block;
+      }
+      .status-badge.active {
+        background-color: rgba(46, 125, 50, 0.1);
+        color: #2e7d32;
+      }
+      .status-badge.inactive {
+        background-color: rgba(0, 0, 0, 0.06);
+        color: rgba(0, 0, 0, 0.54);
+      }
+      .w-100 {
+        width: 100%;
+      }
+      .cc-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        font-size: 0.75rem;
+        background: rgba(25, 118, 210, 0.08);
+        color: #1976d2;
+        padding: 1px 6px;
+        border-radius: 4px;
+        margin-top: 4px;
+        font-weight: 500;
+        max-width: fit-content;
+
+        mat-icon {
+          font-size: 11px;
+          width: 11px;
+          height: 11px;
+          margin: 0;
+        }
+      }
+      .font-weight-500 {
+        font-weight: 500;
+      }
+      .font-weight-600 {
+        font-weight: 600;
+      }
+      .income {
+        color: #2e7d32;
+      }
+      .expense {
+        color: #c62828;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 32px;
+        color: rgba(0, 0, 0, 0.5);
+      }
+      .dialog-actions {
+        padding: 12px 24px;
+      }
+      ::ng-deep app-custom-select {
+        width: 100%;
+      }
+      @media (max-width: 768px) {
+        .dialog-content {
+          min-width: unset !important;
+          width: 100% !important;
+        }
+        .list-header {
+          flex-direction: column;
+          align-items: stretch !important;
+          gap: 12px;
+        }
+        .filter-row {
+          flex-direction: column;
+          align-items: stretch !important;
+          gap: 8px;
+        }
+        .search-field,
+        .status-field,
+        .cost-center-field {
+          width: 100% !important;
+        }
+        .btn-create {
+          width: 100%;
+          align-self: auto !important;
+          margin-top: 8px;
+        }
+      }
+    `,
+  ],
 })
 export class RecurringTransactionsManagementDialogComponent implements OnInit {
   form!: FormGroup;
@@ -470,7 +489,7 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
     private recurringService: RecurringTransactionService,
     private costCenterService: CostCenterService,
     private toastr: ToastrService,
-    @Inject(MAT_DIALOG_DATA) public data: { storeId: string }
+    @Inject(MAT_DIALOG_DATA) public data: { storeId: string },
   ) {}
 
   ngOnInit(): void {
@@ -491,8 +510,8 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
       storeId: [this.data.storeId, [Validators.required]],
       costCenter: this.fb.group({
         id: [''],
-        name: ['']
-      })
+        name: [''],
+      }),
     });
 
     this.form.get('type')?.valueChanges.subscribe(() => {
@@ -512,7 +531,7 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
 
   loadRecurringTransactions(): void {
     const filters: { storeId: string; status?: string; description?: string; costCenterId?: string } = {
-      storeId: this.data.storeId
+      storeId: this.data.storeId,
     };
     if (this.filterStatus) {
       filters.status = this.filterStatus;
@@ -527,7 +546,7 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
       next: (response) => {
         this.recurringTransactions = response.content;
       },
-      error: (err) => console.error('Error loading recurring transactions', err)
+      error: (err) => console.error('Error loading recurring transactions', err),
     });
   }
 
@@ -546,7 +565,7 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
       next: (response) => {
         this.costCenters = this.formatCostCenterHierarchy(response.content);
       },
-      error: (err) => console.error('Error loading cost centers', err)
+      error: (err) => console.error('Error loading cost centers', err),
     });
   }
 
@@ -557,13 +576,13 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
       next: (response) => {
         this.formCostCenters = this.formatCostCenterHierarchy(response.content);
       },
-      error: (err) => console.error('Error loading cost centers for form', err)
+      error: (err) => console.error('Error loading cost centers for form', err),
     });
   }
 
   private formatCostCenterHierarchy(costCenters: ICostCenter[]): { id: string; name: string }[] {
     const ccMap = new Map<string, ICostCenter>();
-    costCenters.forEach(cc => ccMap.set(cc.costCenterId, cc));
+    costCenters.forEach((cc) => ccMap.set(cc.costCenterId, cc));
 
     const getHierarchyName = (cc: ICostCenter): string => {
       const parts: string[] = [];
@@ -575,9 +594,9 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
       return parts.join(' / ');
     };
 
-    return costCenters.map(cc => ({
+    return costCenters.map((cc) => ({
       id: cc.costCenterId,
-      name: getHierarchyName(cc)
+      name: getHierarchyName(cc),
     }));
   }
 
@@ -598,8 +617,8 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
       storeId: item.storeId,
       costCenter: {
         id: item.costCenter?.costCenterId || '',
-        name: item.costCenter?.name || ''
-      }
+        name: item.costCenter?.name || '',
+      },
     });
   }
 
@@ -609,7 +628,7 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
     const rawValue = this.form.value;
     const payload = {
       ...rawValue,
-      costCenterId: rawValue.costCenter?.id || null
+      costCenterId: rawValue.costCenter?.id || null,
     };
     delete payload.costCenter;
 
@@ -623,7 +642,7 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
         error: (err) => {
           console.error(err);
           this.toastr.error('Erro ao atualizar recorrência.', 'Erro');
-        }
+        },
       });
     } else {
       this.recurringService.create(payload).subscribe({
@@ -635,13 +654,17 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
         error: (err) => {
           console.error(err);
           this.toastr.error('Erro ao criar recorrência.', 'Erro');
-        }
+        },
       });
     }
   }
 
   deleteRecurring(item: IRecurringTransaction): void {
-    if (confirm(`Deseja realmente excluir a recorrência "${item.description}"? Isso removerá permanentemente a regra e todas as parcelas pendentes ou canceladas associadas. Transações já pagas serão preservadas e impedirão a exclusão.`)) {
+    if (
+      confirm(
+        `Deseja realmente excluir a recorrência "${item.description}"? Isso removerá permanentemente a regra e todas as parcelas pendentes ou canceladas associadas. Transações já pagas serão preservadas e impedirão a exclusão.`,
+      )
+    ) {
       this.recurringService.delete(item.recurringTransactionId).subscribe({
         next: () => {
           this.toastr.success('Recorrência excluída com sucesso!', 'Sucesso');
@@ -651,7 +674,7 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
           console.error(err);
           const errMsg = err?.error?.errorMessage || 'Erro ao excluir recorrência.';
           this.toastr.error(errMsg, 'Erro');
-        }
+        },
       });
     }
   }

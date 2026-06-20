@@ -77,17 +77,23 @@
 @keyframes draftPulse {
   0% {
     border-color: rgba(59, 122, 184, 0.25) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 0 0 0 rgba(59, 122, 184, 0.15);
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.03),
+      0 0 0 0 rgba(59, 122, 184, 0.15);
     transform: scale(1);
   }
   50% {
     border-color: rgba(59, 122, 184, 0.8) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 0 14px 3px rgba(59, 122, 184, 0.35);
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.03),
+      0 0 14px 3px rgba(59, 122, 184, 0.35);
     transform: scale(1.006);
   }
   100% {
     border-color: rgba(59, 122, 184, 0.25) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 0 0 0 rgba(59, 122, 184, 0.15);
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.03),
+      0 0 0 0 rgba(59, 122, 184, 0.15);
     transform: scale(1);
   }
 }
@@ -101,7 +107,7 @@
 // ========== ESTILO PREMIUM E UNIFICADO PARA RASCUNHOS EM ANDAMENTO ==========
 .drafts-section {
   margin-bottom: 32px !important;
-  
+
   // Garante que se for apenas div (ex: endereço), a borda de 16px seja aplicada
   border-radius: 16px !important;
 
@@ -195,7 +201,7 @@
   // Estilização do indicador visual de chevron elegante (›)
   .mdc-list-item__primary-text::before,
   .mat-option-text::before {
-    content: "›" !important;
+    content: '›' !important;
     color: var(--primary-color, #1976d2) !important;
     font-size: 18px !important;
     font-weight: bold !important;
@@ -207,5 +213,3 @@
     justify-content: center !important;
   }
 }
-
-

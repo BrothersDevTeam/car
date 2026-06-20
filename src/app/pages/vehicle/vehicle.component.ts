@@ -622,7 +622,7 @@ export class VehicleComponent implements CanComponentDeactivate {
       if (result.startsWith('draft:')) {
         const draftName = result.substring(6); // Remove 'draft:'
         const selectedDraftId = this.vehicleFormRef?.selectedDraftId;
-        const existingDraftId = (selectedDraftId && selectedDraftId !== 'new') ? selectedDraftId : undefined;
+        const existingDraftId = selectedDraftId && selectedDraftId !== 'new' ? selectedDraftId : undefined;
         this.saveLocalDraft(false, draftName, existingDraftId);
         this.handleCloseDrawer();
       }

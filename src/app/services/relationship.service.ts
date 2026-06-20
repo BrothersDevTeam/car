@@ -34,7 +34,7 @@ export class RelationshipService {
   create(storeId: string, data: RelationshipRequest): Observable<RelationshipResponse> {
     return this.http.post<RelationshipResponse>(`${this.apiUrl}/store/${storeId}`, data).pipe(
       tap(() => this.relationshipsUpdated$.next()),
-      first()
+      first(),
     );
   }
 
@@ -44,7 +44,7 @@ export class RelationshipService {
   update(id: string, data: RelationshipRequest): Observable<RelationshipResponse> {
     return this.http.put<RelationshipResponse>(`${this.apiUrl}/${id}`, data).pipe(
       tap(() => this.relationshipsUpdated$.next()),
-      first()
+      first(),
     );
   }
 
@@ -54,7 +54,7 @@ export class RelationshipService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       tap(() => this.relationshipsUpdated$.next()),
-      first()
+      first(),
     );
   }
 }

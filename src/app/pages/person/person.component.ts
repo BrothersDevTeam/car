@@ -508,7 +508,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
         const draftName = result.substring(6); // Remove 'draft:'
         // Passa o ID do rascunho existente para garantir atualização
         const selectedDraftId = (formComponent as any).selectedDraftId;
-        const existingDraftId = (selectedDraftId && selectedDraftId !== 'new') ? selectedDraftId : undefined;
+        const existingDraftId = selectedDraftId && selectedDraftId !== 'new' ? selectedDraftId : undefined;
 
         (formComponent as any).saveLocalDraft(false, draftName, existingDraftId);
         this.handleCloseDrawer();
@@ -958,7 +958,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
   private getActiveFormComponent(): any {
     // Se o formulário principal está aberto
     if (this.openForm()) {
-      const isLegalEntity = this.selectedPerson ? this.selectedPerson.legalEntity : (this.selectedTabIndex === 1);
+      const isLegalEntity = this.selectedPerson ? this.selectedPerson.legalEntity : this.selectedTabIndex === 1;
       if (isLegalEntity) {
         return this.legalEntityForm || null;
       }
@@ -967,7 +967,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
 
     // Se a tela de info está aberta (possível edição de endereço)
     if (this.openInfo()) {
-      const isLegalEntity = this.selectedPerson ? this.selectedPerson.legalEntity : (this.selectedTabIndex === 1);
+      const isLegalEntity = this.selectedPerson ? this.selectedPerson.legalEntity : this.selectedTabIndex === 1;
       if (isLegalEntity) {
         return this.legalEntityInfo?.getActiveFormComponent();
       }

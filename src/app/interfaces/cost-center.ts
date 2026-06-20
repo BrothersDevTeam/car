@@ -18,4 +18,3 @@ export interface ICostCenterRecord {
   parentId?: string;
   storeId: string;
 }
-

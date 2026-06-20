@@ -64,12 +64,14 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
       <!-- Formulário de Inserção/Edição (Retrátil) -->
       @if (showForm) {
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="cost-center-form">
-          <h3 style="margin-top: 0; margin-bottom: 12px; font-weight: 500; font-size: 15px; color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; gap: 6px;">
+          <h3
+            style="margin-top: 0; margin-bottom: 12px; font-weight: 500; font-size: 15px; color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; gap: 6px;"
+          >
             <mat-icon style="font-size: 20px; width: 20px; height: 20px; color: #1976d2;">
               {{ activeTab === 'EXPENSE' ? 'trending_down' : 'trending_up' }}
             </mat-icon>
             <span>
-              {{ editingId ? 'Editar Centro de ' : 'Novo Centro de ' }} 
+              {{ editingId ? 'Editar Centro de ' : 'Novo Centro de ' }}
               <strong>{{ activeTab === 'EXPENSE' ? 'Despesa' : 'Receita' }}</strong>
             </span>
           </h3>
@@ -77,7 +79,12 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field-name" style="flex: 1;">
               <mat-label>Nome do Centro</mat-label>
-              <input matInput formControlName="name" [errorStateMatcher]="matcher" placeholder="Ex: CEMIG, Copasa, Combustível..." />
+              <input
+                matInput
+                formControlName="name"
+                [errorStateMatcher]="matcher"
+                placeholder="Ex: CEMIG, Copasa, Combustível..."
+              />
               <mat-error *ngIf="form.get('name')?.hasError('required')">O nome é obrigatório</mat-error>
             </mat-form-field>
           </div>
@@ -104,30 +111,28 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
           <div class="form-actions-row">
             <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid" class="action-btn">
               <mat-icon>{{ editingId ? 'save' : 'add' }}</mat-icon>
-              <span>{{ editingId ? 'Salvar' : ('Adicionar ' + (activeTab === 'EXPENSE' ? 'Despesa' : 'Receita')) }}</span>
+              <span>{{ editingId ? 'Salvar' : 'Adicionar ' + (activeTab === 'EXPENSE' ? 'Despesa' : 'Receita') }}</span>
             </button>
 
-            <button mat-button type="button" (click)="cancelEdit()" class="action-btn">
-              Cancelar
-            </button>
+            <button mat-button type="button" (click)="cancelEdit()" class="action-btn">Cancelar</button>
           </div>
         </form>
       }
 
       <!-- Segmento para trocar visualização Despesas / Receitas -->
       <div class="tabs-container">
-        <button 
-          mat-button 
-          [class.active-tab]="activeTab === 'EXPENSE'" 
+        <button
+          mat-button
+          [class.active-tab]="activeTab === 'EXPENSE'"
           (click)="setActiveTab('EXPENSE')"
           class="tab-btn"
         >
           <mat-icon>trending_down</mat-icon>
           <span>Centros de Despesas</span>
         </button>
-        <button 
-          mat-button 
-          [class.active-tab]="activeTab === 'REVENUE'" 
+        <button
+          mat-button
+          [class.active-tab]="activeTab === 'REVENUE'"
           (click)="setActiveTab('REVENUE')"
           class="tab-btn"
         >
@@ -142,13 +147,18 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Nome</th>
             <td mat-cell *matCellDef="let cc" class="font-weight-500">
-              <span [style.padding-left.px]="cc.indent * 24" style="display: inline-flex; align-items: center; gap: 4px;">
+              <span
+                [style.padding-left.px]="cc.indent * 24"
+                style="display: inline-flex; align-items: center; gap: 4px;"
+              >
                 <!-- Setinha de Expandir/Recolher -->
-                <span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;">
-                  <button 
-                    type="button" 
-                    mat-icon-button 
-                    *ngIf="cc.hasChildren" 
+                <span
+                  style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;"
+                >
+                  <button
+                    type="button"
+                    mat-icon-button
+                    *ngIf="cc.hasChildren"
                     (click)="toggleNode(cc.costCenterId, $event)"
                     style="width: 20px; height: 20px; line-height: 20px; padding: 0; display: flex; align-items: center; justify-content: center;"
                   >
@@ -184,32 +194,30 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef style="width: 80px;">Ações</th>
             <td mat-cell *matCellDef="let cc">
-              <button type="button" mat-icon-button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{cc: cc}" aria-label="Ações">
+              <button
+                type="button"
+                mat-icon-button
+                [matMenuTriggerFor]="menu"
+                [matMenuTriggerData]="{ cc: cc }"
+                aria-label="Ações"
+              >
                 <mat-icon>more_vert</mat-icon>
               </button>
             </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
         </table>
 
         <!-- Menu Template Único para Ações da Tabela -->
         <mat-menu #menu="matMenu">
           <ng-template matMenuContent let-cc="cc">
-            <button
-              mat-menu-item
-              (click)="startEdit(cc)"
-              class="custom-menu-item"
-            >
+            <button mat-menu-item (click)="startEdit(cc)" class="custom-menu-item">
               <mat-icon class="menu-action-icon">edit</mat-icon>
               <span class="menu-action-label">Editar</span>
             </button>
-            <button
-              mat-menu-item
-              (click)="deleteCostCenter(cc)"
-              class="custom-menu-item menu-action-warn"
-            >
+            <button mat-menu-item (click)="deleteCostCenter(cc)" class="custom-menu-item menu-action-warn">
               <mat-icon class="menu-action-icon">delete</mat-icon>
               <span class="menu-action-label">Excluir</span>
             </button>
@@ -226,172 +234,177 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
       <button mat-raised-button mat-dialog-close color="accent">Fechar</button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .dialog-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--mat-sys-primary, #1976d2);
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
-    .dialog-content {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      gap: 16px;
-      width: 100%;
-      box-sizing: border-box;
-      padding-top: 8px !important;
-      max-height: none !important;
-      overflow: hidden;
-    }
-    .cost-center-form {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: rgba(0, 0, 0, 0.02);
-      padding: 16px;
-      border-radius: 8px;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-    .form-row {
-      display: flex;
-      gap: 12px;
-      width: 100%;
-    }
-    .form-field-name {
-      flex: 3;
-    }
-    .form-field-type {
-      flex: 1;
-    }
-    .form-field-parent {
-      flex: 2;
-    }
-    .form-field-desc {
-      flex: 2;
-    }
-    .form-actions-row {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-    }
-    .action-btn {
-      height: 40px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .tabs-container {
-      display: flex;
-      border-bottom: 2px solid rgba(0, 0, 0, 0.08);
-      gap: 16px;
-      margin-top: 8px;
-    }
-    .tab-btn {
-      border-radius: 4px 4px 0 0;
-      padding: 8px 16px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: rgba(0, 0, 0, 0.6);
-      
-      &.active-tab {
-        color: #1976d2;
-        border-bottom: 3px solid #1976d2;
-        background: rgba(25, 118, 210, 0.04);
+  styles: [
+    `
+      .dialog-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--mat-sys-primary, #1976d2);
         font-weight: 600;
+        margin-bottom: 12px;
       }
-    }
-    .table-wrapper {
-      flex: 1;
-      overflow-y: auto;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 4px;
-      min-height: 150px;
-    }
-    .w-100 {
-      width: 100%;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 24px;
-      color: rgba(0, 0, 0, 0.5);
-    }
-    .dialog-actions {
-      padding: 16px 24px;
-    }
-    .header-actions {
-      display: flex;
-      justify-content: flex-start;
-      margin-bottom: 4px;
-    }
-    .new-cc-btn {
-      height: 40px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    @media (max-width: 600px) {
-      .form-row {
+      .dialog-content {
+        display: flex;
         flex-direction: column;
-        gap: 0;
-      }
-      .form-field-name, .form-field-type, .form-field-parent, .form-field-desc {
+        flex: 1;
+        gap: 16px;
         width: 100%;
-        flex: none;
+        box-sizing: border-box;
+        padding-top: 8px !important;
+        max-height: none !important;
+        overflow: hidden;
+      }
+      .cost-center-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: rgba(0, 0, 0, 0.02);
+        padding: 16px;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+      }
+      .form-row {
+        display: flex;
+        gap: 12px;
+        width: 100%;
+      }
+      .form-field-name {
+        flex: 3;
+      }
+      .form-field-type {
+        flex: 1;
+      }
+      .form-field-parent {
+        flex: 2;
+      }
+      .form-field-desc {
+        flex: 2;
+      }
+      .form-actions-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+      .action-btn {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
       }
       .tabs-container {
-        flex-direction: column;
-        gap: 8px;
-        border-bottom: none;
+        display: flex;
+        border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+        gap: 16px;
+        margin-top: 8px;
       }
       .tab-btn {
-        border-radius: 4px;
+        border-radius: 4px 4px 0 0;
+        padding: 8px 16px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: rgba(0, 0, 0, 0.6);
+
+        &.active-tab {
+          color: #1976d2;
+          border-bottom: 3px solid #1976d2;
+          background: rgba(25, 118, 210, 0.04);
+          font-weight: 600;
+        }
+      }
+      .table-wrapper {
+        flex: 1;
+        overflow-y: auto;
         border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 4px;
+        min-height: 150px;
+      }
+      .w-100 {
         width: 100%;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 24px;
+        color: rgba(0, 0, 0, 0.5);
+      }
+      .dialog-actions {
+        padding: 16px 24px;
+      }
+      .header-actions {
+        display: flex;
         justify-content: flex-start;
+        margin-bottom: 4px;
       }
-      .tab-btn.active-tab {
-        border-bottom: 1px solid #1976d2;
-        background: rgba(25, 118, 210, 0.08);
+      .new-cc-btn {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
       }
-    }
-    .root-node {
-      font-weight: 600;
-      color: rgba(0, 0, 0, 0.87);
-    }
-    .child-node {
-      font-weight: 400;
-      color: rgba(0, 0, 0, 0.65);
-      font-size: 0.95em;
-    }
-    .folder-icon-root {
-      color: #ffa000 !important;
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-      margin: 0 !important;
-    }
-    .folder-icon-child {
-      color: #ffca28 !important;
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-      margin: 0 !important;
-    }
-    .tree-connector {
-      color: rgba(0, 0, 0, 0.25);
-      font-family: monospace;
-      margin-right: 4px;
-      font-weight: bold;
-      letter-spacing: -1px;
-    }
-    .font-weight-500 {
-      font-weight: 500;
-    }
-  `]
+      @media (max-width: 600px) {
+        .form-row {
+          flex-direction: column;
+          gap: 0;
+        }
+        .form-field-name,
+        .form-field-type,
+        .form-field-parent,
+        .form-field-desc {
+          width: 100%;
+          flex: none;
+        }
+        .tabs-container {
+          flex-direction: column;
+          gap: 8px;
+          border-bottom: none;
+        }
+        .tab-btn {
+          border-radius: 4px;
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          width: 100%;
+          justify-content: flex-start;
+        }
+        .tab-btn.active-tab {
+          border-bottom: 1px solid #1976d2;
+          background: rgba(25, 118, 210, 0.08);
+        }
+      }
+      .root-node {
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.87);
+      }
+      .child-node {
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.65);
+        font-size: 0.95em;
+      }
+      .folder-icon-root {
+        color: #ffa000 !important;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        margin: 0 !important;
+      }
+      .folder-icon-child {
+        color: #ffca28 !important;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        margin: 0 !important;
+      }
+      .tree-connector {
+        color: rgba(0, 0, 0, 0.25);
+        font-family: monospace;
+        margin-right: 4px;
+        font-weight: bold;
+        letter-spacing: -1px;
+      }
+      .font-weight-500 {
+        font-weight: 500;
+      }
+    `,
+  ],
 })
 export class CostCentersManagementDialogComponent implements OnInit {
   @ViewChild(FormGroupDirective) formDirective!: FormGroupDirective;
@@ -401,7 +414,8 @@ export class CostCentersManagementDialogComponent implements OnInit {
   activeTab: 'EXPENSE' | 'REVENUE' = 'EXPENSE';
   displayedColumns: string[] = ['name', 'description', 'actions'];
   readonly matcher = new CustomErrorStateMatcher();
-  dataSource: (ICostCenter & { displayName: string; indent: number; hasChildren?: boolean; isCollapsed?: boolean })[] = [];
+  dataSource: (ICostCenter & { displayName: string; indent: number; hasChildren?: boolean; isCollapsed?: boolean })[] =
+    [];
   collapsedNodes = new Set<string>();
   showForm = false;
 
@@ -409,7 +423,7 @@ export class CostCentersManagementDialogComponent implements OnInit {
     private fb: FormBuilder,
     private costCenterService: CostCenterService,
     private toastr: ToastrService,
-    @Inject(MAT_DIALOG_DATA) public data: { storeId: string }
+    @Inject(MAT_DIALOG_DATA) public data: { storeId: string },
   ) {}
 
   ngOnInit(): void {
@@ -423,7 +437,7 @@ export class CostCentersManagementDialogComponent implements OnInit {
       description: [''],
       type: ['EXPENSE', [Validators.required]],
       parentId: [null],
-      storeId: [this.data.storeId, [Validators.required]]
+      storeId: [this.data.storeId, [Validators.required]],
     });
   }
 
@@ -433,7 +447,7 @@ export class CostCentersManagementDialogComponent implements OnInit {
         this.costCenters = response.content;
         this.updateDataSource();
       },
-      error: (err) => console.error('Error loading cost centers', err)
+      error: (err) => console.error('Error loading cost centers', err),
     });
   }
 
@@ -466,13 +480,20 @@ export class CostCentersManagementDialogComponent implements OnInit {
     this.updateDataSource();
   }
 
-  getFlattenedTree(type: 'EXPENSE' | 'REVENUE'): (ICostCenter & { displayName: string; indent: number; hasChildren?: boolean; isCollapsed?: boolean })[] {
-    const list = this.costCenters.filter(cc => cc.type === type);
-    const roots = list.filter(cc => !cc.parentId);
-    const result: (ICostCenter & { displayName: string; indent: number; hasChildren?: boolean; isCollapsed?: boolean })[] = [];
+  getFlattenedTree(
+    type: 'EXPENSE' | 'REVENUE',
+  ): (ICostCenter & { displayName: string; indent: number; hasChildren?: boolean; isCollapsed?: boolean })[] {
+    const list = this.costCenters.filter((cc) => cc.type === type);
+    const roots = list.filter((cc) => !cc.parentId);
+    const result: (ICostCenter & {
+      displayName: string;
+      indent: number;
+      hasChildren?: boolean;
+      isCollapsed?: boolean;
+    })[] = [];
 
     const traverse = (node: ICostCenter, depth: number, isParentCollapsed: boolean) => {
-      const hasChildren = list.some(cc => cc.parentId === node.costCenterId);
+      const hasChildren = list.some((cc) => cc.parentId === node.costCenterId);
       const isCollapsed = this.collapsedNodes.has(node.costCenterId);
 
       if (!isParentCollapsed) {
@@ -481,27 +502,27 @@ export class CostCentersManagementDialogComponent implements OnInit {
           displayName: node.name,
           indent: depth,
           hasChildren,
-          isCollapsed
+          isCollapsed,
         });
       }
 
-      const children = list.filter(cc => cc.parentId === node.costCenterId);
+      const children = list.filter((cc) => cc.parentId === node.costCenterId);
       const nextParentCollapsed = isParentCollapsed || isCollapsed;
-      children.forEach(child => traverse(child, depth + 1, nextParentCollapsed));
+      children.forEach((child) => traverse(child, depth + 1, nextParentCollapsed));
     };
 
-    roots.forEach(root => traverse(root, 0, false));
+    roots.forEach((root) => traverse(root, 0, false));
 
     // Órfãos (segurança)
-    list.forEach(node => {
-      const isOrphan = node.parentId && !list.some(cc => cc.costCenterId === node.parentId);
-      if (isOrphan && !result.some(r => r.costCenterId === node.costCenterId)) {
+    list.forEach((node) => {
+      const isOrphan = node.parentId && !list.some((cc) => cc.costCenterId === node.parentId);
+      if (isOrphan && !result.some((r) => r.costCenterId === node.costCenterId)) {
         result.push({
           ...node,
           displayName: node.name,
           indent: 0,
-          hasChildren: list.some(cc => cc.parentId === node.costCenterId),
-          isCollapsed: this.collapsedNodes.has(node.costCenterId)
+          hasChildren: list.some((cc) => cc.parentId === node.costCenterId),
+          isCollapsed: this.collapsedNodes.has(node.costCenterId),
         });
       }
     });
@@ -520,14 +541,14 @@ export class CostCentersManagementDialogComponent implements OnInit {
     const excludedIds = new Set<string>();
     const collectDescendants = (id: string) => {
       excludedIds.add(id);
-      this.costCenters.forEach(cc => {
+      this.costCenters.forEach((cc) => {
         if (cc.parentId === id) {
           collectDescendants(cc.costCenterId);
         }
       });
     };
     collectDescendants(this.editingId);
-    return allOfCurrentType.filter(cc => !excludedIds.has(cc.costCenterId));
+    return allOfCurrentType.filter((cc) => !excludedIds.has(cc.costCenterId));
   }
 
   onSubmit(): void {
@@ -546,7 +567,7 @@ export class CostCentersManagementDialogComponent implements OnInit {
           console.error(err);
           const msg = err.error?.errorMessage || 'Erro ao atualizar Centro de Custo.';
           this.toastr.error(msg, 'Erro');
-        }
+        },
       });
     } else {
       this.costCenterService.createCostCenter(payload).subscribe({
@@ -555,7 +576,7 @@ export class CostCentersManagementDialogComponent implements OnInit {
           this.formDirective.resetForm({
             type: this.activeTab,
             storeId: this.data.storeId,
-            parentId: null
+            parentId: null,
           });
           this.loadCostCenters();
         },
@@ -563,7 +584,7 @@ export class CostCentersManagementDialogComponent implements OnInit {
           console.error(err);
           const msg = err.error?.errorMessage || 'Erro ao criar Centro de Custo.';
           this.toastr.error(msg, 'Erro');
-        }
+        },
       });
     }
   }
@@ -576,7 +597,7 @@ export class CostCentersManagementDialogComponent implements OnInit {
       description: cc.description,
       type: cc.type,
       parentId: cc.parentId || null,
-      storeId: cc.storeId
+      storeId: cc.storeId,
     });
     this.activeTab = cc.type;
   }
@@ -587,15 +608,18 @@ export class CostCentersManagementDialogComponent implements OnInit {
     this.formDirective.resetForm({
       type: this.activeTab,
       storeId: this.data.storeId,
-      parentId: null
+      parentId: null,
     });
   }
 
   deleteCostCenter(cc: ICostCenter): void {
     // Verifica se possui filhos
-    const hasChildren = this.costCenters.some(child => child.parentId === cc.costCenterId);
+    const hasChildren = this.costCenters.some((child) => child.parentId === cc.costCenterId);
     if (hasChildren) {
-      this.toastr.warning('Não é possível excluir um Centro de Custo que possui subcategorias filhas. Exclua as filhas primeiro.', 'Aviso');
+      this.toastr.warning(
+        'Não é possível excluir um Centro de Custo que possui subcategorias filhas. Exclua as filhas primeiro.',
+        'Aviso',
+      );
       return;
     }
 
@@ -610,8 +634,11 @@ export class CostCentersManagementDialogComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.toastr.error('Erro ao excluir Centro de Custo. Certifique-se de que não está associado a nenhuma transação.', 'Erro');
-        }
+          this.toastr.error(
+            'Erro ao excluir Centro de Custo. Certifique-se de que não está associado a nenhuma transação.',
+            'Erro',
+          );
+        },
       });
     }
   }

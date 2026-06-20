@@ -17,7 +17,15 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormArray,
+  ReactiveFormsModule,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -168,58 +176,61 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
    * Formulário com FormGroups aninhados para brand, model e color
    * para trabalhar com o custom-select component
    */
-  protected form: FormGroup = this.formBuilderService.group({
-    owner: this.formBuilderService.group({
-      id: [''],
-      name: [''],
-    }),
-    supplier: this.formBuilderService.group({
-      id: [''],
-      name: [''],
-    }),
-    plate: ['', Validators.required],
-    brand: this.formBuilderService.group({
-      id: [''],
-      name: [''],
-    }),
-    model: this.formBuilderService.group({
-      id: [''],
-      name: [''],
-    }),
-    fipeYear: this.formBuilderService.group({
-      id: [''],
-      name: [''],
-    }),
-    vehicleYear: [''],
-    modelYear: [''],
-    color: this.formBuilderService.group({
-      id: [''],
-      name: [''],
-    }),
-    chassis: [''],
-    renavam: [''],
-    doors: [''],
+  protected form: FormGroup = this.formBuilderService.group(
+    {
+      owner: this.formBuilderService.group({
+        id: [''],
+        name: [''],
+      }),
+      supplier: this.formBuilderService.group({
+        id: [''],
+        name: [''],
+      }),
+      plate: ['', Validators.required],
+      brand: this.formBuilderService.group({
+        id: [''],
+        name: [''],
+      }),
+      model: this.formBuilderService.group({
+        id: [''],
+        name: [''],
+      }),
+      fipeYear: this.formBuilderService.group({
+        id: [''],
+        name: [''],
+      }),
+      vehicleYear: [''],
+      modelYear: [''],
+      color: this.formBuilderService.group({
+        id: [''],
+        name: [''],
+      }),
+      chassis: [''],
+      renavam: [''],
+      doors: [''],
 
-    horsepower: [''],
-    engineDisplacement: [''],
-    engineNumber: [''],
-    km: [''],
-    vehicleType: [''],
-    species: [''],
-    category: [''],
-    features: [''],
-    fuelTypes: [[]], // Array de FuelTypes
-    optionalIds: [[]], // Array de Opcionais (UUIDs)
-    origin: ['NACIONAL'],
-    tipoEntrada: ['COMPRA'],
-    valorCompra: [''],
-    dataCompra: [''],
-    valorVenda: [''],
-    observation: [''],
-    entryDate: [''],
-    exitDate: [''],
-    pagamentosCompra: this.formBuilderService.array([]),
-  }, { validators: [purchasePaymentsValidator] });
+      horsepower: [''],
+      engineDisplacement: [''],
+      engineNumber: [''],
+      km: [''],
+      vehicleType: [''],
+      species: [''],
+      category: [''],
+      features: [''],
+      fuelTypes: [[]], // Array de FuelTypes
+      optionalIds: [[]], // Array de Opcionais (UUIDs)
+      origin: ['NACIONAL'],
+      tipoEntrada: ['COMPRA'],
+      valorCompra: [''],
+      dataCompra: [''],
+      valorVenda: [''],
+      observation: [''],
+      entryDate: [''],
+      exitDate: [''],
+      pagamentosCompra: this.formBuilderService.array([]),
+    },
+    { validators: [purchasePaymentsValidator] },
+  );
 
   public get vehicleForm(): FormGroup {
     return this.form;
@@ -233,7 +244,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     const tipoEntrada = this.form.get('tipoEntrada')?.value;
     const valorCompra = this.form.get('valorCompra')?.value;
     if (tipoEntrada !== 'COMPRA' || !valorCompra) return false;
-    
+
     const cleaned = valorCompra.toString().replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
     const parsed = parseFloat(cleaned);
     return !isNaN(parsed) && parsed > 0;
@@ -245,7 +256,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       valor: [data?.valor || 0, [Validators.required, Validators.min(0.01)]],
       vencimento: [data?.vencimento ? new Date(data.vencimento) : new Date(), Validators.required],
       descricao: [data?.descricao || ''],
-      tipo: [data?.tipo || 'P']
+      tipo: [data?.tipo || 'P'],
     });
   }
 
@@ -341,9 +352,25 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     };
 
     const fields = [
-      'plate', 'origin', 'vehicleType', 'vehicleYear', 'modelYear', 'km', 'doors',
-      'chassis', 'renavam', 'engineNumber', 'engineDisplacement', 'horsepower',
-      'species', 'category', 'features', 'observation', 'dataCompra', 'entryDate', 'exitDate'
+      'plate',
+      'origin',
+      'vehicleType',
+      'vehicleYear',
+      'modelYear',
+      'km',
+      'doors',
+      'chassis',
+      'renavam',
+      'engineNumber',
+      'engineDisplacement',
+      'horsepower',
+      'species',
+      'category',
+      'features',
+      'observation',
+      'dataCompra',
+      'entryDate',
+      'exitDate',
     ];
 
     for (const field of fields) {
@@ -396,12 +423,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     if (this.selectedDraftId) {
       const currentDraft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);
       if (currentDraft) {
-        this.saveLocalDraft(
-          false,
-          currentDraft.draftName,
-          this.selectedDraftId,
-          true,
-        );
+        this.saveLocalDraft(false, currentDraft.draftName, this.selectedDraftId, true);
         return;
       }
     }
@@ -521,13 +543,16 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           observation: formValues.observation || '',
           entryDate: formValues.entryDate || '',
           exitDate: formValues.exitDate || '',
-          pagamentosCompra: formValues.tipoEntrada === 'COMPRA' ? (formValues.pagamentosCompra || []).map((p: any) => ({
-            formaPagamento: p.formaPagamento,
-            descricao: p.descricao,
-            valor: p.valor,
-            vencimento: this.formatDateToISO(p.vencimento),
-            tipo: p.tipo || 'P'
-          })) : [],
+          pagamentosCompra:
+            formValues.tipoEntrada === 'COMPRA'
+              ? (formValues.pagamentosCompra || []).map((p: any) => ({
+                  formaPagamento: p.formaPagamento,
+                  descricao: p.descricao,
+                  valor: p.valor,
+                  vencimento: this.formatDateToISO(p.vencimento),
+                  tipo: p.tipo || 'P',
+                }))
+              : [],
         };
 
         Object.keys(payload).forEach((key) => {
@@ -648,7 +673,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
     this.isFillingForm = true;
     this.form.patchValue(draft.data);
-    
+
     if (draft.data.pagamentosCompra && Array.isArray(draft.data.pagamentosCompra)) {
       const paymentsArray = this.form.get('pagamentosCompra') as FormArray;
       paymentsArray.clear();
@@ -656,7 +681,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
         paymentsArray.push(this.createPagamentoFormGroup(payment));
       });
     }
-    
+
     this.isFillingForm = false;
 
     if (draft.data?.brand?.id) {
@@ -886,7 +911,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
         const hasChanges = this.hasUnsavedChanges();
         this.actionsService.hasFormChanges.set(hasChanges);
         this.formChanged.emit(hasChanges);
-      })
+      }),
     );
 
     // Carrega marcas do backend
@@ -1016,7 +1041,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     this.subscriptions.add(
       this.formDraftService.draftsChanges.subscribe(() => {
         this.checkForDrafts();
-      })
+      }),
     );
   }
 
@@ -1194,7 +1219,8 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
       if (controls['plate'].invalid) invalidFields.push('Placa');
       if (this.form.hasError('supplierRequired')) invalidFields.push('Fornecedor');
-      if (this.form.hasError('paymentsMismatch')) invalidFields.push('Financeiro (Soma das parcelas deve ser igual ao Valor de Compra)');
+      if (this.form.hasError('paymentsMismatch'))
+        invalidFields.push('Financeiro (Soma das parcelas deve ser igual ao Valor de Compra)');
 
       this.toastrService.warning(`Campos obrigatórios pendentes: ${invalidFields.join(', ')}`);
 
@@ -1429,7 +1455,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       this.optionalService.create(payload).subscribe({
         next: (response) => {
           this.toastrService.success('Opcional adicionado com sucesso!');
-          
+
           // Recarrega a lista de opcionais do backend
           this.optionalService.getAvailableOptionals().subscribe({
             next: (available) => {
@@ -1437,18 +1463,18 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
                 value: opt.optionalId,
                 label: opt.name,
               }));
-              
+
               // Seleciona automaticamente o opcional recém-criado
               const currentSelection = this.form.get('optionalIds')?.value || [];
               this.form.get('optionalIds')?.setValue([...currentSelection, response.optionalId]);
               this.form.get('optionalIds')?.markAsDirty();
-            }
+            },
           });
         },
         error: (error) => {
           console.error('Erro ao criar opcional:', error);
           this.toastrService.error('Erro ao adicionar opcional. Tente novamente.');
-        }
+        },
       });
     }
   }
