@@ -134,6 +134,21 @@ export class SideNavComponent {
       });
     }
 
+    // Relatórios
+    if (
+      this.authService.hasAuthority(Authorizations.READ_FINANCIAL_STORE) ||
+      this.authService.hasAuthority(Authorizations.READ_FINANCIAL_NETWORK) ||
+      this.authService.hasAuthority(Authorizations.READ_VEHICLE_STORE) ||
+      this.authService.hasAuthority(Authorizations.READ_PERSON_STORE) ||
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
+    ) {
+      baseMenu.push({
+        icon: 'assessment',
+        label: 'Relatórios',
+        route: '/reports',
+      });
+    }
+
     this.menuItems.set(baseMenu);
   }
 

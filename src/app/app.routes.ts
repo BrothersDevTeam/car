@@ -39,6 +39,10 @@ export const routes: Routes = [
         path: 'financial',
         loadChildren: () => import('./pages/financial/financial.routes').then((m) => m.FINANCIAL_ROUTES),
       },
+      {
+        path: 'reports',
+        loadChildren: () => import('./pages/reports/reports.routes').then((m) => m.REPORTS_ROUTES),
+      },
       { path: 'dashboard', component: DashboardComponent },
     ],
   },

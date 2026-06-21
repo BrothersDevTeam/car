@@ -1,0 +1,143 @@
+<main class="reports-container">
+  <app-content-header title="Central de Relatórios" [showIconOnly]="false"></app-content-header>
+
+  <!-- Seção de Filtros Globais -->
+  <mat-card class="filter-card premium-card">
+    <mat-card-header>
+      <mat-card-title>Filtros do Relatório</mat-card-title>
+      <mat-card-subtitle>Os filtros abaixo serão aplicados à exportação selecionada.</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content [formGroup]="filterForm" class="filter-form-content">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Data Inicial</mat-label>
+        <input matInput type="date" formControlName="startDate" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Data Final</mat-label>
+        <input matInput type="date" formControlName="endDate" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Formato de Exportação</mat-label>
+        <mat-select formControlName="format">
+          <mat-option value="PDF">PDF (.pdf)</mat-option>
+          <mat-option value="EXCEL">Excel (.xlsx)</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Grid de Relatórios Disponíveis -->
+  <div class="reports-grid">
+    <!-- Relatório DRE -->
+    @if (canViewFinancial) {
+      <mat-card class="report-card premium-card">
+        <div class="card-icon-container dre-icon">
+          <mat-icon>analytics</mat-icon>
+        </div>
+        <mat-card-header>
+          <mat-card-title>DRE</mat-card-title>
+          <mat-card-subtitle>Demonstração do Resultado do Exercício</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Exibe o resumo das receitas e despesas acumuladas pelo regime de competência (data de vencimento), permitindo analisar a rentabilidade da loja no período.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" [disabled]="loadingDre" (click)="downloadDre()">
+            @if (loadingDre) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              <ng-container>
+                <mat-icon>download</mat-icon>
+                <span>Exportar DRE</span>
+              </ng-container>
+            }
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Relatório Fluxo de Caixa -->
+      <mat-card class="report-card premium-card">
+        <div class="card-icon-container cashflow-icon">
+          <mat-icon>account_balance_wallet</mat-icon>
+        </div>
+        <mat-card-header>
+          <mat-card-title>Fluxo de Caixa</mat-card-title>
+          <mat-card-subtitle>Entradas e Saídas Liquidadas</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Relatório baseado no regime de caixa (data do pagamento real). Exibe a movimentação financeira líquida do caixa e saldo operacional.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" [disabled]="loadingCashFlow" (click)="downloadCashFlow()">
+            @if (loadingCashFlow) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              <ng-container>
+                <mat-icon>download</mat-icon>
+                <span>Exportar Caixa</span>
+              </ng-container>
+            }
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+
+    <!-- Relatório Veículos -->
+    @if (canViewVehicle) {
+      <mat-card class="report-card premium-card">
+        <div class="card-icon-container vehicle-icon">
+          <mat-icon>directions_car</mat-icon>
+        </div>
+        <mat-card-header>
+          <mat-card-title>Estoque de Veículos</mat-card-title>
+          <mat-card-subtitle>Listagem geral e disponibilidade</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Gera o levantamento geral dos veículos da loja/rede, incluindo status (Disponível/Vendido), ano, placa, e valores de compra (se autorizado) e venda.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" [disabled]="loadingVehicle" (click)="downloadVehicle()">
+            @if (loadingVehicle) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              <ng-container>
+                <mat-icon>download</mat-icon>
+                <span>Exportar Veículos</span>
+              </ng-container>
+            }
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+
+    <!-- Relatório Clientes -->
+    @if (canViewPerson) {
+      <mat-card class="report-card premium-card">
+        <div class="card-icon-container customer-icon">
+          <mat-icon>people</mat-icon>
+        </div>
+        <mat-card-header>
+          <mat-card-title>Lista de Clientes</mat-card-title>
+          <mat-card-subtitle>Banco de dados de pessoas</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Exporta a lista completa de clientes cadastrados, com informações de contato (email, telefone), documento (CPF/CNPJ), tipo (Física/Jurídica) e status ativo.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" [disabled]="loadingCustomer" (click)="downloadCustomer()">
+            @if (loadingCustomer) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              <ng-container>
+                <mat-icon>download</mat-icon>
+                <span>Exportar Clientes</span>
+              </ng-container>
+            }
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+</main>
