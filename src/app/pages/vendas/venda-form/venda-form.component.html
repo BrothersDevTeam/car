@@ -131,6 +131,8 @@
               label="Valor Tabela/Venda"
               formControlName="valor"
               [required]="true"
+              [error]="!!(vendaForm.get('valor')?.touched && vendaForm.get('valor')?.invalid)"
+              errorMessage="O valor deve ser maior que zero"
             ></app-currency-input>
 
             <app-currency-input
@@ -138,6 +140,8 @@
               label="Valor Final (Fechamento)"
               formControlName="valorFinal"
               [required]="true"
+              [error]="!!(vendaForm.get('valorFinal')?.touched && vendaForm.get('valorFinal')?.invalid)"
+              errorMessage="O valor final deve ser maior que zero"
             ></app-currency-input>
 
             <mat-form-field appearance="outline" class="col-12">
@@ -183,6 +187,8 @@
                     formControlName="valor"
                     label="Valor"
                     [required]="true"
+                    [error]="!!(pag.get('valor')?.touched && pag.get('valor')?.invalid)"
+                    errorMessage="O valor é obrigatório"
                     class="col-3"
                   ></app-currency-input>
 

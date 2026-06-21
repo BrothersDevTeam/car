@@ -358,13 +358,23 @@
                   <div class="field-container">
                     <label class="modern-label">Custo de Aquisição</label>
                     <span class="helper-text">Preço pago pelo veículo para cálculo de margem</span>
-                    <app-currency-input formControlName="valorCompra" label="Valor de Compra"></app-currency-input>
+                    <app-currency-input
+                      formControlName="valorCompra"
+                      label="Valor de Compra"
+                      [error]="!!(form.get('valorCompra')?.invalid && (form.get('valorCompra')?.touched || submitted))"
+                      errorMessage="Valor inválido"
+                    ></app-currency-input>
                   </div>
 
                   <div class="field-container">
                     <label class="modern-label">Preço de Venda Sugerido</label>
                     <span class="helper-text">Valor base para anúncios e vitrine</span>
-                    <app-currency-input formControlName="valorVenda" label="Preço de Venda"></app-currency-input>
+                    <app-currency-input
+                      formControlName="valorVenda"
+                      label="Preço de Venda"
+                      [error]="!!(form.get('valorVenda')?.invalid && (form.get('valorVenda')?.touched || submitted))"
+                      errorMessage="Valor inválido"
+                    ></app-currency-input>
                   </div>
                 </div>
               </div>
@@ -484,6 +494,8 @@
                           formControlName="valor"
                           label="Valor"
                           [required]="true"
+                          [error]="!!(pag.get('valor')?.invalid && (pag.get('valor')?.touched || submitted))"
+                          errorMessage="Valor é obrigatório"
                         ></app-currency-input>
 
                         <mat-form-field appearance="outline">

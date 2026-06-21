@@ -110,6 +110,8 @@
               label="Valor de Compra (R$)*"
               formControlName="itemValorUnitarioComercial"
               [required]="true"
+              [error]="!!(itemGroup.get('itemValorUnitarioComercial')?.invalid && (itemGroup.get('itemValorUnitarioComercial')?.touched || submitted))"
+              errorMessage="Valor unitário é obrigatório"
               class="full-width"
             ></app-currency-input>
           </div>
@@ -139,6 +141,8 @@
               label="Valor Unitário (R$)*"
               formControlName="itemValorUnitarioComercial"
               [required]="true"
+              [error]="!!(itemGroup.get('itemValorUnitarioComercial')?.invalid && (itemGroup.get('itemValorUnitarioComercial')?.touched || submitted))"
+              errorMessage="Valor unitário é obrigatório"
             ></app-currency-input>
             <app-currency-input
               label="Valor Total (R$)"
@@ -189,12 +193,22 @@
               </mat-form-field>
             </div>
             <div class="tax-row three-cols">
-              <app-currency-input label="Base Calc. ICMS" formControlName="icmsValorBaseCalculo"></app-currency-input>
+              <app-currency-input
+                label="Base Calc. ICMS"
+                formControlName="icmsValorBaseCalculo"
+                [error]="!!(itemGroup.get('icmsValorBaseCalculo')?.invalid && (itemGroup.get('icmsValorBaseCalculo')?.touched || submitted))"
+                errorMessage="Valor inválido"
+              ></app-currency-input>
               <mat-form-field appearance="outline">
                 <mat-label>Alíquota ICMS (%)</mat-label>
                 <input matInput formControlName="icmsAliquota" />
               </mat-form-field>
-              <app-currency-input label="Valor ICMS" formControlName="icmsValor"></app-currency-input>
+              <app-currency-input
+                label="Valor ICMS"
+                formControlName="icmsValor"
+                [error]="!!(itemGroup.get('icmsValor')?.invalid && (itemGroup.get('icmsValor')?.touched || submitted))"
+                errorMessage="Valor inválido"
+              ></app-currency-input>
             </div>
 
             <div class="tax-section-title">PIS / COFINS</div>
@@ -210,24 +224,41 @@
             </div>
 
             <div class="tax-row three-cols">
-              <app-currency-input label="Base Calc. PIS" formControlName="pisValorBaseCalculo"></app-currency-input>
+              <app-currency-input
+                label="Base Calc. PIS"
+                formControlName="pisValorBaseCalculo"
+                [error]="!!(itemGroup.get('pisValorBaseCalculo')?.invalid && (itemGroup.get('pisValorBaseCalculo')?.touched || submitted))"
+                errorMessage="Valor inválido"
+              ></app-currency-input>
               <mat-form-field appearance="outline">
                 <mat-label>Alíquota PIS (%)</mat-label>
                 <input matInput formControlName="pisAliquota" />
               </mat-form-field>
-              <app-currency-input label="Valor PIS" formControlName="pisValor"></app-currency-input>
+              <app-currency-input
+                label="Valor PIS"
+                formControlName="pisValor"
+                [error]="!!(itemGroup.get('pisValor')?.invalid && (itemGroup.get('pisValor')?.touched || submitted))"
+                errorMessage="Valor inválido"
+              ></app-currency-input>
             </div>
 
             <div class="tax-row three-cols">
               <app-currency-input
                 label="Base Calc. COFINS"
                 formControlName="cofinsValorBaseCalculo"
+                [error]="!!(itemGroup.get('cofinsValorBaseCalculo')?.invalid && (itemGroup.get('cofinsValorBaseCalculo')?.touched || submitted))"
+                errorMessage="Valor inválido"
               ></app-currency-input>
               <mat-form-field appearance="outline">
                 <mat-label>Alíquota COFINS (%)</mat-label>
                 <input matInput formControlName="cofinsAliquota" />
               </mat-form-field>
-              <app-currency-input label="Valor COFINS" formControlName="cofinsValor"></app-currency-input>
+              <app-currency-input
+                label="Valor COFINS"
+                formControlName="cofinsValor"
+                [error]="!!(itemGroup.get('cofinsValor')?.invalid && (itemGroup.get('cofinsValor')?.touched || submitted))"
+                errorMessage="Valor inválido"
+              ></app-currency-input>
             </div>
           </div>
         }
