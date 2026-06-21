@@ -1490,30 +1490,32 @@ function purchasePaymentsValidator(control: AbstractControl): ValidationErrors |
   let hasErrors = false;
 
   if (tipoEntrada === 'COMPRA') {
-    if (!supplierId) {
-      errors['supplierRequired'] = true;
-      hasErrors = true;
+    let valorCompra = 0;
+    if (valorCompraStr) {
+      valorCompra = parseFloat(valorCompraStr.toString().replace(/\s/g, '').replace(/\./g, '').replace(',', '.'));
     }
 
-    if (valorCompraStr) {
-      const valorCompra = parseFloat(valorCompraStr.toString().replace(/\s/g, '').replace(/\./g, '').replace(',', '.'));
-      if (valorCompra > 0) {
-        if (!pagamentos || pagamentos.length === 0) {
+    if (valorCompra > 0) {
+      if (!supplierId) {
+        errors['supplierRequired'] = true;
+        hasErrors = true;
+      }
+
+      if (!pagamentos || pagamentos.length === 0) {
+        errors['paymentsMismatch'] = true;
+        hasErrors = true;
+      } else {
+        let total = 0;
+        for (const group of pagamentos.controls) {
+          const valorParcelaVal = group.get('valor')?.value;
+          if (valorParcelaVal) {
+            total += parseFloat(valorParcelaVal.toString().replace(/\s/g, '').replace(/\./g, '').replace(',', '.'));
+          }
+        }
+        const diff = Math.abs(total - valorCompra);
+        if (diff > 0.01) {
           errors['paymentsMismatch'] = true;
           hasErrors = true;
-        } else {
-          let total = 0;
-          for (const group of pagamentos.controls) {
-            const valorParcelaVal = group.get('valor')?.value;
-            if (valorParcelaVal) {
-              total += parseFloat(valorParcelaVal.toString().replace(/\s/g, '').replace(/\./g, '').replace(',', '.'));
-            }
-          }
-          const diff = Math.abs(total - valorCompra);
-          if (diff > 0.01) {
-            errors['paymentsMismatch'] = true;
-            hasErrors = true;
-          }
         }
       }
     }

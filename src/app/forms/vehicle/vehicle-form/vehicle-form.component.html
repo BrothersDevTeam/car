@@ -326,7 +326,7 @@
                     Informações do Fornecedor
                     <span
                       class="required-asterisk"
-                      *ngIf="form.get('tipoEntrada')?.value === 'COMPRA'"
+                      *ngIf="showFinanceiroTab"
                       style="color: #f44336"
                     >
                       *
@@ -364,6 +364,52 @@
                       [error]="!!(form.get('valorCompra')?.invalid && (form.get('valorCompra')?.touched || submitted))"
                       errorMessage="Valor inválido"
                     ></app-currency-input>
+
+
+
+                    <!-- Alerta de aviso quando o somatório dos pagamentos não bate -->
+                    <div
+                      *ngIf="showFinanceiroTab && form.hasError('paymentsMismatch')"
+                      class="animate-fade-in"
+                      style="
+                        margin-top: 4px;
+                        padding: 10px 12px;
+                        background: #fbe9e7;
+                        color: #d84315;
+                        border-radius: 8px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 8px;
+                        font-size: 13px;
+                        font-weight: 500;
+                        border: 1px solid rgba(216, 67, 21, 0.15);
+                      "
+                    >
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <mat-icon style="color: #d84315; font-size: 20px; width: 20px; height: 20px;">warning</mat-icon>
+                        <span>A soma dos pagamentos deve ser igual ao Valor de Compra.</span>
+                      </div>
+                      <button
+                        type="button"
+                        mat-button
+                        (click)="selectedTabIndex.set(2)"
+                        style="
+                          font-size: 11px;
+                          font-weight: 600;
+                          height: 28px;
+                          line-height: 28px;
+                          padding: 0 10px;
+                          background: #ffffff;
+                          border: 1px solid rgba(216, 67, 21, 0.3);
+                          border-radius: 6px;
+                          color: #d84315;
+                          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+                        "
+                      >
+                        Ajustar Financeiro
+                      </button>
+                    </div>
                   </div>
 
                   <div class="field-container">
