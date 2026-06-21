@@ -50,6 +50,15 @@ export class SideNavComponent {
   private initializeMenuItems() {
     const baseMenu: MenuItem[] = [];
 
+    // Dashboard (exclusivo ROOT_ADMIN)
+    if (this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+      baseMenu.unshift({
+        icon: 'dashboard',
+        label: 'Dashboard',
+        route: '/dashboard',
+      });
+    }
+
     // Lojas
     if (
       this.authService.hasAuthority(Authorizations.READ_STORE_SELF) ||
@@ -60,6 +69,19 @@ export class SideNavComponent {
         icon: 'store',
         label: 'Lojas',
         route: '/store',
+      });
+    }
+
+    // Financeiro
+    if (
+      this.authService.hasAuthority(Authorizations.READ_FINANCIAL_STORE) ||
+      this.authService.hasAuthority(Authorizations.READ_FINANCIAL_NETWORK) ||
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
+    ) {
+      baseMenu.push({
+        icon: 'attach_money',
+        label: 'Financeiro',
+        route: '/financial',
       });
     }
 
@@ -109,28 +131,6 @@ export class SideNavComponent {
         icon: 'description',
         label: 'Notas Fiscais',
         route: '/nfe',
-      });
-    }
-
-    // Financeiro
-    if (
-      this.authService.hasAuthority(Authorizations.READ_FINANCIAL_STORE) ||
-      this.authService.hasAuthority(Authorizations.READ_FINANCIAL_NETWORK) ||
-      this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
-    ) {
-      baseMenu.push({
-        icon: 'attach_money',
-        label: 'Financeiro',
-        route: '/financial',
-      });
-    }
-
-    // Dashboard (exclusivo ROOT_ADMIN)
-    if (this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
-      baseMenu.unshift({
-        icon: 'dashboard',
-        label: 'Dashboard',
-        route: '/dashboard',
       });
     }
 

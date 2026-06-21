@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { FinancialService } from '@services/financial.service';
 import { FinancialTransaction } from '@interfaces/financial';
 import { ToastrService } from 'ngx-toastr';
+import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
 
 @Component({
   selector: 'app-transaction-payment-dialog',
@@ -23,6 +24,7 @@ import { ToastrService } from 'ngx-toastr';
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
+    CurrencyInputComponent,
   ],
   template: `
     <h2 mat-dialog-title class="dialog-title">
@@ -61,19 +63,14 @@ import { ToastrService } from 'ngx-toastr';
 
         <div class="form-grid">
           <!-- Valor a Pagar -->
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Valor do Pagamento (R$)</mat-label>
-            <input matInput type="number" step="0.01" formControlName="amountPaid" placeholder="0.00" />
-            @if (paymentForm.get('amountPaid')?.hasError('required')) {
-              <mat-error>Valor é obrigatório</mat-error>
-            }
-            @if (paymentForm.get('amountPaid')?.hasError('min')) {
-              <mat-error>Valor deve ser maior que zero</mat-error>
-            }
-            @if (paymentForm.get('amountPaid')?.hasError('max')) {
-              <mat-error>Valor não pode exceder o saldo devedor + encargos</mat-error>
-            }
-          </mat-form-field>
+          <app-currency-input
+            formControlName="amountPaid"
+            label="Valor do Pagamento"
+            [required]="true"
+            [error]="!!(paymentForm.get('amountPaid')?.touched && paymentForm.get('amountPaid')?.invalid)"
+            [errorMessage]="getAmountPaidErrorMessage()"
+            class="w-100"
+          ></app-currency-input>
 
           <!-- Forma de Pagamento -->
           <mat-form-field appearance="outline" class="w-100">
@@ -89,22 +86,31 @@ import { ToastrService } from 'ngx-toastr';
           </mat-form-field>
 
           <!-- Multa -->
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Multa (R$)</mat-label>
-            <input matInput type="number" step="0.01" formControlName="penaltyAmount" placeholder="0.00" />
-          </mat-form-field>
+          <app-currency-input
+            formControlName="penaltyAmount"
+            label="Multa"
+            [error]="!!(paymentForm.get('penaltyAmount')?.touched && paymentForm.get('penaltyAmount')?.invalid)"
+            errorMessage="A multa não pode ser negativa"
+            class="w-100"
+          ></app-currency-input>
 
           <!-- Juros -->
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Juros (R$)</mat-label>
-            <input matInput type="number" step="0.01" formControlName="interestAmount" placeholder="0.00" />
-          </mat-form-field>
+          <app-currency-input
+            formControlName="interestAmount"
+            label="Juros"
+            [error]="!!(paymentForm.get('interestAmount')?.touched && paymentForm.get('interestAmount')?.invalid)"
+            errorMessage="Os juros não podem ser negativos"
+            class="w-100"
+          ></app-currency-input>
 
           <!-- Desconto -->
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Desconto (R$)</mat-label>
-            <input matInput type="number" step="0.01" formControlName="discountAmount" placeholder="0.00" />
-          </mat-form-field>
+          <app-currency-input
+            formControlName="discountAmount"
+            label="Desconto"
+            [error]="!!(paymentForm.get('discountAmount')?.touched && paymentForm.get('discountAmount')?.invalid)"
+            errorMessage="O desconto não pode ser negativo"
+            class="w-100"
+          ></app-currency-input>
 
           <!-- Data do Pagamento -->
           <mat-form-field appearance="outline" class="w-100">
@@ -288,6 +294,14 @@ export class TransactionPaymentDialogComponent implements OnInit {
     if (amountPaidControl) {
       amountPaidControl.setValidators([Validators.required, Validators.min(0.01), Validators.max(maxAllowed)]);
     }
+  }
+
+  getAmountPaidErrorMessage(): string {
+    const control = this.paymentForm?.get('amountPaid');
+    if (control?.hasError('required')) return 'Valor é obrigatório';
+    if (control?.hasError('min')) return 'Valor deve ser maior que zero';
+    if (control?.hasError('max')) return 'Valor não pode exceder o saldo devedor';
+    return 'Campo inválido';
   }
 
   private getLocalDateTimeString(): string {

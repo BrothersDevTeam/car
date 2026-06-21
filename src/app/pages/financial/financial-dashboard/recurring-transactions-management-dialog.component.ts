@@ -22,6 +22,7 @@ import { CostCenterService } from '@services/cost-center.service';
 import { IRecurringTransaction } from '@interfaces/recurring-transaction';
 import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
 import { ICostCenter } from '@interfaces/cost-center';
+import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
 
 @Component({
   selector: 'app-recurring-transactions-management-dialog',
@@ -42,6 +43,7 @@ import { ICostCenter } from '@interfaces/cost-center';
     MatTooltipModule,
     MatMenuModule,
     CustomSelectComponent,
+    CurrencyInputComponent,
   ],
   template: `
     <h2 mat-dialog-title class="dialog-title">
@@ -206,12 +208,14 @@ import { ICostCenter } from '@interfaces/cost-center';
               <mat-error *ngIf="form.get('type')?.hasError('required')">O tipo é obrigatório</mat-error>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="flex-grow">
-              <mat-label>Valor (R$)</mat-label>
-              <input matInput type="number" formControlName="amount" placeholder="0,00" step="0.01" min="0.01" />
-              <mat-error *ngIf="form.get('amount')?.hasError('required')">O valor é obrigatório</mat-error>
-              <mat-error *ngIf="form.get('amount')?.hasError('min')">O valor deve ser maior que zero</mat-error>
-            </mat-form-field>
+            <app-currency-input
+              formControlName="amount"
+              label="Valor"
+              [required]="true"
+              [error]="!!(form.get('amount')?.touched && form.get('amount')?.invalid)"
+              errorMessage="O valor deve ser maior que zero"
+              class="flex-grow"
+            ></app-currency-input>
           </div>
 
           <div class="form-row">

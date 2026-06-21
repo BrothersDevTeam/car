@@ -2,7 +2,7 @@ import { ToastrService } from 'ngx-toastr';
 
 import { inject, OnInit, signal, Component, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { catchError, debounceTime, Observable, of, Subject, Subscription, filter } from 'rxjs';
 import { Authorizations } from '../../enums/authorizations';
 import { CanComponentDeactivate } from '@guards/unsaved-changes.guard';
@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelect, MatSelectModule } from '@angular/material/select';
+import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -530,7 +530,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
       const formComponent = this.getActiveFormComponent();
       if (formComponent && this.hasCanDeactivateMethods(formComponent)) {
         const canSave = formComponent.canSaveForm();
-        
+
         let suggestedDraftName = '';
         if (formComponent.form) {
           suggestedDraftName = formComponent.form.value.name || '';

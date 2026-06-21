@@ -27,6 +27,7 @@ export class CurrencyInputComponent implements ControlValueAccessor {
   @Input() hint: string = '';
   @Input() error: boolean = false;
   @Input() inputName: string = '';
+  @Input() errorMessage: string = 'Campo obrigatório';
 
   // Valor interno exibido no input (formatado como string BRL)
   displayValue = signal<string>('');
@@ -62,7 +63,12 @@ export class CurrencyInputComponent implements ControlValueAccessor {
 
   onInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    let value = input.value;
+    const value = input.value;
+
+    // Guarda a posição do cursor em relação ao final do input
+    const selectionStart = input.selectionStart || 0;
+    const oldLength = value.length;
+    const cursorOffsetFromEnd = oldLength - selectionStart;
 
     // Remove tudo que não é número
     const digits = value.replace(/\D/g, '');
@@ -73,9 +79,14 @@ export class CurrencyInputComponent implements ControlValueAccessor {
     this.numericValue = rawValue || 0;
 
     // Atualiza o display durante a digitação para manter a máscara "viva"
-    // ou podemos formatar apenas no blur. Para "Premium", máscara viva é melhor.
-    input.value = this.formatBRL(this.numericValue);
-    this.displayValue.set(input.value);
+    const formatted = this.formatBRL(this.numericValue);
+    input.value = formatted;
+    this.displayValue.set(formatted);
+
+    // Restaura a posição do cursor relativa ao final
+    const newLength = formatted.length;
+    const newPosition = Math.max(0, newLength - cursorOffsetFromEnd);
+    input.setSelectionRange(newPosition, newPosition);
 
     this.onChange(this.numericValue);
   }
