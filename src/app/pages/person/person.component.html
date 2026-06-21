@@ -159,22 +159,26 @@
   }
   @if (openForm()) {
     <app-drawer (closeDrawer)="handleConfirmationCloseDrawer()">
-      <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="selectedTabIndex = $event">
+      <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="handleTabChange($event)">
         <mat-tab label="Pessoa Física" [disabled]="selectedPerson && selectedPerson.legalEntity">
-          <app-natural-person-form
-            [dataForm]="!selectedPerson?.legalEntity ? selectedPerson : null"
-            [draft]="selectedDraft"
-            (formSubmitted)="onFormSubmitted()"
-            (formChanged)="handleFormChanged($event)"
-          />
+          <ng-template matTabContent>
+            <app-natural-person-form
+              [dataForm]="!selectedPerson?.legalEntity ? selectedPerson : null"
+              [draft]="selectedDraft"
+              (formSubmitted)="onFormSubmitted()"
+              (formChanged)="handleFormChanged($event)"
+            />
+          </ng-template>
         </mat-tab>
         <mat-tab label="Pessoa Jurídica" [disabled]="selectedPerson && !selectedPerson.legalEntity">
-          <app-legal-entity-form
-            [dataForm]="selectedPerson?.legalEntity ? selectedPerson : null"
-            [draft]="selectedDraft"
-            (formSubmitted)="onFormSubmitted()"
-            (formChanged)="handleFormChanged($event)"
-          />
+          <ng-template matTabContent>
+            <app-legal-entity-form
+              [dataForm]="selectedPerson?.legalEntity ? selectedPerson : null"
+              [draft]="selectedDraft"
+              (formSubmitted)="onFormSubmitted()"
+              (formChanged)="handleFormChanged($event)"
+            />
+          </ng-template>
         </mat-tab>
       </mat-tab-group>
     </app-drawer>

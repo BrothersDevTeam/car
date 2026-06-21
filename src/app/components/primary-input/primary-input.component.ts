@@ -288,4 +288,13 @@ export class PrimaryInputComponent implements ControlValueAccessor {
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
+
+  /**
+   * Aplica o foco diretamente no elemento de input nativo
+   */
+  focus(): void {
+    if (this.inputElement) {
+      this.inputElement.nativeElement.focus();
+    }
+  }
 }

@@ -84,6 +84,9 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
   @ViewChild('submitButton', { static: false, read: ElementRef })
   submitButton!: ElementRef<HTMLButtonElement>;
 
+  @ViewChild('nameInput', { static: false })
+  nameInput?: PrimaryInputComponent;
+
   /**
    * Armazena o valor inicial do formulário para comparação
    * Usado para detectar se houve mudanças não salvas
@@ -230,6 +233,10 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
         this.loadRelationships();
       }),
     );
+
+    if (this.showFormFields) {
+      this.focusNameField();
+    }
   }
 
   private loadRelationships() {
@@ -747,6 +754,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     if (draftId === 'new') {
       this.resetForm();
       this.selectedDraftId = 'new';
+      this.focusNameField();
       return;
     }
 
@@ -754,6 +762,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     if (!draft) return;
 
     this.loadDraftData(draft);
+    this.focusNameField();
   }
 
   /**
@@ -1023,6 +1032,20 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
       active: true,
       legalEntity: true,
     });
+  }
+
+  /**
+   * Foca automaticamente no campo "Nome da Empresa (Razão Social)"
+   */
+  focusNameField(): void {
+    setTimeout(() => {
+      if (this.nameInput) {
+        this.nameInput.focus();
+        console.log('[focusNameField] Foco aplicado no campo Razão Social');
+      } else {
+        console.warn('[focusNameField] ViewChild nameInput não está disponível');
+      }
+    }, 100);
   }
 
   getSelectedRelationshipName(): string {

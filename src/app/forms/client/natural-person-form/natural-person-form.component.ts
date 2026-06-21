@@ -97,6 +97,9 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
   @ViewChild('usernameInput', { static: false, read: ElementRef })
   usernameInput?: ElementRef;
 
+  @ViewChild('nameInput', { static: false })
+  nameInput?: PrimaryInputComponent;
+
   @Input() dataForm: Person | null = null;
   @Input() draft: FormDraft | null | undefined = null; // Added to receive draft from parent
   @Output() formSubmitted = new EventEmitter<void>();
@@ -733,6 +736,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       // Usuário escolheu "Iniciar novo cadastro"
       this.resetForm();
       this.selectedDraftId = 'new';
+      this.focusNameField();
       return;
     }
 
@@ -743,6 +747,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
     }
 
     this.loadDraftData(draft);
+    this.focusNameField();
   }
 
   /**
@@ -834,6 +839,10 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
         this.loadRelationships();
       }),
     );
+
+    if (this.showFormFields) {
+      this.focusNameField();
+    }
   }
 
   private loadRelationships() {
@@ -1246,6 +1255,20 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
         }
       } else {
         console.warn('[focusUsernameField] ViewChild usernameInput não está disponível');
+      }
+    }, 100);
+  }
+
+  /**
+   * Foca automaticamente no campo "Nome completo"
+   */
+  focusNameField(): void {
+    setTimeout(() => {
+      if (this.nameInput) {
+        this.nameInput.focus();
+        console.log('[focusNameField] Foco aplicado no campo Nome completo');
+      } else {
+        console.warn('[focusNameField] ViewChild nameInput não está disponível');
       }
     }, 100);
   }

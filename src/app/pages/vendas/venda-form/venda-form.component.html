@@ -304,16 +304,20 @@
   <app-drawer (closeDrawer)="handleClosePersonDrawer()">
     <mat-tab-group [selectedIndex]="selectedPersonToEdit()?.legalEntity ? 1 : 0">
       <mat-tab label="Pessoa Física" [disabled]="selectedPersonToEdit() && selectedPersonToEdit()!.legalEntity">
-        <app-natural-person-form
-          [dataForm]="!selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null"
-          (formSubmitted)="onPersonFormSubmitted()"
-        />
+        <ng-template matTabContent>
+          <app-natural-person-form
+            [dataForm]="!selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null"
+            (formSubmitted)="onPersonFormSubmitted()"
+          />
+        </ng-template>
       </mat-tab>
       <mat-tab label="Pessoa Jurídica" [disabled]="selectedPersonToEdit() && !selectedPersonToEdit()!.legalEntity">
-        <app-legal-entity-form
-          [dataForm]="selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null"
-          (formSubmitted)="onPersonFormSubmitted()"
-        />
+        <ng-template matTabContent>
+          <app-legal-entity-form
+            [dataForm]="selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null"
+            (formSubmitted)="onPersonFormSubmitted()"
+          />
+        </ng-template>
       </mat-tab>
     </mat-tab-group>
   </app-drawer>

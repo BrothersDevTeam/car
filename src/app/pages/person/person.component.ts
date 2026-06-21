@@ -517,6 +517,91 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
     });
   }
 
+  /**
+   * Intercepta a mudança de abas no cadastro de pessoas
+   * Se houver alterações não salvas no formulário atual, solicita confirmação do usuário
+   */
+  handleTabChange(newIndex: number) {
+    if (newIndex === this.selectedTabIndex) {
+      return;
+    }
+
+    if (this.actionsService.hasFormChanges()) {
+      const formComponent = this.getActiveFormComponent();
+      if (formComponent && this.hasCanDeactivateMethods(formComponent)) {
+        const canSave = formComponent.canSaveForm();
+        
+        let suggestedDraftName = '';
+        if (formComponent.form) {
+          suggestedDraftName = formComponent.form.value.name || '';
+        }
+
+        const dialogRef = this.dialog.open(UnsavedChangesDialogComponent, {
+          width: '450px',
+          disableClose: true,
+          data: {
+            canSave,
+            message: canSave
+              ? 'Deseja salvar as alterações antes de mudar de perfil?'
+              : 'Há campos obrigatórios não preenchidos. Deseja salvar um rascunho para continuar depois?',
+            currentDraftName: formComponent.currentDraftName,
+            suggestedDraftName: formComponent.suggestedDraftName || suggestedDraftName,
+          },
+        });
+
+        dialogRef.afterClosed().subscribe((result: string | undefined) => {
+          if (!result || result === 'cancel') {
+            // Cancela a mudança: força o tab-group a reverter para a aba anterior
+            const temp = this.selectedTabIndex;
+            this.selectedTabIndex = -1;
+            setTimeout(() => {
+              this.selectedTabIndex = temp;
+            });
+            return;
+          }
+
+          if (result === 'discard') {
+            // Descarta alterações e atualiza a aba
+            this.actionsService.hasFormChanges.set(false);
+            this.selectedTabIndex = newIndex;
+            return;
+          }
+
+          if (result === 'save' && canSave) {
+            formComponent.saveForm(false).subscribe((success: boolean) => {
+              if (success) {
+                this.actionsService.hasFormChanges.set(false);
+                this.selectedTabIndex = newIndex;
+              } else {
+                // Se falhar no salvamento, reverte
+                const temp = this.selectedTabIndex;
+                this.selectedTabIndex = -1;
+                setTimeout(() => {
+                  this.selectedTabIndex = temp;
+                });
+              }
+            });
+            return;
+          }
+
+          if (result.startsWith('draft:')) {
+            const draftName = result.substring(6);
+            const selectedDraftId = formComponent.selectedDraftId;
+            const existingDraftId = selectedDraftId && selectedDraftId !== 'new' ? selectedDraftId : undefined;
+
+            formComponent.saveLocalDraft(false, draftName, existingDraftId, false); // false para closeAfterSave
+            this.actionsService.hasFormChanges.set(false);
+            this.selectedTabIndex = newIndex;
+            return;
+          }
+        });
+        return;
+      }
+    }
+
+    this.selectedTabIndex = newIndex;
+  }
+
   handleCloseDrawer() {
     this.openForm.set(false);
     this.openInfo.set(false);
