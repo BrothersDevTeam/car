@@ -28,7 +28,9 @@ export class AuthService {
     private dialog: MatDialog,
     private actionsService: ActionsService,
     private injector: Injector,
-  ) {}
+  ) {
+    this.startKeepAlive();
+  }
 
   login(email: string, password: string) {
     return this.httpClient
@@ -139,5 +141,24 @@ export class AuthService {
     const token = this.getDecodedToken();
     if (!token) return false;
     return Date.now() < token.exp * 1000; // exp está em segundos, Date.now em ms
+  }
+
+  getUserId(): string | null {
+    return this.getDecodedToken()?.sub ?? null;
+  }
+
+  private startKeepAlive(): void {
+    setInterval(() => {
+      if (this.isLoggedIn()) {
+        const userId = this.getUserId();
+        if (userId) {
+          this.httpClient.get(`/api/users/${userId}`).subscribe({
+            error: (err) => {
+              console.debug('Keep alive ping error', err);
+            }
+          });
+        }
+      }
+    }, 180000); // 3 minutos
   }
 }

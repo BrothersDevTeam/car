@@ -221,6 +221,10 @@ export class StoreEmployeesDialogComponent implements OnInit {
   revokingAccessFor: string | null = null; // personId com revogação em andamento
   updatingRelationshipFor: string | null = null; // personId mudando cargo
 
+  // Controle de visibilidade das senhas
+  passwordVisible = false;
+  confirmPasswordVisible = false;
+
   // Busca de novas pessoas
   personSearchControl = new FormControl('');
   searchPeopleResults: Person[] = [];
@@ -377,6 +381,9 @@ export class StoreEmployeesDialogComponent implements OnInit {
       return;
     }
 
+    this.passwordVisible = false;
+    this.confirmPasswordVisible = false;
+
     // Cria o form e aplica preset baseado no perfil da pessoa
     const form = this.fb.group(
       {
@@ -387,6 +394,8 @@ export class StoreEmployeesDialogComponent implements OnInit {
       },
       { validators: this.passwordMatchValidator },
     );
+
+    this.applyPreset(person, form);
 
     this.createAccessForms.set(id, form);
     this.creatingAccessFor = id;
@@ -497,6 +506,8 @@ export class StoreEmployeesDialogComponent implements OnInit {
         this.toastr.success(`Acesso criado para ${person.name}!`);
         this.savingAccessFor = null;
         this.creatingAccessFor = null;
+        this.passwordVisible = false;
+        this.confirmPasswordVisible = false;
         this.createAccessForms.delete(person.personId);
         this.loadEmployees(); // Recarrega lista para atualizar hasUser
       },
@@ -633,6 +644,14 @@ export class StoreEmployeesDialogComponent implements OnInit {
         this.toastr.error('Erro ao buscar permissões do funcionário selecionado.');
       },
     });
+  }
+
+  togglePasswordVisibility(): void {
+    this.passwordVisible = !this.passwordVisible;
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.confirmPasswordVisible = !this.confirmPasswordVisible;
   }
 
   close(): void {

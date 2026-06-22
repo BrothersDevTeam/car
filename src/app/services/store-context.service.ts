@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthService } from './auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { Authorizations } from '../enums/authorizations';
 
 @Injectable({
   providedIn: 'root',
@@ -19,11 +20,23 @@ export class StoreContextService {
     const savedStoreId = localStorage.getItem(this.STORE_KEY);
     const defaultStoreId = this.authService.getStoreId();
 
-    // Prioriza a loja salva no localStorage, contanto que o usuário esteja logado
-    if (savedStoreId && defaultStoreId) {
-      this.storeIdSubject.next(savedStoreId);
-    } else if (defaultStoreId) {
-      this.storeIdSubject.next(defaultStoreId);
+    const isRootAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+    const canReadStoreNetwork = this.authService.hasAuthority(Authorizations.READ_STORE_NETWORK);
+
+    // Se não for admin e não puder ver a rede inteira, ele só pode acessar a sua própria loja (defaultStoreId)
+    if (!isRootAdmin && !canReadStoreNetwork) {
+      if (defaultStoreId) {
+        this.storeIdSubject.next(defaultStoreId);
+        // Limpa o localStorage para evitar sujeira de outra sessão
+        localStorage.removeItem(this.STORE_KEY);
+      }
+    } else {
+      // Admin ou Gerente de Rede podem selecionar outras lojas, mantendo a preferência do localStorage
+      if (savedStoreId && defaultStoreId) {
+        this.storeIdSubject.next(savedStoreId);
+      } else if (defaultStoreId) {
+        this.storeIdSubject.next(defaultStoreId);
+      }
     }
   }
 
@@ -64,11 +77,17 @@ export class StoreContextService {
     const defaultStoreId = this.authService.getStoreId();
 
     if (defaultStoreId) {
-      // Se estamos logando/atualizando, tenta manter a preferência do localStorage
-      const savedStoreId = localStorage.getItem(this.STORE_KEY);
-      this.storeIdSubject.next(savedStoreId || defaultStoreId);
+      const isRootAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+      const canReadStoreNetwork = this.authService.hasAuthority(Authorizations.READ_STORE_NETWORK);
+
+      if (!isRootAdmin && !canReadStoreNetwork) {
+        this.storeIdSubject.next(defaultStoreId);
+        localStorage.removeItem(this.STORE_KEY);
+      } else {
+        const savedStoreId = localStorage.getItem(this.STORE_KEY);
+        this.storeIdSubject.next(savedStoreId || defaultStoreId);
+      }
     } else {
-      // Se não há token (logout), limpa tudo
       localStorage.removeItem(this.STORE_KEY);
       this.storeIdSubject.next(null);
     }

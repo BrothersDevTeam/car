@@ -212,11 +212,21 @@
                       <mat-label>Senha</mat-label>
                       <input
                         matInput
-                        type="password"
+                        [type]="passwordVisible ? 'text' : 'password'"
                         formControlName="password"
                         placeholder="Mínimo 6 caracteres"
                         autocomplete="new-password"
                       />
+                      <button
+                        mat-icon-button
+                        matSuffix
+                        type="button"
+                        (click)="togglePasswordVisibility()"
+                        [attr.aria-label]="'Alternar visibilidade da senha'"
+                        style="border: none; background: transparent; cursor: pointer;"
+                      >
+                        <mat-icon>{{ passwordVisible ? 'visibility_off' : 'visibility' }}</mat-icon>
+                      </button>
                       @if (getForm(person.personId).get('password')?.hasError('required')) {
                         <mat-error>Obrigatório</mat-error>
                       }
@@ -227,7 +237,22 @@
 
                     <mat-form-field appearance="outline">
                       <mat-label>Confirmar Senha</mat-label>
-                      <input matInput type="password" formControlName="confirmPassword" autocomplete="new-password" />
+                      <input
+                        matInput
+                        [type]="confirmPasswordVisible ? 'text' : 'password'"
+                        formControlName="confirmPassword"
+                        autocomplete="new-password"
+                      />
+                      <button
+                        mat-icon-button
+                        matSuffix
+                        type="button"
+                        (click)="toggleConfirmPasswordVisibility()"
+                        [attr.aria-label]="'Alternar visibilidade da confirmação de senha'"
+                        style="border: none; background: transparent; cursor: pointer;"
+                      >
+                        <mat-icon>{{ confirmPasswordVisible ? 'visibility_off' : 'visibility' }}</mat-icon>
+                      </button>
                       @if (getForm(person.personId).errors?.['passwordMismatch']) {
                         <mat-error>As senhas não coincidem</mat-error>
                       }

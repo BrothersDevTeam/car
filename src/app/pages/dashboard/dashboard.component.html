@@ -99,4 +99,82 @@
       <h3>Não foi possível carregar os dados do dashboard.</h3>
     </div>
   }
+  @if (canViewActiveSessions) {
+    <mat-card class="active-sessions-card mat-elevation-z2">
+      <mat-card-header class="sessions-header">
+        <div mat-card-avatar class="card-icon active-icon">
+          <mat-icon class="pulse-green">people</mat-icon>
+        </div>
+        <div class="header-titles">
+          <mat-card-title>Usuários Online</mat-card-title>
+          <mat-card-subtitle>Sessões ativas no sistema com tempo de atividade em tempo real</mat-card-subtitle>
+        </div>
+      </mat-card-header>
+      
+      <mat-card-content class="sessions-content">
+        @if (activeSessions.length > 0) {
+          <div class="table-responsive">
+            <table class="premium-table">
+              <thead>
+                <tr>
+                  <th>Usuário</th>
+                  <th>Loja Logada</th>
+                  <th>Endereço IP</th>
+                  <th>Dispositivo / Plataforma</th>
+                  <th>Tempo de Atividade</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (session of activeSessions; track session.sessionId) {
+                  <tr class="session-row">
+                    <td>
+                      <div class="user-cell">
+                        <div class="user-avatar-container">
+                          @if (session.user.imageUrl) {
+                            <img [src]="session.user.imageUrl" class="user-avatar" alt="Avatar" />
+                          } @else {
+                            <div class="user-avatar-placeholder">
+                              {{ (session.user.person?.name || session.user.email).substring(0, 2).toUpperCase() }}
+                            </div>
+                          }
+                          <span class="status-indicator online"></span>
+                        </div>
+                        <div class="user-info">
+                          <span class="user-name">{{ session.user.person?.name || 'Usuário do Sistema' }}</span>
+                          <span class="user-email">{{ session.user.email }}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="store-badge">
+                        <mat-icon>store</mat-icon>
+                        {{ session.storeName }}
+                      </span>
+                    </td>
+                    <td class="ip-cell">
+                      <code>{{ session.ipAddress || 'Localhost' }}</code>
+                    </td>
+                    <td class="ua-cell">
+                      <span class="ua-text">{{ session.userAgent || 'Navegador' }}</span>
+                    </td>
+                    <td>
+                      <div class="time-cell">
+                        <mat-icon class="timer-icon">schedule</mat-icon>
+                        <span class="time-text">{{ calculateActiveTime(session.createdAt) }}</span>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="empty-sessions">
+            <mat-icon class="empty-icon">people_outline</mat-icon>
+            <p>Nenhum outro usuário online no momento.</p>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
 </main>

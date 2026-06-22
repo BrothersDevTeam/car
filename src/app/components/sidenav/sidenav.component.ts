@@ -50,14 +50,12 @@ export class SideNavComponent {
   private initializeMenuItems() {
     const baseMenu: MenuItem[] = [];
 
-    // Dashboard (exclusivo ROOT_ADMIN)
-    if (this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
-      baseMenu.unshift({
-        icon: 'dashboard',
-        label: 'Dashboard',
-        route: '/dashboard',
-      });
-    }
+    // Dashboard (exibido para todos os usuários autenticados)
+    baseMenu.unshift({
+      icon: 'dashboard',
+      label: 'Dashboard',
+      route: '/dashboard',
+    });
 
     // Lojas
     if (
