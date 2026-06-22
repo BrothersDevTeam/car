@@ -11,6 +11,8 @@ import { FinancialService } from '@services/financial.service';
 import { FinancialTransaction } from '@interfaces/financial';
 import { ToastrService } from 'ngx-toastr';
 import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
+import { CashRegisterService } from '@services/cash-register.service';
+import { ICashRegister, ICashRegisterSession } from '@interfaces/cash-register';
 
 @Component({
   selector: 'app-transaction-payment-dialog',
@@ -82,6 +84,22 @@ import { CurrencyInputComponent } from '@components/currency-input/currency-inpu
             </mat-select>
             @if (paymentForm.get('paymentMethod')?.hasError('required')) {
               <mat-error>Forma de pagamento é obrigatória</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Caixa Destino -->
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Caixa Destino/Origem</mat-label>
+            <mat-select formControlName="cashRegisterId">
+              <mat-option value="">Selecione um Caixa (Automático se houver apenas um aberto)</mat-option>
+              @for (item of activeRegisters; track item.register.cashRegisterId) {
+                <mat-option [value]="item.register.cashRegisterId">
+                  {{ item.register.name }}
+                </mat-option>
+              }
+            </mat-select>
+            @if (loadingRegisters) {
+              <mat-hint>Carregando caixas...</mat-hint>
             }
           </mat-form-field>
 
@@ -209,6 +227,7 @@ import { CurrencyInputComponent } from '@components/currency-input/currency-inpu
 export class TransactionPaymentDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
   private financialService = inject(FinancialService);
+  private cashRegisterService = inject(CashRegisterService);
   private toastr = inject(ToastrService);
   private dialogRef = inject(MatDialogRef<TransactionPaymentDialogComponent>);
   data = inject<{ transaction: FinancialTransaction }>(MAT_DIALOG_DATA);
@@ -216,6 +235,8 @@ export class TransactionPaymentDialogComponent implements OnInit {
   paymentForm!: FormGroup;
   submitting = false;
   daysOverdue = 0;
+  activeRegisters: { register: ICashRegister; session: ICashRegisterSession }[] = [];
+  loadingRegisters = false;
 
   paymentMethods = [
     { value: 'PIX', label: 'Pix' },
@@ -245,7 +266,10 @@ export class TransactionPaymentDialogComponent implements OnInit {
       interestAmount: [0, [Validators.min(0)]],
       discountAmount: [0, [Validators.min(0)]],
       paymentDate: [this.getLocalDateTimeString(), Validators.required],
+      cashRegisterId: [''],
     });
+
+    this.loadActiveRegisters();
 
     // Carregar configurações da loja para calcular juros sugeridos
     this.financialService.getStoreSettings(this.data.transaction.storeId).subscribe({
@@ -311,6 +335,39 @@ export class TransactionPaymentDialogComponent implements OnInit {
     return localISOTime;
   }
 
+  loadActiveRegisters(): void {
+    const storeId = this.data.transaction.storeId;
+    this.loadingRegisters = true;
+    this.cashRegisterService.getCashRegisters(storeId).subscribe({
+      next: (list) => {
+        const promises = list.map((reg) => {
+          return new Promise<void>((resolve) => {
+            this.cashRegisterService.getCurrentSession(reg.cashRegisterId).subscribe({
+              next: (session) => {
+                if (session && session.status === 'OPEN') {
+                  this.activeRegisters.push({ register: reg, session });
+                }
+                resolve();
+              },
+              error: () => resolve(),
+            });
+          });
+        });
+
+        Promise.all(promises).then(() => {
+          this.loadingRegisters = false;
+          if (this.activeRegisters.length > 0) {
+            this.paymentForm.get('cashRegisterId')?.setValue(this.activeRegisters[0].register.cashRegisterId);
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Erro ao carregar caixas ativos', err);
+        this.loadingRegisters = false;
+      },
+    });
+  }
+
   onSubmit(): void {
     if (this.paymentForm.invalid) return;
 
@@ -324,6 +381,7 @@ export class TransactionPaymentDialogComponent implements OnInit {
       penaltyAmount: formVal.penaltyAmount,
       paymentDate: new Date(formVal.paymentDate).toISOString(),
       paymentMethod: formVal.paymentMethod,
+      cashRegisterId: formVal.cashRegisterId || null,
     };
 
     this.financialService.payTransaction(this.data.transaction.financialTransactionId, request).subscribe({

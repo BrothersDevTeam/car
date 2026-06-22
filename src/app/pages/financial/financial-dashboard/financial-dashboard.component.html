@@ -9,6 +9,15 @@
       mat-stroked-button
       color="primary"
       style="margin-right: 12px; height: 48px"
+      (click)="openCashRegistersManagementModal()"
+    >
+      <mat-icon>point_of_sale</mat-icon>
+      <span>Controle de Caixa</span>
+    </button>
+    <button
+      mat-stroked-button
+      color="primary"
+      style="margin-right: 12px; height: 48px"
       (click)="openRecurringTransactionsManagementModal()"
     >
       <mat-icon>autorenew</mat-icon>

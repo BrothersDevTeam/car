@@ -29,6 +29,7 @@ import { RecurringTransactionsManagementDialogComponent } from './recurring-tran
 import { TransactionPaymentDialogComponent } from './transaction-payment-dialog.component';
 import { TransactionPaymentsHistoryDialogComponent } from './transaction-payments-history-dialog.component';
 import { StoreSettingsDialogComponent } from './store-settings-dialog.component';
+import { CashRegistersManagementDialogComponent } from './cash-registers-management-dialog.component';
 
 @Component({
   selector: 'app-financial-dashboard',
@@ -397,6 +398,25 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(() => {
       this.loadCostCenters();
+      this.loadSummary();
+      this.loadTransactions();
+    });
+  }
+
+  openCashRegistersManagementModal(): void {
+    if (!this.storeContextService.validateStoreSelection()) {
+      return;
+    }
+    const storeId = this.storeContextService.currentStoreId!;
+    const dialogRef = this.dialog.open(CashRegistersManagementDialogComponent, {
+      width: '90%',
+      maxWidth: '850px',
+      height: '80%',
+      maxHeight: '90vh',
+      data: { storeId },
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
       this.loadSummary();
       this.loadTransactions();
     });
