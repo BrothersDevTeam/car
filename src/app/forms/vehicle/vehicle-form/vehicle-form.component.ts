@@ -213,9 +213,9 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       engineDisplacement: [''],
       engineNumber: [''],
       km: [''],
-      vehicleType: [''],
-      species: [''],
-      category: [''],
+      vehicleType: ['AUTOMOVEL'],
+      species: ['PASSAGEIRO'],
+      category: ['PARTICULAR'],
       features: [''],
       fuelTypes: [[]], // Array de FuelTypes
       optionalIds: [[]], // Array de Opcionais (UUIDs)
