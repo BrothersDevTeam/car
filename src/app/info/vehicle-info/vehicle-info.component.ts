@@ -1,7 +1,7 @@
 import { ToastrService } from 'ngx-toastr';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -10,6 +10,9 @@ import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confi
 import { VehicleForm } from '@interfaces/vehicle';
 import { VehicleService } from '@services/vehicle.service';
 import { PersonService } from '@services/person.service';
+import { FinancialService } from '@services/financial.service';
+import { FinancialTransaction } from '@interfaces/financial';
+import { TransactionPaymentDialogComponent } from '../../pages/financial/financial-dashboard/transaction-payment-dialog.component';
 import { Person } from '@interfaces/person';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
@@ -28,30 +31,33 @@ import { MatTabsModule } from '@angular/material/tabs';
     MatChipsModule,
     MatDividerModule,
     MatTabsModule,
+    MatDialogModule,
   ],
   templateUrl: './vehicle-info.component.html',
   styleUrl: './vehicle-info.component.scss',
 })
 export class VehicleInfoComponent implements OnChanges {
   readonly dialog = inject(MatDialog);
+  private toastrService = inject(ToastrService);
+  private vehicleService = inject(VehicleService);
+  private personService = inject(PersonService);
+  private financialService = inject(FinancialService);
+  private router = inject(Router);
 
   @Input() vehicle!: VehicleForm;
   proprietario: Person | null = null;
   fornecedor: Person | null = null;
+  financialTransactions: FinancialTransaction[] = [];
 
   @Output() editEvent = new EventEmitter<VehicleForm>();
   @Output() formSubmitted = new EventEmitter<void>();
 
-  constructor(
-    private toastrService: ToastrService,
-    private vehicleService: VehicleService,
-    private personService: PersonService,
-    private router: Router,
-  ) {}
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['vehicle'] && this.vehicle) {
       const ownerId = this.vehicle.owner;
       const supplierId = this.vehicle.supplierId;
+
+      this.loadFinancialTransactions();
 
       // Se proprietário e fornecedor forem a mesma pessoa, fazemos apenas uma chamada
       if (ownerId && supplierId && ownerId === supplierId) {
@@ -92,6 +98,70 @@ export class VehicleInfoComponent implements OnChanges {
           this.fornecedor = null;
         }
       }
+    }
+  }
+
+  loadFinancialTransactions(): void {
+    const purchase = this.vehicle.purchaseHistory?.[0];
+    if (!purchase || !purchase.compraId) {
+      this.financialTransactions = [];
+      return;
+    }
+    this.financialService.getTransactions(0, 50, { referenceId: purchase.compraId }).subscribe({
+      next: (res) => {
+        this.financialTransactions = res.content;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar lançamentos financeiros da compra', err);
+      }
+    });
+  }
+
+  openPaymentModal(transaction: FinancialTransaction): void {
+    const dialogRef = this.dialog.open(TransactionPaymentDialogComponent, {
+      width: '95%',
+      maxWidth: '850px',
+      data: { transaction },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadFinancialTransactions();
+      }
+    });
+  }
+
+  getTransactionStatusClass(status: string | undefined): string {
+    if (!status) return '';
+    switch (status.toUpperCase()) {
+      case 'PAID':
+      case 'PAGO':
+        return 'status-success';
+      case 'CANCELLED':
+      case 'CANCELADO':
+        return 'status-danger';
+      case 'PENDING':
+      case 'PENDENTE':
+      case 'PARTIALLY_PAID':
+        return 'status-warning';
+      default:
+        return 'status-neutral';
+    }
+  }
+
+  getTransactionStatusLabel(status: string | undefined): string {
+    if (!status) return '—';
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 'Pendente';
+      case 'PAID':
+        return 'Pago';
+      case 'PARTIALLY_PAID':
+        return 'Parcialmente Pago';
+      case 'CANCELLED':
+        return 'Cancelado';
+      default:
+        return status;
     }
   }
 

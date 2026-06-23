@@ -245,7 +245,8 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
     }
 
     const dialogRef = this.dialog.open(TransactionPaymentDialogComponent, {
-      width: '500px',
+      width: '95%',
+      maxWidth: '850px',
       data: { transaction },
     });
 

@@ -91,13 +91,16 @@ import { ICashRegister, ICashRegisterSession } from '@interfaces/cash-register';
           <mat-form-field appearance="outline" class="w-100">
             <mat-label>Caixa Destino/Origem</mat-label>
             <mat-select formControlName="cashRegisterId">
-              <mat-option value="">Selecione um Caixa (Automático se houver apenas um aberto)</mat-option>
-              @for (item of activeRegisters; track item.register.cashRegisterId) {
+              <mat-option value="">Selecione um Caixa</mat-option>
+              @for (item of allRegisters; track item.register.cashRegisterId) {
                 <mat-option [value]="item.register.cashRegisterId">
-                  {{ item.register.name }}
+                  {{ item.register.name }} {{ item.session ? '(ABERTO)' : '(FECHADO)' }}
                 </mat-option>
               }
             </mat-select>
+            @if (paymentForm.get('cashRegisterId')?.hasError('required')) {
+              <mat-error>Caixa é obrigatório</mat-error>
+            }
             @if (loadingRegisters) {
               <mat-hint>Carregando caixas...</mat-hint>
             }
@@ -138,6 +141,23 @@ import { ICashRegister, ICashRegisterSession } from '@interfaces/cash-register';
               <mat-error>Data é obrigatória</mat-error>
             }
           </mat-form-field>
+
+          <!-- Saldo Inicial para Abertura (se o caixa estiver fechado) -->
+          @if (isRegisterClosed()) {
+            <div class="w-100 opening-warning" style="grid-column: 1 / -1;">
+              <mat-icon>info_outline</mat-icon>
+              <span>Este caixa está fechado. Informe o Saldo Inicial para abri-lo e prosseguir com o pagamento.</span>
+            </div>
+            <app-currency-input
+              formControlName="initialBalance"
+              label="Saldo Inicial de Abertura (R$)"
+              [required]="true"
+              [error]="!!(paymentForm.get('initialBalance')?.touched && paymentForm.get('initialBalance')?.invalid)"
+              errorMessage="Saldo inicial de abertura é obrigatório para caixas fechados"
+              class="w-100"
+              style="grid-column: 1 / -1;"
+            ></app-currency-input>
+          }
         </div>
 
         <div class="payment-summary">
@@ -199,10 +219,34 @@ import { ICashRegister, ICashRegisterSession } from '@interfaces/cash-register';
           height: 16px;
         }
       }
+      .opening-warning {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #c62828;
+        background: #ffebee;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
       .form-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(3, 1fr);
         gap: 12px;
+
+        @media (max-width: 800px) {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        @media (max-width: 600px) {
+          grid-template-columns: 1fr;
+        }
       }
       .payment-summary {
         background: rgba(25, 118, 210, 0.05);
@@ -235,7 +279,7 @@ export class TransactionPaymentDialogComponent implements OnInit {
   paymentForm!: FormGroup;
   submitting = false;
   daysOverdue = 0;
-  activeRegisters: { register: ICashRegister; session: ICashRegisterSession }[] = [];
+  allRegisters: { register: ICashRegister; session: ICashRegisterSession | null }[] = [];
   loadingRegisters = false;
 
   paymentMethods = [
@@ -266,10 +310,22 @@ export class TransactionPaymentDialogComponent implements OnInit {
       interestAmount: [0, [Validators.min(0)]],
       discountAmount: [0, [Validators.min(0)]],
       paymentDate: [this.getLocalDateTimeString(), Validators.required],
-      cashRegisterId: [''],
+      cashRegisterId: ['', Validators.required],
+      initialBalance: [0],
     });
 
-    this.loadActiveRegisters();
+    this.loadRegisters();
+
+    // Monitorar mudança de caixa para atualizar validação do Saldo Inicial
+    this.paymentForm.get('cashRegisterId')?.valueChanges.subscribe(() => {
+      const initialBalanceControl = this.paymentForm.get('initialBalance');
+      if (this.isRegisterClosed()) {
+        initialBalanceControl?.setValidators([Validators.required, Validators.min(0)]);
+      } else {
+        initialBalanceControl?.clearValidators();
+      }
+      initialBalanceControl?.updateValueAndValidity();
+    });
 
     // Carregar configurações da loja para calcular juros sugeridos
     this.financialService.getStoreSettings(this.data.transaction.storeId).subscribe({
@@ -335,7 +391,7 @@ export class TransactionPaymentDialogComponent implements OnInit {
     return localISOTime;
   }
 
-  loadActiveRegisters(): void {
+  loadRegisters(): void {
     const storeId = this.data.transaction.storeId;
     this.loadingRegisters = true;
     this.cashRegisterService.getCashRegisters(storeId).subscribe({
@@ -344,20 +400,28 @@ export class TransactionPaymentDialogComponent implements OnInit {
           return new Promise<void>((resolve) => {
             this.cashRegisterService.getCurrentSession(reg.cashRegisterId).subscribe({
               next: (session) => {
-                if (session && session.status === 'OPEN') {
-                  this.activeRegisters.push({ register: reg, session });
-                }
+                this.allRegisters.push({
+                  register: reg,
+                  session: session && session.status === 'OPEN' ? session : null,
+                });
                 resolve();
               },
-              error: () => resolve(),
+              error: () => {
+                this.allRegisters.push({ register: reg, session: null });
+                resolve();
+              },
             });
           });
         });
 
         Promise.all(promises).then(() => {
           this.loadingRegisters = false;
-          if (this.activeRegisters.length > 0) {
-            this.paymentForm.get('cashRegisterId')?.setValue(this.activeRegisters[0].register.cashRegisterId);
+          // Seleciona o primeiro caixa aberto se houver, senão o primeiro da lista
+          const firstOpen = this.allRegisters.find((r) => r.session !== null);
+          if (firstOpen) {
+            this.paymentForm.get('cashRegisterId')?.setValue(firstOpen.register.cashRegisterId);
+          } else if (this.allRegisters.length > 0) {
+            this.paymentForm.get('cashRegisterId')?.setValue(this.allRegisters[0].register.cashRegisterId);
           }
         });
       },
@@ -368,12 +432,47 @@ export class TransactionPaymentDialogComponent implements OnInit {
     });
   }
 
+  isRegisterClosed(): boolean {
+    const selectedId = this.paymentForm.get('cashRegisterId')?.value;
+    if (!selectedId) return false;
+    const reg = this.allRegisters.find((r) => r.register.cashRegisterId === selectedId);
+    return reg ? reg.session === null : false;
+  }
+
   onSubmit(): void {
     if (this.paymentForm.invalid) return;
 
     this.submitting = true;
     const formVal = this.paymentForm.value;
+    const cashRegisterId = formVal.cashRegisterId;
 
+    if (this.isRegisterClosed()) {
+      const openRequest = {
+        cashRegisterId: cashRegisterId,
+        initialBalance: formVal.initialBalance || 0,
+      };
+      this.cashRegisterService.openSession(openRequest).subscribe({
+        next: (session) => {
+          this.toastr.success('Caixa aberto com sucesso! Processando o pagamento...', 'Sucesso');
+          // Atualiza status local do caixa
+          const reg = this.allRegisters.find((r) => r.register.cashRegisterId === cashRegisterId);
+          if (reg) {
+            reg.session = session;
+          }
+          this.executePayment(formVal);
+        },
+        error: (err) => {
+          console.error('Erro ao abrir caixa', err);
+          this.toastr.error('Erro ao abrir o caixa para realizar o pagamento.', 'Erro');
+          this.submitting = false;
+        },
+      });
+    } else {
+      this.executePayment(formVal);
+    }
+  }
+
+  private executePayment(formVal: any): void {
     const request = {
       amountPaid: formVal.amountPaid,
       discountAmount: formVal.discountAmount,

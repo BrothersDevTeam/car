@@ -42,6 +42,7 @@ export class FinancialService {
       description?: string;
       storeId?: string;
       costCenterId?: string;
+      referenceId?: string;
     },
   ): Observable<PaginationResponse<FinancialTransaction>> {
     const currentStoreId = searchParams?.storeId || this.storeContextService.currentStoreId;
@@ -64,6 +65,9 @@ export class FinancialService {
     }
     if (searchParams?.costCenterId) {
       url += `&costCenterId=${encodeURIComponent(searchParams.costCenterId)}`;
+    }
+    if (searchParams?.referenceId) {
+      url += `&referenceId=${encodeURIComponent(searchParams.referenceId)}`;
     }
 
     return this.http.get<PaginationResponse<FinancialTransaction>>(url).pipe(first());

@@ -183,6 +183,58 @@
           </div>
         </section>
 
+        <!-- Lançamentos Financeiros (Caixa) -->
+        <section class="info-card payments-card" style="margin-top: 16px;">
+          <div class="card-header">
+            <mat-icon>account_balance_wallet</mat-icon>
+            <h2>Lançamentos Financeiros (Fluxo de Caixa)</h2>
+          </div>
+          <div class="card-body">
+            @if (financialTransactions.length === 0) {
+              <p class="no-data" style="margin: 0; font-style: italic; color: #999;">Nenhum lançamento financeiro gerado para esta venda.</p>
+            } @else {
+              <table class="payments-table">
+                <thead>
+                  <tr>
+                    <th>Descrição</th>
+                    <th>Vencimento</th>
+                    <th>Status</th>
+                    <th class="text-right">Valor</th>
+                    <th class="text-center" style="width: 80px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let tx of financialTransactions">
+                    <td>
+                      <span class="pag-method">{{ tx.description }}</span>
+                    </td>
+                    <td>{{ formatDate(tx.dueDate) }}</td>
+                    <td>
+                      <span class="status-badge" [ngClass]="getStatusClass(tx.status)">
+                        {{ getStatusLabel(tx.status) }}
+                      </span>
+                    </td>
+                    <td class="text-right bold">
+                      {{ formatCurrency(tx.amount) }}
+                    </td>
+                    <td class="text-center">
+                      <button
+                        *ngIf="tx.status !== 'PAID' && tx.status !== 'CANCELLED'"
+                        mat-flat-button
+                        color="primary"
+                        (click)="openPaymentModal(tx)"
+                        style="font-size: 11px; line-height: 28px; height: 28px; padding: 0 8px; min-width: unset;"
+                      >
+                        Receber
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            }
+          </div>
+        </section>
+
         <!-- Timeline / Auditoria -->
         <section class="info-card timeline-card">
           <div class="card-header">

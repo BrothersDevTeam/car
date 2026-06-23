@@ -354,6 +354,50 @@
                 </div>
               </div>
             }
+
+            <!-- Lançamentos Financeiros (Caixa) -->
+            <div class="info-section" style="margin-top: 24px;">
+              <h2 class="section-title">
+                <mat-icon>account_balance_wallet</mat-icon>
+                Lançamentos Financeiros (Fluxo de Caixa)
+              </h2>
+              @if (financialTransactions.length === 0) {
+                <p class="m-0 text-muted small" style="font-style: italic;">Nenhum lançamento financeiro gerado para esta compra.</p>
+              } @else {
+                <div class="history-list">
+                  @for (tx of financialTransactions; track tx.financialTransactionId) {
+                    <div class="history-item history-buy" style="align-items: center;">
+                      <div class="history-icon-col">
+                        <mat-icon>payments</mat-icon>
+                      </div>
+                      <div class="history-date">
+                        {{ tx.dueDate | date: 'dd/MM/yyyy' }}
+                      </div>
+                      <div class="history-desc">
+                        <strong>{{ tx.description }}</strong>
+                        <span class="status-badge" [ngClass]="getTransactionStatusClass(tx.status)" style="margin-left: 8px;">
+                          {{ getTransactionStatusLabel(tx.status) }}
+                        </span>
+                      </div>
+                      <div class="history-value val-negativo">
+                        {{ tx.amount | currency: 'BRL' }}
+                      </div>
+                      <div style="margin-left: 16px;">
+                        <button
+                          *ngIf="tx.status !== 'PAID' && tx.status !== 'CANCELLED'"
+                          mat-flat-button
+                          color="primary"
+                          (click)="openPaymentModal(tx)"
+                          style="font-size: 11px; line-height: 28px; height: 28px; padding: 0 8px; min-width: unset;"
+                        >
+                          Pagar
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
           </div>
         </mat-tab>
       }

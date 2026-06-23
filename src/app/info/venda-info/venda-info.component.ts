@@ -4,16 +4,26 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { VendaService } from '@services/venda.service';
 import { NfeService } from '@services/nfe.service';
+import { FinancialService } from '@services/financial.service';
 import { VendaResponseDto } from '@interfaces/venda';
 import { Nfe } from '@interfaces/nfe';
-import { catchError, forkJoin, of } from 'rxjs';
+import { FinancialTransaction } from '@interfaces/financial';
+import { TransactionPaymentDialogComponent } from '../../pages/financial/financial-dashboard/transaction-payment-dialog.component';
 
 @Component({
   selector: 'app-venda-info',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatDividerModule, MatTooltipModule],
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,
+    MatDividerModule,
+    MatTooltipModule,
+    MatDialogModule
+  ],
   providers: [DatePipe, CurrencyPipe],
   templateUrl: './venda-info.component.html',
   styleUrl: './venda-info.component.scss',
@@ -25,11 +35,14 @@ export class VendaInfoComponent implements OnInit {
 
   private vendaService = inject(VendaService);
   private nfeService = inject(NfeService);
+  private financialService = inject(FinancialService);
+  private dialog = inject(MatDialog);
   private datePipe = inject(DatePipe);
   private currencyPipe = inject(CurrencyPipe);
 
   venda: VendaResponseDto | null = null;
   nfe: Nfe | null = null;
+  financialTransactions: FinancialTransaction[] = [];
   loading = true;
   error = false;
 
@@ -44,6 +57,7 @@ export class VendaInfoComponent implements OnInit {
     this.vendaService.getVendaById(this.vendaId).subscribe({
       next: (venda: VendaResponseDto) => {
         this.venda = venda;
+        this.loadFinancialTransactions();
         if (venda.nfeId) {
           this.loadNfeDetails(venda.nfeId);
         } else {
@@ -71,6 +85,32 @@ export class VendaInfoComponent implements OnInit {
     });
   }
 
+  loadFinancialTransactions(): void {
+    if (!this.vendaId) return;
+    this.financialService.getTransactions(0, 50, { referenceId: this.vendaId }).subscribe({
+      next: (res) => {
+        this.financialTransactions = res.content;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar lançamentos financeiros da venda', err);
+      }
+    });
+  }
+
+  openPaymentModal(transaction: FinancialTransaction): void {
+    const dialogRef = this.dialog.open(TransactionPaymentDialogComponent, {
+      width: '95%',
+      maxWidth: '850px',
+      data: { transaction },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadFinancialTransactions();
+      }
+    });
+  }
+
   formatDate(date: string | undefined): string {
     if (!date) return '—';
     return this.datePipe.transform(date, 'dd/MM/yyyy') || '—';
@@ -86,12 +126,18 @@ export class VendaInfoComponent implements OnInit {
     switch (status.toUpperCase()) {
       case 'ATIVA':
       case 'AUTORIZADO':
+      case 'PAID':
+      case 'PAGO':
         return 'status-success';
       case 'CANCELADA':
       case 'CANCELADO':
+      case 'CANCELLED':
         return 'status-danger';
       case 'TRANSFERENCIA':
       case 'PROCESSANDO':
+      case 'PENDING':
+      case 'PENDENTE':
+      case 'PARTIALLY_PAID':
         return 'status-warning';
       default:
         return 'status-neutral';
@@ -115,6 +161,14 @@ export class VendaInfoComponent implements OnInit {
         return 'Erro na SEFAZ';
       case 'RASCUNHO':
         return 'Em Digitação';
+      case 'PENDING':
+        return 'Pendente';
+      case 'PAID':
+        return 'Pago';
+      case 'PARTIALLY_PAID':
+        return 'Parcialmente Pago';
+      case 'CANCELLED':
+        return 'Cancelado';
       default:
         return status;
     }
