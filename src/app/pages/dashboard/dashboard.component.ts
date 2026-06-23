@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -59,9 +59,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       if (!this.isAdmin) {
         this.loadActiveSessions();
       }
-      this.activeSessionsInterval = setInterval(() => {
-        this.loadActiveSessions();
-      }, 30000);
+      this.startActiveSessionsPolling();
     }
   }
 
@@ -92,6 +90,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  @HostListener('document:visibilitychange', [])
+  onVisibilityChange(): void {
+    if (!this.canViewActiveSessions) return;
+
+    if (document.hidden) {
+      this.stopActiveSessionsPolling();
+    } else {
+      this.loadActiveSessions();
+      this.startActiveSessionsPolling();
+    }
+  }
+
+  private startActiveSessionsPolling(): void {
+    this.stopActiveSessionsPolling();
+    this.activeSessionsInterval = setInterval(() => {
+      this.loadActiveSessions();
+    }, 30000);
+  }
+
+  private stopActiveSessionsPolling(): void {
+    if (this.activeSessionsInterval) {
+      clearInterval(this.activeSessionsInterval);
+      this.activeSessionsInterval = null;
+    }
+  }
+
   calculateActiveTime(createdAt: string): string {
     const diffMs = Date.now() - new Date(createdAt).getTime();
     if (diffMs < 0) return 'Recém-conectado';
@@ -106,8 +130,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
-    if (this.activeSessionsInterval) {
-      clearInterval(this.activeSessionsInterval);
-    }
+    this.stopActiveSessionsPolling();
   }
 }
