@@ -105,6 +105,23 @@
         </mat-form-field>
       </div>
 
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label style="display: flex; align-items: center; gap: 4px">
+            E-mails para Envio da NFe
+            <mat-icon
+              style="font-size: 16px; width: 16px; height: 16px; cursor: help"
+              matTooltip="Insira os e-mails adicionais que devem receber os arquivos XML e PDF da nota automaticamente. Separe-os por vírgula (ex: financeiro@loja.com, contador@fiscal.com)."
+              matTooltipClass="custom-tooltip"
+              matTooltipPosition="right"
+            >
+              info_outline
+            </mat-icon>
+          </mat-label>
+          <input matInput formControlName="nfeEmails" placeholder="Ex: financeiro@loja.com, contador@fiscal.com" />
+        </mat-form-field>
+      </div>
+
       <div class="checkbox-group">
         <h4>Opções de Emissão</h4>
         <mat-checkbox

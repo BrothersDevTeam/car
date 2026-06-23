@@ -11,6 +11,7 @@ export interface Store {
   storeType: StoreType;
   storeStatus: StoreStatus;
   imageUrl?: string;
+  nfeEmails?: string;
   owners?: any[];
   createdAt?: string;
   updatedAt?: string;
@@ -50,6 +51,7 @@ export type UpdateStore = {
   cnpj?: string;
   email?: string;
   phoneNumber?: string;
+  nfeEmails?: string;
 };
 
 export interface StoreSearchFilters {

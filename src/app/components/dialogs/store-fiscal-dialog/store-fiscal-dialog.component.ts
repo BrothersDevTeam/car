@@ -15,8 +15,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 // Services
-import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fiscal.service';
+import { ParametroFiscalService } from '@services/parametro-fiscal.service';
 import { FocusNfeService } from '@services/focus-nfe.service';
+import { StoreService } from '@services/store.service';
 import { Store } from '@interfaces/store';
 
 @Component({
@@ -58,6 +59,7 @@ export class StoreFiscalDialogComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
+    private storeService: StoreService,
     private parametroFiscalService: ParametroFiscalService,
     private focusNfeService: FocusNfeService,
     private snackBar: MatSnackBar,
@@ -77,6 +79,7 @@ export class StoreFiscalDialogComponent implements OnInit {
       parametroFiscalCadastradoFocusNfe: [{ value: false, disabled: true }],
       parametroFiscalProximoNumeroNfe: [1, [Validators.required, Validators.min(1)]],
       parametroFiscalEmHomologacao: [true],
+      nfeEmails: [''],
     });
   }
 
@@ -90,6 +93,19 @@ export class StoreFiscalDialogComponent implements OnInit {
 
   loadParametros(): void {
     this.loading = true;
+
+    this.storeService.getById(this.data.store.storeId!).subscribe({
+      next: (store) => {
+        if (store) {
+          this.data.store = store;
+          this.form.patchValue({
+            nfeEmails: store.nfeEmails || ''
+          });
+        }
+      },
+      error: (err) => console.error('Erro ao carregar dados da loja', err)
+    });
+
     this.parametroFiscalService.getByStoreId(this.data.store.storeId!).subscribe({
       next: (config: any) => {
         if (config && config.parametroFiscalId) {
@@ -139,27 +155,52 @@ export class StoreFiscalDialogComponent implements OnInit {
     this.saving = true;
     const formData = this.form.getRawValue();
 
-    // Decide se é POST (create) ou PUT (update)
-    const request = this.hasExistingConfig
-      ? this.parametroFiscalService.update(this.data.store.storeId!, formData)
-      : this.parametroFiscalService.create(this.data.store.storeId!, formData);
+    const storeUpdateData = {
+      name: this.data.store.name,
+      tradeName: this.data.store.tradeName,
+      cnpj: this.data.store.cnpj,
+      email: this.data.store.email,
+      phoneNumber: this.data.store.phone,
+      nfeEmails: formData.nfeEmails
+    };
 
-    request.subscribe({
-      next: (res) => {
-        this.snackBar.open('Parâmetros fiscais salvos com sucesso', 'Fechar', {
-          duration: 3000,
+    const storeUpdateRequest = this.data.store.mainStoreId === null
+      ? this.storeService.updateMainStore(this.data.store.storeId!, storeUpdateData)
+      : this.storeService.update(this.data.store.storeId!, storeUpdateData);
+
+    storeUpdateRequest.subscribe({
+      next: (updatedStore) => {
+        this.data.store = updatedStore;
+
+        const fiscalRequest = this.hasExistingConfig
+          ? this.parametroFiscalService.update(this.data.store.storeId!, formData)
+          : this.parametroFiscalService.create(this.data.store.storeId!, formData);
+
+        fiscalRequest.subscribe({
+          next: (res) => {
+            this.snackBar.open('Configurações fiscais e e-mails salvos com sucesso', 'Fechar', {
+              duration: 3000,
+            });
+            this.saving = false;
+            this.hasExistingConfig = true;
+            this.form.patchValue(res);
+          },
+          error: (err) => {
+            console.error(err);
+            this.snackBar.open('Erro ao salvar parâmetros fiscais', 'Fechar', {
+              duration: 4000,
+            });
+            this.saving = false;
+          },
         });
-        this.saving = false;
-        this.hasExistingConfig = true;
-        this.form.patchValue(res);
       },
       error: (err) => {
         console.error(err);
-        this.snackBar.open('Erro ao salvar configurações fiscais', 'Fechar', {
+        this.snackBar.open('Erro ao salvar e-mails da loja', 'Fechar', {
           duration: 4000,
         });
         this.saving = false;
-      },
+      }
     });
   }
 
