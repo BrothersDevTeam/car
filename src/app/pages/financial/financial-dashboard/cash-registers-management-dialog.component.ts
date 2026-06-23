@@ -559,7 +559,7 @@ export class CashRegistersManagementDialogComponent implements OnInit {
   storeId: string;
   loading = true;
   registers: ICashRegister[] = [];
-  sessions: { [key: string]: ICashRegisterSession } = {};
+  sessions: { [key: string]: ICashRegisterSession | undefined } = {};
 
   // Estados de abertura inline
   openingRegisterId: string | null = null;
