@@ -11,6 +11,7 @@ import { UserSessionService } from '@services/user-session.service';
 import { UserSession } from '@interfaces/user-session';
 import { Authorizations } from '../../enums/authorizations';
 import { Subscription } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-dashboard',
@@ -24,6 +25,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private storeContextService = inject(StoreContextService);
   private userSessionService = inject(UserSessionService);
+  private toastrService = inject(ToastrService);
   private subscriptions: Subscription[] = [];
 
   metrics: AdminDashboardMetrics | null = null;
@@ -126,6 +128,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
       return `${hours}h ${mins}m`;
     }
     return `${mins}m`;
+  }
+
+  disconnectUser(session: UserSession): void {
+    const confirmDisconnect = confirm(`Tem certeza que deseja derrubar a sessão do usuário ${session.user.person?.name || session.user.email}?`);
+    if (!confirmDisconnect) return;
+
+    this.userSessionService.disconnectUser(session.user.userId).subscribe({
+      next: () => {
+        this.toastrService.success('Sessão do usuário desconectada com sucesso!');
+        this.loadActiveSessions();
+      },
+      error: (err) => {
+        console.error('Erro ao desconectar usuário', err);
+        this.toastrService.error('Erro ao tentar desconectar o usuário.');
+      }
+    });
   }
 
   ngOnDestroy(): void {

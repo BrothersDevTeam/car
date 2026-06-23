@@ -122,6 +122,7 @@
                   <th>Endereço IP</th>
                   <th>Dispositivo / Plataforma</th>
                   <th>Tempo de Atividade</th>
+                  <th class="actions-header">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -162,6 +163,11 @@
                         <mat-icon class="timer-icon">schedule</mat-icon>
                         <span class="time-text">{{ calculateActiveTime(session.createdAt) }}</span>
                       </div>
+                    </td>
+                    <td class="action-cell">
+                      <button class="disconnect-btn" (click)="disconnectUser(session)" title="Derrubar sessão do usuário">
+                        <mat-icon>logout</mat-icon>
+                      </button>
                     </td>
                   </tr>
                 }

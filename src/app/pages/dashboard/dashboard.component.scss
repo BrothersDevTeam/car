@@ -380,6 +380,47 @@ main {
       height: 18px;
     }
   }
+
+  .actions-header {
+    text-align: center;
+    width: 90px;
+  }
+
+  .action-cell {
+    text-align: center;
+  }
+
+  .disconnect-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--mat-sys-surface-container-high);
+    color: var(--mat-sys-on-surface-variant);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      background-color: #dc3545;
+      color: #fff;
+      transform: scale(1.1);
+      box-shadow: 0 3px 8px rgba(220, 53, 69, 0.25);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
 }
 
 .empty-sessions {

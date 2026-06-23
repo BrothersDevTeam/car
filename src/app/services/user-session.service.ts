@@ -18,4 +18,9 @@ export class UserSessionService {
     }
     return this.http.get<UserSession[]>(url);
   }
+
+  disconnectUser(userId: string): Observable<string> {
+    // Configura responseType como 'text' para evitar erros de parse JSON com respostas de corpo vazio (HTTP 204 No Content)
+    return this.http.delete(`/api/users/${userId}/sessions`, { responseType: 'text' });
+  }
 }
