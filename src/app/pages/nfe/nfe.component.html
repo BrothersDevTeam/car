@@ -204,6 +204,12 @@
                 <span class="chave-acesso">{{ selectedNfe.nfeChave }}</span>
               </div>
             }
+            @if (selectedNfe.nfeInformacoesAdicionaisFisco) {
+              <div class="info-item full-width">
+                <label>Informações de Interesse do Fisco</label>
+                <span>{{ selectedNfe.nfeInformacoesAdicionaisFisco }}</span>
+              </div>
+            }
             @if (selectedNfe.nfeMensagemErro) {
               <div class="info-item full-width error-item">
                 <label>Erros Identificados</label>

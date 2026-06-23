@@ -94,6 +94,7 @@ export interface Nfe {
   nfePresencaComprador?: string;
   nfeIndicadorIntermediario?: string;
   nfeTransporte?: any;
+  nfeInformacoesAdicionaisFisco?: string;
 }
 
 export enum NaturezaOperacao {

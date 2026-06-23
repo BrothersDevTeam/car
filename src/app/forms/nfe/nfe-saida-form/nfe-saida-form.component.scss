@@ -5,6 +5,10 @@ form {
   padding: 1.5rem;
   background: var(--surface-primary);
 
+  .full-width {
+    width: 100%;
+  }
+
   .title-trash {
     display: flex;
     justify-content: space-between;

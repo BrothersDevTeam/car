@@ -182,6 +182,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     nfePresencaComprador: ['1', Validators.required],
     nfeIndicadorIntermediario: ['0', Validators.required],
     modalidadeFrete: ['9', Validators.required],
+    nfeInformacoesAdicionaisFisco: ['EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.'],
   });
 
   constructor() {}
@@ -433,6 +434,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       nfePresencaComprador: this.dataForm.nfePresencaComprador || '1',
       nfeIndicadorIntermediario: this.dataForm.nfeIndicadorIntermediario || '0',
       modalidadeFrete: this.dataForm.nfeTransporte?.modalidadeFrete || '9',
+      nfeInformacoesAdicionaisFisco: this.dataForm.nfeInformacoesAdicionaisFisco || 'EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.',
     });
   }
 
@@ -508,6 +510,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       nfeTransporte: {
         modalidadeFrete: this.form.value.modalidadeFrete,
       },
+      nfeInformacoesAdicionaisFisco: this.form.value.nfeInformacoesAdicionaisFisco,
     };
 
     if (this.dataForm?.nfeId) {
