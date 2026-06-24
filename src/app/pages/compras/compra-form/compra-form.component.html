@@ -37,6 +37,8 @@
               [options]="suppliers"
               [control]="$any(compraForm.get('supplier'))"
               placeholder="Selecione o fornecedor"
+              (onCreateNew)="onCreateNewSupplier()"
+              (onEdit)="onEditSupplier($event)"
             ></app-custom-select>
           </div>
         </mat-card-content>
@@ -236,3 +238,31 @@
     </form>
   }
 </main>
+
+<!-- Drawer para criar/editar pessoa/fornecedor -->
+@if (openPersonForm()) {
+  <app-drawer (closeDrawer)="handleClosePersonDrawer()">
+    <mat-tab-group [selectedIndex]="selectedPersonToEdit?.legalEntity ? 1 : 0" class="modern-tab-group">
+      <mat-tab label="Pessoa Física" [disabled]="selectedPersonToEdit && selectedPersonToEdit.legalEntity">
+        <ng-template matTabContent>
+          <div class="tab-padding">
+            <app-natural-person-form
+              [dataForm]="!selectedPersonToEdit?.legalEntity ? selectedPersonToEdit : null"
+              (formSubmitted)="onPersonFormSubmitted()"
+            />
+          </div>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="Pessoa Jurídica" [disabled]="selectedPersonToEdit && !selectedPersonToEdit.legalEntity">
+        <ng-template matTabContent>
+          <div class="tab-padding">
+            <app-legal-entity-form
+              [dataForm]="selectedPersonToEdit?.legalEntity ? selectedPersonToEdit : null"
+              (formSubmitted)="onPersonFormSubmitted()"
+            />
+          </div>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+  </app-drawer>
+}

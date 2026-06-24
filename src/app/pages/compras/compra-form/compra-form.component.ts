@@ -30,8 +30,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatTabsModule } from '@angular/material/tabs';
 
 import { Compra } from '@interfaces/compra';
+import type { Person } from '@interfaces/person';
+import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
+import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
+import { DrawerComponent } from '@components/drawer/drawer.component';
 
 @Component({
   selector: 'app-compra-form',
@@ -56,6 +61,10 @@ import { Compra } from '@interfaces/compra';
     CurrencyInputComponent,
     DateInputComponent,
     CustomSelectComponent,
+    DrawerComponent,
+    LegalEntityFormComponent,
+    NaturalPersonFormComponent,
+    MatTabsModule,
   ],
   templateUrl: './compra-form.component.html',
   styleUrls: ['./compra-form.component.scss'],
@@ -75,6 +84,10 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
 
   vehicles: { id: string; name: string }[] = [];
   suppliers: { id: string; name: string }[] = [];
+
+  // Flags para controle do drawer de fornecedor (person)
+  openPersonForm = signal(false);
+  selectedPersonToEdit: Person | null = null;
 
   // Propriedades do Assistente Gerador de Parcelas
   geradorParcelas = 1;
@@ -160,11 +173,27 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
     });
 
     // Carrega Fornecedores (Todas as Pessoas)
-    this.personService.getPaginatedData(0, 1000, { storeId }).subscribe((response) => {
-      this.suppliers = (response.content || []).map((p) => ({
-        id: p.personId,
-        name: p.cpf ? `${p.name} - CPF: ${p.cpf}` : `${p.name} - CNPJ: ${p.cnpj}`,
-      }));
+    this.reloadSuppliers();
+  }
+
+  /**
+   * Recarrega a lista de fornecedores
+   */
+  private reloadSuppliers() {
+    const storeId = this.storeContextService.currentStoreId;
+    if (!storeId) return;
+
+    this.personService.getPaginatedData(0, 1000, { storeId }).subscribe({
+      next: (response) => {
+        this.suppliers = (response.content || []).map((p) => ({
+          id: p.personId,
+          name: p.cpf ? `${p.name} - CPF: ${p.cpf}` : `${p.name} - CNPJ: ${p.cnpj}`,
+        }));
+      },
+      error: (error) => {
+        console.error('Erro ao carregar fornecedores:', error);
+        this.toastr.error('Erro ao carregar fornecedores');
+      }
     });
   }
 
@@ -380,6 +409,46 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
 
   saveLocalDraft(silent?: boolean, name?: string): void {
     this.toastr.info('Rascunhos locais de compras não estão habilitados.');
+  }
+
+  /**
+   * Abre o drawer para criar novo fornecedor
+   */
+  onCreateNewSupplier() {
+    this.selectedPersonToEdit = null;
+    this.openPersonForm.set(true);
+  }
+
+  /**
+   * Abre o drawer para editar fornecedor existente
+   */
+  onEditSupplier(personId: string) {
+    this.personService.getById(personId).subscribe({
+      next: (person) => {
+        this.selectedPersonToEdit = person;
+        this.openPersonForm.set(true);
+      },
+      error: (error) => {
+        console.error('Erro ao carregar fornecedor:', error);
+        this.toastr.error('Erro ao carregar fornecedor');
+      },
+    });
+  }
+
+  /**
+   * Fecha o drawer de fornecedor
+   */
+  handleClosePersonDrawer() {
+    this.openPersonForm.set(false);
+    this.selectedPersonToEdit = null;
+  }
+
+  /**
+   * Callback quando o formulário de fornecedor é submetido
+   */
+  onPersonFormSubmitted() {
+    this.reloadSuppliers();
+    this.handleClosePersonDrawer();
   }
 
   cancel() {
