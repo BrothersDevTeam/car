@@ -66,6 +66,20 @@ export interface VendaRequestDto {
   observacao?: string;
   pagamentos: VendaPagamentoDto[];
   avalistasIds?: string[];
+  retornoBancoId?: string;
+  retornoNumero?: number;
+  retornoValor?: number;
+  retornoCreditarDia?: string;
+  despesas?: VendaDespesaDto[];
+}
+
+export interface VendaDespesaDto {
+  descricao: string;
+  valorCusto: number;
+  valorRecebido?: number;
+  dataPagamento: string;
+  fornecedorId?: string;
+  tipo: string;
 }
 
 /**
@@ -104,6 +118,21 @@ export interface VendaResponseDto {
   updatedBy: string;
   buyerName?: string;
   vehicleDescription?: string;
+  retornoBancoId?: string;
+  retornoNumero?: number;
+  retornoValor?: number;
+  retornoCreditarDia?: string;
+  despesas?: VendaDespesaResponse[];
+}
+
+export interface VendaDespesaResponse {
+  vendaDespesaId: string;
+  descricao: string;
+  valorCusto: number;
+  valorRecebido?: number;
+  dataPagamento: string;
+  fornecedorId?: string;
+  tipo: string;
 }
 
 /**

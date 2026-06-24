@@ -143,6 +143,7 @@
                   <th>Forma</th>
                   <th>Vencimento</th>
                   <th>Tipo</th>
+                  <th>Status</th>
                   <th class="text-right">Valor</th>
                 </tr>
               </thead>
@@ -160,6 +161,11 @@
                       {{ pag.tipo === 'D' ? 'Entrada / Débito' : 'Recebível' }}
                     </span>
                   </td>
+                  <td>
+                    <span class="status-badge" [ngClass]="getStatusClass(getPagamentoStatus(pag))">
+                      {{ getStatusLabel(getPagamentoStatus(pag)) }}
+                    </span>
+                  </td>
                   <td class="text-right bold">
                     {{ formatCurrency(pag.valor) }}
                   </td>
@@ -167,13 +173,13 @@
               </tbody>
               <tfoot>
                 <tr>
-                  <td colspan="3" class="text-right">Total Negociado:</td>
+                  <td colspan="4" class="text-right">Valor Tabela/Venda:</td>
                   <td class="text-right total-value">
                     {{ formatCurrency(venda.valor) }}
                   </td>
                 </tr>
                 <tr *ngIf="venda.valorFinal && venda.valorFinal !== venda.valor">
-                  <td colspan="3" class="text-right">Valor Final (c/ Ajustes):</td>
+                  <td colspan="4" class="text-right">Valor Final (Fechamento):</td>
                   <td class="text-right total-final">
                     {{ formatCurrency(venda.valorFinal) }}
                   </td>

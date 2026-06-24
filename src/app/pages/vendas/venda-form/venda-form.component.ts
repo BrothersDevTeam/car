@@ -120,6 +120,32 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
   openPersonForm = signal(false);
   selectedPersonToEdit = signal<Person | null>(null);
 
+  people: { id: string; name: string }[] = [];
+
+  // Propriedades do Assistente Gerador de Parcelas
+  geradorValorTotal = 0;
+  geradorParcelas = 1;
+  geradorPeriodicidadeTipo: 'MENSAL' | 'QUINZENAL' | 'SEMANAL' | 'CUSTOM' = 'MENSAL';
+  geradorPeriodicidadeDias = 30;
+  geradorPrimeiroVencimento = new Date();
+  geradorFormaPagamento = 'PIX'; // Forma padrão de parcelamento
+
+  get despesas() {
+    return this.vendaForm.get('despesas') as FormArray;
+  }
+
+  get receitasControls() {
+    return this.pagamentos.controls
+      .map((control, index) => ({ control, index }))
+      .filter(x => x.control.get('tipo')?.value !== 'D');
+  }
+
+  get debitosControls() {
+    return this.pagamentos.controls
+      .map((control, index) => ({ control, index }))
+      .filter(x => x.control.get('tipo')?.value === 'D');
+  }
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -153,6 +179,11 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
       pagamentos: this.fb.array([]),
       avalistasIds: this.fb.array([]),
       avalistaSearchControl: [''], // Controle auxiliar para busca
+      retornoBancoId: [''],
+      retornoNumero: [null],
+      retornoValor: [0],
+      retornoCreditarDia: [null],
+      despesas: this.fb.array([]),
     });
   }
 
@@ -209,7 +240,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
       }));
     });
 
-    // Carrega Pessoas (Compradores/Vendedores/Avalistas)
+    // Carrega Pessoas (Compradores/Vendedores/Avalistas/Fornecedores/Bancos)
     this.personService.getPaginatedData(0, 1000, { storeId }).subscribe((response) => {
       const mapped = (response.content || []).map((p) => ({
         id: p.personId,
@@ -218,6 +249,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
       this.buyers = [...mapped];
       this.sellers = [...mapped];
       this.avalistasOptions = [...mapped];
+      this.people = [...mapped];
     });
   }
 
@@ -256,21 +288,149 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
   }
 
   // Gestão de Pagamentos
-  private createPagamentoFormGroup(data?: any): FormGroup {
+  createPagamentoFormGroup(data?: any): FormGroup {
     return this.fb.group({
       formaPagamento: [data?.formaPagamento || 'PIX', Validators.required],
       valor: [data?.valor || 0, [Validators.required, Validators.min(0.01)]],
       vencimento: [data?.vencimento ? new Date(data.vencimento) : new Date()],
       descricao: [data?.descricao || ''],
+      tipo: [data?.tipo || 'R', Validators.required]
     });
   }
 
+  addReceita() {
+    this.pagamentos.push(this.createPagamentoFormGroup({ tipo: 'R' }));
+  }
+
+  addDebito() {
+    this.pagamentos.push(this.createPagamentoFormGroup({ formaPagamento: 'TROCA', tipo: 'D' }));
+  }
+
   addPagamento() {
-    this.pagamentos.push(this.createPagamentoFormGroup());
+    this.addReceita();
   }
 
   removePagamento(index: number) {
     this.pagamentos.removeAt(index);
+  }
+
+  createDespesaFormGroup(data?: any): FormGroup {
+    const tipo = data?.tipo || 'LOJA';
+    const isRecebida = tipo === 'RECEBIDA';
+    
+    // Para despesas RECEBIDA, o custo real não é obrigatório no cadastro inicial.
+    const valorCustoValidators = isRecebida
+      ? [Validators.min(0)]
+      : [Validators.required, Validators.min(0)];
+
+    return this.fb.group({
+      descricao: [data?.descricao || '', Validators.required],
+      valorCusto: [
+        data?.valorCusto !== undefined && data?.valorCusto !== null
+          ? data.valorCusto
+          : (isRecebida ? null : 0),
+        valorCustoValidators
+      ],
+      valorRecebido: [data?.valorRecebido || null],
+      dataPagamento: [data?.dataPagamento ? new Date(data.dataPagamento) : new Date(), Validators.required],
+      fornecedorId: [data?.fornecedorId || ''],
+      tipo: [tipo, Validators.required]
+    });
+  }
+
+  addDespesa(tipo: 'LOJA' | 'RECEBIDA') {
+    this.despesas.push(this.createDespesaFormGroup({ tipo }));
+  }
+
+  removeDespesa(index: number) {
+    this.despesas.removeAt(index);
+  }
+
+  adicionarMeses(dataBase: Date, meses: number): Date {
+    const data = new Date(dataBase.getTime());
+    const diaDesejado = dataBase.getDate();
+    
+    data.setMonth(data.getMonth() + meses);
+    
+    if (data.getDate() < diaDesejado) {
+      data.setDate(0);
+    }
+    
+    return data;
+  }
+
+  gerarParcelas() {
+    if (this.geradorValorTotal <= 0) {
+      this.toastr.warning('Digite um valor total maior que zero.');
+      return;
+    }
+    if (this.geradorParcelas <= 0) {
+      this.toastr.warning('O número de parcelas deve ser maior que zero.');
+      return;
+    }
+
+    const indicesParaRemover = this.pagamentos.controls
+      .map((control, index) => {
+        const tipo = control.get('tipo')?.value;
+        const valor = control.get('valor')?.value || 0;
+        const descricao = control.get('descricao')?.value || '';
+
+        // Remove apenas se for receita ('R') e (valor estiver zerado ou for uma parcela gerada anteriormente)
+        const deveRemover = tipo === 'R' && (
+          valor <= 0.009 ||
+          (descricao.startsWith('Parcela ') && descricao.includes('/'))
+        );
+        return { deveRemover, index };
+      })
+      .filter(x => x.deveRemover)
+      .map(x => x.index)
+      .reverse();
+
+    for (const index of indicesParaRemover) {
+      this.pagamentos.removeAt(index);
+    }
+
+    const valorParcela = parseFloat((this.geradorValorTotal / this.geradorParcelas).toFixed(2));
+    let totalAcumulado = 0;
+
+    for (let i = 1; i <= this.geradorParcelas; i++) {
+      let valorFinalParcela = valorParcela;
+      
+      if (i === this.geradorParcelas) {
+        valorFinalParcela = parseFloat((this.geradorValorTotal - totalAcumulado).toFixed(2));
+      } else {
+        totalAcumulado += valorFinalParcela;
+      }
+
+      let vencimento = new Date(this.geradorPrimeiroVencimento);
+      if (this.geradorPeriodicidadeTipo === 'MENSAL') {
+        vencimento = this.adicionarMeses(this.geradorPrimeiroVencimento, i - 1);
+      } else if (this.geradorPeriodicidadeTipo === 'QUINZENAL') {
+        vencimento.setDate(vencimento.getDate() + (i - 1) * 15);
+      } else if (this.geradorPeriodicidadeTipo === 'SEMANAL') {
+        vencimento.setDate(vencimento.getDate() + (i - 1) * 7);
+      } else {
+        vencimento.setDate(vencimento.getDate() + (i - 1) * this.geradorPeriodicidadeDias);
+      }
+
+      const descricao = `Parcela ${i}/${this.geradorParcelas}`;
+
+      this.pagamentos.push(this.createPagamentoFormGroup({
+        formaPagamento: this.geradorFormaPagamento,
+        valor: valorFinalParcela,
+        vencimento: vencimento,
+        descricao: descricao,
+        tipo: 'R'
+      }));
+    }
+
+    this.toastr.success(`${this.geradorParcelas} parcelas geradas com sucesso!`);
+  }
+
+  calcularLucroDespesa(despControl: any): number {
+    const valorRec = despControl.get('valorRecebido')?.value || 0;
+    const valorCusto = despControl.get('valorCusto')?.value || 0;
+    return valorRec - valorCusto;
   }
 
   // Gestão de Avalistas
@@ -548,9 +708,46 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
             valor: venda.valor,
             valorFinal: venda.valorFinal,
             observacao: venda.observacao,
+            retornoBancoId: venda.retornoBancoId || '',
+            retornoNumero: venda.retornoNumero || null,
+            retornoValor: venda.retornoValor || 0,
+            retornoCreditarDia: venda.retornoCreditarDia ? new Date(venda.retornoCreditarDia) : null,
           });
 
-          // O CustomSelect carregará os nomes baseando-se nos IDs carregados
+          // Reconstruir pagamentos
+          this.pagamentos.clear();
+          if (venda.pagamentos && Array.isArray(venda.pagamentos)) {
+            venda.pagamentos.forEach((pag: any) => {
+              this.pagamentos.push(this.createPagamentoFormGroup(pag));
+            });
+          }
+
+          // Reconstruir avalistas
+          this.avalistasIds.clear();
+          this.selectedAvalistas = [];
+          if (venda.avalistasIds && Array.isArray(venda.avalistasIds)) {
+            venda.avalistasIds.forEach((id: string) => {
+              this.avalistasIds.push(this.fb.control(id));
+              this.selectedAvalistas.push({
+                personId: id,
+                name: `ID: ${id.slice(0, 8)}...`,
+              } as any);
+            });
+          }
+
+          // Reconstruir despesas
+          this.despesas.clear();
+          if (venda.despesas && Array.isArray(venda.despesas)) {
+            venda.despesas.forEach((desp: any) => {
+              this.despesas.push(this.createDespesaFormGroup(desp));
+            });
+          }
+
+          // Força a atualização do valor inicial
+          setTimeout(() => {
+            this.initialFormValue = JSON.stringify(this.vendaForm.value);
+            this.lastSavedDraftValue = this.vendaForm.value;
+          }, 300);
         },
         error: () => this.toastr.error('Erro ao carregar dados da venda'),
       });
@@ -576,9 +773,17 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
       buyerPersonId: raw.buyer?.id,
       sellerPersonId: raw.seller?.id,
       dataVenda: dataVendaFormatted,
-      // Converte os valores formatados (string BRL) de volta para número
       valor: raw.valor || 0,
       valorFinal: raw.valorFinal || 0,
+      retornoBancoId: raw.retornoBancoId || null,
+      retornoNumero: raw.retornoNumero || null,
+      retornoValor: raw.retornoValor || 0,
+      retornoCreditarDia: raw.retornoCreditarDia ? this.formatDateToISO(raw.retornoCreditarDia) : null,
+      despesas: (raw.despesas || []).map((d: any) => ({
+        ...d,
+        valorCusto: d.valorCusto !== null && d.valorCusto !== undefined ? d.valorCusto : 0,
+        dataPagamento: this.formatDateToISO(d.dataPagamento)
+      })),
       // Remove campos auxiliares
       vehicle: undefined,
       buyer: undefined,

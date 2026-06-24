@@ -8,7 +8,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { VendaService } from '@services/venda.service';
 import { NfeService } from '@services/nfe.service';
 import { FinancialService } from '@services/financial.service';
-import { VendaResponseDto } from '@interfaces/venda';
+import { VendaResponseDto, PagamentoResponse } from '@interfaces/venda';
 import { Nfe } from '@interfaces/nfe';
 import { FinancialTransaction } from '@interfaces/financial';
 import { TransactionPaymentDialogComponent } from '../../pages/financial/financial-dashboard/transaction-payment-dialog.component';
@@ -194,5 +194,31 @@ export class VendaInfoComponent implements OnInit {
 
   onClose(): void {
     this.close.emit();
+  }
+
+  getPagamentoStatus(pag: PagamentoResponse): string {
+    if (!this.financialTransactions || this.financialTransactions.length === 0) {
+      return 'PENDING';
+    }
+
+    const formatLocalDate = (dateStr: string | undefined): string => {
+      if (!dateStr) return '';
+      return dateStr.substring(0, 10);
+    };
+
+    const pagDueDate = formatLocalDate(pag.vencimento);
+    
+    const match = this.financialTransactions.find(tx => {
+      const txDueDate = formatLocalDate(tx.dueDate);
+      const isSameDate = txDueDate === pagDueDate;
+      const isSameAmount = Math.abs(tx.amount - pag.valor) < 0.01;
+      
+      const expectedTxType = pag.tipo === 'D' ? 'EXPENSE' : 'INCOME';
+      const isSameType = tx.type === expectedTxType;
+
+      return isSameDate && isSameAmount && isSameType;
+    });
+
+    return match ? match.status : 'PENDING';
   }
 }

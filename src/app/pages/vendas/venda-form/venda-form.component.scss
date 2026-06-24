@@ -1,6 +1,6 @@
 .form-container {
   padding: 24px;
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -185,6 +185,12 @@
 .col-3 {
   flex: 0 0 calc(25% - 16px);
 }
+.col-2 {
+  flex: 0 0 calc(16.66% - 16px);
+}
+.col-1 {
+  flex: 0 0 calc(8.33% - 16px);
+}
 
 mat-form-field {
   width: 100%;
@@ -197,12 +203,32 @@ mat-form-field {
 }
 
 .pagamento-item {
-  padding: 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 8px 0;
 
-  .actions-cell {
+  .field-forma {
+    flex: 0 0 180px;
+  }
+  .field-valor {
+    flex: 0 0 150px;
+  }
+  .field-vencimento {
+    flex: 0 0 160px;
+  }
+  .field-descricao {
+    flex: 1;
+    min-width: 150px;
+  }
+  .field-actions {
+    flex: 0 0 50px;
     display: flex;
+    justify-content: center;
     align-items: center;
-    justify-content: flex-end;
+    height: 56px;
+    margin-bottom: 22px;
   }
 }
 
@@ -252,13 +278,32 @@ mat-form-field {
   color: #666;
 }
 
-// Responsividade
 @media (max-width: 768px) {
+  .col-1,
+  .col-2,
   .col-3,
   .col-4,
   .col-6,
   .col-8 {
     flex: 0 0 100%;
+  }
+
+  .pagamento-item {
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .field-forma,
+    .field-valor,
+    .field-vencimento,
+    .field-descricao {
+      flex: 0 0 100%;
+    }
+
+    .field-actions {
+      flex: 0 0 100%;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
   }
 
   .form-actions {
