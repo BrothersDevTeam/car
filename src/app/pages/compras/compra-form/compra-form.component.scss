@@ -1,0 +1,328 @@
+.form-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.compra-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-section {
+  border-radius: 8px;
+
+  mat-card-header {
+    margin-bottom: 16px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+
+    mat-card-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #333;
+    }
+  }
+}
+
+.grid-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.col-12 {
+  flex: 0 0 100%;
+}
+.col-6 {
+  flex: 0 0 calc(50% - 16px);
+}
+.col-4 {
+  flex: 0 0 calc(33.33% - 16px);
+}
+.col-3 {
+  flex: 0 0 calc(25% - 16px);
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.field-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modern-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.premium-toggle-group {
+  border: none !important;
+  background-color: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+  display: flex;
+  height: 48px;
+
+  ::ng-deep {
+    .mat-button-toggle {
+      border: none !important;
+      border-radius: 6px !important;
+      background-color: transparent;
+      color: #64748b;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .mat-button-toggle-label-content {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+        padding: 0 16px;
+      }
+
+      &.mat-button-toggle-checked {
+        background-color: white;
+        color: #3b7ab8;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+        mat-icon {
+          color: #3b7ab8 !important;
+        }
+      }
+    }
+  }
+}
+
+// ===== ASSISTENTE DE PARCELAMENTO =====
+.assistant-bar {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+
+  h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #475569;
+    margin: 0 0 12px 0;
+  }
+
+  .assistant-fields {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+
+    mat-form-field {
+      flex: 1 1 200px;
+      min-width: 150px;
+      margin-bottom: 0;
+
+      ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+      }
+    }
+
+    .small-field {
+      flex: 0 0 120px;
+    }
+
+    button {
+      height: 48px;
+      padding: 0 24px;
+    }
+  }
+}
+
+// ===== LISTA DE PAGAMENTOS =====
+.pagamentos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.pagamento-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+  padding: 8px 0;
+  border-bottom: 1px dashed #f1f5f9;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .field-forma {
+    flex: 0 0 200px;
+  }
+  .field-valor {
+    flex: 0 0 180px;
+  }
+  .field-vencimento {
+    flex: 0 0 180px;
+  }
+  .field-desc {
+    flex: 1;
+  }
+
+  button {
+    margin-top: 4px;
+  }
+}
+
+// ===== TOTALIZADOR =====
+.totalizer-bar {
+  margin-top: 24px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+
+  &.mismatch {
+    border-color: #fca5a5;
+    background-color: #fff5f5;
+  }
+
+  .totals-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .total-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    .label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-top: 4px;
+    }
+
+    .text-warn {
+      color: #ef4444;
+    }
+  }
+
+  .mismatch-warning {
+    text-align: right;
+    color: #ef4444;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 12px 0 0 0;
+  }
+}
+
+// ===== AÇÕES DO FORMULÁRIO =====
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0 48px;
+  width: 100%;
+
+  button {
+    padding: 0 32px;
+    height: 48px;
+    min-width: 150px;
+  }
+}
+
+.spinner-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 40vh;
+  gap: 16px;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .col-4,
+  .col-6 {
+    flex: 0 0 100%;
+  }
+
+  .assistant-fields {
+    flex-direction: column;
+    align-items: stretch;
+
+    mat-form-field,
+    .small-field,
+    button {
+      flex: 1 1 auto;
+      width: 100%;
+    }
+  }
+
+  .pagamento-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+
+    .field-forma,
+    .field-valor,
+    .field-vencimento,
+    .field-desc {
+      flex: 1 1 auto;
+      width: 100%;
+    }
+
+    button {
+      align-self: flex-end;
+    }
+  }
+
+  .totalizer-bar {
+    .totals-group {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 16px;
+    }
+
+    .total-item {
+      align-items: space-between;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+
+  .form-actions {
+    flex-direction: column;
+    button {
+      width: 100%;
+    }
+  }
+}

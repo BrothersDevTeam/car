@@ -137,22 +137,20 @@ export class VehicleComponent implements CanComponentDeactivate {
       ],
     },
     {
-      key: 'acoes_nfe',
-      header: 'Ações NFe',
+      key: 'acoes_compra',
+      header: 'Compra',
       actions: [
         {
-          label: 'Gerar NFe de Compra',
-          icon: 'receipt_long',
+          label: 'Registrar Compra',
+          icon: 'add_shopping_cart',
           color: 'primary',
-          action: (row) => this.gerarNfeCompra(row),
-          hidden: (row) => !!row.hasInputNfe,
+          action: (row) => this.registrarCompra(row),
+          hidden: (row) => !!row.hasPurchase,
         },
       ],
       alertConfig: {
         getMessage: (row) => {
-          return row.nfeValidationErrors && row.nfeValidationErrors.length > 0
-            ? row.nfeValidationErrors.join('; ')
-            : null;
+          return !row.hasPurchase ? 'Veículo sem registro de compra atrelado.' : null;
         },
         icon: 'error_outline',
       },
@@ -532,30 +530,9 @@ export class VehicleComponent implements CanComponentDeactivate {
     }
   }
 
-  gerarNfeCompra(vehicle: VehicleList) {
-    if (!this.storeContextService.validateStoreSelection()) return;
-
-    if (vehicle.nfeValidationErrors && vehicle.nfeValidationErrors.length > 0) {
-      this.snackBar.open(
-        'Resolva as pendências antes de gerar a NFe de Entrada: ' + vehicle.nfeValidationErrors.join(', '),
-        'OK',
-        { duration: 5000, panelClass: ['warn-snackbar'] },
-      );
-      return;
-    }
-
-    this.toastr.info('Gerando rascunho de NFe de compra...');
-    this.nfeService.generatePurchaseNfe(vehicle.vehicleId).subscribe({
-      next: (response: any) => {
-        this.toastr.success('Rascunho de NFe gerado com sucesso!');
-        this.router.navigate(['/nfe']);
-      },
-      error: (err: any) => {
-        console.error('Erro ao gerar NFe:', err);
-        // Tenta extrair a mensagem detalhada da API (errorMessage ou message)
-        const msg = err.error?.errorMessage || err.error?.message || 'Erro ao gerar rascunho de NFe';
-        this.toastr.error(msg, 'Erro ao gerar rascunho de NFe');
-      },
+  registrarCompra(vehicle: VehicleList) {
+    this.router.navigate(['/compras/nova'], {
+      queryParams: { vehicleId: vehicle.vehicleId },
     });
   }
 

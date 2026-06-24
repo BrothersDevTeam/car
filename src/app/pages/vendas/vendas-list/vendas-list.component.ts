@@ -112,6 +112,19 @@ export class VendasListComponent implements OnInit, OnDestroy {
       format: (val) => this.currencyPipe.transform(val, 'BRL', 'symbol', '1.2-2') || '—',
     },
     {
+      key: 'nfeStatus',
+      header: 'NF-e',
+      badgeConfig: {
+        rascunho: { label: 'Em Digitação', cssClass: 'badge-rascunho' },
+        processando: { label: 'Processando', cssClass: 'badge-processando' },
+        autorizado: { label: 'Autorizada', cssClass: 'badge-autorizado' },
+        cancelado: { label: 'Cancelada', cssClass: 'badge-cancelado' },
+        erro: { label: 'Erro', cssClass: 'badge-erro' },
+        erro_autorizacao: { label: 'Erro Autorização', cssClass: 'badge-erro' },
+      },
+      format: (val) => val || 'Não Gerada',
+    },
+    {
       key: 'vendaStatus',
       header: 'Status',
       badgeConfig: {

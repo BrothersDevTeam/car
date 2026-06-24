@@ -126,6 +126,7 @@ export interface VehicleList {
   origin?: string;
   nfeHistory?: NfeSummary[];
   nfeValidationErrors?: string[];
+  hasPurchase?: boolean;
 }
 
 export type CreateVehicle = Omit<Vehicle, 'vehicleId'>;

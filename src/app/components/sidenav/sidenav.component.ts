@@ -108,6 +108,18 @@ export class SideNavComponent {
       });
     }
 
+    // Compras
+    if (
+      this.authService.hasAuthority(Authorizations.READ_VEHICLE_STORE) ||
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
+    ) {
+      baseMenu.push({
+        icon: 'shopping_cart',
+        label: 'Compras',
+        route: '/compras',
+      });
+    }
+
     // Vendas
     if (
       this.authService.hasAuthority(Authorizations.READ_VENDA_STORE) ||

@@ -289,139 +289,26 @@
         <mat-tab>
           <ng-template mat-tab-label>
             <mat-icon class="tab-icon">attach_money</mat-icon>
-            @if (submitted && form.hasError('supplierRequired')) {
-              <mat-icon color="warn" class="error-indicator" style="color: #f44336; margin-left: 4px">error</mat-icon>
-            }
             <span>Dados Gerais</span>
           </ng-template>
 
           <div class="tab-content">
             <section class="form-section">
               <div class="section-title">
-                <mat-icon>shopping_cart</mat-icon>
-                <h3>Informações de Aquisição</h3>
+                <mat-icon>attach_money</mat-icon>
+                <h3>Preço de Venda</h3>
               </div>
 
               <div class="vertical-form-stack">
                 <div class="field-container">
-                  <label class="modern-label">Tipo de Entrada</label>
-                  <mat-button-toggle-group
-                    formControlName="tipoEntrada"
-                    aria-label="Tipo de Entrada"
-                    class="premium-toggle-group"
-                  >
-                    <mat-button-toggle value="COMPRA">
-                      <mat-icon>shopping_cart</mat-icon>
-                      Compra
-                    </mat-button-toggle>
-                    <mat-button-toggle value="CONSIGNACAO">
-                      <mat-icon>assignment</mat-icon>
-                      Consignação
-                    </mat-button-toggle>
-                  </mat-button-toggle-group>
-                </div>
-
-                <div class="field-container">
-                  <label class="modern-label">
-                    Informações do Fornecedor
-                    <span
-                      class="required-asterisk"
-                      *ngIf="showFinanceiroTab"
-                      style="color: #f44336"
-                    >
-                      *
-                    </span>
-                  </label>
-                  <app-custom-select
-                    listType="person"
-                    label="Selecione o fornecedor"
-                    [options]="persons"
-                    [control]="supplierControl"
-                    placeholder="Buscar por nome ou CPF/CNPJ..."
-                    (onCreateNew)="onCreateNewPerson()"
-                    (onEdit)="onEditPerson($event)"
-                  ></app-custom-select>
-                  <span
-                    class="error-message animate-fade-in"
-                    *ngIf="submitted && form.hasError('supplierRequired')"
-                    style="color: #f44336; font-size: 12px; margin-top: 4px; display: block"
-                  >
-                    O fornecedor é obrigatório quando o tipo de entrada for 'Compra'.
-                  </span>
-                </div>
-
-                <div class="date-row">
-                  <app-date-input formControlName="dataCompra" label="Data da Compra"></app-date-input>
-                </div>
-
-                <div class="financial-card-stack">
-                  <div class="field-container">
-                    <label class="modern-label">Custo de Aquisição</label>
-                    <span class="helper-text">Preço pago pelo veículo para cálculo de margem</span>
-                    <app-currency-input
-                      formControlName="valorCompra"
-                      label="Valor de Compra"
-                      [error]="!!(form.get('valorCompra')?.invalid && (form.get('valorCompra')?.touched || submitted))"
-                      errorMessage="Valor inválido"
-                    ></app-currency-input>
-
-
-
-                    <!-- Alerta de aviso quando o somatório dos pagamentos não bate -->
-                    <div
-                      *ngIf="showFinanceiroTab && form.hasError('paymentsMismatch')"
-                      class="animate-fade-in"
-                      style="
-                        margin-top: 4px;
-                        padding: 10px 12px;
-                        background: #fbe9e7;
-                        color: #d84315;
-                        border-radius: 8px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        gap: 8px;
-                        font-size: 13px;
-                        font-weight: 500;
-                        border: 1px solid rgba(216, 67, 21, 0.15);
-                      "
-                    >
-                      <div style="display: flex; align-items: center; gap: 8px;">
-                        <mat-icon style="color: #d84315; font-size: 20px; width: 20px; height: 20px;">warning</mat-icon>
-                        <span>A soma dos pagamentos deve ser igual ao Valor de Compra.</span>
-                      </div>
-                      <button
-                        type="button"
-                        mat-button
-                        (click)="selectedTabIndex.set(2)"
-                        style="
-                          font-size: 11px;
-                          font-weight: 600;
-                          height: 28px;
-                          line-height: 28px;
-                          padding: 0 10px;
-                          background: #ffffff;
-                          border: 1px solid rgba(216, 67, 21, 0.3);
-                          border-radius: 6px;
-                          color: #d84315;
-                          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-                        "
-                      >
-                        Ajustar Financeiro
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="field-container">
-                    <label class="modern-label">Preço de Venda Sugerido</label>
-                    <span class="helper-text">Valor base para anúncios e vitrine</span>
-                    <app-currency-input
-                      formControlName="valorVenda"
-                      label="Preço de Venda"
-                      [error]="!!(form.get('valorVenda')?.invalid && (form.get('valorVenda')?.touched || submitted))"
-                      errorMessage="Valor inválido"
-                    ></app-currency-input>
-                  </div>
+                  <label class="modern-label">Preço de Venda Sugerido</label>
+                  <span class="helper-text">Valor base para anúncios e vitrine</span>
+                  <app-currency-input
+                    formControlName="valorVenda"
+                    label="Preço de Venda"
+                    [error]="!!(form.get('valorVenda')?.invalid && (form.get('valorVenda')?.touched || submitted))"
+                    errorMessage="Valor inválido"
+                  ></app-currency-input>
                 </div>
               </div>
             </section>
@@ -457,130 +344,6 @@
           </div>
         </mat-tab>
 
-        <!-- Aba 3: Financeiro (Compra) - Visível apenas se Tipo de Entrada for COMPRA e valorCompra > 0 -->
-        @if (showFinanceiroTab) {
-          <mat-tab>
-            <ng-template mat-tab-label>
-              <mat-icon class="tab-icon">account_balance_wallet</mat-icon>
-              @if (submitted && form.hasError('paymentsMismatch')) {
-                <mat-icon color="warn" class="error-indicator" style="color: #f44336; margin-left: 4px">error</mat-icon>
-              }
-              <span>Financeiro</span>
-            </ng-template>
-
-            <div class="tab-content">
-              <mat-card class="form-section" style="border: none; box-shadow: none; background: transparent">
-                <mat-card-header
-                  class="header-with-action"
-                  style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px"
-                >
-                  <mat-card-title style="font-size: 18px; font-weight: 500; color: #202124">
-                    Cronograma de Pagamentos
-                  </mat-card-title>
-                  <button type="button" mat-flat-button color="primary" (click)="addPagamento()">
-                    <mat-icon>add</mat-icon>
-                    Adicionar Pagamento
-                  </button>
-                </mat-card-header>
-
-                <mat-card-content style="padding: 0">
-                  @if (form.hasError('paymentsMismatch')) {
-                    <div
-                      class="validation-warning animate-fade-in"
-                      style="
-                        margin-bottom: 16px;
-                        padding: 12px;
-                        background: #fbe9e7;
-                        color: #d84315;
-                        border-radius: 8px;
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                        font-size: 14px;
-                        font-weight: 500;
-                      "
-                    >
-                      <mat-icon style="color: #d84315">warning</mat-icon>
-                      <span>A soma dos pagamentos deve ser exatamente igual ao Valor de Compra do veículo.</span>
-                    </div>
-                  }
-
-                  <div formArrayName="pagamentosCompra" class="pagamentos-list">
-                    @for (pag of pagamentosCompra.controls; track $index) {
-                      <div
-                        [formGroupName]="$index"
-                        class="pagamento-item"
-                        style="
-                          display: grid;
-                          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-                          gap: 16px;
-                          margin-bottom: 24px;
-                          position: relative;
-                          padding: 16px;
-                          border: 1px solid #dadce0;
-                          border-radius: 8px;
-                          background: #ffffff;
-                        "
-                      >
-                        <mat-form-field appearance="outline">
-                          <mat-label>Forma de Pagamento</mat-label>
-                          <mat-select formControlName="formaPagamento">
-                            <mat-option value="DINHEIRO">DINHEIRO</mat-option>
-                            <mat-option value="PIX">PIX</mat-option>
-                            <mat-option value="FINANCIAMENTO">FINANCIAMENTO</mat-option>
-                            <mat-option value="CHEQUE">CHEQUE</mat-option>
-                            <mat-option value="TED">TED</mat-option>
-                            <mat-option value="CARTAO">CARTÃO</mat-option>
-                            <mat-option value="TROCA">TROCA</mat-option>
-                            <mat-option value="OUTROS">OUTROS</mat-option>
-                          </mat-select>
-                        </mat-form-field>
-
-                        <app-currency-input
-                          formControlName="valor"
-                          label="Valor"
-                          [required]="true"
-                          [error]="!!(pag.get('valor')?.invalid && (pag.get('valor')?.touched || submitted))"
-                          errorMessage="Valor é obrigatório"
-                        ></app-currency-input>
-
-                        <mat-form-field appearance="outline">
-                          <mat-label>Vencimento</mat-label>
-                          <input matInput [matDatepicker]="vencPicker" formControlName="vencimento" />
-                          <mat-datepicker-toggle matIconSuffix [for]="vencPicker"></mat-datepicker-toggle>
-                          <mat-datepicker #vencPicker></mat-datepicker>
-                        </mat-form-field>
-
-                        <div style="display: flex; align-items: center; justify-content: flex-end">
-                          @if (pagamentosCompra.length > 1) {
-                            <button
-                              type="button"
-                              mat-icon-button
-                              color="warn"
-                              (click)="removePagamento($index)"
-                              matTooltip="Remover este pagamento"
-                            >
-                              <mat-icon>delete</mat-icon>
-                            </button>
-                          }
-                        </div>
-
-                        <mat-form-field appearance="outline" style="grid-column: 1 / -1; margin-top: -12px">
-                          <mat-label>Descrição / Detalhes do Pagamento</mat-label>
-                          <input
-                            matInput
-                            formControlName="descricao"
-                            placeholder="Ex: Banco, n° do cheque, comprovante..."
-                          />
-                        </mat-form-field>
-                      </div>
-                    }
-                  </div>
-                </mat-card-content>
-              </mat-card>
-            </div>
-          </mat-tab>
-        }
       </mat-tab-group>
 
       <!-- Botão de submit e rascunho -->

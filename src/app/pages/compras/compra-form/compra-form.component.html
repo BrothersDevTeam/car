@@ -1,0 +1,238 @@
+<app-content-header [title]="title" [subtitle]="subtitle">
+  <button mat-stroked-button (click)="cancel()">
+    <mat-icon>arrow_back</mat-icon>
+    Voltar para lista
+  </button>
+</app-content-header>
+
+<main class="form-container">
+  @if (loading()) {
+    <div class="loader-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <span>Carregando dados da compra...</span>
+    </div>
+  } @else {
+    <form [formGroup]="compraForm" (ngSubmit)="onSubmit()" class="compra-form">
+      
+      <!-- SEÇÃO 1: VEÍCULO E FORNECEDOR -->
+      <mat-card class="form-section">
+        <mat-card-header>
+          <mat-card-title>Veículo e Fornecedor</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="grid-row">
+          <div class="col-6">
+            <app-custom-select
+              listType="vehicle"
+              label="Veículo*"
+              [options]="vehicles"
+              [control]="$any(compraForm.get('vehicle'))"
+              placeholder="Selecione o veículo"
+            ></app-custom-select>
+          </div>
+
+          <div class="col-6">
+            <app-custom-select
+              listType="person"
+              label="Fornecedor*"
+              [options]="suppliers"
+              [control]="$any(compraForm.get('supplier'))"
+              placeholder="Selecione o fornecedor"
+            ></app-custom-select>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- SEÇÃO 2: DADOS DA TRANSAÇÃO -->
+      <mat-card class="form-section">
+        <mat-card-header>
+          <mat-card-title>Dados da Compra</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="grid-row">
+          <div class="col-4">
+            <app-currency-input
+              formControlName="valorCompra"
+              label="Valor de Compra*"
+              [required]="true"
+            ></app-currency-input>
+          </div>
+
+          <div class="col-4">
+            <app-date-input
+              formControlName="dataCompra"
+              label="Data da Compra*"
+              [required]="true"
+            ></app-date-input>
+          </div>
+
+          <div class="col-4">
+            <div class="field-container">
+              <label class="modern-label">Tipo de Entrada</label>
+              <mat-button-toggle-group
+                formControlName="tipoEntrada"
+                aria-label="Tipo de Entrada"
+                class="premium-toggle-group"
+              >
+                <mat-button-toggle value="COMPRA">
+                  <mat-icon>shopping_cart</mat-icon>
+                  Compra
+                </mat-button-toggle>
+                <mat-button-toggle value="CONSIGNACAO">
+                  <mat-icon>assignment</mat-icon>
+                  Consignação
+                </mat-button-toggle>
+              </mat-button-toggle-group>
+            </div>
+          </div>
+
+          <div class="col-12" style="margin-top: 16px;">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Observação</mat-label>
+              <textarea
+                matInput
+                formControlName="observacao"
+                rows="3"
+                placeholder="Observações sobre a aquisição do veículo..."
+              ></textarea>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- SEÇÃO 3: FINANCEIRO (PARCELAS) -->
+      <mat-card class="form-section">
+        <mat-card-header>
+          <mat-card-title>Condições de Pagamento</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <!-- Assistente de Geração Automática -->
+          <div class="assistant-bar">
+            <h3>Assistente de Parcelamento</h3>
+            <div class="assistant-fields">
+              <mat-form-field appearance="outline" class="small-field">
+                <mat-label>Qtd. Parcelas</mat-label>
+                <input matInput type="number" [(ngModel)]="geradorParcelas" [ngModelOptions]="{standalone: true}" min="1" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Forma de Pagamento</mat-label>
+                <mat-select [(ngModel)]="geradorFormaPagamento" [ngModelOptions]="{standalone: true}">
+                  <mat-option value="DINHEIRO">DINHEIRO</mat-option>
+                  <mat-option value="PIX">PIX</mat-option>
+                  <mat-option value="FINANCIAMENTO">FINANCIAMENTO</mat-option>
+                  <mat-option value="CHEQUE">CHEQUE</mat-option>
+                  <mat-option value="TED">TED</mat-option>
+                  <mat-option value="DOC">DOC</mat-option>
+                  <mat-option value="CARTAO">CARTÃO</mat-option>
+                  <mat-option value="OUTROS">OUTROS</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Primeiro Vencimento</mat-label>
+                <input matInput [matDatepicker]="picker" [(ngModel)]="geradorPrimeiroVencimento" [ngModelOptions]="{standalone: true}" />
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+
+              <button mat-flat-button color="primary" type="button" (click)="gerarParcelasAutomaticas()">
+                Gerar Parcelas
+              </button>
+            </div>
+          </div>
+
+          <mat-divider style="margin: 24px 0;"></mat-divider>
+
+          <!-- Listagem de Parcelas Manual -->
+          <div formArrayName="pagamentos" class="pagamentos-list">
+            <div *ngFor="let item of pagamentos.controls; let i = index" [formGroupName]="i" class="pagamento-item">
+              <div class="field-forma">
+                <mat-form-field appearance="outline">
+                  <mat-label>Forma</mat-label>
+                  <mat-select formControlName="formaPagamento">
+                    <mat-option value="DINHEIRO">DINHEIRO</mat-option>
+                    <mat-option value="PIX">PIX</mat-option>
+                    <mat-option value="FINANCIAMENTO">FINANCIAMENTO</mat-option>
+                    <mat-option value="CHEQUE">CHEQUE</mat-option>
+                    <mat-option value="TED">TED</mat-option>
+                    <mat-option value="DOC">DOC</mat-option>
+                    <mat-option value="CARTAO">CARTÃO</mat-option>
+                    <mat-option value="OUTROS">OUTROS</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="field-valor">
+                <app-currency-input
+                  formControlName="valor"
+                  label="Valor"
+                  [required]="true"
+                ></app-currency-input>
+              </div>
+
+              <div class="field-vencimento">
+                <app-date-input
+                  formControlName="vencimento"
+                  label="Vencimento"
+                  [required]="true"
+                ></app-date-input>
+              </div>
+
+              <div class="field-desc">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Descrição / Doc</mat-label>
+                  <input matInput formControlName="descricao" placeholder="Ex: Chave Pix, Banco, Nº do Cheque..." />
+                </mat-form-field>
+              </div>
+
+              <button mat-icon-button color="warn" type="button" (click)="removePagamento(i)" style="margin-top: 4px;">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <div style="margin-top: 16px;">
+            <button mat-stroked-button color="primary" type="button" (click)="addPagamento()">
+              <mat-icon>add</mat-icon>
+              Adicionar Parcela
+            </button>
+          </div>
+
+          <!-- Totalizador -->
+          <div class="totalizer-bar" [class.mismatch]="totalDiferenca !== 0">
+            <div class="totals-group">
+              <div class="total-item">
+                <span class="label">Soma das Parcelas</span>
+                <span class="value">{{ currencyFormat(totalPagamentos) }}</span>
+              </div>
+              <div class="total-item">
+                <span class="label">Total da Compra</span>
+                <span class="value">{{ currencyFormat(compraForm.get('valorCompra')?.value || 0) }}</span>
+              </div>
+              <div class="total-item" *ngIf="totalDiferenca !== 0">
+                <span class="label text-warn">Diferença</span>
+                <span class="value text-warn">{{ currencyFormat(totalDiferenca) }}</span>
+              </div>
+            </div>
+            <p *ngIf="totalDiferenca !== 0" class="mismatch-warning">
+              A soma das parcelas deve ser exatamente igual ao valor da compra.
+            </p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Botões de Ação do Form -->
+      <footer class="form-actions">
+        <button mat-stroked-button type="button" (click)="cancel()" [disabled]="isSubmitting()">
+          Cancelar
+        </button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="compraForm.invalid || totalDiferenca !== 0 || isSubmitting()">
+          <span *ngIf="!isSubmitting()">Salvar Compra</span>
+          <span *ngIf="isSubmitting()" class="spinner-inline">
+            <mat-spinner diameter="20" color="accent"></mat-spinner>
+            Salvando...
+          </span>
+        </button>
+      </footer>
+    </form>
+  }
+</main>

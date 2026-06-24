@@ -104,6 +104,7 @@ export interface VendaResponseDto {
   buyerPersonId: string;
   sellerPersonId?: string;
   nfeId?: string;
+  nfeStatus?: string;
   numero?: number;
   dataVenda: string;
   valor: number;

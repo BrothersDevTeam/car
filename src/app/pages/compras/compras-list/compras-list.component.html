@@ -1,0 +1,72 @@
+<main>
+  <app-content-header
+    title="Compras"
+    subtitle="Gestão de aquisições de veículos para o estoque"
+    [showIconOnly]="true"
+    [showAddBadge]="true"
+    fontIcon="shopping_cart"
+    (onClick)="goToNewCompra()"
+  >
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Pesquisar</mat-label>
+        <input
+          matInput
+          placeholder="Busque por Fornecedor ou Placa..."
+          [(ngModel)]="searchValue"
+          (input)="onSearch($event)"
+        />
+        <mat-icon matPrefix>search</mat-icon>
+        <button
+          *ngIf="searchValue"
+          matSuffix
+          mat-icon-button
+          aria-label="Limpar"
+          (click)="searchValue = ''; loadComprasList()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+  </app-content-header>
+
+  <div style="margin-top: 24px">
+    @if (comprasPaginatedList?.page?.totalElements) {
+      <app-generic-table
+        [genericPaginatedList]="comprasPaginatedList"
+        [columns]="columns"
+        [totalElements]="comprasPaginatedList!.page.totalElements"
+        [loading]="comprasListLoading()"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        (rowClick)="onRowClick($event)"
+        (editClick)="handleEdit($event)"
+        (nfeClick)="handleEmitirNfe($event)"
+        (deleteClick)="handleDelete($event)"
+        (pageEvent)="handlePageEvent($event)"
+      ></app-generic-table>
+    } @else {
+      @if (comprasListLoading()) {
+        <div class="loader-div">
+          <span class="loader"></span>
+        </div>
+      } @else {
+        <app-empty-state
+          icon="shopping_cart"
+          title="Nenhuma compra registrada"
+          description="Registre as compras de seus veículos para dar entrada no estoque e gerar NF-e."
+        ></app-empty-state>
+      }
+    }
+  </div>
+</main>
+
+@if (openInfo()) {
+  <app-drawer (closeDrawer)="handleCloseDrawer()">
+    <app-compra-info
+      *ngIf="selectedCompraId()"
+      [compraId]="selectedCompraId()!"
+      (close)="handleCloseDrawer()"
+      (edit)="handleEditFromInfo($event)"
+    ></app-compra-info>
+  </app-drawer>
+}

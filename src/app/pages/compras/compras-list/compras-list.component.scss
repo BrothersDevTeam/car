@@ -1,0 +1,144 @@
+.search-container {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-right: auto;
+  flex: 1;
+
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  ::ng-deep .mat-mdc-form-field-bottom-align {
+    display: none;
+  }
+}
+
+.search-field {
+  flex: 1 1 auto;
+  min-width: 200px;
+}
+
+.loader-div,
+.message-error {
+  width: 100%;
+  height: 40vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  display: block;
+  margin: 20px auto;
+  position: relative;
+  border: 3px solid rgb(200, 200, 200);
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: animloader 3s linear infinite;
+}
+
+.loader::after {
+  content: '';
+  box-sizing: border-box;
+  width: 6px;
+  height: 24px;
+  background: rgb(200, 200, 200);
+  transform: rotate(-45deg);
+  position: absolute;
+  bottom: -20px;
+  left: 46px;
+}
+
+@keyframes animloader {
+  0% {
+    transform: translate(-10px, -10px);
+  }
+  12% {
+    transform: translate(-10px, 0px);
+  }
+  25% {
+    transform: translate(0px, 10px);
+  }
+  37% {
+    transform: translate(10px, 10px);
+  }
+  50% {
+    transform: translate(20px, 0px);
+  }
+  62% {
+    transform: translate(20px, -10px);
+  }
+  75% {
+    transform: translate(10px, -20px);
+  }
+  87% {
+    transform: translate(0px, -20px);
+  }
+  100% {
+    transform: translate(-10px, -10px);
+  }
+}
+
+::ng-deep {
+  .badge-rascunho {
+    background-color: #f1f5f9;
+    color: #475569;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .badge-autorizado {
+    background-color: #e6f4ea;
+    color: #1e8e3e;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .badge-cancelado {
+    background-color: #fce8e6;
+    color: #d93025;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .badge-processando {
+    background-color: #fef7e0;
+    color: #f29900;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .badge-erro {
+    background-color: #fce8e6;
+    color: #d93025;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 768px) {
+  .search-container {
+    gap: 12px;
+  }
+}
