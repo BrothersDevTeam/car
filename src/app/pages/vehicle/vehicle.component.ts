@@ -137,8 +137,8 @@ export class VehicleComponent implements CanComponentDeactivate {
       ],
     },
     {
-      key: 'acoes_compra',
-      header: 'Compra',
+      key: 'acoes_fluxo',
+      header: 'Fluxo',
       actions: [
         {
           label: 'Registrar Compra',
@@ -146,6 +146,13 @@ export class VehicleComponent implements CanComponentDeactivate {
           color: 'primary',
           action: (row) => this.registrarCompra(row),
           hidden: (row) => !!row.hasPurchase,
+        },
+        {
+          label: 'Registrar Venda',
+          icon: 'shopping_cart_checkout',
+          color: 'accent',
+          action: (row) => this.registrarVenda(row),
+          hidden: (row) => !row.hasPurchase || row.status === 'VENDIDO',
         },
       ],
       alertConfig: {
@@ -532,6 +539,12 @@ export class VehicleComponent implements CanComponentDeactivate {
 
   registrarCompra(vehicle: VehicleList) {
     this.router.navigate(['/compras/nova'], {
+      queryParams: { vehicleId: vehicle.vehicleId },
+    });
+  }
+
+  registrarVenda(vehicle: VehicleList) {
+    this.router.navigate(['/vendas/nova'], {
       queryParams: { vehicleId: vehicle.vehicleId },
     });
   }

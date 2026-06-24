@@ -197,6 +197,8 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
 
   ngOnInit() {
     this.vendaId = this.route.snapshot.paramMap.get('id');
+    const queryVehicleId = this.route.snapshot.queryParamMap.get('vehicleId');
+
     if (this.vendaId) {
       this.isEdit = true;
       this.title = 'Editar Venda';
@@ -205,6 +207,10 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
     } else {
       // Começa com um pagamento padrão
       this.addPagamento();
+      if (queryVehicleId) {
+        this.showFormFields = true;
+        this.loadAndSetQueryVehicle(queryVehicleId);
+      }
     }
 
     this.loadInitialData();
@@ -250,6 +256,29 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
       this.sellers = [...mapped];
       this.avalistasOptions = [...mapped];
       this.people = [...mapped];
+    });
+  }
+
+  private loadAndSetQueryVehicle(vehicleId: string) {
+    this.loading.set(true);
+    this.vehicleService.getById(vehicleId).pipe(
+      finalize(() => this.loading.set(false))
+    ).subscribe({
+      next: (v) => {
+        this.vendaForm.get('vehicle')?.patchValue({
+          id: v.vehicleId,
+          name: `${v.brand} ${v.model} (${v.plate})`
+        });
+
+        const valorVenda = v.valorVenda ? parseFloat(v.valorVenda.toString().replace(',', '.')) : 0;
+        this.vendaForm.patchValue({
+          valor: valorVenda,
+          valorFinal: valorVenda,
+        });
+
+        this.geradorValorTotal = valorVenda;
+      },
+      error: () => this.toastr.error('Erro ao carregar dados do veículo selecionado')
     });
   }
 
