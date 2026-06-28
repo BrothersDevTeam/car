@@ -24,9 +24,11 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { ToastrService } from 'ngx-toastr';
-import { Subscription } from 'rxjs';
+import { Subscription, of, Observable } from 'rxjs';
 import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
@@ -36,6 +38,7 @@ import { DrawerComponent } from '@components/drawer/drawer.component';
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
 import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
+import { SaveDraftDialogComponent, SaveDraftDialogResult } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 
 import type { NaturezaOperacao, Nfe } from '@interfaces/nfe';
 import type { Person } from '@interfaces/person';
@@ -47,6 +50,7 @@ import { VehicleService } from '@services/vehicle.service';
 import { extractErrorMessage } from '@utils/error-utils';
 import { StoreContextService } from '@services/store-context.service';
 import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fiscal.service';
+import { FormDraftService, FormDraft } from '@services/form-draft.service';
 
 @Component({
   selector: 'app-nfe-saida-form',
@@ -63,6 +67,8 @@ import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fis
     MatInputModule,
     MatFormFieldModule,
     MatSelectModule,
+    MatCardModule,
+    MatTooltipModule,
     CustomSelectComponent,
     DrawerComponent,
     NaturalPersonFormComponent,
@@ -74,6 +80,16 @@ import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fis
 export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   private subscriptions = new Subscription();
   submitted = false;
+
+  private readonly FORM_TYPE = 'nfe-saida';
+  protected availableDrafts: FormDraft[] = [];
+  public selectedDraftId: string | null = null;
+  protected lastSavedDraftValue: any = null;
+  protected draftSelectorClicked = false;
+  protected showFormFields = false;
+  private initialFormValue: any = null;
+  protected isSaving = false;
+  protected isInitializing = false;
 
   // Listas para os selects/autocompletes
   // Listas para os selects formatadas para o CustomSelect
@@ -159,6 +175,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   submitButton!: ElementRef<HTMLButtonElement>;
 
   @Input() dataForm: Nfe | null = null;
+  @Input() draft: FormDraft | null | undefined = null;
   @Output() formSubmitted = new EventEmitter<void>();
   @Output() formChanged = new EventEmitter<boolean>();
 
@@ -167,6 +184,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   private vehicleService = inject(VehicleService);
   private toastrService = inject(ToastrService);
   private parametroFiscalService = inject(ParametroFiscalService);
+  private formDraftService = inject(FormDraftService);
 
   parametroFiscal: ParametroFiscal | null = null;
   loadingParametros = false;
@@ -196,16 +214,18 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   constructor() {}
 
   ngOnInit(): void {
-    // Inicializa com um item padrão se não for edição
-    if (!this.dataForm) {
+    this.isInitializing = true;
+    this.showFormFields = !!this.dataForm || !!this.draft;
+
+    if (!this.dataForm && !this.draft) {
       this.addItem();
     }
 
     // Observar mudanças no formulário
     this.subscriptions.add(
       this.form.valueChanges.subscribe(() => {
-        const isDirty = this.form.dirty;
-        this.formChanged.emit(isDirty);
+        const hasChanges = this.hasUnsavedChanges();
+        this.formChanged.emit(hasChanges);
       }),
     );
 
@@ -226,6 +246,20 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
         this.addItem();
       }),
     );
+
+    // Inscreve para atualizar lista quando rascunhos mudarem
+    this.subscriptions.add(
+      this.formDraftService.draftsChanges.subscribe(() => {
+        this.loadAvailableDrafts();
+      }),
+    );
+
+    this.loadAvailableDrafts();
+
+    setTimeout(() => {
+      this.captureInitialFormValue();
+      this.isInitializing = false;
+    }, 500);
   }
 
   get itens(): FormArray {
@@ -387,7 +421,16 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['dataForm'] && this.dataForm) {
+      this.isInitializing = true;
       this.tryPatchForm();
+      this.showFormFields = true;
+      setTimeout(() => {
+        this.captureInitialFormValue();
+        this.isInitializing = false;
+      }, 500);
+    }
+    if (changes['draft'] && this.draft) {
+      this.loadDraftData(this.draft);
     }
   }
 
@@ -529,6 +572,12 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
       this.nfeService.update(formValues).subscribe({
         next: () => {
           this.toastrService.success('NFe atualizada com sucesso');
+          const draftIdToDelete = this.selectedDraftId || this.draft?.id;
+          if (draftIdToDelete) {
+            this.formDraftService.removeDraftById(draftIdToDelete);
+          } else {
+            this.formDraftService.removeDraft(this.FORM_TYPE, this.dataForm?.nfeId);
+          }
           this.formSubmitted.emit();
         },
         error: (error) => {
@@ -540,6 +589,12 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
       this.nfeService.create(formValues).subscribe({
         next: () => {
           this.toastrService.success('NFe criada com sucesso');
+          const draftIdToDelete = this.selectedDraftId || this.draft?.id;
+          if (draftIdToDelete) {
+            this.formDraftService.removeDraftById(draftIdToDelete);
+          } else {
+            this.formDraftService.removeDraft(this.FORM_TYPE);
+          }
           this.formSubmitted.emit();
         },
         error: (error) => {
@@ -596,5 +651,265 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   getPersonDisplay(person: Person): string {
     return person.cpf ? `${person.name} - CPF: ${person.cpf}` : `${person.name} - CNPJ: ${person.cnpj}`;
+  }
+
+  get isSaveButtonDisabled(): boolean {
+    if (this.isSaving || this.isInitializing) {
+      return true;
+    }
+    const hasActiveDraft = !!this.draft || !!this.selectedDraftId;
+    const isEditMode = !!this.dataForm && !!this.dataForm.nfeId;
+
+    if (isEditMode) {
+      if (hasActiveDraft) {
+        return !this.form.valid;
+      }
+      return !this.hasUnsavedChanges();
+    }
+    return !this.form.valid;
+  }
+
+  hasChangesComparedToDraft(): boolean {
+    const source = this.lastSavedDraftValue;
+    if (!source) {
+      return this.hasUnsavedChanges();
+    }
+    return JSON.stringify(this.form.getRawValue()) !== JSON.stringify(source);
+  }
+
+  get canShowDraftButton(): boolean {
+    return !this.isSaving && !this.isInitializing && this.form.dirty && this.hasChangesComparedToDraft();
+  }
+
+  get currentDraftName(): string | undefined {
+    if (this.selectedDraftId) {
+      const draft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);
+      return draft?.draftName;
+    }
+    return undefined;
+  }
+
+  get suggestedDraftName(): string {
+    const personName = this.form.value.person?.name || '';
+    const operacao = this.form.value.nfeNaturezaOperacao || 'NFe';
+    return `${operacao} - ${personName}`.trim() || `Rascunho NFe ${new Date().toLocaleString()}`;
+  }
+
+  hasUnsavedChanges(): boolean {
+    if (this.isSaving || this.isInitializing) {
+      return false;
+    }
+    if (this.form.pristine) {
+      return false;
+    }
+    if (this.initialFormValue) {
+      return JSON.stringify(this.form.getRawValue()) !== this.initialFormValue;
+    }
+    return true;
+  }
+
+  private captureInitialFormValue(): void {
+    this.initialFormValue = JSON.stringify(this.form.getRawValue());
+  }
+
+  private loadAvailableDrafts(): void {
+    this.availableDrafts = this.formDraftService.getDraftsByType(this.FORM_TYPE);
+    if (this.availableDrafts.length === 0) {
+      this.showFormFields = true;
+    } else if (this.dataForm || this.draft || this.selectedDraftId) {
+      this.showFormFields = true;
+    }
+  }
+
+  protected onDraftSelected(event: any): void {
+    const draftId = event.value;
+    this.showFormFields = true;
+
+    if (draftId === 'new') {
+      this.resetForm();
+      this.selectedDraftId = 'new';
+      return;
+    }
+
+    const draft = this.availableDrafts.find((d) => d.id === draftId);
+    if (!draft) {
+      return;
+    }
+
+    this.loadDraftData(draft);
+  }
+
+  private loadDraftData(draft: FormDraft): void {
+    this.selectedDraftId = draft.id;
+    const draftData = draft.data;
+
+    if (draftData.itemTipo) {
+      this.form.get('itemTipo')?.setValue(draftData.itemTipo, { emitEvent: false });
+    }
+
+    this.itens.clear();
+    if (draftData.nfeItens && draftData.nfeItens.length > 0) {
+      draftData.nfeItens.forEach((item: any) => {
+        this.itens.push(this.createItem(item));
+      });
+    } else {
+      this.addItem();
+    }
+
+    this.form.patchValue(draftData);
+
+    this.toastrService.success(`Rascunho "${draft.draftName || 'sem nome'}" carregado`);
+    this.lastSavedDraftValue = this.form.getRawValue();
+
+    setTimeout(() => {
+      this.captureInitialFormValue();
+      if (this.dataForm && this.dataForm.nfeId) {
+        this.form.markAsDirty();
+        this.formChanged.emit(true);
+      } else {
+        this.form.markAsPristine();
+        this.formChanged.emit(false);
+      }
+    }, 200);
+  }
+
+  protected deleteDraft(draftId: string, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    const draft = this.availableDrafts.find((d) => d.id === draftId);
+    if (!draft) {
+      return;
+    }
+
+    this.formDraftService.removeDraftById(draft.id);
+    this.loadAvailableDrafts();
+
+    if (this.selectedDraftId === draftId) {
+      this.resetForm();
+      this.selectedDraftId = null;
+      this.showFormFields = this.availableDrafts.length === 0;
+    }
+
+    this.toastrService.success('Rascunho excluído');
+  }
+
+  protected formatDraftDate(date: Date): string {
+    const now = new Date();
+    const diffMs = now.getTime() - new Date(date).getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) {
+      return 'agora mesmo';
+    } else if (diffMins < 60) {
+      return `há ${diffMins} min${diffMins > 1 ? 's' : ''}`;
+    } else if (diffHours < 24) {
+      return `há ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+    } else if (diffDays < 7) {
+      return `há ${diffDays} dia${diffDays > 1 ? 's' : ''}`;
+    } else {
+      return new Date(date).toLocaleDateString('pt-BR');
+    }
+  }
+
+  saveLocalDraft(
+    silent: boolean = false,
+    draftName?: string,
+    existingDraftId?: string,
+    closeAfterSave: boolean = true,
+  ): void {
+    const nfeId = this.dataForm?.nfeId || undefined;
+    let effectiveEntityId = nfeId;
+    const actualDraftId = existingDraftId || this.selectedDraftId;
+
+    if (!effectiveEntityId && actualDraftId) {
+      const prefix = `${this.FORM_TYPE}_`;
+      if (actualDraftId.startsWith(prefix)) {
+        effectiveEntityId = actualDraftId.replace(prefix, '') as any;
+      }
+    }
+
+    const draftData = this.form.getRawValue();
+    const draftId = this.formDraftService.saveDraft(this.FORM_TYPE, draftData, effectiveEntityId, draftName);
+
+    this.selectedDraftId = draftId;
+    this.lastSavedDraftValue = this.form.getRawValue();
+
+    if (!silent) {
+      this.toastrService.info('Rascunho salvo localmente');
+    }
+
+    if (!closeAfterSave) {
+      this.form.markAsPristine();
+      setTimeout(() => {
+        this.captureInitialFormValue();
+      }, 100);
+    } else {
+      this.formSubmitted.emit();
+    }
+  }
+
+  openSaveDraftDialog() {
+    if (this.selectedDraftId && this.selectedDraftId !== 'new') {
+      const currentDraft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);
+      if (currentDraft) {
+        this.saveLocalDraft(
+          false,
+          currentDraft.draftName,
+          this.selectedDraftId,
+          true,
+        );
+        return;
+      }
+    }
+
+    const suggestedName = this.suggestedDraftName;
+
+    const dialogRef = this.dialog.open(SaveDraftDialogComponent, {
+      data: {
+        title: 'Salvar Rascunho',
+        suggestedName,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result: SaveDraftDialogResult) => {
+      if (result && result.confirmed) {
+        const nameExists = this.availableDrafts.some((d) => d.draftName === result.draftName);
+
+        if (nameExists) {
+          this.toastrService.error('Já existe um rascunho com este nome. Por favor, escolha outro.', 'Nome Duplicado');
+          this.openSaveDraftDialog();
+          return;
+        }
+
+        this.saveLocalDraft(false, result.draftName, undefined, true);
+      }
+    });
+  }
+
+  resetForm() {
+    this.form.reset({
+      storeId: this.storeContextService.currentStoreId || '',
+      person: { id: '', name: '' },
+      nfeNaturezaOperacao: '',
+      nfePreenchimentoManualImpostos: false,
+      itemTipo: 'veiculo',
+      nfeFinalidadeEmissao: '1',
+      nfeConsumidorFinal: '1',
+      nfePresencaComprador: '1',
+      nfeIndicadorIntermediario: '0',
+      modalidadeFrete: '9',
+      nfeInformacoesAdicionaisFisco: 'BASE DE CALCULO DO ICMS REDUZIDA 72.22% DE ACORDO COM O ITEM 11 DO ANEXO IV DO RICMS-MG. DECRETO 48.055/2020, OBSERVANDO O DISPOSTO NO SUBITEM 11.7. OS TRIBUTOS FEDERAIS INCIDENTES SOBRE ESTA OPERAÇÃO SERÃO RECOLHIDOS CONFORME ART.5 LEI Nº 9.716/98. PERCENTUAL DE IMPOSTOS CONFORME LEI 12.741 / 8,65%.\nNF DE ENTRADA N.: SERIE: DATA: '
+    });
+    this.itens.clear();
+    this.addItem();
+    this.submitted = false;
+    this.selectedDraftId = null;
+    this.lastSavedDraftValue = this.form.getRawValue();
+    this.form.markAsPristine();
+    this.formChanged.emit(false);
   }
 }

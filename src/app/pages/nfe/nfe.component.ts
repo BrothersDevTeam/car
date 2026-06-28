@@ -503,10 +503,11 @@ export class NfeComponent {
   }
 
   openDialog() {
-    // Verifica qual formulário está ativo para checar a validade
-    const activeFormRef = this.selectedTabIndex() === 0 ? this.entradaFormRef?.nfeForm : this.saidaFormRef?.nfeForm;
-
-    const canSave = activeFormRef?.valid ?? false;
+    // Identifica o formRef ativo e o formulário reativo
+    const activeFormComponent = this.selectedTabIndex() === 0 ? this.entradaFormRef : this.saidaFormRef;
+    const canSave = activeFormComponent?.nfeForm?.valid ?? false;
+    const currentDraftName = activeFormComponent?.currentDraftName;
+    const suggestedDraftName = activeFormComponent?.suggestedDraftName;
 
     const dialogRef = this.dialog.open(UnsavedChangesDialogComponent, {
       width: '450px',
@@ -516,7 +517,9 @@ export class NfeComponent {
         message: canSave
           ? 'Deseja emitir esta NFe antes de sair?'
           : 'Há campos obrigatórios não preenchidos ou inválidos. Deseja descartar?',
-        hideDraftOption: true, // NFes não possuem rascunhos locais neste módulo
+        currentDraftName,
+        suggestedDraftName,
+        hideDraftOption: false,
       },
     });
 
@@ -529,11 +532,11 @@ export class NfeComponent {
       }
 
       if (result === 'save' && canSave) {
-        if (this.selectedTabIndex() === 0) {
-          this.entradaFormRef?.onSubmit();
-        } else {
-          this.saidaFormRef?.onSubmit();
-        }
+        activeFormComponent?.onSubmit();
+      } else if (typeof result === 'string' && result.startsWith('draft:')) {
+        const draftName = result.replace('draft:', '');
+        activeFormComponent?.saveLocalDraft(false, draftName, activeFormComponent.selectedDraftId || undefined, true);
+        this.handleCloseDrawer();
       }
     });
   }

@@ -8,7 +8,62 @@
     }
   </div>
 
-  <div class="section-title">Informações Gerais</div>
+  <!-- Seção Premium de Rascunhos -->
+  @if (availableDrafts.length > 0 && !dataForm) {
+    <div class="drafts-section" (click)="draftSelectorClicked = true">
+      <mat-card class="draft-card" [class.highlight-pulse]="!draftSelectorClicked">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>history</mat-icon>
+          <mat-card-title>Notas Fiscais em andamento</mat-card-title>
+          <mat-card-subtitle>Você possui rascunhos salvos localmente para este formulário.</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="draft-selector-container">
+            <mat-form-field appearance="outline" class="draft-select-field">
+              <mat-label>Selecione um rascunho para continuar ou inicie um preenchimento do zero</mat-label>
+              <mat-select [(value)]="selectedDraftId" (selectionChange)="onDraftSelected($event)">
+                <mat-option value="new" class="new-draft-option">
+                  <mat-icon style="margin-right: 8px; color: white">add_circle_outline</mat-icon>
+                  Iniciar novo preenchimento
+                </mat-option>
+                @for (draft of availableDrafts; track draft.id) {
+                  <mat-option [value]="draft.id" class="draft-option-item">
+                    <div class="draft-option-content">
+                      <div class="draft-info">
+                        <span class="draft-name">
+                          {{ draft.draftName || 'Sem nome' }}
+                          @if (draft.createdBy) {
+                            <small class="draft-author" style="opacity: 0.7; font-size: 0.85em">
+                              (por {{ draft.createdBy }})
+                            </small>
+                          }
+                        </span>
+                        <span class="draft-date">
+                          {{ formatDraftDate(draft.lastModified) }}
+                        </span>
+                      </div>
+                      <button
+                        mat-icon-button
+                        class="delete-draft-btn"
+                        (click)="deleteDraft(draft.id, $event)"
+                        matTooltip="Excluir rascunho"
+                      >
+                        <mat-icon>delete_outline</mat-icon>
+                      </button>
+                    </div>
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+
+  @if (showFormFields) {
+    <div class="section-title">Informações Gerais</div>
   <div class="tax-row">
     <app-custom-select
       listType="person"
@@ -285,17 +340,35 @@
     <textarea matInput formControlName="nfeInformacoesAdicionaisFisco" rows="4" placeholder="Informações adicionais de interesse do fisco"></textarea>
   </mat-form-field>
 
-  <button
-    #submitButton
-    mat-flat-button
-    color="primary"
-    class="submit-btn"
-    (click)="onSubmit()"
-    [disabled]="form.invalid"
-  >
-    <mat-icon>{{ dataForm?.nfeId ? 'save' : 'send' }}</mat-icon>
-    {{ dataForm?.nfeId ? 'Atualizar NFe' : 'Gerar NFe' }}
-  </button>
+    <div class="form-actions">
+      <button
+        #submitButton
+        mat-raised-button
+        color="primary"
+        class="submit-btn"
+        (click)="onSubmit()"
+        [disabled]="isSaveButtonDisabled"
+      >
+        <mat-icon>{{ dataForm?.nfeId ? 'save' : 'send' }}</mat-icon>
+        {{ dataForm?.nfeId ? 'Atualizar NFe' : 'Gerar NFe' }}
+      </button>
+
+      <!-- Salvar Rascunho (Ícone discreto) -->
+      @if (canShowDraftButton) {
+        <button
+          mat-icon-button
+          type="button"
+          color="primary"
+          (click)="openSaveDraftDialog()"
+          [disabled]="isSaving"
+          matTooltip="Salvar Rascunho"
+          style="flex: 0 0 auto !important; width: 48px !important; height: 48px !important; min-width: 48px !important"
+        >
+          <mat-icon style="margin: 0 !important">save_as</mat-icon>
+        </button>
+      }
+    </div>
+  }
 </form>
 
 <!-- Drawer para criar/editar pessoa -->
