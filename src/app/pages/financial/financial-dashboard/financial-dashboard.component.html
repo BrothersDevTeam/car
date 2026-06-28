@@ -305,7 +305,8 @@
                   @if (t.status === 'PENDING' || t.status === 'PARTIALLY_PAID') {
                     <button
                       mat-menu-item
-                      [disabled]="!hasEditPermission"
+                      [disabled]="!hasEditPermission || isTradeTransaction(t)"
+                      [matTooltip]="isTradeTransaction(t) ? 'A liquidação de veículos de troca deve ser confirmada diretamente nos Detalhes da Venda.' : ''"
                       (click)="openPaymentModal(t)"
                       class="custom-menu-item"
                     >
@@ -314,7 +315,8 @@
                     </button>
                     <button
                       mat-menu-item
-                      [disabled]="!hasEditPermission"
+                      [disabled]="!hasEditPermission || isTradeTransaction(t)"
+                      [matTooltip]="isTradeTransaction(t) ? 'A liquidação de veículos de troca deve ser confirmada diretamente nos Detalhes da Venda.' : ''"
                       (click)="liquidar(t)"
                       class="custom-menu-item"
                     >
@@ -323,7 +325,8 @@
                     </button>
                     <button
                       mat-menu-item
-                      [disabled]="!hasEditPermission"
+                      [disabled]="!hasEditPermission || isTradeTransaction(t)"
+                      [matTooltip]="isTradeTransaction(t) ? 'Lançamentos de troca não podem ser editados manualmente.' : ''"
                       (click)="openEditTransactionModal(t)"
                       class="custom-menu-item"
                     >
@@ -332,7 +335,8 @@
                     </button>
                     <button
                       mat-menu-item
-                      [disabled]="!hasEditPermission"
+                      [disabled]="!hasEditPermission || isTradeTransaction(t)"
+                      [matTooltip]="isTradeTransaction(t) ? 'Lançamentos de troca não podem ser cancelados separadamente da venda.' : ''"
                       (click)="cancelarLancamento(t)"
                       class="custom-menu-item menu-action-warn"
                     >

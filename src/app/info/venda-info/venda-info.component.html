@@ -165,6 +165,16 @@
                     <span class="status-badge" [ngClass]="getStatusClass(getPagamentoStatus(pag))">
                       {{ getStatusLabel(getPagamentoStatus(pag)) }}
                     </span>
+                    <button
+                      *ngIf="pag.formaPagamento === 'TROCA' && getPagamentoStatus(pag) === 'PENDING' && venda.vendaStatus === 'ATIVA'"
+                      mat-flat-button
+                      color="accent"
+                      (click)="confirmTradePayment(pag)"
+                      style="font-size: 10px; line-height: 24px; height: 24px; padding: 0 6px; min-width: unset; margin-left: 8px;"
+                      matTooltip="Confirmar recebimento físico do veículo e quitar pernas financeiras"
+                    >
+                      Confirmar Troca
+                    </button>
                   </td>
                   <td class="text-right bold">
                     {{ formatCurrency(pag.valor) }}
@@ -225,7 +235,7 @@
                     </td>
                     <td class="text-center">
                       <button
-                        *ngIf="tx.status !== 'PAID' && tx.status !== 'CANCELLED'"
+                        *ngIf="tx.status !== 'PAID' && tx.status !== 'CANCELLED' && !isTradeTransaction(tx)"
                         mat-flat-button
                         color="primary"
                         (click)="openPaymentModal(tx)"
@@ -233,6 +243,14 @@
                       >
                         Receber
                       </button>
+                      <span
+                        *ngIf="tx.status !== 'PAID' && tx.status !== 'CANCELLED' && isTradeTransaction(tx)"
+                        class="status-badge status-neutral"
+                        style="font-size: 10px;"
+                        matTooltip="A confirmação física da troca deve ser feita na tabela de Formas de Pagamento acima."
+                      >
+                        Troca Pendente
+                      </span>
                     </td>
                   </tr>
                 </tbody>

@@ -107,6 +107,14 @@ export class VendaService {
     );
   }
 
+  confirmarTroca(vendaId: string, vendaPagamentoId: string): Observable<VendaResponseDto> {
+    return this.http.post<VendaResponseDto>(`${this.apiUrl}/${vendaId}/confirmar-troca/${vendaPagamentoId}`, {}).pipe(
+      tap(() => {
+        this.clearCache();
+      })
+    );
+  }
+
   public clearCache() {
     this.cache = null;
     this.cacheUpdated$.next(null);

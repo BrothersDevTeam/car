@@ -1,17 +1,12 @@
-import { Component, OnDestroy, OnInit, Output, signal, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
-  debounceTime,
-  distinctUntilChanged,
-  filter,
   finalize,
   Observable,
   of,
   Subscription,
-  switchMap,
-  tap,
 } from 'rxjs';
 
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
@@ -34,7 +29,7 @@ import {
 } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -51,9 +46,9 @@ import { CanComponentDeactivate } from '@guards/unsaved-changes.guard';
 import { FormDraftService, FormDraft } from '@services/form-draft.service';
 import { ActionsService } from '@services/actions.service';
 
-import { Vehicle, VehicleList } from '@interfaces/vehicle';
 import { Person } from '@interfaces/person';
 import { VendaRequestDto } from '@interfaces/venda';
+import { VehicleFormComponent } from '@forms/vehicle/vehicle-form/vehicle-form.component';
 
 @Component({
   selector: 'app-venda-form',
@@ -83,6 +78,7 @@ import { VendaRequestDto } from '@interfaces/venda';
     DrawerComponent,
     NaturalPersonFormComponent,
     LegalEntityFormComponent,
+    VehicleFormComponent,
   ],
   templateUrl: './venda-form.component.html',
   styleUrls: ['./venda-form.component.scss'],
@@ -119,6 +115,8 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
   // Sinais para controlar os drawers
   openPersonForm = signal(false);
   selectedPersonToEdit = signal<Person | null>(null);
+  openVehicleForm = signal(false);
+  activeTradeIndex: number | null = null;
 
   people: { id: string; name: string }[] = [];
 
@@ -239,12 +237,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
     if (!storeId) return;
 
     // Carrega Veículos em Estoque
-    this.vehicleService.getPaginatedData(0, 1000, { storeId, onlyInStock: true }).subscribe((response) => {
-      this.vehicles = (response.content || []).map((v) => ({
-        id: v.vehicleId,
-        name: `${v.brand} ${v.model} (${v.plate})`,
-      }));
-    });
+    this.reloadVehicles();
 
     // Carrega Pessoas (Compradores/Vendedores/Avalistas/Fornecedores/Bancos)
     this.personService.getPaginatedData(0, 1000, { storeId }).subscribe((response) => {
@@ -256,6 +249,46 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
       this.sellers = [...mapped];
       this.avalistasOptions = [...mapped];
       this.people = [...mapped];
+    });
+  }
+
+  /**
+   * Recarrega a lista de veículos em estoque
+   */
+  private reloadVehicles(selectNewId?: boolean) {
+    const storeId = this.storeContextService.currentStoreId;
+    if (!storeId) return;
+
+    const previousIds = this.vehicles.map(v => v.id);
+
+    this.vehicleService.getPaginatedData(0, 1000, { storeId, onlyInStock: true }).subscribe({
+      next: (response) => {
+        this.vehicles = (response.content || []).map((v) => ({
+          id: v.vehicleId,
+          name: `${v.brand} ${v.model} (${v.plate})`,
+        }));
+
+        if (selectNewId && this.activeTradeIndex !== null) {
+          const newVehicle = this.vehicles.find(v => !previousIds.includes(v.id));
+          if (newVehicle) {
+            const paymentsArray = this.pagamentos;
+            const paymentGroup = paymentsArray.at(this.activeTradeIndex) as FormGroup;
+            paymentGroup.get('descricao')?.setValue({
+              id: newVehicle.id,
+              name: newVehicle.name
+            });
+            paymentGroup.get('descricao')?.markAsDirty();
+
+            // Dispara a busca do valor de compra
+            this.onTradeVehicleSelected({ id: newVehicle.id, name: newVehicle.name }, this.activeTradeIndex);
+          }
+        }
+        this.activeTradeIndex = null;
+      },
+      error: (err) => {
+        console.error('Erro ao recarregar veículos:', err);
+        this.toastr.error('Erro ao recarregar veículos em estoque');
+      }
     });
   }
 
@@ -318,11 +351,20 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
 
   // Gestão de Pagamentos
   createPagamentoFormGroup(data?: any): FormGroup {
+    let descricaoValue = data?.descricao || '';
+    if (data?.formaPagamento === 'TROCA' && typeof descricaoValue === 'string' && descricaoValue.trim() !== '') {
+      const foundVehicle = this.vehicles.find(v => v.id === descricaoValue);
+      descricaoValue = {
+        id: descricaoValue,
+        name: foundVehicle ? foundVehicle.name : ''
+      };
+    }
+
     return this.fb.group({
       formaPagamento: [data?.formaPagamento || 'PIX', Validators.required],
       valor: [data?.valor || 0, [Validators.required, Validators.min(0.01)]],
       vencimento: [data?.vencimento ? new Date(data.vencimento) : new Date()],
-      descricao: [data?.descricao || ''],
+      descricao: [descricaoValue],
       tipo: [data?.tipo || 'R', Validators.required]
     });
   }
@@ -804,10 +846,15 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
       dataVenda: dataVendaFormatted,
       valor: raw.valor || 0,
       valorFinal: raw.valorFinal || 0,
-      retornoBancoId: raw.retornoBancoId || null,
+      retornoBancoId: raw.retornoBancoId?.id || raw.retornoBancoId || null,
       retornoNumero: raw.retornoNumero || null,
       retornoValor: raw.retornoValor || 0,
       retornoCreditarDia: raw.retornoCreditarDia ? this.formatDateToISO(raw.retornoCreditarDia) : null,
+      pagamentos: (raw.pagamentos || []).map((p: any) => ({
+        ...p,
+        descricao: p.formaPagamento === 'TROCA' ? (p.descricao?.id || p.descricao || '') : p.descricao,
+        vencimento: p.vencimento ? this.formatDateToISO(p.vencimento) : null
+      })),
       despesas: (raw.despesas || []).map((d: any) => ({
         ...d,
         valorCusto: d.valorCusto !== null && d.valorCusto !== undefined ? d.valorCusto : 0,
@@ -858,6 +905,55 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  /**
+   * Chamado quando um veículo de troca é selecionado no select.
+   * Busca o valor de compra registrado e atualiza o valor da linha.
+   */
+  onTradeVehicleSelected(option: { id: string; name: string }, index: number) {
+    if (!option || !option.id) return;
+
+    this.vehicleService.getById(option.id).subscribe({
+      next: (vehicle) => {
+        // Mapeia o valorCompra vindo do backend
+        const valorCompra = vehicle.valorCompra ? parseFloat(vehicle.valorCompra.toString().replace(',', '.')) : 0;
+        
+        const paymentsArray = this.pagamentos;
+        const paymentGroup = paymentsArray.at(index) as FormGroup;
+        paymentGroup.patchValue({
+          valor: valorCompra
+        });
+        paymentGroup.get('valor')?.markAsDirty();
+      },
+      error: (err) => {
+        console.error('Erro ao buscar valor de compra do veículo de troca:', err);
+      }
+    });
+  }
+
+  /**
+   * Abre o drawer para criar novo veículo de troca
+   */
+  onCreateNewTradeVehicle(index: number) {
+    this.activeTradeIndex = index;
+    this.openVehicleForm.set(true);
+  }
+
+  /**
+   * Fecha o drawer de veículo
+   */
+  handleCloseVehicleDrawer() {
+    this.openVehicleForm.set(false);
+    this.activeTradeIndex = null;
+  }
+
+  /**
+   * Callback disparado quando o veículo é salvo com sucesso no drawer
+   */
+  onVehicleFormSubmitted() {
+    this.reloadVehicles(true);
+    this.handleCloseVehicleDrawer();
   }
 
   goBack() {

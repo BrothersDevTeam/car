@@ -219,6 +219,10 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
     this.loadTransactions();
   }
 
+  isTradeTransaction(tx: FinancialTransaction): boolean {
+    return tx.description ? tx.description.startsWith('[TROCA]') : false;
+  }
+
   liquidar(transaction: FinancialTransaction): void {
     if (!this.hasEditPermission) {
       this.toastr.warning('Você não tem permissão para liquidar pagamentos.', 'Acesso Negado');

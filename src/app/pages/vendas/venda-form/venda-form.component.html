@@ -347,11 +347,16 @@
                     </mat-form-field>
                   </div>
 
-                  <div class="field-descricao">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Descrição do Veículo de Troca / Detalhes</mat-label>
-                      <input matInput formControlName="descricao" placeholder="Ex: Placa, Modelo, Ano..." />
-                    </mat-form-field>
+                  <div class="field-descricao-select" style="flex: 1;">
+                    <app-custom-select
+                      listType="vehicle"
+                      label="Veículo de Troca*"
+                      [options]="vehicles"
+                      [control]="$any(item.control.get('descricao'))"
+                      placeholder="Selecione o veículo de troca"
+                      (onCreateNew)="onCreateNewTradeVehicle(item.index)"
+                      (optionSelected)="onTradeVehicleSelected($event, item.index)"
+                    ></app-custom-select>
                   </div>
 
                   <div class="field-actions">
@@ -588,6 +593,16 @@
     }
   }
 </main>
+
+<!-- Drawer para criar novo veículo (para troca) -->
+@if (openVehicleForm()) {
+  <app-drawer (closeDrawer)="handleCloseVehicleDrawer()">
+    <app-vehicle-form
+      [dataForm]="null"
+      (formSubmitted)="onVehicleFormSubmitted()"
+    />
+  </app-drawer>
+}
 
 <!-- Drawer para criar/editar pessoa -->
 @if (openPersonForm()) {

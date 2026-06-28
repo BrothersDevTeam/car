@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { VendaService } from '@services/venda.service';
 import { NfeService } from '@services/nfe.service';
 import { FinancialService } from '@services/financial.service';
@@ -22,7 +23,8 @@ import { TransactionPaymentDialogComponent } from '../../pages/financial/financi
     MatButtonModule,
     MatDividerModule,
     MatTooltipModule,
-    MatDialogModule
+    MatDialogModule,
+    MatSnackBarModule
   ],
   providers: [DatePipe, CurrencyPipe],
   templateUrl: './venda-info.component.html',
@@ -39,6 +41,7 @@ export class VendaInfoComponent implements OnInit {
   private dialog = inject(MatDialog);
   private datePipe = inject(DatePipe);
   private currencyPipe = inject(CurrencyPipe);
+  private snackBar = inject(MatSnackBar);
 
   venda: VendaResponseDto | null = null;
   nfe: Nfe | null = null;
@@ -220,5 +223,40 @@ export class VendaInfoComponent implements OnInit {
     });
 
     return match ? match.status : 'PENDING';
+  }
+
+  isTradeTransaction(tx: FinancialTransaction): boolean {
+    return tx.description ? tx.description.startsWith('[TROCA]') : false;
+  }
+
+  confirmTradePayment(pag: PagamentoResponse): void {
+    const formattedAmount = this.formatCurrency(pag.valor);
+    const confirmacao = confirm(
+      `Confirma o recebimento físico do veículo de troca?\n` +
+      `Os lançamentos financeiros gerados por ele (Entrada e Saída no valor de ${formattedAmount}) serão liquidados simultaneamente.`
+    );
+
+    if (confirmacao) {
+      this.loading = true;
+      this.vendaService.confirmarTroca(this.vendaId, pag.vendaPagamentoId).subscribe({
+        next: (vendaUpdated) => {
+          this.venda = vendaUpdated;
+          this.snackBar.open('Troca confirmada e lançamentos liquidados com sucesso!', 'Fechar', {
+            duration: 5000,
+            panelClass: ['snackbar-success']
+          });
+          this.loadFinancialTransactions();
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Erro ao confirmar troca:', err);
+          this.snackBar.open('Erro ao confirmar troca. Tente novamente.', 'Fechar', {
+            duration: 5000,
+            panelClass: ['snackbar-error']
+          });
+          this.loading = false;
+        }
+      });
+    }
   }
 }
