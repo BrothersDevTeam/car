@@ -112,6 +112,14 @@
           <div class="assistant-bar">
             <h3>Assistente de Parcelamento</h3>
             <div class="assistant-fields">
+              <app-currency-input
+                [(ngModel)]="geradorValorTotal"
+                [ngModelOptions]="{standalone: true}"
+                label="Valor a Parcelar"
+                [required]="false"
+                style="flex: 1 1 200px; min-width: 150px;"
+              ></app-currency-input>
+
               <mat-form-field appearance="outline" class="small-field">
                 <mat-label>Qtd. Parcelas</mat-label>
                 <input matInput type="number" [(ngModel)]="geradorParcelas" [ngModelOptions]="{standalone: true}" min="1" />

@@ -96,6 +96,7 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
   selectedVehicleToEdit: any = null;
 
   // Propriedades do Assistente Gerador de Parcelas
+  geradorValorTotal = 0;
   geradorParcelas = 1;
   geradorPrimeiroVencimento = new Date();
   geradorFormaPagamento = 'PIX';
@@ -157,6 +158,7 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
     this.subscriptions.add(
       this.compraForm.valueChanges.subscribe(() => {
         this.actionsService.hasFormChanges.set(this.hasUnsavedChanges());
+        this.geradorValorTotal = this.totalDiferenca;
       }),
     );
   }
@@ -236,6 +238,8 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
           tipoEntrada: compra.tipoEntrada || 'COMPRA',
         });
 
+        this.geradorValorTotal = compra.valorCompra;
+
         // Limpa e preenche pagamentos
         this.pagamentos.clear();
         if (compra.pagamentos && compra.pagamentos.length > 0) {
@@ -285,9 +289,8 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
 
   // Assistente de geração automática de parcelas
   gerarParcelasAutomaticas() {
-    const valorCompra = this.compraForm.get('valorCompra')?.value || 0;
-    if (valorCompra <= 0) {
-      this.toastr.warning('Defina o valor da compra antes de gerar parcelas.');
+    if (this.geradorValorTotal <= 0) {
+      this.toastr.warning('Defina o valor a ser parcelado antes de gerar.');
       return;
     }
 
@@ -296,16 +299,20 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
       return;
     }
 
+    const valorParcela = Number((this.geradorValorTotal / this.geradorParcelas).toFixed(2));
     const confirm = window.confirm(
-      `Deseja sobrescrever as formas de pagamento atuais por ${this.geradorParcelas} parcelas de ${this.currencyFormat(valorCompra / this.geradorParcelas)}?`
+      `Deseja adicionar ${this.geradorParcelas} parcelas de ${this.currencyFormat(valorParcela)} às formas de pagamento atuais?`
     );
 
     if (!confirm) return;
 
-    this.pagamentos.clear();
-    const valorParcela = Number((valorCompra / this.geradorParcelas).toFixed(2));
-    let diferenca = Number((valorCompra - (valorParcela * this.geradorParcelas)).toFixed(2));
+    // Se houver apenas uma parcela e ela for de valor zero, podemos limpá-la
+    const pagamentosAtuais = this.pagamentos.value;
+    if (pagamentosAtuais.length === 1 && pagamentosAtuais[0].valor === 0) {
+      this.pagamentos.clear();
+    }
 
+    let diferenca = Number((this.geradorValorTotal - (valorParcela * this.geradorParcelas)).toFixed(2));
     const dataBase = new Date(this.geradorPrimeiroVencimento);
 
     for (let i = 0; i < this.geradorParcelas; i++) {

@@ -381,6 +381,37 @@
           </mat-card-content>
         </mat-card>
 
+        <!-- Totalizador de Vendas -->
+        <div class="totalizer-bar" [class.mismatch]="totalDiferenca !== 0">
+          <div class="totals-group">
+            <div class="total-item">
+              <span class="label">Entradas (Receitas)</span>
+              <span class="value">{{ currencyFormat(totalReceitas) }}</span>
+            </div>
+            @if (totalDeducoes > 0) {
+              <div class="total-item">
+                <span class="label">Trocas (Deduções)</span>
+                <span class="value">{{ currencyFormat(totalDeducoes) }}</span>
+              </div>
+            }
+            <div class="total-item">
+              <span class="label">Total Registrado</span>
+              <span class="value">{{ currencyFormat(totalPagamentos) }}</span>
+            </div>
+            <div class="total-item">
+              <span class="label">Total da Venda</span>
+              <span class="value">{{ currencyFormat(vendaForm.get('valorFinal')?.value || 0) }}</span>
+            </div>
+            <div class="total-item" *ngIf="totalDiferenca !== 0">
+              <span class="label text-warn">Diferença</span>
+              <span class="value text-warn">{{ currencyFormat(totalDiferenca) }}</span>
+            </div>
+          </div>
+          <p *ngIf="totalDiferenca !== 0" class="mismatch-warning">
+            A soma das parcelas de receita e troca deve ser exatamente igual ao valor final da venda.
+          </p>
+        </div>
+
         <!-- SEÇÃO 3.3: RETORNO DE FINANCIAMENTO -->
         <mat-card class="form-section" style="margin-top: 24px;">
           <mat-card-header>

@@ -560,8 +560,37 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
     return `Venda em ${new Date().toLocaleString()}`;
   }
 
+  currencyFormat(value: number): string {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  }
+
+  get totalReceitas(): number {
+    return this.pagamentos.controls
+      .filter((ctrl) => ctrl.get('tipo')?.value !== 'D')
+      .reduce((sum, ctrl) => sum + (ctrl.get('valor')?.value || 0), 0);
+  }
+
+  get totalDeducoes(): number {
+    return this.pagamentos.controls
+      .filter((ctrl) => ctrl.get('tipo')?.value === 'D')
+      .reduce((sum, ctrl) => sum + (ctrl.get('valor')?.value || 0), 0);
+  }
+
+  get totalPagamentos(): number {
+    return this.pagamentos.controls.reduce((sum, ctrl) => sum + (ctrl.get('valor')?.value || 0), 0);
+  }
+
+  get totalDiferenca(): number {
+    const valorFinal = this.vendaForm.get('valorFinal')?.value || 0;
+    return Number((valorFinal - this.totalPagamentos).toFixed(2));
+  }
+
   get isSaveButtonDisabled(): boolean {
     if (this.isSaving || this.loading() || this.isSubmitting()) {
+      return true;
+    }
+
+    if (this.totalDiferenca !== 0) {
       return true;
     }
 
@@ -827,6 +856,11 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
   onSubmit() {
     if (this.vendaForm.invalid) {
       this.toastr.warning('Por favor, preencha todos os campos obrigatórios corretamente.');
+      return;
+    }
+
+    if (this.totalDiferenca !== 0) {
+      this.toastr.error('A soma das parcelas e trocas deve ser igual ao valor final da venda.');
       return;
     }
 
