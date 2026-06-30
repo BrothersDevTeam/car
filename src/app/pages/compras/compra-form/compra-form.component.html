@@ -27,6 +27,8 @@
               [options]="vehicles"
               [control]="$any(compraForm.get('vehicle'))"
               placeholder="Selecione o veículo"
+              (onCreateNew)="onCreateNewVehicle()"
+              (onEdit)="onEditVehicle($event)"
             ></app-custom-select>
           </div>
 
@@ -264,5 +266,15 @@
         </ng-template>
       </mat-tab>
     </mat-tab-group>
+  </app-drawer>
+}
+
+<!-- Drawer para criar/editar veículo -->
+@if (openVehicleForm()) {
+  <app-drawer (closeDrawer)="handleCloseVehicleDrawer()">
+    <app-vehicle-form
+      [dataForm]="selectedVehicleToEdit"
+      (formSubmitted)="onVehicleFormSubmitted()"
+    />
   </app-drawer>
 }

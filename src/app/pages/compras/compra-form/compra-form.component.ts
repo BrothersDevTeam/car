@@ -37,6 +37,7 @@ import type { Person } from '@interfaces/person';
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 import { DrawerComponent } from '@components/drawer/drawer.component';
+import { VehicleFormComponent } from '@forms/vehicle/vehicle-form/vehicle-form.component';
 
 @Component({
   selector: 'app-compra-form',
@@ -65,6 +66,7 @@ import { DrawerComponent } from '@components/drawer/drawer.component';
     LegalEntityFormComponent,
     NaturalPersonFormComponent,
     MatTabsModule,
+    VehicleFormComponent,
   ],
   templateUrl: './compra-form.component.html',
   styleUrls: ['./compra-form.component.scss'],
@@ -88,6 +90,10 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
   // Flags para controle do drawer de fornecedor (person)
   openPersonForm = signal(false);
   selectedPersonToEdit: Person | null = null;
+
+  // Flags para controle do drawer de veículo
+  openVehicleForm = signal(false);
+  selectedVehicleToEdit: any = null;
 
   // Propriedades do Assistente Gerador de Parcelas
   geradorParcelas = 1;
@@ -165,12 +171,7 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
     if (!storeId) return;
 
     // Carrega Veículos
-    this.vehicleService.getPaginatedData(0, 1000, { storeId }).subscribe((response) => {
-      this.vehicles = (response.content || []).map((v) => ({
-        id: v.vehicleId,
-        name: `${v.brand} ${v.model} (${v.plate})`,
-      }));
-    });
+    this.reloadVehicles();
 
     // Carrega Fornecedores (Todas as Pessoas)
     this.reloadSuppliers();
@@ -449,6 +450,80 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
   onPersonFormSubmitted() {
     this.reloadSuppliers();
     this.handleClosePersonDrawer();
+  }
+
+  /**
+   * Recarrega a lista de veículos
+   */
+  private reloadVehicles(selectNewId?: boolean) {
+    const storeId = this.storeContextService.currentStoreId;
+    if (!storeId) return;
+
+    const previousIds = this.vehicles.map((v) => v.id);
+
+    this.vehicleService.getPaginatedData(0, 1000, { storeId }).subscribe({
+      next: (response) => {
+        this.vehicles = (response.content || []).map((v) => ({
+          id: v.vehicleId,
+          name: `${v.brand} ${v.model} (${v.plate})`,
+        }));
+
+        if (selectNewId) {
+          const newVehicle = this.vehicles.find((v) => !previousIds.includes(v.id));
+          if (newVehicle) {
+            this.compraForm.get('vehicle')?.patchValue({
+              id: newVehicle.id,
+              name: newVehicle.name,
+            });
+            this.compraForm.get('vehicle')?.get('id')?.markAsDirty();
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao recarregar veículos:', error);
+        this.toastr.error('Erro ao recarregar veículos');
+      },
+    });
+  }
+
+  /**
+   * Abre o drawer para criar novo veículo
+   */
+  onCreateNewVehicle() {
+    this.selectedVehicleToEdit = null;
+    this.openVehicleForm.set(true);
+  }
+
+  /**
+   * Abre o drawer para editar veículo existente
+   */
+  onEditVehicle(vehicleId: string) {
+    this.vehicleService.getById(vehicleId).subscribe({
+      next: (vehicle) => {
+        this.selectedVehicleToEdit = vehicle;
+        this.openVehicleForm.set(true);
+      },
+      error: (error) => {
+        console.error('Erro ao carregar veículo:', error);
+        this.toastr.error('Erro ao carregar veículo');
+      },
+    });
+  }
+
+  /**
+   * Fecha o drawer de veículo
+   */
+  handleCloseVehicleDrawer() {
+    this.openVehicleForm.set(false);
+    this.selectedVehicleToEdit = null;
+  }
+
+  /**
+   * Callback quando o formulário de veículo é submetido
+   */
+  onVehicleFormSubmitted() {
+    this.reloadVehicles(true);
+    this.handleCloseVehicleDrawer();
   }
 
   cancel() {
