@@ -30,6 +30,7 @@ export interface ParametroFiscal {
   // Próximo número e Ambiente
   parametroFiscalProximoNumeroNfe?: number;
   parametroFiscalEmHomologacao?: boolean;
+  parametroFiscalSincronizarRenavePadrao?: boolean;
 }
 
 @Injectable({

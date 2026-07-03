@@ -102,6 +102,9 @@ export interface Vehicle {
   purchaseHistory?: CompraSummary[];
   optionals?: Optional[];
   optionalIds?: string[];
+  renaveStatus?: string;
+  renaveProtocol?: string;
+  renaveErrorLog?: string;
 }
 
 /**
@@ -127,6 +130,9 @@ export interface VehicleList {
   nfeHistory?: NfeSummary[];
   nfeValidationErrors?: string[];
   hasPurchase?: boolean;
+  renaveStatus?: string;
+  renaveProtocol?: string;
+  renaveErrorLog?: string;
 }
 
 export type CreateVehicle = Omit<Vehicle, 'vehicleId'>;

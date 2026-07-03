@@ -208,7 +208,10 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     nfePresencaComprador: ['1', Validators.required],
     nfeIndicadorIntermediario: ['0', Validators.required],
     modalidadeFrete: ['9', Validators.required],
-    nfeInformacoesAdicionaisFisco: ['BASE DE CALCULO DO ICMS REDUZIDA 72.22% DE ACORDO COM O ITEM 11 DO ANEXO IV DO RICMS-MG. DECRETO 48.055/2020, OBSERVANDO O DISPOSTO NO SUBITEM 11.7. OS TRIBUTOS FEDERAIS INCIDENTES SOBRE ESTA OPERAÇÃO SERÃO RECOLHIDOS CONFORME ART.5 LEI Nº 9.716/98. PERCENTUAL DE IMPOSTOS CONFORME LEI 12.741 / 8,65%.\nNF DE ENTRADA N.: SERIE: DATA: '],
+    nfeInformacoesAdicionaisFisco: [
+      'BASE DE CALCULO DO ICMS REDUZIDA 72.22% DE ACORDO COM O ITEM 11 DO ANEXO IV DO RICMS-MG. DECRETO 48.055/2020, OBSERVANDO O DISPOSTO NO SUBITEM 11.7. OS TRIBUTOS FEDERAIS INCIDENTES SOBRE ESTA OPERAÇÃO SERÃO RECOLHIDOS CONFORME ART.5 LEI Nº 9.716/98. PERCENTUAL DE IMPOSTOS CONFORME LEI 12.741 / 8,65%.\nNF DE ENTRADA N.: SERIE: DATA: ',
+    ],
+    nfeSincronizarRenave: [false],
   });
 
   constructor() {}
@@ -326,12 +329,24 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  /**
+   * Carrega os parâmetros fiscais da loja selecionada.
+   * Além de armazenar as configurações gerais de tributação e numeração, define a preferência padrão
+   * de sincronização automática com o RENAVE (true ou false) caso seja um preenchimento de nota nova.
+   */
   private loadParametrosFiscais(storeId: string) {
     this.loadingParametros = true;
     this.parametroFiscalService.getByStoreId(storeId).subscribe({
       next: (params) => {
         this.parametroFiscal = params;
         this.loadingParametros = false;
+
+        // Define a preferência padrão de sincronização do RENAVE configurada na loja.
+        // Isso só ocorre quando for uma nova nota (sem rascunho em andamento e sem edição de nota existente).
+        if (params && !this.dataForm && !this.draft) {
+          const syncDefault = params.parametroFiscalSincronizarRenavePadrao === true;
+          this.form.patchValue({ nfeSincronizarRenave: syncDefault });
+        }
       },
       error: () => {
         this.loadingParametros = false;

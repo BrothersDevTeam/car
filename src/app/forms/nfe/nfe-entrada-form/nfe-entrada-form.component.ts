@@ -201,6 +201,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     nfeIndicadorIntermediario: ['0', Validators.required],
     modalidadeFrete: ['9', Validators.required],
     nfeInformacoesAdicionaisFisco: ['EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.'],
+    nfeSincronizarRenave: [false],
   });
 
   constructor() {}
@@ -315,12 +316,24 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  /**
+   * Carrega os parâmetros fiscais da loja selecionada.
+   * Além de armazenar as configurações gerais de tributação e numeração, define a preferência padrão
+   * de sincronização automática com o RENAVE (true ou false) caso seja um preenchimento de nota nova.
+   */
   private loadParametrosFiscais(storeId: string) {
     this.loadingParametros = true;
     this.parametroFiscalService.getByStoreId(storeId).subscribe({
       next: (params) => {
         this.parametroFiscal = params;
         this.loadingParametros = false;
+
+        // Define a preferência padrão de sincronização do RENAVE configurada na loja.
+        // Isso só ocorre quando for uma nova nota (sem rascunho em andamento e sem edição de nota existente).
+        if (params && !this.dataForm && !this.draft) {
+          const syncDefault = params.parametroFiscalSincronizarRenavePadrao === true;
+          this.form.patchValue({ nfeSincronizarRenave: syncDefault });
+        }
       },
       error: () => {
         this.loadingParametros = false;

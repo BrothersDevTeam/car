@@ -109,4 +109,13 @@ export class VehicleService {
     this.cache = null;
     this.cacheUpdated$.next(null);
   }
+
+  syncRenave(vehicleId: string, tipo: 'COMPRA' | 'VENDA'): Observable<{ success: boolean; message: string; protocol?: string; error?: string }> {
+    return this.http.post<{ success: boolean; message: string; protocol?: string; error?: string }>(
+      `${this.apiUrl}/${vehicleId}/renave-sync?tipo=${tipo}`,
+      {}
+    ).pipe(
+      tap(() => this.clearCache())
+    );
+  }
 }

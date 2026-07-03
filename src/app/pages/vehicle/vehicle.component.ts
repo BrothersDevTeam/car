@@ -117,6 +117,18 @@ export class VehicleComponent implements CanComponentDeactivate {
       },
     },
     {
+      key: 'renaveStatus',
+      header: 'Status RENAVE',
+      badgeConfig: {
+        AGUARDANDO_NFE_ENTRADA: { label: 'Aguardando NFe de Entrada', cssClass: 'badge-renave-aguardando-nfe' },
+        PENDENTE_COMPRA: { label: 'Compra Pendente', cssClass: 'badge-renave-pendente-compra' },
+        PENDENTE_VENDA: { label: 'Venda Pendente', cssClass: 'badge-renave-pendente-venda' },
+        EM_ESTOQUE: { label: 'Em Estoque', cssClass: 'badge-renave-em-estoque' },
+        VENDIDO: { label: 'Vendido (RENAVE)', cssClass: 'badge-renave-vendido' },
+        CANCELADO: { label: 'Cancelado', cssClass: 'badge-renave-cancelado' },
+      },
+    },
+    {
       key: 'nfes',
       header: 'NFes',
       actions: [
@@ -171,6 +183,20 @@ export class VehicleComponent implements CanComponentDeactivate {
           icon: 'edit',
           color: 'primary',
           action: (row: VehicleList) => this.handleEdit(row),
+        },
+        {
+          label: 'Sincronizar Compra ao Renave',
+          icon: 'sync',
+          color: 'primary',
+          action: (row: VehicleList) => this.sincronizarRenave(row, 'COMPRA'),
+          hidden: (row: VehicleList) => row.renaveStatus !== 'PENDENTE_COMPRA',
+        },
+        {
+          label: 'Sincronizar Venda ao Renave',
+          icon: 'sync',
+          color: 'accent',
+          action: (row: VehicleList) => this.sincronizarRenave(row, 'VENDA'),
+          hidden: (row: VehicleList) => row.renaveStatus !== 'PENDENTE_VENDA',
         },
         {
           label: 'Excluir Veículo',
@@ -516,6 +542,27 @@ export class VehicleComponent implements CanComponentDeactivate {
         console.error('Erro ao deletar veículo:', err);
         this.toastr.error('Erro ao deletar veículo');
       },
+    });
+  }
+
+  sincronizarRenave(vehicle: VehicleList, tipo: 'COMPRA' | 'VENDA') {
+    if (!this.storeContextService.validateStoreSelection()) return;
+
+    this.toastr.info(`Iniciando sincronização da ${tipo === 'COMPRA' ? 'compra' : 'venda'} ao RENAVE...`, 'Integração RENAVE');
+
+    this.vehicleService.syncRenave(vehicle.vehicleId, tipo).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success(response.message || 'Sincronizado com sucesso!', 'RENAVE OK');
+        } else {
+          this.toastr.error(response.error || 'Erro desconhecido na sincronização.', 'Falha no RENAVE');
+        }
+        this.loadVehicleList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize, this.searchValue);
+      },
+      error: (err) => {
+        console.error('Erro na requisição de sincronização ao RENAVE:', err);
+        this.toastr.error('Erro de rede ou servidor ao tentar sincronizar.', 'Erro de Conexão');
+      }
     });
   }
 

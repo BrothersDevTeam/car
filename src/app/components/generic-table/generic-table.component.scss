@@ -370,6 +370,31 @@ button[mat-icon-button] {
     color: #64748b;
     border: 1px solid #e2e8f0;
   }
+  &.badge-renave-aguardando-nfe {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+  }
+  &.badge-renave-pendente-compra, &.badge-renave-pendente-venda {
+    background-color: #fff7ed;
+    color: #ea580c;
+    border: 1px solid #fed7aa;
+  }
+  &.badge-renave-em-estoque {
+    background-color: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+  }
+  &.badge-renave-vendido {
+    background-color: #e0e7ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+  }
+  &.badge-renave-cancelado {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+  }
 }
 
 /* Paginador */
