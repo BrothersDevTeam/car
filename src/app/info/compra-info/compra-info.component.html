@@ -1,286 +1,315 @@
-<div class="info-container" *ngIf="!loading && compra; else stateTemplate">
-  <!-- Header -->
-  <header class="info-header">
-    <div class="header-main">
-      <div class="title-group">
-        <mat-icon class="header-icon">shopping_cart</mat-icon>
-        <div class="title-text">
-          <h1>Compra do Veículo</h1>
-          <p class="subtitle">Registrada em {{ formatDate(compra.createdAt) }}</p>
+@if (!loading && compra) {
+  <div class="info-container">
+    <!-- Header -->
+    <header class="info-header">
+      <div class="header-main">
+        <div class="title-group">
+          <mat-icon class="header-icon">shopping_cart</mat-icon>
+          <div class="title-text">
+            <h1>Compra do Veículo</h1>
+            <p class="subtitle">Registrada em {{ formatDate(compra.createdAt) }}</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button
+            mat-icon-button
+            (click)="onEdit()"
+            matTooltip="Editar Compra"
+            class="btn-edit"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="onClose()" matTooltip="Fechar" class="btn-close">
+            <mat-icon>close</mat-icon>
+          </button>
         </div>
       </div>
-      <div class="header-actions">
-        <button
-          mat-icon-button
-          (click)="onEdit()"
-          matTooltip="Editar Compra"
-          class="btn-edit"
-        >
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button mat-icon-button (click)="onClose()" matTooltip="Fechar" class="btn-close">
-          <mat-icon>close</mat-icon>
-        </button>
+
+      <!-- Status Bar -->
+      <div class="status-bar">
+        @if (nfe) {
+          <div class="status-item">
+            <span class="status-label">Status da NFe:</span>
+            <span class="status-badge" [ngClass]="getStatusClass(nfe.nfeStatus)">
+              {{ getStatusLabel(nfe.nfeStatus) }}
+            </span>
+          </div>
+        }
+        <div class="spacer"></div>
+        <div class="total-highlight">
+          <span class="label">Valor Total</span>
+          <span class="value">
+            {{ formatCurrency(compra.valorCompra) }}
+          </span>
+        </div>
       </div>
-    </div>
+    </header>
 
-    <!-- Status Bar -->
-    <div class="status-bar">
-      <div class="status-item" *ngIf="nfe">
-        <span class="status-label">Status da NFe:</span>
-        <span class="status-badge" [ngClass]="getStatusClass(nfe.nfeStatus)">
-          {{ getStatusLabel(nfe.nfeStatus) }}
-        </span>
-      </div>
-      <div class="spacer"></div>
-      <div class="total-highlight">
-        <span class="label">Valor Total</span>
-        <span class="value">
-          {{ formatCurrency(compra.valorCompra) }}
-        </span>
-      </div>
-    </div>
-  </header>
+    <div class="info-content">
+      <!-- Grid Layout -->
+      <div class="info-grid">
+        <!-- Fornecedor e Veículo -->
+        <div class="side-column">
+          <!-- Card Fornecedor -->
+          <section class="info-card">
+            <div class="card-header">
+              <mat-icon>person</mat-icon>
+              <h2>Fornecedor</h2>
+            </div>
+            <div class="card-body">
+              <div class="data-item">
+                <span class="label">Nome</span>
+                <span class="value bold">{{ compra.supplierName || '—' }}</span>
+              </div>
+              @if (compra.observacao) {
+                <div class="data-item">
+                  <span class="label">Observação da Compra</span>
+                  <span class="value italic">"{{ compra.observacao }}"</span>
+                </div>
+              }
+            </div>
+          </section>
 
-  <div class="info-content">
-    <!-- Grid Layout -->
-    <div class="info-grid">
-      <!-- Fornecedor e Veículo -->
-      <div class="side-column">
-        <!-- Card Fornecedor -->
-        <section class="info-card">
-          <div class="card-header">
-            <mat-icon>person</mat-icon>
-            <h2>Fornecedor</h2>
-          </div>
-          <div class="card-body">
-            <div class="data-item">
-              <span class="label">Nome</span>
-              <span class="value bold">{{ compra.supplierName || '—' }}</span>
+          <!-- Card Veículo -->
+          <section class="info-card">
+            <div class="card-header">
+              <mat-icon>directions_car</mat-icon>
+              <h2>Veículo</h2>
             </div>
-            <div class="data-item" *ngIf="compra.observacao">
-              <span class="label">Observação da Compra</span>
-              <span class="value italic">"{{ compra.observacao }}"</span>
+            <div class="card-body">
+              @if (compra.vehiclePlate) {
+                <div class="data-item">
+                  <span class="label">Placa / Veículo</span>
+                  <span class="value bold">
+                    {{ compra.vehiclePlate }} - {{ compra.vehicleBrand }} {{ compra.vehicleModel }}
+                  </span>
+                </div>
+              }
+              <div class="data-item">
+                <span class="label">ID do Veículo</span>
+                <span class="value code">{{ compra.vehicleId }}</span>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <!-- Card Veículo -->
-        <section class="info-card">
-          <div class="card-header">
-            <mat-icon>directions_car</mat-icon>
-            <h2>Veículo</h2>
-          </div>
-          <div class="card-body">
-            <div class="data-item" *ngIf="compra.vehiclePlate">
-              <span class="label">Placa / Veículo</span>
-              <span class="value bold">
-                {{ compra.vehiclePlate }} - {{ compra.vehicleBrand }} {{ compra.vehicleModel }}
-              </span>
-            </div>
-            <div class="data-item">
-              <span class="label">ID do Veículo</span>
-              <span class="value code">{{ compra.vehicleId }}</span>
-            </div>
-          </div>
-        </section>
+          <!-- Card NFe (se houver) -->
+          @if (nfe) {
+            <section class="info-card">
+              <div class="card-header">
+                <mat-icon>description</mat-icon>
+                <h2>Documento Fiscal (NFe de Entrada)</h2>
+              </div>
+              <div class="card-body">
+                @if (nfe.nfeNumero) {
+                  <div class="data-item">
+                    <span class="label">Número / Série</span>
+                    <span class="value">{{ nfe.nfeNumero }} / {{ nfe.nfeSerie }}</span>
+                  </div>
+                }
+                @if (nfe.nfeChave) {
+                  <div class="data-item">
+                    <span class="label">Chave de Acesso</span>
+                    <span class="value code small">{{ nfe.nfeChave }}</span>
+                  </div>
+                }
 
-        <!-- Card NFe (se houver) -->
-        <section class="info-card" *ngIf="nfe">
-          <div class="card-header">
-            <mat-icon>description</mat-icon>
-            <h2>Documento Fiscal (NFe de Entrada)</h2>
-          </div>
-          <div class="card-body">
-            <div class="data-item" *ngIf="nfe.nfeNumero">
-              <span class="label">Número / Série</span>
-              <span class="value">{{ nfe.nfeNumero }} / {{ nfe.nfeSerie }}</span>
-            </div>
-            <div class="data-item" *ngIf="nfe.nfeChave">
-              <span class="label">Chave de Acesso</span>
-              <span class="value code small">{{ nfe.nfeChave }}</span>
-            </div>
-
-            <div class="nfe-actions" *ngIf="nfe.nfeStatus === 'autorizado'">
-              <button mat-stroked-button color="primary" (click)="openDanfe()">
-                <mat-icon>picture_as_pdf</mat-icon>
-                DANFE
-              </button>
-              <button mat-stroked-button color="primary" (click)="openXml()">
-                <mat-icon>code</mat-icon>
-                XML
-              </button>
-            </div>
-            <div class="nfe-error" *ngIf="nfe.nfeStatus === 'erro_autorizacao'">
-              <mat-icon>error_outline</mat-icon>
-              <span>
-                Erro ao emitir:
-                {{ nfe.nfeMensagemErro || 'Verifique os logs.' }}
-              </span>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <!-- Pagamentos -->
-      <div class="main-column">
-        <section class="info-card payments-card">
-          <div class="card-header">
-            <mat-icon>payments</mat-icon>
-            <h2>Formas de Pagamento (Saídas)</h2>
-          </div>
-          <div class="card-body">
-            <table class="payments-table">
-              <thead>
-                <tr>
-                  <th>Forma</th>
-                  <th>Vencimento</th>
-                  <th>Tipo</th>
-                  <th>Status</th>
-                  <th class="text-right">Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let pag of compra.pagamentos">
-                  <td>
-                    <span class="pag-method">{{ pag.formaPagamento }}</span>
-                    <small *ngIf="pag.descricao" class="pag-desc">
-                      {{ pag.descricao }}
-                    </small>
-                  </td>
-                  <td>{{ formatDate(pag.vencimento) }}</td>
-                  <td>
-                    <span class="type-badge type-down">
-                      Despesa / Débito
+                @if (nfe.nfeStatus === 'autorizado') {
+                  <div class="nfe-actions">
+                    <button mat-stroked-button color="primary" (click)="openDanfe()">
+                      <mat-icon>picture_as_pdf</mat-icon>
+                      DANFE
+                    </button>
+                    <button mat-stroked-button color="primary" (click)="openXml()">
+                      <mat-icon>code</mat-icon>
+                      XML
+                    </button>
+                  </div>
+                }
+                @if (nfe.nfeStatus === 'erro_autorizacao') {
+                  <div class="nfe-error">
+                    <mat-icon>error_outline</mat-icon>
+                    <span>
+                      Erro ao emitir:
+                      {{ nfe.nfeMensagemErro || 'Verifique os logs.' }}
                     </span>
-                  </td>
-                  <td>
-                    <span class="status-badge" [ngClass]="getStatusClass(getPagamentoStatus(pag))">
-                      {{ getStatusLabel(getPagamentoStatus(pag)) }}
-                    </span>
-                  </td>
-                  <td class="text-right bold">
-                    {{ formatCurrency(pag.valor) }}
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="4" class="text-right">Valor da Compra:</td>
-                  <td class="text-right total-value">
-                    {{ formatCurrency(compra.valorCompra) }}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </section>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+        </div>
 
-        <!-- Lançamentos Financeiros (Caixa) -->
-        <section class="info-card payments-card" style="margin-top: 16px;">
-          <div class="card-header">
-            <mat-icon>account_balance_wallet</mat-icon>
-            <h2>Lançamentos Financeiros (Fluxo de Caixa)</h2>
-          </div>
-          <div class="card-body">
-            @if (financialTransactions.length === 0) {
-              <p class="no-data" style="margin: 0; font-style: italic; color: #999;">Nenhum lançamento financeiro gerado para esta compra.</p>
-            } @else {
+        <!-- Pagamentos -->
+        <div class="main-column">
+          <section class="info-card payments-card">
+            <div class="card-header">
+              <mat-icon>payments</mat-icon>
+              <h2>Formas de Pagamento (Saídas)</h2>
+            </div>
+            <div class="card-body">
               <table class="payments-table">
                 <thead>
                   <tr>
-                    <th>Descrição</th>
+                    <th>Forma</th>
                     <th>Vencimento</th>
+                    <th>Tipo</th>
                     <th>Status</th>
                     <th class="text-right">Valor</th>
-                    <th class="text-center" style="width: 80px;">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let tx of financialTransactions">
-                    <td>
-                      <span class="pag-method">{{ tx.description }}</span>
-                    </td>
-                    <td>{{ formatDate(tx.dueDate) }}</td>
-                    <td>
-                      <span class="status-badge" [ngClass]="getStatusClass(tx.status)">
-                        {{ getStatusLabel(tx.status) }}
-                      </span>
-                    </td>
-                    <td class="text-right bold">
-                      {{ formatCurrency(tx.amount) }}
-                    </td>
-                    <td class="text-center">
-                      <button
-                        *ngIf="tx.status !== 'PAID' && tx.status !== 'CANCELLED'"
-                        mat-flat-button
-                        color="primary"
-                        (click)="openPaymentModal(tx)"
-                        style="font-size: 11px; line-height: 28px; height: 28px; padding: 0 8px; min-width: unset;"
-                      >
-                        Pagar
-                      </button>
+                  @for (pag of compra.pagamentos; track pag) {
+                    <tr>
+                      <td>
+                        <span class="pag-method">{{ pag.formaPagamento }}</span>
+                        @if (pag.descricao) {
+                          <small class="pag-desc">
+                            {{ pag.descricao }}
+                          </small>
+                        }
+                      </td>
+                      <td>{{ formatDate(pag.vencimento) }}</td>
+                      <td>
+                        <span class="type-badge type-down">
+                          Despesa / Débito
+                        </span>
+                      </td>
+                      <td>
+                        <span class="status-badge" [ngClass]="getStatusClass(getPagamentoStatus(pag))">
+                          {{ getStatusLabel(getPagamentoStatus(pag)) }}
+                        </span>
+                      </td>
+                      <td class="text-right bold">
+                        {{ formatCurrency(pag.valor) }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="4" class="text-right">Valor da Compra:</td>
+                    <td class="text-right total-value">
+                      {{ formatCurrency(compra.valorCompra) }}
                     </td>
                   </tr>
-                </tbody>
+                </tfoot>
               </table>
-            }
-          </div>
-        </section>
+            </div>
+          </section>
 
-        <!-- Timeline / Auditoria -->
-        <section class="info-card timeline-card">
-          <div class="card-header">
-            <mat-icon>history</mat-icon>
-            <h2>Auditoria</h2>
-          </div>
-          <div class="card-body">
-            <div class="audit-item">
-              <mat-icon>add_circle_outline</mat-icon>
-              <div class="audit-info">
-                <span class="audit-text">
-                  Criado por
-                  <strong>{{ compra.createdBy }}</strong>
-                </span>
-                <span class="audit-date">
-                  {{ formatDate(compra.createdAt) }} às
-                  {{ compra.createdAt | date: 'HH:mm' }}
-                </span>
-              </div>
+          <!-- Lançamentos Financeiros (Caixa) -->
+          <section class="info-card payments-card" style="margin-top: 16px;">
+            <div class="card-header">
+              <mat-icon>account_balance_wallet</mat-icon>
+              <h2>Lançamentos Financeiros (Fluxo de Caixa)</h2>
             </div>
-            <div class="audit-item" *ngIf="compra.updatedAt !== compra.createdAt">
-              <mat-icon>update</mat-icon>
-              <div class="audit-info">
-                <span class="audit-text">
-                  Última alteração por
-                  <strong>{{ compra.updatedBy }}</strong>
-                </span>
-                <span class="audit-date">
-                  {{ formatDate(compra.updatedAt) }} às
-                  {{ compra.updatedAt | date: 'HH:mm' }}
-                </span>
-              </div>
+            <div class="card-body">
+              @if (financialTransactions.length === 0) {
+                <p class="no-data" style="margin: 0; font-style: italic; color: #999;">Nenhum lançamento financeiro gerado para esta compra.</p>
+              } @else {
+                <table class="payments-table">
+                  <thead>
+                    <tr>
+                      <th>Descrição</th>
+                      <th>Vencimento</th>
+                      <th>Status</th>
+                      <th class="text-right">Valor</th>
+                      <th class="text-center" style="width: 80px;">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (tx of financialTransactions; track tx) {
+                      <tr>
+                        <td>
+                          <span class="pag-method">{{ tx.description }}</span>
+                        </td>
+                        <td>{{ formatDate(tx.dueDate) }}</td>
+                        <td>
+                          <span class="status-badge" [ngClass]="getStatusClass(tx.status)">
+                            {{ getStatusLabel(tx.status) }}
+                          </span>
+                        </td>
+                        <td class="text-right bold">
+                          {{ formatCurrency(tx.amount) }}
+                        </td>
+                        <td class="text-center">
+                          @if (tx.status !== 'PAID' && tx.status !== 'CANCELLED') {
+                            <button
+                              mat-flat-button
+                              color="primary"
+                              (click)="openPaymentModal(tx)"
+                              style="font-size: 11px; line-height: 28px; height: 28px; padding: 0 8px; min-width: unset;"
+                            >
+                              Pagar
+                            </button>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              }
             </div>
-          </div>
-        </section>
+          </section>
+
+          <!-- Timeline / Auditoria -->
+          <section class="info-card timeline-card">
+            <div class="card-header">
+              <mat-icon>history</mat-icon>
+              <h2>Auditoria</h2>
+            </div>
+            <div class="card-body">
+              <div class="audit-item">
+                <mat-icon>add_circle_outline</mat-icon>
+                <div class="audit-info">
+                  <span class="audit-text">
+                    Criado por
+                    <strong>{{ compra.createdBy }}</strong>
+                  </span>
+                  <span class="audit-date">
+                    {{ formatDate(compra.createdAt) }} às
+                    {{ compra.createdAt | date: 'HH:mm' }}
+                  </span>
+                </div>
+              </div>
+              @if (compra.updatedAt !== compra.createdAt) {
+                <div class="audit-item">
+                  <mat-icon>update</mat-icon>
+                  <div class="audit-info">
+                    <span class="audit-text">
+                      Última alteração por
+                      <strong>{{ compra.updatedBy }}</strong>
+                    </span>
+                    <span class="audit-date">
+                      {{ formatDate(compra.updatedAt) }} às
+                      {{ compra.updatedAt | date: 'HH:mm' }}
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   </div>
-</div>
-
-<!-- State Templates -->
-<ng-template #stateTemplate>
-  <div class="state-container loading" *ngIf="loading">
-    <div class="spinner-box">
-      <div class="spinner"></div>
-      <p>Carregando detalhes da compra...</p>
+} @else {
+  <!-- State Templates -->
+  @if (loading) {
+    <div class="state-container loading">
+      <div class="spinner-box">
+        <div class="spinner"></div>
+        <p>Carregando detalhes da compra...</p>
+      </div>
     </div>
-  </div>
+  }
 
-  <div class="state-container error" *ngIf="error">
-    <mat-icon>error_outline</mat-icon>
-    <h3>Erro ao carregar dados</h3>
-    <p>Não foi possível recuperar as informações desta compra. Tente novamente mais tarde.</p>
-    <button mat-flat-button color="primary" (click)="loadCompraDetails()">Tentar Novamente</button>
-  </div>
-</ng-template>
+  @if (error) {
+    <div class="state-container error">
+      <mat-icon>error_outline</mat-icon>
+      <h3>Erro ao carregar dados</h3>
+      <p>Não foi possível recuperar as informações desta compra. Tente novamente mais tarde.</p>
+      <button mat-flat-button color="primary" (click)="loadCompraDetails()">Tentar Novamente</button>
+    </div>
+  }
+}
