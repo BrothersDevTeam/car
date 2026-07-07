@@ -27,7 +27,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>CNPJ *</mat-label>
-          <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" mask="00.000.000/0000-00" />
+          <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" mask="AA.AAA.AAA/AAAA-00" appCnpjValidator />
           @if (storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched) {
             <mat-error>{{ getErrorMessage(storeForm, 'cnpj') }}</mat-error>
           }
@@ -86,7 +86,7 @@
         @if (!ownerForm.value.legalEntity) {
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>CPF *</mat-label>
-            <input matInput formControlName="cpf" placeholder="000.000.000-00" mask="000.000.000-00" />
+            <input matInput formControlName="cpf" placeholder="000.000.000-00" mask="000.000.000-00" appCpfValidator />
             @if (ownerForm.get('cpf')?.invalid && ownerForm.get('cpf')?.touched) {
               <mat-error>{{ getErrorMessage(ownerForm, 'cpf') }}</mat-error>
             }
@@ -94,7 +94,7 @@
         } @else {
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>CNPJ *</mat-label>
-            <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" mask="00.000.000/0000-00" />
+            <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" mask="AA.AAA.AAA/AAAA-00" appCnpjValidator />
             @if (ownerForm.get('cnpj')?.invalid && ownerForm.get('cnpj')?.touched) {
               <mat-error>{{ getErrorMessage(ownerForm, 'cnpj') }}</mat-error>
             }

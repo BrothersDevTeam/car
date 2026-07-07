@@ -80,9 +80,9 @@ export class StoreCardComponent {
 
   get formattedCnpj(): string {
     if (!this.store.cnpj) return '';
-    const cnpj = this.store.cnpj.replace(/\D/g, '');
+    const cnpj = this.store.cnpj.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     if (cnpj.length !== 14) return this.store.cnpj;
-    return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+    return cnpj.replace(/^([A-Z0-9]{2})([A-Z0-9]{3})([A-Z0-9]{3})([A-Z0-9]{4})([A-Z0-9]{2})$/, '$1.$2.$3/$4-$5');
   }
 
   get formattedPhone(): string {

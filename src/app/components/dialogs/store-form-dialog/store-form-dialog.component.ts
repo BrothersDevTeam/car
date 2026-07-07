@@ -23,6 +23,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PrimaryInputComponent } from '../../primary-input/primary-input.component';
+import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
+import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 import { catchError, switchMap, tap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { of, throwError } from 'rxjs';
 
@@ -78,6 +80,8 @@ export interface StoreFormDialogData {
     MatSelectModule,
     MatTooltipModule,
     PrimaryInputComponent, // Componente de input customizado
+    CnpjValidatorDirective,
+    CpfValidatorDirective,
   ],
   providers: [],
   templateUrl: './store-form-dialog.component.html',
@@ -173,7 +177,7 @@ export class StoreFormDialogComponent implements OnInit {
         distinctUntilChanged(),
         switchMap((cnpj) => {
           if (!cnpj) return of(false);
-          const cleanCnpj = cnpj.replace(/\D/g, '');
+          const cleanCnpj = cnpj.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
           if (cleanCnpj.length !== 14) return of(false);
           return this.storeService.checkCnpjExists(cleanCnpj).pipe(catchError(() => of(false)));
         }),
@@ -809,7 +813,7 @@ export class StoreFormDialogComponent implements OnInit {
     const payload: any = {
       name: formValue.name,
       tradeName: formValue.tradeName || null,
-      cnpj: formValue.cnpj.replace(/\D/g, ''), // Remove formatação
+      cnpj: formValue.cnpj.replace(/[^a-zA-Z0-9]/g, '').toUpperCase(), // Remove formatação
       email: formValue.email,
       phoneNumber: formValue.phoneNumber ? formValue.phoneNumber.replace(/\D/g, '') : null,
     };
@@ -851,7 +855,7 @@ export class StoreFormDialogComponent implements OnInit {
       phone: personValue.phone ? personValue.phone.replace(/\D/g, '') : null,
       legalEntity: personValue.legalEntity,
       cpf: personValue.legalEntity ? null : personValue.cpf?.replace(/\D/g, ''),
-      cnpj: personValue.legalEntity ? personValue.cnpj?.replace(/\D/g, '') : null,
+      cnpj: personValue.legalEntity ? personValue.cnpj?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : null,
       rg: personValue.rg || null,
       rgIssuer: personValue.rgIssuer || null,
       ie: null,
@@ -881,14 +885,12 @@ export class StoreFormDialogComponent implements OnInit {
     });
   }
 
-  /**
-   * Retorna mensagem de erro customizada para o CNPJ da loja
-   */
   getCnpjErrorMessage(): string {
     const control = this.storeForm.get('cnpj');
     if (control?.hasError('required')) return 'Este campo é obrigatório';
     if (control?.hasError('minlength') || control?.hasError('maxlength')) return 'O CNPJ deve ter 14 dígitos';
     if (control?.hasError('uniqueCnpj')) return 'CNPJ já cadastrado no sistema';
+    if (control?.hasError('invalidCnpj')) return 'CNPJ inválido';
     return '';
   }
 
