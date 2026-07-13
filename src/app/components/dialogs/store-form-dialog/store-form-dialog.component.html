@@ -63,8 +63,8 @@
         inputName="storeCnpj"
         type="text"
         placeholder="00.000.000/0000-00"
-        mask="00.000.000/0000-00"
-        [uppercase]="false"
+        mask="AA.AAA.AAA/AAAA-00"
+        appCnpjValidator
         [error]="storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched"
       />
 
@@ -190,8 +190,8 @@
               inputName="storeCnpj"
               type="text"
               placeholder="00.000.000/0000-00"
-              mask="00.000.000/0000-00"
-              [uppercase]="false"
+              mask="AA.AAA.AAA/AAAA-00"
+              appCnpjValidator
               [error]="storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched"
               [errorMessage]="getCnpjErrorMessage()"
             />
@@ -275,6 +275,7 @@
                 placeholder="000.000.000-00"
                 mask="000.000.000-00"
                 [uppercase]="false"
+                appCpfValidator
                 [error]="personForm.get('cpf')?.invalid && personForm.get('cpf')?.touched"
               />
 
@@ -309,8 +310,8 @@
                 inputName="personCnpj"
                 type="text"
                 placeholder="00.000.000/0000-00"
-                mask="00.000.000/0000-00"
-                [uppercase]="false"
+                mask="AA.AAA.AAA/AAAA-00"
+                appCnpjValidator
                 [error]="personForm.get('cnpj')?.invalid && personForm.get('cnpj')?.touched"
               />
             }

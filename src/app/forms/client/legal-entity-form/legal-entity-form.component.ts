@@ -331,11 +331,13 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
   private hasChangesComparedTo(source: any): boolean {
     const formValue = this.form.getRawValue() as any;
 
-    const normalize = (val: any, isNumericField = false): string | null => {
+    const normalize = (val: any, fieldName = ''): string | null => {
       if (val === null || val === undefined) return null;
       let str = val.toString().trim();
-      if (isNumericField) {
+      if (['phone', 'cpf'].includes(fieldName)) {
         str = str.replace(/\D/g, '');
+      } else if (fieldName === 'cnpj') {
+        str = str.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
       }
       return str === '' ? null : str;
     };
@@ -373,9 +375,8 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
         continue;
       }
 
-      const isNumeric = ['phone', 'cnpj'].includes(field.formField);
-      const normF = normalize(fVal, isNumeric);
-      const normS = normalize(sVal, isNumeric);
+      const normF = normalize(fVal, field.formField);
+      const normS = normalize(sVal, field.formField);
 
       if (normF !== normS) {
         console.log(`[dirty-check] Mudança no campo ${field.formField}: '${normF}' !== '${normS}'`);
@@ -499,7 +500,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
         const baseData = {
           name: formRawValue.name || '',
           nickName: formRawValue.nickName || '',
-          cnpj: formRawValue.cnpj?.replace(/\D/g, '') || '',
+          cnpj: formRawValue.cnpj?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || '',
           ie: formRawValue.ie || '',
           active: true as const,
           email: formRawValue.email || '',
@@ -564,11 +565,11 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
 
   onCnpjBlur(): void {
     const rawCnpj = this.form.get('cnpj')?.value;
-    const cleanCnpj = rawCnpj?.replace(/\D/g, '') || '';
+    const cleanCnpj = rawCnpj?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || '';
 
     // Se for novo cadastro (ou se o CNPJ do input for diferente do dataForm carregado)
     const isNew = !this.dataForm?.personId;
-    const isCnpjChanged = !isNew && cleanCnpj !== (this.dataForm?.cnpj?.replace(/\D/g, '') || '');
+    const isCnpjChanged = !isNew && cleanCnpj !== (this.dataForm?.cnpj?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || '');
 
     if (cleanCnpj.length === 14 && (isNew || isCnpjChanged)) {
       this.personService.getPaginatedData(0, 10, { cnpj: cleanCnpj, includeInactive: true }).subscribe({
@@ -942,7 +943,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
     const baseData = {
       name: this.form.value.name || '',
       nickName: this.form.value.nickName || '',
-      cnpj: this.form.value.cnpj?.replace(/\D/g, '') || '',
+      cnpj: this.form.value.cnpj?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || '',
       ie: this.form.value.ie || '',
       indicadorIe: this.form.value.indicadorIe || '',
       isuf: this.form.value.isuf || '',

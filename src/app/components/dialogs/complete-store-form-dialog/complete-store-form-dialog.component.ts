@@ -8,6 +8,8 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatRadioModule } from '@angular/material/radio';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
+import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
+import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 
 export interface CompleteStoreFormData {
   title: string;
@@ -26,6 +28,8 @@ export interface CompleteStoreFormData {
     MatStepperModule,
     MatRadioModule,
     NgxMaskDirective,
+    CnpjValidatorDirective,
+    CpfValidatorDirective,
   ],
   providers: [provideNgxMask()],
   templateUrl: './complete-store-form-dialog.component.html',
@@ -98,7 +102,7 @@ export class CompleteStoreFormDialogComponent implements OnInit {
         store: {
           name: this.storeForm.value.name,
           tradeName: this.storeForm.value.tradeName || null,
-          cnpj: this.storeForm.value.cnpj.replace(/\D/g, ''),
+          cnpj: this.storeForm.value.cnpj.replace(/[^a-zA-Z0-9]/g, '').toUpperCase(),
           email: this.storeForm.value.email,
           phoneNumber: this.storeForm.value.phoneNumber ? this.storeForm.value.phoneNumber.replace(/\D/g, '') : null,
         },
@@ -106,7 +110,7 @@ export class CompleteStoreFormDialogComponent implements OnInit {
           legalEntity: this.ownerForm.value.legalEntity,
           name: this.ownerForm.value.name,
           cpf: this.ownerForm.value.legalEntity ? null : this.ownerForm.value.cpf?.replace(/\D/g, ''),
-          cnpj: this.ownerForm.value.legalEntity ? this.ownerForm.value.cnpj?.replace(/\D/g, '') : null,
+          cnpj: this.ownerForm.value.legalEntity ? this.ownerForm.value.cnpj?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : null,
           email: this.ownerForm.value.email || null,
           phone: this.ownerForm.value.phone ? this.ownerForm.value.phone.replace(/\D/g, '') : null,
         },

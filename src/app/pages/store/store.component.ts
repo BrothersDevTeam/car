@@ -157,9 +157,9 @@ export class StoreComponent implements OnInit {
 
   getFormattedCnpj(cnpj: string | undefined): string {
     if (!cnpj) return '';
-    const cleanCnpj = cnpj.replace(/\D/g, '');
+    const cleanCnpj = cnpj.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     if (cleanCnpj.length !== 14) return cnpj;
-    return cleanCnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+    return cleanCnpj.replace(/^([A-Z0-9]{2})([A-Z0-9]{3})([A-Z0-9]{3})([A-Z0-9]{4})([A-Z0-9]{2})$/, '$1.$2.$3/$4-$5');
   }
 
   onEditStore(store: Store): void {

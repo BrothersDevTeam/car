@@ -7,37 +7,42 @@ export class CnpjValidatorService {
   constructor() {}
 
   isValid(cnpj: string): boolean {
-    cnpj = cnpj.replace(/\D/g, '');
+    if (!cnpj) return false;
+
+    // Remove caracteres especiais de máscara (mantém letras e números)
+    cnpj = cnpj.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 
     if (cnpj.length !== 14) return false;
 
-    if (/^(\d)\1+$/.test(cnpj)) return false;
+    // Padrão: 12 caracteres alfanuméricos e os 2 últimos numéricos (DVs)
+    const cnpjPattern = /^[A-Z0-9]{12}[0-9]{2}$/;
+    if (!cnpjPattern.test(cnpj)) return false;
 
-    let length = 12;
-    let numbers = cnpj.substring(0, length);
-    let digits = cnpj.substring(length);
-    let sum = 0;
-    let position = length - 7;
+    // Rejeita sequências repetidas
+    if (/^([A-Z0-9])\1+$/.test(cnpj)) return false;
 
-    for (let i = length; i >= 1; i--) {
-      sum += +numbers[length - i] * position--;
-      if (position < 2) position = 9;
+    // Primeiro dígito verificador
+    const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    let sum1 = 0;
+    for (let i = 0; i < 12; i++) {
+      const charValue = cnpj.charCodeAt(i) - 48; // Módulo 11 adaptado da Receita Federal
+      sum1 += charValue * weights1[i];
     }
+    const mod1 = sum1 % 11;
+    const dv1 = mod1 < 2 ? 0 : 11 - mod1;
 
-    let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
-    if (result !== +digits[0]) return false;
+    if (dv1 !== parseInt(cnpj.charAt(12), 10)) return false;
 
-    length = 13;
-    numbers = cnpj.substring(0, length);
-    sum = 0;
-    position = length - 7;
-
-    for (let i = length; i >= 1; i--) {
-      sum += +numbers[length - i] * position--;
-      if (position < 2) position = 9;
+    // Segundo dígito verificador
+    const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    let sum2 = 0;
+    for (let i = 0; i < 13; i++) {
+      const charValue = cnpj.charCodeAt(i) - 48; // Módulo 11 adaptado da Receita Federal
+      sum2 += charValue * weights2[i];
     }
+    const mod2 = sum2 % 11;
+    const dv2 = mod2 < 2 ? 0 : 11 - mod2;
 
-    result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
-    return result === +digits[1];
+    return dv2 === parseInt(cnpj.charAt(13), 10);
   }
 }
