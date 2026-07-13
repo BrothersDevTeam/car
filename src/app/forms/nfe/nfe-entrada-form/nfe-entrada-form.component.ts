@@ -28,7 +28,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { ToastrService } from 'ngx-toastr';
-import { Subscription, of, Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
@@ -37,12 +37,12 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
-import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { SaveDraftDialogComponent, SaveDraftDialogResult } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 
-import type { NaturezaOperacao, Nfe } from '@interfaces/nfe';
+import { NaturezaOperacao } from '@interfaces/nfe';
+import type { Nfe } from '@interfaces/nfe';
 import type { Person } from '@interfaces/person';
-import { Vehicle, VehicleList } from '@interfaces/vehicle';
+import { Vehicle } from '@interfaces/vehicle';
 
 import { NfeService } from '@services/nfe.service';
 import { PersonService } from '@services/person.service';
@@ -102,23 +102,23 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   openVehicleForm = signal(false);
   tiposNfeEntrada: { value: NaturezaOperacao; label: string }[] = [
     {
-      value: 'ENTRADA DE VEICULO USADO' as NaturezaOperacao,
+      value: NaturezaOperacao.ENTRADA_VEICULO_USADO,
       label: 'Entrada de Veículo Usado',
     },
     {
-      value: 'ENTRADA EM CONSIGNAÇÃO' as NaturezaOperacao,
+      value: NaturezaOperacao.ENTRADA_CONSIGNACAO,
       label: 'Entrada em Consignação',
     },
     {
-      value: 'COMPRA DE VEICULO PARA ESTOQUE' as NaturezaOperacao,
+      value: NaturezaOperacao.COMPRA_VEICULO_PARA_ESTOQUE,
       label: 'Compra de Veículo para Estoque',
     },
     {
-      value: 'DEVOLUÇÃO DE VENDA' as NaturezaOperacao,
+      value: NaturezaOperacao.DEVOLUCAO_VENDA,
       label: 'Devolução de Venda',
     },
     {
-      value: 'ENTRADA PARA CONTRATO EM COMISSÃO' as NaturezaOperacao,
+      value: NaturezaOperacao.ENTRADA_CONTRATO_COMISSAO,
       label: 'Entrada para Contrato em Comissão',
     },
   ];

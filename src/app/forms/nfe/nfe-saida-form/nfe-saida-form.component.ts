@@ -28,7 +28,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { ToastrService } from 'ngx-toastr';
-import { Subscription, of, Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
@@ -37,12 +37,12 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
-import { WrapperCardComponent } from '@components/wrapper-card/wrapper-card.component';
 import { SaveDraftDialogComponent, SaveDraftDialogResult } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 
-import type { NaturezaOperacao, Nfe } from '@interfaces/nfe';
+import { NaturezaOperacao } from '@interfaces/nfe';
+import type { Nfe } from '@interfaces/nfe';
 import type { Person } from '@interfaces/person';
-import { Vehicle, VehicleList } from '@interfaces/vehicle';
+import { Vehicle } from '@interfaces/vehicle';
 
 import { NfeService } from '@services/nfe.service';
 import { PersonService } from '@services/person.service';
@@ -102,31 +102,31 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   openVehicleForm = signal(false); // No futuro podemos abrir o form de veículo aqui também
   tiposNfeSaida: { value: NaturezaOperacao; label: string }[] = [
     {
-      value: 'VENDA DE VEICULO USADO' as NaturezaOperacao,
+      value: NaturezaOperacao.VENDA_VEICULO_USADO,
       label: 'Venda de Veículo Usado',
     },
     {
-      value: 'DEVOLUÇÃO DE CONSIGNAÇÃO' as NaturezaOperacao,
+      value: NaturezaOperacao.DEVOLUCAO_CONSIGNACAO,
       label: 'Devolução de Consignação',
     },
     {
-      value: 'VENDA EM CONSIGNAÇÃO' as NaturezaOperacao,
+      value: NaturezaOperacao.VENDA_CONSIGNACAO,
       label: 'Venda em Consignação',
     },
     {
-      value: 'DEVOLUÇÃO SIMBÓLICA DE CONSIGNAÇÃO' as NaturezaOperacao,
+      value: NaturezaOperacao.DEVOLUCAO_SIMBOLICA_CONSIGNACAO,
       label: 'Devolução Simbólica de Consignação',
     },
     {
-      value: 'DEVOLUÇÃO DE COMPRA' as NaturezaOperacao,
+      value: NaturezaOperacao.DEVOLUCAO_COMPRA,
       label: 'Devolução de Compra',
     },
     {
-      value: 'SAÍDA PARA CONTRATO EM COMISSÃO' as NaturezaOperacao,
+      value: NaturezaOperacao.SAIDA_CONTRATO_COMISSAO,
       label: 'Saída para Contrato em Comissão',
     },
     {
-      value: 'TRANSFERÊNCIA DE MERCADORIA ADQUIRIDA OU RECEBIDA DE TERCEIROS' as NaturezaOperacao,
+      value: NaturezaOperacao.TRANSFERENCIA_MERCADORIA,
       label: 'Transferência de Mercadoria',
     },
   ];
