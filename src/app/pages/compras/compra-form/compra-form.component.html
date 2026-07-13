@@ -69,23 +69,16 @@
           </div>
 
           <div class="col-4">
-            <div class="field-container">
-              <label class="modern-label">Tipo de Entrada</label>
-              <mat-button-toggle-group
-                formControlName="tipoEntrada"
-                aria-label="Tipo de Entrada"
-                class="premium-toggle-group"
-              >
-                <mat-button-toggle value="COMPRA">
-                  <mat-icon>shopping_cart</mat-icon>
-                  Compra
-                </mat-button-toggle>
-                <mat-button-toggle value="CONSIGNACAO">
-                  <mat-icon>assignment</mat-icon>
-                  Consignação
-                </mat-button-toggle>
-              </mat-button-toggle-group>
-            </div>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Tipo de Entrada</mat-label>
+              <mat-select formControlName="tipoEntrada">
+                <mat-option value="COMPRA">Compra</mat-option>
+                <mat-option value="CONSIGNACAO">Consignação</mat-option>
+                <mat-option value="COMISSAO">Comissão</mat-option>
+                <mat-option value="DEVOLUCAO">Devolução</mat-option>
+                <mat-option value="TRANSFERENCIA">Transferência</mat-option>
+              </mat-select>
+            </mat-form-field>
           </div>
 
           <div class="col-12" style="margin-top: 16px;">
@@ -103,7 +96,7 @@
       </mat-card>
 
       <!-- SEÇÃO 3: FINANCEIRO (PARCELAS) -->
-      <mat-card class="form-section">
+      <mat-card class="form-section" *ngIf="compraForm.get('tipoEntrada')?.value === 'COMPRA'">
         <mat-card-header>
           <mat-card-title>Condições de Pagamento</mat-card-title>
         </mat-card-header>
@@ -237,7 +230,7 @@
         <button mat-stroked-button type="button" (click)="cancel()" [disabled]="isSubmitting()">
           Cancelar
         </button>
-        <button mat-flat-button color="primary" type="submit" [disabled]="compraForm.invalid || totalDiferenca !== 0 || isSubmitting()">
+        <button mat-flat-button color="primary" type="submit" [disabled]="compraForm.invalid || (compraForm.get('tipoEntrada')?.value === 'COMPRA' && totalDiferenca !== 0) || isSubmitting()">
           <span *ngIf="!isSubmitting()">Salvar Compra</span>
           <span *ngIf="isSubmitting()" class="spinner-inline">
             <mat-spinner diameter="20" color="accent"></mat-spinner>

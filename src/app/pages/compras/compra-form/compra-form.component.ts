@@ -361,10 +361,13 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
       return;
     }
 
-    const valorCompra = this.compraForm.get('valorCompra')?.value || 0;
-    if (Math.abs(valorCompra - this.totalPagamentos) > 0.01) {
-      this.toastr.error('A soma das parcelas deve ser igual ao valor da compra.');
-      return;
+    const tipoEntrada = this.compraForm.get('tipoEntrada')?.value || 'COMPRA';
+    if (tipoEntrada === 'COMPRA') {
+      const valorCompra = this.compraForm.get('valorCompra')?.value || 0;
+      if (Math.abs(valorCompra - this.totalPagamentos) > 0.01) {
+        this.toastr.error('A soma das parcelas deve ser igual ao valor da compra.');
+        return;
+      }
     }
 
     this.isSubmitting.set(true);
@@ -378,13 +381,15 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
       valorCompra: formValues.valorCompra,
       observacao: formValues.observacao,
       tipoEntrada: formValues.tipoEntrada,
-      pagamentos: formValues.pagamentos.map((p: any) => ({
-        formaPagamento: p.formaPagamento,
-        descricao: p.descricao,
-        valor: p.valor,
-        vencimento: p.vencimento,
-        tipo: p.tipo,
-      })),
+      pagamentos: formValues.tipoEntrada === 'COMPRA'
+        ? formValues.pagamentos.map((p: any) => ({
+            formaPagamento: p.formaPagamento,
+            descricao: p.descricao,
+            valor: p.valor,
+            vencimento: p.vencimento,
+            tipo: p.tipo,
+          }))
+        : [],
     };
 
     const request$ = this.isEdit
