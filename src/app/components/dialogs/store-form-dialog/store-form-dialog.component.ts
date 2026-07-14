@@ -161,6 +161,7 @@ export class StoreFormDialogComponent implements OnInit {
         formsChanges();
         this.createdStoreInstance = null;
       });
+      this.addressForm.valueChanges.subscribe(formsChanges);
       this.personForm.valueChanges.subscribe(formsChanges);
       this.accessForm.valueChanges.subscribe(formsChanges);
 
@@ -294,6 +295,7 @@ export class StoreFormDialogComponent implements OnInit {
   private getCurrentFormValue(): any {
     return {
       store: this.storeForm.value,
+      address: this.addressForm.value,
       person: this.personForm.value,
       access: this.accessForm.value,
     };
@@ -345,7 +347,11 @@ export class StoreFormDialogComponent implements OnInit {
 
   get canShowDraftButton(): boolean {
     if (this.data.mode !== 'create') return false;
-    const isDirty = this.storeForm.dirty || this.personForm.dirty || this.accessForm.dirty;
+    const isDirty =
+      this.storeForm.dirty ||
+      this.addressForm.dirty ||
+      this.personForm.dirty ||
+      this.accessForm.dirty;
     return !this.isSubmitting && isDirty && this.hasChangesComparedToDraft();
   }
 
@@ -382,6 +388,7 @@ export class StoreFormDialogComponent implements OnInit {
     this.selectedDraftId = draft.id;
     if (draft.data) {
       if (draft.data.store) this.storeForm.patchValue(draft.data.store);
+      if (draft.data.address) this.addressForm.patchValue(draft.data.address);
       if (draft.data.person) this.personForm.patchValue(draft.data.person);
       if (draft.data.access) this.accessForm.patchValue(draft.data.access);
     }
@@ -393,6 +400,7 @@ export class StoreFormDialogComponent implements OnInit {
     setTimeout(() => {
       this.captureInitialFormValue();
       this.storeForm.markAsDirty();
+      this.addressForm.markAsDirty();
       this.personForm.markAsDirty();
       this.accessForm.markAsDirty();
     }, 200);
@@ -427,6 +435,7 @@ export class StoreFormDialogComponent implements OnInit {
       this.dialogRef.close(null);
     } else {
       this.storeForm.markAsPristine();
+      this.addressForm.markAsPristine();
       this.personForm.markAsPristine();
       this.accessForm.markAsPristine();
       this.captureInitialFormValue();
