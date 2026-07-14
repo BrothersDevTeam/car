@@ -39,7 +39,9 @@ export class CashRegisterService {
   }
 
   getCurrentSession(cashRegisterId: string): Observable<ICashRegisterSession | null> {
-    return this.http.get<ICashRegisterSession | null>(`${this.apiUrl}/${encodeURIComponent(cashRegisterId)}/current-session`).pipe(first());
+    return this.http
+      .get<ICashRegisterSession | null>(`${this.apiUrl}/${encodeURIComponent(cashRegisterId)}/current-session`)
+      .pipe(first());
   }
 
   closeSession(sessionId: string): Observable<ICashRegisterSession> {

@@ -569,7 +569,8 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
 
     // Se for novo cadastro (ou se o CNPJ do input for diferente do dataForm carregado)
     const isNew = !this.dataForm?.personId;
-    const isCnpjChanged = !isNew && cleanCnpj !== (this.dataForm?.cnpj?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || '');
+    const isCnpjChanged =
+      !isNew && cleanCnpj !== (this.dataForm?.cnpj?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || '');
 
     if (cleanCnpj.length === 14 && (isNew || isCnpjChanged)) {
       this.personService.getPaginatedData(0, 10, { cnpj: cleanCnpj, includeInactive: true }).subscribe({

@@ -94,7 +94,7 @@ export class CompraService {
     return this.http.post<any>(`${this.apiUrl}/${compraId}/gerar-rascunho-nfe`, {}).pipe(
       tap(() => {
         this.clearCache();
-      })
+      }),
     );
   }
 

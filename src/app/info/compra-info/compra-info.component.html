@@ -11,12 +11,7 @@
           </div>
         </div>
         <div class="header-actions">
-          <button
-            mat-icon-button
-            (click)="onEdit()"
-            matTooltip="Editar Compra"
-            class="btn-edit"
-          >
+          <button mat-icon-button (click)="onEdit()" matTooltip="Editar Compra" class="btn-edit">
             <mat-icon>edit</mat-icon>
           </button>
           <button mat-icon-button (click)="onClose()" matTooltip="Fechar" class="btn-close">
@@ -170,9 +165,7 @@
                       </td>
                       <td>{{ formatDate(pag.vencimento) }}</td>
                       <td>
-                        <span class="type-badge type-down">
-                          Despesa / Débito
-                        </span>
+                        <span class="type-badge type-down">Despesa / Débito</span>
                       </td>
                       <td>
                         <span class="status-badge" [ngClass]="getStatusClass(getPagamentoStatus(pag))">
@@ -198,14 +191,16 @@
           </section>
 
           <!-- Lançamentos Financeiros (Caixa) -->
-          <section class="info-card payments-card" style="margin-top: 16px;">
+          <section class="info-card payments-card" style="margin-top: 16px">
             <div class="card-header">
               <mat-icon>account_balance_wallet</mat-icon>
               <h2>Lançamentos Financeiros (Fluxo de Caixa)</h2>
             </div>
             <div class="card-body">
               @if (financialTransactions.length === 0) {
-                <p class="no-data" style="margin: 0; font-style: italic; color: #999;">Nenhum lançamento financeiro gerado para esta compra.</p>
+                <p class="no-data" style="margin: 0; font-style: italic; color: #999">
+                  Nenhum lançamento financeiro gerado para esta compra.
+                </p>
               } @else {
                 <table class="payments-table">
                   <thead>
@@ -214,7 +209,7 @@
                       <th>Vencimento</th>
                       <th>Status</th>
                       <th class="text-right">Valor</th>
-                      <th class="text-center" style="width: 80px;">Ações</th>
+                      <th class="text-center" style="width: 80px">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -238,7 +233,7 @@
                               mat-flat-button
                               color="primary"
                               (click)="openPaymentModal(tx)"
-                              style="font-size: 11px; line-height: 28px; height: 28px; padding: 0 8px; min-width: unset;"
+                              style="font-size: 11px; line-height: 28px; height: 28px; padding: 0 8px; min-width: unset"
                             >
                               Pagar
                             </button>

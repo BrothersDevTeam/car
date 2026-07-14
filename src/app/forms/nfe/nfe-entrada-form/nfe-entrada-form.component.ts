@@ -37,7 +37,10 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
-import { SaveDraftDialogComponent, SaveDraftDialogResult } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
+import {
+  SaveDraftDialogComponent,
+  SaveDraftDialogResult,
+} from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 
 import { NaturezaOperacao } from '@interfaces/nfe';
 import type { Nfe } from '@interfaces/nfe';
@@ -200,7 +203,9 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     nfePresencaComprador: ['1', Validators.required],
     nfeIndicadorIntermediario: ['0', Validators.required],
     modalidadeFrete: ['9', Validators.required],
-    nfeInformacoesAdicionaisFisco: ['EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.'],
+    nfeInformacoesAdicionaisFisco: [
+      'EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.',
+    ],
     nfeSincronizarRenave: [false],
   });
 
@@ -491,7 +496,9 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       nfePresencaComprador: this.dataForm.nfePresencaComprador || '1',
       nfeIndicadorIntermediario: this.dataForm.nfeIndicadorIntermediario || '0',
       modalidadeFrete: this.dataForm.nfeTransporte?.modalidadeFrete || '9',
-      nfeInformacoesAdicionaisFisco: this.dataForm.nfeInformacoesAdicionaisFisco || 'EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.',
+      nfeInformacoesAdicionaisFisco:
+        this.dataForm.nfeInformacoesAdicionaisFisco ||
+        'EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.',
     });
   }
 
@@ -858,12 +865,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     if (this.selectedDraftId && this.selectedDraftId !== 'new') {
       const currentDraft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);
       if (currentDraft) {
-        this.saveLocalDraft(
-          false,
-          currentDraft.draftName,
-          this.selectedDraftId,
-          true,
-        );
+        this.saveLocalDraft(false, currentDraft.draftName, this.selectedDraftId, true);
         return;
       }
     }
@@ -904,7 +906,8 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       nfePresencaComprador: '1',
       nfeIndicadorIntermediario: '0',
       modalidadeFrete: '9',
-      nfeInformacoesAdicionaisFisco: 'EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.'
+      nfeInformacoesAdicionaisFisco:
+        'EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.',
     });
     this.itens.clear();
     this.addItem();

@@ -306,7 +306,11 @@
                     <button
                       mat-menu-item
                       [disabled]="!hasEditPermission || isTradeTransaction(t)"
-                      [matTooltip]="isTradeTransaction(t) ? 'A liquidação de veículos de troca deve ser confirmada diretamente nos Detalhes da Venda.' : ''"
+                      [matTooltip]="
+                        isTradeTransaction(t)
+                          ? 'A liquidação de veículos de troca deve ser confirmada diretamente nos Detalhes da Venda.'
+                          : ''
+                      "
                       (click)="openPaymentModal(t)"
                       class="custom-menu-item"
                     >
@@ -316,7 +320,11 @@
                     <button
                       mat-menu-item
                       [disabled]="!hasEditPermission || isTradeTransaction(t)"
-                      [matTooltip]="isTradeTransaction(t) ? 'A liquidação de veículos de troca deve ser confirmada diretamente nos Detalhes da Venda.' : ''"
+                      [matTooltip]="
+                        isTradeTransaction(t)
+                          ? 'A liquidação de veículos de troca deve ser confirmada diretamente nos Detalhes da Venda.'
+                          : ''
+                      "
                       (click)="liquidar(t)"
                       class="custom-menu-item"
                     >
@@ -326,7 +334,9 @@
                     <button
                       mat-menu-item
                       [disabled]="!hasEditPermission || isTradeTransaction(t)"
-                      [matTooltip]="isTradeTransaction(t) ? 'Lançamentos de troca não podem ser editados manualmente.' : ''"
+                      [matTooltip]="
+                        isTradeTransaction(t) ? 'Lançamentos de troca não podem ser editados manualmente.' : ''
+                      "
                       (click)="openEditTransactionModal(t)"
                       class="custom-menu-item"
                     >
@@ -336,7 +346,11 @@
                     <button
                       mat-menu-item
                       [disabled]="!hasEditPermission || isTradeTransaction(t)"
-                      [matTooltip]="isTradeTransaction(t) ? 'Lançamentos de troca não podem ser cancelados separadamente da venda.' : ''"
+                      [matTooltip]="
+                        isTradeTransaction(t)
+                          ? 'Lançamentos de troca não podem ser cancelados separadamente da venda.'
+                          : ''
+                      "
                       (click)="cancelarLancamento(t)"
                       class="custom-menu-item menu-action-warn"
                     >

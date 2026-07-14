@@ -13,7 +13,6 @@
     </div>
   } @else {
     <form [formGroup]="compraForm" (ngSubmit)="onSubmit()" class="compra-form">
-      
       <!-- SEÇÃO 1: VEÍCULO E FORNECEDOR -->
       <mat-card class="form-section">
         <mat-card-header>
@@ -61,11 +60,7 @@
           </div>
 
           <div class="col-4">
-            <app-date-input
-              formControlName="dataCompra"
-              label="Data da Compra*"
-              [required]="true"
-            ></app-date-input>
+            <app-date-input formControlName="dataCompra" label="Data da Compra*" [required]="true"></app-date-input>
           </div>
 
           <div class="col-4">
@@ -81,7 +76,7 @@
             </mat-form-field>
           </div>
 
-          <div class="col-12" style="margin-top: 16px;">
+          <div class="col-12" style="margin-top: 16px">
             <mat-form-field appearance="outline" class="w-100">
               <mat-label>Observação</mat-label>
               <textarea
@@ -107,20 +102,26 @@
             <div class="assistant-fields">
               <app-currency-input
                 [(ngModel)]="geradorValorTotal"
-                [ngModelOptions]="{standalone: true}"
+                [ngModelOptions]="{ standalone: true }"
                 label="Valor a Parcelar"
                 [required]="false"
-                style="flex: 1 1 200px; min-width: 150px;"
+                style="flex: 1 1 200px; min-width: 150px"
               ></app-currency-input>
 
               <mat-form-field appearance="outline" class="small-field">
                 <mat-label>Qtd. Parcelas</mat-label>
-                <input matInput type="number" [(ngModel)]="geradorParcelas" [ngModelOptions]="{standalone: true}" min="1" />
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="geradorParcelas"
+                  [ngModelOptions]="{ standalone: true }"
+                  min="1"
+                />
               </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>Forma de Pagamento</mat-label>
-                <mat-select [(ngModel)]="geradorFormaPagamento" [ngModelOptions]="{standalone: true}">
+                <mat-select [(ngModel)]="geradorFormaPagamento" [ngModelOptions]="{ standalone: true }">
                   <mat-option value="DINHEIRO">DINHEIRO</mat-option>
                   <mat-option value="PIX">PIX</mat-option>
                   <mat-option value="FINANCIAMENTO">FINANCIAMENTO</mat-option>
@@ -134,7 +135,12 @@
 
               <mat-form-field appearance="outline">
                 <mat-label>Primeiro Vencimento</mat-label>
-                <input matInput [matDatepicker]="picker" [(ngModel)]="geradorPrimeiroVencimento" [ngModelOptions]="{standalone: true}" />
+                <input
+                  matInput
+                  [matDatepicker]="picker"
+                  [(ngModel)]="geradorPrimeiroVencimento"
+                  [ngModelOptions]="{ standalone: true }"
+                />
                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker></mat-datepicker>
               </mat-form-field>
@@ -145,7 +151,7 @@
             </div>
           </div>
 
-          <mat-divider style="margin: 24px 0;"></mat-divider>
+          <mat-divider style="margin: 24px 0"></mat-divider>
 
           <!-- Listagem de Parcelas Manual -->
           <div formArrayName="pagamentos" class="pagamentos-list">
@@ -167,19 +173,11 @@
               </div>
 
               <div class="field-valor">
-                <app-currency-input
-                  formControlName="valor"
-                  label="Valor"
-                  [required]="true"
-                ></app-currency-input>
+                <app-currency-input formControlName="valor" label="Valor" [required]="true"></app-currency-input>
               </div>
 
               <div class="field-vencimento">
-                <app-date-input
-                  formControlName="vencimento"
-                  label="Vencimento"
-                  [required]="true"
-                ></app-date-input>
+                <app-date-input formControlName="vencimento" label="Vencimento" [required]="true"></app-date-input>
               </div>
 
               <div class="field-desc">
@@ -189,13 +187,13 @@
                 </mat-form-field>
               </div>
 
-              <button mat-icon-button color="warn" type="button" (click)="removePagamento(i)" style="margin-top: 4px;">
+              <button mat-icon-button color="warn" type="button" (click)="removePagamento(i)" style="margin-top: 4px">
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
           </div>
 
-          <div style="margin-top: 16px;">
+          <div style="margin-top: 16px">
             <button mat-stroked-button color="primary" type="button" (click)="addPagamento()">
               <mat-icon>add</mat-icon>
               Adicionar Parcela
@@ -227,10 +225,17 @@
 
       <!-- Botões de Ação do Form -->
       <footer class="form-actions">
-        <button mat-stroked-button type="button" (click)="cancel()" [disabled]="isSubmitting()">
-          Cancelar
-        </button>
-        <button mat-flat-button color="primary" type="submit" [disabled]="compraForm.invalid || (compraForm.get('tipoEntrada')?.value === 'COMPRA' && totalDiferenca !== 0) || isSubmitting()">
+        <button mat-stroked-button type="button" (click)="cancel()" [disabled]="isSubmitting()">Cancelar</button>
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="
+            compraForm.invalid ||
+            (compraForm.get('tipoEntrada')?.value === 'COMPRA' && totalDiferenca !== 0) ||
+            isSubmitting()
+          "
+        >
           <span *ngIf="!isSubmitting()">Salvar Compra</span>
           <span *ngIf="isSubmitting()" class="spinner-inline">
             <mat-spinner diameter="20" color="accent"></mat-spinner>
@@ -273,9 +278,6 @@
 <!-- Drawer para criar/editar veículo -->
 @if (openVehicleForm()) {
   <app-drawer (closeDrawer)="handleCloseVehicleDrawer()">
-    <app-vehicle-form
-      [dataForm]="selectedVehicleToEdit"
-      (formSubmitted)="onVehicleFormSubmitted()"
-    />
+    <app-vehicle-form [dataForm]="selectedVehicleToEdit" (formSubmitted)="onVehicleFormSubmitted()" />
   </app-drawer>
 }

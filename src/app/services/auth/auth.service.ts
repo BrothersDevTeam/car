@@ -155,7 +155,7 @@ export class AuthService {
           this.httpClient.get(`/api/users/${userId}`).subscribe({
             error: (err) => {
               console.debug('Keep alive ping error', err);
-            }
+            },
           });
         }
       }

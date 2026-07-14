@@ -137,8 +137,7 @@ export class ComprasListComponent implements OnInit, OnDestroy {
           icon: 'receipt_long',
           color: 'primary',
           action: (row: Compra) => this.handleEmitirNfe(row),
-          hidden: (row: Compra) =>
-            !this.authService.hasAuthority(Authorizations.CREATE_NFE_STORE) || !!row.nfeId,
+          hidden: (row: Compra) => !this.authService.hasAuthority(Authorizations.CREATE_NFE_STORE) || !!row.nfeId,
         },
         {
           label: 'Excluir Compra',

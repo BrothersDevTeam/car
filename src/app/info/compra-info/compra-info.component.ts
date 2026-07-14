@@ -16,14 +16,7 @@ import { TransactionPaymentDialogComponent } from '../../pages/financial/financi
 @Component({
   selector: 'app-compra-info',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatDividerModule,
-    MatTooltipModule,
-    MatDialogModule
-  ],
+  imports: [CommonModule, MatIconModule, MatButtonModule, MatDividerModule, MatTooltipModule, MatDialogModule],
   providers: [DatePipe, CurrencyPipe],
   templateUrl: './compra-info.component.html',
   styleUrl: './compra-info.component.scss',
@@ -93,7 +86,7 @@ export class CompraInfoComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao carregar lançamentos financeiros da compra', err);
-      }
+      },
     });
   }
 
@@ -207,12 +200,12 @@ export class CompraInfoComponent implements OnInit {
     };
 
     const pagDueDate = formatLocalDate(pag.vencimento);
-    
-    const match = this.financialTransactions.find(tx => {
+
+    const match = this.financialTransactions.find((tx) => {
       const txDueDate = formatLocalDate(tx.dueDate);
       const isSameDate = txDueDate === pagDueDate;
       const isSameAmount = Math.abs(tx.amount - pag.valor) < 0.01;
-      
+
       const expectedTxType = pag.tipo === 'D' ? 'EXPENSE' : 'INCOME';
       const isSameType = tx.type === expectedTxType;
 

@@ -51,7 +51,6 @@ import { ICashRegister, ICashRegisterSession, ICashRegisterReport } from '@inter
 
     <mat-dialog-content class="dialog-content">
       <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)">
-        
         <!-- ABA 1: LISTAGEM E OPERAÇÕES -->
         <mat-tab label="Caixas e Aberturas">
           <div class="tab-padding">
@@ -81,7 +80,11 @@ import { ICashRegister, ICashRegisterSession, ICashRegisterReport } from '@inter
                             <mat-icon>lock</mat-icon>
                             <span>Fechar Caixa</span>
                           </button>
-                          <button mat-stroked-button color="primary" (click)="viewReport(sessions[reg.cashRegisterId]!)">
+                          <button
+                            mat-stroked-button
+                            color="primary"
+                            (click)="viewReport(sessions[reg.cashRegisterId]!)"
+                          >
                             <mat-icon>bar_chart</mat-icon>
                             <span>Relatório</span>
                           </button>
@@ -91,11 +94,19 @@ import { ICashRegister, ICashRegisterSession, ICashRegisterReport } from '@inter
                             <span>Abrir Caixa</span>
                           </button>
                           @if (sessions[reg.cashRegisterId]) {
-                            <button mat-stroked-button color="warn" (click)="reopenSession(sessions[reg.cashRegisterId]!)">
+                            <button
+                              mat-stroked-button
+                              color="warn"
+                              (click)="reopenSession(sessions[reg.cashRegisterId]!)"
+                            >
                               <mat-icon>refresh</mat-icon>
                               <span>Reabrir</span>
                             </button>
-                            <button mat-stroked-button color="primary" (click)="viewReport(sessions[reg.cashRegisterId]!)">
+                            <button
+                              mat-stroked-button
+                              color="primary"
+                              (click)="viewReport(sessions[reg.cashRegisterId]!)"
+                            >
                               <mat-icon>bar_chart</mat-icon>
                               <span>Último Relatório</span>
                             </button>
@@ -115,11 +126,15 @@ import { ICashRegister, ICashRegisterSession, ICashRegisterReport } from '@inter
                           </div>
                           <div>
                             <span class="label">Aberto Em</span>
-                            <span class="val">{{ sessions[reg.cashRegisterId]?.openedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+                            <span class="val">
+                              {{ sessions[reg.cashRegisterId]?.openedAt | date: 'dd/MM/yyyy HH:mm' }}
+                            </span>
                           </div>
                           <div>
                             <span class="label">Saldo Inicial</span>
-                            <span class="val">{{ sessions[reg.cashRegisterId]?.initialBalance | currency: 'BRL' }}</span>
+                            <span class="val">
+                              {{ sessions[reg.cashRegisterId]?.initialBalance | currency: 'BRL' }}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -138,9 +153,7 @@ import { ICashRegister, ICashRegisterSession, ICashRegisterReport } from '@inter
                             <button mat-raised-button color="primary" type="submit" [disabled]="openForm.invalid">
                               Confirmar Abertura
                             </button>
-                            <button mat-button type="button" (click)="openingRegisterId = null">
-                              Cancelar
-                            </button>
+                            <button mat-button type="button" (click)="openingRegisterId = null">Cancelar</button>
                           </div>
                         </form>
                       </div>
@@ -169,7 +182,14 @@ import { ICashRegister, ICashRegisterSession, ICashRegisterReport } from '@inter
                 <div class="report-header">
                   <div>
                     <h3 class="title">Resumo do Caixa: {{ activeReportSession.cashRegisterName }}</h3>
-                    <span class="subtitle">Sessão: {{ activeReportSession.openedAt | date: 'dd/MM/yyyy HH:mm' }} até {{ activeReportSession.closedAt ? (activeReportSession.closedAt | date: 'dd/MM/yyyy HH:mm') : 'Hoje (Aberto)' }}</span>
+                    <span class="subtitle">
+                      Sessão: {{ activeReportSession.openedAt | date: 'dd/MM/yyyy HH:mm' }} até
+                      {{
+                        activeReportSession.closedAt
+                          ? (activeReportSession.closedAt | date: 'dd/MM/yyyy HH:mm')
+                          : 'Hoje (Aberto)'
+                      }}
+                    </span>
                   </div>
                 </div>
 
@@ -187,8 +207,12 @@ import { ICashRegister, ICashRegisterSession, ICashRegisterReport } from '@inter
                     <span class="val">-{{ reportData.totalExpense | currency: 'BRL' }}</span>
                   </div>
                   <div class="metric-card final">
-                    <span class="label">{{ activeReportSession.status === 'CLOSED' ? 'Saldo Final' : 'Saldo Projetado' }}</span>
-                    <span class="val" [class.negative]="reportData.finalBalance < 0">{{ reportData.finalBalance | currency: 'BRL' }}</span>
+                    <span class="label">
+                      {{ activeReportSession.status === 'CLOSED' ? 'Saldo Final' : 'Saldo Projetado' }}
+                    </span>
+                    <span class="val" [class.negative]="reportData.finalBalance < 0">
+                      {{ reportData.finalBalance | currency: 'BRL' }}
+                    </span>
                   </div>
                 </div>
 
@@ -235,7 +259,13 @@ import { ICashRegister, ICashRegisterSession, ICashRegisterReport } from '@inter
                 <input matInput formControlName="name" placeholder="Ex: Caixa Principal, Caixa Banco..." />
                 <mat-error *ngIf="registerForm.get('name')?.hasError('required')">O nome é obrigatório</mat-error>
               </mat-form-field>
-              <button mat-raised-button color="primary" type="submit" [disabled]="registerForm.invalid" style="height: 48px">
+              <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="registerForm.invalid"
+                style="height: 48px"
+              >
                 Adicionar Caixa
               </button>
             </form>
@@ -248,312 +278,332 @@ import { ICashRegister, ICashRegisterSession, ICashRegisterReport } from '@inter
       <button mat-button mat-dialog-close>Fechar Tela</button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .dialog-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #1976d2;
-      color: white;
-      padding: 16px 24px;
-      margin: 0;
-      font-size: 20px;
-      font-weight: 500;
-      mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
-      }
-    }
-
-    .dialog-content {
-      padding: 0 !important;
-      min-height: 450px;
-      max-height: 70vh;
-    }
-
-    .tab-padding {
-      padding: 20px 24px;
-    }
-
-    .spinner-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 200px;
-    }
-
-    .registers-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .register-card {
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      padding: 20px;
-      background: #fafafa;
-      transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
-
-      &.open {
-        border-color: rgba(46, 125, 50, 0.4);
-        background: #f1f8e9;
-      }
-
-      &:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      }
-    }
-
-    .card-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .title-section {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      .card-icon {
-        font-size: 28px;
-        width: 28px;
-        height: 28px;
-        color: #1976d2;
-      }
-
-      .register-name {
-        margin: 0;
-        font-size: 16px;
-        font-weight: 600;
-        color: #333;
-      }
-    }
-
-    .status-badge {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 4px;
-      background: #ccc;
-      color: white;
-      margin-top: 4px;
-
-      &.open {
-        background: #2e7d32;
-      }
-    }
-
-    .actions-section {
-      display: flex;
-      gap: 8px;
-      button {
-        height: 38px;
-        font-size: 13px;
-        mat-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-        }
-      }
-    }
-
-    .session-details {
-      margin-top: 16px;
-      padding-top: 16px;
-    }
-
-    .details-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 16px;
-      margin-top: 12px;
-
-      .label {
-        display: block;
-        font-size: 11px;
-        color: #666;
-        text-transform: uppercase;
-        font-weight: 500;
-      }
-
-      .val {
-        display: block;
-        font-size: 14px;
-        font-weight: 600;
-        color: #333;
-        margin-top: 2px;
-      }
-    }
-
-    .open-form-inline {
-      margin-top: 16px;
-      padding-top: 16px;
-
-      .form-row {
+  styles: [
+    `
+      .dialog-title {
         display: flex;
         align-items: center;
-        gap: 16px;
-        margin-top: 12px;
-      }
-
-      .form-field {
-        margin-bottom: 0;
-        ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-          display: none;
+        gap: 8px;
+        background: #1976d2;
+        color: white;
+        padding: 16px 24px;
+        margin: 0;
+        font-size: 20px;
+        font-weight: 500;
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
         }
       }
 
-      .form-actions {
+      .dialog-content {
+        padding: 0 !important;
+        min-height: 450px;
+        max-height: 70vh;
+      }
+
+      .tab-padding {
+        padding: 20px 24px;
+      }
+
+      .spinner-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+      }
+
+      .registers-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .register-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 20px;
+        background: #fafafa;
+        transition:
+          box-shadow 0.2s ease-in-out,
+          border-color 0.2s ease-in-out;
+
+        &.open {
+          border-color: rgba(46, 125, 50, 0.4);
+          background: #f1f8e9;
+        }
+
+        &:hover {
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+      }
+
+      .card-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .title-section {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .card-icon {
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+          color: #1976d2;
+        }
+
+        .register-name {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #333;
+        }
+      }
+
+      .status-badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 4px;
+        background: #ccc;
+        color: white;
+        margin-top: 4px;
+
+        &.open {
+          background: #2e7d32;
+        }
+      }
+
+      .actions-section {
         display: flex;
         gap: 8px;
         button {
-          height: 48px;
+          height: 38px;
+          font-size: 13px;
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
         }
       }
-    }
 
-    .report-container {
-      background: white;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      padding: 24px;
-    }
+      .session-details {
+        margin-top: 16px;
+        padding-top: 16px;
+      }
 
-    .report-header {
-      margin-bottom: 20px;
-      .title {
-        margin: 0;
-        font-size: 18px;
+      .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 16px;
+        margin-top: 12px;
+
+        .label {
+          display: block;
+          font-size: 11px;
+          color: #666;
+          text-transform: uppercase;
+          font-weight: 500;
+        }
+
+        .val {
+          display: block;
+          font-size: 14px;
+          font-weight: 600;
+          color: #333;
+          margin-top: 2px;
+        }
+      }
+
+      .open-form-inline {
+        margin-top: 16px;
+        padding-top: 16px;
+
+        .form-row {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-top: 12px;
+        }
+
+        .form-field {
+          margin-bottom: 0;
+          ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+            display: none;
+          }
+        }
+
+        .form-actions {
+          display: flex;
+          gap: 8px;
+          button {
+            height: 48px;
+          }
+        }
+      }
+
+      .report-container {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 24px;
+      }
+
+      .report-header {
+        margin-bottom: 20px;
+        .title {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: #333;
+        }
+        .subtitle {
+          font-size: 13px;
+          color: #666;
+        }
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+      }
+
+      .metric-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 16px;
+        background: #fafafa;
+        display: flex;
+        flex-direction: column;
+
+        .label {
+          font-size: 12px;
+          color: #666;
+          text-transform: uppercase;
+          font-weight: 500;
+        }
+
+        .val {
+          font-size: 20px;
+          font-weight: 700;
+          color: #333;
+          margin-top: 4px;
+        }
+
+        &.income {
+          border-left: 4px solid #2e7d32;
+          .val {
+            color: #2e7d32;
+          }
+        }
+
+        &.expense {
+          border-left: 4px solid #c62828;
+          .val {
+            color: #c62828;
+          }
+        }
+
+        &.final {
+          background: #e8f5e9;
+          border-left: 4px solid #2e7d32;
+          .val {
+            color: #2e7d32;
+          }
+
+          .val.negative {
+            color: #c62828;
+          }
+        }
+      }
+
+      .methods-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 32px;
+      }
+
+      .section-title {
+        margin-top: 0;
+        margin-bottom: 16px;
+        font-size: 15px;
         font-weight: 600;
         color: #333;
       }
-      .subtitle {
+
+      .method-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px dashed #e0e0e0;
+        font-size: 14px;
+      }
+
+      .no-data {
         font-size: 13px;
-        color: #666;
-      }
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-    }
-
-    .metric-card {
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 16px;
-      background: #fafafa;
-      display: flex;
-      flex-direction: column;
-
-      .label {
-        font-size: 12px;
-        color: #666;
-        text-transform: uppercase;
-        font-weight: 500;
+        color: #999;
+        margin: 0;
+        font-style: italic;
       }
 
-      .val {
-        font-size: 20px;
-        font-weight: 700;
-        color: #333;
-        margin-top: 4px;
+      .text-success {
+        color: #2e7d32;
+      }
+      .text-danger {
+        color: #c62828;
       }
 
-      &.income {
-        border-left: 4px solid #2e7d32;
-        .val { color: #2e7d32; }
+      .register-form {
+        max-width: 400px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
       }
 
-      &.expense {
-        border-left: 4px solid #c62828;
-        .val { color: #c62828; }
-      }
-
-      &.final {
-        background: #e8f5e9;
-        border-left: 4px solid #2e7d32;
-        .val { color: #2e7d32; }
-
-        .val.negative {
-          color: #c62828;
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px;
+        color: #888;
+        mat-icon {
+          font-size: 36px;
+          width: 36px;
+          height: 36px;
+          margin-bottom: 8px;
         }
       }
-    }
 
-    .methods-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 32px;
-    }
-
-    .section-title {
-      margin-top: 0;
-      margin-bottom: 16px;
-      font-size: 15px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .method-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px dashed #e0e0e0;
-      font-size: 14px;
-    }
-
-    .no-data {
-      font-size: 13px;
-      color: #999;
-      margin: 0;
-      font-style: italic;
-    }
-
-    .text-success { color: #2e7d32; }
-    .text-danger { color: #c62828; }
-
-    .register-form {
-      max-width: 400px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px;
-      color: #888;
-      mat-icon {
-        font-size: 36px;
-        width: 36px;
-        height: 36px;
-        margin-bottom: 8px;
+      .w-100 {
+        width: 100%;
       }
-    }
 
-    .w-100 {
-      width: 100%;
-    }
+      .animate-fade-in {
+        animation: fadeIn 0.2s ease-in-out;
+      }
 
-    .animate-fade-in {
-      animation: fadeIn 0.2s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  `]
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    `,
+  ],
 })
 export class CashRegistersManagementDialogComponent implements OnInit {
   storeId: string;
@@ -686,7 +736,7 @@ export class CashRegistersManagementDialogComponent implements OnInit {
   reopenSession(session: ICashRegisterSession): void {
     if (
       !confirm(
-        `AVISO CRÍTICO:\nReabrir o caixa "${session.cashRegisterName}" irá reabrir este e todos os caixas posteriores deste mesmo registro.\n\nOs saldos de todas as aberturas e fechamentos subsequentes serão recalculados automaticamente em cascata para manter a integridade financeira.\n\nDeseja reabrir mesmo assim?`
+        `AVISO CRÍTICO:\nReabrir o caixa "${session.cashRegisterName}" irá reabrir este e todos os caixas posteriores deste mesmo registro.\n\nOs saldos de todas as aberturas e fechamentos subsequentes serão recalculados automaticamente em cascata para manter a integridade financeira.\n\nDeseja reabrir mesmo assim?`,
       )
     ) {
       return;

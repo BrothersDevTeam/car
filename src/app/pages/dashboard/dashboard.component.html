@@ -110,7 +110,7 @@
           <mat-card-subtitle>Sessões ativas no sistema com tempo de atividade em tempo real</mat-card-subtitle>
         </div>
       </mat-card-header>
-      
+
       <mat-card-content class="sessions-content">
         @if (activeSessions.length > 0) {
           <div class="table-responsive">
@@ -165,7 +165,11 @@
                       </div>
                     </td>
                     <td class="action-cell">
-                      <button class="disconnect-btn" (click)="disconnectUser(session)" title="Derrubar sessão do usuário">
+                      <button
+                        class="disconnect-btn"
+                        (click)="disconnectUser(session)"
+                        title="Derrubar sessão do usuário"
+                      >
                         <mat-icon>logout</mat-icon>
                       </button>
                     </td>

@@ -110,7 +110,9 @@ export class CompleteStoreFormDialogComponent implements OnInit {
           legalEntity: this.ownerForm.value.legalEntity,
           name: this.ownerForm.value.name,
           cpf: this.ownerForm.value.legalEntity ? null : this.ownerForm.value.cpf?.replace(/\D/g, ''),
-          cnpj: this.ownerForm.value.legalEntity ? this.ownerForm.value.cnpj?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : null,
+          cnpj: this.ownerForm.value.legalEntity
+            ? this.ownerForm.value.cnpj?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
+            : null,
           email: this.ownerForm.value.email || null,
           phone: this.ownerForm.value.phone ? this.ownerForm.value.phone.replace(/\D/g, '') : null,
         },

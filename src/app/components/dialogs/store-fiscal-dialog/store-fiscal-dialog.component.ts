@@ -100,11 +100,11 @@ export class StoreFiscalDialogComponent implements OnInit {
         if (store) {
           this.data.store = store;
           this.form.patchValue({
-            nfeEmails: store.nfeEmails || ''
+            nfeEmails: store.nfeEmails || '',
           });
         }
       },
-      error: (err) => console.error('Erro ao carregar dados da loja', err)
+      error: (err) => console.error('Erro ao carregar dados da loja', err),
     });
 
     this.parametroFiscalService.getByStoreId(this.data.store.storeId!).subscribe({
@@ -162,12 +162,13 @@ export class StoreFiscalDialogComponent implements OnInit {
       cnpj: this.data.store.cnpj,
       email: this.data.store.email,
       phoneNumber: this.data.store.phone,
-      nfeEmails: formData.nfeEmails
+      nfeEmails: formData.nfeEmails,
     };
 
-    const storeUpdateRequest = this.data.store.mainStoreId === null
-      ? this.storeService.updateMainStore(this.data.store.storeId!, storeUpdateData)
-      : this.storeService.update(this.data.store.storeId!, storeUpdateData);
+    const storeUpdateRequest =
+      this.data.store.mainStoreId === null
+        ? this.storeService.updateMainStore(this.data.store.storeId!, storeUpdateData)
+        : this.storeService.update(this.data.store.storeId!, storeUpdateData);
 
     storeUpdateRequest.subscribe({
       next: (updatedStore) => {
@@ -201,7 +202,7 @@ export class StoreFiscalDialogComponent implements OnInit {
           duration: 4000,
         });
         this.saving = false;
-      }
+      },
     });
   }
 

@@ -111,7 +111,7 @@ export class VendaService {
     return this.http.post<VendaResponseDto>(`${this.apiUrl}/${vendaId}/confirmar-troca/${vendaPagamentoId}`, {}).pipe(
       tap(() => {
         this.clearCache();
-      })
+      }),
     );
   }
 

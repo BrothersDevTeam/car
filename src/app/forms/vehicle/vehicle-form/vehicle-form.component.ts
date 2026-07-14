@@ -176,62 +176,58 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
    * Formulário com FormGroups aninhados para brand, model e color
    * para trabalhar com o custom-select component
    */
-  protected form: FormGroup = this.formBuilderService.group(
-    {
-      owner: this.formBuilderService.group({
-        id: [''],
-        name: [''],
-      }),
-      supplier: this.formBuilderService.group({
-        id: [''],
-        name: [''],
-      }),
-      plate: ['', Validators.required],
-      brand: this.formBuilderService.group({
-        id: [''],
-        name: [''],
-      }),
-      model: this.formBuilderService.group({
-        id: [''],
-        name: [''],
-      }),
-      fipeYear: this.formBuilderService.group({
-        id: [''],
-        name: [''],
-      }),
-      vehicleYear: [''],
-      modelYear: [''],
-      color: this.formBuilderService.group({
-        id: [''],
-        name: [''],
-      }),
-      chassis: [''],
-      renavam: [''],
-      doors: [''],
+  protected form: FormGroup = this.formBuilderService.group({
+    owner: this.formBuilderService.group({
+      id: [''],
+      name: [''],
+    }),
+    supplier: this.formBuilderService.group({
+      id: [''],
+      name: [''],
+    }),
+    plate: ['', Validators.required],
+    brand: this.formBuilderService.group({
+      id: [''],
+      name: [''],
+    }),
+    model: this.formBuilderService.group({
+      id: [''],
+      name: [''],
+    }),
+    fipeYear: this.formBuilderService.group({
+      id: [''],
+      name: [''],
+    }),
+    vehicleYear: [''],
+    modelYear: [''],
+    color: this.formBuilderService.group({
+      id: [''],
+      name: [''],
+    }),
+    chassis: [''],
+    renavam: [''],
+    doors: [''],
 
-      horsepower: [''],
-      engineDisplacement: [''],
-      engineNumber: [''],
-      km: [''],
-      vehicleType: ['AUTOMOVEL'],
-      species: ['PASSAGEIRO'],
-      category: ['PARTICULAR'],
-      features: [''],
-      fuelTypes: [[]], // Array de FuelTypes
-      optionalIds: [[]], // Array de Opcionais (UUIDs)
-      origin: ['NACIONAL'],
-      valorVenda: [''],
-      observation: [''],
-      entryDate: [''],
-      exitDate: [''],
-    }
-  );
+    horsepower: [''],
+    engineDisplacement: [''],
+    engineNumber: [''],
+    km: [''],
+    vehicleType: ['AUTOMOVEL'],
+    species: ['PASSAGEIRO'],
+    category: ['PARTICULAR'],
+    features: [''],
+    fuelTypes: [[]], // Array de FuelTypes
+    optionalIds: [[]], // Array de Opcionais (UUIDs)
+    origin: ['NACIONAL'],
+    valorVenda: [''],
+    observation: [''],
+    entryDate: [''],
+    exitDate: [''],
+  });
 
   public get vehicleForm(): FormGroup {
     return this.form;
   }
-
-
 
   private formatDateToISO(date: Date | string): string {
     const d = date instanceof Date ? date : new Date(date);
@@ -1397,5 +1393,3 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 }
-
-

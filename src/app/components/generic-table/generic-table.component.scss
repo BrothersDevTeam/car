@@ -375,7 +375,8 @@ button[mat-icon-button] {
     color: #475569;
     border: 1px solid #e2e8f0;
   }
-  &.badge-renave-pendente-compra, &.badge-renave-pendente-venda {
+  &.badge-renave-pendente-compra,
+  &.badge-renave-pendente-venda {
     background-color: #fff7ed;
     color: #ea580c;
     border: 1px solid #fed7aa;

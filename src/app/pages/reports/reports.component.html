@@ -41,7 +41,10 @@
           <mat-card-subtitle>Demonstração do Resultado do Exercício</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <p>Exibe o resumo das receitas e despesas acumuladas pelo regime de competência (data de vencimento), permitindo analisar a rentabilidade da loja no período.</p>
+          <p>
+            Exibe o resumo das receitas e despesas acumuladas pelo regime de competência (data de vencimento),
+            permitindo analisar a rentabilidade da loja no período.
+          </p>
         </mat-card-content>
         <mat-card-actions>
           <button mat-raised-button color="primary" [disabled]="loadingDre" (click)="downloadDre()">
@@ -67,7 +70,10 @@
           <mat-card-subtitle>Entradas e Saídas Liquidadas</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <p>Relatório baseado no regime de caixa (data do pagamento real). Exibe a movimentação financeira líquida do caixa e saldo operacional.</p>
+          <p>
+            Relatório baseado no regime de caixa (data do pagamento real). Exibe a movimentação financeira líquida do
+            caixa e saldo operacional.
+          </p>
         </mat-card-content>
         <mat-card-actions>
           <button mat-raised-button color="primary" [disabled]="loadingCashFlow" (click)="downloadCashFlow()">
@@ -95,7 +101,10 @@
           <mat-card-subtitle>Listagem geral e disponibilidade</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <p>Gera o levantamento geral dos veículos da loja/rede, incluindo status (Disponível/Vendido), ano, placa, e valores de compra (se autorizado) e venda.</p>
+          <p>
+            Gera o levantamento geral dos veículos da loja/rede, incluindo status (Disponível/Vendido), ano, placa, e
+            valores de compra (se autorizado) e venda.
+          </p>
         </mat-card-content>
         <mat-card-actions>
           <button mat-raised-button color="primary" [disabled]="loadingVehicle" (click)="downloadVehicle()">
@@ -123,7 +132,10 @@
           <mat-card-subtitle>Banco de dados de pessoas</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <p>Exporta a lista completa de clientes cadastrados, com informações de contato (email, telefone), documento (CPF/CNPJ), tipo (Física/Jurídica) e status ativo.</p>
+          <p>
+            Exporta a lista completa de clientes cadastrados, com informações de contato (email, telefone), documento
+            (CPF/CNPJ), tipo (Física/Jurídica) e status ativo.
+          </p>
         </mat-card-content>
         <mat-card-actions>
           <button mat-raised-button color="primary" [disabled]="loadingCustomer" (click)="downloadCustomer()">

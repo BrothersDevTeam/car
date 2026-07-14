@@ -17,14 +17,14 @@
 
 .filter-card {
   padding: 16px;
-  
+
   .filter-form-content {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 16px;
     margin-top: 16px;
   }
-  
+
   .filter-field {
     width: 100%;
   }
@@ -43,7 +43,7 @@
   height: 100%;
   position: relative;
   overflow: hidden;
-  
+
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
@@ -68,7 +68,7 @@
     display: flex;
     justify-content: flex-end;
     margin: 0;
-    
+
     button {
       width: 100%;
       display: flex;
@@ -78,7 +78,7 @@
       padding: 12px;
       font-weight: 500;
       border-radius: 8px;
-      
+
       mat-spinner {
         display: inline-block;
       }
@@ -95,7 +95,7 @@
   justify-content: center;
   margin-bottom: 16px;
   color: #ffffff;
-  
+
   mat-icon {
     font-size: 24px;
     width: 24px;

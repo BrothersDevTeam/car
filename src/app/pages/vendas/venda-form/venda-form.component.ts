@@ -2,12 +2,7 @@ import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import {
-  finalize,
-  Observable,
-  of,
-  Subscription,
-} from 'rxjs';
+import { finalize, Observable, of, Subscription } from 'rxjs';
 
 import { ContentHeaderComponent } from '@components/content-header/content-header.component';
 import { VendaService } from '@services/venda.service';
@@ -135,13 +130,13 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
   get receitasControls() {
     return this.pagamentos.controls
       .map((control, index) => ({ control, index }))
-      .filter(x => x.control.get('tipo')?.value !== 'D');
+      .filter((x) => x.control.get('tipo')?.value !== 'D');
   }
 
   get debitosControls() {
     return this.pagamentos.controls
       .map((control, index) => ({ control, index }))
-      .filter(x => x.control.get('tipo')?.value === 'D');
+      .filter((x) => x.control.get('tipo')?.value === 'D');
   }
 
   constructor(
@@ -259,7 +254,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
     const storeId = this.storeContextService.currentStoreId;
     if (!storeId) return;
 
-    const previousIds = this.vehicles.map(v => v.id);
+    const previousIds = this.vehicles.map((v) => v.id);
 
     this.vehicleService.getPaginatedData(0, 1000, { storeId, onlyInStock: true }).subscribe({
       next: (response) => {
@@ -269,13 +264,13 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
         }));
 
         if (selectNewId && this.activeTradeIndex !== null) {
-          const newVehicle = this.vehicles.find(v => !previousIds.includes(v.id));
+          const newVehicle = this.vehicles.find((v) => !previousIds.includes(v.id));
           if (newVehicle) {
             const paymentsArray = this.pagamentos;
             const paymentGroup = paymentsArray.at(this.activeTradeIndex) as FormGroup;
             paymentGroup.get('descricao')?.setValue({
               id: newVehicle.id,
-              name: newVehicle.name
+              name: newVehicle.name,
             });
             paymentGroup.get('descricao')?.markAsDirty();
 
@@ -288,31 +283,32 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
       error: (err) => {
         console.error('Erro ao recarregar veículos:', err);
         this.toastr.error('Erro ao recarregar veículos em estoque');
-      }
+      },
     });
   }
 
   private loadAndSetQueryVehicle(vehicleId: string) {
     this.loading.set(true);
-    this.vehicleService.getById(vehicleId).pipe(
-      finalize(() => this.loading.set(false))
-    ).subscribe({
-      next: (v) => {
-        this.vendaForm.get('vehicle')?.patchValue({
-          id: v.vehicleId,
-          name: `${v.brand} ${v.model} (${v.plate})`
-        });
+    this.vehicleService
+      .getById(vehicleId)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (v) => {
+          this.vendaForm.get('vehicle')?.patchValue({
+            id: v.vehicleId,
+            name: `${v.brand} ${v.model} (${v.plate})`,
+          });
 
-        const valorVenda = v.valorVenda ? parseFloat(v.valorVenda.toString().replace(',', '.')) : 0;
-        this.vendaForm.patchValue({
-          valor: valorVenda,
-          valorFinal: valorVenda,
-        });
+          const valorVenda = v.valorVenda ? parseFloat(v.valorVenda.toString().replace(',', '.')) : 0;
+          this.vendaForm.patchValue({
+            valor: valorVenda,
+            valorFinal: valorVenda,
+          });
 
-        this.geradorValorTotal = valorVenda;
-      },
-      error: () => this.toastr.error('Erro ao carregar dados do veículo selecionado')
-    });
+          this.geradorValorTotal = valorVenda;
+        },
+        error: () => this.toastr.error('Erro ao carregar dados do veículo selecionado'),
+      });
   }
 
   // Métodos para o Drawer de Person
@@ -353,10 +349,10 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
   createPagamentoFormGroup(data?: any): FormGroup {
     let descricaoValue = data?.descricao || '';
     if (data?.formaPagamento === 'TROCA' && typeof descricaoValue === 'string' && descricaoValue.trim() !== '') {
-      const foundVehicle = this.vehicles.find(v => v.id === descricaoValue);
+      const foundVehicle = this.vehicles.find((v) => v.id === descricaoValue);
       descricaoValue = {
         id: descricaoValue,
-        name: foundVehicle ? foundVehicle.name : ''
+        name: foundVehicle ? foundVehicle.name : '',
       };
     }
 
@@ -365,7 +361,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
       valor: [data?.valor || 0, [Validators.required, Validators.min(0.01)]],
       vencimento: [data?.vencimento ? new Date(data.vencimento) : new Date()],
       descricao: [descricaoValue],
-      tipo: [data?.tipo || 'R', Validators.required]
+      tipo: [data?.tipo || 'R', Validators.required],
     });
   }
 
@@ -388,24 +384,20 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
   createDespesaFormGroup(data?: any): FormGroup {
     const tipo = data?.tipo || 'LOJA';
     const isRecebida = tipo === 'RECEBIDA';
-    
+
     // Para despesas RECEBIDA, o custo real não é obrigatório no cadastro inicial.
-    const valorCustoValidators = isRecebida
-      ? [Validators.min(0)]
-      : [Validators.required, Validators.min(0)];
+    const valorCustoValidators = isRecebida ? [Validators.min(0)] : [Validators.required, Validators.min(0)];
 
     return this.fb.group({
       descricao: [data?.descricao || '', Validators.required],
       valorCusto: [
-        data?.valorCusto !== undefined && data?.valorCusto !== null
-          ? data.valorCusto
-          : (isRecebida ? null : 0),
-        valorCustoValidators
+        data?.valorCusto !== undefined && data?.valorCusto !== null ? data.valorCusto : isRecebida ? null : 0,
+        valorCustoValidators,
       ],
       valorRecebido: [data?.valorRecebido || null],
       dataPagamento: [data?.dataPagamento ? new Date(data.dataPagamento) : new Date(), Validators.required],
       fornecedorId: [data?.fornecedorId || ''],
-      tipo: [tipo, Validators.required]
+      tipo: [tipo, Validators.required],
     });
   }
 
@@ -420,13 +412,13 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
   adicionarMeses(dataBase: Date, meses: number): Date {
     const data = new Date(dataBase.getTime());
     const diaDesejado = dataBase.getDate();
-    
+
     data.setMonth(data.getMonth() + meses);
-    
+
     if (data.getDate() < diaDesejado) {
       data.setDate(0);
     }
-    
+
     return data;
   }
 
@@ -447,14 +439,12 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
         const descricao = control.get('descricao')?.value || '';
 
         // Remove apenas se for receita ('R') e (valor estiver zerado ou for uma parcela gerada anteriormente)
-        const deveRemover = tipo === 'R' && (
-          valor <= 0.009 ||
-          (descricao.startsWith('Parcela ') && descricao.includes('/'))
-        );
+        const deveRemover =
+          tipo === 'R' && (valor <= 0.009 || (descricao.startsWith('Parcela ') && descricao.includes('/')));
         return { deveRemover, index };
       })
-      .filter(x => x.deveRemover)
-      .map(x => x.index)
+      .filter((x) => x.deveRemover)
+      .map((x) => x.index)
       .reverse();
 
     for (const index of indicesParaRemover) {
@@ -466,7 +456,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
 
     for (let i = 1; i <= this.geradorParcelas; i++) {
       let valorFinalParcela = valorParcela;
-      
+
       if (i === this.geradorParcelas) {
         valorFinalParcela = parseFloat((this.geradorValorTotal - totalAcumulado).toFixed(2));
       } else {
@@ -486,13 +476,15 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
 
       const descricao = `Parcela ${i}/${this.geradorParcelas}`;
 
-      this.pagamentos.push(this.createPagamentoFormGroup({
-        formaPagamento: this.geradorFormaPagamento,
-        valor: valorFinalParcela,
-        vencimento: vencimento,
-        descricao: descricao,
-        tipo: 'R'
-      }));
+      this.pagamentos.push(
+        this.createPagamentoFormGroup({
+          formaPagamento: this.geradorFormaPagamento,
+          valor: valorFinalParcela,
+          vencimento: vencimento,
+          descricao: descricao,
+          tipo: 'R',
+        }),
+      );
     }
 
     this.toastr.success(`${this.geradorParcelas} parcelas geradas com sucesso!`);
@@ -886,13 +878,13 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
       retornoCreditarDia: raw.retornoCreditarDia ? this.formatDateToISO(raw.retornoCreditarDia) : null,
       pagamentos: (raw.pagamentos || []).map((p: any) => ({
         ...p,
-        descricao: p.formaPagamento === 'TROCA' ? (p.descricao?.id || p.descricao || '') : p.descricao,
-        vencimento: p.vencimento ? this.formatDateToISO(p.vencimento) : null
+        descricao: p.formaPagamento === 'TROCA' ? p.descricao?.id || p.descricao || '' : p.descricao,
+        vencimento: p.vencimento ? this.formatDateToISO(p.vencimento) : null,
       })),
       despesas: (raw.despesas || []).map((d: any) => ({
         ...d,
         valorCusto: d.valorCusto !== null && d.valorCusto !== undefined ? d.valorCusto : 0,
-        dataPagamento: this.formatDateToISO(d.dataPagamento)
+        dataPagamento: this.formatDateToISO(d.dataPagamento),
       })),
       // Remove campos auxiliares
       vehicle: undefined,
@@ -952,17 +944,17 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
       next: (vehicle) => {
         // Mapeia o valorCompra vindo do backend
         const valorCompra = vehicle.valorCompra ? parseFloat(vehicle.valorCompra.toString().replace(',', '.')) : 0;
-        
+
         const paymentsArray = this.pagamentos;
         const paymentGroup = paymentsArray.at(index) as FormGroup;
         paymentGroup.patchValue({
-          valor: valorCompra
+          valor: valorCompra,
         });
         paymentGroup.get('valor')?.markAsDirty();
       },
       error: (err) => {
         console.error('Erro ao buscar valor de compra do veículo de troca:', err);
-      }
+      },
     });
   }
 

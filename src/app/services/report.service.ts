@@ -31,7 +31,9 @@ export class ReportService {
   }
 
   downloadCashFlowReport(request: ReportRequest): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/financial/cash-flow/download`, request, { responseType: 'blob' }).pipe(first());
+    return this.http
+      .post(`${this.apiUrl}/financial/cash-flow/download`, request, { responseType: 'blob' })
+      .pipe(first());
   }
 
   saveFile(blob: Blob, filename: string): void {

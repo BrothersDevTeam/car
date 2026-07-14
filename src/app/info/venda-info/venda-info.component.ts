@@ -24,7 +24,7 @@ import { TransactionPaymentDialogComponent } from '../../pages/financial/financi
     MatDividerModule,
     MatTooltipModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
   ],
   providers: [DatePipe, CurrencyPipe],
   templateUrl: './venda-info.component.html',
@@ -96,7 +96,7 @@ export class VendaInfoComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao carregar lançamentos financeiros da venda', err);
-      }
+      },
     });
   }
 
@@ -210,12 +210,12 @@ export class VendaInfoComponent implements OnInit {
     };
 
     const pagDueDate = formatLocalDate(pag.vencimento);
-    
-    const match = this.financialTransactions.find(tx => {
+
+    const match = this.financialTransactions.find((tx) => {
       const txDueDate = formatLocalDate(tx.dueDate);
       const isSameDate = txDueDate === pagDueDate;
       const isSameAmount = Math.abs(tx.amount - pag.valor) < 0.01;
-      
+
       const expectedTxType = pag.tipo === 'D' ? 'EXPENSE' : 'INCOME';
       const isSameType = tx.type === expectedTxType;
 
@@ -233,7 +233,7 @@ export class VendaInfoComponent implements OnInit {
     const formattedAmount = this.formatCurrency(pag.valor);
     const confirmacao = confirm(
       `Confirma o recebimento físico do veículo de troca?\n` +
-      `Os lançamentos financeiros gerados por ele (Entrada e Saída no valor de ${formattedAmount}) serão liquidados simultaneamente.`
+        `Os lançamentos financeiros gerados por ele (Entrada e Saída no valor de ${formattedAmount}) serão liquidados simultaneamente.`,
     );
 
     if (confirmacao) {
@@ -243,7 +243,7 @@ export class VendaInfoComponent implements OnInit {
           this.venda = vendaUpdated;
           this.snackBar.open('Troca confirmada e lançamentos liquidados com sucesso!', 'Fechar', {
             duration: 5000,
-            panelClass: ['snackbar-success']
+            panelClass: ['snackbar-success'],
           });
           this.loadFinancialTransactions();
           this.loading = false;
@@ -252,10 +252,10 @@ export class VendaInfoComponent implements OnInit {
           console.error('Erro ao confirmar troca:', err);
           this.snackBar.open('Erro ao confirmar troca. Tente novamente.', 'Fechar', {
             duration: 5000,
-            panelClass: ['snackbar-error']
+            panelClass: ['snackbar-error'],
           });
           this.loading = false;
-        }
+        },
       });
     }
   }

@@ -113,7 +113,7 @@ export class VehicleInfoComponent implements OnChanges {
       },
       error: (err) => {
         console.error('Erro ao carregar lançamentos financeiros da compra', err);
-      }
+      },
     });
   }
 

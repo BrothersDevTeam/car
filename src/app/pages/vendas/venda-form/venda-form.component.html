@@ -169,13 +169,24 @@
 
           <mat-card-content>
             <!-- Assistente Gerador de Parcelas -->
-            <div class="parcelas-wizard grid-row mb-4" style="background: rgba(0,0,0,0.02); padding: 15px; border-radius: 8px; border: 1px dashed rgba(0,0,0,0.1); width: 100%;">
-              <h4 class="col-12" style="margin: 0 0 12px 0; font-weight: 500; color: #555;">Gerador Automático de Parcelas</h4>
-              
+            <div
+              class="parcelas-wizard grid-row mb-4"
+              style="
+                background: rgba(0, 0, 0, 0.02);
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px dashed rgba(0, 0, 0, 0.1);
+                width: 100%;
+              "
+            >
+              <h4 class="col-12" style="margin: 0 0 12px 0; font-weight: 500; color: #555">
+                Gerador Automático de Parcelas
+              </h4>
+
               <div class="col-2">
                 <app-currency-input
                   [(ngModel)]="geradorValorTotal"
-                  [ngModelOptions]="{standalone: true}"
+                  [ngModelOptions]="{ standalone: true }"
                   label="Valor Total"
                   [required]="false"
                 ></app-currency-input>
@@ -184,14 +195,14 @@
               <div class="col-1">
                 <mat-form-field appearance="outline">
                   <mat-label>Nº Parcelas</mat-label>
-                  <input matInput type="number" [(ngModel)]="geradorParcelas" [ngModelOptions]="{standalone: true}" />
+                  <input matInput type="number" [(ngModel)]="geradorParcelas" [ngModelOptions]="{ standalone: true }" />
                 </mat-form-field>
               </div>
 
               <div class="col-2">
                 <mat-form-field appearance="outline">
                   <mat-label>Periodicidade</mat-label>
-                  <mat-select [(ngModel)]="geradorPeriodicidadeTipo" [ngModelOptions]="{standalone: true}">
+                  <mat-select [(ngModel)]="geradorPeriodicidadeTipo" [ngModelOptions]="{ standalone: true }">
                     <mat-option value="MENSAL">Mensal (Mesmo Dia)</mat-option>
                     <mat-option value="QUINZENAL">Quinzenal</mat-option>
                     <mat-option value="SEMANAL">Semanal</mat-option>
@@ -204,7 +215,12 @@
                 <div class="col-1">
                   <mat-form-field appearance="outline">
                     <mat-label>Dias</mat-label>
-                    <input matInput type="number" [(ngModel)]="geradorPeriodicidadeDias" [ngModelOptions]="{standalone: true}" />
+                    <input
+                      matInput
+                      type="number"
+                      [(ngModel)]="geradorPeriodicidadeDias"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
                   </mat-form-field>
                 </div>
               }
@@ -212,7 +228,12 @@
               <div [class]="geradorPeriodicidadeTipo === 'CUSTOM' ? 'col-2' : 'col-3'">
                 <mat-form-field appearance="outline">
                   <mat-label>1º Vencimento</mat-label>
-                  <input matInput [matDatepicker]="wizPicker" [(ngModel)]="geradorPrimeiroVencimento" [ngModelOptions]="{standalone: true}" />
+                  <input
+                    matInput
+                    [matDatepicker]="wizPicker"
+                    [(ngModel)]="geradorPrimeiroVencimento"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
                   <mat-datepicker-toggle matIconSuffix [for]="wizPicker"></mat-datepicker-toggle>
                   <mat-datepicker #wizPicker></mat-datepicker>
                 </mat-form-field>
@@ -221,7 +242,7 @@
               <div class="col-2">
                 <mat-form-field appearance="outline">
                   <mat-label>Forma Padrão</mat-label>
-                  <mat-select [(ngModel)]="geradorFormaPagamento" [ngModelOptions]="{standalone: true}">
+                  <mat-select [(ngModel)]="geradorFormaPagamento" [ngModelOptions]="{ standalone: true }">
                     <mat-option value="DINHEIRO">DINHEIRO</mat-option>
                     <mat-option value="PIX">PIX</mat-option>
                     <mat-option value="FINANCIAMENTO">FINANCIAMENTO</mat-option>
@@ -234,8 +255,14 @@
                 </mat-form-field>
               </div>
 
-              <div class="col-2" style="display: flex; align-items: center; height: 56px;">
-                <button type="button" mat-raised-button color="accent" style="width: 100%; height: 48px;" (click)="gerarParcelas()">
+              <div class="col-2" style="display: flex; align-items: center; height: 56px">
+                <button
+                  type="button"
+                  mat-raised-button
+                  color="accent"
+                  style="width: 100%; height: 48px"
+                  (click)="gerarParcelas()"
+                >
                   Gerar
                 </button>
               </div>
@@ -243,7 +270,11 @@
 
             <div formArrayName="pagamentos" class="pagamentos-list">
               @for (item of receitasControls; track item.control) {
-                <div [formGroupName]="item.index" class="pagamento-item" style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                <div
+                  [formGroupName]="item.index"
+                  class="pagamento-item"
+                  style="border-bottom: 1px solid rgba(0, 0, 0, 0.05)"
+                >
                   <div class="field-forma">
                     <mat-form-field appearance="outline">
                       <mat-label>Forma</mat-label>
@@ -282,7 +313,11 @@
                   <div class="field-descricao">
                     <mat-form-field appearance="outline">
                       <mat-label>Descrição / Detalhes do Pagamento</mat-label>
-                      <input matInput formControlName="descricao" placeholder="Ex: Banco, n° do cheque, comprovante..." />
+                      <input
+                        matInput
+                        formControlName="descricao"
+                        placeholder="Ex: Banco, n° do cheque, comprovante..."
+                      />
                     </mat-form-field>
                   </div>
 
@@ -304,7 +339,7 @@
         </mat-card>
 
         <!-- SEÇÃO 3.2: DEDUÇÕES / TROCA -->
-        <mat-card class="form-section" style="margin-top: 24px;">
+        <mat-card class="form-section" style="margin-top: 24px">
           <mat-card-header class="header-with-action">
             <mat-card-title>Deduções / Base de Troca (Débitos)</mat-card-title>
             <button type="button" mat-flat-button color="accent" (click)="addDebito()">
@@ -316,7 +351,11 @@
           <mat-card-content>
             <div formArrayName="pagamentos" class="pagamentos-list">
               @for (item of debitosControls; track item.control) {
-                <div [formGroupName]="item.index" class="pagamento-item" style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                <div
+                  [formGroupName]="item.index"
+                  class="pagamento-item"
+                  style="border-bottom: 1px solid rgba(0, 0, 0, 0.05)"
+                >
                   <div class="field-forma">
                     <mat-form-field appearance="outline">
                       <mat-label>Forma</mat-label>
@@ -347,7 +386,7 @@
                     </mat-form-field>
                   </div>
 
-                  <div class="field-descricao-select" style="flex: 1;">
+                  <div class="field-descricao-select" style="flex: 1">
                     <app-custom-select
                       listType="vehicle"
                       label="Veículo de Troca*"
@@ -373,7 +412,7 @@
                 </div>
               }
               @if (debitosControls.length === 0) {
-                <p class="empty-state" style="color: #999; font-style: italic; text-align: center; margin: 16px 0;">
+                <p class="empty-state" style="color: #999; font-style: italic; text-align: center; margin: 16px 0">
                   Nenhum veículo de troca cadastrado nesta venda.
                 </p>
               }
@@ -413,7 +452,7 @@
         </div>
 
         <!-- SEÇÃO 3.3: RETORNO DE FINANCIAMENTO -->
-        <mat-card class="form-section" style="margin-top: 24px;">
+        <mat-card class="form-section" style="margin-top: 24px">
           <mat-card-header>
             <mat-card-title>Retorno de Financiamento (Comissão/Bônus de Banco)</mat-card-title>
           </mat-card-header>
@@ -457,10 +496,10 @@
         </mat-card>
 
         <!-- SEÇÃO 3.4: DESPESAS E SERVIÇOS -->
-        <mat-card class="form-section" style="margin-top: 24px; margin-bottom: 24px;">
+        <mat-card class="form-section" style="margin-top: 24px; margin-bottom: 24px">
           <mat-card-header class="header-with-action">
             <mat-card-title>Despesas e Serviços (Transferência, Despachante, IPVA)</mat-card-title>
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 8px">
               <button type="button" mat-flat-button color="primary" (click)="addDespesa('LOJA')">
                 <mat-icon>add</mat-icon>
                 Despesa Loja
@@ -473,14 +512,48 @@
           </mat-card-header>
 
           <mat-card-content>
-            <div formArrayName="despesas" class="despesas-list" style="display: flex; flex-direction: column; gap: 16px;">
+            <div
+              formArrayName="despesas"
+              class="despesas-list"
+              style="display: flex; flex-direction: column; gap: 16px"
+            >
               @for (desp of despesas.controls; track desp) {
-                <div [formGroupName]="$index" class="despesa-item grid-row" style="border: 1px solid rgba(0,0,0,0.1); padding: 16px; border-radius: 8px; background: rgba(0,0,0,0.01); width: 100%;">
-                  <div class="col-12" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px;">
+                <div
+                  [formGroupName]="$index"
+                  class="despesa-item grid-row"
+                  style="
+                    border: 1px solid rgba(0, 0, 0, 0.1);
+                    padding: 16px;
+                    border-radius: 8px;
+                    background: rgba(0, 0, 0, 0.01);
+                    width: 100%;
+                  "
+                >
+                  <div
+                    class="col-12"
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      margin-bottom: 12px;
+                      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+                      padding-bottom: 8px;
+                    "
+                  >
                     <strong [style.color]="desp.get('tipo')?.value === 'RECEBIDA' ? '#2e7d32' : '#c62828'">
-                      {{ desp.get('tipo')?.value === 'RECEBIDA' ? 'RECEBIDA DO CLIENTE (Margem Lucrável)' : 'CUSTO DA LOJA' }}
+                      {{
+                        desp.get('tipo')?.value === 'RECEBIDA'
+                          ? 'RECEBIDA DO CLIENTE (Margem Lucrável)'
+                          : 'CUSTO DA LOJA'
+                      }}
                     </strong>
-                    <button type="button" mat-icon-button color="warn" (click)="removeDespesa($index)" matTooltip="Remover serviço/despesa">
+                    <button
+                      type="button"
+                      mat-icon-button
+                      color="warn"
+                      (click)="removeDespesa($index)"
+                      matTooltip="Remover serviço/despesa"
+                    >
                       <mat-icon>delete</mat-icon>
                     </button>
                   </div>
@@ -488,7 +561,11 @@
                   <div class="col-4">
                     <mat-form-field appearance="outline">
                       <mat-label>Descrição do Serviço</mat-label>
-                      <input matInput formControlName="descricao" placeholder="Ex: Transferência, IPVA, Despachante..." />
+                      <input
+                        matInput
+                        formControlName="descricao"
+                        placeholder="Ex: Transferência, IPVA, Despachante..."
+                      />
                     </mat-form-field>
                   </div>
 
@@ -527,17 +604,17 @@
                       ></app-currency-input>
                     </div>
 
-                    <div class="col-4" style="display: flex; align-items: center; padding-left: 16px;">
-                      <span style="font-weight: 500;">Lucro Esperado: </span>
-                      <strong style="color: #2e7d32; margin-left: 8px; font-size: 1.1rem;">
-                        {{ calcularLucroDespesa(desp) | currency:'BRL' }}
+                    <div class="col-4" style="display: flex; align-items: center; padding-left: 16px">
+                      <span style="font-weight: 500">Lucro Esperado:</span>
+                      <strong style="color: #2e7d32; margin-left: 8px; font-size: 1.1rem">
+                        {{ calcularLucroDespesa(desp) | currency: 'BRL' }}
                       </strong>
                     </div>
                   }
                 </div>
               }
               @if (despesas.length === 0) {
-                <p class="empty-state" style="color: #999; font-style: italic; text-align: center; margin: 16px 0;">
+                <p class="empty-state" style="color: #999; font-style: italic; text-align: center; margin: 16px 0">
                   Nenhum serviço de despachante ou despesa associada a esta venda.
                 </p>
               }
@@ -558,10 +635,7 @@
                 [options]="avalistasOptions"
                 [control]="$any(vendaForm.get('avalistaSearchControl'))"
                 placeholder="Pesquise pelo nome do avalista"
-                (optionSelected)="
-                  addAvalistaDirectly($event);
-                  vendaForm.get('avalistaSearchControl')?.reset()
-                "
+                (optionSelected)="addAvalistaDirectly($event); vendaForm.get('avalistaSearchControl')?.reset()"
               ></app-custom-select>
             </div>
 
@@ -628,10 +702,7 @@
 <!-- Drawer para criar novo veículo (para troca) -->
 @if (openVehicleForm()) {
   <app-drawer (closeDrawer)="handleCloseVehicleDrawer()">
-    <app-vehicle-form
-      [dataForm]="null"
-      (formSubmitted)="onVehicleFormSubmitted()"
-    />
+    <app-vehicle-form [dataForm]="null" (formSubmitted)="onVehicleFormSubmitted()" />
   </app-drawer>
 }
 

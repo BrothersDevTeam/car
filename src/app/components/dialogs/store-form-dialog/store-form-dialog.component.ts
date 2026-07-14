@@ -697,7 +697,7 @@ export class StoreFormDialogComponent implements OnInit {
               this.createdAddressInstance = createdAddress;
               console.log('✅ Endereço da loja criado:', createdAddress);
             }),
-            switchMap((createdAddress: any) => of({ createdStore, createdAddress }))
+            switchMap((createdAddress: any) => of({ createdStore, createdAddress })),
           );
         }),
 
@@ -1118,8 +1118,7 @@ export class StoreFormDialogComponent implements OnInit {
       city: rawValue.city,
       state: rawValue.state,
       active: true,
-      mainAddress: true
+      mainAddress: true,
     };
   }
 }
-

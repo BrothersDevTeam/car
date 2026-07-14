@@ -39,9 +39,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
-    this.canViewActiveSessions = this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
-                                 this.authService.hasAuthority('read:user:store') ||
-                                 this.authService.hasAuthority('read:user:network');
+    this.canViewActiveSessions =
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
+      this.authService.hasAuthority('read:user:store') ||
+      this.authService.hasAuthority('read:user:network');
 
     if (this.isAdmin) {
       this.subscriptions.push(
@@ -84,11 +85,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.userSessionService.getActiveSessions(storeIdParam).subscribe({
       next: (sessions) => {
         const currentUserEmail = this.authService.getUsername();
-        this.activeSessions = sessions.filter(session => session.user.email !== currentUserEmail);
+        this.activeSessions = sessions.filter((session) => session.user.email !== currentUserEmail);
       },
       error: (err) => {
         console.error('Error loading active sessions', err);
-      }
+      },
     });
   }
 
@@ -131,7 +132,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   disconnectUser(session: UserSession): void {
-    const confirmDisconnect = confirm(`Tem certeza que deseja derrubar a sessão do usuário ${session.user.person?.name || session.user.email}?`);
+    const confirmDisconnect = confirm(
+      `Tem certeza que deseja derrubar a sessão do usuário ${session.user.person?.name || session.user.email}?`,
+    );
     if (!confirmDisconnect) return;
 
     this.userSessionService.disconnectUser(session.user.userId).subscribe({
@@ -142,7 +145,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       error: (err) => {
         console.error('Erro ao desconectar usuário', err);
         this.toastrService.error('Erro ao tentar desconectar o usuário.');
-      }
+      },
     });
   }
 

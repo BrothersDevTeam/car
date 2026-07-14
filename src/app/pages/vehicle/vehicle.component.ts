@@ -548,7 +548,10 @@ export class VehicleComponent implements CanComponentDeactivate {
   sincronizarRenave(vehicle: VehicleList, tipo: 'COMPRA' | 'VENDA') {
     if (!this.storeContextService.validateStoreSelection()) return;
 
-    this.toastr.info(`Iniciando sincronização da ${tipo === 'COMPRA' ? 'compra' : 'venda'} ao RENAVE...`, 'Integração RENAVE');
+    this.toastr.info(
+      `Iniciando sincronização da ${tipo === 'COMPRA' ? 'compra' : 'venda'} ao RENAVE...`,
+      'Integração RENAVE',
+    );
 
     this.vehicleService.syncRenave(vehicle.vehicleId, tipo).subscribe({
       next: (response) => {
@@ -557,12 +560,16 @@ export class VehicleComponent implements CanComponentDeactivate {
         } else {
           this.toastr.error(response.error || 'Erro desconhecido na sincronização.', 'Falha no RENAVE');
         }
-        this.loadVehicleList(this.paginationRequestConfig.pageIndex, this.paginationRequestConfig.pageSize, this.searchValue);
+        this.loadVehicleList(
+          this.paginationRequestConfig.pageIndex,
+          this.paginationRequestConfig.pageSize,
+          this.searchValue,
+        );
       },
       error: (err) => {
         console.error('Erro na requisição de sincronização ao RENAVE:', err);
         this.toastr.error('Erro de rede ou servidor ao tentar sincronizar.', 'Erro de Conexão');
-      }
+      },
     });
   }
 

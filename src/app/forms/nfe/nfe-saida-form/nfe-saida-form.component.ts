@@ -37,7 +37,10 @@ import { CustomSelectComponent } from '@components/custom-select/custom-select.c
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
-import { SaveDraftDialogComponent, SaveDraftDialogResult } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
+import {
+  SaveDraftDialogComponent,
+  SaveDraftDialogResult,
+} from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 
 import { NaturezaOperacao } from '@interfaces/nfe';
 import type { Nfe } from '@interfaces/nfe';
@@ -504,7 +507,9 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
       nfePresencaComprador: this.dataForm.nfePresencaComprador || '1',
       nfeIndicadorIntermediario: this.dataForm.nfeIndicadorIntermediario || '0',
       modalidadeFrete: this.dataForm.nfeTransporte?.modalidadeFrete || '9',
-      nfeInformacoesAdicionaisFisco: this.dataForm.nfeInformacoesAdicionaisFisco || 'BASE DE CALCULO DO ICMS REDUZIDA 72.22% DE ACORDO COM O ITEM 11 DO ANEXO IV DO RICMS-MG. DECRETO 48.055/2020, OBSERVANDO O DISPOSTO NO SUBITEM 11.7. OS TRIBUTOS FEDERAIS INCIDENTES SOBRE ESTA OPERAÇÃO SERÃO RECOLHIDOS CONFORME ART.5 LEI Nº 9.716/98. PERCENTUAL DE IMPOSTOS CONFORME LEI 12.741 / 8,65%.\nNF DE ENTRADA N.: SERIE: DATA: ',
+      nfeInformacoesAdicionaisFisco:
+        this.dataForm.nfeInformacoesAdicionaisFisco ||
+        'BASE DE CALCULO DO ICMS REDUZIDA 72.22% DE ACORDO COM O ITEM 11 DO ANEXO IV DO RICMS-MG. DECRETO 48.055/2020, OBSERVANDO O DISPOSTO NO SUBITEM 11.7. OS TRIBUTOS FEDERAIS INCIDENTES SOBRE ESTA OPERAÇÃO SERÃO RECOLHIDOS CONFORME ART.5 LEI Nº 9.716/98. PERCENTUAL DE IMPOSTOS CONFORME LEI 12.741 / 8,65%.\nNF DE ENTRADA N.: SERIE: DATA: ',
     });
   }
 
@@ -871,12 +876,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     if (this.selectedDraftId && this.selectedDraftId !== 'new') {
       const currentDraft = this.availableDrafts.find((d) => d.id === this.selectedDraftId);
       if (currentDraft) {
-        this.saveLocalDraft(
-          false,
-          currentDraft.draftName,
-          this.selectedDraftId,
-          true,
-        );
+        this.saveLocalDraft(false, currentDraft.draftName, this.selectedDraftId, true);
         return;
       }
     }
@@ -917,7 +917,8 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
       nfePresencaComprador: '1',
       nfeIndicadorIntermediario: '0',
       modalidadeFrete: '9',
-      nfeInformacoesAdicionaisFisco: 'BASE DE CALCULO DO ICMS REDUZIDA 72.22% DE ACORDO COM O ITEM 11 DO ANEXO IV DO RICMS-MG. DECRETO 48.055/2020, OBSERVANDO O DISPOSTO NO SUBITEM 11.7. OS TRIBUTOS FEDERAIS INCIDENTES SOBRE ESTA OPERAÇÃO SERÃO RECOLHIDOS CONFORME ART.5 LEI Nº 9.716/98. PERCENTUAL DE IMPOSTOS CONFORME LEI 12.741 / 8,65%.\nNF DE ENTRADA N.: SERIE: DATA: '
+      nfeInformacoesAdicionaisFisco:
+        'BASE DE CALCULO DO ICMS REDUZIDA 72.22% DE ACORDO COM O ITEM 11 DO ANEXO IV DO RICMS-MG. DECRETO 48.055/2020, OBSERVANDO O DISPOSTO NO SUBITEM 11.7. OS TRIBUTOS FEDERAIS INCIDENTES SOBRE ESTA OPERAÇÃO SERÃO RECOLHIDOS CONFORME ART.5 LEI Nº 9.716/98. PERCENTUAL DE IMPOSTOS CONFORME LEI 12.741 / 8,65%.\nNF DE ENTRADA N.: SERIE: DATA: ',
     });
     this.itens.clear();
     this.addItem();

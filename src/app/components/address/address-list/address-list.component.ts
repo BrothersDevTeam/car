@@ -258,7 +258,9 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
 
   onDelete(address: Address) {
     if (this.ownerType === 'store' && this.addresses.length <= 1) {
-      this.toastr.warning('A loja deve possuir pelo menos um endereço cadastrado. Não é permitido excluir o único endereço.');
+      this.toastr.warning(
+        'A loja deve possuir pelo menos um endereço cadastrado. Não é permitido excluir o único endereço.',
+      );
       return;
     }
 
@@ -278,7 +280,7 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
             this.toastr.success('Endereço excluído com sucesso');
 
             if (this.ownerType === 'person') {
-              const remaining = this.addresses.filter(a => a.addressId !== address.addressId);
+              const remaining = this.addresses.filter((a) => a.addressId !== address.addressId);
               if (remaining.length === 1 && !remaining[0].mainAddress) {
                 const soleAddress = remaining[0];
                 soleAddress.mainAddress = true;
@@ -289,7 +291,7 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
                   error: (err) => {
                     console.error('Erro ao marcar endereço restante como principal:', err);
                     this.loadAddresses();
-                  }
+                  },
                 });
                 return;
               }

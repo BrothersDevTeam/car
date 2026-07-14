@@ -27,7 +27,13 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>CNPJ *</mat-label>
-          <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" mask="AA.AAA.AAA/AAAA-00" appCnpjValidator />
+          <input
+            matInput
+            formControlName="cnpj"
+            placeholder="00.000.000/0000-00"
+            mask="AA.AAA.AAA/AAAA-00"
+            appCnpjValidator
+          />
           @if (storeForm.get('cnpj')?.invalid && storeForm.get('cnpj')?.touched) {
             <mat-error>{{ getErrorMessage(storeForm, 'cnpj') }}</mat-error>
           }
@@ -94,7 +100,13 @@
         } @else {
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>CNPJ *</mat-label>
-            <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" mask="AA.AAA.AAA/AAAA-00" appCnpjValidator />
+            <input
+              matInput
+              formControlName="cnpj"
+              placeholder="00.000.000/0000-00"
+              mask="AA.AAA.AAA/AAAA-00"
+              appCnpjValidator
+            />
             @if (ownerForm.get('cnpj')?.invalid && ownerForm.get('cnpj')?.touched) {
               <mat-error>{{ getErrorMessage(ownerForm, 'cnpj') }}</mat-error>
             }

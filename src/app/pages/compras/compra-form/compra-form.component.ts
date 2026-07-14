@@ -196,75 +196,77 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
       error: (error) => {
         console.error('Erro ao carregar fornecedores:', error);
         this.toastr.error('Erro ao carregar fornecedores');
-      }
+      },
     });
   }
 
   private loadAndSetQueryVehicle(vehicleId: string) {
     this.loading.set(true);
-    this.vehicleService.getById(vehicleId).pipe(
-      finalize(() => this.loading.set(false))
-    ).subscribe({
-      next: (v) => {
-        this.compraForm.get('vehicle')?.patchValue({
-          id: v.vehicleId,
-          name: `${v.brand} ${v.model} (${v.plate})`
-        });
-      },
-      error: () => this.toastr.error('Erro ao carregar dados do veículo selecionado')
-    });
+    this.vehicleService
+      .getById(vehicleId)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (v) => {
+          this.compraForm.get('vehicle')?.patchValue({
+            id: v.vehicleId,
+            name: `${v.brand} ${v.model} (${v.plate})`,
+          });
+        },
+        error: () => this.toastr.error('Erro ao carregar dados do veículo selecionado'),
+      });
   }
 
   private loadCompra() {
     if (!this.compraId) return;
 
     this.loading.set(true);
-    this.compraService.getCompraById(this.compraId).pipe(
-      finalize(() => this.loading.set(false))
-    ).subscribe({
-      next: (compra) => {
-        this.compraForm.patchValue({
-          vehicle: {
-            id: compra.vehicleId,
-            name: `${compra.vehicleBrand} ${compra.vehicleModel} (${compra.vehiclePlate})`
-          },
-          supplier: {
-            id: compra.supplierId,
-            name: compra.supplierName
-          },
-          dataCompra: compra.dataCompra ? new Date(compra.dataCompra) : new Date(),
-          valorCompra: compra.valorCompra,
-          observacao: compra.observacao || '',
-          tipoEntrada: compra.tipoEntrada || 'COMPRA',
-        });
-
-        this.geradorValorTotal = compra.valorCompra;
-
-        // Limpa e preenche pagamentos
-        this.pagamentos.clear();
-        if (compra.pagamentos && compra.pagamentos.length > 0) {
-          compra.pagamentos.forEach((pag) => {
-            this.pagamentos.push(
-              this.fb.group({
-                formaPagamento: [pag.formaPagamento, Validators.required],
-                descricao: [pag.descricao || ''],
-                valor: [pag.valor, [Validators.required, Validators.min(0.01)]],
-                vencimento: [pag.vencimento ? new Date(pag.vencimento) : new Date(), Validators.required],
-                tipo: [pag.tipo || 'D'],
-              })
-            );
+    this.compraService
+      .getCompraById(this.compraId)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (compra) => {
+          this.compraForm.patchValue({
+            vehicle: {
+              id: compra.vehicleId,
+              name: `${compra.vehicleBrand} ${compra.vehicleModel} (${compra.vehiclePlate})`,
+            },
+            supplier: {
+              id: compra.supplierId,
+              name: compra.supplierName,
+            },
+            dataCompra: compra.dataCompra ? new Date(compra.dataCompra) : new Date(),
+            valorCompra: compra.valorCompra,
+            observacao: compra.observacao || '',
+            tipoEntrada: compra.tipoEntrada || 'COMPRA',
           });
-        }
 
-        setTimeout(() => {
-          this.initialFormValue = JSON.stringify(this.compraForm.value);
-        }, 300);
-      },
-      error: () => {
-        this.toastr.error('Erro ao carregar detalhes da compra');
-        this.router.navigate(['/compras']);
-      }
-    });
+          this.geradorValorTotal = compra.valorCompra;
+
+          // Limpa e preenche pagamentos
+          this.pagamentos.clear();
+          if (compra.pagamentos && compra.pagamentos.length > 0) {
+            compra.pagamentos.forEach((pag) => {
+              this.pagamentos.push(
+                this.fb.group({
+                  formaPagamento: [pag.formaPagamento, Validators.required],
+                  descricao: [pag.descricao || ''],
+                  valor: [pag.valor, [Validators.required, Validators.min(0.01)]],
+                  vencimento: [pag.vencimento ? new Date(pag.vencimento) : new Date(), Validators.required],
+                  tipo: [pag.tipo || 'D'],
+                }),
+              );
+            });
+          }
+
+          setTimeout(() => {
+            this.initialFormValue = JSON.stringify(this.compraForm.value);
+          }, 300);
+        },
+        error: () => {
+          this.toastr.error('Erro ao carregar detalhes da compra');
+          this.router.navigate(['/compras']);
+        },
+      });
   }
 
   addPagamento() {
@@ -275,7 +277,7 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
         valor: [0, [Validators.required, Validators.min(0.01)]],
         vencimento: [new Date(), Validators.required],
         tipo: ['D'], // Débito / Despesa
-      })
+      }),
     );
   }
 
@@ -301,7 +303,7 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
 
     const valorParcela = Number((this.geradorValorTotal / this.geradorParcelas).toFixed(2));
     const confirm = window.confirm(
-      `Deseja adicionar ${this.geradorParcelas} parcelas de ${this.currencyFormat(valorParcela)} às formas de pagamento atuais?`
+      `Deseja adicionar ${this.geradorParcelas} parcelas de ${this.currencyFormat(valorParcela)} às formas de pagamento atuais?`,
     );
 
     if (!confirm) return;
@@ -312,12 +314,12 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
       this.pagamentos.clear();
     }
 
-    let diferenca = Number((this.geradorValorTotal - (valorParcela * this.geradorParcelas)).toFixed(2));
+    let diferenca = Number((this.geradorValorTotal - valorParcela * this.geradorParcelas).toFixed(2));
     const dataBase = new Date(this.geradorPrimeiroVencimento);
 
     for (let i = 0; i < this.geradorParcelas; i++) {
-      const valorFinalParcela = i === this.geradorParcelas - 1 ? (valorParcela + diferenca) : valorParcela;
-      
+      const valorFinalParcela = i === this.geradorParcelas - 1 ? valorParcela + diferenca : valorParcela;
+
       const vencimento = new Date(dataBase);
       vencimento.setMonth(dataBase.getMonth() + i);
 
@@ -328,7 +330,7 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
           valor: [valorFinalParcela, [Validators.required, Validators.min(0.01)]],
           vencimento: [vencimento, Validators.required],
           tipo: ['D'],
-        })
+        }),
       );
     }
 
@@ -381,24 +383,23 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
       valorCompra: formValues.valorCompra,
       observacao: formValues.observacao,
       tipoEntrada: formValues.tipoEntrada,
-      pagamentos: formValues.tipoEntrada === 'COMPRA'
-        ? formValues.pagamentos.map((p: any) => ({
-            formaPagamento: p.formaPagamento,
-            descricao: p.descricao,
-            valor: p.valor,
-            vencimento: p.vencimento,
-            tipo: p.tipo,
-          }))
-        : [],
+      pagamentos:
+        formValues.tipoEntrada === 'COMPRA'
+          ? formValues.pagamentos.map((p: any) => ({
+              formaPagamento: p.formaPagamento,
+              descricao: p.descricao,
+              valor: p.valor,
+              vencimento: p.vencimento,
+              tipo: p.tipo,
+            }))
+          : [],
     };
 
     const request$ = this.isEdit
       ? this.compraService.update(this.compraId!, requestPayload)
       : this.compraService.create(requestPayload);
 
-    request$.pipe(
-      finalize(() => this.isSubmitting.set(false))
-    ).subscribe({
+    request$.pipe(finalize(() => this.isSubmitting.set(false))).subscribe({
       next: () => {
         this.toastr.success(this.isEdit ? 'Compra atualizada com sucesso!' : 'Compra registrada com sucesso!');
         this.initialFormValue = JSON.stringify(this.compraForm.value); // reseta controle de mudanças
@@ -407,7 +408,7 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
       error: (err) => {
         const errorMsg = extractErrorMessage(err, 'Erro ao salvar registro de compra');
         this.toastr.error(errorMsg);
-      }
+      },
     });
   }
 
