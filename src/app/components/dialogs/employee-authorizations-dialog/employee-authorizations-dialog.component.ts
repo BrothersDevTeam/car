@@ -64,6 +64,7 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
 
   getTranslatedModule(moduleStr: string): string {
     const translations: Record<string, string> = {
+      FINANCIAL: 'Financeiro',
       VENDA: 'Vendas',
       VEHICLE: 'Veículos',
       PERSON: 'Clientes',
