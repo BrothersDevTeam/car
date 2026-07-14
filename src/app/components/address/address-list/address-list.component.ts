@@ -257,6 +257,11 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onDelete(address: Address) {
+    if (this.ownerType === 'store' && this.addresses.length <= 1) {
+      this.toastr.warning('A loja deve possuir pelo menos um endereço cadastrado. Não é permitido excluir o único endereço.');
+      return;
+    }
+
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Confirmar Exclusão',
@@ -271,6 +276,25 @@ export class AddressListComponent implements OnInit, OnChanges, OnDestroy {
         this.addressService.delete(address.addressId!).subscribe({
           next: () => {
             this.toastr.success('Endereço excluído com sucesso');
+
+            if (this.ownerType === 'person') {
+              const remaining = this.addresses.filter(a => a.addressId !== address.addressId);
+              if (remaining.length === 1 && !remaining[0].mainAddress) {
+                const soleAddress = remaining[0];
+                soleAddress.mainAddress = true;
+                this.addressService.update(soleAddress.addressId!, soleAddress).subscribe({
+                  next: () => {
+                    this.loadAddresses();
+                  },
+                  error: (err) => {
+                    console.error('Erro ao marcar endereço restante como principal:', err);
+                    this.loadAddresses();
+                  }
+                });
+                return;
+              }
+            }
+
             this.loadAddresses();
           },
           error: (err) => {

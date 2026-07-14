@@ -69,7 +69,7 @@
       *ngFor="let address of addresses"
       [address]="address"
       [canEdit]="canEdit"
-      [canDelete]="canDelete"
+      [canDelete]="canDelete && (ownerType !== 'store' || addresses.length > 1)"
       [canSetMain]="true"
       (edit)="onEdit($event)"
       (delete)="onDelete($event)"

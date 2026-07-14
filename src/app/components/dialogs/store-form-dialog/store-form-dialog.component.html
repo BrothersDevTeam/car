@@ -230,7 +230,117 @@
           </form>
         </mat-step>
 
-        <!-- ========== STEP 2: DADOS DO PROPRIETÁRIO ========== -->
+        <!-- ========== STEP 2: ENDEREÇO DA LOJA ========== -->
+        <mat-step [stepControl]="addressForm" label="Endereço da Loja">
+          <form [formGroup]="addressForm" class="step-form">
+            <p class="step-description">
+              <mat-icon>info</mat-icon>
+              Informe o endereço comercial da loja física.
+            </p>
+
+            <!-- CEP -->
+            <app-primary-input
+              formControlName="cep"
+              label="CEP *"
+              inputName="storeCep"
+              type="text"
+              placeholder="00000-000"
+              mask="00000-000"
+              [uppercase]="false"
+              (blur)="onCepBlur()"
+              [error]="addressForm.get('cep')?.invalid && addressForm.get('cep')?.touched"
+            />
+
+            <!-- Logradouro -->
+            <app-primary-input
+              formControlName="street"
+              label="Logradouro (Rua/Avenida) *"
+              inputName="storeStreet"
+              type="text"
+              placeholder="Ex: Rua das Flores"
+              maxlength="100"
+              [error]="addressForm.get('street')?.invalid && addressForm.get('street')?.touched"
+            />
+
+            <!-- Número e Complemento -->
+            <div style="display: flex; gap: 16px; width: 100%;">
+              <div style="flex: 1;">
+                <app-primary-input
+                  formControlName="number"
+                  label="Número *"
+                  inputName="storeNumber"
+                  type="text"
+                  placeholder="Ex: 123"
+                  maxlength="10"
+                  [error]="addressForm.get('number')?.invalid && addressForm.get('number')?.touched"
+                />
+              </div>
+
+              <div style="flex: 2;">
+                <app-primary-input
+                  formControlName="complement"
+                  label="Complemento"
+                  inputName="storeComplement"
+                  type="text"
+                  placeholder="Ex: Sala 4"
+                  maxlength="100"
+                />
+              </div>
+            </div>
+
+            <!-- Bairro -->
+            <app-primary-input
+              formControlName="neighborhood"
+              label="Bairro *"
+              inputName="storeNeighborhood"
+              type="text"
+              placeholder="Ex: Centro"
+              maxlength="100"
+              [error]="addressForm.get('neighborhood')?.invalid && addressForm.get('neighborhood')?.touched"
+            />
+
+            <!-- Cidade e Estado -->
+            <div style="display: flex; gap: 16px; width: 100%;">
+              <div style="flex: 3;">
+                <app-primary-input
+                  formControlName="city"
+                  label="Cidade *"
+                  inputName="storeCity"
+                  type="text"
+                  placeholder="Ex: São Paulo"
+                  maxlength="100"
+                  [error]="addressForm.get('city')?.invalid && addressForm.get('city')?.touched"
+                />
+              </div>
+
+              <div style="flex: 1;">
+                <app-primary-input
+                  formControlName="state"
+                  label="Estado (UF) *"
+                  inputName="storeState"
+                  type="text"
+                  placeholder="Ex: SP"
+                  maxlength="2"
+                  [error]="addressForm.get('state')?.invalid && addressForm.get('state')?.touched"
+                />
+              </div>
+            </div>
+
+            <!-- Botões do Step 2 -->
+            <div class="step-actions">
+              <button mat-button matStepperPrevious>
+                <mat-icon>arrow_back</mat-icon>
+                Voltar
+              </button>
+              <button mat-button matStepperNext [disabled]="!addressForm.valid">
+                Próximo
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- ========== STEP 3: DADOS DO PROPRIETÁRIO ========== -->
         <mat-step [stepControl]="personForm" label="Dados do Proprietário">
           <form [formGroup]="personForm" class="step-form">
             <p class="step-description">

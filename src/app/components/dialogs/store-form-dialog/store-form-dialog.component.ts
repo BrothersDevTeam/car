@@ -27,6 +27,9 @@ import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
 import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 import { catchError, switchMap, tap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { of, throwError } from 'rxjs';
+import { AddressService } from '@services/address.service';
+import { CepService } from '@services/cep.service';
+import { ViaCepResponse } from '@interfaces/address';
 
 /**
  * Interface de dados para o dialog de cadastro de loja
@@ -90,8 +93,9 @@ export interface StoreFormDialogData {
 export class StoreFormDialogComponent implements OnInit {
   // Formulários dos 3 steps
   storeForm!: FormGroup; // Step 1: Dados da Loja
-  personForm!: FormGroup; // Step 2: Dados do Proprietário
-  accessForm!: FormGroup; // Step 3: Dados de Acesso
+  addressForm!: FormGroup; // Step 2: Endereço da Loja (na criação)
+  personForm!: FormGroup; // Step 3: Dados do Proprietário
+  accessForm!: FormGroup; // Step 4: Dados de Acesso
 
   readonly FORM_TYPE = 'store';
 
@@ -106,6 +110,8 @@ export class StoreFormDialogComponent implements OnInit {
   isSubmitting = false;
   submitError: string | null = null;
   createdStoreInstance: Store | null = null;
+  createdAddressInstance: any = null;
+  loadingCep = false;
 
   constructor(
     private fb: FormBuilder,
@@ -118,6 +124,8 @@ export class StoreFormDialogComponent implements OnInit {
     private formDraftService: FormDraftService,
     private dialog: MatDialog,
     private toastrService: ToastrService,
+    private addressService: AddressService,
+    private cepService: CepService,
   ) {}
 
   ngOnInit(): void {
@@ -486,6 +494,7 @@ export class StoreFormDialogComponent implements OnInit {
 
   private resetForms(): void {
     this.storeForm.reset();
+    this.addressForm.reset();
     this.personForm.reset({
       legalEntity: false,
     });
@@ -493,6 +502,7 @@ export class StoreFormDialogComponent implements OnInit {
     this.updatePersonDocumentValidation(false);
     this.initialFormValues = null;
     this.createdStoreInstance = null;
+    this.createdAddressInstance = null;
     this.captureInitialFormValue();
   }
 
@@ -529,7 +539,18 @@ export class StoreFormDialogComponent implements OnInit {
       phoneNumber: ['', [Validators.maxLength(20)]],
     });
 
-    // STEP 2: Formulário de dados do proprietário
+    // STEP 2: Formulário de endereço da loja (para criação)
+    this.addressForm = this.fb.group({
+      cep: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(9)]],
+      street: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+      number: ['', [Validators.required, Validators.maxLength(10)]],
+      complement: ['', [Validators.maxLength(100)]],
+      neighborhood: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      city: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      state: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
+    });
+
+    // STEP 3: Formulário de dados do proprietário
     this.personForm = this.fb.group({
       legalEntity: [false], // false = Pessoa Física, true = Pessoa Jurídica
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
@@ -612,7 +633,7 @@ export class StoreFormDialogComponent implements OnInit {
     }
 
     // Valida todos os formulários
-    if (!this.storeForm.valid || !this.personForm.valid || !this.accessForm.valid) {
+    if (!this.storeForm.valid || !this.addressForm.valid || !this.personForm.valid || !this.accessForm.valid) {
       this.markAllAsTouched();
       return;
     }
@@ -657,8 +678,31 @@ export class StoreFormDialogComponent implements OnInit {
 
     createStoreObservable
       .pipe(
-        // PASSO 2: Criar Person com o storeId
+        // PASSO 1.5: Criar endereço da loja
         switchMap((createdStore: Store) => {
+          if (!createdStore.storeId) {
+            throw new Error('Store criada sem storeId');
+          }
+
+          // Se já criamos o endereço em tentativa anterior, pulamos a criação
+          if (this.createdAddressInstance) {
+            return of({ createdStore, createdAddress: this.createdAddressInstance });
+          }
+
+          const addressPayload = this.prepareAddressPayload(createdStore.storeId);
+          console.log('📝 Criando endereço da loja:', addressPayload);
+
+          return this.addressService.create(addressPayload).pipe(
+            tap((createdAddress: any) => {
+              this.createdAddressInstance = createdAddress;
+              console.log('✅ Endereço da loja criado:', createdAddress);
+            }),
+            switchMap((createdAddress: any) => of({ createdStore, createdAddress }))
+          );
+        }),
+
+        // PASSO 2: Criar Person com o storeId
+        switchMap(({ createdStore, createdAddress }) => {
           // Valida se storeId existe
           if (!createdStore.storeId) {
             throw new Error('Store criada sem storeId');
@@ -877,6 +921,11 @@ export class StoreFormDialogComponent implements OnInit {
     Object.keys(this.storeForm.controls).forEach((key) => {
       this.storeForm.get(key)?.markAsTouched();
     });
+    if (this.data.mode === 'create') {
+      Object.keys(this.addressForm.controls).forEach((key) => {
+        this.addressForm.get(key)?.markAsTouched();
+      });
+    }
     Object.keys(this.personForm.controls).forEach((key) => {
       this.personForm.get(key)?.markAsTouched();
     });
@@ -1003,4 +1052,74 @@ export class StoreFormDialogComponent implements OnInit {
       },
     });
   }
+
+  onCepBlur() {
+    const cep = this.addressForm.get('cep')?.value;
+    console.log('🔍 onCepBlur (Loja) chamado - CEP digitado:', cep);
+
+    if (!cep || cep.length < 8) {
+      console.log('❌ CEP muito curto:', cep);
+      return;
+    }
+
+    const cleanCep = this.addressService.cleanCep(cep);
+    console.log('🧹 CEP limpo:', cleanCep);
+
+    if (!this.addressService.isValidCep(cleanCep)) {
+      console.log('❌ CEP inválido');
+      this.toastrService.error('CEP inválido');
+      return;
+    }
+
+    console.log('✅ CEP válido - Iniciando busca...');
+    this.loadingCep = true;
+
+    this.cepService.getAddressByCep(cleanCep).subscribe({
+      next: (data: ViaCepResponse) => {
+        console.log('📦 Resposta do ViaCEP (Loja):', data);
+
+        if (data.erro) {
+          console.log('❌ CEP não encontrado no ViaCEP');
+          this.toastrService.error('CEP não encontrado');
+          this.loadingCep = false;
+          return;
+        }
+
+        console.log('✅ Preenchendo formulário de endereço com dados do ViaCEP');
+        this.addressForm.patchValue({
+          street: data.logradouro || '',
+          complement: data.complemento || '',
+          neighborhood: data.bairro || '',
+          city: data.localidade || '',
+          state: data.uf || '',
+        });
+
+        this.toastrService.success('Endereço preenchido automaticamente');
+        this.loadingCep = false;
+      },
+      error: (err) => {
+        console.error('❌ Erro ao buscar CEP:', err);
+        this.toastrService.error('Erro ao buscar CEP');
+        this.loadingCep = false;
+      },
+    });
+  }
+
+  private prepareAddressPayload(storeId: string): any {
+    const rawValue = this.addressForm.value;
+    return {
+      storeId: storeId,
+      addressType: 'COMERCIAL',
+      cep: this.addressService.cleanCep(rawValue.cep),
+      street: rawValue.street,
+      number: rawValue.number,
+      complement: rawValue.complement || '',
+      neighborhood: rawValue.neighborhood,
+      city: rawValue.city,
+      state: rawValue.state,
+      active: true,
+      mainAddress: true
+    };
+  }
 }
+
