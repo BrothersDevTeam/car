@@ -24,7 +24,7 @@ export class DashboardService {
     if (storeId) {
       params = params.set('storeId', storeId);
     }
-    return this.http.get<AdminDashboardMetrics>(`${this.apiUrl}/admin`, {
+    return this.http.get<AdminDashboardMetrics>(`${this.apiUrl}/metrics`, {
       params,
     });
   }

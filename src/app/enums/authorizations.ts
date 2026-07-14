@@ -78,4 +78,8 @@ export enum Authorizations {
   EDIT_FINANCIAL_NETWORK = 'edit:financial:network',
   DELETE_FINANCIAL_STORE = 'delete:financial:store',
   DELETE_FINANCIAL_NETWORK = 'delete:financial:network',
+
+  // DASHBOARD
+  READ_DASHBOARD_STORE = 'read:dashboard:store',
+  READ_DASHBOARD_NETWORK = 'read:dashboard:network',
 }

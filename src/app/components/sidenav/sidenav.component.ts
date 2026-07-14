@@ -50,12 +50,18 @@ export class SideNavComponent {
   private initializeMenuItems() {
     const baseMenu: MenuItem[] = [];
 
-    // Dashboard (exibido para todos os usuários autenticados)
-    baseMenu.unshift({
-      icon: 'dashboard',
-      label: 'Dashboard',
-      route: '/dashboard',
-    });
+    // Dashboard
+    if (
+      this.authService.hasAuthority(Authorizations.READ_DASHBOARD_STORE) ||
+      this.authService.hasAuthority(Authorizations.READ_DASHBOARD_NETWORK) ||
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
+    ) {
+      baseMenu.unshift({
+        icon: 'dashboard',
+        label: 'Dashboard',
+        route: '/dashboard',
+      });
+    }
 
     // Lojas
     if (

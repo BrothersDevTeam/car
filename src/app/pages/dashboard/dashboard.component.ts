@@ -31,6 +31,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   metrics: AdminDashboardMetrics | null = null;
   loading = true;
   isAdmin = false;
+  hasDashboardPermission = false;
+  hasNetworkPermission = false;
   selectedStoreId: string | null = null;
 
   activeSessions: UserSession[] = [];
@@ -39,12 +41,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+    this.hasDashboardPermission =
+      this.isAdmin ||
+      this.authService.hasAuthority(Authorizations.READ_DASHBOARD_STORE) ||
+      this.authService.hasAuthority(Authorizations.READ_DASHBOARD_NETWORK);
+    this.hasNetworkPermission =
+      this.isAdmin || this.authService.hasAuthority(Authorizations.READ_DASHBOARD_NETWORK);
+
     this.canViewActiveSessions =
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
       this.authService.hasAuthority('read:user:store') ||
       this.authService.hasAuthority('read:user:network');
 
-    if (this.isAdmin) {
+    if (this.hasDashboardPermission) {
       this.subscriptions.push(
         this.storeContextService.currentStoreId$.subscribe((storeId) => {
           this.selectedStoreId = storeId;
@@ -59,7 +68,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     if (this.canViewActiveSessions) {
-      if (!this.isAdmin) {
+      if (!this.hasDashboardPermission) {
         this.loadActiveSessions();
       }
       this.startActiveSessionsPolling();
@@ -81,7 +90,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   loadActiveSessions(): void {
-    const storeIdParam = this.isAdmin ? this.selectedStoreId : null;
+    const storeIdParam = this.hasNetworkPermission ? this.selectedStoreId : null;
     this.userSessionService.getActiveSessions(storeIdParam).subscribe({
       next: (sessions) => {
         const currentUserEmail = this.authService.getUsername();
