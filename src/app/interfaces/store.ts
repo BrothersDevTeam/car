@@ -26,6 +26,7 @@ export interface StoreMinimal {
   name: string;
   tradeName: string;
   cnpj: string;
+  storeStatus: StoreStatus;
 }
 
 export type CreateMainStore = {

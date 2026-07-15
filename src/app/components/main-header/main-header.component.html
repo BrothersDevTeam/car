@@ -21,7 +21,7 @@
       @if (inactiveStores.length === 0) {
         <div class="notification-empty" (click)="$event.stopPropagation()">
           <mat-icon>notifications_none</mat-icon>
-          <p>Nenhuma loja pendente</p>
+          <p>Nenhuma notificação pendente</p>
         </div>
       } @else {
         <div class="notification-list">
@@ -69,11 +69,14 @@
       </mat-option>
 
       @for (store of stores; track store.storeId) {
-        <mat-option [value]="store.storeId" class="custom-store-option">
+        <mat-option [value]="store.storeId" class="custom-store-option" [disabled]="store.storeStatus === 'INACTIVE'">
           <div class="option-content-container">
             <mat-icon color="primary">store</mat-icon>
             <span class="option-title">
               {{ store.tradeName || store.name }}
+              @if (store.storeStatus === 'INACTIVE') {
+                <span style="color: #dc3545; font-size: 0.75rem; margin-left: 8px; font-weight: bold;">(Inativa)</span>
+              }
             </span>
           </div>
         </mat-option>
