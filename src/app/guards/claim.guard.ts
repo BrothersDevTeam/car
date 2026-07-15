@@ -15,12 +15,15 @@ export const claimGuard: CanActivateFn = (route, state) => {
   const requiredClaim = route.data?.['claim'];
 
   // Se não houver claim exigida na rota, permite o acesso.
-  // Nota: Geralmente usado em conjunto com AuthGuard para garantir autenticação prévia.
   if (!requiredClaim) {
     return true;
   }
 
-  if (authService.hasAuthority(requiredClaim)) {
+  const hasAccess = Array.isArray(requiredClaim)
+    ? requiredClaim.some((claim) => authService.hasAuthority(claim))
+    : authService.hasAuthority(requiredClaim);
+
+  if (hasAccess) {
     return true;
   }
 
