@@ -70,6 +70,12 @@
           Ver Filiais
         </button>
       }
+      @if (store.storeStatus === StoreStatus.INACTIVE && isRootAdmin) {
+        <button mat-raised-button (click)="onActivate()" class="btn-activate-store" style="background-color: #28a745; color: white;">
+          <mat-icon>play_circle</mat-icon>
+          Ativar Loja
+        </button>
+      }
       <button mat-stroked-button (click)="onViewDetails()" class="btn-details">
         <mat-icon>info</mat-icon>
         Detalhes
@@ -82,6 +88,12 @@
           <mat-icon>more_horiz</mat-icon>
         </button>
         <mat-menu #compactMenu="matMenu">
+          @if (store.storeStatus === StoreStatus.INACTIVE && isRootAdmin) {
+            <button mat-menu-item (click)="onActivate()">
+              <mat-icon style="color: #28a745">play_circle</mat-icon>
+              <span>Ativar Loja</span>
+            </button>
+          }
           @if (canEdit) {
             <button mat-menu-item (click)="onEdit()">
               <mat-icon>edit</mat-icon>

@@ -58,6 +58,7 @@ export class StoreCardComponent {
 
   @Output() uploadImage = new EventEmitter<Store>();
   @Output() viewDetails = new EventEmitter<Store>();
+  @Output() activate = new EventEmitter<Store>();
 
   StoreType = StoreType;
   StoreStatus = StoreStatus;
@@ -145,6 +146,9 @@ export class StoreCardComponent {
   }
   onViewDetails(): void {
     this.viewDetails.emit(this.store);
+  }
+  onActivate(): void {
+    this.activate.emit(this.store);
   }
 
   getRegimeTributarioLabel(crt: string | undefined): string {

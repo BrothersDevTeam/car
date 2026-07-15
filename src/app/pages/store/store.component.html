@@ -118,6 +118,12 @@
         <!-- Table Menu Template -->
         <mat-menu #menu="matMenu">
           <ng-template matMenuContent let-store="store">
+            @if (store.storeStatus === 'INACTIVE' && isCarAdmin) {
+              <button mat-menu-item (click)="onActivateStore(store)">
+                <mat-icon style="color: #28a745">play_circle</mat-icon>
+                <span>Ativar Loja</span>
+              </button>
+            }
             <button mat-menu-item (click)="onEditStore(store)">
               <mat-icon style="color: #007bff">edit</mat-icon>
               <span>Editar</span>
@@ -191,6 +197,7 @@
             (manageAddress)="onManageAddress($event)"
             (uploadImage)="onUploadImage($event)"
             (viewDetails)="onViewDetails($event)"
+            (activate)="onActivateStore($event)"
           ></app-store-card>
         } @empty {
           <div class="empty-state">

@@ -139,4 +139,8 @@ export class StoreService {
   checkEmailExists(email: string): Observable<boolean> {
     return this.http.get<boolean>(`${this.apiUrl}/exists/email/${encodeURIComponent(email)}`);
   }
+
+  activateStore(storeId: string): Observable<Store> {
+    return this.http.put<Store>(`${this.apiUrl}/${storeId}/activate`, {});
+  }
 }

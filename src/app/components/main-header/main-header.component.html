@@ -5,6 +5,42 @@
   <span>C.A.R.</span>
   <span class="spacer"></span>
 
+  @if (isCarAdmin) {
+    <button mat-icon-button [matMenuTriggerFor]="notificationMenu" aria-label="Notificações" class="notification-btn">
+      <mat-icon [matBadge]="inactiveStores.length" [matBadgeHidden]="inactiveStores.length === 0" matBadgeColor="warn">
+        notifications
+      </mat-icon>
+    </button>
+    
+    <mat-menu #notificationMenu="matMenu" xPosition="before" class="notification-menu-panel">
+      <div class="notification-header" (click)="$event.stopPropagation()">
+        <span>Notificações</span>
+      </div>
+      <mat-divider></mat-divider>
+      
+      @if (inactiveStores.length === 0) {
+        <div class="notification-empty" (click)="$event.stopPropagation()">
+          <mat-icon>notifications_none</mat-icon>
+          <p>Nenhuma loja pendente</p>
+        </div>
+      } @else {
+        <div class="notification-list">
+          @for (store of inactiveStores; track store.storeId) {
+            <button mat-menu-item (click)="goToStoresPage()" class="notification-item-btn">
+              <mat-icon style="color: #dc3545; margin-right: 8px;">store</mat-icon>
+              <div class="notification-text-content">
+                <div class="notification-item-title">Nova Loja Cadastrada</div>
+                <div class="notification-item-desc">
+                  {{ store.tradeName || store.name }} está aguardando ativação.
+                </div>
+              </div>
+            </button>
+          }
+        </div>
+      }
+    </mat-menu>
+  }
+
   <mat-select
     [(ngModel)]="selectedStoreId"
     (selectionChange)="onStoreChange()"

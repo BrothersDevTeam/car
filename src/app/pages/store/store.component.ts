@@ -22,6 +22,7 @@ import { AuthService } from '@services/auth/auth.service';
 import { StoreContextService } from '@services/store-context.service';
 import { Authorizations } from '../../enums/authorizations';
 import { StoreStatus, StoreStatusLabels, StoreStatusIcons, StoreStatusColors } from '../../enums/storeTypes';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-store',
@@ -62,6 +63,7 @@ export class StoreComponent implements OnInit {
     private authService: AuthService,
     private storeContextService: StoreContextService,
     private dialog: MatDialog,
+    private toastrService: ToastrService,
   ) {}
 
   ngOnInit(): void {
@@ -249,6 +251,21 @@ export class StoreComponent implements OnInit {
 
   onViewDetails(store: Store): void {
     console.log('ℹ️ Ver detalhes de:', store);
+  }
+
+  onActivateStore(store: Store): void {
+    if (!store.storeId) return;
+    this.storeService.activateStore(store.storeId).subscribe({
+      next: (activatedStore) => {
+        this.toastrService.success(`Loja "${activatedStore.tradeName || activatedStore.name}" ativada com sucesso!`);
+        this.storeService.notifyStoreUpdated();
+        this.loadStores();
+      },
+      error: (err) => {
+        console.error('Erro ao ativar loja:', err);
+        this.toastrService.error('Erro ao ativar loja. Tente novamente.');
+      },
+    });
   }
 
   /**
