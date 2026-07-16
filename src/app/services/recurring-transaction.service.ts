@@ -19,7 +19,7 @@ export class RecurringTransactionService {
   getRecurringTransactions(
     pageIndex: number,
     pageSize: number,
-    searchParams?: { description?: string; storeId?: string; type?: string; status?: string; costCenterId?: string },
+    searchParams?: { description?: string; storeId?: string; type?: string; status?: string; financialCategoryId?: string },
   ): Observable<PaginationResponse<IRecurringTransaction>> {
     const currentStoreId = searchParams?.storeId || this.storeContextService.currentStoreId;
     let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
@@ -36,8 +36,8 @@ export class RecurringTransactionService {
     if (searchParams?.status) {
       url += `&status=${encodeURIComponent(searchParams.status)}`;
     }
-    if (searchParams?.costCenterId) {
-      url += `&costCenterId=${encodeURIComponent(searchParams.costCenterId)}`;
+    if (searchParams?.financialCategoryId) {
+      url += `&financialCategoryId=${encodeURIComponent(searchParams.financialCategoryId)}`;
     }
 
     return this.http.get<PaginationResponse<IRecurringTransaction>>(url).pipe(first());

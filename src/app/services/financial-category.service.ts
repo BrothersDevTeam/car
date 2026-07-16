@@ -1,26 +1,26 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, first, map } from 'rxjs';
-import { ICostCenter, ICostCenterRecord } from '@interfaces/cost-center';
+import { IFinancialCategory, IFinancialCategoryRecord } from '@interfaces/financial-category';
 import { PaginationResponse } from '@interfaces/pagination';
 import { StoreContextService } from './store-context.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class CostCenterService {
-  private readonly apiUrl: string = '/api/financial/cost-centers';
+export class FinancialCategoryService {
+  private readonly apiUrl: string = '/api/financial/financial-categories';
 
   constructor(
     private http: HttpClient,
     private storeContextService: StoreContextService,
   ) {}
 
-  getCostCenters(
+  getFinancialCategories(
     pageIndex: number,
     pageSize: number,
     searchParams?: { name?: string; storeId?: string; type?: 'EXPENSE' | 'REVENUE' },
-  ): Observable<PaginationResponse<ICostCenter>> {
+  ): Observable<PaginationResponse<IFinancialCategory>> {
     const currentStoreId = searchParams?.storeId || this.storeContextService.currentStoreId;
     let url = `${this.apiUrl}?page=${pageIndex}&size=${pageSize}`;
 
@@ -34,53 +34,53 @@ export class CostCenterService {
       url += `&type=${encodeURIComponent(searchParams.type)}`;
     }
 
-    return this.http.get<PaginationResponse<ICostCenter>>(url).pipe(first());
+    return this.http.get<PaginationResponse<IFinancialCategory>>(url).pipe(first());
   }
 
-  getAllCostCenters(storeId?: string, type?: 'EXPENSE' | 'REVENUE'): Observable<PaginationResponse<ICostCenter>> {
-    return this.getCostCenters(0, 9999, { storeId, type });
+  getAllFinancialCategories(storeId?: string, type?: 'EXPENSE' | 'REVENUE'): Observable<PaginationResponse<IFinancialCategory>> {
+    return this.getFinancialCategories(0, 9999, { storeId, type });
   }
 
-  createCostCenter(data: ICostCenterRecord): Observable<ICostCenter> {
-    return this.http.post<ICostCenter>(this.apiUrl, data).pipe(first());
+  createFinancialCategory(data: IFinancialCategoryRecord): Observable<IFinancialCategory> {
+    return this.http.post<IFinancialCategory>(this.apiUrl, data).pipe(first());
   }
 
-  updateCostCenter(id: string, data: ICostCenterRecord): Observable<ICostCenter> {
-    return this.http.put<ICostCenter>(`${this.apiUrl}/${id}`, data).pipe(first());
+  updateFinancialCategory(id: string, data: IFinancialCategoryRecord): Observable<IFinancialCategory> {
+    return this.http.put<IFinancialCategory>(`${this.apiUrl}/${id}`, data).pipe(first());
   }
 
-  deleteCostCenter(id: string): Observable<void> {
+  deleteFinancialCategory(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(first());
   }
 
   // Aliases para o CriateElementConfirmDialog (usado no custom-select)
   create(data: { description: string }): Observable<any> {
-    return this.createCostCenter({
+    return this.createFinancialCategory({
       name: data.description,
       type: 'EXPENSE', // Fallback padrão
       storeId: this.storeContextService.currentStoreId!,
     }).pipe(
       map((res) => ({
-        id: res.costCenterId,
+        id: res.financialCategoryId,
         description: res.name,
       })),
     );
   }
 
   update(data: { id: string; description: string }): Observable<any> {
-    return this.updateCostCenter(data.id, {
+    return this.updateFinancialCategory(data.id, {
       name: data.description,
       type: 'EXPENSE', // Mantém o tipo existente ou padrão
       storeId: this.storeContextService.currentStoreId!,
     }).pipe(
       map((res) => ({
-        id: res.costCenterId,
+        id: res.financialCategoryId,
         description: res.name,
       })),
     );
   }
 
   delete(id: string): Observable<any> {
-    return this.deleteCostCenter(id);
+    return this.deleteFinancialCategory(id);
   }
 }

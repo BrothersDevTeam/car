@@ -20,11 +20,11 @@ import { ContentHeaderComponent } from '@components/content-header/content-heade
 import { FinancialService } from '@services/financial.service';
 import { AuthService } from '@services/auth/auth.service';
 import { StoreContextService } from '@services/store-context.service';
-import { CostCenterService } from '@services/cost-center.service';
+import { FinancialCategoryService } from '@services/financial-category.service';
 import { Authorizations } from '../../../enums/authorizations';
 import { FinancialSummary, FinancialTransaction } from '@interfaces/financial';
 import { ManualTransactionDialogComponent } from './manual-transaction-dialog.component';
-import { CostCentersManagementDialogComponent } from './cost-centers-management-dialog.component';
+import { FinancialCategoriesManagementDialogComponent } from './financial-categories-management-dialog.component';
 import { RecurringTransactionsManagementDialogComponent } from './recurring-transactions-management-dialog.component';
 import { TransactionPaymentDialogComponent } from './transaction-payment-dialog.component';
 import { TransactionPaymentsHistoryDialogComponent } from './transaction-payments-history-dialog.component';
@@ -59,7 +59,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
   private financialService = inject(FinancialService);
   private authService = inject(AuthService);
   private storeContextService = inject(StoreContextService);
-  private costCenterService = inject(CostCenterService);
+  private financialCategoryService = inject(FinancialCategoryService);
   private toastr = inject(ToastrService);
   private dialog = inject(MatDialog);
 
@@ -72,7 +72,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
   // Dados
   summary: FinancialSummary | null = null;
   transactions: FinancialTransaction[] = [];
-  costCenters: { id: string; name: string }[] = [];
+  financialCategories: { id: string; name: string }[] = [];
 
   // Tabela e Paginação
   displayedColumns: string[] = [
@@ -105,7 +105,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       type: [''],
       status: [''],
       description: [''],
-      costCenterId: [''],
+      financialCategoryId: [''],
     });
 
     // Escuta mudança global de loja
@@ -113,7 +113,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       this.storeContextService.currentStoreId$.subscribe((storeId) => {
         this.selectedStoreId = storeId;
         this.pageIndex = 0; // reseta paginação
-        this.loadCostCenters();
+        this.loadFinancialCategories();
         this.loadSummary();
         this.loadTransactions();
       }),
@@ -143,22 +143,22 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadCostCenters(): void {
+  loadFinancialCategories(): void {
     if (!this.selectedStoreId) {
-      this.costCenters = [];
+      this.financialCategories = [];
       return;
     }
-    this.costCenterService.getAllCostCenters(this.selectedStoreId).subscribe({
+    this.financialCategoryService.getAllFinancialCategories(this.selectedStoreId).subscribe({
       next: (response) => {
-        this.costCenters = [{ id: '', name: 'Todos' }, ...this.formatCostCentersForSelect(response.content)];
+        this.financialCategories = [{ id: '', name: 'Todos' }, ...this.formatFinancialCategoriesForSelect(response.content)];
       },
       error: (err) => {
-        console.error('Error loading cost centers', err);
+        console.error('Error loading financial categories', err);
       },
     });
   }
 
-  private formatCostCentersForSelect(list: any[]): { id: string; name: string }[] {
+  private formatFinancialCategoriesForSelect(list: any[]): { id: string; name: string }[] {
     const roots = list.filter((cc) => !cc.parentId);
     const result: { id: string; name: string }[] = [];
 
@@ -166,10 +166,10 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       const prefix = '— '.repeat(depth);
       const typeLabel = node.type === 'REVENUE' ? ' (Receita)' : ' (Despesa)';
       result.push({
-        id: node.costCenterId,
+        id: node.financialCategoryId,
         name: prefix + node.name + typeLabel,
       });
-      const children = list.filter((cc) => cc.parentId === node.costCenterId);
+      const children = list.filter((cc) => cc.parentId === node.financialCategoryId);
       children.forEach((child) => traverse(child, depth + 1));
     };
 
@@ -177,9 +177,9 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
 
     // Órfãos se houver
     list.forEach((node) => {
-      if (!result.some((r) => r.id === node.costCenterId)) {
+      if (!result.some((r) => r.id === node.financialCategoryId)) {
         result.push({
-          id: node.costCenterId,
+          id: node.financialCategoryId,
           name: node.name + (node.type === 'REVENUE' ? ' (Receita)' : ' (Despesa)'),
         });
       }
@@ -195,7 +195,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       type: rawFilters.type,
       status: rawFilters.status,
       description: rawFilters.description,
-      costCenterId: rawFilters.costCenterId || undefined,
+      financialCategoryId: rawFilters.financialCategoryId || undefined,
       storeId: this.selectedStoreId || undefined,
     };
 
@@ -372,12 +372,12 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  openCostCentersManagementModal(): void {
+  openFinancialCategoriesManagementModal(): void {
     if (!this.storeContextService.validateStoreSelection()) {
       return;
     }
     const storeId = this.storeContextService.currentStoreId!;
-    const dialogRef = this.dialog.open(CostCentersManagementDialogComponent, {
+    const dialogRef = this.dialog.open(FinancialCategoriesManagementDialogComponent, {
       width: '90%',
       maxWidth: '850px',
       height: '80%',
@@ -386,7 +386,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
     });
 
     dialogRef.afterClosed().subscribe(() => {
-      this.loadCostCenters();
+      this.loadFinancialCategories();
       this.loadTransactions();
     });
   }
@@ -402,7 +402,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
     });
 
     dialogRef.afterClosed().subscribe(() => {
-      this.loadCostCenters();
+      this.loadFinancialCategories();
       this.loadSummary();
       this.loadTransactions();
     });

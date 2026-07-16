@@ -15,8 +15,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
-import { CostCenterService } from '@services/cost-center.service';
-import { ICostCenter } from '@interfaces/cost-center';
+import { FinancialCategoryService } from '@services/financial-category.service';
+import { IFinancialCategory } from '@interfaces/financial-category';
 import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
 
 @Component({
@@ -85,11 +85,11 @@ import { CurrencyInputComponent } from '@components/currency-input/currency-inpu
 
         <div class="form-row" style="margin-bottom: 8px;">
           <app-custom-select
-            listType="cost_center"
-            label="Centro de Custo"
-            [options]="costCenters"
-            [control]="$any(form.get('costCenter'))"
-            placeholder="Selecione o centro de custo"
+            listType="financial_category"
+            label="Categoria Financeira"
+            [options]="financialCategories"
+            [control]="$any(form.get('financialCategory'))"
+            placeholder="Selecione a categoria financeira"
             class="flex-grow"
           ></app-custom-select>
         </div>
@@ -154,11 +154,11 @@ import { CurrencyInputComponent } from '@components/currency-input/currency-inpu
 })
 export class ManualTransactionDialogComponent implements OnInit {
   form!: FormGroup;
-  costCenters: { id: string; name: string }[] = [];
+  financialCategories: { id: string; name: string }[] = [];
 
   constructor(
     private fb: FormBuilder,
-    private costCenterService: CostCenterService,
+    private financialCategoryService: FinancialCategoryService,
     public dialogRef: MatDialogRef<ManualTransactionDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { storeId: string; transaction?: any },
   ) {}
@@ -174,10 +174,10 @@ export class ManualTransactionDialogComponent implements OnInit {
         ? this.data.transaction.dueDate.substring(0, 10)
         : today;
     const initialDescription = isEdit ? this.data.transaction.description : '';
-    const initialCostCenterId =
-      isEdit && this.data.transaction.costCenter ? this.data.transaction.costCenter.costCenterId : '';
-    const initialCostCenterName =
-      isEdit && this.data.transaction.costCenter ? this.data.transaction.costCenter.name : '';
+    const initialFinancialCategoryId =
+      isEdit && this.data.transaction.financialCategory ? this.data.transaction.financialCategory.financialCategoryId : '';
+    const initialFinancialCategoryName =
+      isEdit && this.data.transaction.financialCategory ? this.data.transaction.financialCategory.name : '';
 
     this.form = this.fb.group({
       amount: [initialAmount, [Validators.required, Validators.min(0.01)]],
@@ -186,39 +186,39 @@ export class ManualTransactionDialogComponent implements OnInit {
       description: [initialDescription, [Validators.required]],
       installments: [1, isEdit ? [] : [Validators.min(1)]],
       storeId: [this.data.storeId],
-      costCenter: this.fb.group({
-        id: [initialCostCenterId],
-        name: [initialCostCenterName],
+      financialCategory: this.fb.group({
+        id: [initialFinancialCategoryId],
+        name: [initialFinancialCategoryName],
       }),
     });
 
     this.form.get('type')?.valueChanges.subscribe(() => {
-      this.loadCostCenters();
+      this.loadFinancialCategories();
     });
 
-    this.loadCostCenters();
+    this.loadFinancialCategories();
   }
 
-  loadCostCenters(): void {
+  loadFinancialCategories(): void {
     const type = this.form.get('type')?.value;
-    const costCenterType = type === 'INCOME' ? 'REVENUE' : 'EXPENSE';
-    this.costCenterService.getAllCostCenters(this.data.storeId, costCenterType).subscribe({
+    const financialCategoryType = type === 'INCOME' ? 'REVENUE' : 'EXPENSE';
+    this.financialCategoryService.getAllFinancialCategories(this.data.storeId, financialCategoryType).subscribe({
       next: (response) => {
-        this.costCenters = this.formatCostCenterHierarchy(response.content);
+        this.financialCategories = this.formatFinancialCategoryHierarchy(response.content);
       },
       error: (err) => {
-        console.error('Error loading cost centers', err);
+        console.error('Error loading financial categories', err);
       },
     });
   }
 
-  private formatCostCenterHierarchy(costCenters: ICostCenter[]): { id: string; name: string }[] {
-    const ccMap = new Map<string, ICostCenter>();
-    costCenters.forEach((cc) => ccMap.set(cc.costCenterId, cc));
+  private formatFinancialCategoryHierarchy(financialCategories: IFinancialCategory[]): { id: string; name: string }[] {
+    const ccMap = new Map<string, IFinancialCategory>();
+    financialCategories.forEach((cc) => ccMap.set(cc.financialCategoryId, cc));
 
-    const getHierarchyName = (cc: ICostCenter): string => {
+    const getHierarchyName = (cc: IFinancialCategory): string => {
       const parts: string[] = [];
-      let current: ICostCenter | undefined = cc;
+      let current: IFinancialCategory | undefined = cc;
       while (current) {
         parts.unshift(current.name);
         current = current.parentId ? ccMap.get(current.parentId) : undefined;
@@ -226,8 +226,8 @@ export class ManualTransactionDialogComponent implements OnInit {
       return parts.join(' / ');
     };
 
-    return costCenters.map((cc) => ({
-      id: cc.costCenterId,
+    return financialCategories.map((cc) => ({
+      id: cc.financialCategoryId,
       name: getHierarchyName(cc),
     }));
   }
@@ -237,9 +237,9 @@ export class ManualTransactionDialogComponent implements OnInit {
       const rawValue = this.form.getRawValue();
       const payload = {
         ...rawValue,
-        costCenterId: rawValue.costCenter?.id || null,
+        financialCategoryId: rawValue.financialCategory?.id || null,
       };
-      delete payload.costCenter;
+      delete payload.financialCategory;
       this.dialogRef.close(payload);
     }
   }

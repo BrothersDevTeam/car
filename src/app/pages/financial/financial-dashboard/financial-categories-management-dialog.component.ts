@@ -16,8 +16,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatMenuModule } from '@angular/material/menu';
 import { ToastrService } from 'ngx-toastr';
-import { CostCenterService } from '@services/cost-center.service';
-import { ICostCenter } from '@interfaces/cost-center';
+import { FinancialCategoryService } from '@services/financial-category.service';
+import { IFinancialCategory } from '@interfaces/financial-category';
 import { ErrorStateMatcher } from '@angular/material/core';
 
 class CustomErrorStateMatcher implements ErrorStateMatcher {
@@ -27,7 +27,7 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
 }
 
 @Component({
-  selector: 'app-cost-centers-management-dialog',
+  selector: 'app-financial-categories-management-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -46,8 +46,8 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
   ],
   template: `
     <h2 mat-dialog-title class="dialog-title">
-      <mat-icon>business</mat-icon>
-      <span>Gerenciar Centros de Custo</span>
+      <mat-icon>account_tree</mat-icon>
+      <span>Gerenciar Plano de Contas</span>
     </h2>
 
     <mat-dialog-content class="dialog-content">
@@ -56,14 +56,14 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
         <div class="header-actions">
           <button mat-raised-button color="primary" (click)="showForm = true" class="new-cc-btn">
             <mat-icon>add</mat-icon>
-            <span>Novo Centro de Custo</span>
+            <span>Nova Categoria</span>
           </button>
         </div>
       }
 
       <!-- Formulário de Inserção/Edição (Retrátil) -->
       @if (showForm) {
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="cost-center-form">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="financial-category-form">
           <h3
             style="margin-top: 0; margin-bottom: 12px; font-weight: 500; font-size: 15px; color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; gap: 6px;"
           >
@@ -71,14 +71,14 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
               {{ activeTab === 'EXPENSE' ? 'trending_down' : 'trending_up' }}
             </mat-icon>
             <span>
-              {{ editingId ? 'Editar Centro de ' : 'Novo Centro de ' }}
+              {{ editingId ? 'Editar Categoria de ' : 'Nova Categoria de ' }}
               <strong>{{ activeTab === 'EXPENSE' ? 'Despesa' : 'Receita' }}</strong>
             </span>
           </h3>
 
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field-name" style="flex: 1;">
-              <mat-label>Nome do Centro</mat-label>
+              <mat-label>Nome da Categoria</mat-label>
               <input
                 matInput
                 formControlName="name"
@@ -91,11 +91,11 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
 
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field-parent">
-              <mat-label>Centro Pai (Opcional)</mat-label>
+              <mat-label>Categoria Pai (Opcional)</mat-label>
               <mat-select formControlName="parentId">
-                <mat-option [value]="null">Nenhum (Categoria Raiz)</mat-option>
-                @for (parentCC of getAvailableParents(); track parentCC.costCenterId) {
-                  <mat-option [value]="parentCC.costCenterId">
+                <mat-option [value]="null">Nenhuma (Categoria Raiz)</mat-option>
+                @for (parentCC of getAvailableParents(); track parentCC.financialCategoryId) {
+                  <mat-option [value]="parentCC.financialCategoryId">
                     {{ '— '.repeat(parentCC.indent) + parentCC.name }}
                   </mat-option>
                 }
@@ -128,7 +128,7 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
           class="tab-btn"
         >
           <mat-icon>trending_down</mat-icon>
-          <span>Centros de Despesas</span>
+          <span>Categorias de Despesas</span>
         </button>
         <button
           mat-button
@@ -137,7 +137,7 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
           class="tab-btn"
         >
           <mat-icon>trending_up</mat-icon>
-          <span>Centros de Receitas</span>
+          <span>Categorias de Receitas</span>
         </button>
       </div>
 
@@ -146,43 +146,50 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
         <table mat-table [dataSource]="dataSource" class="w-100">
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Nome</th>
-            <td mat-cell *matCellDef="let cc" class="font-weight-500">
-              <span
-                [style.padding-left.px]="cc.indent * 24"
-                style="display: inline-flex; align-items: center; gap: 4px;"
-              >
-                <!-- Setinha de Expandir/Recolher -->
-                <span
-                  style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;"
-                >
-                  <button
-                    type="button"
-                    mat-icon-button
-                    *ngIf="cc.hasChildren"
-                    (click)="toggleNode(cc.costCenterId, $event)"
-                    style="width: 20px; height: 20px; line-height: 20px; padding: 0; display: flex; align-items: center; justify-content: center;"
-                  >
-                    <mat-icon style="font-size: 18px; width: 18px; height: 18px; color: rgba(0,0,0,0.54);">
-                      {{ cc.isCollapsed ? 'keyboard_arrow_right' : 'keyboard_arrow_down' }}
-                    </mat-icon>
-                  </button>
-                </span>
+            <td mat-cell *matCellDef="let cc" class="font-weight-500" style="position: relative;">
+              <div class="tree-cell-container" [style.padding-left.px]="cc.indent * 28">
+                <!-- Guias verticais para os níveis pais -->
+                @for (level of getLevels(cc.indent); track level) {
+                  <div 
+                    class="tree-guide-line" 
+                    [style.left.px]="level * 28 + 10"
+                  ></div>
+                }
+                
+                <!-- Linha horizontal curta conectora para o nó atual se cc.indent > 0 -->
+                @if (cc.indent > 0) {
+                  <div 
+                    class="tree-connector-horizontal"
+                    [style.left.px]="(cc.indent - 1) * 28 + 10"
+                  ></div>
+                }
 
-                <!-- Conector Visual da Árvore -->
-                <span class="tree-connector" *ngIf="cc.indent > 0">
-                  {{ '— '.repeat(cc.indent - 1) + '└─' }}
+                <!-- Botão de expansão / espaço reservado se não houver filhos -->
+                <span class="expansion-space">
+                  @if (cc.hasChildren) {
+                    <button
+                      type="button"
+                      mat-icon-button
+                      (click)="toggleNode(cc.financialCategoryId, $event)"
+                      class="toggle-btn"
+                    >
+                      <mat-icon>
+                        {{ cc.isCollapsed ? 'chevron_right' : 'expand_more' }}
+                      </mat-icon>
+                    </button>
+                  }
                 </span>
 
                 <!-- Ícone de Pasta -->
-                <mat-icon [class.folder-icon-root]="cc.indent === 0" [class.folder-icon-child]="cc.indent > 0">
-                  {{ cc.indent > 0 ? 'folder' : 'folder_open' }}
+                <mat-icon class="node-icon" [class.root-icon]="cc.indent === 0" [class.child-icon]="cc.indent > 0">
+                  {{ cc.indent === 0 ? 'folder_open' : 'subdirectory_arrow_right' }}
                 </mat-icon>
 
                 <!-- Nome -->
-                <span [class.root-node]="cc.indent === 0" [class.child-node]="cc.indent > 0">
+                <span class="node-name" [class.root-name]="cc.indent === 0">
                   {{ cc.name }}
                 </span>
-              </span>
+              </div>
             </td>
           </ng-container>
 
@@ -217,7 +224,7 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
               <mat-icon class="menu-action-icon">edit</mat-icon>
               <span class="menu-action-label">Editar</span>
             </button>
-            <button mat-menu-item (click)="deleteCostCenter(cc)" class="custom-menu-item menu-action-warn">
+            <button mat-menu-item (click)="deleteFinancialCategory(cc)" class="custom-menu-item menu-action-warn">
               <mat-icon class="menu-action-icon">delete</mat-icon>
               <span class="menu-action-label">Excluir</span>
             </button>
@@ -225,7 +232,7 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
         </mat-menu>
 
         <div *ngIf="dataSource.length === 0" class="empty-state">
-          <p>Nenhum Centro de Custo cadastrado nesta categoria.</p>
+          <p>Nenhuma Categoria Financeira cadastrada neste tipo.</p>
         </div>
       </div>
     </mat-dialog-content>
@@ -255,7 +262,7 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
         max-height: none !important;
         overflow: hidden;
       }
-      .cost-center-form {
+      .financial-category-form {
         display: flex;
         flex-direction: column;
         gap: 12px;
@@ -370,35 +377,83 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
           background: rgba(25, 118, 210, 0.08);
         }
       }
-      .root-node {
-        font-weight: 600;
-        color: rgba(0, 0, 0, 0.87);
+      .tree-cell-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        min-height: 40px;
       }
-      .child-node {
-        font-weight: 400;
-        color: rgba(0, 0, 0, 0.65);
-        font-size: 0.95em;
+      .tree-guide-line {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 1.5px;
+        background-color: rgba(25, 118, 210, 0.15);
       }
-      .folder-icon-root {
-        color: #ffa000 !important;
+      .tree-connector-horizontal {
+        position: absolute;
+        top: 50%;
+        width: 16px;
+        height: 1.5px;
+        background-color: rgba(25, 118, 210, 0.15);
+      }
+      .expansion-space {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        z-index: 2;
+      }
+      .toggle-btn {
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+          color: rgba(0, 0, 0, 0.54);
+        }
+      }
+      .node-icon {
         font-size: 20px;
         width: 20px;
         height: 20px;
         margin: 0 !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+
+        &.root-icon {
+          color: #1976d2 !important;
+        }
+        &.child-icon {
+          color: #ffa000 !important;
+        }
       }
-      .folder-icon-child {
-        color: #ffca28 !important;
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        margin: 0 !important;
-      }
-      .tree-connector {
-        color: rgba(0, 0, 0, 0.25);
-        font-family: monospace;
-        margin-right: 4px;
-        font-weight: bold;
-        letter-spacing: -1px;
+      .node-name {
+        font-size: 0.95rem;
+        color: rgba(0, 0, 0, 0.8);
+        z-index: 2;
+
+        &.root-name {
+          font-weight: 600;
+          color: rgba(0, 0, 0, 0.9);
+          font-size: 1rem;
+        }
       }
       .font-weight-500 {
         font-weight: 500;
@@ -406,29 +461,37 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
     `,
   ],
 })
-export class CostCentersManagementDialogComponent implements OnInit {
+export class FinancialCategoriesManagementDialogComponent implements OnInit {
   @ViewChild(FormGroupDirective) formDirective!: FormGroupDirective;
   form!: FormGroup;
-  costCenters: ICostCenter[] = [];
+  financialCategories: IFinancialCategory[] = [];
   editingId: string | null = null;
   activeTab: 'EXPENSE' | 'REVENUE' = 'EXPENSE';
   displayedColumns: string[] = ['name', 'description', 'actions'];
   readonly matcher = new CustomErrorStateMatcher();
-  dataSource: (ICostCenter & { displayName: string; indent: number; hasChildren?: boolean; isCollapsed?: boolean })[] =
+  dataSource: (IFinancialCategory & { displayName: string; indent: number; hasChildren?: boolean; isCollapsed?: boolean })[] =
     [];
   collapsedNodes = new Set<string>();
   showForm = false;
 
   constructor(
     private fb: FormBuilder,
-    private costCenterService: CostCenterService,
+    private financialCategoryService: FinancialCategoryService,
     private toastr: ToastrService,
     @Inject(MAT_DIALOG_DATA) public data: { storeId: string },
   ) {}
 
   ngOnInit(): void {
     this.initForm();
-    this.loadCostCenters();
+    this.loadFinancialCategories();
+  }
+
+  getLevels(indent: number): number[] {
+    const levels = [];
+    for (let i = 0; i < indent; i++) {
+      levels.push(i);
+    }
+    return levels;
   }
 
   initForm(): void {
@@ -441,13 +504,13 @@ export class CostCentersManagementDialogComponent implements OnInit {
     });
   }
 
-  loadCostCenters(): void {
-    this.costCenterService.getAllCostCenters(this.data.storeId).subscribe({
+  loadFinancialCategories(): void {
+    this.financialCategoryService.getAllFinancialCategories(this.data.storeId).subscribe({
       next: (response) => {
-        this.costCenters = response.content;
+        this.financialCategories = response.content;
         this.updateDataSource();
       },
-      error: (err) => console.error('Error loading cost centers', err),
+      error: (err) => console.error('Error loading financial categories', err),
     });
   }
 
@@ -482,19 +545,19 @@ export class CostCentersManagementDialogComponent implements OnInit {
 
   getFlattenedTree(
     type: 'EXPENSE' | 'REVENUE',
-  ): (ICostCenter & { displayName: string; indent: number; hasChildren?: boolean; isCollapsed?: boolean })[] {
-    const list = this.costCenters.filter((cc) => cc.type === type);
+  ): (IFinancialCategory & { displayName: string; indent: number; hasChildren?: boolean; isCollapsed?: boolean })[] {
+    const list = this.financialCategories.filter((cc) => cc.type === type);
     const roots = list.filter((cc) => !cc.parentId);
-    const result: (ICostCenter & {
+    const result: (IFinancialCategory & {
       displayName: string;
       indent: number;
       hasChildren?: boolean;
       isCollapsed?: boolean;
     })[] = [];
 
-    const traverse = (node: ICostCenter, depth: number, isParentCollapsed: boolean) => {
-      const hasChildren = list.some((cc) => cc.parentId === node.costCenterId);
-      const isCollapsed = this.collapsedNodes.has(node.costCenterId);
+    const traverse = (node: IFinancialCategory, depth: number, isParentCollapsed: boolean) => {
+      const hasChildren = list.some((cc) => cc.parentId === node.financialCategoryId);
+      const isCollapsed = this.collapsedNodes.has(node.financialCategoryId);
 
       if (!isParentCollapsed) {
         result.push({
@@ -506,7 +569,7 @@ export class CostCentersManagementDialogComponent implements OnInit {
         });
       }
 
-      const children = list.filter((cc) => cc.parentId === node.costCenterId);
+      const children = list.filter((cc) => cc.parentId === node.financialCategoryId);
       const nextParentCollapsed = isParentCollapsed || isCollapsed;
       children.forEach((child) => traverse(child, depth + 1, nextParentCollapsed));
     };
@@ -515,14 +578,14 @@ export class CostCentersManagementDialogComponent implements OnInit {
 
     // Órfãos (segurança)
     list.forEach((node) => {
-      const isOrphan = node.parentId && !list.some((cc) => cc.costCenterId === node.parentId);
-      if (isOrphan && !result.some((r) => r.costCenterId === node.costCenterId)) {
+      const isOrphan = node.parentId && !list.some((cc) => cc.financialCategoryId === node.parentId);
+      if (isOrphan && !result.some((r) => r.financialCategoryId === node.financialCategoryId)) {
         result.push({
           ...node,
           displayName: node.name,
           indent: 0,
-          hasChildren: list.some((cc) => cc.parentId === node.costCenterId),
-          isCollapsed: this.collapsedNodes.has(node.costCenterId),
+          hasChildren: list.some((cc) => cc.parentId === node.financialCategoryId),
+          isCollapsed: this.collapsedNodes.has(node.financialCategoryId),
         });
       }
     });
@@ -541,14 +604,14 @@ export class CostCentersManagementDialogComponent implements OnInit {
     const excludedIds = new Set<string>();
     const collectDescendants = (id: string) => {
       excludedIds.add(id);
-      this.costCenters.forEach((cc) => {
+      this.financialCategories.forEach((cc) => {
         if (cc.parentId === id) {
-          collectDescendants(cc.costCenterId);
+          collectDescendants(cc.financialCategoryId);
         }
       });
     };
     collectDescendants(this.editingId);
-    return allOfCurrentType.filter((cc) => !excludedIds.has(cc.costCenterId));
+    return allOfCurrentType.filter((cc) => !excludedIds.has(cc.financialCategoryId));
   }
 
   onSubmit(): void {
@@ -557,41 +620,41 @@ export class CostCentersManagementDialogComponent implements OnInit {
     const payload = this.form.value;
 
     if (this.editingId) {
-      this.costCenterService.updateCostCenter(this.editingId, payload).subscribe({
+      this.financialCategoryService.updateFinancialCategory(this.editingId, payload).subscribe({
         next: () => {
-          this.toastr.success('Centro de Custo atualizado com sucesso!', 'Sucesso');
+          this.toastr.success('Categoria Financeira atualizada com sucesso!', 'Sucesso');
           this.cancelEdit();
-          this.loadCostCenters();
+          this.loadFinancialCategories();
         },
         error: (err) => {
           console.error(err);
-          const msg = err.error?.errorMessage || 'Erro ao atualizar Centro de Custo.';
+          const msg = err.error?.errorMessage || 'Erro ao atualizar Categoria Financeira.';
           this.toastr.error(msg, 'Erro');
         },
       });
     } else {
-      this.costCenterService.createCostCenter(payload).subscribe({
+      this.financialCategoryService.createFinancialCategory(payload).subscribe({
         next: () => {
-          this.toastr.success('Centro de Custo criado com sucesso!', 'Sucesso');
+          this.toastr.success('Categoria Financeira criada com sucesso!', 'Sucesso');
           this.formDirective.resetForm({
             type: this.activeTab,
             storeId: this.data.storeId,
             parentId: null,
           });
-          this.loadCostCenters();
+          this.loadFinancialCategories();
         },
         error: (err) => {
           console.error(err);
-          const msg = err.error?.errorMessage || 'Erro ao criar Centro de Custo.';
+          const msg = err.error?.errorMessage || 'Erro ao criar Categoria Financeira.';
           this.toastr.error(msg, 'Erro');
         },
       });
     }
   }
 
-  startEdit(cc: ICostCenter): void {
+  startEdit(cc: IFinancialCategory): void {
     this.showForm = true;
-    this.editingId = cc.costCenterId;
+    this.editingId = cc.financialCategoryId;
     this.form.patchValue({
       name: cc.name,
       description: cc.description,
@@ -612,30 +675,30 @@ export class CostCentersManagementDialogComponent implements OnInit {
     });
   }
 
-  deleteCostCenter(cc: ICostCenter): void {
+  deleteFinancialCategory(cc: IFinancialCategory): void {
     // Verifica se possui filhos
-    const hasChildren = this.costCenters.some((child) => child.parentId === cc.costCenterId);
+    const hasChildren = this.financialCategories.some((child) => child.parentId === cc.financialCategoryId);
     if (hasChildren) {
       this.toastr.warning(
-        'Não é possível excluir um Centro de Custo que possui subcategorias filhas. Exclua as filhas primeiro.',
+        'Não é possível excluir uma Categoria Financeira que possui subcategorias filhas. Exclua as filhas primeiro.',
         'Aviso',
       );
       return;
     }
 
-    if (confirm(`Deseja realmente excluir o centro de custo "${cc.name}"?`)) {
-      this.costCenterService.deleteCostCenter(cc.costCenterId).subscribe({
+    if (confirm(`Deseja realmente excluir a categoria financeira "${cc.name}"?`)) {
+      this.financialCategoryService.deleteFinancialCategory(cc.financialCategoryId).subscribe({
         next: () => {
-          this.toastr.success('Centro de Custo excluído com sucesso!', 'Sucesso');
-          this.loadCostCenters();
-          if (this.editingId === cc.costCenterId) {
+          this.toastr.success('Categoria Financeira excluída com sucesso!', 'Sucesso');
+          this.loadFinancialCategories();
+          if (this.editingId === cc.financialCategoryId) {
             this.cancelEdit();
           }
         },
         error: (err) => {
           console.error(err);
           this.toastr.error(
-            'Erro ao excluir Centro de Custo. Certifique-se de que não está associado a nenhuma transação.',
+            'Erro ao excluir Categoria Financeira. Certifique-se de que não está associada a nenhuma transação.',
             'Erro',
           );
         },

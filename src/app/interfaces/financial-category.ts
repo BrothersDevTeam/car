@@ -1,5 +1,5 @@
-export interface ICostCenter {
-  costCenterId: string;
+export interface IFinancialCategory {
+  financialCategoryId: string;
   storeId: string;
   name: string;
   description?: string;
@@ -11,7 +11,7 @@ export interface ICostCenter {
   updatedBy: string;
 }
 
-export interface ICostCenterRecord {
+export interface IFinancialCategoryRecord {
   name: string;
   description?: string;
   type: 'EXPENSE' | 'REVENUE';

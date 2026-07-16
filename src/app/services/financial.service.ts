@@ -41,7 +41,7 @@ export class FinancialService {
       status?: string;
       description?: string;
       storeId?: string;
-      costCenterId?: string;
+      financialCategoryId?: string;
       referenceId?: string;
     },
   ): Observable<PaginationResponse<FinancialTransaction>> {
@@ -63,8 +63,8 @@ export class FinancialService {
     if (searchParams?.description?.trim()) {
       url += `&description=${encodeURIComponent(searchParams.description.trim())}`;
     }
-    if (searchParams?.costCenterId) {
-      url += `&costCenterId=${encodeURIComponent(searchParams.costCenterId)}`;
+    if (searchParams?.financialCategoryId) {
+      url += `&financialCategoryId=${encodeURIComponent(searchParams.financialCategoryId)}`;
     }
     if (searchParams?.referenceId) {
       url += `&referenceId=${encodeURIComponent(searchParams.referenceId)}`;

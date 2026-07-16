@@ -1,4 +1,4 @@
-import { ICostCenter } from './cost-center';
+import { IFinancialCategory } from './financial-category';
 
 export type TransactionType = 'INCOME' | 'EXPENSE';
 export type TransactionOrigin = 'MANUAL' | 'VEHICLE_SALE' | 'VEHICLE_PURCHASE';
@@ -46,7 +46,7 @@ export interface FinancialTransaction {
   totalInstallments: number;
   referenceId?: string;
   description?: string;
-  costCenter?: ICostCenter;
+  financialCategory?: IFinancialCategory;
   totalPaid: number;
   totalDiscount: number;
   totalInterest: number;
@@ -66,7 +66,7 @@ export interface FinancialTransactionRecord {
   description: string;
   storeId: string;
   installments?: number;
-  costCenterId?: string;
+  financialCategoryId?: string;
 }
 
 export interface FinancialSummary {

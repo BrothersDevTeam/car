@@ -1,4 +1,4 @@
-import { ICostCenter } from './cost-center';
+import { IFinancialCategory } from './financial-category';
 
 export interface IRecurringTransaction {
   recurringTransactionId: string;
@@ -10,7 +10,7 @@ export interface IRecurringTransaction {
   endDate?: string; // ISO Date String
   dueDay: number;
   nextGenerationDate: string; // ISO Date String
-  costCenter?: ICostCenter;
+  financialCategory?: IFinancialCategory;
   description: string;
   createdAt: string;
   updatedAt: string;
@@ -26,5 +26,5 @@ export interface IRecurringTransactionRecord {
   dueDay: number;
   description: string;
   storeId: string;
-  costCenterId?: string;
+  financialCategoryId?: string;
 }

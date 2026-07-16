@@ -18,10 +18,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { ToastrService } from 'ngx-toastr';
 import { RecurringTransactionService } from '@services/recurring-transaction.service';
-import { CostCenterService } from '@services/cost-center.service';
+import { FinancialCategoryService } from '@services/financial-category.service';
 import { IRecurringTransaction } from '@interfaces/recurring-transaction';
 import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
-import { ICostCenter } from '@interfaces/cost-center';
+import { IFinancialCategory } from '@interfaces/financial-category';
 import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
 
 @Component({
@@ -78,11 +78,11 @@ import { CurrencyInputComponent } from '@components/currency-input/currency-inpu
                 </mat-select>
               </mat-form-field>
 
-              <mat-form-field appearance="outline" class="filter-field cost-center-field">
-                <mat-label>Centro de Custo</mat-label>
-                <mat-select [(value)]="filterCostCenterId" (selectionChange)="onFilterChange()">
+              <mat-form-field appearance="outline" class="filter-field financial-category-field">
+                <mat-label>Categoria Financeira</mat-label>
+                <mat-select [(value)]="filterFinancialCategoryId" (selectionChange)="onFilterChange()">
                   <mat-option value="">Todos</mat-option>
-                  @for (cc of costCenters; track cc.id) {
+                  @for (cc of financialCategories; track cc.id) {
                     <mat-option [value]="cc.id">{{ cc.name }}</mat-option>
                   }
                 </mat-select>
@@ -102,9 +102,9 @@ import { CurrencyInputComponent } from '@components/currency-input/currency-inpu
               <th mat-header-cell *matHeaderCellDef>Descrição</th>
               <td mat-cell *matCellDef="let r" class="font-weight-500">
                 {{ r.description }}
-                <div *ngIf="r.costCenter" class="cc-tag">
+                <div *ngIf="r.financialCategory" class="cc-tag">
                   <mat-icon>label</mat-icon>
-                  {{ r.costCenter.name }}
+                  {{ r.financialCategory.name }}
                 </div>
               </td>
             </ng-container>
@@ -242,11 +242,11 @@ import { CurrencyInputComponent } from '@components/currency-input/currency-inpu
 
           <div class="form-row" style="margin-bottom: 8px;">
             <app-custom-select
-              listType="cost_center"
-              label="Centro de Custo"
-              [options]="formCostCenters"
-              [control]="$any(form.get('costCenter'))"
-              placeholder="Selecione o centro de custo"
+              listType="financial_category"
+              label="Categoria Financeira"
+              [options]="formFinancialCategories"
+              [control]="$any(form.get('financialCategory'))"
+              placeholder="Selecione a categoria financeira"
               class="flex-grow"
             ></app-custom-select>
           </div>
@@ -334,7 +334,7 @@ import { CurrencyInputComponent } from '@components/currency-input/currency-inpu
       .status-field {
         width: 120px;
       }
-      .cost-center-field {
+      .financial-category-field {
         width: 160px;
       }
       .btn-create {
@@ -464,7 +464,7 @@ import { CurrencyInputComponent } from '@components/currency-input/currency-inpu
         }
         .search-field,
         .status-field,
-        .cost-center-field {
+        .financial-category-field {
           width: 100% !important;
         }
         .btn-create {
@@ -479,19 +479,19 @@ import { CurrencyInputComponent } from '@components/currency-input/currency-inpu
 export class RecurringTransactionsManagementDialogComponent implements OnInit {
   form!: FormGroup;
   recurringTransactions: IRecurringTransaction[] = [];
-  costCenters: { id: string; name: string }[] = [];
-  formCostCenters: { id: string; name: string }[] = [];
+  financialCategories: { id: string; name: string }[] = [];
+  formFinancialCategories: { id: string; name: string }[] = [];
   editingId: string | null = null;
   viewMode: 'list' | 'form' = 'list';
   filterStatus = '';
   filterDescription = '';
-  filterCostCenterId = '';
+  filterFinancialCategoryId = '';
   displayedColumns: string[] = ['description', 'amount', 'dueDay', 'status', 'actions'];
 
   constructor(
     private fb: FormBuilder,
     private recurringService: RecurringTransactionService,
-    private costCenterService: CostCenterService,
+    private financialCategoryService: FinancialCategoryService,
     private toastr: ToastrService,
     @Inject(MAT_DIALOG_DATA) public data: { storeId: string },
   ) {}
@@ -499,7 +499,7 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadRecurringTransactions();
-    this.loadCostCenters();
+    this.loadFinancialCategories();
   }
 
   initForm(): void {
@@ -512,14 +512,14 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
       startDate: [today, [Validators.required]],
       endDate: [null],
       storeId: [this.data.storeId, [Validators.required]],
-      costCenter: this.fb.group({
+      financialCategory: this.fb.group({
         id: [''],
         name: [''],
       }),
     });
 
     this.form.get('type')?.valueChanges.subscribe(() => {
-      this.loadCostCentersForForm();
+      this.loadFinancialCategoriesForForm();
     });
   }
 
@@ -529,12 +529,12 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
       this.editingId = null;
       this.initForm();
     } else if (mode === 'form') {
-      this.loadCostCentersForForm();
+      this.loadFinancialCategoriesForForm();
     }
   }
 
   loadRecurringTransactions(): void {
-    const filters: { storeId: string; status?: string; description?: string; costCenterId?: string } = {
+    const filters: { storeId: string; status?: string; description?: string; financialCategoryId?: string } = {
       storeId: this.data.storeId,
     };
     if (this.filterStatus) {
@@ -543,8 +543,8 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
     if (this.filterDescription?.trim()) {
       filters.description = this.filterDescription.trim();
     }
-    if (this.filterCostCenterId) {
-      filters.costCenterId = this.filterCostCenterId;
+    if (this.filterFinancialCategoryId) {
+      filters.financialCategoryId = this.filterFinancialCategoryId;
     }
     this.recurringService.getRecurringTransactions(0, 100, filters).subscribe({
       next: (response) => {
@@ -564,33 +564,33 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
     this.onFilterChange();
   }
 
-  loadCostCenters(): void {
-    this.costCenterService.getAllCostCenters(this.data.storeId).subscribe({
+  loadFinancialCategories(): void {
+    this.financialCategoryService.getAllFinancialCategories(this.data.storeId).subscribe({
       next: (response) => {
-        this.costCenters = this.formatCostCenterHierarchy(response.content);
+        this.financialCategories = this.formatFinancialCategoryHierarchy(response.content);
       },
-      error: (err) => console.error('Error loading cost centers', err),
+      error: (err) => console.error('Error loading financial categories', err),
     });
   }
 
-  loadCostCentersForForm(): void {
+  loadFinancialCategoriesForForm(): void {
     const type = this.form.get('type')?.value;
-    const costCenterType = type === 'INCOME' ? 'REVENUE' : 'EXPENSE';
-    this.costCenterService.getAllCostCenters(this.data.storeId, costCenterType).subscribe({
+    const financialCategoryType = type === 'INCOME' ? 'REVENUE' : 'EXPENSE';
+    this.financialCategoryService.getAllFinancialCategories(this.data.storeId, financialCategoryType).subscribe({
       next: (response) => {
-        this.formCostCenters = this.formatCostCenterHierarchy(response.content);
+        this.formFinancialCategories = this.formatFinancialCategoryHierarchy(response.content);
       },
-      error: (err) => console.error('Error loading cost centers for form', err),
+      error: (err) => console.error('Error loading financial categories for form', err),
     });
   }
 
-  private formatCostCenterHierarchy(costCenters: ICostCenter[]): { id: string; name: string }[] {
-    const ccMap = new Map<string, ICostCenter>();
-    costCenters.forEach((cc) => ccMap.set(cc.costCenterId, cc));
+  private formatFinancialCategoryHierarchy(financialCategories: IFinancialCategory[]): { id: string; name: string }[] {
+    const ccMap = new Map<string, IFinancialCategory>();
+    financialCategories.forEach((cc) => ccMap.set(cc.financialCategoryId, cc));
 
-    const getHierarchyName = (cc: ICostCenter): string => {
+    const getHierarchyName = (cc: IFinancialCategory): string => {
       const parts: string[] = [];
-      let current: ICostCenter | undefined = cc;
+      let current: IFinancialCategory | undefined = cc;
       while (current) {
         parts.unshift(current.name);
         current = current.parentId ? ccMap.get(current.parentId) : undefined;
@@ -598,8 +598,8 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
       return parts.join(' / ');
     };
 
-    return costCenters.map((cc) => ({
-      id: cc.costCenterId,
+    return financialCategories.map((cc) => ({
+      id: cc.financialCategoryId,
       name: getHierarchyName(cc),
     }));
   }
@@ -619,9 +619,9 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
       startDate: item.startDate,
       endDate: item.endDate,
       storeId: item.storeId,
-      costCenter: {
-        id: item.costCenter?.costCenterId || '',
-        name: item.costCenter?.name || '',
+      financialCategory: {
+        id: item.financialCategory?.financialCategoryId || '',
+        name: item.financialCategory?.name || '',
       },
     });
   }
@@ -632,9 +632,9 @@ export class RecurringTransactionsManagementDialogComponent implements OnInit {
     const rawValue = this.form.value;
     const payload = {
       ...rawValue,
-      costCenterId: rawValue.costCenter?.id || null,
+      financialCategoryId: rawValue.financialCategory?.id || null,
     };
-    delete payload.costCenter;
+    delete payload.financialCategory;
 
     if (this.editingId) {
       this.recurringService.update(this.editingId, payload).subscribe({
