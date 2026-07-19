@@ -20,6 +20,9 @@ import { FocusNfeService } from '@services/focus-nfe.service';
 import { StoreService } from '@services/store.service';
 import { Store } from '@interfaces/store';
 
+// Directives
+import { HasAuthorityDirective } from '@directives/has-authority.directive';
+
 @Component({
   selector: 'app-store-fiscal-dialog',
   standalone: true,
@@ -35,6 +38,7 @@ import { Store } from '@interfaces/store';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    HasAuthorityDirective,
   ],
   templateUrl: './store-fiscal-dialog.component.html',
   styleUrl: './store-fiscal-dialog.component.scss',

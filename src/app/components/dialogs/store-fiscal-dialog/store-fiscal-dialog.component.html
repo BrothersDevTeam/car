@@ -183,6 +183,7 @@
     {{ saving ? 'Salvando...' : 'Salvar Parâmetros' }}
   </button>
   <button
+    *appHasAuthority="'focusnfe:sync'"
     mat-flat-button
     class="sync-button"
     (click)="onSyncFocusNfe()"
