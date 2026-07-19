@@ -133,34 +133,36 @@
               <div class="employee-actions">
                 <!-- Funcionário COM acesso: botão de permissões + revogar -->
                 @if (person.hasUser) {
-                  <button
-                    mat-stroked-button
-                    color="primary"
-                    (click)="openAuthorizationsDialog(person)"
-                    matTooltip="Gerenciar permissões granulares do funcionário"
-                  >
-                    <mat-icon>security</mat-icon>
-                    Permissões
-                  </button>
-                  <button
-                    mat-stroked-button
-                    color="warn"
-                    (click)="revokeAccess(person)"
-                    [disabled]="revokingAccessFor === person.personId"
-                    matTooltip="Remover acesso ao sistema (a pessoa permanece cadastrada)"
-                  >
-                    @if (revokingAccessFor === person.personId) {
-                      <ng-container>
-                        <mat-spinner diameter="16" class="btn-spinner"></mat-spinner>
-                        Aguarde...
-                      </ng-container>
-                    } @else {
-                      <ng-container>
-                        <mat-icon>person_remove</mat-icon>
-                        Revogar Acesso
-                      </ng-container>
-                    }
-                  </button>
+                  @if (person.userId !== currentUserId) {
+                    <button
+                      mat-stroked-button
+                      color="primary"
+                      (click)="openAuthorizationsDialog(person)"
+                      matTooltip="Gerenciar permissões granulares do funcionário"
+                    >
+                      <mat-icon>security</mat-icon>
+                      Permissões
+                    </button>
+                    <button
+                      mat-stroked-button
+                      color="warn"
+                      (click)="revokeAccess(person)"
+                      [disabled]="revokingAccessFor === person.personId"
+                      matTooltip="Remover acesso ao sistema (a pessoa permanece cadastrada)"
+                    >
+                      @if (revokingAccessFor === person.personId) {
+                        <ng-container>
+                          <mat-spinner diameter="16" class="btn-spinner"></mat-spinner>
+                          Aguarde...
+                        </ng-container>
+                      } @else {
+                        <ng-container>
+                          <mat-icon>person_remove</mat-icon>
+                          Revogar Acesso
+                        </ng-container>
+                      }
+                    </button>
+                  }
                 }
 
                 <!-- Funcionário SEM acesso: botão de criar -->

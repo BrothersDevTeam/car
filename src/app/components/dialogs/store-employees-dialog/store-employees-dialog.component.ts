@@ -233,6 +233,10 @@ export class StoreEmployeesDialogComponent implements OnInit {
   readonly authGroups = AUTH_GROUPS;
   RelationshipTypes = RelationshipTypes;
 
+  get currentUserId(): string | null {
+    return this.authService.getUserId();
+  }
+
   constructor(
     private employeeService: EmployeeService,
     private personService: PersonService,
