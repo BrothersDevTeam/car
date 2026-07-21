@@ -40,6 +40,19 @@ export interface StoreEmployeesDialogData {
 // Grupos de autorização padrão (mesmos presets do natural-person-form)
 const AUTH_GROUPS = [
   {
+    name: 'Compras',
+    permissions: [
+      { key: Authorizations.READ_COMPRA_STORE, label: 'Visualizar compras (loja)' },
+      { key: Authorizations.READ_COMPRA_NETWORK, label: 'Visualizar compras (rede)' },
+      { key: Authorizations.CREATE_COMPRA_STORE, label: 'Registrar compra (loja)' },
+      { key: Authorizations.CREATE_COMPRA_NETWORK, label: 'Registrar compra (rede)' },
+      { key: Authorizations.EDIT_COMPRA_STORE, label: 'Editar compra (loja)' },
+      { key: Authorizations.EDIT_COMPRA_NETWORK, label: 'Editar compra (rede)' },
+      { key: Authorizations.CANCEL_COMPRA_STORE, label: 'Cancelar compra (loja)' },
+      { key: Authorizations.CANCEL_COMPRA_NETWORK, label: 'Cancelar compra (rede)' },
+    ],
+  },
+  {
     name: 'Vendas',
     permissions: [
       { key: Authorizations.READ_VENDA_STORE, label: 'Visualizar vendas (loja)' },
@@ -97,7 +110,7 @@ const AUTH_GROUPS = [
     ],
   },
   {
-    name: 'Configurações de Loja',
+    name: 'Lojas',
     permissions: [
       { key: Authorizations.READ_STORE_SELF, label: 'Visualizar dados (loja)' },
       { key: Authorizations.READ_STORE_NETWORK, label: 'Visualizar dados (rede)' },

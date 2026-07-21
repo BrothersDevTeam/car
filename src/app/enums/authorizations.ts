@@ -56,6 +56,16 @@ export enum Authorizations {
   CANCEL_NFE_STORE = 'cancel:nfe:store',
   CANCEL_NFE_NETWORK = 'cancel:nfe:network',
 
+  // COMPRA
+  READ_COMPRA_STORE = 'read:compra:store',
+  READ_COMPRA_NETWORK = 'read:compra:network',
+  CREATE_COMPRA_STORE = 'create:compra:store',
+  CREATE_COMPRA_NETWORK = 'create:compra:network',
+  EDIT_COMPRA_STORE = 'edit:compra:store',
+  EDIT_COMPRA_NETWORK = 'edit:compra:network',
+  CANCEL_COMPRA_STORE = 'cancel:compra:store',
+  CANCEL_COMPRA_NETWORK = 'cancel:compra:network',
+
   // VENDA
   READ_VENDA_STORE = 'read:venda:store',
   READ_VENDA_NETWORK = 'read:venda:network',

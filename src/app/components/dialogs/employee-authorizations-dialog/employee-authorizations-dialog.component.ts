@@ -64,15 +64,18 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
 
   getTranslatedModule(moduleStr: string): string {
     const translations: Record<string, string> = {
+      ABAS: 'Abas',
       FINANCIAL: 'Financeiro',
       DASHBOARD: 'Dashboard',
       VENDA: 'Vendas',
+      COMPRA: 'Compras',
       VEHICLE: 'Veículos',
       PERSON: 'Clientes',
-      STORE: 'Configurações de Loja',
+      STORE: 'Lojas',
       NFE: 'Notas Fiscais (NFe)',
       USER: 'Usuários do Sistema',
       AUTH: 'Controle de Permissões',
+      COBRANCA: 'Cobrança',
     };
     return translations[moduleStr] || moduleStr;
   }
@@ -117,13 +120,13 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
         const isRoot = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
         const rootOnlyKeys = [Authorizations.ROOT_ADMIN];
 
-        const moduleOrder = ['VENDA', 'VEHICLE', 'PERSON', 'NFE', 'STORE', 'USER', 'AUTH'];
+        const moduleOrder = ['ABAS', 'DASHBOARD', 'STORE', 'COBRANCA', 'FINANCIAL', 'PERSON', 'VEHICLE', 'COMPRA', 'VENDA', 'NFE', 'USER', 'AUTH'];
 
         this.modules = Object.keys(response)
           .map((module) => {
             let auths = response[module];
             if (!isRoot) {
-              auths = auths.filter((a) => !rootOnlyKeys.includes(a.key as Authorizations));
+              auths = auths.filter((a) => !rootOnlyKeys.includes(a.key as Authorizations) && this.authService.hasAuthority(a.key as Authorizations));
             }
             return {
               module,
