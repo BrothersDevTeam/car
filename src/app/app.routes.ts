@@ -7,12 +7,13 @@ import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
 import { AuthGuard } from './services/auth/auth.guard';
+import { subscriptionGuard } from './guards/subscription.guard';
 
 export const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, subscriptionGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {

@@ -8,6 +8,7 @@ export enum StoreStatus {
   CANCELLED = 'CANCELLED',
   BLOCKED = 'BLOCKED',
   INACTIVE = 'INACTIVE',
+  SOFT_BLOCKED = 'SOFT_BLOCKED',
 }
 
 export const StoreTypeLabels: Record<StoreType, string> = {
@@ -20,6 +21,7 @@ export const StoreStatusLabels: Record<StoreStatus, string> = {
   [StoreStatus.CANCELLED]: 'Cancelada',
   [StoreStatus.BLOCKED]: 'Bloqueada',
   [StoreStatus.INACTIVE]: 'Inativa',
+  [StoreStatus.SOFT_BLOCKED]: 'Bloqueio Financeiro',
 };
 
 export const StoreTypeIcons: Record<StoreType, string> = {
@@ -32,6 +34,7 @@ export const StoreStatusIcons: Record<StoreStatus, string> = {
   [StoreStatus.CANCELLED]: 'cancel',
   [StoreStatus.BLOCKED]: 'block',
   [StoreStatus.INACTIVE]: 'pause_circle',
+  [StoreStatus.SOFT_BLOCKED]: 'warning_amber',
 };
 
 export const StoreStatusColors: Record<StoreStatus, string> = {
@@ -39,4 +42,5 @@ export const StoreStatusColors: Record<StoreStatus, string> = {
   [StoreStatus.CANCELLED]: '#6c757d',
   [StoreStatus.BLOCKED]: '#ffc107',
   [StoreStatus.INACTIVE]: '#dc3545',
+  [StoreStatus.SOFT_BLOCKED]: '#fd7e14',
 };

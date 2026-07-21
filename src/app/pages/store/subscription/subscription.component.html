@@ -1,0 +1,80 @@
+<div class="paywall-container">
+  <div class="neon-glow"></div>
+  <div class="paywall-header animate-fade-in">
+    <div class="logo-wrapper">
+      <mat-icon class="logo-icon">storefont</mat-icon>
+      <span class="logo-text">Gestão CAR</span>
+    </div>
+    <h1>Ative a sua conta para começar</h1>
+    <p class="subtitle">Sua loja está pronta para decolar. Contrate agora a assinatura para liberar o acesso a todas as funcionalidades do sistema.</p>
+  </div>
+
+  <div class="paywall-content animate-slide-up">
+    <mat-card class="plan-card">
+      <div class="plan-badge">RECOMENDADO</div>
+      <mat-card-header>
+        <mat-card-title>Assinatura Básica</mat-card-title>
+        <mat-card-subtitle>Plano ideal para revendas de veículos</mat-card-subtitle>
+      </mat-card-header>
+
+      <div class="plan-price">
+        <span class="currency">R$</span>
+        <span class="value">149</span>
+        <span class="period">/mês</span>
+      </div>
+
+      <div class="plan-trial">
+        <mat-icon>verified</mat-icon>
+        <span>Teste grátis por 30 dias inclusos</span>
+      </div>
+
+      <mat-card-content>
+        <ul class="features-list">
+          <li>
+            <mat-icon class="check-icon">check_circle</mat-icon>
+            <span>Emissão de Notas Fiscais Eletrônicas (NFe)</span>
+          </li>
+          <li>
+            <mat-icon class="check-icon">check_circle</mat-icon>
+            <span>Cadastro e Gestão Completa de Veículos</span>
+          </li>
+          <li>
+            <mat-icon class="check-icon">check_circle</mat-icon>
+            <span>Controle Financeiro de Caixa e Contas</span>
+          </li>
+          <li>
+            <mat-icon class="check-icon">check_circle</mat-icon>
+            <span>Gestão de Clientes, Proprietários e Vendedores</span>
+          </li>
+          <li>
+            <mat-icon class="check-icon">check_circle</mat-icon>
+            <span>Relatórios Avançados de Performance de Vendas</span>
+          </li>
+        </ul>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-raised-button color="primary" class="subscribe-btn" [disabled]="loading" (click)="onSubscribe()">
+          @if (loading) {
+            <span class="button-content-wrapper">
+              <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
+              <span>Ativando plano...</span>
+            </span>
+          } @else {
+            <span class="button-content-wrapper">
+              <mat-icon>bolt</mat-icon>
+              <span>Contratar e Começar Agora</span>
+            </span>
+          }
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <div class="paywall-footer animate-fade-in">
+    <button mat-button class="logout-btn" (click)="onLogout()">
+      <mat-icon>logout</mat-icon>
+      Sair do Sistema
+    </button>
+  </div>
+</div>

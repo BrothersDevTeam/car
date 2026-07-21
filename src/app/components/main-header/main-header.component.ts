@@ -48,14 +48,33 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   stores: Store[] = [];
   selectedStoreId: string = 'ALL';
   inactiveStores: Store[] = [];
+  
+  // Variáveis para o banner de faturamento
+  showBillingWarning = false;
+  warningMessage = '';
+  diasAtraso = 0;
 
   ngOnInit(): void {
-    this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
-    this.canReadStoreOthers = this.authService.hasAuthority(Authorizations.READ_STORE_NETWORK);
+    // Escuta atualizações nas autorizações do usuário logado
+    this.authService.authorizations$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+      this.canReadStoreOthers = this.authService.hasAuthority(Authorizations.READ_STORE_NETWORK);
 
-    if (this.isCarAdmin) {
-      this.loadInactiveStores();
-    }
+      if (this.isCarAdmin) {
+        this.loadInactiveStores();
+      }
+
+      const initialStoreId = this.authService.getStoreId();
+      if (initialStoreId) {
+        this.checkBillingStatus(initialStoreId);
+      }
+
+      if (this.isCarAdmin || this.canReadStoreOthers) {
+        this.loadAllStores();
+      } else {
+        this.loadCurrentStoreName();
+      }
+    });
 
     // Escuta mudanças na loja globalmente selecionada
     this.storeContextService.currentStoreId$
@@ -63,6 +82,13 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
       .subscribe((storeId) => {
         // Configura o ID inicial pelo contexto global (usando 'ALL' em vez de null para o html renderizar)
         this.selectedStoreId = storeId ?? 'ALL';
+
+        const storeToCheck = storeId || this.authService.getStoreId();
+        if (storeToCheck) {
+          this.checkBillingStatus(storeToCheck);
+        } else {
+          this.showBillingWarning = false;
+        }
 
         if (this.isCarAdmin || this.canReadStoreOthers) {
           this.loadAllStores();
@@ -156,5 +182,43 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   goToStoresPage(): void {
     this.router.navigate(['/store']);
+  }
+
+  checkBillingStatus(storeId: string): void {
+    if (!storeId || storeId === 'ALL') {
+      this.showBillingWarning = false;
+      return;
+    }
+
+    if (this.isCarAdmin) {
+      this.showBillingWarning = false;
+      return;
+    }
+
+    this.storeService.getById(storeId).subscribe({
+      next: (store) => {
+        if (store && store.dueDate) {
+          const dueDateObj = new Date(store.dueDate + 'T00:00:00');
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          dueDateObj.setHours(0, 0, 0, 0);
+
+          if (today > dueDateObj) {
+            const diffTime = Math.abs(today.getTime() - dueDateObj.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            this.diasAtraso = diffDays;
+            this.showBillingWarning = true;
+            this.warningMessage = `Atenção: Detectamos uma pendência financeira em sua mensalidade (${diffDays} ${diffDays === 1 ? 'dia' : 'dias'} de atraso). Regularize o pagamento para evitar suspensão de recursos.`;
+          } else {
+            this.showBillingWarning = false;
+          }
+        } else {
+          this.showBillingWarning = false;
+        }
+      },
+      error: () => {
+        this.showBillingWarning = false;
+      }
+    });
   }
 }

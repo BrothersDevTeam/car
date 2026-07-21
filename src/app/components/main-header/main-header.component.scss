@@ -355,3 +355,46 @@ mat-toolbar {
   margin-top: 8px;
 }
 
+// ===== BANNER DE AVISO DE FATURAMENTO =====
+.billing-warning-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #fff3cd; // soft yellow
+  border-bottom: 1.5px solid #ffe69c;
+  color: #664d03; // dark yellow/brown text
+  padding: 10px 16px;
+  font-family: 'Inter', Roboto, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 6;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  animation: slideDown 0.3s ease-out;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #fd7e14; // orange icon
+    flex-shrink: 0;
+  }
+
+  .warning-text {
+    line-height: 1.4;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+

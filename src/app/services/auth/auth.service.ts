@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { tap } from 'rxjs';
+import { tap, BehaviorSubject } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { LoginResponse } from '@interfaces/login';
 import { TokenPayload } from '@interfaces/token';
@@ -22,6 +22,9 @@ export class AuthService {
   private readonly apiUrl: string = '/api/auth/login';
   private readonly TOKEN_KEY = 'car-token';
 
+  private readonly authorizationsSubject = new BehaviorSubject<string[]>([]);
+  readonly authorizations$ = this.authorizationsSubject.asObservable();
+
   constructor(
     private httpClient: HttpClient,
     private router: Router,
@@ -30,6 +33,7 @@ export class AuthService {
     private injector: Injector,
   ) {
     this.startKeepAlive();
+    this.authorizationsSubject.next(this.getAuthorizations());
   }
 
   login(email: string, password: string) {
@@ -41,12 +45,29 @@ export class AuthService {
       .pipe(
         tap((value) => {
           sessionStorage.setItem(this.TOKEN_KEY, value.token);
+          this.authorizationsSubject.next(this.getAuthorizations());
           try {
             this.injector.get(StoreContextService).refreshFromToken();
           } catch (e) {
             console.warn('Erro ao atualizar StoreContextService no login', e);
           }
           this.router.navigate(['/dashboard']);
+        }),
+      );
+  }
+
+  refreshToken() {
+    return this.httpClient
+      .post<LoginResponse>('/api/auth/refresh', {})
+      .pipe(
+        tap((value) => {
+          sessionStorage.setItem(this.TOKEN_KEY, value.token);
+          this.authorizationsSubject.next(this.getAuthorizations());
+          try {
+            this.injector.get(StoreContextService).refreshFromToken();
+          } catch (e) {
+            console.warn('Erro ao atualizar StoreContextService no refresh', e);
+          }
         }),
       );
   }
@@ -76,6 +97,7 @@ export class AuthService {
     this.actionsService.hasFormChanges.set(false);
     this.dialog.closeAll();
     sessionStorage.removeItem(this.TOKEN_KEY);
+    this.authorizationsSubject.next([]);
     try {
       this.injector.get(StoreContextService).refreshFromToken();
     } catch (e) {
@@ -135,6 +157,10 @@ export class AuthService {
    */
   hasAuthority(authority: string): boolean {
     return this.getAuthorizations().includes(authority) || this.getAuthorizations().includes('root:admin');
+  }
+
+  isSubscriptionRestricted(): boolean {
+    return this.getAuthorizations().includes('contract:subscription');
   }
 
   isLoggedIn(): boolean {

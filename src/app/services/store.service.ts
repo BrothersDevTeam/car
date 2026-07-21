@@ -143,4 +143,8 @@ export class StoreService {
   activateStore(storeId: string): Observable<Store> {
     return this.http.put<Store>(`${this.apiUrl}/${storeId}/activate`, {});
   }
+
+  subscribeBasicStore(storeId: string): Observable<Store> {
+    return this.http.post<Store>(`${this.apiUrl}/${storeId}/subscribe-basic`, {});
+  }
 }

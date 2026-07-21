@@ -1,9 +1,10 @@
-import { Component, computed, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, computed, EventEmitter, Input, Output, signal, OnInit, OnDestroy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { Subscription } from 'rxjs';
 
 import { ActionsService } from '@services/actions.service';
 import { AuthService } from '@services/auth/auth.service';
@@ -23,11 +24,12 @@ export type MenuItem = {
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
 })
-export class SideNavComponent {
+export class SideNavComponent implements OnInit, OnDestroy {
   sideNavCollapsed = signal(false);
   isSmallScreen = signal(false);
   loggedUsername = signal('');
   userRole = signal('');
+  private authSubscription!: Subscription;
 
   @Input() set collapsed(val: boolean) {
     this.sideNavCollapsed.set(val);
@@ -40,15 +42,35 @@ export class SideNavComponent {
     private authService: AuthService,
     private actionsService: ActionsService,
     private router: Router,
-  ) {
-    this.loggedUsername.set(this.authService.getPersonName() || this.authService.getUsername() || 'Usuário');
-    this.userRole.set(this.authService.getPersonRelationship() || this.formatRole(this.authService.getRoles()));
+  ) {}
 
-    this.initializeMenuItems();
+  ngOnInit() {
+    this.authSubscription = this.authService.authorizations$.subscribe(() => {
+      this.loggedUsername.set(this.authService.getPersonName() || this.authService.getUsername() || 'Usuário');
+      this.userRole.set(this.authService.getPersonRelationship() || this.formatRole(this.authService.getRoles()));
+      this.initializeMenuItems();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
   }
 
   private initializeMenuItems() {
     const baseMenu: MenuItem[] = [];
+
+    const hasSubscriptionClaim = this.authService.isSubscriptionRestricted();
+    if (hasSubscriptionClaim) {
+      baseMenu.push({
+        icon: 'receipt_long',
+        label: 'Assinatura',
+        route: '/store/subscription',
+      });
+      this.menuItems.set(baseMenu);
+      return;
+    }
 
     // Dashboard
     if (
@@ -73,6 +95,15 @@ export class SideNavComponent {
         icon: 'store',
         label: 'Lojas',
         route: '/store',
+      });
+    }
+
+    // Cobrança (Apenas ROOT_ADMIN)
+    if (this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+      baseMenu.push({
+        icon: 'receipt_long',
+        label: 'Cobrança',
+        route: '/store/billing-settings',
       });
     }
 

@@ -12,6 +12,7 @@ export interface Store {
   storeStatus: StoreStatus;
   imageUrl?: string;
   nfeEmails?: string;
+  dueDate?: string;
   owners?: any[];
   createdAt?: string;
   updatedAt?: string;

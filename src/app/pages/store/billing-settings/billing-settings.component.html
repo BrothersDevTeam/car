@@ -1,0 +1,115 @@
+<app-content-header title="Configurações de Cobrança"
+  subtitle="Gerencie os limites de dias de atraso para as regras de faturamento e bloqueio do sistema.">
+  <button mat-stroked-button color="primary" (click)="ngOnInit()">
+    <mat-icon>refresh</mat-icon> Atualizar
+  </button>
+</app-content-header>
+
+<div class="billing-container">
+  @if (loading) {
+  <div class="loading-spinner">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Carregando configurações...</p>
+  </div>
+  } @else {
+  <mat-card class="premium-card">
+    <mat-card-header>
+      <mat-card-title>Configurar Régua de Cobrança</mat-card-title>
+      <mat-card-subtitle>Defina a quantidade de dias após o vencimento da fatura para acionar os
+        bloqueios</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="billingForm" (ngSubmit)="onSubmit()" class="billing-form">
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-title">
+              <mat-icon style="color: #0dcaf0; margin-right: 8px;">info</mat-icon>
+              Notificação de Pendência (Aviso Amigável)
+            </span>
+            <span class="setting-description">Os usuários visualizarão alertas no topo do sistema sobre o atraso no
+              pagamento, mas manterão o acesso completo e sem restrições a todas as funcionalidades do sistema.</span>
+          </div>
+          <div class="days-display">
+            @if (billingForm.get('nfeBlockDays')?.value > 1) {
+            <span class="static-days-range">1 a {{ billingForm.get('nfeBlockDays')?.value - 1 }} {{
+              (billingForm.get('nfeBlockDays')?.value - 1) === 1 ? 'dia' : 'dias' }}</span>
+            } @else {
+            <span class="static-days-range text-muted">Sem período de aviso</span>
+            }
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-title">
+              <mat-icon style="color: #0d6efd; margin-right: 8px;">description</mat-icon>
+              Bloqueio Parcial (NFe)
+            </span>
+            <span class="setting-description">Usuário perde a permissão de criar e emitir novas Notas Fiscais, mas
+              mantém acesso de leitura e outros cadastros.</span>
+          </div>
+          <mat-form-field appearance="outline" class="days-input">
+            <mat-label>Dias de Atraso</mat-label>
+            <input matInput type="number" formControlName="nfeBlockDays" min="0">
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-title">
+              <mat-icon style="color: #fd7e14; margin-right: 8px;">warning</mat-icon>
+              Modo Leitura (Soft Block)
+            </span>
+            <span class="setting-description">Todas as operações de alteração, edição e exclusão de dados em qualquer
+              tela são bloqueadas na API. O acesso é mantido apenas para visualizações e relatórios.</span>
+          </div>
+          <mat-form-field appearance="outline" class="days-input">
+            <mat-label>Dias de Atraso</mat-label>
+            <input matInput type="number" formControlName="softBlockDays" min="0">
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-title">
+              <mat-icon style="color: #dc3545; margin-right: 8px;">lock</mat-icon>
+              Suspensão de Acesso (Hard Block)
+            </span>
+            <span class="setting-description">O login do usuário é totalmente bloqueado. A loja inteira fica impedida de
+              entrar no sistema até a regularização financeira.</span>
+          </div>
+          <mat-form-field appearance="outline" class="days-input">
+            <mat-label>Dias de Atraso</mat-label>
+            <input matInput type="number" formControlName="hardBlockDays" min="0">
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="billingForm.invalid || saving">
+            @if (saving) {
+              <span class="button-content-wrapper">
+                <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
+                <span>Salvando...</span>
+              </span>
+            } @else {
+              <span class="button-content-wrapper">
+                <mat-icon>save</mat-icon>
+                <span>Salvar Configurações</span>
+              </span>
+            }
+          </button>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+  }
+</div>
