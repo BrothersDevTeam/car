@@ -2,7 +2,6 @@ main {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 1rem;
 }
 
 .loader-container {
@@ -100,20 +99,26 @@ main {
 // Card Accents
 .balance-card {
   border-top-color: #2e7d32; // Green
+
   .card-icon {
     background-color: rgba(46, 125, 50, 0.1);
+
     mat-icon {
       color: #2e7d32;
     }
   }
+
   &.negative {
     border-top-color: #c62828; // Red
+
     .card-icon {
       background-color: rgba(198, 40, 40, 0.1);
+
       mat-icon {
         color: #c62828;
       }
     }
+
     .metric-value {
       color: #c62828;
     }
@@ -122,8 +127,10 @@ main {
 
 .income-pending-card {
   border-top-color: #1565c0; // Blue
+
   .card-icon {
     background-color: rgba(21, 101, 192, 0.1);
+
     mat-icon {
       color: #1565c0;
     }
@@ -132,8 +139,10 @@ main {
 
 .expense-pending-card {
   border-top-color: #ef6c00; // Orange
+
   .card-icon {
     background-color: rgba(239, 108, 0, 0.1);
+
     mat-icon {
       color: #ef6c00;
     }
@@ -142,8 +151,10 @@ main {
 
 .income-paid-card {
   border-top-color: #00838f; // Teal
+
   .card-icon {
     background-color: rgba(0, 131, 143, 0.1);
+
     mat-icon {
       color: #00838f;
     }
@@ -152,8 +163,10 @@ main {
 
 .expense-paid-card {
   border-top-color: #ad1457; // Pink
+
   .card-icon {
     background-color: rgba(173, 20, 87, 0.1);
+
     mat-icon {
       color: #ad1457;
     }
@@ -169,6 +182,7 @@ main {
 
   .table-header {
     padding: 0.5rem 1rem 1rem;
+
     mat-card-title {
       font-size: 1.2rem;
       font-weight: 600;
@@ -186,6 +200,7 @@ main {
   .filter-field {
     flex: 1;
     min-width: 180px;
+
     ::ng-deep .mat-mdc-form-field-subscript-wrapper {
       display: none; // hides validation spacing to save space
     }
@@ -254,6 +269,7 @@ main {
     background-color: rgba(76, 175, 80, 0.12);
     color: #2e7d32;
   }
+
   &.expense {
     background-color: rgba(244, 67, 54, 0.12);
     color: #c62828;
@@ -272,14 +288,17 @@ main {
     background-color: rgba(255, 152, 0, 0.12);
     color: #ef6c00;
   }
+
   &.paid {
     background-color: rgba(76, 175, 80, 0.12);
     color: #2e7d32;
   }
+
   &.cancelled {
     background-color: rgba(158, 158, 158, 0.15);
     color: #616161;
   }
+
   &.partial {
     background-color: rgba(30, 136, 229, 0.12);
     color: #1e88e5;
@@ -367,7 +386,7 @@ main {
       margin-right: 0px;
     }
 
-    .dropdown-container > mat-icon {
+    .dropdown-container>mat-icon {
       display: none !important;
     }
   }

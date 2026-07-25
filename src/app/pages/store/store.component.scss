@@ -267,6 +267,16 @@
     width: 14px;
     height: 14px;
   }
+
+  &.pendency-badge {
+    background-color: #fff3cd !important;
+    color: #856404 !important;
+    border: 1px solid #ffeeba;
+
+    .pendency-icon {
+      color: #856404 !important;
+    }
+  }
 }
 
 .actions-header,

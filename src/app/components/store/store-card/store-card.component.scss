@@ -255,6 +255,16 @@
     background: #fff3cd;
     color: #856404;
   }
+
+  &.pendency-badge {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+
+    .pendency-icon {
+      color: #856404;
+    }
+  }
 }
 
 // ========== CORPO DO CARD ==========

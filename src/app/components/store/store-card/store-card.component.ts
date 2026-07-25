@@ -112,6 +112,18 @@ export class StoreCardComponent {
   get shouldShowViewBranches(): boolean {
     return this.canViewBranches && this.isMainStore;
   }
+  get daysOverdue(): number {
+    if (!this.store || !this.store.dueDate) return 0;
+    const dueDateObj = new Date(this.store.dueDate + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    dueDateObj.setHours(0, 0, 0, 0);
+    if (today > dueDateObj) {
+      const diffTime = Math.abs(today.getTime() - dueDateObj.getTime());
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+    return 0;
+  }
 
   onEdit(): void {
     this.edit.emit(this.store);

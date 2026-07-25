@@ -24,6 +24,16 @@
         <mat-icon class="status-icon">{{ statusIcon }}</mat-icon>
         {{ statusLabel }}
       </span>
+
+      @if (daysOverdue > 0) {
+        <span
+          class="badge pendency-badge"
+          [matTooltip]="'Mensalidade com ' + daysOverdue + (daysOverdue === 1 ? ' dia' : ' dias') + ' de atraso'"
+        >
+          <mat-icon class="pendency-icon">warning</mat-icon>
+          Atraso: {{ daysOverdue }}d
+        </span>
+      }
     </div>
   </div>
 
