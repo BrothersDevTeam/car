@@ -659,7 +659,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getPersonDisplay(person: Person): string {
-    return person.cpf ? `${person.name} - CPF: ${person.cpf}` : `${person.name} - CNPJ: ${person.cnpj}`;
+    return person ? person.name : '';
   }
 
   get isSaveButtonDisabled(): boolean {
@@ -725,8 +725,10 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     this.availableDrafts = this.formDraftService.getDraftsByType(this.FORM_TYPE);
     if (this.availableDrafts.length === 0) {
       this.showFormFields = true;
-    } else if (this.dataForm || this.draft || this.selectedDraftId) {
+    } else if (this.dataForm || this.draft || (this.selectedDraftId && this.selectedDraftId !== 'new')) {
       this.showFormFields = true;
+    } else {
+      this.showFormFields = false;
     }
   }
 
