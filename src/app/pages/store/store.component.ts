@@ -16,6 +16,7 @@ import { StoreOwnerDialogComponent } from '../../components/dialogs/store-owner-
 import { StoreAddressDialogComponent } from '../../components/dialogs/store-address-dialog/store-address-dialog.component';
 import { StoreEmployeesDialogComponent } from '../../components/dialogs/store-employees-dialog/store-employees-dialog.component';
 import { StoreFiscalDialogComponent } from '../../components/dialogs/store-fiscal-dialog/store-fiscal-dialog.component';
+import { StoreManualPaymentDialogComponent } from '../../components/dialogs/store-manual-payment-dialog/store-manual-payment-dialog.component';
 import { Store } from '@interfaces/store';
 import { StoreService } from '@services/store.service';
 import { AuthService } from '@services/auth/auth.service';
@@ -39,6 +40,7 @@ import { ToastrService } from 'ngx-toastr';
     MatDividerModule,
     StoreCardComponent,
     ContentHeaderComponent,
+    StoreManualPaymentDialogComponent,
   ],
   templateUrl: './store.component.html',
   styleUrl: './store.component.scss',
@@ -280,6 +282,21 @@ export class StoreComponent implements OnInit {
       },
     });
   }
+
+  onRegisterManualPayment(store: Store): void {
+    const dialogRef = this.dialog.open(StoreManualPaymentDialogComponent, {
+      width: '750px',
+      maxHeight: '90vh',
+      data: { store },
+    });
+
+    dialogRef.afterClosed().subscribe((hasChanges) => {
+      if (hasChanges) {
+        this.loadStores();
+      }
+    });
+  }
+
 
   /**
    * Abre o wizard de cadastro completo de loja (Store + Person + User)

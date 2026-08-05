@@ -86,6 +86,12 @@
           Ativar Loja
         </button>
       }
+      @if (isRootAdmin) {
+        <button mat-raised-button (click)="onRegisterPayment()" class="btn-payment-store" style="background-color: #0d6efd; color: white;" matTooltip="Registrar pagamento manual e histórico">
+          <mat-icon>price_check</mat-icon>
+          Pagamento
+        </button>
+      }
       <button mat-stroked-button (click)="onViewDetails()" class="btn-details">
         <mat-icon>info</mat-icon>
         Detalhes
@@ -102,6 +108,12 @@
             <button mat-menu-item (click)="onActivate()">
               <mat-icon style="color: #28a745">play_circle</mat-icon>
               <span>Ativar Loja</span>
+            </button>
+          }
+          @if (isRootAdmin) {
+            <button mat-menu-item (click)="onRegisterPayment()">
+              <mat-icon style="color: #0d6efd">price_check</mat-icon>
+              <span>Registrar Pagamento / Histórico</span>
             </button>
           }
           @if (canEdit) {

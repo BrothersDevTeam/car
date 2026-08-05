@@ -14,7 +14,7 @@
   } @else {
   <mat-card class="premium-card">
     <mat-card-header>
-      <mat-card-title>Configurar Régua de Cobrança</mat-card-title>
+      <mat-card-title>Configurar Regras de Cobrança</mat-card-title>
       <mat-card-subtitle>Defina a quantidade de dias após o vencimento da fatura para acionar os
         bloqueios</mat-card-subtitle>
     </mat-card-header>
@@ -95,15 +95,15 @@
         <div class="form-actions">
           <button mat-raised-button color="primary" type="submit" [disabled]="billingForm.invalid || saving">
             @if (saving) {
-              <span class="button-content-wrapper">
-                <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
-                <span>Salvando...</span>
-              </span>
+            <span class="button-content-wrapper">
+              <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
+              <span>Salvando...</span>
+            </span>
             } @else {
-              <span class="button-content-wrapper">
-                <mat-icon>save</mat-icon>
-                <span>Salvar Configurações</span>
-              </span>
+            <span class="button-content-wrapper">
+              <mat-icon>save</mat-icon>
+              <span>Salvar Configurações</span>
+            </span>
             }
           </button>
         </div>

@@ -136,6 +136,12 @@
                 <span>Ativar Loja</span>
               </button>
             }
+            @if (isCarAdmin) {
+              <button mat-menu-item (click)="onRegisterManualPayment(store)">
+                <mat-icon style="color: #28a745">price_check</mat-icon>
+                <span>Registrar Pagamento / Desbloquear</span>
+              </button>
+            }
             <button mat-menu-item (click)="onEditStore(store)">
               <mat-icon style="color: #007bff">edit</mat-icon>
               <span>Editar</span>
@@ -210,6 +216,7 @@
             (uploadImage)="onUploadImage($event)"
             (viewDetails)="onViewDetails($event)"
             (activate)="onActivateStore($event)"
+            (registerPayment)="onRegisterManualPayment($event)"
           ></app-store-card>
         } @empty {
           <div class="empty-state">

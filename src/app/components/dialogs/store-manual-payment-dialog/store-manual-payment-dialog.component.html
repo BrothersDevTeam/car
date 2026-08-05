@@ -1,0 +1,183 @@
+<div class="dialog-header">
+  <div class="header-title">
+    <mat-icon color="primary">price_check</mat-icon>
+    <div>
+      <h2 mat-dialog-title>Faturamento & Pagamento Manual</h2>
+      <p class="subtitle">{{ store.tradeName || store.name }} - CNPJ: {{ store.cnpj }}</p>
+    </div>
+  </div>
+  <button mat-icon-button mat-dialog-close aria-label="Fechar">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-body">
+  <mat-tab-group animationDuration="200ms" class="custom-tab-group">
+    <!-- ABA 1: REGISTRAR PAGAMENTO -->
+    <mat-tab>
+      <ng-template matTabLabel>
+        <mat-icon class="tab-icon">add_card</mat-icon>
+        <span>Registrar Pagamento / Desbloquear</span>
+      </ng-template>
+
+      <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="payment-form">
+        <div class="store-status-summary">
+          <div class="summary-item">
+            <span class="label">Status Atual:</span>
+            <span class="value badge-status" [class.active]="store.storeStatus === 'ACTIVE'" [class.blocked]="store.storeStatus === 'BLOCKED'">
+              {{ store.storeStatus }}
+            </span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Vencimento Atual:</span>
+            <span class="value">{{ store.dueDate ? (store.dueDate | date: 'dd/MM/yyyy') : 'Sem data' }}</span>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <!-- Valor Pago -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Valor Pago (R$)</mat-label>
+            <span matPrefix>R$&nbsp;</span>
+            <input matInput type="number" step="0.01" formControlName="amount" placeholder="199.90" />
+            <mat-error *ngIf="paymentForm.get('amount')?.hasError('required')">Valor é obrigatório</mat-error>
+            <mat-error *ngIf="paymentForm.get('amount')?.hasError('min')">Valor deve ser maior que zero</mat-error>
+          </mat-form-field>
+
+          <!-- Data do Pagamento -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Data do Pagamento</mat-label>
+            <input matInput type="date" formControlName="paymentDate" />
+            <mat-error *ngIf="paymentForm.get('paymentDate')?.hasError('required')">Data é obrigatória</mat-error>
+          </mat-form-field>
+
+          <!-- Meio de Pagamento -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Meio de Pagamento</mat-label>
+            <mat-select formControlName="paymentMethod">
+              @for (method of paymentMethods; track method.value) {
+                <mat-option [value]="method.value">{{ method.label }}</mat-option>
+              }
+            </mat-select>
+            <mat-error *ngIf="paymentForm.get('paymentMethod')?.hasError('required')">Meio de pagamento é obrigatório</mat-error>
+          </mat-form-field>
+
+          <!-- Período de Prorrogação -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Prorrogar Vencimento por</mat-label>
+            <mat-select formControlName="extensionPeriod">
+              <mat-option value="30">+ 30 dias (1 mês)</mat-option>
+              <mat-option value="60">+ 60 dias (2 meses)</mat-option>
+              <mat-option value="90">+ 90 dias (3 meses)</mat-option>
+              <mat-option value="365">+ 365 dias (1 ano)</mat-option>
+              <mat-option value="CUSTOM">Data Personalizada</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Data Personalizada (Se selecionada) -->
+          @if (paymentForm.get('extensionPeriod')?.value === 'CUSTOM') {
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nova Data de Vencimento</mat-label>
+              <input matInput type="date" formControlName="customDueDate" />
+            </mat-form-field>
+          }
+        </div>
+
+        <!-- Observação / Comprovante (Obrigatório) -->
+        <mat-form-field appearance="outline" class="full-width note-field">
+          <mat-label>Observação / Detalhes do Comprovante *</mat-label>
+          <textarea
+            matInput
+            rows="3"
+            formControlName="note"
+            placeholder="Ex: Pagamento verificado via extrato bancário PIX #123456 no dia 29/07."
+          ></textarea>
+          <mat-hint align="end">{{ paymentForm.get('note')?.value?.length || 0 }}/500</mat-hint>
+          <mat-error *ngIf="paymentForm.get('note')?.hasError('required')">A observação é obrigatória para auditoria</mat-error>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-button type="button" mat-dialog-close [disabled]="saving">Cancelar</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="paymentForm.invalid || saving">
+            @if (saving) {
+              <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
+              <span>Registrando...</span>
+            } @else {
+              <mat-icon>check_circle</mat-icon>
+              <span>Confirmar Pagamento e Desbloquear</span>
+            }
+          </button>
+        </div>
+      </form>
+    </mat-tab>
+
+    <!-- ABA 2: HISTÓRICO DE PAGAMENTOS -->
+    <mat-tab>
+      <ng-template matTabLabel>
+        <mat-icon class="tab-icon">history</mat-icon>
+        <span>Histórico de Pagamentos</span>
+      </ng-template>
+
+      <div class="history-container">
+        @if (loadingHistory) {
+          <div class="loading-state">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Carregando histórico financeiro...</p>
+          </div>
+        } @else if (historyList.length === 0) {
+          <div class="empty-history">
+            <mat-icon>receipt_long</mat-icon>
+            <p>Nenhum histórico de pagamento registrado para esta loja.</p>
+          </div>
+        } @else {
+          <table mat-table [dataSource]="historyList" class="history-table mat-elevation-z1">
+            <!-- Data Pagamento -->
+            <ng-container matColumnDef="paymentDate">
+              <th mat-header-cell *matHeaderCellDef>Data Pgto</th>
+              <td mat-cell *matCellDef="let p">{{ p.paymentDate | date: 'dd/MM/yyyy' }}</td>
+            </ng-container>
+
+            <!-- Valor -->
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>Valor</th>
+              <td mat-cell *matCellDef="let p" class="amount-cell">
+                {{ p.amount | currency: 'BRL' : 'symbol' : '1.2-2' }}
+              </td>
+            </ng-container>
+
+            <!-- Forma -->
+            <ng-container matColumnDef="paymentMethod">
+              <th mat-header-cell *matHeaderCellDef>Forma</th>
+              <td mat-cell *matCellDef="let p">
+                <span class="method-badge">{{ getPaymentMethodLabel(p.paymentMethod) }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Novo Vencimento -->
+            <ng-container matColumnDef="newDueDate">
+              <th mat-header-cell *matHeaderCellDef>Novo Vencimento</th>
+              <td mat-cell *matCellDef="let p">{{ p.newDueDate | date: 'dd/MM/yyyy' }}</td>
+            </ng-container>
+
+            <!-- Observação -->
+            <ng-container matColumnDef="note">
+              <th mat-header-cell *matHeaderCellDef>Observação</th>
+              <td mat-cell *matCellDef="let p" [matTooltip]="p.note" class="note-cell">
+                {{ p.note }}
+              </td>
+            </ng-container>
+
+            <!-- Registrado Por -->
+            <ng-container matColumnDef="registeredBy">
+              <th mat-header-cell *matHeaderCellDef>Registrado Por</th>
+              <td mat-cell *matCellDef="let p">{{ p.registeredBy }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</mat-dialog-content>

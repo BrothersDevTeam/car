@@ -147,4 +147,14 @@ export class StoreService {
   subscribeBasicStore(storeId: string): Observable<Store> {
     return this.http.post<Store>(`${this.apiUrl}/${storeId}/subscribe-basic`, {});
   }
+
+  registerManualPayment(storeId: string, payload: any): Observable<Store> {
+    return this.http.post<Store>(`${this.apiUrl}/${storeId}/payments`, payload);
+  }
+
+  getStorePaymentHistory(storeId: string, page = 0, size = 20): Observable<any> {
+    const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+    return this.http.get<any>(`${this.apiUrl}/${storeId}/payments`, { params });
+  }
 }
+
