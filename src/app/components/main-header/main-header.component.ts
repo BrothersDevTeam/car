@@ -51,7 +51,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   selectedStoreId: string = 'ALL';
   inactiveStores: Store[] = [];
   isStoreSelectionLocked = signal<boolean>(false);
-  
+
   // Variáveis para o banner de faturamento
   showBillingWarning = false;
   warningMessage = '';
@@ -166,16 +166,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     const store = this.stores.find((s) => s.storeId === this.selectedStoreId);
     if (store) {
       const name = store.tradeName || store.name;
-      return `${name} - ${this.formatCnpj(store.cnpj)}`;
+      return `${name}`;
     }
     return this.storeName() || 'Filial';
-  }
-
-  formatCnpj(cnpj: string | undefined): string {
-    if (!cnpj) return '';
-    const cleanCnpj = cnpj.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-    if (cleanCnpj.length !== 14) return cnpj;
-    return cleanCnpj.replace(/^([A-Z0-9]{2})([A-Z0-9]{3})([A-Z0-9]{3})([A-Z0-9]{4})([A-Z0-9]{2})$/, '$1.$2.$3/$4-$5');
   }
 
   loadInactiveStores(): void {
