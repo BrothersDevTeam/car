@@ -684,16 +684,25 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
   }
 
   handleSelectedPerson(person: Person) {
+    if (person.storeId) {
+      this.storeContextService.setStoreId(person.storeId);
+    }
     this.selectedPerson = person;
     this.openInfo.set(true);
   }
 
   onRowClick(person: Person) {
+    if (person.storeId) {
+      this.storeContextService.setStoreId(person.storeId);
+    }
     if (person.personId) {
       this.clientListLoading.set(true);
       this.personService.getById(person.personId).subscribe({
         next: (fullPerson) => {
           this.clientListLoading.set(false);
+          if (fullPerson.storeId) {
+            this.storeContextService.setStoreId(fullPerson.storeId);
+          }
           this.handleSelectedPerson(fullPerson);
         },
         error: (err) => {
@@ -742,6 +751,11 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
   }
 
   handleEdit(person?: Person) {
+    const targetPerson = person || this.selectedPerson;
+    if (targetPerson && targetPerson.storeId) {
+      this.storeContextService.setStoreId(targetPerson.storeId);
+    }
+
     if (!this.storeContextService.validateStoreSelection()) return;
 
     if (person && person.personId) {
@@ -813,6 +827,9 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
   }
 
   handleDelete(person: Person) {
+    if (person.storeId) {
+      this.storeContextService.setStoreId(person.storeId);
+    }
     if (!this.storeContextService.validateStoreSelection()) return;
     this.openDeleteDialog(person);
   }

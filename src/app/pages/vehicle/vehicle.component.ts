@@ -394,8 +394,14 @@ export class VehicleComponent implements CanComponentDeactivate {
   }
 
   handleSelectedVehicle(vehicle: VehicleList) {
+    if (vehicle.storeId) {
+      this.storeContextService.setStoreId(vehicle.storeId);
+    }
     this.vehicleService.getById(vehicle.vehicleId).subscribe({
       next: (fullVehicle) => {
+        if (fullVehicle.storeId) {
+          this.storeContextService.setStoreId(fullVehicle.storeId);
+        }
         this.selectedVehicle = this.vehicleToForm(fullVehicle);
         this.openInfo.set(true);
       },
@@ -476,6 +482,11 @@ export class VehicleComponent implements CanComponentDeactivate {
    * Quando vem do vehicle-info (editEvent), recebe VehicleForm
    */
   handleEdit(vehicle: VehicleList | Vehicle | VehicleForm) {
+    const storeId = (vehicle as any).storeId;
+    if (storeId) {
+      this.storeContextService.setStoreId(storeId);
+    }
+
     if (!this.storeContextService.validateStoreSelection()) return;
 
     if ('vehicleId' in vehicle && !('chassis' in vehicle) && !('buyerDisplay' in vehicle)) {
@@ -514,6 +525,9 @@ export class VehicleComponent implements CanComponentDeactivate {
   }
 
   handleDelete(vehicle: VehicleList) {
+    if (vehicle.storeId) {
+      this.storeContextService.setStoreId(vehicle.storeId);
+    }
     if (!this.storeContextService.validateStoreSelection()) return;
 
     const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(ConfirmDialogComponent, {

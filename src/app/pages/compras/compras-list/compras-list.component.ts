@@ -212,6 +212,9 @@ export class ComprasListComponent implements OnInit, OnDestroy {
   }
 
   onRowClick(compra: Compra) {
+    if (compra.storeId) {
+      this.storeContextService.setStoreId(compra.storeId);
+    }
     if (compra.compraId) {
       this.selectedCompraId.set(compra.compraId);
       this.openInfo.set(true);
@@ -224,6 +227,9 @@ export class ComprasListComponent implements OnInit, OnDestroy {
   }
 
   handleEdit(compra: Compra) {
+    if (compra.storeId) {
+      this.storeContextService.setStoreId(compra.storeId);
+    }
     if (!this.storeContextService.validateStoreSelection()) return;
     this.router.navigate(['/compras/editar', compra.compraId]);
   }
