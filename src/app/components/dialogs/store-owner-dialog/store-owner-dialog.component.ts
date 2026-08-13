@@ -55,7 +55,7 @@ export class StoreOwnerDialogComponent implements OnInit {
     private storeService: StoreService,
     public dialogRef: MatDialogRef<StoreOwnerDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: StoreOwnerDialogData,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.store = { ...this.data.store };
@@ -131,10 +131,8 @@ export class StoreOwnerDialogComponent implements OnInit {
   }
 
   getPersonDisplay(person: Person): string {
-    const type = person.legalEntity ? 'CNPJ' : 'CPF';
-    const doc = person.legalEntity ? person.cnpj : person.cpf;
     const accessStatus = person.hasUser ? '✅ Com acesso' : '❌ Sem acesso';
-    return `${person.name} - ${type}: ${doc} (${accessStatus})`;
+    return `${person.name} - (${accessStatus})`;
   }
 
   onAddOwner(): void {
