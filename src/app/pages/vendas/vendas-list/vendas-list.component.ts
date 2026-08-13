@@ -232,6 +232,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.storeContextService.setStoreSelectionLock(false);
     this.subscription.unsubscribe();
   }
 
@@ -287,11 +288,13 @@ export class VendasListComponent implements OnInit, OnDestroy {
     }
     this.selectedVendaId.set(venda.vendaId);
     this.openInfo.set(true);
+    this.storeContextService.setStoreSelectionLock(true);
   }
 
   handleCloseDrawer() {
     this.openInfo.set(false);
     this.selectedVendaId.set(null);
+    this.storeContextService.setStoreSelectionLock(false);
   }
 
   handleEdit(venda: VendaResponseDto) {

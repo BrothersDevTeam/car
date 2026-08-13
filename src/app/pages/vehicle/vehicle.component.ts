@@ -289,6 +289,7 @@ export class VehicleComponent implements CanComponentDeactivate {
   }
 
   ngOnDestroy() {
+    this.storeContextService.setStoreSelectionLock(false);
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -341,6 +342,7 @@ export class VehicleComponent implements CanComponentDeactivate {
     this.selectedVehicle = null;
     this.selectedDraft = null;
     this.actionsService.hasFormChanges.set(false);
+    this.storeContextService.setStoreSelectionLock(false);
   }
 
   loadVehicleList(pageIndex: number, pageSize: number, searchValue?: string) {
@@ -404,6 +406,7 @@ export class VehicleComponent implements CanComponentDeactivate {
         }
         this.selectedVehicle = this.vehicleToForm(fullVehicle);
         this.openInfo.set(true);
+        this.storeContextService.setStoreSelectionLock(true);
       },
       error: (err) => {
         this.toastr.error('Erro ao carregar detalhes do veículo');
@@ -419,6 +422,7 @@ export class VehicleComponent implements CanComponentDeactivate {
   handleOpenForm() {
     if (!this.storeContextService.validateStoreSelection()) return;
     this.openForm.set(true);
+    this.storeContextService.setStoreSelectionLock(true);
   }
 
   handlePageEvent(event: PageEvent) {
@@ -522,6 +526,7 @@ export class VehicleComponent implements CanComponentDeactivate {
     this.selectedVehicle = null;
     this.selectedDraft = null;
     this.actionsService.hasFormChanges.set(false);
+    this.storeContextService.setStoreSelectionLock(false);
   }
 
   handleDelete(vehicle: VehicleList) {

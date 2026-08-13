@@ -53,7 +53,8 @@
     (selectionChange)="onStoreChange()"
     class="header-store-select"
     panelClass="header-store-select-panel"
-    [disabled]="!isCarAdmin && !canReadStoreOthers"
+    [disabled]="(!isCarAdmin && !canReadStoreOthers) || isStoreSelectionLocked()"
+    [matTooltip]="isStoreSelectionLocked() ? 'A seleção de loja está bloqueada durante a visualização ou edição de um registro' : ''"
   >
     <mat-select-trigger>
       <div class="store-trigger-content">

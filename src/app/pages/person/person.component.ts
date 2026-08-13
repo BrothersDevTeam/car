@@ -389,6 +389,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
   }
 
   ngOnDestroy() {
+    this.storeContextService.setStoreSelectionLock(false);
     this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
@@ -610,6 +611,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
     this.pendingAddressDraftId = null;
     this.selectedTabIndex = 0;
     this.actionsService.hasFormChanges.set(false);
+    this.storeContextService.setStoreSelectionLock(false);
   }
 
   loadPersonList(pageIndex: number, pageSize: number, searchValue?: string) {
@@ -689,6 +691,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
     }
     this.selectedPerson = person;
     this.openInfo.set(true);
+    this.storeContextService.setStoreSelectionLock(true);
   }
 
   onRowClick(person: Person) {
@@ -722,6 +725,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
     this.selectedDraft = null;
     this.selectedTabIndex = 0;
     this.openForm.set(true);
+    this.storeContextService.setStoreSelectionLock(true);
   }
 
   handlePageEvent(event: PageEvent) {
@@ -922,6 +926,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
     this.selectedPerson = null;
     this.selectedDraft = undefined; // Force placeholder
     this.actionsService.hasFormChanges.set(false);
+    this.storeContextService.setStoreSelectionLock(false);
   }
 
   /**

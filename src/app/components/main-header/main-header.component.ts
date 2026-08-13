@@ -13,6 +13,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, distinctUntilChanged } from 'rxjs';
 
@@ -26,6 +27,7 @@ import { Subject, takeUntil, distinctUntilChanged } from 'rxjs';
     MatMenuModule,
     MatBadgeModule,
     MatDividerModule,
+    MatTooltipModule,
     FormsModule,
   ],
   templateUrl: './main-header.component.html',
@@ -48,6 +50,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   stores: Store[] = [];
   selectedStoreId: string = 'ALL';
   inactiveStores: Store[] = [];
+  isStoreSelectionLocked = signal<boolean>(false);
   
   // Variáveis para o banner de faturamento
   showBillingWarning = false;
@@ -95,6 +98,13 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         } else {
           this.loadCurrentStoreName();
         }
+      });
+
+    // Escuta estado de bloqueio do seletor de loja
+    this.storeContextService.isStoreSelectionLocked$
+      .pipe(takeUntil(this.destroy$), distinctUntilChanged())
+      .subscribe((isLocked) => {
+        this.isStoreSelectionLocked.set(isLocked);
       });
 
     // Escuta atualizações de lojas para recarregar a lista do header sem f5

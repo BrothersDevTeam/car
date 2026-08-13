@@ -13,6 +13,9 @@ export class StoreContextService {
   // Guarda o storeId atual. Inicializa com a loja padrão do usuário vinda do token.
   private readonly storeIdSubject = new BehaviorSubject<string | null>(null);
 
+  // Controla o bloqueio temporário do seletor de loja (ex: durante visualização/edição)
+  private readonly isStoreSelectionLockedSubject = new BehaviorSubject<boolean>(false);
+
   constructor(
     private readonly authService: AuthService,
     private readonly toastr: ToastrService,
@@ -53,6 +56,27 @@ export class StoreContextService {
    */
   get currentStoreId(): string | null {
     return this.storeIdSubject.getValue();
+  }
+
+  /**
+   * Observable do estado de bloqueio do seletor de loja.
+   */
+  get isStoreSelectionLocked$(): Observable<boolean> {
+    return this.isStoreSelectionLockedSubject.asObservable();
+  }
+
+  /**
+   * Valor síncrono do estado de bloqueio.
+   */
+  get isStoreSelectionLocked(): boolean {
+    return this.isStoreSelectionLockedSubject.getValue();
+  }
+
+  /**
+   * Define o bloqueio/desbloqueio do seletor de loja.
+   */
+  setStoreSelectionLock(isLocked: boolean): void {
+    this.isStoreSelectionLockedSubject.next(isLocked);
   }
 
   /**

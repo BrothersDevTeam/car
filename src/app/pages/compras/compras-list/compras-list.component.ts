@@ -169,6 +169,7 @@ export class ComprasListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.storeContextService.setStoreSelectionLock(false);
     this.subscription.unsubscribe();
   }
 
@@ -218,12 +219,14 @@ export class ComprasListComponent implements OnInit, OnDestroy {
     if (compra.compraId) {
       this.selectedCompraId.set(compra.compraId);
       this.openInfo.set(true);
+      this.storeContextService.setStoreSelectionLock(true);
     }
   }
 
   handleCloseDrawer() {
     this.openInfo.set(false);
     this.selectedCompraId.set(null);
+    this.storeContextService.setStoreSelectionLock(false);
   }
 
   handleEdit(compra: Compra) {
