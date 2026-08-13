@@ -121,6 +121,11 @@ export class PrimaryInputComponent implements ControlValueAccessor {
   @Input() required?: boolean = false;
 
   /**
+   * Define se o campo é somente leitura
+   */
+  @Input() readonly?: boolean = false;
+
+  /**
    * Evento emitido quando o campo perde o foco
    * Útil para validações customizadas ou comportamentos específicos
    */

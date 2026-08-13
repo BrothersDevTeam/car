@@ -40,15 +40,21 @@
             <mat-label>Valor Pago (R$)</mat-label>
             <span matPrefix>R$&nbsp;</span>
             <input matInput type="number" step="0.01" formControlName="amount" placeholder="199.90" />
-            <mat-error *ngIf="paymentForm.get('amount')?.hasError('required')">Valor é obrigatório</mat-error>
-            <mat-error *ngIf="paymentForm.get('amount')?.hasError('min')">Valor deve ser maior que zero</mat-error>
+            @if (paymentForm.get('amount')?.hasError('required')) {
+              <mat-error>Valor é obrigatório</mat-error>
+            }
+            @if (paymentForm.get('amount')?.hasError('min')) {
+              <mat-error>Valor deve ser maior que zero</mat-error>
+            }
           </mat-form-field>
 
           <!-- Data do Pagamento -->
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Data do Pagamento</mat-label>
             <input matInput type="date" formControlName="paymentDate" />
-            <mat-error *ngIf="paymentForm.get('paymentDate')?.hasError('required')">Data é obrigatória</mat-error>
+            @if (paymentForm.get('paymentDate')?.hasError('required')) {
+              <mat-error>Data é obrigatória</mat-error>
+            }
           </mat-form-field>
 
           <!-- Meio de Pagamento -->
@@ -59,7 +65,9 @@
                 <mat-option [value]="method.value">{{ method.label }}</mat-option>
               }
             </mat-select>
-            <mat-error *ngIf="paymentForm.get('paymentMethod')?.hasError('required')">Meio de pagamento é obrigatório</mat-error>
+            @if (paymentForm.get('paymentMethod')?.hasError('required')) {
+              <mat-error>Meio de pagamento é obrigatório</mat-error>
+            }
           </mat-form-field>
 
           <!-- Período de Prorrogação -->
@@ -93,18 +101,24 @@
             placeholder="Ex: Pagamento verificado via extrato bancário PIX #123456 no dia 29/07."
           ></textarea>
           <mat-hint align="end">{{ paymentForm.get('note')?.value?.length || 0 }}/500</mat-hint>
-          <mat-error *ngIf="paymentForm.get('note')?.hasError('required')">A observação é obrigatória para auditoria</mat-error>
+          @if (paymentForm.get('note')?.hasError('required')) {
+            <mat-error>A observação é obrigatória para auditoria</mat-error>
+          }
         </mat-form-field>
 
         <div class="form-actions">
           <button mat-button type="button" mat-dialog-close [disabled]="saving">Cancelar</button>
           <button mat-raised-button color="primary" type="submit" [disabled]="paymentForm.invalid || saving">
             @if (saving) {
-              <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
-              <span>Registrando...</span>
+              <ng-container>
+                <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
+                <span>Registrando...</span>
+              </ng-container>
             } @else {
-              <mat-icon>check_circle</mat-icon>
-              <span>Confirmar Pagamento e Desbloquear</span>
+              <ng-container>
+                <mat-icon>check_circle</mat-icon>
+                <span>Confirmar Pagamento e Desbloquear</span>
+              </ng-container>
             }
           </button>
         </div>
