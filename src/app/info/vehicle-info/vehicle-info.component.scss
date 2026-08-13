@@ -137,7 +137,7 @@
     // CARDS DE VALORES
     .value-cards {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 16px;
 
       @media (max-width: 480px) {
@@ -178,6 +178,54 @@
           color: #1967d2;
           border: 1px solid #d2e3fc;
         }
+
+        &.fipe {
+          background: #f0fdf4;
+          color: #15803d;
+          border: 1px solid #bbf7d0;
+
+          .card-label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+
+            .fipe-refresh-icon-btn {
+              width: 28px;
+              height: 28px;
+              line-height: 28px;
+              margin-top: -4px;
+              margin-right: -4px;
+              color: #15803d;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+
+              &:hover:not([disabled]) {
+                background-color: rgba(21, 128, 61, 0.12);
+              }
+
+              mat-icon {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+
+                &.spin {
+                  animation: spin 1s linear infinite;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
       }
     }
 

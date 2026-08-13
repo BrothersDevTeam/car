@@ -220,6 +220,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     optionalIds: [[]], // Array de Opcionais (UUIDs)
     origin: ['NACIONAL'],
     valorVenda: [''],
+    fipeValue: [''],
     observation: [''],
     entryDate: [''],
     exitDate: [''],
@@ -495,6 +496,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           fuelTypes: this.mapFuelTypeToBackend(formValues.fuelTypes),
           optionalIds: formValues.optionalIds || [],
           valorVenda: formValues.valorVenda?.toString() || '',
+          fipeValue: formValues.fipeValue || '',
           observation: formValues.observation || '',
           entryDate: formValues.entryDate || '',
           exitDate: formValues.exitDate || '',
@@ -767,7 +769,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  loadVehicleDetails() {
+  loadVehicleDetails(showToast = true) {
     const brandId = this.brandControl.value?.id;
     const modelId = this.modelControl.value?.id;
     const yearId = this.fipeYearControl.value?.id;
@@ -793,18 +795,37 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
             modelYear: fipeYear, // FIPE geralmente retorna apenas AnoModelo
             engineDisplacement: extractedDisplacement,
             fuelTypes: this.mapFuelTypeToBackend(details.Combustivel),
+            fipeValue: details.Valor,
           });
 
-          // Opcional: Se quiser salvar o valor da tabela FIPE em algum lugar, pode fazer aqui
           console.log('Detalhes FIPE:', details);
-          this.toastrService.info(`Valor tabela FIPE: ${details.Valor}`, 'Dados carregados');
+          if (showToast) {
+            this.toastrService.info(`Valor tabela FIPE: ${details.Valor}`, 'Dados FIPE carregados');
+          }
         },
         error: (error) => {
           console.error('Erro ao carregar detalhes FIPE:', error);
           this.loadingDetails.set(false);
+          this.toastrService.error('Erro ao consultar Tabela FIPE', 'Erro');
         },
       });
     }
+  }
+
+  refreshFipeValue() {
+    const brandId = this.brandControl.value?.id;
+    const modelId = this.modelControl.value?.id;
+    const yearId = this.fipeYearControl.value?.id;
+
+    if (!brandId || !modelId || !yearId) {
+      this.toastrService.warning(
+        'Selecione a marca, modelo e versão/ano na aba Veículo para consultar a Tabela FIPE.',
+        'Tabela FIPE',
+      );
+      return;
+    }
+
+    this.loadVehicleDetails(true);
   }
 
   loadColors() {
@@ -1054,6 +1075,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       optionalIds: this.dataForm!.optionals ? this.dataForm!.optionals.map((opt) => opt.optionalId) : [], // Opcionais do veículo
       origin: this.dataForm!.origin || 'NACIONAL',
       valorVenda: this.dataForm!.valorVenda || '',
+      fipeValue: this.dataForm!.fipeValue || '',
       observation: this.dataForm!.observation || '',
       entryDate: this.dataForm!.entryDate ? this.dataForm!.entryDate.toString().substring(0, 16) : '',
       exitDate: this.dataForm!.exitDate ? this.dataForm!.exitDate.toString().substring(0, 16) : '',
@@ -1087,11 +1109,50 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
               id: selectedModel.id,
               name: selectedModel.name,
             });
-            // Opcional: Carregar anos se o modelo for encontrado
-          }
 
-          this.isInitializing = false;
-          this.lastSavedDraftValue = this.form.getRawValue();
+            // Carrega os anos/versões FIPE para o modelo selecionado
+            this.loadingYears.set(true);
+            this.fipeService.getAnos(fipeType, selectedBrand.id, selectedModel.id).subscribe({
+              next: (yearsResponse) => {
+                this.years = yearsResponse.map((ano) => ({
+                  id: ano.codigo,
+                  name: ano.nome.replace('32000', 'Zero KM'),
+                }));
+                this.selectYearDisabled.set(false);
+                this.loadingYears.set(false);
+
+                // Busca e pré-seleciona a opção FIPE correspondente ao ano do modelo/veículo
+                const targetYear = (this.dataForm?.modelYear || this.dataForm?.vehicleYear || '').toString();
+                if (targetYear) {
+                  const selectedYear = this.years.find(
+                    (y) => y.id.startsWith(targetYear) || y.name.includes(targetYear),
+                  );
+
+                  if (selectedYear) {
+                    this.fipeYearControl.patchValue(
+                      {
+                        id: selectedYear.id,
+                        name: selectedYear.name,
+                      },
+                      { emitEvent: false },
+                    );
+                  }
+                }
+                this.isInitializing = false;
+                this.lastSavedDraftValue = this.form.getRawValue();
+              },
+              error: (err) => {
+                console.error('Erro ao carregar anos FIPE na edição:', err);
+                this.selectYearDisabled.set(true);
+                this.loadingYears.set(false);
+                this.isInitializing = false;
+                this.lastSavedDraftValue = this.form.getRawValue();
+              },
+            });
+          } else {
+            this.isInitializing = false;
+            this.lastSavedDraftValue = this.form.getRawValue();
+          }
         },
         error: (error) => {
           console.error('Erro ao carregar modelos:', error);

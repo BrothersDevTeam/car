@@ -2,7 +2,7 @@ import { ToastrService } from 'ngx-toastr';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
-import { Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
@@ -19,6 +19,8 @@ import { CommonModule } from '@angular/common';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { FipeService } from '@services/fipe.service';
 
 @Component({
   selector: 'app-vehicle-info',
@@ -32,6 +34,7 @@ import { MatTabsModule } from '@angular/material/tabs';
     MatDividerModule,
     MatTabsModule,
     MatDialogModule,
+    MatTooltipModule,
   ],
   templateUrl: './vehicle-info.component.html',
   styleUrl: './vehicle-info.component.scss',
@@ -42,7 +45,10 @@ export class VehicleInfoComponent implements OnChanges {
   private vehicleService = inject(VehicleService);
   private personService = inject(PersonService);
   private financialService = inject(FinancialService);
+  private fipeService = inject(FipeService);
   private router = inject(Router);
+
+  isRefreshingFipe = signal(false);
 
   @Input() vehicle!: VehicleForm;
   proprietario: Person | null = null;
@@ -51,6 +57,121 @@ export class VehicleInfoComponent implements OnChanges {
 
   @Output() editEvent = new EventEmitter<VehicleForm>();
   @Output() formSubmitted = new EventEmitter<void>();
+
+  private getFipeVehicleType(vehicleType?: string): string {
+    const typeMap: Record<string, string> = {
+      MOTOCICLETA: 'motos',
+      MOTO: 'motos',
+      CAMINHAO: 'caminhoes',
+      CAMINHONETE: 'caminhoes',
+    };
+    return typeMap[vehicleType || ''] || 'carros';
+  }
+
+  refreshFipeValue() {
+    if (!this.vehicle || !this.vehicle.brand || !this.vehicle.model) {
+      this.toastrService.warning('Informações de marca ou modelo incompletas para consultar a FIPE.', 'Tabela FIPE');
+      return;
+    }
+
+    const fipeType = this.getFipeVehicleType(this.vehicle.vehicleType);
+    const targetBrand = this.vehicle.brand.trim().toLowerCase();
+    const targetModel = this.vehicle.model.trim().toLowerCase();
+    const targetYear = (this.vehicle.modelYear || this.vehicle.vehicleYear || '').toString();
+
+    this.isRefreshingFipe.set(true);
+
+    this.fipeService.getMarcas(fipeType).subscribe({
+      next: (marcas) => {
+        const foundBrand = marcas.find(
+          (b) =>
+            b.nome.toLowerCase() === targetBrand ||
+            targetBrand.includes(b.nome.toLowerCase()) ||
+            b.nome.toLowerCase().includes(targetBrand),
+        );
+
+        if (!foundBrand) {
+          this.isRefreshingFipe.set(false);
+          this.toastrService.warning(`Marca "${this.vehicle.brand}" não encontrada na Tabela FIPE.`, 'Tabela FIPE');
+          return;
+        }
+
+        this.fipeService.getModelos(fipeType, foundBrand.codigo).subscribe({
+          next: (res) => {
+            const modelos = res.modelos || [];
+            const foundModel = modelos.find(
+              (m) =>
+                m.nome.toLowerCase() === targetModel ||
+                targetModel.includes(m.nome.toLowerCase()) ||
+                m.nome.toLowerCase().includes(targetModel),
+            );
+
+            if (!foundModel) {
+              this.isRefreshingFipe.set(false);
+              this.toastrService.warning(`Modelo "${this.vehicle.model}" não encontrado na Tabela FIPE.`, 'Tabela FIPE');
+              return;
+            }
+
+            this.fipeService.getAnos(fipeType, foundBrand.codigo, foundModel.codigo).subscribe({
+              next: (anos) => {
+                const foundYear = anos.find((a) => a.nome.includes(targetYear) || a.codigo.startsWith(targetYear));
+                const yearId = foundYear ? foundYear.codigo : anos.length > 0 ? anos[0].codigo : null;
+
+                if (!yearId) {
+                  this.isRefreshingFipe.set(false);
+                  this.toastrService.warning('Ano/versão não encontrado na Tabela FIPE.', 'Tabela FIPE');
+                  return;
+                }
+
+                this.fipeService.getVehicleDetails(fipeType, foundBrand.codigo, foundModel.codigo, yearId).subscribe({
+                  next: (details) => {
+                    this.isRefreshingFipe.set(false);
+                    const previousValue = (this.vehicle.fipeValue || '').trim();
+                    const newValue = (details.Valor || '').trim();
+
+                    if (previousValue === newValue && previousValue !== '') {
+                      this.toastrService.info(`O valor da Tabela FIPE permanece o mesmo (${newValue}).`, 'Sem alterações');
+                      return;
+                    }
+
+                    this.vehicle.fipeValue = details.Valor;
+                    this.toastrService.success(`Tabela FIPE atualizada: ${details.Valor}`, 'Sucesso');
+
+                    if (this.vehicle.vehicleId) {
+                      this.vehicleService.update(this.vehicle as any).subscribe({
+                        next: () => {
+                          // Salvo com sucesso no banco de dados sem fechar o modal
+                        },
+                        error: (err) => {
+                          console.error('Erro ao salvar FIPE no veículo:', err);
+                        },
+                      });
+                    }
+                  },
+                  error: () => {
+                    this.isRefreshingFipe.set(false);
+                    this.toastrService.error('Erro ao consultar detalhes na FIPE.', 'Erro');
+                  },
+                });
+              },
+              error: () => {
+                this.isRefreshingFipe.set(false);
+                this.toastrService.error('Erro ao consultar anos na FIPE.', 'Erro');
+              },
+            });
+          },
+          error: () => {
+            this.isRefreshingFipe.set(false);
+            this.toastrService.error('Erro ao consultar modelos na FIPE.', 'Erro');
+          },
+        });
+      },
+      error: () => {
+        this.isRefreshingFipe.set(false);
+        this.toastrService.error('Erro ao consultar marcas na FIPE.', 'Erro');
+      },
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['vehicle'] && this.vehicle) {
