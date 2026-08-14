@@ -359,26 +359,31 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
       }),
     );
 
-    // Verifica se há um ID de edição vindo da rota (ex: redirecionamento de erro de endereço)
+    // Verifica se há um ID de edição vindo da rota (ex: redirecionamento de erro de endereço ou vinculação de usuário)
     this.subscriptions.push(
       this.route.queryParams.subscribe((params) => {
         const editId = params['editId'];
+        const openEdit = params['openEdit'] === 'true';
         if (editId) {
-          this.loadPersonForEdit(editId);
+          this.loadPersonForEdit(editId, openEdit);
         }
       }),
     );
   }
 
   /**
-   * Busca os dados de uma pessoa pelo ID e abre o formulário de edição
+   * Busca os dados de uma pessoa pelo ID e abre o formulário de edição ou a visualização de detalhes
    */
-  private loadPersonForEdit(personId: string) {
+  private loadPersonForEdit(personId: string, openEditDirectly: boolean = false) {
     this.clientListLoading.set(true);
     this.personService.getById(personId).subscribe({
       next: (person) => {
         this.clientListLoading.set(false);
-        this.handleSelectedPerson(person); // Abre a visualização de Detalhes (Info)
+        if (openEditDirectly) {
+          this.handleEdit(person);
+        } else {
+          this.handleSelectedPerson(person); // Abre a visualização de Detalhes (Info)
+        }
       },
       error: (err) => {
         this.clientListLoading.set(false);

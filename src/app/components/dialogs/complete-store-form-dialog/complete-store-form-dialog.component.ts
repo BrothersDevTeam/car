@@ -10,6 +10,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
 import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
+import { ToastrService } from 'ngx-toastr';
 
 export interface CompleteStoreFormData {
   title: string;
@@ -42,6 +43,7 @@ export class CompleteStoreFormDialogComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
+    private toastr: ToastrService,
     public dialogRef: MatDialogRef<CompleteStoreFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: CompleteStoreFormData,
   ) {}
@@ -94,7 +96,7 @@ export class CompleteStoreFormDialogComponent implements OnInit {
   onSubmit(): void {
     if (this.storeForm.valid && this.ownerForm.valid && this.userForm.valid) {
       if (this.userForm.value.password !== this.userForm.value.confirmPassword) {
-        alert('As senhas não coincidem!');
+        this.toastr.error('As senhas não coincidem!', 'Validação');
         return;
       }
 

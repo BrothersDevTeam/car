@@ -674,15 +674,26 @@ export class AddressFormComponent implements OnInit, OnChanges, CanComponentDeac
     const draft = this.availableDrafts.find((d) => d.id === draftId);
     if (!draft) return;
 
-    const confirmed = confirm(`Excluir rascunho "${draft.draftName || 'sem nome'}"?`);
-    if (!confirmed) return;
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Excluir Rascunho',
+        message: `Excluir rascunho "${draft.draftName || 'sem nome'}"?`,
+        confirmText: 'Excluir',
+        cancelText: 'Cancelar',
+        type: 'danger',
+      },
+    });
 
-    this.formDraftService.removeDraftById(draft.id);
-    if (this.selectedDraftId === draftId) {
-      this.resetForm();
-      this.selectedDraftId = null;
-    }
-    this.toastr.success('Rascunho excluído');
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.formDraftService.removeDraftById(draft.id);
+        if (this.selectedDraftId === draftId) {
+          this.resetForm();
+          this.selectedDraftId = null;
+        }
+        this.toastr.success('Rascunho excluído');
+      }
+    });
   }
 
   /**

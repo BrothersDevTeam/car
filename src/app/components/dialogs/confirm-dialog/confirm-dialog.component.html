@@ -1,20 +1,24 @@
 <div class="confirm-dialog-container" [ngClass]="data.type || 'primary'">
-  <div class="dialog-header" *ngIf="data.icon">
-    <div class="icon-circle">
-      <mat-icon>{{ data.icon }}</mat-icon>
+  @if (data.icon) {
+    <div class="dialog-header">
+      <div class="icon-circle">
+        <mat-icon>{{ data.icon }}</mat-icon>
+      </div>
     </div>
-  </div>
+  }
 
   <h2 mat-dialog-title>{{ data.title }}</h2>
 
   <mat-dialog-content>
-    <p [innerHTML]="safeMessage"></p>
+    <div [innerHTML]="safeMessage"></div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button mat-dialog-close class="cancel-btn">
-      {{ data.cancelText }}
-    </button>
+    @if (data.cancelText) {
+      <button mat-button mat-dialog-close class="cancel-btn">
+        {{ data.cancelText }}
+      </button>
+    }
     <button mat-flat-button [mat-dialog-close]="true" class="confirm-btn">
       {{ data.confirmText }}
     </button>

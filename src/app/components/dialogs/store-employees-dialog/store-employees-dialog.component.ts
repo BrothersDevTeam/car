@@ -35,6 +35,7 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.compone
 export interface StoreEmployeesDialogData {
   store: Store;
   isRootAdmin?: boolean;
+  targetPersonId?: string;
 }
 
 // Grupos de autorização padrão (mesmos presets do natural-person-form)
@@ -354,6 +355,20 @@ export class StoreEmployeesDialogComponent implements OnInit {
       next: (response) => {
         this.employees = response.content;
         this.loading = false;
+
+        if (this.data.targetPersonId) {
+          const target = this.employees.find((e) => e.personId === this.data.targetPersonId);
+          if (target) {
+            setTimeout(() => this.toggleCreateAccess(target), 150);
+          } else {
+            this.personService.getById(this.data.targetPersonId).subscribe({
+              next: (person) => {
+                this.employees.unshift(person);
+                setTimeout(() => this.toggleCreateAccess(person), 150);
+              },
+            });
+          }
+        }
       },
       error: (err) => {
         console.error('Erro ao carregar funcionários:', err);
