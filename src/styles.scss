@@ -213,3 +213,48 @@
     justify-content: center !important;
   }
 }
+
+// Estilização global do painel de modais de feedback para remoção de sangria nos cantos, transparência e alinhamento de botões
+.feedback-dialog-panel,
+.feedback-detail-dialog-panel {
+  .mat-mdc-dialog-container .mdc-dialog__surface {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    padding: 0 !important;
+  }
+
+  .mat-mdc-dialog-actions,
+  .dialog-actions {
+    padding: 16px 24px !important;
+    gap: 12px !important;
+    border-top: 1px solid var(--border-color, #e2e8f0) !important;
+    background: #ffffff !important;
+
+    .btn-submit {
+      height: 42px !important;
+      padding: 0 20px !important;
+      border-radius: 8px !important;
+      font-weight: 600 !important;
+
+      .mdc-button__label {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+      }
+
+      mat-icon {
+        margin: 0 !important;
+        font-size: 20px !important;
+        width: 20px !important;
+        height: 20px !important;
+        line-height: 20px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+    }
+  }
+}

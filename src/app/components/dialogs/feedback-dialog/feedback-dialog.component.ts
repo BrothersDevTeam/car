@@ -108,19 +108,20 @@ export class FeedbackDialogComponent implements OnInit {
   captureCurrentScreen(): void {
     this.capturingScreenshot.set(true);
 
-    // Ocultar temporariamente dialogs antes de capturar a tela
+    // Ocultar temporariamente dialogs e overlays antes de capturar a tela
     const elementsToHide = document.querySelectorAll('.cdk-overlay-container');
-    elementsToHide.forEach((el) => ((el as HTMLElement).style.visibility = 'hidden'));
+    elementsToHide.forEach((el) => ((el as HTMLElement).style.display = 'none'));
 
     setTimeout(() => {
       html2canvas(document.body, {
         useCORS: true,
+        allowTaint: true,
         logging: false,
         scale: 1,
         ignoreElements: (element) => element.classList.contains('cdk-overlay-container'),
       })
         .then((canvas) => {
-          elementsToHide.forEach((el) => ((el as HTMLElement).style.visibility = 'visible'));
+          elementsToHide.forEach((el) => ((el as HTMLElement).style.display = 'block'));
           const dataUrl = canvas.toDataURL('image/png');
           this.screenshotDataUrl.set(dataUrl);
           this.capturingScreenshot.set(false);
@@ -129,10 +130,11 @@ export class FeedbackDialogComponent implements OnInit {
         })
         .catch((err) => {
           console.error('Erro ao capturar tela:', err);
-          elementsToHide.forEach((el) => ((el as HTMLElement).style.visibility = 'visible'));
+          elementsToHide.forEach((el) => ((el as HTMLElement).style.display = 'block'));
           this.capturingScreenshot.set(false);
+          this.toastr.error('Não foi possível capturar a tela. Tente novamente.');
         });
-    }, 200);
+    }, 250);
   }
 
   removeScreenshot(): void {
@@ -258,6 +260,9 @@ export class FeedbackDialogComponent implements OnInit {
       next: (response) => {
         this.myFeedbacks.set(response.content || []);
         this.loadingMyFeedbacks.set(false);
+        this.feedbackService.markUserRead().subscribe({
+          next: () => this.feedbackService.notifyFeedbackUpdated(),
+        });
       },
       error: () => this.loadingMyFeedbacks.set(false),
     });

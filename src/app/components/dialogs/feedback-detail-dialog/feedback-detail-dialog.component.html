@@ -110,13 +110,16 @@
 
   <div class="dialog-actions">
     <button mat-button (click)="onClose()">Cancelar</button>
-    <button mat-flat-button color="primary" (click)="onSave()" [disabled]="saving()">
+    <button mat-flat-button color="primary" class="btn-submit" (click)="onSave()" [disabled]="saving()">
       @if (saving()) {
-        <mat-spinner diameter="18" style="margin-right: 8px; display: inline-block;"></mat-spinner>
-        Salvando...
+        <ng-container>
+          <mat-spinner diameter="18"></mat-spinner>
+          <span>Salvando...</span>
+        </ng-container>
       } @else {
         <ng-container>
-          <mat-icon>save</mat-icon> Salvar Alterações
+          <mat-icon class="btn-icon">save</mat-icon>
+          <span>Salvar Alterações</span>
         </ng-container>
       }
     </button>

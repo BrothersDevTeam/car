@@ -75,4 +75,12 @@ export class FeedbackService {
   deleteFeedback(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  markUserRead(): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/mark-user-read`, {});
+  }
+
+  markAdminRead(): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/mark-admin-read`, {});
+  }
 }

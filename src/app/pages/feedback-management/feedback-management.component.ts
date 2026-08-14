@@ -136,6 +136,7 @@ export class FeedbackManagementComponent implements OnInit {
     const dialogRef = this.dialog.open(FeedbackDetailDialogComponent, {
       width: '840px',
       maxHeight: '92vh',
+      panelClass: 'feedback-detail-dialog-panel',
       data: { feedback },
     });
 
@@ -143,6 +144,7 @@ export class FeedbackManagementComponent implements OnInit {
       if (updated) {
         this.loadFeedbacks();
         this.loadStats();
+        this.feedbackService.notifyFeedbackUpdated();
       }
     });
   }
@@ -167,6 +169,7 @@ export class FeedbackManagementComponent implements OnInit {
             this.toastr.success('Feedback excluído com sucesso.');
             this.loadFeedbacks();
             this.loadStats();
+            this.feedbackService.notifyFeedbackUpdated();
           },
           error: () => this.toastr.error('Erro ao excluir feedback.'),
         });

@@ -56,7 +56,7 @@
   <!-- Barra de Filtros -->
   <div class="filters-card">
     <div class="filters-row">
-      <mat-form-field appearance="outline" class="filter-field">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-field">
         <mat-label>Status</mat-label>
         <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onFilterChange()">
           <mat-option value="ALL">Todos os Status</mat-option>
@@ -68,7 +68,7 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="filter-field">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-field">
         <mat-label>Tipo</mat-label>
         <mat-select [(ngModel)]="selectedType" (selectionChange)="onFilterChange()">
           <mat-option value="ALL">Todos os Tipos</mat-option>
@@ -80,7 +80,7 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="filter-field">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-field">
         <mat-label>Loja de Origem</mat-label>
         <mat-select [(ngModel)]="selectedStoreId" (selectionChange)="onFilterChange()">
           <mat-option value="ALL">Todas as Lojas</mat-option>
@@ -91,7 +91,7 @@
       </mat-form-field>
 
       <button mat-stroked-button (click)="onFilterChange()" class="refresh-btn">
-        <mat-icon>refresh</mat-icon> Atualizar
+        <mat-icon>refresh</mat-icon> <span>Atualizar</span>
       </button>
     </div>
   </div>

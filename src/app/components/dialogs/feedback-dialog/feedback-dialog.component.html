@@ -146,13 +146,16 @@
           <!-- Botões de Ação -->
           <div class="dialog-actions">
             <button mat-button type="button" (click)="onClose()">Cancelar</button>
-            <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
+            <button mat-flat-button color="primary" type="submit" class="btn-submit" [disabled]="submitting()">
               @if (submitting()) {
-                <mat-spinner diameter="18" style="margin-right: 8px; display: inline-block;"></mat-spinner>
-                Enviando...
+                <ng-container>
+                  <mat-spinner diameter="18"></mat-spinner>
+                  <span>Enviando...</span>
+                </ng-container>
               } @else {
                 <ng-container>
-                  <mat-icon>send</mat-icon> Enviar Feedback
+                  <mat-icon class="btn-icon">send</mat-icon>
+                  <span>Enviar Feedback</span>
                 </ng-container>
               }
             </button>

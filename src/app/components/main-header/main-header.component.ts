@@ -201,7 +201,16 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   }
 
   goToFeedbacksPage(): void {
-    this.router.navigate(['/feedbacks']);
+    this.feedbackService.markAdminRead().subscribe({
+      next: () => {
+        this.unreadFeedbacksCount.set(0);
+        this.router.navigate(['/feedbacks']);
+      },
+      error: () => {
+        this.unreadFeedbacksCount.set(0);
+        this.router.navigate(['/feedbacks']);
+      },
+    });
   }
 
 

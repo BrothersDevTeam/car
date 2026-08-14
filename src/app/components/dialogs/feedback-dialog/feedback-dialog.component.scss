@@ -2,13 +2,13 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  max-width: 720px;
   width: 100%;
+  max-width: 100%;
   background: var(--bg-surface, #ffffff);
   color: var(--text-primary, #1e293b);
-  border-radius: 16px;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: none;
 }
 
 .dialog-header {
@@ -59,6 +59,15 @@
   padding: 20px 24px 24px;
   max-height: 70vh;
   overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+  }
 }
 
 .tab-icon {
@@ -278,6 +287,24 @@
   gap: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border-color, #e2e8f0);
+
+  .btn-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    .btn-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
 }
 
 /* Lista de Meus Feedbacks */
