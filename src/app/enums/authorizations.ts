@@ -104,4 +104,9 @@ export enum Authorizations {
   // DASHBOARD
   READ_DASHBOARD_STORE = 'read:dashboard:store',
   READ_DASHBOARD_NETWORK = 'read:dashboard:network',
+
+  // FEEDBACK
+  READ_FEEDBACK = 'read:feedback',
+  TAB_FEEDBACK = 'tab:feedback',
 }
+

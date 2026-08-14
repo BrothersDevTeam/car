@@ -7,6 +7,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { MainHeaderComponent } from '@components/main-header/main-header.component';
 import { SideNavComponent } from '@components/sidenav/sidenav.component';
+import { FeedbackWidgetComponent } from '@components/feedback-widget/feedback-widget.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
 
 @Component({
@@ -19,6 +20,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
     MatSidenavModule,
     SideNavComponent,
     MainHeaderComponent,
+    FeedbackWidgetComponent,
     NgxSpinnerModule,
   ],
   templateUrl: './main-layout.component.html',

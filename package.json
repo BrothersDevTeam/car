@@ -24,6 +24,8 @@
     "@angular/platform-browser": "^20.1.6",
     "@angular/platform-browser-dynamic": "^20.1.6",
     "@angular/router": "^20.1.6",
+    "@types/html2canvas": "^0.5.35",
+    "html2canvas": "^1.4.1",
     "jwt-decode": "^4.0.0",
     "ngx-mask": "^19.0.6",
     "ngx-spinner": "^17.0.0",

@@ -1,0 +1,21 @@
+<div class="feedback-widget-container">
+  <button
+    type="button"
+    class="feedback-trigger-btn"
+    (click)="openFeedbackDialog()"
+    matTooltip="Enviar sugestão ou relatar problema"
+    matTooltipPosition="left"
+  >
+    <div class="btn-content">
+      <mat-icon
+        [matBadge]="unreadResponsesCount()"
+        [matBadgeHidden]="unreadResponsesCount() === 0"
+        matBadgeColor="warn"
+        class="widget-icon"
+      >
+        rate_review
+      </mat-icon>
+      <span class="btn-text">Feedback</span>
+    </div>
+  </button>
+</div>

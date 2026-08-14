@@ -215,6 +215,8 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
       this.checkForDrafts();
     }, 500);
 
+    this.storeContextService.setStoreSelectionLock(true);
+
     this.subscriptions.add(
       this.vendaForm.valueChanges.subscribe(() => {
         this.actionsService.hasFormChanges.set(this.hasUnsavedChanges());
@@ -223,6 +225,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
   }
 
   ngOnDestroy() {
+    this.storeContextService.setStoreSelectionLock(false);
     this.actionsService.hasFormChanges.set(false);
     this.subscriptions.unsubscribe();
   }

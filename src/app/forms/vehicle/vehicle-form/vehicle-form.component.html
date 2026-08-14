@@ -1,412 +1,340 @@
 <div class="form-container">
   <!-- Seção de Rascunhos -->
   @if (availableDrafts.length > 0 && !dataForm) {
-    <div class="drafts-section" (click)="draftSelectorClicked = true">
-      <mat-card class="draft-card" [class.highlight-pulse]="!draftSelectorClicked">
-        <mat-card-header>
-          <mat-icon mat-card-avatar>history</mat-icon>
-          <mat-card-title>Veículos em andamento</mat-card-title>
-          <mat-card-subtitle>Você possui rascunhos salvos para este perfil.</mat-card-subtitle>
-        </mat-card-header>
+  <div class="drafts-section" (click)="draftSelectorClicked = true">
+    <mat-card class="draft-card" [class.highlight-pulse]="!draftSelectorClicked">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>history</mat-icon>
+        <mat-card-title>Veículos em andamento</mat-card-title>
+        <mat-card-subtitle>Você possui rascunhos salvos para este perfil.</mat-card-subtitle>
+      </mat-card-header>
 
-        <mat-card-content>
-          <div class="draft-selector-container">
-            <mat-form-field appearance="outline" class="draft-select-field">
-              <mat-label>Selecione um rascunho para continuar ou inicie um novo cadastro</mat-label>
-              <mat-select [(value)]="selectedDraftId" (selectionChange)="handleDraftSelection($event.value)">
-                <mat-option value="new" class="new-draft-option">
-                  <mat-icon style="margin-right: 8px; color: white">add_circle_outline</mat-icon>
-                  Iniciar novo cadastro
-                </mat-option>
-                @for (draft of availableDrafts; track draft.id) {
-                  <mat-option [value]="draft.id" class="draft-option-item">
-                    <div class="draft-option-content">
-                      <div class="draft-info">
-                        <span class="draft-name">
-                          {{ draft.draftName || 'Sem nome' }}
-                          @if (draft.createdBy) {
-                            <small class="draft-author" style="opacity: 0.7; font-size: 0.85em">
-                              (por {{ draft.createdBy }})
-                            </small>
-                          }
-                        </span>
-                        <span class="draft-date">
-                          {{ formatDraftDate(draft.lastModified) }}
-                        </span>
-                      </div>
-                      <button
-                        mat-icon-button
-                        class="delete-draft-btn"
-                        (click)="removeDraft(draft.id, $event)"
-                        matTooltip="Excluir rascunho"
-                      >
-                        <mat-icon>delete_outline</mat-icon>
-                      </button>
-                    </div>
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
+      <mat-card-content>
+        <div class="draft-selector-container">
+          <mat-form-field appearance="outline" class="draft-select-field">
+            <mat-label>Selecione um rascunho para continuar ou inicie um novo cadastro</mat-label>
+            <mat-select [(value)]="selectedDraftId" (selectionChange)="handleDraftSelection($event.value)">
+              <mat-option value="new" class="new-draft-option">
+                <mat-icon style="margin-right: 8px; color: white">add_circle_outline</mat-icon>
+                Iniciar novo cadastro
+              </mat-option>
+              @for (draft of availableDrafts; track draft.id) {
+              <mat-option [value]="draft.id" class="draft-option-item">
+                <div class="draft-option-content">
+                  <div class="draft-info">
+                    <span class="draft-name">
+                      {{ draft.draftName || 'Sem nome' }}
+                      @if (draft.createdBy) {
+                      <small class="draft-author" style="opacity: 0.7; font-size: 0.85em">
+                        (por {{ draft.createdBy }})
+                      </small>
+                      }
+                    </span>
+                    <span class="draft-date">
+                      {{ formatDraftDate(draft.lastModified) }}
+                    </span>
+                  </div>
+                  <button mat-icon-button class="delete-draft-btn" (click)="removeDraft(draft.id, $event)"
+                    matTooltip="Excluir rascunho">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
   }
 
   @if (showFormFields) {
-    <form [formGroup]="form" (keydown.enter)="onEnter($event)" class="modern-form">
-      @if (dataForm?.plate) {
-        <div class="form-header-title">
-          <mat-icon>directions_car</mat-icon>
-          <h2>
-            Veículo Placa:
-            <span>{{ dataForm!.plate }}</span>
-          </h2>
-        </div>
-      }
+  <form [formGroup]="form" (keydown.enter)="onEnter($event)" class="modern-form">
+    @if (dataForm?.plate) {
+    <div class="form-header-title">
+      <mat-icon>directions_car</mat-icon>
+      <h2>
+        Veículo Placa:
+        <span>{{ dataForm!.plate }}</span>
+      </h2>
+    </div>
+    }
 
-      <mat-tab-group
-        [selectedIndex]="selectedTabIndex()"
-        (selectedIndexChange)="selectedTabIndex.set($event)"
-        animationDuration="500ms"
-        class="modern-tab-group"
-      >
-        <!-- Aba 1: Dados do Veículo -->
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <mat-icon class="tab-icon">directions_car</mat-icon>
-            @if (submitted && !!form.get('plate')?.invalid) {
-              <mat-icon color="warn" class="error-indicator">error</mat-icon>
+    <mat-tab-group [selectedIndex]="selectedTabIndex()" (selectedIndexChange)="selectedTabIndex.set($event)"
+      animationDuration="500ms" class="modern-tab-group">
+      <!-- Aba 1: Dados do Veículo -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">directions_car</mat-icon>
+          @if (submitted && !!form.get('plate')?.invalid) {
+          <mat-icon color="warn" class="error-indicator">error</mat-icon>
+          }
+          <span>Veículo</span>
+        </ng-template>
+
+        <div class="tab-content">
+          <!-- Grupo: Identificação Básica -->
+          <section class="form-section">
+            <div class="section-title">
+              <mat-icon>info</mat-icon>
+              <h3>Identificação Básica</h3>
+            </div>
+
+            <div class="form-grid grid-3-cols align-items-end">
+              <div class="field-container">
+                <label class="modern-label">Origem do Veículo</label>
+                <mat-button-toggle-group formControlName="origin" aria-label="Origem do Veículo"
+                  class="premium-toggle-group">
+                  <mat-button-toggle value="NACIONAL">
+                    <mat-icon>flag</mat-icon>
+                    Nacional
+                  </mat-button-toggle>
+                  <mat-button-toggle value="IMPORTADO">
+                    <mat-icon>public</mat-icon>
+                    Importado
+                  </mat-button-toggle>
+                </mat-button-toggle-group>
+              </div>
+
+              <app-primary-select formControlName="vehicleType" label="Tipo de Veículo" [options]="vehicleTypeOptions"
+                optionLabel="label" optionValue="value"></app-primary-select>
+
+              <app-primary-input formControlName="plate" label="Placa*" mask="AAA-AAAA" placeholder="ABC-1234"
+                [error]="!!(form.get('plate')?.invalid && (form.get('plate')?.touched || submitted))" />
+
+              <app-primary-select formControlName="species" label="Espécie" [options]="speciesOptions"
+                optionLabel="label" optionValue="value"></app-primary-select>
+
+              <app-primary-select formControlName="category" label="Categoria" [options]="categoryOptions"
+                optionLabel="label" optionValue="value"></app-primary-select>
+            </div>
+          </section>
+
+          <!-- Grupo: Marca e Modelo -->
+          <section class="form-section">
+            <div class="section-title">
+              <mat-icon>category</mat-icon>
+              <h3>Marca e Modelo</h3>
+            </div>
+
+            <div class="form-grid">
+              <app-custom-select listType="person" label="Proprietário" [options]="persons" [control]="ownerControl"
+                (onCreateNew)="onCreateNewPerson()" (onEdit)="onEditPerson($event)"></app-custom-select>
+
+              <app-custom-select listType="brand" label="Marca" [options]="brands" [control]="brandControl"
+                (itemChanged)="loadBrands()"></app-custom-select>
+
+              <app-custom-select listType="model" label="Modelo" [options]="models" [control]="modelControl"
+                [placeholder]="selectModelDisabled() ? 'Selecione uma marca primeiro' : 'Selecione um modelo'"
+                [disabled]="selectModelDisabled() || loadingModels()" (itemChanged)="loadModels()"></app-custom-select>
+
+              <app-custom-select listType="model" label="Ano/Versão (FIPE)" [options]="years"
+                [control]="fipeYearControl"
+                [placeholder]="selectYearDisabled() ? 'Selecione um modelo primeiro' : 'Selecione o ano/versão'"
+                [disabled]="selectYearDisabled() || loadingYears()"></app-custom-select>
+            </div>
+
+            @if (loadingDetails()) {
+            <div class="loading-overlay">
+              <span class="loader-sm"></span>
+              <span>Buscando detalhes na FIPE...</span>
+            </div>
             }
-            <span>Veículo</span>
-          </ng-template>
+          </section>
 
-          <div class="tab-content">
-            <!-- Grupo: Identificação Básica -->
-            <section class="form-section">
-              <div class="section-title">
-                <mat-icon>info</mat-icon>
-                <h3>Identificação Básica</h3>
+          <!-- Grupo: Especificações Técnicas -->
+          <section class="form-section">
+            <div class="section-title">
+              <mat-icon>settings</mat-icon>
+              <h3>Especificações Técnicas</h3>
+            </div>
+
+            <div class="form-grid grid-3">
+              <app-custom-select listType="color" label="Cor" [options]="colors" [control]="colorControl"
+                (itemChanged)="loadColors()"></app-custom-select>
+
+              <app-primary-select formControlName="fuelTypes" label="Combustível" [options]="fuelTypesOptions"
+                optionValue="value" optionLabel="label"></app-primary-select>
+
+              <app-primary-input formControlName="vehicleYear" label="Ano Fabr." mask="0000" />
+              <app-primary-input formControlName="modelYear" label="Ano Modelo" mask="0000" />
+              <app-primary-input formControlName="km" label="KM Atual" />
+              <app-primary-input formControlName="doors" label="Portas" />
+            </div>
+          </section>
+
+          <!-- Grupo: Opcionais do Veículo -->
+          <section class="form-section optionals-section">
+            <div class="section-title">
+              <mat-icon>check_box</mat-icon>
+              <h3>Opcionais do Veículo</h3>
+            </div>
+
+            <div class="form-grid">
+              <app-primary-select formControlName="optionalIds" label="Opcionais"
+                placeholder="Selecione os opcionais do veículo" [options]="optionalsOptions" optionValue="value"
+                optionLabel="label" [allowMultiple]="true" [showSearch]="true" [useColumns]="true" maxHeight="500px"
+                [showAddButton]="true" (onCreateNew)="onCreateNewOptional($event)"></app-primary-select>
+            </div>
+
+            @if (getSelectedOptionals().length > 0) {
+            <div class="selected-optionals-container animate-fade-in">
+              <mat-chip-set>
+                @for (opt of getSelectedOptionals(); track opt.value) {
+                <mat-chip-row (removed)="removeOptional(opt.value)" class="optional-chip">
+                  {{ opt.label }}
+                  <button matChipRemove aria-label="Remover">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip-row>
+                }
+              </mat-chip-set>
+            </div>
+            }
+          </section>
+
+          <!-- Grupo: Documentação e Motor -->
+          <section class="form-section">
+            <div class="section-title">
+              <mat-icon>description</mat-icon>
+              <h3>Documentação e Motor</h3>
+            </div>
+
+            <div class="form-grid">
+              <app-primary-input formControlName="chassis" label="Chassi" mask="AAAAAAAAAAAAAAAAA" />
+              <app-primary-input formControlName="renavam" label="Renavam" />
+              <app-primary-input formControlName="engineNumber" label="Nº do Motor" />
+              <app-primary-input formControlName="engineDisplacement" label="Cilindrada" />
+              <app-primary-input formControlName="horsepower" label="Potência (CV)" />
+              <app-primary-input formControlName="features" label="Características" class="full-row" />
+            </div>
+          </section>
+        </div>
+      </mat-tab>
+
+      <!-- Aba 2: Dados Gerais (Negócio) -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">attach_money</mat-icon>
+          <span>Dados Gerais</span>
+        </ng-template>
+
+        <div class="tab-content">
+          <section class="form-section">
+            <div class="section-title">
+              <mat-icon>attach_money</mat-icon>
+              <h3>Preço de Venda e Tabela FIPE</h3>
+            </div>
+
+            <div class="form-grid">
+              <div class="field-container">
+                <label class="modern-label">Preço de Venda Sugerido</label>
+                <span class="helper-text">Valor base para anúncios e vitrine</span>
+                <app-currency-input formControlName="valorVenda" label="Preço de Venda"
+                  [error]="!!(form.get('valorVenda')?.invalid && (form.get('valorVenda')?.touched || submitted))"
+                  errorMessage="Valor inválido"></app-currency-input>
               </div>
 
-              <div class="form-grid grid-3-cols align-items-end">
-                <div class="field-container">
-                  <label class="modern-label">Origem do Veículo</label>
-                  <mat-button-toggle-group
-                    formControlName="origin"
-                    aria-label="Origem do Veículo"
-                    class="premium-toggle-group"
+              <div class="field-container">
+                <label class="modern-label">Valor Tabela FIPE</label>
+                <span class="helper-text">Valor de referência retornado da Tabela FIPE</span>
+                <div class="fipe-field-container">
+                  <app-primary-input
+                    formControlName="fipeValue"
+                    placeholder="R$ 0,00"
+                    [readonly]="true"
+                    class="fipe-input"
+                  ></app-primary-input>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    color="primary"
+                    (click)="refreshFipeValue()"
+                    [disabled]="loadingDetails()"
+                    matTooltip="Atualizar valor da Tabela FIPE"
+                    class="refresh-fipe-btn"
                   >
-                    <mat-button-toggle value="NACIONAL">
-                      <mat-icon>flag</mat-icon>
-                      Nacional
-                    </mat-button-toggle>
-                    <mat-button-toggle value="IMPORTADO">
-                      <mat-icon>public</mat-icon>
-                      Importado
-                    </mat-button-toggle>
-                  </mat-button-toggle-group>
-                </div>
-
-                <app-primary-select
-                  formControlName="vehicleType"
-                  label="Tipo de Veículo"
-                  [options]="vehicleTypeOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                ></app-primary-select>
-
-                <app-primary-input
-                  formControlName="plate"
-                  label="Placa*"
-                  mask="AAA-AAAA"
-                  placeholder="ABC-1234"
-                  [error]="!!(form.get('plate')?.invalid && (form.get('plate')?.touched || submitted))"
-                />
-
-                <app-primary-select
-                  formControlName="species"
-                  label="Espécie"
-                  [options]="speciesOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                ></app-primary-select>
-
-                <app-primary-select
-                  formControlName="category"
-                  label="Categoria"
-                  [options]="categoryOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                ></app-primary-select>
-              </div>
-            </section>
-
-            <!-- Grupo: Marca e Modelo -->
-            <section class="form-section">
-              <div class="section-title">
-                <mat-icon>category</mat-icon>
-                <h3>Marca e Modelo</h3>
-              </div>
-
-              <div class="form-grid">
-                <app-custom-select
-                  listType="person"
-                  label="Proprietário"
-                  [options]="persons"
-                  [control]="ownerControl"
-                  (onCreateNew)="onCreateNewPerson()"
-                  (onEdit)="onEditPerson($event)"
-                ></app-custom-select>
-
-                <app-custom-select
-                  listType="brand"
-                  label="Marca"
-                  [options]="brands"
-                  [control]="brandControl"
-                  (itemChanged)="loadBrands()"
-                ></app-custom-select>
-
-                <app-custom-select
-                  listType="model"
-                  label="Modelo"
-                  [options]="models"
-                  [control]="modelControl"
-                  [placeholder]="selectModelDisabled() ? 'Selecione uma marca primeiro' : 'Selecione um modelo'"
-                  [disabled]="selectModelDisabled() || loadingModels()"
-                  (itemChanged)="loadModels()"
-                ></app-custom-select>
-
-                <app-custom-select
-                  listType="model"
-                  label="Ano/Versão (FIPE)"
-                  [options]="years"
-                  [control]="fipeYearControl"
-                  [placeholder]="selectYearDisabled() ? 'Selecione um modelo primeiro' : 'Selecione o ano/versão'"
-                  [disabled]="selectYearDisabled() || loadingYears()"
-                ></app-custom-select>
-              </div>
-
-              @if (loadingDetails()) {
-                <div class="loading-overlay">
-                  <span class="loader-sm"></span>
-                  <span>Buscando detalhes na FIPE...</span>
-                </div>
-              }
-            </section>
-
-            <!-- Grupo: Especificações Técnicas -->
-            <section class="form-section">
-              <div class="section-title">
-                <mat-icon>settings</mat-icon>
-                <h3>Especificações Técnicas</h3>
-              </div>
-
-              <div class="form-grid grid-3">
-                <app-custom-select
-                  listType="color"
-                  label="Cor"
-                  [options]="colors"
-                  [control]="colorControl"
-                  (itemChanged)="loadColors()"
-                ></app-custom-select>
-
-                <app-primary-select
-                  formControlName="fuelTypes"
-                  label="Combustível"
-                  [options]="fuelTypesOptions"
-                  optionValue="value"
-                  optionLabel="label"
-                ></app-primary-select>
-
-                <app-primary-input formControlName="vehicleYear" label="Ano Fabr." mask="0000" />
-                <app-primary-input formControlName="modelYear" label="Ano Modelo" mask="0000" />
-                <app-primary-input formControlName="km" label="KM Atual" />
-                <app-primary-input formControlName="doors" label="Portas" />
-              </div>
-            </section>
-
-            <!-- Grupo: Opcionais do Veículo -->
-            <section class="form-section optionals-section">
-              <div class="section-title">
-                <mat-icon>check_box</mat-icon>
-                <h3>Opcionais do Veículo</h3>
-              </div>
-
-              <div class="form-grid">
-                <app-primary-select
-                  formControlName="optionalIds"
-                  label="Opcionais"
-                  placeholder="Selecione os opcionais do veículo"
-                  [options]="optionalsOptions"
-                  optionValue="value"
-                  optionLabel="label"
-                  [allowMultiple]="true"
-                  [showSearch]="true"
-                  [useColumns]="true"
-                  maxHeight="500px"
-                  [showAddButton]="true"
-                  (onCreateNew)="onCreateNewOptional($event)"
-                ></app-primary-select>
-              </div>
-
-              @if (getSelectedOptionals().length > 0) {
-                <div class="selected-optionals-container animate-fade-in">
-                  <mat-chip-set>
-                    @for (opt of getSelectedOptionals(); track opt.value) {
-                      <mat-chip-row (removed)="removeOptional(opt.value)" class="optional-chip">
-                        {{ opt.label }}
-                        <button matChipRemove aria-label="Remover">
-                          <mat-icon>cancel</mat-icon>
-                        </button>
-                      </mat-chip-row>
-                    }
-                  </mat-chip-set>
-                </div>
-              }
-            </section>
-
-            <!-- Grupo: Documentação e Motor -->
-            <section class="form-section">
-              <div class="section-title">
-                <mat-icon>description</mat-icon>
-                <h3>Documentação e Motor</h3>
-              </div>
-
-              <div class="form-grid">
-                <app-primary-input formControlName="chassis" label="Chassi" mask="AAAAAAAAAAAAAAAAA" />
-                <app-primary-input formControlName="renavam" label="Renavam" />
-                <app-primary-input formControlName="engineNumber" label="Nº do Motor" />
-                <app-primary-input formControlName="engineDisplacement" label="Cilindrada" />
-                <app-primary-input formControlName="horsepower" label="Potência (CV)" />
-                <app-primary-input formControlName="features" label="Características" class="full-row" />
-              </div>
-            </section>
-          </div>
-        </mat-tab>
-
-        <!-- Aba 2: Dados Gerais (Negócio) -->
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <mat-icon class="tab-icon">attach_money</mat-icon>
-            <span>Dados Gerais</span>
-          </ng-template>
-
-          <div class="tab-content">
-            <section class="form-section">
-              <div class="section-title">
-                <mat-icon>attach_money</mat-icon>
-                <h3>Preço de Venda</h3>
-              </div>
-
-              <div class="vertical-form-stack">
-                <div class="field-container">
-                  <label class="modern-label">Preço de Venda Sugerido</label>
-                  <span class="helper-text">Valor base para anúncios e vitrine</span>
-                  <app-currency-input
-                    formControlName="valorVenda"
-                    label="Preço de Venda"
-                    [error]="!!(form.get('valorVenda')?.invalid && (form.get('valorVenda')?.touched || submitted))"
-                    errorMessage="Valor inválido"
-                  ></app-currency-input>
+                    <mat-icon [class.spin]="loadingDetails()">refresh</mat-icon>
+                  </button>
                 </div>
               </div>
-            </section>
+            </div>
+          </section>
 
-            <section class="form-section">
-              <div class="section-title">
-                <mat-icon>event</mat-icon>
-                <h3>Logística</h3>
-              </div>
-              <div class="form-grid">
-                <app-date-input formControlName="entryDate" label="Data de Entrada"></app-date-input>
-                <app-date-input formControlName="exitDate" label="Data de Saída"></app-date-input>
-              </div>
-            </section>
+          <section class="form-section">
+            <div class="section-title">
+              <mat-icon>event</mat-icon>
+              <h3>Logística</h3>
+            </div>
+            <div class="form-grid">
+              <app-date-input formControlName="entryDate" label="Data de Entrada"></app-date-input>
+              <app-date-input formControlName="exitDate" label="Data de Saída"></app-date-input>
+            </div>
+          </section>
 
-            <section class="form-section">
-              <div class="section-title">
-                <mat-icon>notes</mat-icon>
-                <h3>Observações</h3>
-              </div>
-              <div class="full-row">
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Observações Internas</mat-label>
-                  <textarea
-                    matInput
-                    formControlName="observation"
-                    rows="4"
-                    placeholder="Detalhes importantes..."
-                  ></textarea>
-                </mat-form-field>
-              </div>
-            </section>
-          </div>
-        </mat-tab>
-      </mat-tab-group>
+          <section class="form-section">
+            <div class="section-title">
+              <mat-icon>notes</mat-icon>
+              <h3>Observações</h3>
+            </div>
+            <div class="full-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Observações Internas</mat-label>
+                <textarea matInput formControlName="observation" rows="4"
+                  placeholder="Detalhes importantes..."></textarea>
+              </mat-form-field>
+            </div>
+          </section>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
 
-      <!-- Botão de submit e rascunho -->
-      <div class="form-actions" style="display: flex; gap: 16px; align-items: center; width: 100%">
-        <button
-          mat-raised-button
-          class="submit-btn"
-          (click)="onSubmit()"
-          [disabled]="isSaveButtonDisabled"
-          #submitButton
-          style="flex: 1"
-        >
-          <mat-icon>{{ dataForm?.plate ? 'save' : 'add_circle' }}</mat-icon>
-          {{ dataForm?.plate ? 'Salvar Alterações' : 'Cadastrar Veículo' }}
-        </button>
+    <!-- Botão de submit e rascunho -->
+    <div class="form-actions" style="display: flex; gap: 16px; align-items: center; width: 100%">
+      <button mat-raised-button class="submit-btn" (click)="onSubmit()" [disabled]="isSaveButtonDisabled" #submitButton
+        style="flex: 1">
+        <mat-icon>{{ dataForm?.plate ? 'save' : 'add_circle' }}</mat-icon>
+        {{ dataForm?.plate ? 'Salvar Alterações' : 'Cadastrar Veículo' }}
+      </button>
 
-        <!-- Salvar Rascunho (Ícone discreto) -->
-        @if (canShowDraftButton) {
-          <button
-            mat-icon-button
-            type="button"
-            color="primary"
-            (click)="openSaveDraftDialog()"
-            [disabled]="isSaving"
-            matTooltip="Salvar Rascunho"
-            style="
+      <!-- Salvar Rascunho (Ícone discreto) -->
+      @if (canShowDraftButton) {
+      <button mat-icon-button type="button" color="primary" (click)="openSaveDraftDialog()" [disabled]="isSaving"
+        matTooltip="Salvar Rascunho" style="
               flex: 0 0 auto !important;
               width: 48px !important;
               height: 48px !important;
               min-width: 48px !important;
-            "
-          >
-            <mat-icon style="margin: 0 !important">save_as</mat-icon>
-          </button>
-        }
-      </div>
-    </form>
+            ">
+        <mat-icon style="margin: 0 !important">save_as</mat-icon>
+      </button>
+      }
+    </div>
+  </form>
   }
 </div>
 
 <!-- Drawer para criar/editar pessoa -->
 @if (openPersonForm()) {
-  <app-drawer (closeDrawer)="handleClosePersonDrawer()">
-    <mat-tab-group [selectedIndex]="selectedPersonToEdit?.legalEntity ? 1 : 0" class="modern-tab-group">
-      <mat-tab label="Pessoa Física" [disabled]="selectedPersonToEdit && selectedPersonToEdit.legalEntity">
-        <ng-template matTabContent>
-          <div class="tab-padding">
-            <app-natural-person-form
-              [dataForm]="!selectedPersonToEdit?.legalEntity ? selectedPersonToEdit : null"
-              (formSubmitted)="onPersonFormSubmitted()"
-            />
-          </div>
-        </ng-template>
-      </mat-tab>
-      <mat-tab label="Pessoa Jurídica" [disabled]="selectedPersonToEdit && !selectedPersonToEdit.legalEntity">
-        <ng-template matTabContent>
-          <div class="tab-padding">
-            <app-legal-entity-form
-              [dataForm]="selectedPersonToEdit?.legalEntity ? selectedPersonToEdit : null"
-              (formSubmitted)="onPersonFormSubmitted()"
-            />
-          </div>
-        </ng-template>
-      </mat-tab>
-    </mat-tab-group>
-  </app-drawer>
+<app-drawer (closeDrawer)="handleClosePersonDrawer()">
+  <mat-tab-group [selectedIndex]="selectedPersonToEdit?.legalEntity ? 1 : 0" class="modern-tab-group">
+    <mat-tab label="Pessoa Física" [disabled]="selectedPersonToEdit && selectedPersonToEdit.legalEntity">
+      <ng-template matTabContent>
+        <div class="tab-padding">
+          <app-natural-person-form [dataForm]="!selectedPersonToEdit?.legalEntity ? selectedPersonToEdit : null"
+            (formSubmitted)="onPersonFormSubmitted()" />
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="Pessoa Jurídica" [disabled]="selectedPersonToEdit && !selectedPersonToEdit.legalEntity">
+      <ng-template matTabContent>
+        <div class="tab-padding">
+          <app-legal-entity-form [dataForm]="selectedPersonToEdit?.legalEntity ? selectedPersonToEdit : null"
+            (formSubmitted)="onPersonFormSubmitted()" />
+        </div>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+</app-drawer>
 }

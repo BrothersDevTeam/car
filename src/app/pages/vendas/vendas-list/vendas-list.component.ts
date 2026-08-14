@@ -232,6 +232,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.storeContextService.setStoreSelectionLock(false);
     this.subscription.unsubscribe();
   }
 
@@ -282,16 +283,24 @@ export class VendasListComponent implements OnInit, OnDestroy {
   }
 
   onRowClick(venda: VendaResponseDto) {
+    if (venda.storeId) {
+      this.storeContextService.setStoreId(venda.storeId);
+    }
     this.selectedVendaId.set(venda.vendaId);
     this.openInfo.set(true);
+    this.storeContextService.setStoreSelectionLock(true);
   }
 
   handleCloseDrawer() {
     this.openInfo.set(false);
     this.selectedVendaId.set(null);
+    this.storeContextService.setStoreSelectionLock(false);
   }
 
   handleEdit(venda: VendaResponseDto) {
+    if (venda.storeId) {
+      this.storeContextService.setStoreId(venda.storeId);
+    }
     if (!this.storeContextService.validateStoreSelection()) return;
     this.router.navigate(['/vendas/editar', venda.vendaId]);
   }

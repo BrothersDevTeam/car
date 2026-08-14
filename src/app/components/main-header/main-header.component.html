@@ -14,7 +14,11 @@
 
   @if (isCarAdmin) {
     <button mat-icon-button [matMenuTriggerFor]="notificationMenu" aria-label="Notificações" class="notification-btn">
-      <mat-icon [matBadge]="inactiveStores.length" [matBadgeHidden]="inactiveStores.length === 0" matBadgeColor="warn">
+      <mat-icon
+        [matBadge]="inactiveStores.length + unreadFeedbacksCount()"
+        [matBadgeHidden]="(inactiveStores.length + unreadFeedbacksCount()) === 0"
+        matBadgeColor="warn"
+      >
         notifications
       </mat-icon>
     </button>
@@ -25,13 +29,25 @@
       </div>
       <mat-divider></mat-divider>
       
-      @if (inactiveStores.length === 0) {
+      @if (inactiveStores.length === 0 && unreadFeedbacksCount() === 0) {
         <div class="notification-empty" (click)="$event.stopPropagation()">
           <mat-icon>notifications_none</mat-icon>
           <p>Nenhuma notificação pendente</p>
         </div>
       } @else {
         <div class="notification-list">
+          @if (unreadFeedbacksCount() > 0) {
+            <button mat-menu-item (click)="goToFeedbacksPage()" class="notification-item-btn">
+              <mat-icon style="color: #3b82f6; margin-right: 8px;">rate_review</mat-icon>
+              <div class="notification-text-content">
+                <div class="notification-item-title">Novos Feedbacks ({{ unreadFeedbacksCount() }})</div>
+                <div class="notification-item-desc">
+                  Você possui sugestões/bugs aguardando análise.
+                </div>
+              </div>
+            </button>
+          }
+
           @for (store of inactiveStores; track store.storeId) {
             <button mat-menu-item (click)="goToStoresPage()" class="notification-item-btn">
               <mat-icon style="color: #dc3545; margin-right: 8px;">store</mat-icon>
@@ -53,7 +69,8 @@
     (selectionChange)="onStoreChange()"
     class="header-store-select"
     panelClass="header-store-select-panel"
-    [disabled]="!isCarAdmin && !canReadStoreOthers"
+    [disabled]="(!isCarAdmin && !canReadStoreOthers) || isStoreSelectionLocked()"
+    [matTooltip]="isStoreSelectionLocked() ? 'A seleção de loja está bloqueada durante a visualização ou edição de um registro' : ''"
   >
     <mat-select-trigger>
       <div class="store-trigger-content">

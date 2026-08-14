@@ -13,8 +13,11 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, distinctUntilChanged } from 'rxjs';
+
+import { FeedbackService } from '@services/feedback.service';
 
 @Component({
   selector: 'app-main-header',
@@ -26,6 +29,7 @@ import { Subject, takeUntil, distinctUntilChanged } from 'rxjs';
     MatMenuModule,
     MatBadgeModule,
     MatDividerModule,
+    MatTooltipModule,
     FormsModule,
   ],
   templateUrl: './main-header.component.html',
@@ -41,6 +45,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private storeService = inject(StoreService);
   private storeContextService = inject(StoreContextService);
+  private feedbackService = inject(FeedbackService);
   private router = inject(Router);
 
   isCarAdmin = false;
@@ -48,7 +53,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   stores: Store[] = [];
   selectedStoreId: string = 'ALL';
   inactiveStores: Store[] = [];
-  
+  isStoreSelectionLocked = signal<boolean>(false);
+  unreadFeedbacksCount = signal<number>(0);
+
   // Variáveis para o banner de faturamento
   showBillingWarning = false;
   warningMessage = '';
@@ -62,6 +69,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
       if (this.isCarAdmin) {
         this.loadInactiveStores();
+        this.loadUnreadFeedbacksCount();
       }
 
       const initialStoreId = this.authService.getStoreId();
@@ -95,6 +103,13 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         } else {
           this.loadCurrentStoreName();
         }
+      });
+
+    // Escuta estado de bloqueio do seletor de loja
+    this.storeContextService.isStoreSelectionLocked$
+      .pipe(takeUntil(this.destroy$), distinctUntilChanged())
+      .subscribe((isLocked) => {
+        this.isStoreSelectionLocked.set(isLocked);
       });
 
     // Escuta atualizações de lojas para recarregar a lista do header sem f5
@@ -156,16 +171,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     const store = this.stores.find((s) => s.storeId === this.selectedStoreId);
     if (store) {
       const name = store.tradeName || store.name;
-      return `${name} - ${this.formatCnpj(store.cnpj)}`;
+      return `${name}`;
     }
     return this.storeName() || 'Filial';
-  }
-
-  formatCnpj(cnpj: string | undefined): string {
-    if (!cnpj) return '';
-    const cleanCnpj = cnpj.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-    if (cleanCnpj.length !== 14) return cnpj;
-    return cleanCnpj.replace(/^([A-Z0-9]{2})([A-Z0-9]{3})([A-Z0-9]{3})([A-Z0-9]{4})([A-Z0-9]{2})$/, '$1.$2.$3/$4-$5');
   }
 
   loadInactiveStores(): void {
@@ -180,9 +188,31 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadUnreadFeedbacksCount(): void {
+    if (!this.isCarAdmin) return;
+    this.feedbackService.getUnreadCount().subscribe({
+      next: (res) => this.unreadFeedbacksCount.set(res.unreadCount || 0),
+      error: () => this.unreadFeedbacksCount.set(0),
+    });
+  }
+
   goToStoresPage(): void {
     this.router.navigate(['/store']);
   }
+
+  goToFeedbacksPage(): void {
+    this.feedbackService.markAdminRead().subscribe({
+      next: () => {
+        this.unreadFeedbacksCount.set(0);
+        this.router.navigate(['/feedbacks']);
+      },
+      error: () => {
+        this.unreadFeedbacksCount.set(0);
+        this.router.navigate(['/feedbacks']);
+      },
+    });
+  }
+
 
   checkBillingStatus(storeId: string): void {
     if (!storeId || storeId === 'ALL') {

@@ -289,6 +289,7 @@ export class VehicleComponent implements CanComponentDeactivate {
   }
 
   ngOnDestroy() {
+    this.storeContextService.setStoreSelectionLock(false);
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -341,6 +342,7 @@ export class VehicleComponent implements CanComponentDeactivate {
     this.selectedVehicle = null;
     this.selectedDraft = null;
     this.actionsService.hasFormChanges.set(false);
+    this.storeContextService.setStoreSelectionLock(false);
   }
 
   loadVehicleList(pageIndex: number, pageSize: number, searchValue?: string) {
@@ -394,10 +396,17 @@ export class VehicleComponent implements CanComponentDeactivate {
   }
 
   handleSelectedVehicle(vehicle: VehicleList) {
+    if (vehicle.storeId) {
+      this.storeContextService.setStoreId(vehicle.storeId);
+    }
     this.vehicleService.getById(vehicle.vehicleId).subscribe({
       next: (fullVehicle) => {
+        if (fullVehicle.storeId) {
+          this.storeContextService.setStoreId(fullVehicle.storeId);
+        }
         this.selectedVehicle = this.vehicleToForm(fullVehicle);
         this.openInfo.set(true);
+        this.storeContextService.setStoreSelectionLock(true);
       },
       error: (err) => {
         this.toastr.error('Erro ao carregar detalhes do veículo');
@@ -413,6 +422,7 @@ export class VehicleComponent implements CanComponentDeactivate {
   handleOpenForm() {
     if (!this.storeContextService.validateStoreSelection()) return;
     this.openForm.set(true);
+    this.storeContextService.setStoreSelectionLock(true);
   }
 
   handlePageEvent(event: PageEvent) {
@@ -476,6 +486,11 @@ export class VehicleComponent implements CanComponentDeactivate {
    * Quando vem do vehicle-info (editEvent), recebe VehicleForm
    */
   handleEdit(vehicle: VehicleList | Vehicle | VehicleForm) {
+    const storeId = (vehicle as any).storeId;
+    if (storeId) {
+      this.storeContextService.setStoreId(storeId);
+    }
+
     if (!this.storeContextService.validateStoreSelection()) return;
 
     if ('vehicleId' in vehicle && !('chassis' in vehicle) && !('buyerDisplay' in vehicle)) {
@@ -511,9 +526,13 @@ export class VehicleComponent implements CanComponentDeactivate {
     this.selectedVehicle = null;
     this.selectedDraft = null;
     this.actionsService.hasFormChanges.set(false);
+    this.storeContextService.setStoreSelectionLock(false);
   }
 
   handleDelete(vehicle: VehicleList) {
+    if (vehicle.storeId) {
+      this.storeContextService.setStoreId(vehicle.storeId);
+    }
     if (!this.storeContextService.validateStoreSelection()) return;
 
     const dialogRef: MatDialogRef<ConfirmDialogComponent> = this.dialog.open(ConfirmDialogComponent, {

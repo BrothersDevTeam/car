@@ -40,7 +40,6 @@ import { ToastrService } from 'ngx-toastr';
     MatDividerModule,
     StoreCardComponent,
     ContentHeaderComponent,
-    StoreManualPaymentDialogComponent,
   ],
   templateUrl: './store.component.html',
   styleUrl: './store.component.scss',

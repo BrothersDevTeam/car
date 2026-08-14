@@ -37,7 +37,9 @@
               <div class="value-card buy">
                 <span class="card-label">
                   Valor de Compra
-                  <small *ngIf="isCompraEfetiva" style="font-size: 10px; opacity: 0.7">(Efetivo)</small>
+                  @if (isCompraEfetiva) {
+                    <small style="font-size: 10px; opacity: 0.7">(Efetivo)</small>
+                  }
                 </span>
                 <span class="card-value">
                   {{ valorCompraEfetivo | currency: 'BRL' }}
@@ -46,10 +48,30 @@
               <div class="value-card sell">
                 <span class="card-label">
                   Valor de Venda
-                  <small *ngIf="isVendaEfetiva" style="font-size: 10px; opacity: 0.7">(Real)</small>
+                  @if (isVendaEfetiva) {
+                    <small style="font-size: 10px; opacity: 0.7">(Real)</small>
+                  }
                 </span>
                 <span class="card-value">
                   {{ valorVendaEfetivo | currency: 'BRL' }}
+                </span>
+              </div>
+              <div class="value-card fipe">
+                <div class="card-label-row">
+                  <span class="card-label">Valor Tabela FIPE</span>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    (click)="refreshFipeValue()"
+                    [disabled]="isRefreshingFipe()"
+                    matTooltip="Consultar/Atualizar Tabela FIPE"
+                    class="fipe-refresh-icon-btn"
+                  >
+                    <mat-icon [class.spin]="isRefreshingFipe()">refresh</mat-icon>
+                  </button>
+                </div>
+                <span class="card-value">
+                  {{ vehicle.fipeValue || 'Não informado' }}
                 </span>
               </div>
             </div>

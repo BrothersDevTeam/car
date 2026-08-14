@@ -155,6 +155,8 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
       this.initialFormValue = JSON.stringify(this.compraForm.value);
     }, 800);
 
+    this.storeContextService.setStoreSelectionLock(true);
+
     this.subscriptions.add(
       this.compraForm.valueChanges.subscribe(() => {
         this.actionsService.hasFormChanges.set(this.hasUnsavedChanges());
@@ -164,6 +166,7 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
   }
 
   ngOnDestroy() {
+    this.storeContextService.setStoreSelectionLock(false);
     this.actionsService.hasFormChanges.set(false);
     this.subscriptions.unsubscribe();
   }

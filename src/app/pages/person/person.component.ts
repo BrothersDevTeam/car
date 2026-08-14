@@ -359,26 +359,31 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
       }),
     );
 
-    // Verifica se há um ID de edição vindo da rota (ex: redirecionamento de erro de endereço)
+    // Verifica se há um ID de edição vindo da rota (ex: redirecionamento de erro de endereço ou vinculação de usuário)
     this.subscriptions.push(
       this.route.queryParams.subscribe((params) => {
         const editId = params['editId'];
+        const openEdit = params['openEdit'] === 'true';
         if (editId) {
-          this.loadPersonForEdit(editId);
+          this.loadPersonForEdit(editId, openEdit);
         }
       }),
     );
   }
 
   /**
-   * Busca os dados de uma pessoa pelo ID e abre o formulário de edição
+   * Busca os dados de uma pessoa pelo ID e abre o formulário de edição ou a visualização de detalhes
    */
-  private loadPersonForEdit(personId: string) {
+  private loadPersonForEdit(personId: string, openEditDirectly: boolean = false) {
     this.clientListLoading.set(true);
     this.personService.getById(personId).subscribe({
       next: (person) => {
         this.clientListLoading.set(false);
-        this.handleSelectedPerson(person); // Abre a visualização de Detalhes (Info)
+        if (openEditDirectly) {
+          this.handleEdit(person);
+        } else {
+          this.handleSelectedPerson(person); // Abre a visualização de Detalhes (Info)
+        }
       },
       error: (err) => {
         this.clientListLoading.set(false);
@@ -389,6 +394,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
   }
 
   ngOnDestroy() {
+    this.storeContextService.setStoreSelectionLock(false);
     this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
@@ -610,6 +616,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
     this.pendingAddressDraftId = null;
     this.selectedTabIndex = 0;
     this.actionsService.hasFormChanges.set(false);
+    this.storeContextService.setStoreSelectionLock(false);
   }
 
   loadPersonList(pageIndex: number, pageSize: number, searchValue?: string) {
@@ -684,16 +691,26 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
   }
 
   handleSelectedPerson(person: Person) {
+    if (person.storeId) {
+      this.storeContextService.setStoreId(person.storeId);
+    }
     this.selectedPerson = person;
     this.openInfo.set(true);
+    this.storeContextService.setStoreSelectionLock(true);
   }
 
   onRowClick(person: Person) {
+    if (person.storeId) {
+      this.storeContextService.setStoreId(person.storeId);
+    }
     if (person.personId) {
       this.clientListLoading.set(true);
       this.personService.getById(person.personId).subscribe({
         next: (fullPerson) => {
           this.clientListLoading.set(false);
+          if (fullPerson.storeId) {
+            this.storeContextService.setStoreId(fullPerson.storeId);
+          }
           this.handleSelectedPerson(fullPerson);
         },
         error: (err) => {
@@ -713,6 +730,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
     this.selectedDraft = null;
     this.selectedTabIndex = 0;
     this.openForm.set(true);
+    this.storeContextService.setStoreSelectionLock(true);
   }
 
   handlePageEvent(event: PageEvent) {
@@ -742,6 +760,11 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
   }
 
   handleEdit(person?: Person) {
+    const targetPerson = person || this.selectedPerson;
+    if (targetPerson && targetPerson.storeId) {
+      this.storeContextService.setStoreId(targetPerson.storeId);
+    }
+
     if (!this.storeContextService.validateStoreSelection()) return;
 
     if (person && person.personId) {
@@ -813,6 +836,9 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
   }
 
   handleDelete(person: Person) {
+    if (person.storeId) {
+      this.storeContextService.setStoreId(person.storeId);
+    }
     if (!this.storeContextService.validateStoreSelection()) return;
     this.openDeleteDialog(person);
   }
@@ -905,6 +931,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
     this.selectedPerson = null;
     this.selectedDraft = undefined; // Force placeholder
     this.actionsService.hasFormChanges.set(false);
+    this.storeContextService.setStoreSelectionLock(false);
   }
 
   /**

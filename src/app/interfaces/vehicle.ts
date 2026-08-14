@@ -92,6 +92,7 @@ export interface Vehicle {
   supplierName?: string;
   dataCompra?: string;
   valorVenda?: string;
+  fipeValue?: string;
   observation?: string;
   entryDate?: string;
   exitDate?: string;
