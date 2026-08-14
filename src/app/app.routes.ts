@@ -8,6 +8,8 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
 import { AuthGuard } from './services/auth/auth.guard';
 import { subscriptionGuard } from './guards/subscription.guard';
+import { claimGuard } from './guards/claim.guard';
+import { Authorizations } from './enums/authorizations';
 
 export const routes: Routes = [
   {
@@ -48,7 +50,7 @@ export const routes: Routes = [
         path: 'reports',
         loadChildren: () => import('./pages/reports/reports.routes').then((m) => m.REPORTS_ROUTES),
       },
-      { path: 'dashboard', component: DashboardComponent },
+      { path: 'dashboard', component: DashboardComponent, canActivate: [claimGuard], data: { claim: Authorizations.TAB_DASHBOARD } },
     ],
   },
   {

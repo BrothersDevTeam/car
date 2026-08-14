@@ -1,6 +1,18 @@
 export enum Authorizations {
   ROOT_ADMIN = 'root:admin',
 
+  // TABS
+  TAB_DASHBOARD = 'tab:dashboard',
+  TAB_STORE = 'tab:store',
+  TAB_COBRANCA = 'tab:cobranca',
+  TAB_FINANCIAL = 'tab:financial',
+  TAB_PERSON = 'tab:person',
+  TAB_VEHICLE = 'tab:vehicle',
+  TAB_COMPRA = 'tab:compra',
+  TAB_VENDA = 'tab:venda',
+  TAB_NFE = 'tab:nfe',
+  TAB_REPORT = 'tab:report',
+
   // STORE
   READ_STORE_SELF = 'read:store:self',
   READ_STORE_NETWORK = 'read:store:network',

@@ -12,7 +12,7 @@ export const VENDAS_ROUTES: Routes = [
     path: '',
     loadComponent: () => import('./vendas-list/vendas-list.component').then((m) => m.VendasListComponent),
     canActivate: [claimGuard],
-    data: { claim: Authorizations.READ_VENDA_STORE },
+    data: { claim: Authorizations.TAB_VENDA },
   },
   {
     path: 'nova',

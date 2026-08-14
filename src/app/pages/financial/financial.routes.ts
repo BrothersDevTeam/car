@@ -8,6 +8,6 @@ export const FINANCIAL_ROUTES: Routes = [
     loadComponent: () =>
       import('./financial-dashboard/financial-dashboard.component').then((m) => m.FinancialDashboardComponent),
     canActivate: [claimGuard],
-    data: { claim: Authorizations.READ_FINANCIAL_STORE },
+    data: { claim: Authorizations.TAB_FINANCIAL },
   },
 ];

@@ -8,7 +8,7 @@ export const COMPRAS_ROUTES: Routes = [
     path: '',
     loadComponent: () => import('./compras-list/compras-list.component').then((m) => m.ComprasListComponent),
     canActivate: [claimGuard],
-    data: { claim: Authorizations.READ_VEHICLE_STORE }, // Reusando a autorização de veículos
+    data: { claim: Authorizations.TAB_COMPRA },
   },
   {
     path: 'nova',

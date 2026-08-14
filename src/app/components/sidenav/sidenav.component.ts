@@ -74,8 +74,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     // Dashboard
     if (
-      this.authService.hasAuthority(Authorizations.READ_DASHBOARD_STORE) ||
-      this.authService.hasAuthority(Authorizations.READ_DASHBOARD_NETWORK) ||
+      this.authService.hasAuthority(Authorizations.TAB_DASHBOARD) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.unshift({
@@ -87,8 +86,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     // Lojas
     if (
-      this.authService.hasAuthority(Authorizations.READ_STORE_SELF) ||
-      this.authService.hasAuthority(Authorizations.READ_STORE_NETWORK) ||
+      this.authService.hasAuthority(Authorizations.TAB_STORE) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.push({
@@ -98,8 +96,11 @@ export class SideNavComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Cobrança (Apenas ROOT_ADMIN)
-    if (this.authService.hasAuthority(Authorizations.ROOT_ADMIN)) {
+    // Cobrança (Apenas ROOT_ADMIN ou quem tem tab:cobranca)
+    if (
+      this.authService.hasAuthority(Authorizations.TAB_COBRANCA) ||
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
+    ) {
       baseMenu.push({
         icon: 'receipt_long',
         label: 'Cobrança',
@@ -109,8 +110,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     // Financeiro
     if (
-      this.authService.hasAuthority(Authorizations.READ_FINANCIAL_STORE) ||
-      this.authService.hasAuthority(Authorizations.READ_FINANCIAL_NETWORK) ||
+      this.authService.hasAuthority(Authorizations.TAB_FINANCIAL) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.push({
@@ -122,8 +122,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     // Pessoas
     if (
-      this.authService.hasAuthority(Authorizations.READ_PERSON_STORE) ||
-      this.authService.hasAuthority(Authorizations.READ_PERSON_NETWORK) ||
+      this.authService.hasAuthority(Authorizations.TAB_PERSON) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.push({
@@ -135,7 +134,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     // Veículos
     if (
-      this.authService.hasAuthority(Authorizations.READ_VEHICLE_STORE) ||
+      this.authService.hasAuthority(Authorizations.TAB_VEHICLE) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.push({
@@ -147,7 +146,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     // Compras
     if (
-      this.authService.hasAuthority(Authorizations.READ_VEHICLE_STORE) ||
+      this.authService.hasAuthority(Authorizations.TAB_COMPRA) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.push({
@@ -159,7 +158,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     // Vendas
     if (
-      this.authService.hasAuthority(Authorizations.READ_VENDA_STORE) ||
+      this.authService.hasAuthority(Authorizations.TAB_VENDA) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.push({
@@ -171,7 +170,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     // Notas Fiscais
     if (
-      this.authService.hasAuthority(Authorizations.READ_NFE_STORE) ||
+      this.authService.hasAuthority(Authorizations.TAB_NFE) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.push({
@@ -183,10 +182,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     // Relatórios
     if (
-      this.authService.hasAuthority(Authorizations.READ_FINANCIAL_STORE) ||
-      this.authService.hasAuthority(Authorizations.READ_FINANCIAL_NETWORK) ||
-      this.authService.hasAuthority(Authorizations.READ_VEHICLE_STORE) ||
-      this.authService.hasAuthority(Authorizations.READ_PERSON_STORE) ||
+      this.authService.hasAuthority(Authorizations.TAB_REPORT) ||
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN)
     ) {
       baseMenu.push({
