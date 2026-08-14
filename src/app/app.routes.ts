@@ -48,6 +48,13 @@ export const routes: Routes = [
         path: 'reports',
         loadChildren: () => import('./pages/reports/reports.routes').then((m) => m.REPORTS_ROUTES),
       },
+      {
+        path: 'feedbacks',
+        loadComponent: () =>
+          import('./pages/feedback-management/feedback-management.component').then(
+            (m) => m.FeedbackManagementComponent,
+          ),
+      },
       { path: 'dashboard', component: DashboardComponent },
     ],
   },

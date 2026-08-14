@@ -1,0 +1,219 @@
+<div class="feedback-page-container">
+  <!-- Top Title Banner -->
+  <div class="page-header">
+    <div class="header-left">
+      <mat-icon class="page-icon">rate_review</mat-icon>
+      <div>
+        <h1>Central de Feedbacks & Sugestões</h1>
+        <p class="subtitle">Gerencie sugestões de melhorias, relatos de bugs e críticas dos usuários</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards de Métricas no Topo -->
+  <div class="stats-cards-grid">
+    <div class="stat-card">
+      <div class="stat-icon total">
+        <mat-icon>inbox</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ totalCount() }}</span>
+        <span class="stat-label">Total Recebidos</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon new">
+        <mat-icon>mark_email_unread</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ newCount() }}</span>
+        <span class="stat-label">Novos Pendentes</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon progress">
+        <mat-icon>pending_actions</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ inProgressCount() }}</span>
+        <span class="stat-label">Em Análise / Andamento</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon resolved">
+        <mat-icon>task_alt</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ resolvedCount() }}</span>
+        <span class="stat-label">Resolvidos</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de Filtros -->
+  <div class="filters-card">
+    <div class="filters-row">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onFilterChange()">
+          <mat-option value="ALL">Todos os Status</mat-option>
+          <mat-option value="NEW">Novos</mat-option>
+          <mat-option value="UNDER_REVIEW">Em Análise</mat-option>
+          <mat-option value="IN_PROGRESS">Em Andamento</mat-option>
+          <mat-option value="RESOLVED">Resolvidos</mat-option>
+          <mat-option value="DISCARDED">Descartados</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Tipo</mat-label>
+        <mat-select [(ngModel)]="selectedType" (selectionChange)="onFilterChange()">
+          <mat-option value="ALL">Todos os Tipos</mat-option>
+          <mat-option value="BUG">Erro / Bug</mat-option>
+          <mat-option value="SUGGESTION">Sugestão</mat-option>
+          <mat-option value="IMPROVEMENT">Melhoria</mat-option>
+          <mat-option value="CRITICISM">Crítica</mat-option>
+          <mat-option value="OTHER">Outros</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Loja de Origem</mat-label>
+        <mat-select [(ngModel)]="selectedStoreId" (selectionChange)="onFilterChange()">
+          <mat-option value="ALL">Todas as Lojas</mat-option>
+          @for (store of stores(); track store.storeId) {
+            <mat-option [value]="store.storeId">{{ store.tradeName || store.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-stroked-button (click)="onFilterChange()" class="refresh-btn">
+        <mat-icon>refresh</mat-icon> Atualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabela de Feedbacks -->
+  <div class="table-card">
+    @if (loading()) {
+      <div class="table-loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <span>Carregando feedbacks...</span>
+      </div>
+    } @else if (feedbacks().length === 0) {
+      <div class="empty-table-state">
+        <mat-icon class="empty-icon">search_off</mat-icon>
+        <h3>Nenhum feedback encontrado</h3>
+        <p>Tente ajustar os filtros selecionados acima.</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table mat-table [dataSource]="feedbacks()" class="custom-table">
+          <!-- Data -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>Data</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="date-cell">
+                <span class="date-main">{{ element.createdAt | date: 'dd/MM/yyyy' }}</span>
+                <span class="date-sub">{{ element.createdAt | date: 'HH:mm' }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Tipo -->
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Tipo</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="type-tag" [class.type-bug]="element.type === 'BUG'">
+                {{ getTypeLabel(element.type) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Usuário / Loja -->
+          <ng-container matColumnDef="userName">
+            <th mat-header-cell *matHeaderCellDef>Usuário / Loja</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="user-cell">
+                <span class="user-name">{{ element.userName || 'Usuário' }}</span>
+                <span class="user-store">{{ element.storeName || 'Loja Principal' }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Rota -->
+          <ng-container matColumnDef="currentRoute">
+            <th mat-header-cell *matHeaderCellDef>Rota</th>
+            <td mat-cell *matCellDef="let element">
+              <code class="route-code">{{ element.currentRoute || '/' }}</code>
+            </td>
+          </ng-container>
+
+          <!-- Título -->
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Título</th>
+            <td mat-cell *matCellDef="let element" class="title-cell">
+              <span class="title-text" [matTooltip]="element.title">{{ element.title }}</span>
+              @if (element.screenshotUrl) {
+                <mat-icon class="has-image-icon" matTooltip="Possui captura de tela">photo</mat-icon>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Status -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="status-badge" [ngClass]="getStatusBadgeClass(element.status)">
+                {{ getStatusLabel(element.status) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Ações -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef style="text-align: right;">Ações</th>
+            <td mat-cell *matCellDef="let element" style="text-align: right;">
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="openDetailDialog(element)"
+                matTooltip="Visualizar e Responder"
+              >
+                <mat-icon>visibility</mat-icon>
+              </button>
+
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="onDelete(element, $event)"
+                matTooltip="Excluir Feedback"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            (click)="openDetailDialog(row)"
+            class="clickable-row"
+          ></tr>
+        </table>
+      </div>
+
+      <mat-paginator
+        [length]="totalElements()"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[10, 15, 25, 50]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons
+      ></mat-paginator>
+    }
+  </div>
+</div>

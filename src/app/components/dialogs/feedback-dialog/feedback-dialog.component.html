@@ -1,0 +1,216 @@
+<div class="feedback-dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-title">
+      <mat-icon class="header-icon">rate_review</mat-icon>
+      <div>
+        <h2>Central de Feedback</h2>
+        <p class="subtitle">Envie sugestões ou acompanhe as suas solicitações</p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="onClose()" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Abas -->
+  <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="custom-tabs">
+    <!-- ABA 1: NOVO FEEDBACK -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">add_comment</mat-icon>
+        Novo Feedback
+      </ng-template>
+
+      <div class="tab-body">
+        <form [formGroup]="feedbackForm" (ngSubmit)="onSubmit()">
+          <!-- Seletor de Tipo -->
+          <div class="type-selector-section">
+            <label class="section-label">O que você gostaria de enviar?</label>
+            <div class="type-chips">
+              @for (item of feedbackTypes; track item.value) {
+                <button
+                  type="button"
+                  class="type-chip"
+                  [class.active]="feedbackForm.get('type')?.value === item.value"
+                  (click)="feedbackForm.get('type')?.setValue(item.value)"
+                >
+                  <mat-icon [style.color]="item.color">{{ item.icon }}</mat-icon>
+                  <span>{{ item.label }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Campos de Texto -->
+          <div class="form-fields">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Título resumido</mat-label>
+              <input matInput formControlName="title" placeholder="Ex: Adicionar filtro por placa na tela de veículos" />
+              @if (feedbackForm.get('title')?.hasError('required') && feedbackForm.get('title')?.touched) {
+                <mat-error>O título é obrigatório</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Detalhamento da sugestão ou problema</mat-label>
+              <textarea
+                matInput
+                formControlName="description"
+                rows="3"
+                placeholder="Descreva com detalhes o que aconteceu ou a sua sugestão..."
+              ></textarea>
+              @if (feedbackForm.get('description')?.hasError('required') && feedbackForm.get('description')?.touched) {
+                <mat-error>A descrição é obrigatória</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- Seção de Captura de Tela -->
+          <div class="screenshot-section">
+            <div class="screenshot-header">
+              <div class="screenshot-title">
+                <mat-icon>photo_camera</mat-icon>
+                <span>Captura de Tela da Sua Visualização (Opcional)</span>
+              </div>
+              <div class="screenshot-tools">
+                @if (screenshotDataUrl()) {
+                  <button
+                    type="button"
+                    mat-stroked-button
+                    [color]="isDrawingMode() ? 'warn' : 'primary'"
+                    (click)="toggleDrawingMode()"
+                    class="tool-btn"
+                  >
+                    <mat-icon>{{ isDrawingMode() ? 'check' : 'gesture' }}</mat-icon>
+                    {{ isDrawingMode() ? 'Concluir Destaque' : 'Desenhar Destaque' }}
+                  </button>
+
+                  <button type="button" mat-icon-button (click)="clearAnnotations()" matTooltip="Limpar marcações">
+                    <mat-icon>cleaning_services</mat-icon>
+                  </button>
+
+                  <button type="button" mat-icon-button (click)="captureCurrentScreen()" matTooltip="Recapturar Tela">
+                    <mat-icon>refresh</mat-icon>
+                  </button>
+
+                  <button type="button" mat-icon-button color="warn" (click)="removeScreenshot()" matTooltip="Remover Print">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                }
+              </div>
+            </div>
+
+            @if (capturingScreenshot()) {
+              <div class="screenshot-loading">
+                <mat-spinner diameter="32"></mat-spinner>
+                <span>Gerando captura da tela atual...</span>
+              </div>
+            } @else if (screenshotDataUrl()) {
+              <div class="canvas-wrapper" [class.drawing-active]="isDrawingMode()">
+                @if (isDrawingMode()) {
+                  <div class="drawing-banner">
+                    ✏️ Clique e arraste com o mouse sobre a imagem para destacar uma área
+                  </div>
+                }
+                <canvas
+                  #drawingCanvas
+                  (mousedown)="startDrawing($event)"
+                  (mousemove)="draw($event)"
+                  (mouseup)="stopDrawing()"
+                  (mouseleave)="stopDrawing()"
+                  (touchstart)="startDrawing($event)"
+                  (touchmove)="draw($event)"
+                  (touchend)="stopDrawing()"
+                ></canvas>
+              </div>
+            } @else {
+              <div class="screenshot-empty-box">
+                <button type="button" mat-stroked-button color="primary" (click)="captureCurrentScreen()" class="trigger-capture-btn">
+                  <mat-icon>add_a_photo</mat-icon>
+                  Capturar Imagem da Tela Atual
+                </button>
+                <span class="empty-hint">Gere um print automático da tela para desenhar destaques ou apontar um problema.</span>
+              </div>
+            }
+          </div>
+
+          <!-- Metadados da Rota -->
+          <div class="metadata-footer">
+            <label class="metadata-checkbox">
+              <input type="checkbox" formControlName="includeMetadata" />
+              <span>Incluir rota atual (<code>{{ currentRoute }}</code>) e resolução (<code>{{ screenResolution }}</code>)</span>
+            </label>
+          </div>
+
+          <!-- Botões de Ação -->
+          <div class="dialog-actions">
+            <button mat-button type="button" (click)="onClose()">Cancelar</button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
+              @if (submitting()) {
+                <mat-spinner diameter="18" style="margin-right: 8px; display: inline-block;"></mat-spinner>
+                Enviando...
+              } @else {
+                <ng-container>
+                  <mat-icon>send</mat-icon> Enviar Feedback
+                </ng-container>
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </mat-tab>
+
+    <!-- ABA 2: MEUS FEEDBACKS -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">history</mat-icon>
+        Meus Feedbacks
+      </ng-template>
+
+      <div class="tab-body my-feedbacks-list">
+        @if (loadingMyFeedbacks()) {
+          <div class="loading-state">
+            <mat-spinner diameter="36"></mat-spinner>
+            <p>Carregando seus feedbacks...</p>
+          </div>
+        } @else if (myFeedbacks().length === 0) {
+          <div class="empty-state">
+            <mat-icon class="empty-icon">inbox</mat-icon>
+            <h3>Nenhum feedback enviado ainda</h3>
+            <p>Seus envios e as respostas dos desenvolvedores ficarão salvos aqui.</p>
+          </div>
+        } @else {
+          @for (item of myFeedbacks(); track item.id) {
+            <div class="feedback-card">
+              <div class="card-header">
+                <div class="card-type-title">
+                  <mat-icon class="type-icon">{{ getTypeIcon(item.type) }}</mat-icon>
+                  <div>
+                    <h4 class="card-title">{{ item.title }}</h4>
+                    <span class="card-date">{{ item.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
+                </div>
+                <span class="status-badge" [ngClass]="getStatusBadgeClass(item.status)">
+                  {{ getStatusLabel(item.status) }}
+                </span>
+              </div>
+
+              <p class="card-description">{{ item.description }}</p>
+
+              @if (item.adminNotes) {
+                <div class="dev-response-box">
+                  <div class="response-header">
+                    <mat-icon>forum</mat-icon>
+                    <span>Resposta da Equipe de Desenvolvimento</span>
+                  </div>
+                  <p class="response-text">{{ item.adminNotes }}</p>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

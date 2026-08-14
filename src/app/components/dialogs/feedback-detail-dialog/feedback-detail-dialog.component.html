@@ -1,0 +1,124 @@
+<div class="feedback-detail-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-left">
+      <span class="type-badge">{{ getTypeLabel(feedback.type) }}</span>
+      <h2>{{ feedback.title }}</h2>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="onClose()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content">
+    <!-- Grid de Informações de Contexto -->
+    <div class="metadata-grid">
+      <div class="meta-item">
+        <mat-icon class="meta-icon">store</mat-icon>
+        <div>
+          <span class="meta-label">Loja / Origem</span>
+          <span class="meta-value">{{ feedback.storeName || 'Loja Principal' }}</span>
+        </div>
+      </div>
+
+      <div class="meta-item">
+        <mat-icon class="meta-icon">person</mat-icon>
+        <div>
+          <span class="meta-label">Usuário</span>
+          <span class="meta-value">{{ feedback.userName || 'Anônimo' }} ({{ feedback.userEmail || 'Sem e-mail' }})</span>
+        </div>
+      </div>
+
+      <div class="meta-item">
+        <mat-icon class="meta-icon">link</mat-icon>
+        <div>
+          <span class="meta-label">Rota Ocorrida</span>
+          <span class="meta-value"><code>{{ feedback.currentRoute || 'N/A' }}</code></span>
+        </div>
+      </div>
+
+      <div class="meta-item">
+        <mat-icon class="meta-icon">schedule</mat-icon>
+        <div>
+          <span class="meta-label">Data de Envio</span>
+          <span class="meta-value">{{ feedback.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Descrição -->
+    <div class="section-box">
+      <h3 class="section-title">
+        <mat-icon>notes</mat-icon>
+        Descrição Completa do Relato
+      </h3>
+      <p class="description-text">{{ feedback.description }}</p>
+    </div>
+
+    <!-- Print Anetado / Captura de Tela -->
+    @if (feedback.screenshotUrl) {
+      <div class="section-box">
+        <div class="section-title-between">
+          <h3 class="section-title">
+            <mat-icon>image</mat-icon>
+            Captura de Tela Anexada
+          </h3>
+          <button mat-button color="primary" (click)="toggleImageZoom()" type="button">
+            <mat-icon>{{ isZoomedImage() ? 'zoom_out' : 'zoom_in' }}</mat-icon>
+            {{ isZoomedImage() ? 'Reduzir' : 'Ampliar' }}
+          </button>
+        </div>
+
+        <div class="image-wrapper" [class.zoomed]="isZoomedImage()" (click)="toggleImageZoom()">
+          <img [src]="feedback.screenshotUrl" alt="Print de feedback" class="screenshot-img" />
+        </div>
+      </div>
+    }
+
+    <!-- Seção de Ação do Admin / Desenvolvedor -->
+    <div class="admin-action-box">
+      <h3 class="section-title">
+        <mat-icon>admin_panel_settings</mat-icon>
+        Gerenciamento e Resposta do Administrador
+      </h3>
+
+      <div class="admin-fields">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Status do Feedback</mat-label>
+          <mat-select [(ngModel)]="selectedStatus">
+            @for (opt of statusOptions; track opt.value) {
+              <mat-option [value]="opt.value">
+                <span class="status-option-dot" [style.background-color]="opt.color"></span>
+                {{ opt.label }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Resposta ao Usuário / Notas Internas</mat-label>
+          <textarea
+            matInput
+            [(ngModel)]="adminNotes"
+            rows="3"
+            placeholder="Digite a resposta ou ações tomadas (Esta mensagem será enviada ao e-mail do usuário)..."
+          ></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-actions">
+    <button mat-button (click)="onClose()">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="onSave()" [disabled]="saving()">
+      @if (saving()) {
+        <mat-spinner diameter="18" style="margin-right: 8px; display: inline-block;"></mat-spinner>
+        Salvando...
+      } @else {
+        <ng-container>
+          <mat-icon>save</mat-icon> Salvar Alterações
+        </ng-container>
+      }
+    </button>
+  </div>
+</div>

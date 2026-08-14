@@ -107,6 +107,18 @@ export class SideNavComponent implements OnInit, OnDestroy {
       });
     }
 
+    // Feedbacks (Apenas ROOT_ADMIN / READ_FEEDBACK)
+    if (
+      this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
+      this.authService.hasAuthority(Authorizations.READ_FEEDBACK)
+    ) {
+      baseMenu.push({
+        icon: 'rate_review',
+        label: 'Feedbacks',
+        route: '/feedbacks',
+      });
+    }
+
     // Financeiro
     if (
       this.authService.hasAuthority(Authorizations.READ_FINANCIAL_STORE) ||
