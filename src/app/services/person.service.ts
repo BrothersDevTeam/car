@@ -62,6 +62,7 @@ export class PersonService {
       roleNames?: string[]; // NOVO: Parâmetro para filtrar por roles
       includeInactive?: boolean; // NOVO: Se true, retorna inativos
       networkStoreId?: string; // NOVO: Parâmetro para filtrar pela rede da loja
+      active?: boolean; // Filtro explícito de ativo/inativo
     },
   ): Observable<PaginationResponse<Person>> {
     // Se houver parâmetros de busca, não usa cache
@@ -71,6 +72,9 @@ export class PersonService {
       Object.values(searchParams).some((value) => {
         if (Array.isArray(value)) {
           return value.length > 0; // Array não vazio
+        }
+        if (typeof value === 'boolean') {
+          return true;
         }
         return value && typeof value === 'string' && value.trim(); // String com conteúdo
       });
@@ -112,6 +116,10 @@ export class PersonService {
         url += `&networkStoreId=${encodeURIComponent(searchParams.networkStoreId.trim())}`;
       }
 
+      if (searchParams.active !== undefined) {
+        url += `&active=${searchParams.active}`;
+      }
+
       // Adiciona o filtro de relationshipTypes se fornecido
       // O backend espera múltiplos valores no formato: ?relationshipTypes=CLIENTE&relationshipTypes=FUNCIONARIO
       if (searchParams.relationshipTypes && searchParams.relationshipTypes.length > 0) {
@@ -134,23 +142,11 @@ export class PersonService {
     return this.http.get<PaginationResponse<Person>>(url).pipe(
       first(),
       tap((response) => {
-        console.log('✅ Resposta original do backend:', response);
-
         // Só atualiza o cache se não houver busca
         if (!hasSearchParams) {
           this.cache = response;
-          this.cache.content = this.filterByActive(this.cache.content);
-          this.cache.page.totalElements = this.cache.content.length;
-
           // Notifica sobre o carregamento inicial com uma nova referência
           this.cacheUpdated$.next({ ...this.cache });
-        } else {
-          // Se houver busca, filtra mas não armazena em cache
-          // Se includeInactive for true, NÃO filtra por ativo
-          if (!searchParams?.includeInactive) {
-            response.content = this.filterByActive(response.content);
-          }
-          response.page.totalElements = response.content.length;
         }
       }),
     );

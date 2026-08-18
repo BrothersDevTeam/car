@@ -165,7 +165,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
       header: '',
       showCheckbox: (row: Person) => {
         const loggedUserRelationship = this.authService.getPersonRelationship()?.toUpperCase();
-        const rowRelName = row.relationship?.name?.toUpperCase() || '';
+        const rowRelName = (row.relationshipName || row.relationship?.name)?.toUpperCase() || '';
 
         // Proprietário não pode excluir outro proprietário (e consequentemente ele mesmo)
         if (loggedUserRelationship === 'PROPRIETARIO' && rowRelName === 'PROPRIETARIO') {
@@ -196,7 +196,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
       key: 'relationship',
       header: 'Vínculo',
       format: (value: any, row: any) => {
-        const relationshipName = row.relationship?.name;
+        const relationshipName = row.relationshipName || row.relationship?.name;
         if (!relationshipName) return '-';
 
         // Mapeia diretamente o campo relationship para um label human-readable
@@ -252,7 +252,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
             }
 
             const loggedUserRelationship = this.authService.getPersonRelationship()?.toUpperCase();
-            const rowRelName = row.relationship?.name?.toUpperCase() || '';
+            const rowRelName = (row.relationshipName || row.relationship?.name)?.toUpperCase() || '';
 
             // Proprietário não pode excluir outro proprietário (e consequentemente ele mesmo)
             if (loggedUserRelationship === 'PROPRIETARIO' && rowRelName === 'PROPRIETARIO') {

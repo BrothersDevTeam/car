@@ -37,6 +37,7 @@ export interface Person {
   active: boolean;
   relationship?: RelationshipResponse;
   relationshipId?: string;
+  relationshipName?: string;
   isEmployee: boolean;
   username?: string;
   password?: string;
