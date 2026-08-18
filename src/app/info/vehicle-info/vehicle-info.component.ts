@@ -21,6 +21,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FipeService } from '@services/fipe.service';
+import { FuelType, FuelTypeLabels } from '../../enums/fuelType';
 
 @Component({
   selector: 'app-vehicle-info',
@@ -57,6 +58,11 @@ export class VehicleInfoComponent implements OnChanges {
 
   @Output() editEvent = new EventEmitter<VehicleForm>();
   @Output() formSubmitted = new EventEmitter<void>();
+
+  getFuelTypeLabel(fuel?: FuelType | string | null): string {
+    if (!fuel) return '-';
+    return FuelTypeLabels[fuel as FuelType] || fuel;
+  }
 
   private getFipeVehicleType(vehicleType?: string): string {
     const typeMap: Record<string, string> = {

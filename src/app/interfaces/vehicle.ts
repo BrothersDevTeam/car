@@ -1,4 +1,4 @@
-import { FuelTypes } from '../enums/fuelTypes';
+import { FuelType } from '../enums/fuelType';
 import { VehicleCategory } from '../enums/vehicleCategoryTypes';
 import { VehicleSpecies } from '../enums/vehicleSpeciesTypes';
 import { VehicleType } from '../enums/vehicleType';
@@ -85,7 +85,7 @@ export interface Vehicle {
   species?: string;
   category?: string;
   features?: string;
-  fuelTypes: FuelTypes[];
+  fuelType?: FuelType | string;
   origin?: string;
   valorCompra?: string;
   supplierId?: string;

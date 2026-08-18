@@ -54,7 +54,7 @@ import { PrimarySelectComponent } from '@components/primary-select/primary-selec
 
 import { VehicleForm, SPECIES_OPTIONS, CATEGORY_OPTIONS, VEHICLE_TYPE_OPTIONS } from '@interfaces/vehicle';
 import { extractErrorMessage } from '@utils/error-utils';
-import { FuelTypes, FuelTypesLabels } from '../../../enums/fuelTypes';
+import { FuelType, FuelTypeLabels } from '../../../enums/fuelType';
 
 import { VehicleService } from '@services/vehicle.service';
 import { ColorService } from '@services/color.service';
@@ -145,7 +145,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   loadingDetails = signal(false);
 
   // Opções de tipos de combustível
-  fuelTypesOptions: { value: string; label: string }[] = [];
+  fuelTypeOptions: { value: string; label: string }[] = [];
 
   // Opções de opcionais
   optionalsOptions: { value: string; label: string }[] = [];
@@ -216,7 +216,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     species: ['PASSAGEIRO'],
     category: ['PARTICULAR'],
     features: [''],
-    fuelTypes: [[]], // Array de FuelTypes
+    fuelType: [''], // Tipo de Combustível (String)
     optionalIds: [[]], // Array de Opcionais (UUIDs)
     origin: ['NACIONAL'],
     valorVenda: [''],
@@ -263,7 +263,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
 
     const defaultSource = {
       origin: 'NACIONAL',
-      fuelTypes: [],
+      fuelType: '',
       optionalIds: [],
     };
     return this.hasChangesComparedTo(defaultSource);
@@ -348,7 +348,13 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       }
     }
 
-    const arrays = ['fuelTypes', 'optionalIds'];
+    const formFuel = normalize(formValue['fuelType']);
+    const sourceFuel = normalize(source['fuelType']);
+    if (formFuel !== sourceFuel) {
+      return true;
+    }
+
+    const arrays = ['optionalIds'];
     for (const arrField of arrays) {
       const formArr = Array.isArray(formValue[arrField]) ? formValue[arrField] : [];
       const sourceArr = Array.isArray(source[arrField]) ? source[arrField] : [];
@@ -493,7 +499,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           category: formValues.category || '',
           features: formValues.features || '',
           origin: formValues.origin || 'NACIONAL',
-          fuelTypes: this.mapFuelTypeToBackend(formValues.fuelTypes),
+          fuelType: this.mapFuelTypeToBackend(formValues.fuelType),
           optionalIds: formValues.optionalIds || [],
           valorVenda: formValues.valorVenda?.toString() || '',
           fipeValue: formValues.fipeValue || '',
@@ -590,7 +596,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       this.selectedDraft = null;
       this.form.reset({
         origin: 'NACIONAL',
-        fuelTypes: [],
+        fuelType: '',
       });
       this.modelControl.reset();
       this.fipeYearControl.reset();
@@ -649,7 +655,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     if (this.selectedDraftId === draftId) {
       this.form.reset({
         origin: 'NACIONAL',
-        fuelTypes: [],
+        fuelType: '',
       });
       this.modelControl.reset();
       this.fipeYearControl.reset();
@@ -794,7 +800,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
             vehicleYear: fipeYear,
             modelYear: fipeYear, // FIPE geralmente retorna apenas AnoModelo
             engineDisplacement: extractedDisplacement,
-            fuelTypes: this.mapFuelTypeToBackend(details.Combustivel),
+            fuelType: this.mapFuelTypeToBackend(details.Combustivel),
             fipeValue: details.Valor,
           });
 
@@ -852,11 +858,11 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     this.isInitializing = true;
 
     // Carrega opções de tipos de combustível do enum
-    this.fuelTypesOptions = Object.keys(FuelTypes).map((key) => {
-      const enumValue = FuelTypes[key as keyof typeof FuelTypes];
+    this.fuelTypeOptions = Object.keys(FuelType).map((key) => {
+      const enumValue = FuelType[key as keyof typeof FuelType];
       return {
         value: key,
-        label: FuelTypesLabels[enumValue],
+        label: FuelTypeLabels[enumValue],
       };
     });
 
@@ -1071,7 +1077,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       species: this.dataForm!.species || '',
       category: this.dataForm!.category || '',
       features: this.dataForm!.features || '',
-      fuelTypes: this.dataForm!.fuelTypes || [], // Tipos de combustível
+      fuelType: this.dataForm!.fuelType || '', // Tipo de combustível
       optionalIds: this.dataForm!.optionals ? this.dataForm!.optionals.map((opt) => opt.optionalId) : [], // Opcionais do veículo
       origin: this.dataForm!.origin || 'NACIONAL',
       valorVenda: this.dataForm!.valorVenda || '',
@@ -1347,34 +1353,34 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Mapeia os valores do frontend/FIPE para o Enum do backend
    */
-  private mapFuelTypeToBackend(frontendValue: string | string[]): string[] {
+  private mapFuelTypeToBackend(frontendValue: string | string[]): string {
     const valueToCheck = Array.isArray(frontendValue) ? frontendValue[0] : frontendValue;
-    if (!valueToCheck) return [];
+    if (!valueToCheck) return '';
 
     const upperValue = valueToCheck.toUpperCase();
 
     // Mapeamento Direto (Nomes dos Enums do Backend)
-    const directMatch = Object.keys(FuelTypes).find((key) => key === upperValue);
-    if (directMatch) return [directMatch];
+    const directMatch = Object.keys(FuelType).find((key) => key === upperValue);
+    if (directMatch) return directMatch;
 
     // Mapeamento por Descrição (FIPE / Labels)
     if (upperValue.includes('ALCOOL/GASOLINA') || upperValue === 'FLEX' || upperValue === 'ALCOOL/GASOL') {
-      return ['FLEX'];
+      return 'FLEX';
     }
     if (
       upperValue === 'GASOLINA/ALCOOL/GAS NATURAL VEICULAR' ||
       (upperValue.includes('FLEX') && upperValue.includes('GNV'))
     ) {
-      return ['FLEX_GNV'];
+      return 'FLEX_GNV';
     }
     if (upperValue === 'GASOLINA/ELETRICO' || upperValue === 'HIBRIDO') {
-      return ['HIBRIDO'];
+      return 'HIBRIDO';
     }
-    if (upperValue === 'ALCOOL' || upperValue === 'ETANOL') return ['ALCOOL'];
-    if (upperValue === 'GASOLINA') return ['GASOLINA'];
-    if (upperValue === 'DIESEL') return ['DIESEL'];
-    if (upperValue.includes('GNV') || upperValue.includes('GAS NATURAL VEICULAR')) return ['GNV'];
-    if (upperValue.includes('ELETRICO')) return ['ELETRICO_FONTE_INTERNA'];
+    if (upperValue === 'ALCOOL' || upperValue === 'ETANOL') return 'ALCOOL';
+    if (upperValue === 'GASOLINA') return 'GASOLINA';
+    if (upperValue === 'DIESEL') return 'DIESEL';
+    if (upperValue.includes('GNV') || upperValue.includes('GAS NATURAL VEICULAR')) return 'GNV';
+    if (upperValue.includes('ELETRICO')) return 'ELETRICO_FONTE_INTERNA';
 
     // Fallback: Tenta normalizar e ver se bate com algum enum
     const normalized = valueToCheck
@@ -1383,8 +1389,8 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       .toUpperCase()
       .replace(/\s+/g, '_');
 
-    const normalizedMatch = Object.keys(FuelTypes).find((key) => key === normalized);
-    return normalizedMatch ? [normalizedMatch] : [];
+    const normalizedMatch = Object.keys(FuelType).find((key) => key === normalized);
+    return normalizedMatch ? normalizedMatch : '';
   }
 
   protected formatDraftDate(date: Date): string {
