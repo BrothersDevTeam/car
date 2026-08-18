@@ -220,7 +220,7 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
     {
       key: 'cnpj',
       header: 'PF/PJ',
-      format: (value: any, row: Person) => (row.legalEntity ? 'PESSOA JURÍDICA' : 'PESSOA FÍSICA'),
+      format: (value: any, row: Person) => (row.legalEntity ? 'PJ' : 'PF'),
     },
     {
       key: 'cpf-cnpj',

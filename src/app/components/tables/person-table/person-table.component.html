@@ -22,14 +22,14 @@
     <ng-container matColumnDef="cpf">
       <th mat-header-cell *matHeaderCellDef>Pessoa Jurídica</th>
       <td mat-cell *matCellDef="let element">
-        {{ element.cpf ? 'Não' : 'Sim' }}
+        {{ element.legalEntity ? 'Sim' : 'Não' }}
       </td>
     </ng-container>
 
     <ng-container matColumnDef="cnpj">
       <th mat-header-cell *matHeaderCellDef>CPF / CNPJ</th>
       <td mat-cell *matCellDef="let element">
-        {{ element.cpf ? element.cpf : element.cnpj }}
+        {{ element.legalEntity ? (element.cnpj || '-') : (element.cpf || '-') }}
       </td>
     </ng-container>
 
