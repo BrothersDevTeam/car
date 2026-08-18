@@ -16,12 +16,20 @@
   mat-card-header {
     margin-bottom: 16px;
     border-bottom: 1px solid #eee;
-    padding-bottom: 8px;
+    padding-bottom: 12px;
 
     mat-card-title {
       font-size: 1.1rem;
       font-weight: 500;
       color: #333;
+    }
+
+    &.header-with-action {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
     }
   }
 }
@@ -146,12 +154,34 @@
   }
 }
 
+// ===== SUBSEÇÕES MODO MISTO =====
+.sub-section {
+  margin-bottom: 8px;
+}
+
+.sub-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #334155;
+  margin: 0 0 16px 0;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #3b7ab8;
+  }
+}
+
 // ===== LISTA DE PAGAMENTOS =====
 .pagamentos-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .pagamento-item {
@@ -271,6 +301,17 @@
 }
 
 @media (max-width: 768px) {
+  .header-with-action {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .premium-toggle-group {
+    height: auto;
+    flex-wrap: wrap;
+  }
+
   .col-4,
   .col-6 {
     flex: 0 0 100%;

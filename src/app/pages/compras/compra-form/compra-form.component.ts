@@ -87,6 +87,23 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
   vehicles: { id: string; name: string }[] = [];
   suppliers: { id: string; name: string }[] = [];
 
+  // Modalidade de Pagamento ('A_VISTA' | 'PARCELADO' | 'MISTO')
+  condicaoPagamento = signal<'A_VISTA' | 'PARCELADO' | 'MISTO'>('A_VISTA');
+
+  // Lista de Formas de Pagamento
+  readonly formasPagamentoList = [
+    { value: 'DINHEIRO', label: 'DINHEIRO' },
+    { value: 'PIX', label: 'PIX' },
+    { value: 'CARTAO', label: 'CARTÃO' },
+    { value: 'TED', label: 'TED' },
+    { value: 'DOC', label: 'DOC' },
+    { value: 'BOLETO', label: 'BOLETO' },
+    { value: 'CHEQUE', label: 'CHEQUE' },
+    { value: 'PROMISSORIA', label: 'PROMISSÓRIA' },
+    { value: 'FINANCIAMENTO', label: 'FINANCIAMENTO' },
+    { value: 'OUTROS', label: 'OUTROS' },
+  ];
+
   // Flags para controle do drawer de fornecedor (person)
   openPersonForm = signal(false);
   selectedPersonToEdit: Person | null = null;
@@ -103,6 +120,26 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
 
   get pagamentos() {
     return this.compraForm.get('pagamentos') as FormArray;
+  }
+
+  get pagamentosVistaIndices(): number[] {
+    const indices: number[] = [];
+    this.pagamentos.controls.forEach((ctrl, idx) => {
+      if (ctrl.get('origem')?.value !== 'PRAZO') {
+        indices.push(idx);
+      }
+    });
+    return indices;
+  }
+
+  get pagamentosPrazoIndices(): number[] {
+    const indices: number[] = [];
+    this.pagamentos.controls.forEach((ctrl, idx) => {
+      if (ctrl.get('origem')?.value === 'PRAZO') {
+        indices.push(idx);
+      }
+    });
+    return indices;
   }
 
   constructor(
@@ -143,7 +180,7 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
       this.subtitle = 'Editando os detalhes da compra';
       this.loadCompra();
     } else {
-      this.addPagamento();
+      this.addFormaPagamento('VISTA');
       if (queryVehicleId) {
         this.loadAndSetQueryVehicle(queryVehicleId);
       }
@@ -160,7 +197,24 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
     this.subscriptions.add(
       this.compraForm.valueChanges.subscribe(() => {
         this.actionsService.hasFormChanges.set(this.hasUnsavedChanges());
-        this.geradorValorTotal = this.totalDiferenca;
+      }),
+    );
+
+    // Sincroniza valor da compra com pagamentos no modo À Vista quando houver 1 pagamento
+    this.subscriptions.add(
+      this.compraForm.get('valorCompra')?.valueChanges.subscribe((novoValor) => {
+        const mode = this.condicaoPagamento();
+        if (mode === 'A_VISTA' && this.pagamentos.length === 1) {
+          const p0 = this.pagamentos.at(0);
+          if (!p0.dirty || p0.get('valor')?.value === 0) {
+            p0.patchValue({ valor: novoValor || 0 }, { emitEvent: false });
+          }
+        }
+        if (mode === 'PARCELADO') {
+          this.geradorValorTotal = novoValor || 0;
+        } else if (mode === 'MISTO') {
+          this.geradorValorTotal = this.totalDiferenca > 0 ? this.totalDiferenca : 0;
+        }
       }),
     );
   }
@@ -248,17 +302,42 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
           // Limpa e preenche pagamentos
           this.pagamentos.clear();
           if (compra.pagamentos && compra.pagamentos.length > 0) {
+            const dataCompraStr = compra.dataCompra ? new Date(compra.dataCompra).toISOString().substring(0, 10) : '';
+
+            let hasVista = false;
+            let hasPrazo = false;
+
             compra.pagamentos.forEach((pag) => {
+              const pagVencStr = pag.vencimento ? new Date(pag.vencimento).toISOString().substring(0, 10) : '';
+              const isDescParcela = pag.descricao && pag.descricao.toLowerCase().includes('parcela');
+              const isPrazo = isDescParcela || (dataCompraStr && pagVencStr && pagVencStr > dataCompraStr);
+
+              if (isPrazo) {
+                hasPrazo = true;
+              } else {
+                hasVista = true;
+              }
+
               this.pagamentos.push(
-                this.fb.group({
-                  formaPagamento: [pag.formaPagamento, Validators.required],
-                  descricao: [pag.descricao || ''],
-                  valor: [pag.valor, [Validators.required, Validators.min(0.01)]],
-                  vencimento: [pag.vencimento ? new Date(pag.vencimento) : new Date(), Validators.required],
-                  tipo: [pag.tipo || 'D'],
+                this.createPagamentoFormGroup({
+                  formaPagamento: pag.formaPagamento,
+                  descricao: pag.descricao || '',
+                  valor: pag.valor,
+                  vencimento: pag.vencimento ? new Date(pag.vencimento) : new Date(),
+                  tipo: pag.tipo || 'D',
+                  origem: isPrazo ? 'PRAZO' : 'VISTA',
                 }),
               );
             });
+
+            // Detecta modalidade automaticamente
+            if (hasVista && hasPrazo) {
+              this.condicaoPagamento.set('MISTO');
+            } else if (hasPrazo) {
+              this.condicaoPagamento.set('PARCELADO');
+            } else {
+              this.condicaoPagamento.set('A_VISTA');
+            }
           }
 
           setTimeout(() => {
@@ -272,16 +351,58 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
       });
   }
 
-  addPagamento() {
+  createPagamentoFormGroup(data?: any): FormGroup {
+    return this.fb.group({
+      formaPagamento: [data?.formaPagamento || 'PIX', Validators.required],
+      descricao: [data?.descricao || ''],
+      valor: [data?.valor !== undefined ? data.valor : 0, [Validators.required, Validators.min(0.01)]],
+      vencimento: [data?.vencimento ? new Date(data.vencimento) : new Date(), Validators.required],
+      tipo: [data?.tipo || 'D'],
+      origem: [data?.origem || 'VISTA'],
+    });
+  }
+
+  onCondicaoPagamentoChange(tipo: 'A_VISTA' | 'PARCELADO' | 'MISTO') {
+    this.condicaoPagamento.set(tipo);
+
+    const valorCompra = this.compraForm.get('valorCompra')?.value || 0;
+
+    if (tipo === 'A_VISTA') {
+      // Ajusta todos os pagamentos existentes para origem VISTA
+      this.pagamentos.controls.forEach((ctrl) => ctrl.patchValue({ origem: 'VISTA' }, { emitEvent: false }));
+      if (this.pagamentos.length === 0) {
+        this.addFormaPagamento('VISTA');
+      }
+    } else if (tipo === 'PARCELADO') {
+      this.geradorValorTotal = valorCompra;
+      // Ajusta pagamentos existentes para origem PRAZO
+      this.pagamentos.controls.forEach((ctrl) => ctrl.patchValue({ origem: 'PRAZO' }, { emitEvent: false }));
+    } else if (tipo === 'MISTO') {
+      this.geradorValorTotal = this.totalDiferenca > 0 ? this.totalDiferenca : 0;
+    }
+  }
+
+  addFormaPagamento(origem: 'VISTA' | 'PRAZO' = 'VISTA') {
+    const saldoRestante = this.totalDiferenca > 0 ? this.totalDiferenca : 0;
+    const dataCompra = this.compraForm.get('dataCompra')?.value;
+    const dataPadrao = dataCompra ? new Date(dataCompra) : new Date();
+
+    const descPadrao = origem === 'PRAZO' ? `Parcela ${this.pagamentosPrazoIndices.length + 1}` : '';
+
     this.pagamentos.push(
-      this.fb.group({
-        formaPagamento: ['PIX', Validators.required],
-        descricao: [''],
-        valor: [0, [Validators.required, Validators.min(0.01)]],
-        vencimento: [new Date(), Validators.required],
-        tipo: ['D'], // Débito / Despesa
+      this.createPagamentoFormGroup({
+        formaPagamento: 'PIX',
+        descricao: descPadrao,
+        valor: saldoRestante,
+        vencimento: dataPadrao,
+        tipo: 'D',
+        origem: origem,
       }),
     );
+  }
+
+  addPagamento() {
+    this.addFormaPagamento(this.condicaoPagamento() === 'PARCELADO' ? 'PRAZO' : 'VISTA');
   }
 
   removePagamento(index: number) {
@@ -306,33 +427,44 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
 
     const valorParcela = Number((this.geradorValorTotal / this.geradorParcelas).toFixed(2));
     const confirm = window.confirm(
-      `Deseja adicionar ${this.geradorParcelas} parcelas de ${this.currencyFormat(valorParcela)} às formas de pagamento atuais?`,
+      `Deseja adicionar ${this.geradorParcelas} parcelas de ${this.currencyFormat(valorParcela)} às formas de pagamento?`,
     );
 
     if (!confirm) return;
 
-    // Se houver apenas uma parcela e ela for de valor zero, podemos limpá-la
-    const pagamentosAtuais = this.pagamentos.value;
-    if (pagamentosAtuais.length === 1 && pagamentosAtuais[0].valor === 0) {
-      this.pagamentos.clear();
+    const mode = this.condicaoPagamento();
+
+    if (mode === 'PARCELADO') {
+      // Se houver apenas uma linha com valor zero ou igual ao valor da compra, limpa para adicionar as parcelas
+      const pagamentosAtuais = this.pagamentos.value;
+      if (pagamentosAtuais.length === 1 && (pagamentosAtuais[0].valor === 0 || pagamentosAtuais[0].valor === this.compraForm.get('valorCompra')?.value)) {
+        this.pagamentos.clear();
+      }
+    } else if (mode === 'MISTO') {
+      // Remove parcelas a prazo geradas anteriormente para recriar
+      const indicesPrazo = this.pagamentosPrazoIndices;
+      for (let i = indicesPrazo.length - 1; i >= 0; i--) {
+        this.pagamentos.removeAt(indicesPrazo[i]);
+      }
     }
 
     let diferenca = Number((this.geradorValorTotal - valorParcela * this.geradorParcelas).toFixed(2));
     const dataBase = new Date(this.geradorPrimeiroVencimento);
 
     for (let i = 0; i < this.geradorParcelas; i++) {
-      const valorFinalParcela = i === this.geradorParcelas - 1 ? valorParcela + diferenca : valorParcela;
+      const valorFinalParcela = i === this.geradorParcelas - 1 ? Number((valorParcela + diferenca).toFixed(2)) : valorParcela;
 
       const vencimento = new Date(dataBase);
       vencimento.setMonth(dataBase.getMonth() + i);
 
       this.pagamentos.push(
-        this.fb.group({
-          formaPagamento: [this.geradorFormaPagamento, Validators.required],
-          descricao: [`Parcela ${i + 1}/${this.geradorParcelas}`],
-          valor: [valorFinalParcela, [Validators.required, Validators.min(0.01)]],
-          vencimento: [vencimento, Validators.required],
-          tipo: ['D'],
+        this.createPagamentoFormGroup({
+          formaPagamento: this.geradorFormaPagamento,
+          descricao: `Parcela ${i + 1}/${this.geradorParcelas}`,
+          valor: valorFinalParcela,
+          vencimento: vencimento,
+          tipo: 'D',
+          origem: 'PRAZO',
         }),
       );
     }
