@@ -10,6 +10,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@interfaces/store';
+import { Person } from '@interfaces/person';
 import { StoreService } from '@services/store.service';
 import { PersonService } from '@services/person.service';
 import { StoreContextService } from '@services/store-context.service';
@@ -26,7 +27,7 @@ import { PrimaryInputComponent } from '../../primary-input/primary-input.compone
 import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
 import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 import { catchError, switchMap, tap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { of, throwError } from 'rxjs';
+import { of, throwError, forkJoin } from 'rxjs';
 import { AddressService } from '@services/address.service';
 import { CepService } from '@services/cep.service';
 import { ViaCepResponse } from '@interfaces/address';
@@ -42,28 +43,7 @@ export interface StoreFormDialogData {
 }
 
 /**
- * Componente wizard para cadastro completo de nova loja matriz
- *
- * Este componente implementa um fluxo de 3 etapas para resolver o problema
- * do "loop infinito" no cadastro:
- *
- * PROBLEMA ORIGINAL:
- * - Para criar Person → precisa de Store
- * - Para fazer login → precisa de User
- * - Para criar User → precisa de Person
- * - LOOP! 🔄
- *
- * SOLUÇÃO (3 STEPS):
- * Step 1: Dados da Loja (CNPJ, razão social, email, telefone)
- * Step 2: Dados do Proprietário (CPF/CNPJ, nome, email, telefone)
- * Step 3: Dados de Acesso (username, senha)
- *
- * FLUXO DE EXECUÇÃO:
- * 1. POST /stores/mainstore → Cria loja MATRIZ
- * 2. POST /persons → Cria pessoa vinculada à loja (com user e password)
- * 3. POST /stores/owner → Vincula pessoa como proprietária da loja
- *
- * Após isso, o cliente pode fazer login e começar a usar o sistema!
+ * Componente wizard para cadastro completo de nova loja matriz ou filial
  */
 @Component({
   selector: 'app-store-form-dialog',
@@ -91,13 +71,20 @@ export interface StoreFormDialogData {
   styleUrls: ['./store-form-dialog.component.scss'],
 })
 export class StoreFormDialogComponent implements OnInit {
-  // Formulários dos 3 steps
+  // Formulários dos steps
   storeForm!: FormGroup; // Step 1: Dados da Loja
   addressForm!: FormGroup; // Step 2: Endereço da Loja (na criação)
-  personForm!: FormGroup; // Step 3: Dados do Proprietário
-  accessForm!: FormGroup; // Step 4: Dados de Acesso
+  personForm!: FormGroup; // Step 3: Dados do Proprietário (quando novo)
+  accessForm!: FormGroup; // Step 4: Dados de Acesso (quando novo)
 
   readonly FORM_TYPE = 'store';
+
+  // Modo de proprietário na Filial ('matrix' = selecionar da matriz, 'new' = cadastrar novo)
+  ownerMode: 'matrix' | 'new' = 'matrix';
+  matrixOwners: Person[] = [];
+  selectedMatrixOwnerIds: string[] = [];
+  loadingMatrixOwners = false;
+  matrixOwnersError: string | null = null;
 
   draftSelectorClicked = false;
   availableDrafts: FormDraft[] = [];
@@ -151,6 +138,9 @@ export class StoreFormDialogComponent implements OnInit {
       }, 100);
     } else {
       this.loadAvailableDrafts();
+      if (!this.data.isCarAdmin) {
+        this.loadMatrixOwners();
+      }
 
       // Monitora mudanças nos formulários para controlar o estado dirty e hasChanges
       const formsChanges = () => {
@@ -278,6 +268,109 @@ export class StoreFormDialogComponent implements OnInit {
   }
 
   /**
+   * Carrega os proprietários da loja Matriz para seleção no cadastro de filial
+   */
+  loadMatrixOwners(): void {
+    if (this.data.isCarAdmin || this.data.mode !== 'create') {
+      return;
+    }
+    const currentStoreId = this.storeContextService.currentStoreId;
+    if (!currentStoreId) {
+      this.ownerMode = 'new';
+      return;
+    }
+
+    this.loadingMatrixOwners = true;
+    this.matrixOwnersError = null;
+
+    this.storeService.getById(currentStoreId).subscribe({
+      next: (store) => {
+        this.loadingMatrixOwners = false;
+        this.matrixOwners = store.owners || [];
+
+        if (this.matrixOwners.length === 0) {
+          this.ownerMode = 'new';
+        } else if (this.selectedMatrixOwnerIds.length === 0) {
+          // Pré-seleciona se houver apenas 1 proprietário com usuário de acesso ativo
+          const eligibleOwners = this.matrixOwners.filter((o) => o.hasUser !== false);
+          if (eligibleOwners.length === 1 && eligibleOwners[0].personId) {
+            this.selectedMatrixOwnerIds = [eligibleOwners[0].personId];
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Erro ao carregar proprietários da matriz:', err);
+        this.loadingMatrixOwners = false;
+        this.matrixOwnersError = 'Não foi possível carregar os proprietários da Matriz.';
+        this.ownerMode = 'new';
+      },
+    });
+  }
+
+  /**
+   * Alterna a seleção de um proprietário da matriz
+   */
+  toggleMatrixOwner(personId: string, hasUser: boolean = true): void {
+    if (!hasUser) {
+      this.toastrService.warning(
+        'Este proprietário não possui usuário de login configurado na Matriz.',
+        'Sem Acesso',
+      );
+      return;
+    }
+    const index = this.selectedMatrixOwnerIds.indexOf(personId);
+    if (index > -1) {
+      this.selectedMatrixOwnerIds.splice(index, 1);
+    } else {
+      this.selectedMatrixOwnerIds.push(personId);
+    }
+    this.submitError = null;
+    this.captureInitialFormValue();
+  }
+
+  /**
+   * Verifica se o proprietário da matriz está selecionado
+   */
+  isMatrixOwnerSelected(personId: string): boolean {
+    return this.selectedMatrixOwnerIds.includes(personId);
+  }
+
+  /**
+   * Define o modo de proprietário (Matriz ou Novo)
+   */
+  setOwnerMode(mode: 'matrix' | 'new'): void {
+    this.ownerMode = mode;
+    this.submitError = null;
+    this.captureInitialFormValue();
+  }
+
+  /**
+   * Validação do Step 3 (Proprietário)
+   */
+  isStep3Valid(): boolean {
+    if (!this.data.isCarAdmin && this.ownerMode === 'matrix') {
+      return this.selectedMatrixOwnerIds.length > 0;
+    }
+    return this.personForm.valid;
+  }
+
+  /**
+   * Validação geral para habilitar o botão de submissão
+   */
+  isFormValidForSubmit(): boolean {
+    if (this.data.mode === 'edit') {
+      return this.storeForm.valid && this.hasUnsavedChanges();
+    }
+    if (!this.storeForm.valid || !this.addressForm.valid) {
+      return false;
+    }
+    if (!this.data.isCarAdmin && this.ownerMode === 'matrix') {
+      return this.selectedMatrixOwnerIds.length > 0;
+    }
+    return this.personForm.valid && this.accessForm.valid && this.passwordsMatch();
+  }
+
+  /**
    * Move o scroll do diálogo para o passo ativo ao mudar de etapa
    */
   onStepChange(event: any): void {
@@ -298,6 +391,8 @@ export class StoreFormDialogComponent implements OnInit {
       address: this.addressForm.value,
       person: this.personForm.value,
       access: this.accessForm.value,
+      ownerMode: this.ownerMode,
+      selectedMatrixOwnerIds: this.selectedMatrixOwnerIds,
     };
   }
 
@@ -351,7 +446,8 @@ export class StoreFormDialogComponent implements OnInit {
       this.storeForm.dirty ||
       this.addressForm.dirty ||
       this.personForm.dirty ||
-      this.accessForm.dirty;
+      this.accessForm.dirty ||
+      this.selectedMatrixOwnerIds.length > 0;
     return !this.isSubmitting && isDirty && this.hasChangesComparedToDraft();
   }
 
@@ -391,6 +487,8 @@ export class StoreFormDialogComponent implements OnInit {
       if (draft.data.address) this.addressForm.patchValue(draft.data.address);
       if (draft.data.person) this.personForm.patchValue(draft.data.person);
       if (draft.data.access) this.accessForm.patchValue(draft.data.access);
+      if (draft.data.ownerMode) this.ownerMode = draft.data.ownerMode;
+      if (draft.data.selectedMatrixOwnerIds) this.selectedMatrixOwnerIds = draft.data.selectedMatrixOwnerIds;
     }
 
     this.toastrService.success(`Rascunho "${draft.draftName || 'sem nome'}" carregado`);
@@ -512,6 +610,11 @@ export class StoreFormDialogComponent implements OnInit {
     this.initialFormValues = null;
     this.createdStoreInstance = null;
     this.createdAddressInstance = null;
+    this.ownerMode = 'matrix';
+    this.selectedMatrixOwnerIds = [];
+    if (this.matrixOwners.length === 1 && this.matrixOwners[0].hasUser !== false && this.matrixOwners[0].personId) {
+      this.selectedMatrixOwnerIds = [this.matrixOwners[0].personId];
+    }
     this.captureInitialFormValue();
   }
 
@@ -536,7 +639,7 @@ export class StoreFormDialogComponent implements OnInit {
   }
 
   /**
-   * Inicializa os 3 formulários do wizard
+   * Inicializa os formulários do wizard
    */
   private initForms(): void {
     // STEP 1: Formulário de dados da loja
@@ -559,7 +662,7 @@ export class StoreFormDialogComponent implements OnInit {
       state: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
     });
 
-    // STEP 3: Formulário de dados do proprietário
+    // STEP 3: Formulário de dados do proprietário (quando cadastrando novo)
     this.personForm = this.fb.group({
       legalEntity: [false], // false = Pessoa Física, true = Pessoa Jurídica
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
@@ -572,7 +675,7 @@ export class StoreFormDialogComponent implements OnInit {
       phone: ['', [Validators.maxLength(14)]],
     });
 
-    // STEP 3: Formulário de dados de acesso
+    // STEP 4: Formulário de dados de acesso (quando cadastrando novo)
     this.accessForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(20)]],
@@ -627,12 +730,13 @@ export class StoreFormDialogComponent implements OnInit {
   }
 
   /**
-   * Submete o cadastro completo (3 requisições em sequência)
+   * Submete o cadastro completo
    *
    * FLUXO:
    * 1. Cria Store → retorna storeId
-   * 2. Cria Person (com storeId) → retorna personId
-   * 3. Vincula Person como owner da Store
+   * 2. Cria Endereço da Store
+   * 3. Se Filial com proprietários da Matriz: vincula os selecionados via POST /stores/owner
+   *    Se Novo proprietário (ou Matriz): cria Person (com User) e vincula como owner
    * 4. Retorna sucesso e fecha dialog
    */
   onSubmit(): void {
@@ -641,16 +745,31 @@ export class StoreFormDialogComponent implements OnInit {
       return;
     }
 
-    // Valida todos os formulários
-    if (!this.storeForm.valid || !this.addressForm.valid || !this.personForm.valid || !this.accessForm.valid) {
+    // Validação dos passos básicos (Loja + Endereço)
+    if (!this.storeForm.valid || !this.addressForm.valid) {
       this.markAllAsTouched();
       return;
     }
 
-    // Valida se as senhas conferem
-    if (!this.passwordsMatch()) {
-      this.submitError = 'As senhas não conferem';
-      return;
+    // Validação específica por modo de proprietário
+    const isMatrixOwnerMode = !this.data.isCarAdmin && this.ownerMode === 'matrix';
+
+    if (isMatrixOwnerMode) {
+      if (this.selectedMatrixOwnerIds.length === 0) {
+        this.submitError = 'Selecione ao menos um proprietário da Matriz para a filial.';
+        this.toastrService.warning('Selecione ao menos um proprietário da Matriz para continuar.');
+        return;
+      }
+    } else {
+      // Exige dados completos do novo proprietário e credenciais de acesso
+      if (!this.personForm.valid || !this.accessForm.valid) {
+        this.markAllAsTouched();
+        return;
+      }
+      if (!this.passwordsMatch()) {
+        this.submitError = 'As senhas não conferem';
+        return;
+      }
     }
 
     this.isSubmitting = true;
@@ -661,29 +780,26 @@ export class StoreFormDialogComponent implements OnInit {
     try {
       storePayload = this.prepareStorePayload();
     } catch (error: any) {
-      // Se o prepareStorePayload lançar erro (ex: mainStoreId não encontrado)
       this.submitError = error.message || 'Erro ao preparar dados da loja';
       this.isSubmitting = false;
       return;
     }
 
-    // 📝 LOG: Mostra qual endpoint será chamado
     console.log('🎯 Tipo de cadastro:', this.data.isCarAdmin ? 'MATRIZ' : 'FILIAL');
-    console.log('📦 Payload que será enviado:', JSON.stringify(storePayload, null, 2));
+    console.log('📦 Modo de proprietário:', isMatrixOwnerMode ? 'PROPRIETÁRIOS DA MATRIZ' : 'NOVO PROPRIETÁRIO');
 
-    // PASSO 1: Criar Store (MATRIZ ou FILIAL baseado na role) ou usar a instância criada em tentativa anterior
+    // PASSO 1: Criar Store (MATRIZ ou FILIAL) ou usar a instância criada em tentativa anterior
     const createStoreObservable = this.createdStoreInstance
       ? of(this.createdStoreInstance)
       : (this.data.isCarAdmin
-          ? this.storeService.createMainStore(storePayload) // CAR_ADMIN → POST /stores/mainstore
+          ? this.storeService.createMainStore(storePayload)
           : this.storeService.createBranch(storePayload)
-        ) // ADMIN → POST /stores
-          .pipe(
-            tap((createdStore: Store) => {
-              this.createdStoreInstance = createdStore;
-              console.log('✅ Store criada e salva no estado:', createdStore);
-            }),
-          );
+        ).pipe(
+          tap((createdStore: Store) => {
+            this.createdStoreInstance = createdStore;
+            console.log('✅ Store criada e salva no estado:', createdStore);
+          }),
+        );
 
     createStoreObservable
       .pipe(
@@ -693,7 +809,6 @@ export class StoreFormDialogComponent implements OnInit {
             throw new Error('Store criada sem storeId');
           }
 
-          // Se já criamos o endereço em tentativa anterior, pulamos a criação
           if (this.createdAddressInstance) {
             return of({ createdStore, createdAddress: this.createdAddressInstance });
           }
@@ -710,48 +825,45 @@ export class StoreFormDialogComponent implements OnInit {
           );
         }),
 
-        // PASSO 2: Criar Person com o storeId
+        // PASSO 2: Vincular proprietários da Matriz OU Criar novo Person + User
         switchMap(({ createdStore, createdAddress }) => {
-          // Valida se storeId existe
           if (!createdStore.storeId) {
             throw new Error('Store criada sem storeId');
           }
 
+          if (isMatrixOwnerMode) {
+            console.log('🔗 Vinculando proprietários selecionados da Matriz:', this.selectedMatrixOwnerIds);
+            const linkObservables = this.selectedMatrixOwnerIds.map((personId) =>
+              this.storeService.setStoreOwner(createdStore.storeId!, personId),
+            );
+
+            return forkJoin(linkObservables).pipe(
+              tap((updatedStores) => {
+                console.log('✅ Todos os proprietários da Matriz foram vinculados:', updatedStores);
+              }),
+              switchMap(() => of(createdStore)),
+            );
+          }
+
+          // Fluxo de criação de Novo Proprietário
           const personPayload = this.preparePersonPayload(createdStore.storeId);
-          console.log('📝 Criando proprietário:', personPayload);
-          console.log('🆔 StoreId para vinculação:', createdStore.storeId);
+          console.log('📝 Criando novo proprietário:', personPayload);
 
           return this.personService.createPerson(personPayload).pipe(
-            // Backend retorna o objeto Person completo, não apenas o ID
             tap((createdPerson: any) => {
-              console.log('✅ Proprietário criado:', createdPerson);
-              console.log('🆔 PersonId extraído:', createdPerson.personId);
-              console.log('📊 Tipo do objeto:', typeof createdPerson);
+              console.log('✅ Novo proprietário criado:', createdPerson);
             }),
-            // PASSO 3: Vincular Person como owner da Store usando o personId extraído
             switchMap((createdPerson: any) => {
-              console.log('🔗 Vinculando proprietário à loja');
-
-              // Validação adicional para garantir que storeId ainda existe
-              if (!createdStore.storeId) {
-                throw new Error('storeId não encontrado');
-              }
-
-              // Valida se personId existe no objeto retornado
               if (!createdPerson.personId) {
                 throw new Error('Person criada sem personId');
               }
-
-              console.log('📤 Payload de vinculação:', {
+              console.log('🔗 Vinculando proprietário à loja:', {
                 storeId: createdStore.storeId,
                 personId: createdPerson.personId,
               });
 
               return this.storeService
-                .setStoreOwner(
-                  createdStore.storeId,
-                  createdPerson.personId, // ✅ Agora extrai do objeto
-                )
+                .setStoreOwner(createdStore.storeId!, createdPerson.personId)
                 .pipe(
                   tap({
                     next: (updatedStore) => {
@@ -759,15 +871,8 @@ export class StoreFormDialogComponent implements OnInit {
                     },
                     error: (error) => {
                       console.error('❌ Erro ao vincular proprietário:', error);
-                      console.error('📋 Detalhes do erro:', {
-                        status: error.status,
-                        statusText: error.statusText,
-                        message: error.error?.message || error.message,
-                        fullError: error,
-                      });
                     },
                   }),
-                  // Retorna a store completa
                   switchMap(() => of(createdStore)),
                 );
             }),
@@ -797,7 +902,6 @@ export class StoreFormDialogComponent implements OnInit {
           } else if (error.status === 400) {
             this.submitError = 'Dados inválidos. Verifique os campos e tente novamente.';
           } else if (error.status === 409 || error.status === 500) {
-            // Verifica se é erro de duplicação no corpo do erro
             const errorMessage = JSON.stringify(error.error || error.message || '').toLowerCase();
 
             if (errorMessage.includes('email') && errorMessage.includes('already exists')) {
@@ -817,7 +921,6 @@ export class StoreFormDialogComponent implements OnInit {
             this.submitError = 'Erro ao cadastrar loja. Tente novamente.';
           }
 
-          // Feedback visual via Toastr (notificação flutuante para evitar problemas de scroll)
           if (this.submitError) {
             const cleanMessage = this.submitError.replace(/^[❌\s]+/, '');
             this.toastrService.error(cleanMessage, 'Erro no Cadastro', {
@@ -834,19 +937,15 @@ export class StoreFormDialogComponent implements OnInit {
         next: (createdStore: Store) => {
           console.log('🎉 Cadastro completo com sucesso!');
           this.isSubmitting = false;
-          // Notifica o sistema que uma nova loja foi adicionada
           this.storeService.notifyStoreUpdated();
 
-          // Remove o rascunho ativo se aplicável
           if (this.selectedDraftId && this.selectedDraftId !== 'new') {
             this.formDraftService.removeDraftById(this.selectedDraftId);
           }
 
-          // Fecha dialog e retorna a store criada
           this.dialogRef.close(createdStore);
         },
         error: () => {
-          // Erro já tratado no catchError
           this.isSubmitting = false;
         },
       });

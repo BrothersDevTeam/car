@@ -341,186 +341,324 @@
         </mat-step>
 
         <!-- ========== STEP 3: DADOS DO PROPRIETÁRIO ========== -->
-        <mat-step [stepControl]="personForm" label="Dados do Proprietário">
-          <form [formGroup]="personForm" class="step-form">
-            <p class="step-description">
-              <mat-icon>info</mat-icon>
-              Informe os dados do proprietário da loja (pessoa que terá acesso administrativo)
-            </p>
+        <mat-step [stepControl]="isStep3Valid() ? storeForm : personForm" label="Dados do Proprietário">
+          <div class="step-form">
+            <!-- Se for Filial, exibe o seletor de modo (Proprietário da Matriz ou Novo) -->
+            @if (!data.isCarAdmin) {
+              <div class="owner-mode-selector">
+                <div
+                  class="mode-card"
+                  [class.active]="ownerMode === 'matrix'"
+                  (click)="setOwnerMode('matrix')"
+                >
+                  <div class="mode-icon-wrapper">
+                    <mat-icon>business</mat-icon>
+                  </div>
+                  <div class="mode-text">
+                    <span class="mode-title">Proprietário(s) da Matriz</span>
+                    <span class="mode-desc">Vincular sócios da Matriz com login já configurado</span>
+                  </div>
+                  <mat-icon class="mode-check">{{ ownerMode === 'matrix' ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
+                </div>
 
-            <!-- Tipo de Pessoa -->
-            <div class="checkbox-field">
-              <mat-checkbox formControlName="legalEntity">Pessoa Jurídica (empresa)</mat-checkbox>
-              <span class="hint">Deixe desmarcado para Pessoa Física</span>
-            </div>
-
-            <!-- Nome -->
-            <app-primary-input
-              formControlName="name"
-              label="Nome Completo / Razão Social *"
-              inputName="personName"
-              type="text"
-              placeholder="Nome completo do proprietário"
-              maxlength="50"
-              [error]="personForm.get('name')?.invalid && personForm.get('name')?.touched"
-            />
-
-            <!-- Apelido -->
-            <app-primary-input
-              formControlName="nickName"
-              label="Apelido / Nome Fantasia (Opcional)"
-              inputName="personNickName"
-              type="text"
-              placeholder="Como prefere ser chamado"
-              maxlength="50"
-            />
-
-            <!-- CPF (apenas se Pessoa Física) -->
-            @if (!personForm.get('legalEntity')?.value) {
-              <app-primary-input
-                formControlName="cpf"
-                label="CPF *"
-                inputName="personCpf"
-                type="text"
-                placeholder="000.000.000-00"
-                mask="000.000.000-00"
-                [uppercase]="false"
-                appCpfValidator
-                [error]="personForm.get('cpf')?.invalid && personForm.get('cpf')?.touched"
-              />
-
-              <!-- RG e Órgão Emissor (apenas se Pessoa Física) -->
-              <div class="row">
-                <app-primary-input
-                  formControlName="rg"
-                  label="RG (Opcional)"
-                  inputName="personRg"
-                  type="text"
-                  placeholder="000000000"
-                  maxlength="14"
-                  [uppercase]="false"
-                />
-
-                <app-primary-input
-                  formControlName="rgIssuer"
-                  label="Órgão Emissor (Opcional)"
-                  inputName="personRgIssuer"
-                  type="text"
-                  placeholder="SSP/SP"
-                  maxlength="14"
-                />
+                <div
+                  class="mode-card"
+                  [class.active]="ownerMode === 'new'"
+                  (click)="setOwnerMode('new')"
+                >
+                  <div class="mode-icon-wrapper">
+                    <mat-icon>person_add</mat-icon>
+                  </div>
+                  <div class="mode-text">
+                    <span class="mode-title">Novo Proprietário</span>
+                    <span class="mode-desc">Cadastrar uma nova pessoa e novas credenciais</span>
+                  </div>
+                  <mat-icon class="mode-check">{{ ownerMode === 'new' ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
+                </div>
               </div>
             }
 
-            <!-- CNPJ (apenas se Pessoa Jurídica) -->
-            @if (personForm.get('legalEntity')?.value) {
+            <!-- MODO A: SELEÇÃO DE PROPRIETÁRIOS DA MATRIZ (FILIAL) -->
+            @if (!data.isCarAdmin && ownerMode === 'matrix') {
+              <div class="matrix-owners-section">
+                <p class="step-description">
+                  <mat-icon>info</mat-icon>
+                  Selecione os proprietários da Matriz que terão acesso e gestão sobre esta filial.
+                </p>
+
+                @if (loadingMatrixOwners) {
+                  <div class="loading-matrix-container">
+                    <mat-spinner diameter="32"></mat-spinner>
+                    <span>Carregando proprietários da Matriz...</span>
+                  </div>
+                } @else if (matrixOwnersError) {
+                  <div class="error-banner">
+                    <mat-icon>warning</mat-icon>
+                    <span>{{ matrixOwnersError }}</span>
+                  </div>
+                } @else if (matrixOwners.length === 0) {
+                  <div class="empty-matrix-card">
+                    <mat-icon>people_outline</mat-icon>
+                    <div class="empty-text">
+                      <p class="empty-title">Nenhum proprietário encontrado na Matriz</p>
+                      <p class="empty-subtitle">Selecione a opção <strong>"Novo Proprietário"</strong> acima para cadastrar o responsável por esta filial.</p>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="matrix-owners-grid">
+                    @for (owner of matrixOwners; track owner.personId) {
+                      <div
+                        class="matrix-owner-card"
+                        [class.selected]="isMatrixOwnerSelected(owner.personId)"
+                        [class.disabled]="owner.hasUser === false"
+                        (click)="toggleMatrixOwner(owner.personId, owner.hasUser !== false)"
+                      >
+                        <div class="owner-checkbox">
+                          <mat-checkbox
+                            [checked]="isMatrixOwnerSelected(owner.personId)"
+                            [disabled]="owner.hasUser === false"
+                            (click)="$event.stopPropagation()"
+                            (change)="toggleMatrixOwner(owner.personId, owner.hasUser !== false)"
+                          ></mat-checkbox>
+                        </div>
+
+                        <div class="owner-avatar">
+                          <mat-icon>{{ owner.legalEntity ? 'corporate_fare' : 'person' }}</mat-icon>
+                        </div>
+
+                        <div class="owner-info">
+                          <span class="owner-name">{{ owner.name }}</span>
+                          <div class="owner-meta">
+                            <span class="owner-doc" *ngIf="owner.cpf || owner.cnpj">
+                              {{ owner.legalEntity ? 'CNPJ: ' + (owner.cnpj | slice:0:14) : 'CPF: ' + owner.cpf }}
+                            </span>
+                            <span class="owner-email" *ngIf="owner.email">{{ owner.email }}</span>
+                          </div>
+                        </div>
+
+                        <div class="owner-status">
+                          @if (owner.hasUser !== false) {
+                            <span class="badge badge-access" matTooltip="Possui login ativo no sistema">
+                              <mat-icon>check_circle</mat-icon>
+                              Com acesso
+                            </span>
+                          } @else {
+                            <span class="badge badge-no-access" matTooltip="Este proprietário não possui usuário de login ativo na Matriz">
+                              <mat-icon>lock</mat-icon>
+                              Sem usuário
+                            </span>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  @if (selectedMatrixOwnerIds.length === 0) {
+                    <p class="selection-warning">
+                      <mat-icon>warning_amber</mat-icon>
+                      Selecione ao menos um proprietário da Matriz para vincular à filial.
+                    </p>
+                  } @else {
+                    <div class="info-note">
+                      <mat-icon>vpn_key</mat-icon>
+                      <span>Os proprietários selecionados poderão acessar esta filial diretamente com seu login e senha atuais.</span>
+                    </div>
+                  }
+                }
+
+                <!-- Botões do Step 3 (Modo Matriz) -->
+                <div class="step-actions">
+                  <button mat-button matStepperPrevious>
+                    <mat-icon>arrow_back</mat-icon>
+                    Voltar
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <!-- MODO B: FORMULÁRIO DE NOVO PROPRIETÁRIO -->
+              <form [formGroup]="personForm" class="new-owner-form-fields">
+                <p class="step-description">
+                  <mat-icon>info</mat-icon>
+                  Informe os dados do novo proprietário que será cadastrado no sistema
+                </p>
+
+                <!-- Tipo de Pessoa -->
+                <div class="checkbox-field">
+                  <mat-checkbox formControlName="legalEntity">Pessoa Jurídica (empresa)</mat-checkbox>
+                  <span class="hint">Deixe desmarcado para Pessoa Física</span>
+                </div>
+
+                <!-- Nome -->
+                <app-primary-input
+                  formControlName="name"
+                  label="Nome Completo / Razão Social *"
+                  inputName="personName"
+                  type="text"
+                  placeholder="Nome completo do proprietário"
+                  maxlength="50"
+                  [error]="personForm.get('name')?.invalid && personForm.get('name')?.touched"
+                />
+
+                <!-- Apelido -->
+                <app-primary-input
+                  formControlName="nickName"
+                  label="Apelido / Nome Fantasia (Opcional)"
+                  inputName="personNickName"
+                  type="text"
+                  placeholder="Como prefere ser chamado"
+                  maxlength="50"
+                />
+
+                <!-- CPF (apenas se Pessoa Física) -->
+                @if (!personForm.get('legalEntity')?.value) {
+                  <app-primary-input
+                    formControlName="cpf"
+                    label="CPF *"
+                    inputName="personCpf"
+                    type="text"
+                    placeholder="000.000.000-00"
+                    mask="000.000.000-00"
+                    [uppercase]="false"
+                    appCpfValidator
+                    [error]="personForm.get('cpf')?.invalid && personForm.get('cpf')?.touched"
+                  />
+
+                  <!-- RG e Órgão Emissor (apenas se Pessoa Física) -->
+                  <div class="row">
+                    <app-primary-input
+                      formControlName="rg"
+                      label="RG (Opcional)"
+                      inputName="personRg"
+                      type="text"
+                      placeholder="000000000"
+                      maxlength="14"
+                      [uppercase]="false"
+                    />
+
+                    <app-primary-input
+                      formControlName="rgIssuer"
+                      label="Órgão Emissor (Opcional)"
+                      inputName="personRgIssuer"
+                      type="text"
+                      placeholder="SSP/SP"
+                      maxlength="14"
+                    />
+                  </div>
+                }
+
+                <!-- CNPJ (apenas se Pessoa Jurídica) -->
+                @if (personForm.get('legalEntity')?.value) {
+                  <app-primary-input
+                    formControlName="cnpj"
+                    label="CNPJ *"
+                    inputName="personCnpj"
+                    type="text"
+                    placeholder="00.000.000/0000-00"
+                    mask="AA.AAA.AAA/AAAA-00"
+                    appCnpjValidator
+                    [error]="personForm.get('cnpj')?.invalid && personForm.get('cnpj')?.touched"
+                  />
+                }
+
+                <!-- Email -->
+                <app-primary-input
+                  formControlName="email"
+                  label="Email *"
+                  inputName="personEmail"
+                  type="email"
+                  placeholder="email@exemplo.com.br"
+                  maxlength="255"
+                  [uppercase]="false"
+                  [error]="personForm.get('email')?.invalid && personForm.get('email')?.touched"
+                />
+
+                <!-- Telefone -->
+                <app-primary-input
+                  formControlName="phone"
+                  label="Telefone (Opcional)"
+                  inputName="personPhone"
+                  type="tel"
+                  placeholder="(00) 0000-0000"
+                  mask="(00) 0000-0000||(00) 0 0000-0000"
+                  [uppercase]="false"
+                />
+
+                <!-- Botões do Step 3 (Novo) -->
+                <div class="step-actions">
+                  <button mat-button matStepperPrevious>
+                    <mat-icon>arrow_back</mat-icon>
+                    Voltar
+                  </button>
+                  <button mat-button matStepperNext [disabled]="!personForm.valid">
+                    Próximo
+                    <mat-icon>arrow_forward</mat-icon>
+                  </button>
+                </div>
+              </form>
+            }
+          </div>
+        </mat-step>
+
+        <!-- ========== STEP 4: DADOS DE ACESSO (APENAS PARA NOVO PROPRIETÁRIO OU MATRIZ) ========== -->
+        @if (data.isCarAdmin || ownerMode === 'new') {
+          <mat-step [stepControl]="accessForm" label="Dados de Acesso">
+            <form [formGroup]="accessForm" class="step-form">
+              <p class="step-description">
+                <mat-icon>info</mat-icon>
+                Defina o usuário e senha para acesso ao sistema
+              </p>
+
+              <!-- Username -->
               <app-primary-input
-                formControlName="cnpj"
-                label="CNPJ *"
-                inputName="personCnpj"
-                type="text"
-                placeholder="00.000.000/0000-00"
-                mask="AA.AAA.AAA/AAAA-00"
-                appCnpjValidator
-                [error]="personForm.get('cnpj')?.invalid && personForm.get('cnpj')?.touched"
+                formControlName="username"
+                label="E-mail de Usuário *"
+                inputName="username"
+                type="email"
+                placeholder="exemplo@email.com"
+                maxlength="50"
+                [uppercase]="false"
+                [error]="accessForm.get('username')?.invalid && accessForm.get('username')?.touched"
+                [errorMessage]="getUsernameErrorMessage()"
               />
-            }
 
-            <!-- Email -->
-            <app-primary-input
-              formControlName="email"
-              label="Email *"
-              inputName="personEmail"
-              type="email"
-              placeholder="email@exemplo.com.br"
-              maxlength="255"
-              [uppercase]="false"
-              [error]="personForm.get('email')?.invalid && personForm.get('email')?.touched"
-            />
+              <!-- Senha -->
+              <app-primary-input
+                formControlName="password"
+                label="Senha *"
+                inputName="password"
+                type="password"
+                placeholder="••••••••"
+                maxlength="20"
+                [uppercase]="false"
+                [error]="accessForm.get('password')?.invalid && accessForm.get('password')?.touched"
+              />
 
-            <!-- Telefone -->
-            <app-primary-input
-              formControlName="phone"
-              label="Telefone (Opcional)"
-              inputName="personPhone"
-              type="tel"
-              placeholder="(00) 0000-0000"
-              mask="(00) 0000-0000||(00) 0 0000-0000"
-              [uppercase]="false"
-            />
+              <!-- Confirmar Senha -->
+              <app-primary-input
+                formControlName="confirmPassword"
+                label="Confirmar Senha *"
+                inputName="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                maxlength="20"
+                [uppercase]="false"
+                [error]="accessForm.get('confirmPassword')?.touched && !passwordsMatch()"
+              />
 
-            <!-- Botões do Step 2 -->
-            <div class="step-actions">
-              <button mat-button matStepperPrevious>
-                <mat-icon>arrow_back</mat-icon>
-                Voltar
-              </button>
-              <button mat-button matStepperNext [disabled]="!personForm.valid">
-                Próximo
-                <mat-icon>arrow_forward</mat-icon>
-              </button>
-            </div>
-          </form>
-        </mat-step>
+              @if (accessForm.get('confirmPassword')?.touched && !passwordsMatch()) {
+                <p class="error-message">As senhas não conferem</p>
+              }
 
-        <!-- ========== STEP 3: DADOS DE ACESSO ========== -->
-        <mat-step [stepControl]="accessForm" label="Dados de Acesso">
-          <form [formGroup]="accessForm" class="step-form">
-            <p class="step-description">
-              <mat-icon>info</mat-icon>
-              Defina o usuário e senha para acesso ao sistema
-            </p>
-
-            <!-- Username -->
-            <app-primary-input
-              formControlName="username"
-              label="E-mail de Usuário *"
-              inputName="username"
-              type="email"
-              placeholder="exemplo@email.com"
-              maxlength="50"
-              [uppercase]="false"
-              [error]="accessForm.get('username')?.invalid && accessForm.get('username')?.touched"
-              [errorMessage]="getUsernameErrorMessage()"
-            />
-
-            <!-- Senha -->
-            <app-primary-input
-              formControlName="password"
-              label="Senha *"
-              inputName="password"
-              type="password"
-              placeholder="••••••••"
-              maxlength="20"
-              [uppercase]="false"
-              [error]="accessForm.get('password')?.invalid && accessForm.get('password')?.touched"
-            />
-
-            <!-- Confirmar Senha -->
-            <app-primary-input
-              formControlName="confirmPassword"
-              label="Confirmar Senha *"
-              inputName="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              maxlength="20"
-              [uppercase]="false"
-              [error]="accessForm.get('confirmPassword')?.touched && !passwordsMatch()"
-            />
-
-            @if (accessForm.get('confirmPassword')?.touched && !passwordsMatch()) {
-              <p class="error-message">As senhas não conferem</p>
-            }
-
-            <!-- Botões do Step 3 -->
-            <div class="step-actions">
-              <button mat-button matStepperPrevious>
-                <mat-icon>arrow_back</mat-icon>
-                Voltar
-              </button>
-            </div>
-          </form>
-        </mat-step>
+              <!-- Botões do Step 4 -->
+              <div class="step-actions">
+                <button mat-button matStepperPrevious>
+                  <mat-icon>arrow_back</mat-icon>
+                  Voltar
+                </button>
+              </div>
+            </form>
+          </mat-step>
+        }
       </mat-stepper>
     }
   }
@@ -535,7 +673,7 @@
       mat-raised-button
       color="primary"
       (click)="onSubmit()"
-      [disabled]="!storeForm.valid || !hasUnsavedChanges() || isSubmitting"
+      [disabled]="!isFormValidForSubmit() || isSubmitting"
     >
       @if (isSubmitting) {
         <span class="button-content">
@@ -554,7 +692,7 @@
       mat-raised-button
       color="primary"
       (click)="onSubmit()"
-      [disabled]="!storeForm.valid || !personForm.valid || !accessForm.valid || !passwordsMatch() || isSubmitting"
+      [disabled]="!isFormValidForSubmit() || isSubmitting"
     >
       @if (isSubmitting) {
         <span class="button-content">
@@ -564,7 +702,7 @@
       } @else {
         <span class="button-content">
           <mat-icon>save</mat-icon>
-          <span>Cadastrar Loja</span>
+          <span>Cadastrar {{ data.isCarAdmin ? 'Matriz' : 'Filial' }}</span>
         </span>
       }
     </button>
