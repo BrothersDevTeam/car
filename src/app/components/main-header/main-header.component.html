@@ -49,7 +49,7 @@
           }
 
           @for (store of inactiveStores; track store.storeId) {
-            <button mat-menu-item (click)="goToStoresPage()" class="notification-item-btn">
+            <button mat-menu-item (click)="goToStoresPage(store.storeId)" class="notification-item-btn">
               <mat-icon style="color: #dc3545; margin-right: 8px;">store</mat-icon>
               <div class="notification-text-content">
                 <div class="notification-item-title">Nova Loja Cadastrada</div>

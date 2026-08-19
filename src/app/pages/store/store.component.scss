@@ -346,3 +346,82 @@
 .clickable-card {
   cursor: pointer;
 }
+
+// ========== IDENTIFICADORES DE TIPO DE LOJA NA TABELA ==========
+.mat-column-type {
+  width: 120px;
+  white-space: nowrap;
+}
+
+.table-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &.type-matriz {
+    background-color: #e3f2fd;
+    color: #0d6efd;
+    border: 1px solid #bbdefb;
+  }
+
+  &.type-branch {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+    border: 1px solid #e1bee7;
+  }
+}
+
+.table-store-parent {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #616161;
+  margin-top: 3px;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: #757575;
+  }
+
+  strong {
+    color: #424242;
+  }
+}
+
+// ========== DESTAQUE VISUAL PARA NOTIFICAÇÕES (HIGHLIGHT) ==========
+.highlight-pulse {
+  animation: highlightPulse 2s cubic-bezier(0.4, 0, 0.2, 1) 3 alternate forwards;
+  border-radius: 8px;
+}
+
+@keyframes highlightPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.6);
+    background-color: #e7f1ff;
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(13, 110, 253, 0.2);
+    background-color: #d0e3ff;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+    background-color: inherit;
+  }
+}
+

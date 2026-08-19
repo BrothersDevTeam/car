@@ -196,8 +196,12 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     });
   }
 
-  goToStoresPage(): void {
-    this.router.navigate(['/store']);
+  goToStoresPage(targetStoreId?: string): void {
+    if (targetStoreId) {
+      this.router.navigate(['/store'], { queryParams: { highlight: targetStoreId } });
+    } else {
+      this.router.navigate(['/store']);
+    }
   }
 
   goToFeedbacksPage(): void {

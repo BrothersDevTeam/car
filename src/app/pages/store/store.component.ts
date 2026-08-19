@@ -23,6 +23,7 @@ import { AuthService } from '@services/auth/auth.service';
 import { StoreContextService } from '@services/store-context.service';
 import { Authorizations } from '../../enums/authorizations';
 import { StoreStatus, StoreStatusLabels, StoreStatusIcons, StoreStatusColors } from '../../enums/storeTypes';
+import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -46,6 +47,8 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class StoreComponent implements OnInit {
   stores: Store[] = [];
+  allStores: Store[] = [];
+  highlightedStoreId: string | null = null;
   loading = true;
   error = false;
   isCarAdmin = false;
@@ -55,7 +58,7 @@ export class StoreComponent implements OnInit {
   canManageOwnerOnly = false; // Só root:admin pode gerenciar proprietário
 
   viewMode: 'grid' | 'compact' | 'table' = 'grid';
-  displayedColumns: string[] = ['logo', 'name', 'cnpj', 'status', 'actions'];
+  displayedColumns: string[] = ['logo', 'name', 'type', 'cnpj', 'status', 'actions'];
   selectedStoreId: string | null = null;
   StoreStatus = StoreStatus;
 
@@ -63,6 +66,7 @@ export class StoreComponent implements OnInit {
     private storeService: StoreService,
     private authService: AuthService,
     private storeContextService: StoreContextService,
+    private route: ActivatedRoute,
     private dialog: MatDialog,
     private toastrService: ToastrService,
   ) {}
@@ -74,6 +78,16 @@ export class StoreComponent implements OnInit {
     }
 
     this.checkUserRole();
+
+    this.route.queryParams.subscribe((params) => {
+      if (params['highlight']) {
+        this.highlightedStoreId = params['highlight'];
+        if (this.stores.length > 0) {
+          setTimeout(() => this.scrollToHighlightedStore(), 300);
+        }
+      }
+    });
+
     this.storeContextService.currentStoreId$.subscribe((storeId) => {
       this.selectedStoreId = storeId;
       this.loadStores();
@@ -125,19 +139,20 @@ export class StoreComponent implements OnInit {
 
     serviceCall.subscribe({
       next: (response) => {
-        const allFetchedStores = response.content;
+        this.allStores = response.content || [];
         if (this.selectedStoreId) {
-          this.stores = allFetchedStores.filter(
+          this.stores = this.allStores.filter(
             (store: any) => store.storeId === this.selectedStoreId || store.mainStoreId === this.selectedStoreId,
           );
         } else {
-          if (this.isCarAdmin) {
-            this.stores = allFetchedStores.filter((store: any) => store.storeType === 'MATRIZ');
-          } else {
-            this.stores = allFetchedStores;
-          }
+          // Em visão global (Toda a Rede), exibe todas as lojas cadastradas
+          this.stores = this.allStores;
         }
         this.loading = false;
+
+        if (this.highlightedStoreId) {
+          setTimeout(() => this.scrollToHighlightedStore(), 300);
+        }
       },
       error: (err) => {
         console.error('Erro ao carregar lojas:', err);
@@ -145,6 +160,24 @@ export class StoreComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  getMainStoreName(mainStoreId: string | null | undefined): string | null {
+    if (!mainStoreId) return null;
+    const mainStore = this.allStores.find((s) => s.storeId === mainStoreId);
+    return mainStore ? (mainStore.tradeName || mainStore.name) : null;
+  }
+
+  private scrollToHighlightedStore(): void {
+    if (!this.highlightedStoreId) return;
+    const elementId =
+      this.viewMode === 'table'
+        ? `store-row-${this.highlightedStoreId}`
+        : `store-card-${this.highlightedStoreId}`;
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 
   changeViewMode(mode: 'grid' | 'compact' | 'table'): void {

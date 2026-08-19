@@ -62,6 +62,24 @@
               <div class="table-store-legal" *ngIf="store.tradeName && store.tradeName !== store.name">
                 {{ store.name }}
               </div>
+              <div class="table-store-parent" *ngIf="store.storeType === 'BRANCH' && getMainStoreName(store.mainStoreId)">
+                <mat-icon>account_tree</mat-icon>
+                <span>Filial de: <strong>{{ getMainStoreName(store.mainStoreId) }}</strong></span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Tipo</th>
+            <td mat-cell *matCellDef="let store">
+              <span
+                class="table-type-badge"
+                [class.type-matriz]="store.storeType === 'MATRIZ'"
+                [class.type-branch]="store.storeType === 'BRANCH'"
+              >
+                <mat-icon>{{ store.storeType === 'MATRIZ' ? 'business' : 'store' }}</mat-icon>
+                {{ store.storeType === 'MATRIZ' ? 'Matriz' : 'Filial' }}
+              </span>
             </td>
           </ng-container>
 
@@ -121,8 +139,10 @@
           <tr
             mat-row
             *matRowDef="let row; columns: displayedColumns"
+            [id]="'store-row-' + row.storeId"
             (click)="onSelectStore(row)"
             [class.active-store]="row.storeId === selectedStoreId"
+            [class.highlight-pulse]="row.storeId === highlightedStoreId"
             class="clickable-row"
           ></tr>
         </table>
@@ -193,6 +213,8 @@
       <div class="stores-grid" [class.compact-grid]="viewMode === 'compact'">
         @for (store of stores; track store.storeId) {
           <app-store-card
+            [id]="'store-card-' + store.storeId"
+            [class.highlight-pulse]="store.storeId === highlightedStoreId"
             [store]="store"
             (click)="onSelectStore(store)"
             [class.clickable-card]="true"
