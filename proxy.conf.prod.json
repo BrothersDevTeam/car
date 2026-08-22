@@ -1,7 +1,7 @@
 {
   "/api": {
-    "target": "http://api.carctrl.duckdns.org",
-    "secure": false,
+    "target": "https://api.car.cosmocode.com.br",
+    "secure": true,
     "changeOrigin": true,
     "logLevel": "debug",
     "pathRewrite": {

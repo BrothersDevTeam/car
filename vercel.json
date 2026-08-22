@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "http://api.carctrl.duckdns.org/api/v1/car/$1"
+      "destination": "https://api.car.cosmocode.com.br/api/v1/car/$1"
     }
   ]
 }
