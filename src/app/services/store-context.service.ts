@@ -26,20 +26,19 @@ export class StoreContextService {
     const isRootAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
     const canReadStoreNetwork = this.authService.hasAuthority(Authorizations.READ_STORE_NETWORK);
 
-    // Se não for admin e não puder ver a rede inteira, ele só pode acessar a sua própria loja (defaultStoreId)
-    if (!isRootAdmin && !canReadStoreNetwork) {
+    // Se for Admin, inicia por padrão com 'null' (Toda a Rede / Global), mas preserva seleção em caso de F5 (savedStoreId)
+    if (isRootAdmin) {
+      this.storeIdSubject.next(savedStoreId || null);
+    } else if (!canReadStoreNetwork) {
+      // Se não for admin e não puder ver a rede inteira, ele só pode acessar a sua própria loja (defaultStoreId)
       if (defaultStoreId) {
         this.storeIdSubject.next(defaultStoreId);
         // Limpa o localStorage para evitar sujeira de outra sessão
         localStorage.removeItem(this.STORE_KEY);
       }
     } else {
-      // Admin ou Gerente de Rede podem selecionar outras lojas, mantendo a preferência do localStorage
-      if (savedStoreId && defaultStoreId) {
-        this.storeIdSubject.next(savedStoreId);
-      } else if (defaultStoreId) {
-        this.storeIdSubject.next(defaultStoreId);
-      }
+      // Gerente de Rede pode selecionar outras lojas, mantendo a preferência do localStorage
+      this.storeIdSubject.next(savedStoreId || defaultStoreId);
     }
   }
 
@@ -95,16 +94,23 @@ export class StoreContextService {
 
   /**
    * Recarrega o estado inicial a partir do token de autenticação atual.
-   * Limpa o localStorage se não houver token (logout).
+   * Limpa o localStorage se não houver token (logout) ou se for novo login de Admin.
    */
-  refreshFromToken(): void {
+  refreshFromToken(isNewLogin: boolean = false): void {
     const defaultStoreId = this.authService.getStoreId();
+    const isRootAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+    const canReadStoreNetwork = this.authService.hasAuthority(Authorizations.READ_STORE_NETWORK);
 
-    if (defaultStoreId) {
-      const isRootAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
-      const canReadStoreNetwork = this.authService.hasAuthority(Authorizations.READ_STORE_NETWORK);
-
-      if (!isRootAdmin && !canReadStoreNetwork) {
+    if (isRootAdmin) {
+      if (isNewLogin) {
+        localStorage.removeItem(this.STORE_KEY);
+        this.storeIdSubject.next(null);
+      } else {
+        const savedStoreId = localStorage.getItem(this.STORE_KEY);
+        this.storeIdSubject.next(savedStoreId || null);
+      }
+    } else if (defaultStoreId) {
+      if (!canReadStoreNetwork) {
         this.storeIdSubject.next(defaultStoreId);
         localStorage.removeItem(this.STORE_KEY);
       } else {

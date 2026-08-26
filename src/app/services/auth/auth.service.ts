@@ -47,7 +47,7 @@ export class AuthService {
           sessionStorage.setItem(this.TOKEN_KEY, value.token);
           this.authorizationsSubject.next(this.getAuthorizations());
           try {
-            this.injector.get(StoreContextService).refreshFromToken();
+            this.injector.get(StoreContextService).refreshFromToken(true);
           } catch (e) {
             console.warn('Erro ao atualizar StoreContextService no login', e);
           }
@@ -64,7 +64,7 @@ export class AuthService {
           sessionStorage.setItem(this.TOKEN_KEY, value.token);
           this.authorizationsSubject.next(this.getAuthorizations());
           try {
-            this.injector.get(StoreContextService).refreshFromToken();
+            this.injector.get(StoreContextService).refreshFromToken(false);
           } catch (e) {
             console.warn('Erro ao atualizar StoreContextService no refresh', e);
           }
@@ -99,7 +99,7 @@ export class AuthService {
     sessionStorage.removeItem(this.TOKEN_KEY);
     this.authorizationsSubject.next([]);
     try {
-      this.injector.get(StoreContextService).refreshFromToken();
+      this.injector.get(StoreContextService).refreshFromToken(true);
     } catch (e) {
       console.warn('Erro ao atualizar StoreContextService no logout', e);
     }
