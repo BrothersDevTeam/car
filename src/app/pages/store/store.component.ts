@@ -96,10 +96,13 @@ export class StoreComponent implements OnInit {
 
   private checkUserRole(): void {
     this.isCarAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+    const isProprietario = this.authService.getPersonRelationship()?.toUpperCase() === 'PROPRIETARIO';
 
     this.canCreateStore =
-      this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||
-      this.authService.hasAuthority(Authorizations.EDIT_STORE_SELF);
+      this.isCarAdmin ||
+      (isProprietario &&
+        (this.authService.hasAuthority(Authorizations.EDIT_STORE_SELF) ||
+          this.authService.hasAuthority(Authorizations.EDIT_STORE_NETWORK)));
 
     this.canManageFiscal =
       this.authService.hasAuthority(Authorizations.ROOT_ADMIN) ||

@@ -28,6 +28,7 @@ import { CnpjValidatorDirective } from '@directives/cnpj-validator.directive';
 import { CpfValidatorDirective } from '@directives/cpf-validator.directive';
 import { catchError, switchMap, tap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { of, throwError, forkJoin } from 'rxjs';
+import { AuthService } from '@services/auth/auth.service';
 import { AddressService } from '@services/address.service';
 import { CepService } from '@services/cep.service';
 import { ViaCepResponse } from '@interfaces/address';
@@ -44,6 +45,7 @@ export interface StoreFormDialogData {
 
 /**
  * Componente wizard para cadastro completo de nova loja matriz ou filial
+ * Segue o fluxo: Store -> Address -> Person (Owner) -> User (Credentials)
  */
 @Component({
   selector: 'app-store-form-dialog',
@@ -83,6 +85,7 @@ export class StoreFormDialogComponent implements OnInit {
   ownerMode: 'matrix' | 'new' = 'matrix';
   matrixOwners: Person[] = [];
   selectedMatrixOwnerIds: string[] = [];
+  matrixStoreId: string | null = null;
   loadingMatrixOwners = false;
   matrixOwnersError: string | null = null;
 
@@ -105,6 +108,7 @@ export class StoreFormDialogComponent implements OnInit {
     private storeService: StoreService,
     private personService: PersonService,
     private storeContextService: StoreContextService,
+    private authService: AuthService,
     public dialogRef: MatDialogRef<StoreFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: StoreFormDialogData,
     private elementRef: ElementRef,
@@ -274,8 +278,8 @@ export class StoreFormDialogComponent implements OnInit {
     if (this.data.isCarAdmin || this.data.mode !== 'create') {
       return;
     }
-    const currentStoreId = this.storeContextService.currentStoreId;
-    if (!currentStoreId) {
+    const storeIdToFetch = this.storeContextService.currentStoreId || this.authService.getStoreId();
+    if (!storeIdToFetch) {
       this.ownerMode = 'new';
       return;
     }
@@ -283,19 +287,22 @@ export class StoreFormDialogComponent implements OnInit {
     this.loadingMatrixOwners = true;
     this.matrixOwnersError = null;
 
-    this.storeService.getById(currentStoreId).subscribe({
+    this.storeService.getById(storeIdToFetch).subscribe({
       next: (store) => {
-        this.loadingMatrixOwners = false;
-        this.matrixOwners = store.owners || [];
-
-        if (this.matrixOwners.length === 0) {
-          this.ownerMode = 'new';
-        } else if (this.selectedMatrixOwnerIds.length === 0) {
-          // Pré-seleciona se houver apenas 1 proprietário com usuário de acesso ativo
-          const eligibleOwners = this.matrixOwners.filter((o) => o.hasUser !== false);
-          if (eligibleOwners.length === 1 && eligibleOwners[0].personId) {
-            this.selectedMatrixOwnerIds = [eligibleOwners[0].personId];
-          }
+        if (store.mainStoreId) {
+          this.matrixStoreId = store.mainStoreId;
+          this.storeService.getById(store.mainStoreId).subscribe({
+            next: (matrizStore) => {
+              this.applyMatrixOwners(matrizStore.owners || []);
+            },
+            error: (err) => {
+              console.error('Erro ao carregar proprietários da matriz raiz:', err);
+              this.applyMatrixOwners(store.owners || []);
+            },
+          });
+        } else {
+          this.matrixStoreId = store.storeId || storeIdToFetch;
+          this.applyMatrixOwners(store.owners || []);
         }
       },
       error: (err) => {
@@ -305,6 +312,21 @@ export class StoreFormDialogComponent implements OnInit {
         this.ownerMode = 'new';
       },
     });
+  }
+
+  private applyMatrixOwners(owners: Person[]): void {
+    this.loadingMatrixOwners = false;
+    this.matrixOwners = owners;
+
+    if (this.matrixOwners.length === 0) {
+      this.ownerMode = 'new';
+    } else if (this.selectedMatrixOwnerIds.length === 0) {
+      // Pré-seleciona se houver apenas 1 proprietário com usuário de acesso ativo
+      const eligibleOwners = this.matrixOwners.filter((o) => o.hasUser !== false);
+      if (eligibleOwners.length === 1 && eligibleOwners[0].personId) {
+        this.selectedMatrixOwnerIds = [eligibleOwners[0].personId];
+      }
+    }
   }
 
   /**
@@ -972,15 +994,15 @@ export class StoreFormDialogComponent implements OnInit {
 
     // Se não for CAR_ADMIN, é uma filial e precisa do mainStoreId
     if (!this.data.isCarAdmin) {
-      // Busca o storeId do usuário logado (que é a matriz)
-      const userStoreId = this.storeContextService.currentStoreId;
+      // Busca o storeId da matriz raiz (ou loja do usuário como fallback)
+      const userStoreId = this.matrixStoreId || this.storeContextService.currentStoreId || this.authService.getStoreId();
 
       // ⚠️ VALIDAÇÃO CRÍTICA: Backend exige mainStoreId para criar filial
       if (!userStoreId) {
         throw new Error('Erro: não foi possível identificar a loja matriz. Faça login novamente.');
       }
 
-      console.log('🏢 Criando FILIAL da matriz:', userStoreId);
+      console.log('🏢 Criando FILIAL vinculada à matriz:', userStoreId);
       payload.mainStoreId = userStoreId;
     } else {
       console.log('🏢 Criando MATRIZ (CAR_ADMIN)');
