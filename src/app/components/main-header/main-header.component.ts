@@ -51,7 +51,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   isCarAdmin = false;
   canReadStoreOthers = false;
   stores: Store[] = [];
-  selectedStoreId: string = 'ALL';
+  selectedStoreId: string = '';
   inactiveStores: Store[] = [];
   isStoreSelectionLocked = signal<boolean>(false);
   unreadFeedbacksCount = signal<number>(0);
@@ -77,19 +77,18 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.checkBillingStatus(initialStoreId);
       }
 
-      if (this.isCarAdmin || this.canReadStoreOthers) {
-        this.loadAllStores();
-      } else {
-        this.loadCurrentStoreName();
+      if (!this.isCarAdmin && !this.canReadStoreOthers) {
+        this.selectedStoreId = initialStoreId ?? '';
       }
+
+      this.loadAllStores();
     });
 
     // Escuta mudanças na loja globalmente selecionada
     this.storeContextService.currentStoreId$
       .pipe(takeUntil(this.destroy$), distinctUntilChanged())
       .subscribe((storeId) => {
-        // Configura o ID inicial pelo contexto global (usando 'ALL' em vez de null para o html renderizar)
-        this.selectedStoreId = storeId ?? 'ALL';
+        this.selectedStoreId = storeId ?? (this.isCarAdmin || this.canReadStoreOthers ? 'ALL' : (this.authService.getStoreId() ?? ''));
 
         const storeToCheck = storeId || this.authService.getStoreId();
         if (storeToCheck) {
@@ -98,11 +97,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
           this.showBillingWarning = false;
         }
 
-        if (this.isCarAdmin || this.canReadStoreOthers) {
-          this.loadAllStores();
-        } else {
-          this.loadCurrentStoreName();
-        }
+        this.loadAllStores();
       });
 
     // Escuta estado de bloqueio do seletor de loja
@@ -114,11 +109,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     // Escuta atualizações de lojas para recarregar a lista do header sem f5
     this.storeService.storeUpdated$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      if (this.isCarAdmin || this.canReadStoreOthers) {
-        this.loadAllStores();
-      } else {
-        this.loadCurrentStoreName();
-      }
+      this.loadAllStores();
       if (this.isCarAdmin) {
         this.loadInactiveStores();
       }
@@ -141,8 +132,17 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         if (response && response.content) {
           this.stores = response.content;
 
-          // Se o usuário não for admin e a loja atualmente selecionada não for ativa, reverte para loja padrão ativa ou 'ALL'
-          if (!this.isCarAdmin && this.selectedStoreId && this.selectedStoreId !== 'ALL') {
+          // Se o usuário não tem permissão de rede e não é admin, garante seleção da sua loja
+          if (!this.isCarAdmin && !this.canReadStoreOthers) {
+            const userStoreId = this.authService.getStoreId();
+            if (userStoreId) {
+              this.selectedStoreId = userStoreId;
+              this.storeContextService.setStoreId(userStoreId);
+            } else if (this.stores.length > 0 && this.stores[0].storeId) {
+              this.selectedStoreId = this.stores[0].storeId;
+              this.storeContextService.setStoreId(this.stores[0].storeId);
+            }
+          } else if (!this.isCarAdmin && this.selectedStoreId && this.selectedStoreId !== 'ALL') {
             const currentSelected = this.stores.find((s) => s.storeId === this.selectedStoreId);
             if (currentSelected && currentSelected.storeStatus !== StoreStatus.ACTIVE) {
               const defaultStoreId = this.authService.getStoreId();
@@ -161,19 +161,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     return StoreStatusLabels[status as StoreStatus] || (status as string);
   }
 
-  private loadCurrentStoreName() {
-    if (this.selectedStoreId) {
-      this.storeService.getById(this.selectedStoreId).subscribe({
-        next: (store) => {
-          this.storeName.set(store.tradeName || store.name || 'Filial');
-        },
-        error: () => this.storeName.set('Filial'),
-      });
-    } else {
-      this.storeName.set('Filial');
-    }
-  }
-
   onStoreChange() {
     const storeToEmit = this.selectedStoreId === 'ALL' ? null : this.selectedStoreId;
     this.storeContextService.setStoreId(storeToEmit);
@@ -181,14 +168,19 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   getSelectedStoreName(): string {
     if (this.selectedStoreId === 'ALL') {
-      return this.isCarAdmin ? 'Toda a Rede (Global)' : 'Toda a Rede';
+      if (this.isCarAdmin || this.canReadStoreOthers) {
+        return this.isCarAdmin ? 'Toda a Rede (Global)' : 'Toda a Rede';
+      }
     }
     const store = this.stores.find((s) => s.storeId === this.selectedStoreId);
     if (store) {
       const name = store.tradeName || store.name;
       return `${name}`;
     }
-    return this.storeName() || 'Filial';
+    if (this.stores.length === 1 && !this.isCarAdmin && !this.canReadStoreOthers) {
+      return this.stores[0].tradeName || this.stores[0].name;
+    }
+    return this.storeName() || '';
   }
 
   loadInactiveStores(): void {

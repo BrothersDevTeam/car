@@ -31,13 +31,10 @@ export class StoreContextService {
       this.storeIdSubject.next(savedStoreId || null);
     } else if (!canReadStoreNetwork) {
       // Se não for admin e não puder ver a rede inteira, ele só pode acessar a sua própria loja (defaultStoreId)
-      if (defaultStoreId) {
-        this.storeIdSubject.next(defaultStoreId);
-        // Limpa o localStorage para evitar sujeira de outra sessão
-        localStorage.removeItem(this.STORE_KEY);
-      }
+      this.storeIdSubject.next(defaultStoreId);
+      localStorage.removeItem(this.STORE_KEY);
     } else {
-      // Gerente de Rede pode selecionar outras lojas, mantendo a preferência do localStorage
+      // Usuário com permissão de rede pode selecionar outras lojas, mantendo a preferência do localStorage
       this.storeIdSubject.next(savedStoreId || defaultStoreId);
     }
   }
@@ -82,6 +79,16 @@ export class StoreContextService {
    * Atualiza a loja atual selecionada e persiste no localStorage.
    */
   setStoreId(storeId: string | null): void {
+    const isRootAdmin = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+    const canReadStoreNetwork = this.authService.hasAuthority(Authorizations.READ_STORE_NETWORK);
+
+    if (!isRootAdmin && !canReadStoreNetwork) {
+      const defaultStoreId = this.authService.getStoreId();
+      this.storeIdSubject.next(defaultStoreId);
+      localStorage.removeItem(this.STORE_KEY);
+      return;
+    }
+
     if (this.storeIdSubject.getValue() !== storeId) {
       if (storeId) {
         localStorage.setItem(this.STORE_KEY, storeId);
@@ -109,14 +116,12 @@ export class StoreContextService {
         const savedStoreId = localStorage.getItem(this.STORE_KEY);
         this.storeIdSubject.next(savedStoreId || null);
       }
+    } else if (!canReadStoreNetwork) {
+      this.storeIdSubject.next(defaultStoreId);
+      localStorage.removeItem(this.STORE_KEY);
     } else if (defaultStoreId) {
-      if (!canReadStoreNetwork) {
-        this.storeIdSubject.next(defaultStoreId);
-        localStorage.removeItem(this.STORE_KEY);
-      } else {
-        const savedStoreId = localStorage.getItem(this.STORE_KEY);
-        this.storeIdSubject.next(savedStoreId || defaultStoreId);
-      }
+      const savedStoreId = localStorage.getItem(this.STORE_KEY);
+      this.storeIdSubject.next(savedStoreId || defaultStoreId);
     } else {
       localStorage.removeItem(this.STORE_KEY);
       this.storeIdSubject.next(null);
