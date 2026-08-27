@@ -121,8 +121,8 @@ export class StoreOwnerDialogComponent implements OnInit {
 
     this.personService.getPaginatedData(0, 100, params).subscribe({
       next: (response) => {
-        // Filtra para remover quem já é proprietário desta loja
-        this.persons = response.content.filter((p) => !this.isStoreOwner(p.personId!));
+        // Filtra para remover quem já é proprietário desta loja e manter apenas pessoas com acesso ao sistema
+        this.persons = response.content.filter((p) => !this.isStoreOwner(p.personId!) && p.hasUser);
         this.loading = false;
       },
       error: (err) => {
@@ -138,8 +138,7 @@ export class StoreOwnerDialogComponent implements OnInit {
   }
 
   getPersonDisplay(person: Person): string {
-    const accessStatus = person.hasUser ? '✅ Com acesso' : '❌ Sem acesso';
-    return `${person.name} - (${accessStatus})`;
+    return person.name;
   }
 
   onAddOwner(): void {
