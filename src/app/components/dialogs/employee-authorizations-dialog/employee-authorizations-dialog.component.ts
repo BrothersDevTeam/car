@@ -70,7 +70,7 @@ export class EmployeeAuthorizationsDialogComponent implements OnInit {
       VENDA: 'Vendas',
       COMPRA: 'Compras',
       VEHICLE: 'Veículos',
-      PERSON: 'Clientes',
+      PERSON: 'Pessoas',
       STORE: 'Lojas',
       NFE: 'Notas Fiscais (NFe)',
       USER: 'Usuários do Sistema',

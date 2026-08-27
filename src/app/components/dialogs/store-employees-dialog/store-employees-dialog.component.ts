@@ -38,116 +38,47 @@ export interface StoreEmployeesDialogData {
   targetPersonId?: string;
 }
 
-// Grupos de autorização padrão (mesmos presets do natural-person-form)
-const AUTH_GROUPS = [
-  {
-    name: 'Compras',
-    permissions: [
-      { key: Authorizations.READ_COMPRA_STORE, label: 'Visualizar compras (loja)' },
-      { key: Authorizations.READ_COMPRA_NETWORK, label: 'Visualizar compras (rede)' },
-      { key: Authorizations.CREATE_COMPRA_STORE, label: 'Registrar compra (loja)' },
-      { key: Authorizations.CREATE_COMPRA_NETWORK, label: 'Registrar compra (rede)' },
-      { key: Authorizations.EDIT_COMPRA_STORE, label: 'Editar compra (loja)' },
-      { key: Authorizations.EDIT_COMPRA_NETWORK, label: 'Editar compra (rede)' },
-      { key: Authorizations.CANCEL_COMPRA_STORE, label: 'Cancelar compra (loja)' },
-      { key: Authorizations.CANCEL_COMPRA_NETWORK, label: 'Cancelar compra (rede)' },
-    ],
-  },
-  {
-    name: 'Vendas',
-    permissions: [
-      { key: Authorizations.READ_VENDA_STORE, label: 'Visualizar vendas (loja)' },
-      { key: Authorizations.READ_VENDA_NETWORK, label: 'Visualizar vendas (rede)' },
-      { key: Authorizations.CREATE_VENDA_STORE, label: 'Registrar venda (loja)' },
-      { key: Authorizations.CREATE_VENDA_NETWORK, label: 'Registrar venda (rede)' },
-      { key: Authorizations.EDIT_VENDA_STORE, label: 'Editar venda (loja)' },
-      { key: Authorizations.EDIT_VENDA_NETWORK, label: 'Editar venda (rede)' },
-      { key: Authorizations.CANCEL_VENDA_STORE, label: 'Cancelar venda (loja)' },
-      { key: Authorizations.CANCEL_VENDA_NETWORK, label: 'Cancelar venda (rede)' },
-    ],
-  },
-  {
-    name: 'Veículos',
-    permissions: [
-      { key: Authorizations.READ_VEHICLE_STORE, label: 'Visualizar estoque (loja)' },
-      { key: Authorizations.READ_VEHICLE_NETWORK, label: 'Visualizar estoque (rede)' },
-      { key: Authorizations.CREATE_VEHICLE_STORE, label: 'Cadastrar veículos (loja)' },
-      { key: Authorizations.CREATE_VEHICLE_NETWORK, label: 'Cadastrar veículos (rede)' },
-      { key: Authorizations.EDIT_VEHICLE_STORE, label: 'Editar veículos (loja)' },
-      { key: Authorizations.EDIT_VEHICLE_NETWORK, label: 'Editar veículos (rede)' },
-      { key: Authorizations.DELETE_VEHICLE_STORE, label: 'Excluir veículos (loja)' },
-      { key: Authorizations.DELETE_VEHICLE_NETWORK, label: 'Excluir veículos (rede)' },
-      { key: Authorizations.READ_VEHICLE_PURCHASE_PRICE, label: 'Ver preço de compra' },
-      { key: Authorizations.READ_VEHICLE_PROFIT, label: 'Ver lucro/margem' },
-    ],
-  },
-  {
-    name: 'Clientes e Pessoas',
-    permissions: [
-      { key: Authorizations.READ_PERSON_SELF, label: 'Visualizar próprio registro' },
-      { key: Authorizations.READ_PERSON_STORE, label: 'Visualizar pessoas (loja)' },
-      { key: Authorizations.READ_PERSON_NETWORK, label: 'Visualizar pessoas (rede)' },
-      { key: Authorizations.CREATE_PERSON_STORE, label: 'Cadastrar pessoas (loja)' },
-      { key: Authorizations.CREATE_PERSON_NETWORK, label: 'Cadastrar pessoas (rede)' },
-      { key: Authorizations.EDIT_PERSON_SELF, label: 'Editar próprio registro' },
-      { key: Authorizations.EDIT_PERSON_STORE, label: 'Editar pessoas (loja)' },
-      { key: Authorizations.EDIT_PERSON_NETWORK, label: 'Editar pessoas (rede)' },
-      { key: Authorizations.DELETE_PERSON_STORE, label: 'Excluir pessoas (loja)' },
-      { key: Authorizations.DELETE_PERSON_NETWORK, label: 'Excluir pessoas (rede)' },
-    ],
-  },
-  {
-    name: 'Notas Fiscais (NFe)',
-    permissions: [
-      { key: Authorizations.READ_NFE_STORE, label: 'Visualizar NFes (loja)' },
-      { key: Authorizations.READ_NFE_NETWORK, label: 'Visualizar NFes (rede)' },
-      { key: Authorizations.CREATE_NFE_STORE, label: 'Gerar NFes (loja)' },
-      { key: Authorizations.CREATE_NFE_NETWORK, label: 'Gerar NFes (rede)' },
-      { key: Authorizations.EMITIR_NFE_STORE, label: 'Emitir NFes (loja)' },
-      { key: Authorizations.EMITIR_NFE_NETWORK, label: 'Emitir NFes (rede)' },
-      { key: Authorizations.EDIT_NFE_NETWORK, label: 'Editar NFes (rede)' },
-      { key: Authorizations.CANCEL_NFE_STORE, label: 'Cancelar NFes (loja)' },
-      { key: Authorizations.CANCEL_NFE_NETWORK, label: 'Cancelar NFes (rede)' },
-    ],
-  },
-  {
-    name: 'Lojas',
-    permissions: [
-      { key: Authorizations.READ_STORE_SELF, label: 'Visualizar dados (loja)' },
-      { key: Authorizations.READ_STORE_NETWORK, label: 'Visualizar dados (rede)' },
-      { key: Authorizations.EDIT_STORE_SELF, label: 'Configurar própria loja' },
-      { key: Authorizations.EDIT_STORE_NETWORK, label: 'Configurar lojas da rede' },
-      { key: Authorizations.SYNC_FOCUSNFE, label: 'Sincronizar Focus NFe' },
-    ],
-  },
-  {
-    name: 'Usuários do Sistema',
-    permissions: [
-      { key: Authorizations.READ_USER_SELF, label: 'Ver próprio perfil' },
-      { key: Authorizations.READ_USER_STORE, label: 'Visualizar usuários (loja)' },
-      { key: Authorizations.READ_USER_NETWORK, label: 'Visualizar usuários (rede)' },
-      { key: Authorizations.CREATE_USER_STORE, label: 'Criar usuários (loja)' },
-      { key: Authorizations.CREATE_USER_NETWORK, label: 'Criar usuários (rede)' },
-      { key: Authorizations.EDIT_USER_SELF, label: 'Editar próprio perfil' },
-      { key: Authorizations.EDIT_USER_STORE, label: 'Editar outros usuários' },
-      { key: Authorizations.EDIT_USER_NETWORK, label: 'Editar usuários (rede)' },
-      { key: Authorizations.DELETE_USER_STORE, label: 'Excluir usuários (loja)' },
-      { key: Authorizations.DELETE_USER_NETWORK, label: 'Excluir usuários (rede)' },
-    ],
-  },
-  {
-    name: 'Controle de Permissões',
-    permissions: [
-      { key: Authorizations.EDIT_MANAGER_AUTH, label: 'Editar permissões de Gerentes' },
-      { key: Authorizations.EDIT_SELLER_AUTH, label: 'Editar permissões de Vendedores' },
-    ],
-  },
-];
+export interface Authorization {
+  key: string;
+  label: string;
+}
+
+export interface ModuleAuthorizations {
+  module: string;
+  authorizations: Authorization[];
+}
 
 // Presets de autorização por perfil
 const PRESET_GERENTE: string[] = [
+  // ABAS
+  Authorizations.TAB_DASHBOARD,
+  Authorizations.TAB_STORE,
+  Authorizations.TAB_FINANCIAL,
+  Authorizations.TAB_PERSON,
+  Authorizations.TAB_VEHICLE,
+  Authorizations.TAB_COMPRA,
+  Authorizations.TAB_VENDA,
+  Authorizations.TAB_NFE,
+  Authorizations.TAB_REPORT,
+
+  // DASHBOARD
+  Authorizations.READ_DASHBOARD_STORE,
+  Authorizations.READ_DASHBOARD_NETWORK,
+
+  // STORE
   Authorizations.READ_STORE_SELF,
   Authorizations.READ_STORE_NETWORK,
+
+  // FINANCIAL
+  Authorizations.READ_FINANCIAL_STORE,
+  Authorizations.READ_FINANCIAL_NETWORK,
+  Authorizations.CREATE_FINANCIAL_STORE,
+  Authorizations.CREATE_FINANCIAL_NETWORK,
+  Authorizations.EDIT_FINANCIAL_STORE,
+  Authorizations.EDIT_FINANCIAL_NETWORK,
+  Authorizations.DELETE_FINANCIAL_STORE,
+
+  // USER
   Authorizations.READ_USER_SELF,
   Authorizations.READ_USER_STORE,
   Authorizations.CREATE_USER_STORE,
@@ -155,6 +86,8 @@ const PRESET_GERENTE: string[] = [
   Authorizations.EDIT_USER_STORE,
   Authorizations.DELETE_USER_STORE,
   Authorizations.EDIT_SELLER_AUTH,
+
+  // PERSON
   Authorizations.READ_PERSON_SELF,
   Authorizations.READ_PERSON_STORE,
   Authorizations.READ_PERSON_NETWORK,
@@ -162,16 +95,28 @@ const PRESET_GERENTE: string[] = [
   Authorizations.EDIT_PERSON_SELF,
   Authorizations.EDIT_PERSON_STORE,
   Authorizations.DELETE_PERSON_STORE,
+
+  // VEHICLE
   Authorizations.READ_VEHICLE_STORE,
   Authorizations.READ_VEHICLE_NETWORK,
   Authorizations.CREATE_VEHICLE_STORE,
   Authorizations.EDIT_VEHICLE_STORE,
   Authorizations.READ_VEHICLE_PURCHASE_PRICE,
   Authorizations.READ_VEHICLE_PROFIT,
+
+  // NFE
   Authorizations.READ_NFE_STORE,
   Authorizations.CREATE_NFE_STORE,
   Authorizations.EMITIR_NFE_STORE,
   Authorizations.CANCEL_NFE_STORE,
+
+  // COMPRA
+  Authorizations.READ_COMPRA_STORE,
+  Authorizations.CREATE_COMPRA_STORE,
+  Authorizations.EDIT_COMPRA_STORE,
+  Authorizations.CANCEL_COMPRA_STORE,
+
+  // VENDA
   Authorizations.READ_VENDA_STORE,
   Authorizations.CREATE_VENDA_STORE,
   Authorizations.EDIT_VENDA_STORE,
@@ -179,20 +124,37 @@ const PRESET_GERENTE: string[] = [
 ];
 
 const PRESET_VENDEDOR: string[] = [
+  // ABAS
+  Authorizations.TAB_PERSON,
+  Authorizations.TAB_VEHICLE,
+  Authorizations.TAB_VENDA,
+  Authorizations.TAB_NFE,
+
+  // STORE
   Authorizations.READ_STORE_SELF,
+
+  // USER
   Authorizations.READ_USER_SELF,
   Authorizations.EDIT_USER_SELF,
+
+  // PERSON
   Authorizations.READ_PERSON_SELF,
   Authorizations.READ_PERSON_STORE,
   Authorizations.CREATE_PERSON_STORE,
   Authorizations.EDIT_PERSON_SELF,
   Authorizations.EDIT_PERSON_STORE,
+
+  // VEHICLE
   Authorizations.READ_VEHICLE_STORE,
   Authorizations.CREATE_VEHICLE_STORE,
   Authorizations.EDIT_VEHICLE_STORE,
+
+  // NFE
   Authorizations.READ_NFE_STORE,
   Authorizations.CREATE_NFE_STORE,
   Authorizations.EMITIR_NFE_STORE,
+
+  // VENDA
   Authorizations.READ_VENDA_STORE,
   Authorizations.CREATE_VENDA_STORE,
   Authorizations.EDIT_VENDA_STORE,
@@ -244,7 +206,8 @@ export class StoreEmployeesDialogComponent implements OnInit {
   searchPeopleResults: Person[] = [];
   searchingPeople = false;
 
-  readonly authGroups = AUTH_GROUPS;
+  modules: ModuleAuthorizations[] = [];
+  loadingAuthorizations = true;
   RelationshipTypes = RelationshipTypes;
 
   get currentUserId(): string | null {
@@ -265,9 +228,76 @@ export class StoreEmployeesDialogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadAuthorizations();
     this.loadEmployees();
     this.loadRelationships();
     this.setupPersonSearch();
+  }
+
+  getTranslatedModule(moduleStr: string): string {
+    const translations: Record<string, string> = {
+      ABAS: 'Abas',
+      FINANCIAL: 'Financeiro',
+      DASHBOARD: 'Dashboard',
+      VENDA: 'Vendas',
+      COMPRA: 'Compras',
+      VEHICLE: 'Veículos',
+      PERSON: 'Pessoas',
+      STORE: 'Lojas',
+      NFE: 'Notas Fiscais (NFe)',
+      USER: 'Usuários do Sistema',
+      AUTH: 'Controle de Permissões',
+      COBRANCA: 'Cobrança',
+    };
+    return translations[moduleStr] || moduleStr;
+  }
+
+  loadAuthorizations(): void {
+    this.http.get<Record<string, Authorization[]>>('/api/authorizations').subscribe({
+      next: (response) => {
+        const isRoot = this.authService.hasAuthority(Authorizations.ROOT_ADMIN);
+        const rootOnlyKeys = [Authorizations.ROOT_ADMIN];
+
+        const moduleOrder = [
+          'ABAS',
+          'DASHBOARD',
+          'STORE',
+          'COBRANCA',
+          'FINANCIAL',
+          'PERSON',
+          'VEHICLE',
+          'COMPRA',
+          'VENDA',
+          'NFE',
+          'USER',
+          'AUTH',
+        ];
+
+        this.modules = Object.keys(response)
+          .map((module) => {
+            let auths = response[module];
+            if (!isRoot) {
+              auths = auths.filter(
+                (a) =>
+                  !rootOnlyKeys.includes(a.key as Authorizations) &&
+                  this.authService.hasAuthority(a.key as Authorizations),
+              );
+            }
+            return {
+              module,
+              authorizations: auths,
+            };
+          })
+          .filter((m) => m.authorizations.length > 0)
+          .sort((a, b) => moduleOrder.indexOf(a.module) - moduleOrder.indexOf(b.module));
+
+        this.loadingAuthorizations = false;
+      },
+      error: (err) => {
+        console.error('Falha ao carregar permissões', err);
+        this.loadingAuthorizations = false;
+      },
+    });
   }
 
   private setupPersonSearch(): void {
@@ -482,28 +512,28 @@ export class StoreEmployeesDialogComponent implements OnInit {
     }
   }
 
-  isAllGroupSelected(personId: string, group: any): boolean {
+  isAllGroupSelected(personId: string, group: ModuleAuthorizations): boolean {
     const form = this.createAccessForms.get(personId);
     if (!form) return false;
     const arr = form.get('authorizations') as FormArray;
-    return group.permissions.every((perm: any) => arr.value.includes(perm.key));
+    return group.authorizations.every((perm) => arr.value.includes(perm.key));
   }
 
-  isSomeGroupSelected(personId: string, group: any): boolean {
+  isSomeGroupSelected(personId: string, group: ModuleAuthorizations): boolean {
     const form = this.createAccessForms.get(personId);
     if (!form) return false;
     const arr = form.get('authorizations') as FormArray;
-    const checkedCount = group.permissions.filter((perm: any) => arr.value.includes(perm.key)).length;
-    return checkedCount > 0 && checkedCount < group.permissions.length;
+    const checkedCount = group.authorizations.filter((perm) => arr.value.includes(perm.key)).length;
+    return checkedCount > 0 && checkedCount < group.authorizations.length;
   }
 
-  toggleAllGroup(personId: string, group: any, event: Event): void {
+  toggleAllGroup(personId: string, group: ModuleAuthorizations, event: Event): void {
     const form = this.createAccessForms.get(personId);
     if (!form) return;
     const arr = form.get('authorizations') as FormArray;
     const checked = (event.target as HTMLInputElement).checked;
 
-    group.permissions.forEach((perm: any) => {
+    group.authorizations.forEach((perm) => {
       const idx = arr.value.indexOf(perm.key);
       if (checked) {
         if (idx === -1) {

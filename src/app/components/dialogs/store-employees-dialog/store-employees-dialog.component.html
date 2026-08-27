@@ -322,32 +322,39 @@
                     </div>
 
                     <div class="perm-groups">
-                      @for (group of authGroups; track group.name) {
-                        <div class="perm-group">
-                          <span class="perm-group-title">
-                            <label class="group-title-label">
-                              <input
-                                type="checkbox"
-                                [checked]="isAllGroupSelected(person.personId, group)"
-                                [indeterminate]="isSomeGroupSelected(person.personId, group)"
-                                (change)="toggleAllGroup(person.personId, group, $event)"
-                              />
-                              {{ group.name }}
-                            </label>
-                          </span>
-                          <div class="perm-checkboxes">
-                            @for (perm of group.permissions; track perm.key) {
-                              <label class="perm-checkbox-label">
+                      @if (loadingAuthorizations) {
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 16px; color: #666">
+                          <mat-spinner diameter="20"></mat-spinner>
+                          <span>Carregando opções de permissões...</span>
+                        </div>
+                      } @else {
+                        @for (group of modules; track group.module) {
+                          <div class="perm-group">
+                            <span class="perm-group-title">
+                              <label class="group-title-label">
                                 <input
                                   type="checkbox"
-                                  [checked]="isAuthorized(person.personId, perm.key)"
-                                  (change)="togglePermission(person.personId, perm.key)"
+                                  [checked]="isAllGroupSelected(person.personId, group)"
+                                  [indeterminate]="isSomeGroupSelected(person.personId, group)"
+                                  (change)="toggleAllGroup(person.personId, group, $event)"
                                 />
-                                {{ perm.label }}
+                                {{ getTranslatedModule(group.module) }}
                               </label>
-                            }
+                            </span>
+                            <div class="perm-checkboxes">
+                              @for (perm of group.authorizations; track perm.key) {
+                                <label class="perm-checkbox-label">
+                                  <input
+                                    type="checkbox"
+                                    [checked]="isAuthorized(person.personId, perm.key)"
+                                    (change)="togglePermission(person.personId, perm.key)"
+                                  />
+                                  {{ perm.label }}
+                                </label>
+                              }
+                            </div>
                           </div>
-                        </div>
+                        }
                       }
                     </div>
                   </div>
