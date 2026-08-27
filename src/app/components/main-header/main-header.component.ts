@@ -8,7 +8,7 @@ import { StoreService } from '@services/store.service';
 import { StoreContextService } from '@services/store-context.service';
 import { Authorizations } from '../../enums/authorizations';
 import { Store } from '@interfaces/store';
-import { StoreStatus } from '../../enums/storeTypes';
+import { StoreStatus, StoreStatusLabels } from '../../enums/storeTypes';
 import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -140,10 +140,25 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
       next: (response) => {
         if (response && response.content) {
           this.stores = response.content;
+
+          // Se o usuário não for admin e a loja atualmente selecionada não for ativa, reverte para loja padrão ativa ou 'ALL'
+          if (!this.isCarAdmin && this.selectedStoreId && this.selectedStoreId !== 'ALL') {
+            const currentSelected = this.stores.find((s) => s.storeId === this.selectedStoreId);
+            if (currentSelected && currentSelected.storeStatus !== StoreStatus.ACTIVE) {
+              const defaultStoreId = this.authService.getStoreId();
+              const defaultStoreActive = defaultStoreId && this.stores.find((s) => s.storeId === defaultStoreId && s.storeStatus === StoreStatus.ACTIVE);
+              const fallbackStoreId = defaultStoreActive ? defaultStoreId : null;
+              this.storeContextService.setStoreId(fallbackStoreId);
+            }
+          }
         }
       },
       error: () => this.storeName.set('Lojas indisponíveis'),
     });
+  }
+
+  getStatusLabel(status: any): string {
+    return StoreStatusLabels[status as StoreStatus] || (status as string);
   }
 
   private loadCurrentStoreName() {

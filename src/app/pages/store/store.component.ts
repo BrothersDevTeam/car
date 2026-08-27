@@ -185,7 +185,18 @@ export class StoreComponent implements OnInit {
     localStorage.setItem('storeViewMode', mode);
   }
 
+  isStoreSelectable(store: Store): boolean {
+    return this.isCarAdmin || store.storeStatus === StoreStatus.ACTIVE;
+  }
+
   onSelectStore(store: Store): void {
+    if (!this.isStoreSelectable(store)) {
+      this.toastrService.warning(
+        'Lojas inativas ou com bloqueio não podem ser selecionadas como loja atual.',
+        'Acesso Não Permitido',
+      );
+      return;
+    }
     if (store.storeId) {
       this.storeContextService.setStoreId(store.storeId);
       // O header se atualizará automaticamente devido ao serviço

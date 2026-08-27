@@ -343,8 +343,21 @@
   }
 }
 
+.disabled-row {
+  cursor: not-allowed;
+  opacity: 0.85;
+
+  &:hover {
+    background-color: #fcfcfc;
+  }
+}
+
 .clickable-card {
   cursor: pointer;
+}
+
+.disabled-card {
+  cursor: not-allowed;
 }
 
 // ========== IDENTIFICADORES DE TIPO DE LOJA NA TABELA ==========

@@ -93,13 +93,13 @@
       </mat-option>
 
       @for (store of stores; track store.storeId) {
-        <mat-option [value]="store.storeId" class="custom-store-option" [disabled]="store.storeStatus === 'INACTIVE'">
+        <mat-option [value]="store.storeId" class="custom-store-option" [disabled]="!isCarAdmin && store.storeStatus !== 'ACTIVE'">
           <div class="option-content-container">
             <mat-icon color="primary">store</mat-icon>
             <span class="option-title">
               {{ store.tradeName || store.name }}
-              @if (store.storeStatus === 'INACTIVE') {
-                <span style="color: #dc3545; font-size: 0.75rem; margin-left: 8px; font-weight: bold;">(Inativa)</span>
+              @if (store.storeStatus !== 'ACTIVE') {
+                <span style="color: #dc3545; font-size: 0.75rem; margin-left: 8px; font-weight: bold;">({{ getStatusLabel(store.storeStatus) }})</span>
               }
             </span>
           </div>
