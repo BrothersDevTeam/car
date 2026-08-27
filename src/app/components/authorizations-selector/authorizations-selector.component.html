@@ -1,0 +1,163 @@
+<div class="authorizations-selector-container">
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner diameter="36"></mat-spinner>
+      <span>Carregando módulos e permissões...</span>
+    </div>
+  } @else {
+    <!-- Barra de Ferramentas / Ações Rápidas -->
+    <div class="tools-bar">
+      @if (showPresetsBar) {
+        <div class="presets-section">
+          <span class="presets-label">
+            <mat-icon>auto_fix_high</mat-icon>
+            Presets Rápidos:
+          </span>
+          <div class="preset-buttons">
+            <button
+              type="button"
+              class="preset-btn preset-gerente"
+              (click)="applyPreset('GERENTE')"
+              [disabled]="disabled"
+              matTooltip="Aplica todas as permissões típicas de Gerente (Gestão completa e relatórios)"
+            >
+              <mat-icon>admin_panel_settings</mat-icon>
+              <span>Gerente</span>
+            </button>
+
+            <button
+              type="button"
+              class="preset-btn preset-vendedor"
+              (click)="applyPreset('VENDEDOR')"
+              [disabled]="disabled"
+              matTooltip="Aplica permissões operacionais para Vendedor (Vendas, Veículos, Clientes e NFes)"
+            >
+              <mat-icon>badge</mat-icon>
+              <span>Vendedor</span>
+            </button>
+
+            <button
+              type="button"
+              class="preset-btn preset-all"
+              (click)="applyPreset('ALL')"
+              [disabled]="disabled"
+              matTooltip="Marcar todas as permissões disponíveis"
+            >
+              <mat-icon>done_all</mat-icon>
+              <span>Todas</span>
+            </button>
+
+            <button
+              type="button"
+              class="preset-btn preset-none"
+              (click)="applyPreset('NONE')"
+              [disabled]="disabled"
+              matTooltip="Desmarcar todas as permissões"
+            >
+              <mat-icon>remove_done</mat-icon>
+              <span>Limpar</span>
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (showCopyBar && otherEmployees.length > 0) {
+        <div class="copy-section">
+          <button
+            type="button"
+            class="copy-menu-btn"
+            [matMenuTriggerFor]="copyMenu"
+            [disabled]="disabled || copying"
+            matTooltip="Copiar permissões de outro colaborador com acesso nesta loja"
+          >
+            <mat-icon class="copy-icon">content_copy</mat-icon>
+            <span>Copiar de outro colaborador</span>
+            <mat-icon class="dropdown-arrow">arrow_drop_down</mat-icon>
+          </button>
+
+          <mat-menu #copyMenu="matMenu" class="custom-copy-menu" xPosition="before">
+            <div class="menu-header-label">
+              <mat-icon>group</mat-icon>
+              <span>Selecione o colaborador:</span>
+            </div>
+            <mat-divider></mat-divider>
+            @for (emp of otherEmployees; track emp.personId) {
+              <button mat-menu-item (click)="copyPermissionsFrom(emp)" class="copy-menu-option-btn">
+                <div class="menu-emp-row">
+                  <div class="emp-avatar-icon">
+                    <mat-icon>person</mat-icon>
+                  </div>
+                  <div class="emp-text-details">
+                    <span class="emp-name">{{ emp.name }}</span>
+                    <span class="emp-role-tag">{{ getRelationshipLabel(emp.relationship) }}</span>
+                  </div>
+                </div>
+              </button>
+            }
+          </mat-menu>
+        </div>
+      }
+    </div>
+
+    <!-- Grid de Módulos -->
+    <div class="modules-grid">
+      @for (moduleGroup of modules; track moduleGroup.module) {
+        <div
+          class="module-card"
+          [class.has-active]="getActiveCount(moduleGroup) > 0"
+          [class.all-active]="isAllModuleSelected(moduleGroup)"
+        >
+          <!-- Cabeçalho do Módulo -->
+          <div class="module-header">
+            <label class="module-header-title-label">
+              <input
+                type="checkbox"
+                class="custom-checkbox header-checkbox"
+                [checked]="isAllModuleSelected(moduleGroup)"
+                [indeterminate]="isSomeModuleSelected(moduleGroup)"
+                (change)="toggleAllModule(moduleGroup, $event)"
+                [disabled]="disabled"
+              />
+              <mat-icon class="module-icon">{{ moduleGroup.icon }}</mat-icon>
+              <span class="module-title">{{ moduleGroup.title }}</span>
+            </label>
+
+            <div class="module-counter-badge" [class.badge-counter-active]="getActiveCount(moduleGroup) > 0">
+              {{ getActiveCount(moduleGroup) }}/{{ moduleGroup.authorizations.length }}
+            </div>
+          </div>
+
+          <!-- Lista de Permissões do Módulo -->
+          <div class="module-body">
+            @for (auth of moduleGroup.authorizations; track auth.key) {
+              <div
+                class="auth-item-row"
+                [class.checked]="hasAuth(auth.key)"
+                [class.scope-network]="auth.scopeType === 'network'"
+                [class.scope-sensitive]="auth.scopeType === 'sensitive'"
+                (click)="toggleAuth(auth.key)"
+              >
+                <input
+                  type="checkbox"
+                  class="custom-checkbox item-checkbox"
+                  [checked]="hasAuth(auth.key)"
+                  (click)="$event.stopPropagation()"
+                  (change)="toggleAuth(auth.key)"
+                  [disabled]="disabled"
+                />
+
+                <span class="auth-label">{{ auth.label }}</span>
+
+                <!-- Badge de Escopo -->
+                <span class="scope-badge badge-{{ auth.scopeType }}">
+                  <mat-icon class="scope-icon">{{ auth.scopeIcon }}</mat-icon>
+                  <span class="scope-text">{{ auth.scopeLabel }}</span>
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

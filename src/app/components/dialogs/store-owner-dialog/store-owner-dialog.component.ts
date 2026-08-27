@@ -177,8 +177,9 @@ export class StoreOwnerDialogComponent implements OnInit {
           if (confirmed) {
             this.dialogRef.close(this.hasChanges);
             this.dialog.open(StoreEmployeesDialogComponent, {
-              width: '800px',
-              maxHeight: '90vh',
+              width: '1200px',
+              maxWidth: '95vw',
+              maxHeight: '92vh',
               data: {
                 store: this.store,
                 isRootAdmin: this.isCarAdmin,

@@ -29,6 +29,7 @@ import { Store } from '@interfaces/store';
 import { RelationshipResponse } from '@interfaces/relationship';
 import { Authorizations } from '@enums/authorizations';
 import { RelationshipTypes } from '../../../enums/relationshipTypes';
+import { AuthorizationsSelectorComponent } from '../../authorizations-selector/authorizations-selector.component';
 import { EmployeeAuthorizationsDialogComponent } from '../employee-authorizations-dialog/employee-authorizations-dialog.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
@@ -180,6 +181,7 @@ const PRESET_VENDEDOR: string[] = [
     MatExpansionModule,
     MatMenuModule,
     MatSelectModule,
+    AuthorizationsSelectorComponent,
   ],
   templateUrl: './store-employees-dialog.component.html',
   styleUrls: ['./store-employees-dialog.component.scss'],
@@ -228,7 +230,6 @@ export class StoreEmployeesDialogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadAuthorizations();
     this.loadEmployees();
     this.loadRelationships();
     this.setupPersonSearch();
@@ -510,58 +511,11 @@ export class StoreEmployeesDialogComponent implements OnInit {
     defaults.forEach((auth) => authArray.push(new FormControl(auth)));
   }
 
-  isAuthorized(personId: string, key: string): boolean {
-    const form = this.createAccessForms.get(personId);
-    if (!form) return false;
-    const arr = form.get('authorizations') as FormArray;
-    return arr.value.includes(key);
-  }
-
-  togglePermission(personId: string, key: string): void {
-    const form = this.createAccessForms.get(personId);
-    if (!form) return;
-    const arr = form.get('authorizations') as FormArray;
-    const idx = arr.value.indexOf(key);
-    if (idx === -1) {
-      arr.push(new FormControl(key));
-    } else {
-      arr.removeAt(idx);
-    }
-  }
-
-  isAllGroupSelected(personId: string, group: ModuleAuthorizations): boolean {
-    const form = this.createAccessForms.get(personId);
-    if (!form) return false;
-    const arr = form.get('authorizations') as FormArray;
-    return group.authorizations.every((perm) => arr.value.includes(perm.key));
-  }
-
-  isSomeGroupSelected(personId: string, group: ModuleAuthorizations): boolean {
-    const form = this.createAccessForms.get(personId);
-    if (!form) return false;
-    const arr = form.get('authorizations') as FormArray;
-    const checkedCount = group.authorizations.filter((perm) => arr.value.includes(perm.key)).length;
-    return checkedCount > 0 && checkedCount < group.authorizations.length;
-  }
-
-  toggleAllGroup(personId: string, group: ModuleAuthorizations, event: Event): void {
-    const form = this.createAccessForms.get(personId);
-    if (!form) return;
-    const arr = form.get('authorizations') as FormArray;
-    const checked = (event.target as HTMLInputElement).checked;
-
-    group.authorizations.forEach((perm) => {
-      const idx = arr.value.indexOf(perm.key);
-      if (checked) {
-        if (idx === -1) {
-          arr.push(new FormControl(perm.key));
-        }
-      } else {
-        if (idx !== -1) {
-          arr.removeAt(idx);
-        }
-      }
-    });
+  onAuthorizationsChanged(personId: string, newAuths: string[]): void {
+    const form = this.getForm(personId);
+    const authArray = form.get('authorizations') as FormArray;
+    authArray.clear();
+    newAuths.forEach((auth) => authArray.push(new FormControl(auth)));
   }
 
   saveAccess(person: Person): void {
@@ -683,7 +637,9 @@ export class StoreEmployeesDialogComponent implements OnInit {
 
   openAuthorizationsDialog(person: Person): void {
     const dialogRef = this.dialog.open(EmployeeAuthorizationsDialogComponent, {
-      width: '1150px',
+      width: '1200px',
+      maxWidth: '95vw',
+      maxHeight: '92vh',
       data: {
         person,
         store: this.data.store,

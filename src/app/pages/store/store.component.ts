@@ -270,8 +270,9 @@ export class StoreComponent implements OnInit {
 
   onManageAuthorizations(store: Store): void {
     this.dialog.open(StoreEmployeesDialogComponent, {
-      width: '800px',
-      maxHeight: '90vh',
+      width: '1200px',
+      maxWidth: '95vw',
+      maxHeight: '92vh',
       data: { store, isRootAdmin: this.isCarAdmin },
     });
   }
@@ -284,8 +285,9 @@ export class StoreComponent implements OnInit {
    */
   onManageEmployees(store: Store): void {
     this.dialog.open(StoreEmployeesDialogComponent, {
-      width: '800px',
-      maxHeight: '90vh',
+      width: '1200px',
+      maxWidth: '95vw',
+      maxHeight: '92vh',
       data: { store, isRootAdmin: this.isCarAdmin },
     });
   }
