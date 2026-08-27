@@ -272,59 +272,104 @@ export class StoreFormDialogComponent implements OnInit {
   }
 
   /**
-   * Carrega os proprietários da loja Matriz para seleção no cadastro de filial
+   * Carrega todos os proprietários da rede para seleção no cadastro de filial
    */
   loadMatrixOwners(): void {
     if (this.data.isCarAdmin || this.data.mode !== 'create') {
-      return;
-    }
-    const storeIdToFetch = this.storeContextService.currentStoreId || this.authService.getStoreId();
-    if (!storeIdToFetch) {
-      this.ownerMode = 'new';
       return;
     }
 
     this.loadingMatrixOwners = true;
     this.matrixOwnersError = null;
 
-    this.storeService.getById(storeIdToFetch).subscribe({
-      next: (store) => {
-        if (store.mainStoreId) {
-          this.matrixStoreId = store.mainStoreId;
-          this.storeService.getById(store.mainStoreId).subscribe({
-            next: (matrizStore) => {
-              this.applyMatrixOwners(matrizStore.owners || []);
+    // Busca todas as lojas da rede para consolidar os proprietários existentes e identificar a Matriz
+    this.storeService.getBranches({ page: 0, size: 100 }).subscribe({
+      next: (response) => {
+        const stores = response.content || [];
+        const ownersMap = new Map<string, Person>();
+
+        // Identifica a Matriz raiz da rede
+        const matrizStore = stores.find((s) => s.storeType === 'MATRIZ' || s.mainStoreId === null);
+        if (matrizStore && matrizStore.storeId) {
+          this.matrixStoreId = matrizStore.storeId;
+        }
+
+        // Agrega todos os proprietários vinculados às lojas da rede
+        stores.forEach((store) => {
+          if (store.owners && store.owners.length > 0) {
+            store.owners.forEach((owner) => {
+              if (owner.personId && !ownersMap.has(owner.personId)) {
+                ownersMap.set(owner.personId, owner);
+              }
+            });
+          }
+        });
+
+        // Complementa buscando na listagem de pessoas da rede com perfil PROPRIETARIO
+        this.personService
+          .getPaginatedData(0, 100, { relationshipTypes: ['PROPRIETARIO'], active: true })
+          .subscribe({
+            next: (personResponse) => {
+              const persons = personResponse.content || [];
+              persons.forEach((person) => {
+                if (person.personId && !ownersMap.has(person.personId) && person.hasUser) {
+                  ownersMap.set(person.personId, person as any);
+                }
+              });
+
+              this.applyNetworkOwners(Array.from(ownersMap.values()));
             },
             error: (err) => {
-              console.error('Erro ao carregar proprietários da matriz raiz:', err);
-              this.applyMatrixOwners(store.owners || []);
+              console.warn('Não foi possível buscar pessoas com perfil PROPRIETARIO:', err);
+              this.applyNetworkOwners(Array.from(ownersMap.values()));
             },
           });
-        } else {
-          this.matrixStoreId = store.storeId || storeIdToFetch;
-          this.applyMatrixOwners(store.owners || []);
-        }
       },
       error: (err) => {
-        console.error('Erro ao carregar proprietários da matriz:', err);
-        this.loadingMatrixOwners = false;
-        this.matrixOwnersError = 'Não foi possível carregar os proprietários da Matriz.';
-        this.ownerMode = 'new';
+        console.error('Erro ao carregar lojas da rede para proprietários:', err);
+        // Fallback: busca pessoas com perfil PROPRIETARIO diretamente
+        this.personService
+          .getPaginatedData(0, 100, { relationshipTypes: ['PROPRIETARIO'], active: true })
+          .subscribe({
+            next: (personResponse) => {
+              const persons = (personResponse.content || []).filter((p) => p.hasUser);
+              this.applyNetworkOwners(persons as any);
+            },
+            error: () => {
+              this.loadingMatrixOwners = false;
+              this.matrixOwnersError = 'Não foi possível carregar os proprietários da Rede.';
+              this.ownerMode = 'new';
+            },
+          });
       },
     });
   }
 
-  private applyMatrixOwners(owners: Person[]): void {
+  private applyNetworkOwners(owners: Person[]): void {
     this.loadingMatrixOwners = false;
     this.matrixOwners = owners;
 
     if (this.matrixOwners.length === 0) {
       this.ownerMode = 'new';
     } else if (this.selectedMatrixOwnerIds.length === 0) {
-      // Pré-seleciona se houver apenas 1 proprietário com usuário de acesso ativo
-      const eligibleOwners = this.matrixOwners.filter((o) => o.hasUser !== false);
-      if (eligibleOwners.length === 1 && eligibleOwners[0].personId) {
-        this.selectedMatrixOwnerIds = [eligibleOwners[0].personId];
+      const loggedUsername = this.authService.getUsername();
+      const loggedPersonName = this.authService.getPersonName();
+
+      // Tenta pré-selecionar o usuário proprietário logado
+      const loggedOwner = this.matrixOwners.find(
+        (o) =>
+          o.hasUser !== false &&
+          ((loggedUsername && (o.email === loggedUsername || (o as any).userEmail === loggedUsername)) ||
+            (loggedPersonName && o.name === loggedPersonName))
+      );
+
+      if (loggedOwner && loggedOwner.personId) {
+        this.selectedMatrixOwnerIds = [loggedOwner.personId];
+      } else {
+        const eligibleOwners = this.matrixOwners.filter((o) => o.hasUser !== false);
+        if (eligibleOwners.length === 1 && eligibleOwners[0].personId) {
+          this.selectedMatrixOwnerIds = [eligibleOwners[0].personId];
+        }
       }
     }
   }
@@ -335,7 +380,7 @@ export class StoreFormDialogComponent implements OnInit {
   toggleMatrixOwner(personId: string, hasUser: boolean = true): void {
     if (!hasUser) {
       this.toastrService.warning(
-        'Este proprietário não possui usuário de login configurado na Matriz.',
+        'Este proprietário não possui usuário de login configurado na rede.',
         'Sem Acesso',
       );
       return;
@@ -985,10 +1030,10 @@ export class StoreFormDialogComponent implements OnInit {
     const formValue = this.storeForm.value;
 
     const payload: any = {
-      name: formValue.name,
-      tradeName: formValue.tradeName || null,
+      name: formValue.name?.trim(),
+      tradeName: formValue.tradeName && formValue.tradeName.trim() ? formValue.tradeName.trim() : null,
       cnpj: formValue.cnpj.replace(/[^a-zA-Z0-9]/g, '').toUpperCase(), // Remove formatação
-      email: formValue.email,
+      email: formValue.email?.trim(),
       phoneNumber: formValue.phoneNumber ? formValue.phoneNumber.replace(/\D/g, '') : null,
     };
 

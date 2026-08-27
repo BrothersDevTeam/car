@@ -343,7 +343,7 @@
         <!-- ========== STEP 3: DADOS DO PROPRIETÁRIO ========== -->
         <mat-step [stepControl]="isStep3Valid() ? storeForm : personForm" label="Dados do Proprietário">
           <div class="step-form">
-            <!-- Se for Filial, exibe o seletor de modo (Proprietário da Matriz ou Novo) -->
+            <!-- Se for Filial, exibe o seletor de modo (Proprietário da Rede ou Novo) -->
             @if (!data.isCarAdmin) {
               <div class="owner-mode-selector">
                 <div
@@ -355,8 +355,8 @@
                     <mat-icon>business</mat-icon>
                   </div>
                   <div class="mode-text">
-                    <span class="mode-title">Proprietário(s) da Matriz</span>
-                    <span class="mode-desc">Vincular sócios da Matriz com login já configurado</span>
+                    <span class="mode-title">Proprietário(s) da Rede</span>
+                    <span class="mode-desc">Vincular sócios/proprietários da rede com login já configurado</span>
                   </div>
                   <mat-icon class="mode-check">{{ ownerMode === 'matrix' ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
                 </div>
@@ -378,18 +378,18 @@
               </div>
             }
 
-            <!-- MODO A: SELEÇÃO DE PROPRIETÁRIOS DA MATRIZ (FILIAL) -->
+            <!-- MODO A: SELEÇÃO DE PROPRIETÁRIOS DA REDE (FILIAL) -->
             @if (!data.isCarAdmin && ownerMode === 'matrix') {
               <div class="matrix-owners-section">
                 <p class="step-description">
                   <mat-icon>info</mat-icon>
-                  Selecione os proprietários da Matriz que terão acesso e gestão sobre esta filial.
+                  Selecione os proprietários da rede que terão acesso e gestão sobre esta filial.
                 </p>
 
                 @if (loadingMatrixOwners) {
                   <div class="loading-matrix-container">
                     <mat-spinner diameter="32"></mat-spinner>
-                    <span>Carregando proprietários da Matriz...</span>
+                    <span>Carregando proprietários da rede...</span>
                   </div>
                 } @else if (matrixOwnersError) {
                   <div class="error-banner">
@@ -400,7 +400,7 @@
                   <div class="empty-matrix-card">
                     <mat-icon>people_outline</mat-icon>
                     <div class="empty-text">
-                      <p class="empty-title">Nenhum proprietário encontrado na Matriz</p>
+                      <p class="empty-title">Nenhum proprietário encontrado na rede</p>
                       <p class="empty-subtitle">Selecione a opção <strong>"Novo Proprietário"</strong> acima para cadastrar o responsável por esta filial.</p>
                     </div>
                   </div>
@@ -443,7 +443,7 @@
                               Com acesso
                             </span>
                           } @else {
-                            <span class="badge badge-no-access" matTooltip="Este proprietário não possui usuário de login ativo na Matriz">
+                            <span class="badge badge-no-access" matTooltip="Este proprietário não possui usuário de login ativo na rede">
                               <mat-icon>lock</mat-icon>
                               Sem usuário
                             </span>
@@ -456,7 +456,7 @@
                   @if (selectedMatrixOwnerIds.length === 0) {
                     <p class="selection-warning">
                       <mat-icon>warning_amber</mat-icon>
-                      Selecione ao menos um proprietário da Matriz para vincular à filial.
+                      Selecione ao menos um proprietário da rede para vincular à filial.
                     </p>
                   } @else {
                     <div class="info-note">
