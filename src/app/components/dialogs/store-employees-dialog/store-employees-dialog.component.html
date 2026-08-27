@@ -40,23 +40,34 @@
                 <span class="results-title">Pessoas Encontradas</span>
                 <span class="results-count">{{ searchPeopleResults.length }}</span>
               </div>
-              <mat-list>
+              <div class="search-results-list">
                 @for (p of searchPeopleResults; track p.personId) {
-                  <mat-list-item (click)="selectPersonToPromote(p)" class="search-item">
-                    <mat-icon matListItemIcon class="search-item-avatar-icon">person</mat-icon>
-                    <span matListItemTitle class="search-item-title">{{ p.name }}</span>
-                    <span matListItemLine class="search-item-meta">
-                      {{ p.cpf || p.email }} • Perfil:
-                      <span class="badge-role">{{ getRelationshipLabel(p.relationship) }}</span>
-                    </span>
-                    <div matListItemMeta>
-                      <button mat-icon-button class="add-btn" color="primary" matTooltip="Adicionar à equipe">
-                        <mat-icon>person_add</mat-icon>
-                      </button>
+                  <div class="search-item" (click)="selectPersonToPromote(p)">
+                    <div class="search-item-avatar-icon">
+                      <mat-icon>person</mat-icon>
                     </div>
-                  </mat-list-item>
+                    <div class="search-item-info">
+                      <span class="search-item-title">{{ p.name }}</span>
+                      <span class="search-item-meta">
+                        {{ p.cpf || p.email }}
+                        @if (p.relationship) {
+                          • Perfil:
+                          <span class="badge-role">{{ getRelationshipLabel(p.relationship) }}</span>
+                        }
+                      </span>
+                    </div>
+                    <button
+                      mat-icon-button
+                      class="add-btn"
+                      color="primary"
+                      matTooltip="Adicionar à equipe"
+                      (click)="$event.stopPropagation(); selectPersonToPromote(p)"
+                    >
+                      <mat-icon>person_add</mat-icon>
+                    </button>
+                  </div>
                 }
-              </mat-list>
+              </div>
             </div>
           }
         </div>
@@ -85,17 +96,17 @@
                   [disabled]="
                     !canManageAccess ||
                     updatingRelationshipFor === person.personId ||
-                    person.relationship?.name?.toUpperCase() === 'PROPRIETARIO'
+                    getRelationshipName(person.relationship) === 'PROPRIETARIO'
                   "
-                  [class.chip-manager]="person.relationship?.name?.toUpperCase() === 'GERENTE'"
-                  [class.chip-seller]="person.relationship?.name?.toUpperCase() === 'VENDEDOR'"
-                  [class.chip-owner]="person.relationship?.name?.toUpperCase() === 'PROPRIETARIO'"
+                  [class.chip-manager]="getRelationshipName(person.relationship) === 'GERENTE'"
+                  [class.chip-seller]="getRelationshipName(person.relationship) === 'VENDEDOR'"
+                  [class.chip-owner]="getRelationshipName(person.relationship) === 'PROPRIETARIO'"
                 >
                   @if (updatingRelationshipFor === person.personId) {
                     <mat-spinner diameter="12" class="chip-spinner"></mat-spinner>
                   } @else {
-                    {{ getRelationshipLabel(person.relationship) }}
-                    @if (canManageAccess && person.relationship?.name?.toUpperCase() !== 'PROPRIETARIO') {
+                    {{ getRelationshipLabel(person.relationship) || 'Definir Cargo' }}
+                    @if (canManageAccess && getRelationshipName(person.relationship) !== 'PROPRIETARIO') {
                       <mat-icon class="chip-arrow">arrow_drop_down</mat-icon>
                     }
                   }
@@ -105,9 +116,9 @@
                   @for (rel of relationships; track rel.relationshipId) {
                     <button mat-menu-item (click)="changeRelationship(person, rel)">
                       <mat-icon
-                        [color]="person.relationship?.name?.toUpperCase() === rel.name.toUpperCase() ? 'primary' : ''"
+                        [color]="getRelationshipName(person.relationship) === getRelationshipName(rel) ? 'primary' : ''"
                       >
-                        {{ person.relationship?.name?.toUpperCase() === rel.name.toUpperCase() ? 'check' : 'badge' }}
+                        {{ getRelationshipName(person.relationship) === getRelationshipName(rel) ? 'check' : 'badge' }}
                       </mat-icon>
                       <span>{{ getRelationshipLabel(rel) }}</span>
                     </button>

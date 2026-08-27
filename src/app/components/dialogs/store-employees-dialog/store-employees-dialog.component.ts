@@ -339,18 +339,18 @@ export class StoreEmployeesDialogComponent implements OnInit {
     this.searchPeopleResults = [];
     this.personSearchControl.setValue('', { emitEvent: false });
 
-    // Se a pessoa já está na lista (mas por algum motivo apareceu na busca), ignora
-    if (this.employees.some((e) => e.personId === person.personId)) {
+    // Se a pessoa já está na lista (mas por algum motivo apareceu na busca), apenas abre o form
+    const existing = this.employees.find((e) => e.personId === person.personId);
+    if (existing) {
+      setTimeout(() => this.toggleCreateAccess(existing));
       return;
     }
 
-    // Se for CLIENTE, sugere VENDEDOR por padrão para o fluxo de promoção
-    const relName = person.relationship?.name?.toUpperCase() || '';
-    if (relName === 'CLIENTE') {
-      person.relationship = {
-        name: 'VENDEDOR',
-        relationshipId: '',
-      } as any;
+    // Se for CLIENTE ou sem perfil de funcionário, sugere VENDEDOR por padrão para o fluxo de promoção
+    const relName = this.getRelationshipName(person.relationship);
+    if (!relName || relName === 'CLIENTE') {
+      const vendedorRel = this.relationships.find((r) => r.name.toUpperCase() === 'VENDEDOR');
+      person.relationship = vendedorRel || ({ name: 'VENDEDOR', relationshipId: '' } as any);
     }
 
     // Adiciona a pessoa temporariamente à lista para permitir criar acesso
@@ -420,7 +420,14 @@ export class StoreEmployeesDialogComponent implements OnInit {
     });
   }
 
+  getRelationshipName(rel: any): string {
+    if (!rel) return '';
+    const name = typeof rel === 'object' ? rel?.name || '' : rel;
+    return (name || '').toUpperCase();
+  }
+
   getRelationshipLabel(rel: any): string {
+    if (!rel) return '';
     const relStr = typeof rel === 'object' ? rel?.name || '' : rel;
     const labels: Record<string, string> = {
       GERENTE: 'Gerente',
@@ -428,7 +435,28 @@ export class StoreEmployeesDialogComponent implements OnInit {
       PROPRIETARIO: 'Proprietário',
       CLIENTE: 'Cliente',
     };
-    return labels[relStr.toUpperCase()] || relStr;
+    return labels[(relStr || '').toUpperCase()] || relStr;
+  }
+
+  getForm(personId: string): FormGroup {
+    let form = this.createAccessForms.get(personId);
+    if (!form) {
+      const person = this.employees.find((e) => e.personId === personId);
+      form = this.fb.group(
+        {
+          email: [person?.email || '', [Validators.required, Validators.email]],
+          password: ['', [Validators.required, Validators.minLength(6)]],
+          confirmPassword: ['', [Validators.required]],
+          authorizations: this.fb.array<string>([]),
+        },
+        { validators: this.passwordMatchValidator },
+      );
+      if (person) {
+        this.applyPreset(person, form);
+      }
+      this.createAccessForms.set(personId, form);
+    }
+    return form;
   }
 
   // ─────────────────────────────────────────
@@ -446,20 +474,13 @@ export class StoreEmployeesDialogComponent implements OnInit {
     this.passwordVisible = false;
     this.confirmPasswordVisible = false;
 
-    // Cria o form e aplica preset baseado no perfil da pessoa
-    const form = this.fb.group(
-      {
-        email: ['', [Validators.required, Validators.email]],
-        password: ['', [Validators.required, Validators.minLength(6)]],
-        confirmPassword: ['', [Validators.required]],
-        authorizations: this.fb.array<string>([]),
-      },
-      { validators: this.passwordMatchValidator },
-    );
-
+    // Garante que o form esteja inicializado e com preset
+    const form = this.getForm(id);
+    if (person.email && !form.get('email')?.value) {
+      form.get('email')?.setValue(person.email);
+    }
     this.applyPreset(person, form);
 
-    this.createAccessForms.set(id, form);
     this.creatingAccessFor = id;
   }
 
@@ -487,10 +508,6 @@ export class StoreEmployeesDialogComponent implements OnInit {
     }
 
     defaults.forEach((auth) => authArray.push(new FormControl(auth)));
-  }
-
-  getForm(personId: string): FormGroup {
-    return this.createAccessForms.get(personId)!;
   }
 
   isAuthorized(personId: string, key: string): boolean {
