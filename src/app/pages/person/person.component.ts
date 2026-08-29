@@ -44,6 +44,7 @@ import { FormDraftService, FormDraft } from '@services/form-draft.service';
 import { StoreContextService } from '@services/store-context.service';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { formatCpfCnpj } from '@utils/document-utils';
 
 /**
  * Tipo literal para representar os tipos principais de relacionamento
@@ -226,7 +227,8 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
       key: 'cpf-cnpj',
       header: 'CPF/CNPJ',
       format: (value: any, row: Person) => {
-        return row.legalEntity ? row.cnpj : row.cpf || '-';
+        const rawDoc = row.legalEntity ? row.cnpj : row.cpf;
+        return formatCpfCnpj(rawDoc);
       },
     },
     {

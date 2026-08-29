@@ -59,7 +59,7 @@
         </div>
         <div class="field">
           <label>CNPJ</label>
-          <span class="value">{{ person.cnpj || '---' }}</span>
+          <span class="value">{{ formatCnpj(person.cnpj) }}</span>
         </div>
       </div>
     </section>
@@ -77,7 +77,7 @@
         </div>
         <div class="field">
           <label>Telefone / WhatsApp</label>
-          <span class="value">{{ person.phone || 'Não informado' }}</span>
+          <span class="value">{{ formatPhone(person.phone) }}</span>
         </div>
       </div>
     </section>

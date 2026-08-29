@@ -26,6 +26,7 @@
       "@info/*": ["./src/app/info/*"],
       "@enums/*": ["./src/app/enums/*"],
       "@guards/*": ["./src/app/guards/*"],
+      "@pipes/*": ["./src/app/pipes/*"],
       "@utils/*": ["./src/app/utils/*"]
     }
   },

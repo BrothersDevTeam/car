@@ -51,7 +51,7 @@
       <div class="field-group">
         <div class="field">
           <label>CPF</label>
-          <span class="value">{{ person.cpf || '---' }}</span>
+          <span class="value">{{ formatCpf(person.cpf) }}</span>
         </div>
         <div class="field">
           <label>RG</label>
@@ -83,7 +83,7 @@
         </div>
         <div class="field">
           <label>Telefone / WhatsApp</label>
-          <span class="value">{{ person.phone || 'Não informado' }}</span>
+          <span class="value">{{ formatPhone(person.phone) }}</span>
         </div>
       </div>
     </section>

@@ -17,6 +17,7 @@ import type { Person } from '@interfaces/person';
 
 import { PersonService } from '@services/person.service';
 import { AuthService } from '@services/auth/auth.service';
+import { formatCnpj, formatPhone } from '@utils/document-utils';
 
 @Component({
   selector: 'app-legal-entity-info',
@@ -124,5 +125,13 @@ export class LegalEntityInfoComponent {
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
     return parts[0][0].toUpperCase();
+  }
+
+  formatCnpj(cnpj: string | null | undefined): string {
+    return formatCnpj(cnpj);
+  }
+
+  formatPhone(phone: string | null | undefined): string {
+    return formatPhone(phone);
   }
 }

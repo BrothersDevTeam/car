@@ -16,6 +16,7 @@ import { Person } from '@interfaces/person';
 import { PersonService } from '@services/person.service';
 import { AuthService } from '@services/auth/auth.service';
 import { Authorizations } from '../../enums/authorizations';
+import { formatCpf, formatPhone } from '@utils/document-utils';
 
 @Component({
   selector: 'app-natural-person-info',
@@ -125,5 +126,13 @@ export class NaturalPersonInfoComponent implements OnInit {
     if (t === 'GERENTE') return 'manage_accounts';
     if (t === 'PROPRIETARIO') return 'stars';
     return 'account_circle';
+  }
+
+  formatCpf(cpf: string | null | undefined): string {
+    return formatCpf(cpf);
+  }
+
+  formatPhone(phone: string | null | undefined): string {
+    return formatPhone(phone);
   }
 }

@@ -5,9 +5,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { Address } from '@interfaces/address';
-import { AddressTypeLabels, AddressTypeIcons } from '../../../enums/addressTypes';
+import { AddressTypeLabels, AddressTypeIcons } from '@enums/addressTypes';
 import { AddressService } from '@services/address.service';
-import { SafePipe } from '../../../pipes/safe.pipe';
+import { SafePipe } from '@pipes/safe.pipe';
 
 @Component({
   selector: 'app-address-card',
