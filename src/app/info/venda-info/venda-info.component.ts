@@ -178,15 +178,35 @@ export class VendaInfoComponent implements OnInit {
   }
 
   openDanfe(): void {
-    if (this.nfe?.nfeDanfeUrl) {
-      window.open(this.nfe.nfeDanfeUrl, '_blank');
-    }
+    if (!this.nfe?.nfeId) return;
+    const filename = `${this.nfe.nfeChave || this.nfe.nfeId}-danfe.pdf`;
+    this.nfeService.downloadDanfe(this.nfe.nfeId).subscribe({
+      next: (blob) => {
+        this.nfeService.downloadFileFromBlob(blob, filename);
+      },
+      error: (err) => {
+        console.error('Erro ao baixar DANFE:', err);
+        if (this.nfe?.nfeDanfeUrl) {
+          window.open(this.nfe.nfeDanfeUrl, '_blank');
+        }
+      },
+    });
   }
 
   openXml(): void {
-    if (this.nfe?.nfeXmlUrl) {
-      window.open(this.nfe.nfeXmlUrl, '_blank');
-    }
+    if (!this.nfe?.nfeId) return;
+    const filename = `${this.nfe.nfeChave || this.nfe.nfeId}-nfe.xml`;
+    this.nfeService.downloadXml(this.nfe.nfeId).subscribe({
+      next: (blob) => {
+        this.nfeService.downloadFileFromBlob(blob, filename);
+      },
+      error: (err) => {
+        console.error('Erro ao baixar XML:', err);
+        if (this.nfe?.nfeXmlUrl) {
+          window.open(this.nfe.nfeXmlUrl, '_blank');
+        }
+      },
+    });
   }
 
   onEdit(): void {

@@ -209,6 +209,87 @@
                 </div>
               </div>
             </div>
+
+            <!-- Seção Documento Fiscal (NFe de Saída) -->
+            <div class="info-section" style="margin-top: 24px">
+              <h2 class="section-title">
+                <mat-icon>receipt_long</mat-icon>
+                Documento Fiscal (NFe de Saída)
+              </h2>
+              @if (nfeSaida) {
+                <div class="nfe-card">
+                  <div class="nfe-header">
+                    <div class="nfe-icon-box">
+                      <mat-icon>description</mat-icon>
+                    </div>
+                    <div class="nfe-title-info">
+                      <div class="nfe-title-row">
+                        <h3>
+                          NFe de Saída
+                          @if (nfeSaida.nfeNumero) {
+                            (Nº {{ nfeSaida.nfeNumero }} - Série {{ nfeSaida.nfeSerie || '1' }})
+                          }
+                        </h3>
+                        <span class="status-badge" [ngClass]="getNfeStatusClass(nfeSaida.nfeStatus)">
+                          {{ getNfeStatusLabel(nfeSaida.nfeStatus) }}
+                        </span>
+                      </div>
+                      <p class="nfe-natureza">{{ nfeSaida.nfeNaturezaOperacao || 'Venda de Veículo' }}</p>
+                    </div>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="nfe-details">
+                    @if (nfeSaida.nfeChave) {
+                      <div class="info-item full-width">
+                        <label>Chave de Acesso</label>
+                        <span class="mono">{{ nfeSaida.nfeChave }}</span>
+                      </div>
+                    }
+                    @if (nfeSaida.nfeDataEmissao) {
+                      <div class="info-item">
+                        <label>Data de Emissão</label>
+                        <span>{{ nfeSaida.nfeDataEmissao | date: 'dd/MM/yyyy HH:mm' }}</span>
+                      </div>
+                    }
+                    @if (nfeSaida.nfeValorTotal) {
+                      <div class="info-item">
+                        <label>Valor Total da NFe</label>
+                        <span style="font-weight: 700">{{ nfeSaida.nfeValorTotal | currency: 'BRL' }}</span>
+                      </div>
+                    }
+                  </div>
+                  @if (nfeSaida.nfeStatus?.toLowerCase() === 'autorizado') {
+                    <mat-divider></mat-divider>
+                    <div class="nfe-actions">
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        (click)="downloadNfeDanfe(nfeSaida)"
+                        [disabled]="isDownloadingDanfe() === nfeSaida.nfeId"
+                      >
+                        <mat-icon>picture_as_pdf</mat-icon>
+                        {{ isDownloadingDanfe() === nfeSaida.nfeId ? 'Baixando DANFE...' : 'Baixar DANFE (PDF)' }}
+                      </button>
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        (click)="downloadNfeXml(nfeSaida)"
+                        [disabled]="isDownloadingXml() === nfeSaida.nfeId"
+                      >
+                        <mat-icon>code</mat-icon>
+                        {{ isDownloadingXml() === nfeSaida.nfeId ? 'Baixando XML...' : 'Baixar XML' }}
+                      </button>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="nfe-empty-card">
+                  <mat-icon>receipt</mat-icon>
+                  <span>Nenhum documento fiscal de saída emitido para esta venda.</span>
+                </div>
+              }
+            </div>
           } @else if (proprietario) {
             <div class="owner-card">
               <div class="owner-header">
@@ -279,6 +360,87 @@
                   </span>
                 </div>
               </div>
+            </div>
+
+            <!-- Seção Documento Fiscal (NFe de Entrada) -->
+            <div class="info-section">
+              <h2 class="section-title">
+                <mat-icon>receipt_long</mat-icon>
+                Documento Fiscal (NFe de Entrada)
+              </h2>
+              @if (nfeEntrada) {
+                <div class="nfe-card">
+                  <div class="nfe-header">
+                    <div class="nfe-icon-box">
+                      <mat-icon>description</mat-icon>
+                    </div>
+                    <div class="nfe-title-info">
+                      <div class="nfe-title-row">
+                        <h3>
+                          NFe de Entrada
+                          @if (nfeEntrada.nfeNumero) {
+                            (Nº {{ nfeEntrada.nfeNumero }} - Série {{ nfeEntrada.nfeSerie || '1' }})
+                          }
+                        </h3>
+                        <span class="status-badge" [ngClass]="getNfeStatusClass(nfeEntrada.nfeStatus)">
+                          {{ getNfeStatusLabel(nfeEntrada.nfeStatus) }}
+                        </span>
+                      </div>
+                      <p class="nfe-natureza">{{ nfeEntrada.nfeNaturezaOperacao || 'Compra / Entrada de Veículo' }}</p>
+                    </div>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="nfe-details">
+                    @if (nfeEntrada.nfeChave) {
+                      <div class="info-item full-width">
+                        <label>Chave de Acesso</label>
+                        <span class="mono">{{ nfeEntrada.nfeChave }}</span>
+                      </div>
+                    }
+                    @if (nfeEntrada.nfeDataEmissao) {
+                      <div class="info-item">
+                        <label>Data de Emissão</label>
+                        <span>{{ nfeEntrada.nfeDataEmissao | date: 'dd/MM/yyyy HH:mm' }}</span>
+                      </div>
+                    }
+                    @if (nfeEntrada.nfeValorTotal) {
+                      <div class="info-item">
+                        <label>Valor Total da NFe</label>
+                        <span style="font-weight: 700">{{ nfeEntrada.nfeValorTotal | currency: 'BRL' }}</span>
+                      </div>
+                    }
+                  </div>
+                  @if (nfeEntrada.nfeStatus?.toLowerCase() === 'autorizado') {
+                    <mat-divider></mat-divider>
+                    <div class="nfe-actions">
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        (click)="downloadNfeDanfe(nfeEntrada)"
+                        [disabled]="isDownloadingDanfe() === nfeEntrada.nfeId"
+                      >
+                        <mat-icon>picture_as_pdf</mat-icon>
+                        {{ isDownloadingDanfe() === nfeEntrada.nfeId ? 'Baixando DANFE...' : 'Baixar DANFE (PDF)' }}
+                      </button>
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        (click)="downloadNfeXml(nfeEntrada)"
+                        [disabled]="isDownloadingXml() === nfeEntrada.nfeId"
+                      >
+                        <mat-icon>code</mat-icon>
+                        {{ isDownloadingXml() === nfeEntrada.nfeId ? 'Baixando XML...' : 'Baixar XML' }}
+                      </button>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="nfe-empty-card">
+                  <mat-icon>receipt</mat-icon>
+                  <span>Nenhum documento fiscal de entrada emitido para este veículo.</span>
+                </div>
+              }
             </div>
 
             <!-- Dados do Fornecedor -->

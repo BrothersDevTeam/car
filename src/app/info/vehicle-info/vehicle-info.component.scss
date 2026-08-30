@@ -512,3 +512,113 @@
     color: #475569;
   }
 }
+
+// NFE CARD STYLES
+.nfe-card {
+  border: 1px solid #dadce0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  .nfe-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #f8f9fa;
+
+    .nfe-icon-box {
+      width: 42px;
+      height: 42px;
+      background: #e8f0fe;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1a73e8;
+
+      mat-icon {
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    .nfe-title-info {
+      flex: 1;
+
+      .nfe-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+
+        h3 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #202124;
+        }
+      }
+
+      .nfe-natureza {
+        margin: 2px 0 0 0;
+        font-size: 13px;
+        color: #5f6368;
+      }
+    }
+  }
+
+  .nfe-details {
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+
+    @media (max-width: 500px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .nfe-actions {
+    padding: 12px 20px;
+    display: flex;
+    gap: 12px;
+    background: #fafafa;
+    align-items: center;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+
+      button {
+        width: 100%;
+      }
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+    }
+  }
+}
+
+.nfe-empty-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border: 1px dashed #dadce0;
+  border-radius: 8px;
+  color: #70757a;
+  font-size: 13px;
+
+  mat-icon {
+    color: #9aa0a6;
+  }
+}

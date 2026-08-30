@@ -7,10 +7,11 @@ import { Router } from '@angular/router';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 
-import { VehicleForm } from '@interfaces/vehicle';
+import { NfeSummary, VehicleForm } from '@interfaces/vehicle';
 import { VehicleService } from '@services/vehicle.service';
 import { PersonService } from '@services/person.service';
 import { FinancialService } from '@services/financial.service';
+import { NfeService } from '@services/nfe.service';
 import { FinancialTransaction } from '@interfaces/financial';
 import { TransactionPaymentDialogComponent } from '../../pages/financial/financial-dashboard/transaction-payment-dialog.component';
 import { Person } from '@interfaces/person';
@@ -46,10 +47,13 @@ export class VehicleInfoComponent implements OnChanges {
   private vehicleService = inject(VehicleService);
   private personService = inject(PersonService);
   private financialService = inject(FinancialService);
+  private nfeService = inject(NfeService);
   private fipeService = inject(FipeService);
   private router = inject(Router);
 
   isRefreshingFipe = signal(false);
+  isDownloadingDanfe = signal<string | null>(null);
+  isDownloadingXml = signal<string | null>(null);
 
   @Input() vehicle!: VehicleForm;
   proprietario: Person | null = null;
@@ -440,5 +444,98 @@ export class VehicleInfoComponent implements OnChanges {
   navigateToPerson(personId?: string) {
     if (!personId) return;
     this.router.navigate(['/person'], { queryParams: { editId: personId } });
+  }
+
+  get nfeEntrada(): NfeSummary | undefined {
+    return this.vehicle?.nfeHistory?.find((n) => n.nfeTipoDocumento === '0');
+  }
+
+  get nfeSaida(): NfeSummary | undefined {
+    return this.vehicle?.nfeHistory?.find((n) => n.nfeTipoDocumento === '1');
+  }
+
+  getNfeStatusLabel(status?: string): string {
+    if (!status) return 'Rascunho';
+    switch (status.toLowerCase()) {
+      case 'autorizado':
+        return 'Autorizada';
+      case 'processando':
+        return 'Processando';
+      case 'cancelado':
+        return 'Cancelada';
+      case 'erro':
+        return 'Erro';
+      default:
+        return status;
+    }
+  }
+
+  getNfeStatusClass(status?: string): string {
+    if (!status) return 'status-neutral';
+    switch (status.toLowerCase()) {
+      case 'autorizado':
+        return 'status-success';
+      case 'cancelado':
+      case 'erro':
+        return 'status-danger';
+      case 'processando':
+        return 'status-warning';
+      default:
+        return 'status-neutral';
+    }
+  }
+
+  downloadNfeDanfe(nfe: NfeSummary) {
+    if (!nfe || !nfe.nfeId) return;
+    if (nfe.nfeStatus?.toLowerCase() !== 'autorizado') {
+      this.toastrService.info(
+        'O DANFE (PDF) só está disponível para download após a autorização da NFe.',
+        'NFe não autorizada',
+      );
+      return;
+    }
+
+    this.isDownloadingDanfe.set(nfe.nfeId);
+    const filename = `${nfe.nfeChave || nfe.nfeId}-danfe.pdf`;
+
+    this.nfeService.downloadDanfe(nfe.nfeId).subscribe({
+      next: (blob) => {
+        this.isDownloadingDanfe.set(null);
+        this.nfeService.downloadFileFromBlob(blob, filename);
+        this.toastrService.success('Download do DANFE concluído com sucesso.', 'Sucesso');
+      },
+      error: (err) => {
+        this.isDownloadingDanfe.set(null);
+        console.error('Erro ao baixar DANFE:', err);
+        this.toastrService.error('Não foi possível realizar o download do DANFE (PDF).', 'Erro no Download');
+      },
+    });
+  }
+
+  downloadNfeXml(nfe: NfeSummary) {
+    if (!nfe || !nfe.nfeId) return;
+    if (nfe.nfeStatus?.toLowerCase() !== 'autorizado') {
+      this.toastrService.info(
+        'O XML só está disponível para download após a autorização da NFe.',
+        'NFe não autorizada',
+      );
+      return;
+    }
+
+    this.isDownloadingXml.set(nfe.nfeId);
+    const filename = `${nfe.nfeChave || nfe.nfeId}-nfe.xml`;
+
+    this.nfeService.downloadXml(nfe.nfeId).subscribe({
+      next: (blob) => {
+        this.isDownloadingXml.set(null);
+        this.nfeService.downloadFileFromBlob(blob, filename);
+        this.toastrService.success('Download do XML concluído com sucesso.', 'Sucesso');
+      },
+      error: (err) => {
+        this.isDownloadingXml.set(null);
+        console.error('Erro ao baixar XML:', err);
+        this.toastrService.error('Não foi possível realizar o download do XML.', 'Erro no Download');
+      },
+    });
   }
 }

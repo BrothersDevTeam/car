@@ -156,6 +156,29 @@ export class NfeService {
       .pipe(tap(() => this.clearCache()));
   }
 
+  downloadXml(nfeId: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${nfeId}/download/xml`, {
+      responseType: 'blob',
+    });
+  }
+
+  downloadDanfe(nfeId: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${nfeId}/download/danfe`, {
+      responseType: 'blob',
+    });
+  }
+
+  downloadFileFromBlob(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }
+
   public clearCache() {
     this.cache = null;
     this.cacheUpdated$.next(null);

@@ -593,18 +593,53 @@ export class VehicleComponent implements CanComponentDeactivate {
   }
 
   /**
-   * Chama o backend para gerar o rascunho da NFe de compra.
+   * Realiza o download do DANFE (PDF) da NFe ou redireciona caso ainda em rascunho.
    */
   viewNfe(row: any, tipo: string) {
     const nfe = row.nfeHistory?.find((n: any) => n.nfeTipoDocumento === tipo);
-    if (nfe && nfe.nfeDanfeUrl) {
-      window.open(nfe.nfeDanfeUrl, '_blank');
+    if (nfe && nfe.nfeStatus?.toLowerCase() === 'autorizado' && nfe.nfeId) {
+      const filename = `${nfe.nfeChave || nfe.nfeId}-danfe.pdf`;
+      this.nfeService.downloadDanfe(nfe.nfeId).subscribe({
+        next: (blob) => {
+          this.nfeService.downloadFileFromBlob(blob, filename);
+          this.toastr.success('Download do DANFE (PDF) iniciado.', 'Sucesso');
+        },
+        error: (err) => {
+          console.error('Erro ao baixar DANFE:', err);
+          if (nfe.nfeDanfeUrl) {
+            window.open(nfe.nfeDanfeUrl, '_blank');
+          } else {
+            this.toastr.error('Não foi possível realizar o download do DANFE (PDF).', 'Erro');
+          }
+        },
+      });
     } else if (nfe) {
       this.toastr.info(
         'DANFE não disponível. A NFe está em rascunho ou processamento. Redirecionando para a lista de NFes...',
         'Info',
       );
       this.router.navigate(['/nfe']);
+    } else {
+      this.toastr.warning('NFe não encontrada.');
+    }
+  }
+
+  downloadNfeXml(row: any, tipo: string) {
+    const nfe = row.nfeHistory?.find((n: any) => n.nfeTipoDocumento === tipo);
+    if (nfe && nfe.nfeStatus?.toLowerCase() === 'autorizado' && nfe.nfeId) {
+      const filename = `${nfe.nfeChave || nfe.nfeId}-nfe.xml`;
+      this.nfeService.downloadXml(nfe.nfeId).subscribe({
+        next: (blob) => {
+          this.nfeService.downloadFileFromBlob(blob, filename);
+          this.toastr.success('Download do XML iniciado.', 'Sucesso');
+        },
+        error: (err) => {
+          console.error('Erro ao baixar XML:', err);
+          this.toastr.error('Não foi possível realizar o download do XML.', 'Erro');
+        },
+      });
+    } else if (nfe) {
+      this.toastr.info('O XML só está disponível para notas fiscais autorizadas.', 'Info');
     } else {
       this.toastr.warning('NFe não encontrada.');
     }
