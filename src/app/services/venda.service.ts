@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, first, Observable, of, tap } from 'rxjs';
 
@@ -6,6 +6,7 @@ import { PaginationResponse } from '@interfaces/pagination';
 import { VendaResponseDto, VendaRequestDto } from '@interfaces/venda';
 import { MessageResponse } from '@interfaces/message-response';
 import { StoreContextService } from './store-context.service';
+import { VehicleService } from './vehicle.service';
 
 @Injectable({
   providedIn: 'root',
@@ -21,7 +22,9 @@ export class VendaService {
   constructor(
     private http: HttpClient,
     private storeContextService: StoreContextService,
+    private injector: Injector,
   ) {}
+
 
   // Observable público para componentes se inscreverem
   get cacheUpdated(): Observable<PaginationResponse<VendaResponseDto> | null> {
@@ -118,5 +121,11 @@ export class VendaService {
   public clearCache() {
     this.cache = null;
     this.cacheUpdated$.next(null);
+    try {
+      this.injector.get(VehicleService).clearCache();
+    } catch (e) {
+      console.warn('Não foi possível invalidar o cache de veículos', e);
+    }
   }
 }
+

@@ -238,7 +238,7 @@
                 <div class="value-card buy">
                   <span class="card-label">Custo de Aquisição</span>
                   <span class="card-value">
-                    {{ compraAtiva.valorCompra | currency: 'BRL' }}
+                    {{ compraAtiva.valorCompra != null ? (compraAtiva.valorCompra | currency: 'BRL') : 'Restrito' }}
                   </span>
                 </div>
                 <div class="value-card">
@@ -248,6 +248,7 @@
                   </span>
                 </div>
               </div>
+
             </div>
 
             <!-- Seção Documento Fiscal (NFe de Entrada) -->
@@ -424,13 +425,14 @@
                         </p>
                       </div>
                       <div class="history-value val-negativo">
-                        {{ pag.valor | currency: 'BRL' }}
+                        {{ pag.valor != null ? (pag.valor | currency: 'BRL') : 'Restrito' }}
                       </div>
                     </div>
                   }
                 </div>
               </div>
             }
+
 
             <!-- Lançamentos Financeiros (Caixa) -->
             <div class="info-section" style="margin-top: 24px">

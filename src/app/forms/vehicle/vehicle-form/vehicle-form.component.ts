@@ -1058,6 +1058,10 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Preenche o formulário com os dados do veículo
     this.isFillingForm = true;
     this.form.patchValue({
+      owner: {
+        id: this.dataForm?.ownerId || '',
+        name: this.dataForm?.ownerName || '',
+      },
       plate: this.dataForm?.plate || '',
       brand: selectedBrand
         ? { id: selectedBrand.id, name: selectedBrand.name }

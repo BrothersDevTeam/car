@@ -185,7 +185,7 @@ export class VehicleInfoComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['vehicle'] && this.vehicle) {
-      const ownerId = this.vehicle.owner;
+      const ownerId = this.vehicle.ownerId || (this.vehicle as any).owner;
       const supplierId = this.vehicle.supplierId || this.vehicle.purchaseHistory?.[0]?.supplierId;
       const buyerId = this.vehicle.salesHistory?.[0]?.buyerId;
 
