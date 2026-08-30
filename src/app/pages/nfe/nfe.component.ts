@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Component, inject, signal, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { DatePipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -261,6 +262,8 @@ export class NfeComponent {
     this.setupSearchDebounce();
   }
 
+  private route = inject(ActivatedRoute);
+
   ngOnInit() {
     this.subscription.add(
       this.actionsService.sidebarClick$.subscribe((targetRoute: string | undefined) => {
@@ -280,6 +283,16 @@ export class NfeComponent {
         this.selectedStoreId = storeId;
         this.nfeService.clearCache(); // Limpa cache para garantir dados da nova loja/rede
         this.loadNfeList(0, this.paginationRequestConfig.pageSize, this.searchValue);
+      }),
+    );
+
+    // Escuta queryParams para abrir diretamente uma NFe selecionada (ex: vindo de compras ou vendas)
+    this.subscription.add(
+      this.route.queryParams.subscribe((params) => {
+        const nfeId = params['nfeId'];
+        if (nfeId) {
+          this.handleSelectedNfe({ nfeId } as Nfe);
+        }
       }),
     );
   }

@@ -114,15 +114,16 @@ export class VendasListComponent implements OnInit, OnDestroy {
     {
       key: 'nfeStatus',
       header: 'NF-e',
-      badgeConfig: {
-        rascunho: { label: 'Em Digitação', cssClass: 'badge-rascunho' },
-        processando: { label: 'Processando', cssClass: 'badge-processando' },
-        autorizado: { label: 'Autorizada', cssClass: 'badge-autorizado' },
-        cancelado: { label: 'Cancelada', cssClass: 'badge-cancelado' },
-        erro: { label: 'Erro', cssClass: 'badge-erro' },
-        erro_autorizacao: { label: 'Erro Autorização', cssClass: 'badge-erro' },
-      },
-      format: (val) => val || 'Não Gerada',
+      actions: [
+        {
+          label: (row: VendaResponseDto) => this.getNfeTooltip(row),
+          icon: (row: VendaResponseDto) => this.getNfeIcon(row),
+          cssClass: (row: VendaResponseDto) => this.getNfeButtonClass(row),
+          action: (row: VendaResponseDto) => this.navigateToNfe(row),
+          hidden: (row: VendaResponseDto) => !row.nfeId,
+        },
+      ],
+      format: (val, row) => (!row?.nfeId ? '—' : ''),
     },
     {
       key: 'vendaStatus',
@@ -394,5 +395,66 @@ export class VendasListComponent implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  getNfeTooltip(venda: VendaResponseDto): string {
+    const status = (venda.nfeStatus || '').toLowerCase();
+    switch (status) {
+      case 'autorizado':
+        return 'NFe Autorizada - Clique para visualizar';
+      case 'processando':
+        return 'NFe em Processamento na SEFAZ - Clique para visualizar';
+      case 'rascunho':
+        return 'NFe em Digitação (Rascunho) - Clique para visualizar';
+      case 'cancelado':
+        return 'NFe Cancelada - Clique para visualizar';
+      case 'erro':
+      case 'erro_autorizacao':
+        return 'Erro na Autorização da NFe - Clique para visualizar';
+      case 'denegado':
+        return 'NFe Denegada - Clique para visualizar';
+      default:
+        return venda.nfeStatus ? `NFe (${venda.nfeStatus}) - Clique para visualizar` : 'Ver Detalhes da NFe';
+    }
+  }
+
+  getNfeIcon(venda: VendaResponseDto): string {
+    const status = (venda.nfeStatus || '').toLowerCase();
+    switch (status) {
+      case 'autorizado':
+        return 'check_circle';
+      case 'processando':
+        return 'sync';
+      case 'rascunho':
+        return 'edit_note';
+      case 'cancelado':
+        return 'cancel';
+      case 'erro':
+      case 'erro_autorizacao':
+        return 'error';
+      case 'denegado':
+        return 'gavel';
+      default:
+        return 'description';
+    }
+  }
+
+  getNfeButtonClass(venda: VendaResponseDto): string {
+    const status = (venda.nfeStatus || '').toLowerCase();
+    let statusClass = 'nfe-btn-rascunho';
+    if (status === 'autorizado') {
+      statusClass = 'nfe-btn-autorizado';
+    } else if (status === 'processando') {
+      statusClass = 'nfe-btn-processando';
+    } else if (status === 'cancelado' || status === 'erro' || status === 'erro_autorizacao' || status === 'denegado') {
+      statusClass = 'nfe-btn-erro';
+    }
+    return `nfe-status-btn ${statusClass}`;
+  }
+
+  navigateToNfe(venda: VendaResponseDto): void {
+    if (venda.nfeId) {
+      this.router.navigate(['/nfe'], { queryParams: { nfeId: venda.nfeId } });
+    }
   }
 }

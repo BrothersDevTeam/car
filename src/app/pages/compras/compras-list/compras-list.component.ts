@@ -111,15 +111,16 @@ export class ComprasListComponent implements OnInit, OnDestroy {
     {
       key: 'nfeStatus',
       header: 'NF-e',
-      badgeConfig: {
-        rascunho: { label: 'Em Digitação', cssClass: 'badge-rascunho' },
-        processando: { label: 'Processando', cssClass: 'badge-processando' },
-        autorizado: { label: 'Autorizada', cssClass: 'badge-autorizado' },
-        cancelado: { label: 'Cancelada', cssClass: 'badge-cancelado' },
-        erro: { label: 'Erro', cssClass: 'badge-erro' },
-        erro_autorizacao: { label: 'Erro Autorização', cssClass: 'badge-erro' },
-      },
-      format: (val) => val || 'Não Gerada',
+      actions: [
+        {
+          label: (row: Compra) => this.getNfeTooltip(row),
+          icon: (row: Compra) => this.getNfeIcon(row),
+          cssClass: (row: Compra) => this.getNfeButtonClass(row),
+          action: (row: Compra) => this.navigateToNfe(row),
+          hidden: (row: Compra) => !row.nfeId,
+        },
+      ],
+      format: (val, row) => (!row?.nfeId ? '—' : ''),
     },
     {
       key: 'acoes',
@@ -299,5 +300,66 @@ export class ComprasListComponent implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  getNfeTooltip(compra: Compra): string {
+    const status = (compra.nfeStatus || '').toLowerCase();
+    switch (status) {
+      case 'autorizado':
+        return 'NFe Autorizada - Clique para visualizar';
+      case 'processando':
+        return 'NFe em Processamento na SEFAZ - Clique para visualizar';
+      case 'rascunho':
+        return 'NFe em Digitação (Rascunho) - Clique para visualizar';
+      case 'cancelado':
+        return 'NFe Cancelada - Clique para visualizar';
+      case 'erro':
+      case 'erro_autorizacao':
+        return 'Erro na Autorização da NFe - Clique para visualizar';
+      case 'denegado':
+        return 'NFe Denegada - Clique para visualizar';
+      default:
+        return compra.nfeStatus ? `NFe (${compra.nfeStatus}) - Clique para visualizar` : 'Ver Detalhes da NFe';
+    }
+  }
+
+  getNfeIcon(compra: Compra): string {
+    const status = (compra.nfeStatus || '').toLowerCase();
+    switch (status) {
+      case 'autorizado':
+        return 'check_circle';
+      case 'processando':
+        return 'sync';
+      case 'rascunho':
+        return 'edit_note';
+      case 'cancelado':
+        return 'cancel';
+      case 'erro':
+      case 'erro_autorizacao':
+        return 'error';
+      case 'denegado':
+        return 'gavel';
+      default:
+        return 'description';
+    }
+  }
+
+  getNfeButtonClass(compra: Compra): string {
+    const status = (compra.nfeStatus || '').toLowerCase();
+    let statusClass = 'nfe-btn-rascunho';
+    if (status === 'autorizado') {
+      statusClass = 'nfe-btn-autorizado';
+    } else if (status === 'processando') {
+      statusClass = 'nfe-btn-processando';
+    } else if (status === 'cancelado' || status === 'erro' || status === 'erro_autorizacao' || status === 'denegado') {
+      statusClass = 'nfe-btn-erro';
+    }
+    return `nfe-status-btn ${statusClass}`;
+  }
+
+  navigateToNfe(compra: Compra): void {
+    if (compra.nfeId) {
+      this.router.navigate(['/nfe'], { queryParams: { nfeId: compra.nfeId } });
+    }
   }
 }

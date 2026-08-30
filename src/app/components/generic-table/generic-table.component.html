@@ -72,27 +72,28 @@
               <!-- Dados normais para outras colunas -->
               @if (column.key !== 'select' && column.key !== 'edit' && column.key !== 'delete') {
                 <!-- Ações dinâmicas da coluna -->
-                @if (column.actions) {
+                @if (column.actions && hasVisibleActions(column, element)) {
                   <div class="column-actions">
                     @for (action of column.actions; track action) {
                       @if (!action.hidden || !action.hidden(element)) {
                         <button
                           mat-icon-button
-                          [color]="action.color || 'primary'"
+                          [color]="getActionColor(action, element)"
+                          [ngClass]="getActionCssClass(action, element)"
                           [matTooltip]="
                             action.disabled && action.disabled(element)
                               ? 'Complete as pendências para habilitar'
-                              : action.label
+                              : getActionLabel(action, element)
                           "
                           [disabled]="action.disabled && action.disabled(element)"
                           (click)="$event.stopPropagation(); action.action(element)"
                         >
-                          <mat-icon>{{ action.icon }}</mat-icon>
+                          <mat-icon>{{ getActionIcon(action, element) }}</mat-icon>
                         </button>
                       }
                     }
                   </div>
-                } @else if (column.menuActions) {
+                } @else if (column.menuActions && hasVisibleMenuActions(column, element)) {
                   <div class="column-actions">
                     <button mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
                       <mat-icon>more_vert</mat-icon>
@@ -104,11 +105,12 @@
                             mat-menu-item
                             [disabled]="action.disabled && action.disabled(element)"
                             (click)="action.action(element)"
-                            [class.menu-action-warn]="action.color === 'warn'"
+                            [class.menu-action-warn]="getActionColor(action, element) === 'warn'"
+                            [ngClass]="getActionCssClass(action, element)"
                             class="custom-menu-item"
                           >
-                            <mat-icon class="menu-action-icon">{{ action.icon }}</mat-icon>
-                            <span class="menu-action-label">{{ action.label }}</span>
+                            <mat-icon class="menu-action-icon">{{ getActionIcon(action, element) }}</mat-icon>
+                            <span class="menu-action-label">{{ getActionLabel(action, element) }}</span>
                           </button>
                         }
                       }

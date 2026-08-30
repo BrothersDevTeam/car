@@ -160,6 +160,36 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
     return column.alertConfig?.getMessage(row) ?? null;
   }
 
+  getActionLabel(action: any, row: T): string {
+    if (!action) return '';
+    return typeof action.label === 'function' ? action.label(row) : action.label || '';
+  }
+
+  getActionIcon(action: any, row: T): string {
+    if (!action) return '';
+    return typeof action.icon === 'function' ? action.icon(row) : action.icon || '';
+  }
+
+  getActionColor(action: any, row: T): string {
+    if (!action) return 'primary';
+    return typeof action.color === 'function' ? action.color(row) : action.color || 'primary';
+  }
+
+  getActionCssClass(action: any, row: T): string {
+    if (!action) return '';
+    return typeof action.cssClass === 'function' ? action.cssClass(row) : action.cssClass || '';
+  }
+
+  hasVisibleActions(column: ColumnConfig<T>, row: T): boolean {
+    if (!column.actions || column.actions.length === 0) return false;
+    return column.actions.some((a) => !a.hidden || !a.hidden(row));
+  }
+
+  hasVisibleMenuActions(column: ColumnConfig<T>, row: T): boolean {
+    if (!column.menuActions || column.menuActions.length === 0) return false;
+    return column.menuActions.some((a) => !a.hidden || !a.hidden(row));
+  }
+
   updateTooltipDirection(event: MouseEvent) {
     const y = event.clientY;
     const windowHeight = window.innerHeight;

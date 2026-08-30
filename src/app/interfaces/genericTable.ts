@@ -12,6 +12,26 @@ export interface AlertConfig<T> {
   icon?: string;
 }
 
+export interface TableActionConfig<T> {
+  label: string | ((row: T) => string);
+  icon: string | ((row: T) => string);
+  color?: string | ((row: T) => string);
+  cssClass?: string | ((row: T) => string);
+  action: (row: T) => void;
+  hidden?: (row: T) => boolean;
+  disabled?: (row: T) => boolean;
+}
+
+export interface TableMenuActionConfig<T> {
+  label: string | ((row: T) => string);
+  icon: string | ((row: T) => string);
+  color?: string | ((row: T) => string);
+  cssClass?: string | ((row: T) => string);
+  action: (row: T) => void;
+  hidden?: (row: T) => boolean;
+  disabled?: (row: T) => boolean;
+}
+
 export interface ColumnConfig<T> {
   key: string;
   header: string;
@@ -27,21 +47,7 @@ export interface ColumnConfig<T> {
   // Função para esconder a coluna dinamicamente
   hidden?: () => boolean;
   // Ações customizadas para a coluna
-  actions?: {
-    label: string;
-    icon: string;
-    color?: string;
-    action: (row: T) => void;
-    hidden?: (row: T) => boolean;
-    disabled?: (row: T) => boolean;
-  }[];
+  actions?: TableActionConfig<T>[];
   // Ações em formato de menu (três pontinhos)
-  menuActions?: {
-    label: string;
-    icon: string;
-    color?: string;
-    action: (row: T) => void;
-    hidden?: (row: T) => boolean;
-    disabled?: (row: T) => boolean;
-  }[];
+  menuActions?: TableMenuActionConfig<T>[];
 }
