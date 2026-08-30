@@ -655,3 +655,35 @@
     color: #9aa0a6;
   }
 }
+
+.section-title-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .section-title {
+    margin-bottom: 0;
+  }
+}
+
+.btn-transacao-link {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  padding: 0 14px !important;
+
+  mat-icon {
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+  }
+}
+

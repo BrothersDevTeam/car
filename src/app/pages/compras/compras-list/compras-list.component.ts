@@ -1,7 +1,7 @@
 import { Component, inject, signal, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, Subscription, of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { extractErrorMessage } from '@utils/error-utils';
@@ -58,6 +58,7 @@ export class ComprasListComponent implements OnInit, OnDestroy {
   private toastr = inject(ToastrService);
   private dialog = inject(MatDialog);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private datePipe = inject(DatePipe);
   private currencyPipe = inject(CurrencyPipe);
 
@@ -88,11 +89,6 @@ export class ComprasListComponent implements OnInit, OnDestroy {
       hidden: () => !!this.selectedStoreId,
     },
     {
-      key: 'supplierName',
-      header: 'Fornecedor',
-      format: (val) => val || '—',
-    },
-    {
       key: 'vehicleDescription',
       header: 'Veículo',
       format: (val, row) => {
@@ -102,6 +98,11 @@ export class ComprasListComponent implements OnInit, OnDestroy {
         }
         return val || '—';
       },
+    },
+    {
+      key: 'supplierName',
+      header: 'Fornecedor',
+      format: (val) => val || '—',
     },
     {
       key: 'valorCompra',
@@ -152,6 +153,19 @@ export class ComprasListComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit() {
+    this.subscription.add(
+      this.route.queryParams.subscribe((params) => {
+        if (params['search']) {
+          this.searchValue = params['search'];
+        }
+        if (params['compraId']) {
+          this.selectedCompraId.set(params['compraId']);
+          this.openInfo.set(true);
+          this.storeContextService.setStoreSelectionLock(true);
+        }
+      }),
+    );
+
     this.subscription.add(
       this.storeContextService.currentStoreId$.subscribe((storeId) => {
         this.selectedStoreId = storeId;

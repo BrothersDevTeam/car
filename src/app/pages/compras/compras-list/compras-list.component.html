@@ -67,6 +67,7 @@
       [compraId]="selectedCompraId()!"
       (close)="handleCloseDrawer()"
       (edit)="handleEditFromInfo($event)"
+      (nfeGenerated)="loadComprasList()"
     ></app-compra-info>
   </app-drawer>
 }

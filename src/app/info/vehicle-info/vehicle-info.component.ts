@@ -474,19 +474,17 @@ export class VehicleInfoComponent implements OnChanges {
   }
 
   navigateToCompra(compraId?: string) {
-    if (this.vehicle?.plate) {
-      this.router.navigate(['/compras'], { queryParams: { search: this.vehicle.plate } });
-    } else {
-      this.router.navigate(['/compras']);
-    }
+    const queryParams: any = {};
+    if (compraId) queryParams.compraId = compraId;
+    if (this.vehicle?.plate) queryParams.search = this.vehicle.plate;
+    this.router.navigate(['/compras'], { queryParams });
   }
 
   navigateToVenda(vendaId?: string) {
-    if (this.vehicle?.plate) {
-      this.router.navigate(['/vendas'], { queryParams: { search: this.vehicle.plate } });
-    } else {
-      this.router.navigate(['/vendas']);
-    }
+    const queryParams: any = {};
+    if (vendaId) queryParams.vendaId = vendaId;
+    if (this.vehicle?.plate) queryParams.search = this.vehicle.plate;
+    this.router.navigate(['/vendas'], { queryParams });
   }
 
   registrarCompra() {

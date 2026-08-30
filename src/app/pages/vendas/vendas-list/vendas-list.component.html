@@ -98,6 +98,7 @@
       [vendaId]="selectedVendaId()!"
       (close)="handleCloseDrawer()"
       (edit)="handleEditFromInfo($event)"
+      (nfeGenerated)="loadVendasList()"
     ></app-venda-info>
   </app-drawer>
 }

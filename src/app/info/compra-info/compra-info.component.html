@@ -127,20 +127,33 @@
             </div>
           </section>
 
-          <!-- Card NFe (se houver) -->
-          @if (nfe) {
-            <section class="info-card">
-              <div class="card-header">
-                <mat-icon>description</mat-icon>
-                <h2>Documento Fiscal (NFe de Entrada)</h2>
-              </div>
-              <div class="card-body">
+          <!-- Card Informações Fiscais (NFe de Entrada) -->
+          <section class="info-card fiscal-card">
+            <div class="card-header">
+              <mat-icon>input</mat-icon>
+              <h2>Informações Fiscais (NFe de Entrada)</h2>
+            </div>
+            <div class="card-body">
+              @if (nfe) {
+                <div class="data-item">
+                  <span class="label">Status da Nota</span>
+                  <div>
+                    <span class="status-badge" [ngClass]="getStatusClass(nfe.nfeStatus)">
+                      {{ getStatusLabel(nfe.nfeStatus) }}
+                    </span>
+                  </div>
+                </div>
+
                 @if (nfe.nfeNumero) {
                   <div class="data-item">
                     <span class="label">Número / Série</span>
-                    <span class="value">{{ nfe.nfeNumero }} / {{ nfe.nfeSerie }}</span>
+                    <span class="value clickable-link" (click)="navigateToNfe(nfe.nfeId)" matTooltip="Clique para ver a NF-e">
+                      Nº {{ nfe.nfeNumero }} - Série {{ nfe.nfeSerie || '1' }}
+                      <mat-icon>open_in_new</mat-icon>
+                    </span>
                   </div>
                 }
+
                 @if (nfe.nfeChave) {
                   <div class="data-item">
                     <span class="label">Chave de Acesso</span>
@@ -148,15 +161,29 @@
                   </div>
                 }
 
-                @if (nfe.nfeStatus === 'autorizado') {
+                @if (nfe.nfeDataEmissao) {
+                  <div class="data-item">
+                    <span class="label">Data de Emissão</span>
+                    <span class="value">{{ nfe.nfeDataEmissao | date: 'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
+                }
+
+                @if (nfe.nfeValorTotal) {
+                  <div class="data-item">
+                    <span class="label">Valor Total da NF-e</span>
+                    <span class="value bold">{{ nfe.nfeValorTotal | currency: 'BRL' }}</span>
+                  </div>
+                }
+
+                @if (nfe.nfeStatus?.toLowerCase() === 'autorizado') {
                   <div class="nfe-actions">
-                    <button mat-stroked-button color="primary" (click)="openDanfe()">
+                    <button mat-flat-button color="primary" (click)="openDanfe()" [disabled]="isDownloadingDanfe">
                       <mat-icon>picture_as_pdf</mat-icon>
-                      DANFE
+                      {{ isDownloadingDanfe ? 'Baixando...' : 'Baixar DANFE' }}
                     </button>
-                    <button mat-stroked-button color="primary" (click)="openXml()">
+                    <button mat-stroked-button (click)="openXml()" [disabled]="isDownloadingXml">
                       <mat-icon>code</mat-icon>
-                      XML
+                      {{ isDownloadingXml ? 'Baixando...' : 'Baixar XML' }}
                     </button>
                   </div>
                 }
@@ -169,9 +196,25 @@
                     </span>
                   </div>
                 }
-              </div>
-            </section>
-          }
+              } @else {
+                <div class="empty-nfe-container">
+                  <mat-icon class="empty-nfe-icon">receipt</mat-icon>
+                  <p class="empty-nfe-text">Nenhuma NF-e de entrada emitida para esta compra.</p>
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="button"
+                    (click)="emitirNfe()"
+                    [disabled]="generatingNfe"
+                    class="btn-emitir-nfe"
+                  >
+                    <mat-icon>{{ generatingNfe ? 'hourglass_empty' : 'add_circle_outline' }}</mat-icon>
+                    {{ generatingNfe ? 'Gerando NF-e...' : 'Gerar NF-e de Compra' }}
+                  </button>
+                </div>
+              }
+            </div>
+          </section>
         </div>
 
         <!-- Pagamentos -->

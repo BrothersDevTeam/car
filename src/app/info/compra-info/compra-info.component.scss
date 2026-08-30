@@ -465,3 +465,35 @@
     height: 16px;
   }
 }
+
+.empty-nfe-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px 4px;
+  gap: 10px;
+
+  .empty-nfe-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: #94a3b8;
+  }
+
+  .empty-nfe-text {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #64748b;
+    line-height: 1.4;
+  }
+
+  .btn-emitir-nfe {
+    margin-top: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+  }
+}
+

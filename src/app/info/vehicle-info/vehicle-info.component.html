@@ -217,10 +217,23 @@
           @if (compraAtiva) {
             <!-- Seção Resumo Financeiro da Compra -->
             <div class="info-section animate-fade-in">
-              <h2 class="section-title">
-                <mat-icon>shopping_cart</mat-icon>
-                Resumo da Compra
-              </h2>
+              <div class="section-title-with-action">
+                <h2 class="section-title">
+                  <mat-icon>shopping_cart</mat-icon>
+                  Resumo da Compra
+                </h2>
+                <button
+                  mat-stroked-button
+                  color="primary"
+                  type="button"
+                  (click)="navigateToCompra(compraAtiva.compraId)"
+                  matTooltip="Abrir registro de compra no painel de compras"
+                  class="btn-transacao-link"
+                >
+                  <mat-icon>open_in_new</mat-icon>
+                  Ver Compra
+                </button>
+              </div>
               <div class="value-cards">
                 <div class="value-card buy">
                   <span class="card-label">Custo de Aquisição</span>
@@ -488,10 +501,23 @@
           @if (isVendido && vendaAtiva) {
             <!-- Seção Resumo Financeiro da Venda -->
             <div class="info-section animate-fade-in">
-              <h2 class="section-title">
-                <mat-icon>sell</mat-icon>
-                Resumo da Venda
-              </h2>
+              <div class="section-title-with-action">
+                <h2 class="section-title">
+                  <mat-icon>sell</mat-icon>
+                  Resumo da Venda
+                </h2>
+                <button
+                  mat-stroked-button
+                  color="primary"
+                  type="button"
+                  (click)="navigateToVenda(vendaAtiva.vendaId)"
+                  matTooltip="Abrir registro de venda no painel de vendas"
+                  class="btn-transacao-link"
+                >
+                  <mat-icon>open_in_new</mat-icon>
+                  Ver Venda
+                </button>
+              </div>
               <div class="value-cards">
                 <div class="value-card sell">
                   <span class="card-label">Valor Final de Venda</span>
@@ -659,10 +685,23 @@
           } @else if (isVendido) {
             <!-- Seção quando o veículo está com status Vendido mas sem objeto de venda completo -->
             <div class="info-section animate-fade-in">
-              <h2 class="section-title">
-                <mat-icon>sell</mat-icon>
-                Resumo da Venda
-              </h2>
+              <div class="section-title-with-action">
+                <h2 class="section-title">
+                  <mat-icon>sell</mat-icon>
+                  Resumo da Venda
+                </h2>
+                <button
+                  mat-stroked-button
+                  color="primary"
+                  type="button"
+                  (click)="navigateToVenda()"
+                  matTooltip="Buscar vendas deste veículo no painel de vendas"
+                  class="btn-transacao-link"
+                >
+                  <mat-icon>open_in_new</mat-icon>
+                  Ver Vendas
+                </button>
+              </div>
               <div class="value-cards">
                 <div class="value-card sell">
                   <span class="card-label">Status do Veículo</span>

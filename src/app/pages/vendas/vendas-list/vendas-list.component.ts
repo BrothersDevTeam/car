@@ -1,7 +1,7 @@
 import { Component, inject, signal, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, Subscription, of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { extractErrorMessage, getErrorDetails } from '@utils/error-utils';
@@ -61,6 +61,7 @@ export class VendasListComponent implements OnInit, OnDestroy {
   private toastr = inject(ToastrService);
   private dialog = inject(MatDialog);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private datePipe = inject(DatePipe);
   private currencyPipe = inject(CurrencyPipe);
 
@@ -213,6 +214,19 @@ export class VendasListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.subscription.add(
+      this.route.queryParams.subscribe((params) => {
+        if (params['search']) {
+          this.searchValue = params['search'];
+        }
+        if (params['vendaId']) {
+          this.selectedVendaId.set(params['vendaId']);
+          this.openInfo.set(true);
+          this.storeContextService.setStoreSelectionLock(true);
+        }
+      }),
+    );
+
     // Escuta mudança de loja no contexto global
     this.subscription.add(
       this.storeContextService.currentStoreId$.subscribe((storeId) => {

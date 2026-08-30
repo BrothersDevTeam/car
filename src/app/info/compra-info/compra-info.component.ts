@@ -6,9 +6,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ToastrService } from 'ngx-toastr';
 import { CompraService } from '@services/compra.service';
 import { NfeService } from '@services/nfe.service';
 import { FinancialService } from '@services/financial.service';
+import { StoreContextService } from '@services/store-context.service';
+import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
+import { extractErrorMessage } from '@utils/error-utils';
 import { Compra, CompraPagamento } from '@interfaces/compra';
 import { Nfe } from '@interfaces/nfe';
 import { FinancialTransaction } from '@interfaces/financial';
@@ -26,10 +30,13 @@ export class CompraInfoComponent implements OnInit {
   @Input() compraId!: string;
   @Output() close = new EventEmitter<void>();
   @Output() edit = new EventEmitter<string>();
+  @Output() nfeGenerated = new EventEmitter<void>();
 
   private compraService = inject(CompraService);
   private nfeService = inject(NfeService);
   private financialService = inject(FinancialService);
+  private storeContextService = inject(StoreContextService);
+  private toastrService = inject(ToastrService);
   private dialog = inject(MatDialog);
   private datePipe = inject(DatePipe);
   private currencyPipe = inject(CurrencyPipe);
@@ -40,6 +47,9 @@ export class CompraInfoComponent implements OnInit {
   financialTransactions: FinancialTransaction[] = [];
   loading = true;
   error = false;
+  generatingNfe = false;
+  isDownloadingDanfe = false;
+  isDownloadingXml = false;
 
   ngOnInit(): void {
     if (this.compraId) {
@@ -56,6 +66,7 @@ export class CompraInfoComponent implements OnInit {
         if (compra.nfeId) {
           this.loadNfeDetails(compra.nfeId);
         } else {
+          this.nfe = null;
           this.loading = false;
         }
       },
@@ -166,17 +177,60 @@ export class CompraInfoComponent implements OnInit {
     }
   }
 
+  emitirNfe(): void {
+    if (!this.storeContextService.validateStoreSelection()) return;
+    if (!this.compra?.compraId) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Gerar NFe de Compra',
+        message: `Deseja gerar a <strong style="color: var(--primary-color)">NFe de Compra (Entrada)</strong> para a compra do veículo <strong>${this.compra.vehiclePlate || ''}</strong>? <br><br> <small style="color: var(--text-secondary)">Os dados do fornecedor e do veículo serão importados automaticamente.</small>`,
+        confirmText: 'Sim, Gerar',
+        cancelText: 'Não',
+        icon: 'receipt_long',
+        type: 'primary',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.generatingNfe = true;
+        this.compraService.gerarRascunhoNfe(this.compra!.compraId!).subscribe({
+          next: () => {
+            this.toastrService.success('Rascunho da NFe de Entrada gerado com sucesso!');
+            this.generatingNfe = false;
+            this.loadCompraDetails();
+            this.nfeGenerated.emit();
+          },
+          error: (err) => {
+            this.generatingNfe = false;
+            const errorMessage = extractErrorMessage(err, 'Erro ao gerar NFe de Compra');
+            this.toastrService.error(errorMessage);
+          },
+        });
+      }
+    });
+  }
+
   openDanfe(): void {
     if (!this.nfe?.nfeId) return;
     const filename = `${this.nfe.nfeChave || this.nfe.nfeId}-danfe.pdf`;
+    this.isDownloadingDanfe = true;
+    this.toastrService.info('Iniciando download do DANFE...', 'Download DANFE');
+
     this.nfeService.downloadDanfe(this.nfe.nfeId).subscribe({
       next: (blob) => {
         this.nfeService.downloadFileFromBlob(blob, filename);
+        this.isDownloadingDanfe = false;
+        this.toastrService.success('Download do DANFE concluído com sucesso.', 'Sucesso');
       },
       error: (err) => {
         console.error('Erro ao baixar DANFE:', err);
+        this.isDownloadingDanfe = false;
         if (this.nfe?.nfeDanfeUrl) {
           window.open(this.nfe.nfeDanfeUrl, '_blank');
+        } else {
+          this.toastrService.error('Não foi possível realizar o download do DANFE (PDF).', 'Erro no Download');
         }
       },
     });
@@ -185,14 +239,22 @@ export class CompraInfoComponent implements OnInit {
   openXml(): void {
     if (!this.nfe?.nfeId) return;
     const filename = `${this.nfe.nfeChave || this.nfe.nfeId}-nfe.xml`;
+    this.isDownloadingXml = true;
+    this.toastrService.info('Iniciando download do XML...', 'Download XML');
+
     this.nfeService.downloadXml(this.nfe.nfeId).subscribe({
       next: (blob) => {
         this.nfeService.downloadFileFromBlob(blob, filename);
+        this.isDownloadingXml = false;
+        this.toastrService.success('Download do XML concluído com sucesso.', 'Sucesso');
       },
       error: (err) => {
         console.error('Erro ao baixar XML:', err);
+        this.isDownloadingXml = false;
         if (this.nfe?.nfeXmlUrl) {
           window.open(this.nfe.nfeXmlUrl, '_blank');
+        } else {
+          this.toastrService.error('Não foi possível realizar o download do XML.', 'Erro no Download');
         }
       },
     });
@@ -206,6 +268,11 @@ export class CompraInfoComponent implements OnInit {
 
   onClose(): void {
     this.close.emit();
+  }
+
+  navigateToNfe(nfeId?: string): void {
+    if (!nfeId) return;
+    this.router.navigate(['/nfe'], { queryParams: { nfeId } });
   }
 
   navigateToPerson(personId?: string): void {

@@ -109,39 +109,93 @@
           </div>
         </section>
 
-        <!-- Card NFe (se houver) -->
-        <section class="info-card" *ngIf="nfe">
+        <!-- Card Informações Fiscais (NFe de Saída) -->
+        <section class="info-card fiscal-card">
           <div class="card-header">
-            <mat-icon>description</mat-icon>
-            <h2>Documento Fiscal (NFe)</h2>
+            <mat-icon>output</mat-icon>
+            <h2>Informações Fiscais (NFe de Saída)</h2>
           </div>
           <div class="card-body">
-            <div class="data-item" *ngIf="nfe.nfeNumero">
-              <span class="label">Número / Série</span>
-              <span class="value">{{ nfe.nfeNumero }} / {{ nfe.nfeSerie }}</span>
-            </div>
-            <div class="data-item" *ngIf="nfe.nfeChave">
-              <span class="label">Chave de Acesso</span>
-              <span class="value code small">{{ nfe.nfeChave }}</span>
-            </div>
+            @if (nfe) {
+              <div class="data-item">
+                <span class="label">Status da Nota</span>
+                <div>
+                  <span class="status-badge" [ngClass]="getStatusClass(nfe.nfeStatus)">
+                    {{ getStatusLabel(nfe.nfeStatus) }}
+                  </span>
+                </div>
+              </div>
 
-            <div class="nfe-actions" *ngIf="nfe.nfeStatus === 'autorizado'">
-              <button mat-stroked-button color="primary" (click)="openDanfe()">
-                <mat-icon>picture_as_pdf</mat-icon>
-                DANFE
-              </button>
-              <button mat-stroked-button color="primary" (click)="openXml()">
-                <mat-icon>code</mat-icon>
-                XML
-              </button>
-            </div>
-            <div class="nfe-error" *ngIf="nfe.nfeStatus === 'erro_autorizacao'">
-              <mat-icon>error_outline</mat-icon>
-              <span>
-                Erro ao emitir:
-                {{ nfe.nfeMensagemErro || 'Verifique os logs.' }}
-              </span>
-            </div>
+              @if (nfe.nfeNumero) {
+                <div class="data-item">
+                  <span class="label">Número / Série</span>
+                  <span class="value clickable-link" (click)="navigateToNfe(nfe.nfeId)" matTooltip="Clique para ver a NF-e">
+                    Nº {{ nfe.nfeNumero }} - Série {{ nfe.nfeSerie || '1' }}
+                    <mat-icon>open_in_new</mat-icon>
+                  </span>
+                </div>
+              }
+
+              @if (nfe.nfeChave) {
+                <div class="data-item">
+                  <span class="label">Chave de Acesso</span>
+                  <span class="value code small">{{ nfe.nfeChave }}</span>
+                </div>
+              }
+
+              @if (nfe.nfeDataEmissao) {
+                <div class="data-item">
+                  <span class="label">Data de Emissão</span>
+                  <span class="value">{{ nfe.nfeDataEmissao | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              }
+
+              @if (nfe.nfeValorTotal) {
+                <div class="data-item">
+                  <span class="label">Valor Total da NF-e</span>
+                  <span class="value bold">{{ nfe.nfeValorTotal | currency: 'BRL' }}</span>
+                </div>
+              }
+
+              @if (nfe.nfeStatus?.toLowerCase() === 'autorizado') {
+                <div class="nfe-actions">
+                  <button mat-flat-button color="primary" (click)="openDanfe()" [disabled]="isDownloadingDanfe">
+                    <mat-icon>picture_as_pdf</mat-icon>
+                    {{ isDownloadingDanfe ? 'Baixando...' : 'Baixar DANFE' }}
+                  </button>
+                  <button mat-stroked-button (click)="openXml()" [disabled]="isDownloadingXml">
+                    <mat-icon>code</mat-icon>
+                    {{ isDownloadingXml ? 'Baixando...' : 'Baixar XML' }}
+                  </button>
+                </div>
+              }
+
+              @if (nfe.nfeStatus === 'erro_autorizacao') {
+                <div class="nfe-error">
+                  <mat-icon>error_outline</mat-icon>
+                  <span>
+                    Erro ao emitir:
+                    {{ nfe.nfeMensagemErro || 'Verifique os logs.' }}
+                  </span>
+                </div>
+              }
+            } @else {
+              <div class="empty-nfe-container">
+                <mat-icon class="empty-nfe-icon">receipt</mat-icon>
+                <p class="empty-nfe-text">Nenhuma NF-e de saída emitida para esta venda.</p>
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="button"
+                  (click)="emitirNfe()"
+                  [disabled]="generatingNfe || venda.vendaStatus === 'CANCELADA'"
+                  class="btn-emitir-nfe"
+                >
+                  <mat-icon>{{ generatingNfe ? 'hourglass_empty' : 'add_circle_outline' }}</mat-icon>
+                  {{ generatingNfe ? 'Gerando NF-e...' : 'Gerar NF-e de Venda' }}
+                </button>
+              </div>
+            }
           </div>
         </section>
       </div>
