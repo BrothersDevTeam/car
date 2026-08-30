@@ -3,12 +3,12 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Component, inject, signal, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { DatePipe, NgClass } from '@angular/common';
+import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
@@ -53,11 +53,13 @@ import { ToastrService } from 'ngx-toastr';
     MatButtonToggleModule,
     EmptyStateComponent,
   ],
+  providers: [CurrencyPipe, DatePipe],
   templateUrl: './nfe.component.html',
   styleUrl: './nfe.component.scss',
 })
 export class NfeComponent {
   readonly dialog = inject(MatDialog);
+  private currencyPipe = inject(CurrencyPipe);
   private subscription: Subscription = new Subscription();
   private cacheSubscription!: Subscription;
   private searchSubject = new Subject<string>();
@@ -109,9 +111,21 @@ export class NfeComponent {
       },
     },
     {
+      key: 'nfeValorTotal',
+      header: 'Valor Total',
+      format: (val, row) => {
+        const raw = val ?? row?.nfeValorTotal ?? row?.valorTotal;
+        if (raw === null || raw === undefined || raw === '') return '—';
+        const num = typeof raw === 'number' ? raw : Number(raw);
+        if (isNaN(num)) return '—';
+        return this.currencyPipe.transform(num, 'BRL', 'symbol', '1.2-2') || '—';
+      },
+    },
+    {
       key: 'cfop',
       header: 'CFOP',
     },
+
     {
       key: 'nfeNaturezaOperacao',
       header: 'Natureza da Operação',
