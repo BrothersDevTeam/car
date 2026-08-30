@@ -58,6 +58,7 @@ export class VehicleInfoComponent implements OnChanges {
   @Input() vehicle!: VehicleForm;
   proprietario: Person | null = null;
   fornecedor: Person | null = null;
+  comprador: Person | null = null;
   financialTransactions: FinancialTransaction[] = [];
 
   @Output() editEvent = new EventEmitter<VehicleForm>();
@@ -102,14 +103,13 @@ export class VehicleInfoComponent implements OnChanges {
 
         if (!foundBrand) {
           this.isRefreshingFipe.set(false);
-          this.toastrService.warning(`Marca "${this.vehicle.brand}" não encontrada na Tabela FIPE.`, 'Tabela FIPE');
+          this.toastrService.error('Marca não encontrada na Tabela FIPE.', 'Erro FIPE');
           return;
         }
 
         this.fipeService.getModelos(fipeType, foundBrand.codigo).subscribe({
-          next: (res) => {
-            const modelos = res.modelos || [];
-            const foundModel = modelos.find(
+          next: (modelosRes) => {
+            const foundModel = modelosRes.modelos.find(
               (m) =>
                 m.nome.toLowerCase() === targetModel ||
                 targetModel.includes(m.nome.toLowerCase()) ||
@@ -118,7 +118,7 @@ export class VehicleInfoComponent implements OnChanges {
 
             if (!foundModel) {
               this.isRefreshingFipe.set(false);
-              this.toastrService.warning(`Modelo "${this.vehicle.model}" não encontrado na Tabela FIPE.`, 'Tabela FIPE');
+              this.toastrService.error('Modelo não encontrado na Tabela FIPE.', 'Erro FIPE');
               return;
             }
 
@@ -186,9 +186,23 @@ export class VehicleInfoComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['vehicle'] && this.vehicle) {
       const ownerId = this.vehicle.owner;
-      const supplierId = this.vehicle.supplierId;
+      const supplierId = this.vehicle.supplierId || this.vehicle.purchaseHistory?.[0]?.supplierId;
+      const buyerId = this.vehicle.salesHistory?.[0]?.buyerId;
 
       this.loadFinancialTransactions();
+
+      // Carrega Comprador
+      if (buyerId) {
+        this.personService.getById(buyerId).subscribe({
+          next: (person) => (this.comprador = person),
+          error: (error) => {
+            console.error('Erro ao carregar comprador:', error);
+            this.comprador = null;
+          },
+        });
+      } else {
+        this.comprador = null;
+      }
 
       // Se proprietário e fornecedor forem a mesma pessoa, fazemos apenas uma chamada
       if (ownerId && supplierId && ownerId === supplierId) {
@@ -340,6 +354,7 @@ export class VehicleInfoComponent implements OnChanges {
           type: 'COMPRA',
           icon: 'input',
           personId: compra.supplierId || this.vehicle.supplierId,
+          compraId: compra.compraId,
         });
       });
     }
@@ -349,12 +364,13 @@ export class VehicleInfoComponent implements OnChanges {
       this.vehicle.salesHistory.forEach((v) => {
         timeline.push({
           date: v.dataVenda,
-          title: 'Venda Realizada',
-          description: `Veículo vendido para ${v.buyerName}`,
+          title: 'Saída do Estoque (Venda)',
+          description: `Veículo vendido para ${v.buyerName || 'Cliente'}`,
           value: v.valorFinal,
           type: 'VENDA',
-          icon: 'shopping_cart_checkout',
+          icon: 'output',
           personId: v.buyerId,
+          vendaId: v.vendaId,
         });
       });
     }
@@ -367,37 +383,35 @@ export class VehicleInfoComponent implements OnChanges {
     });
   }
 
-  get statusLabel(): string {
+  get isVendido(): boolean {
     const s = this.vehicle?.status?.toUpperCase() || '';
-    // Se estiver vazio, assumimos que está em estoque por padrão
-    if (!s || s.includes('DISPONIVEL') || s.includes('DISPONÍVEL')) {
-      return 'Em Estoque';
-    }
-    if (s === 'VENDIDO') {
+    return (
+      s === 'VENDIDO' ||
+      !!this.vehicle?.exitDate ||
+      (this.vehicle?.salesHistory?.length ?? 0) > 0
+    );
+  }
+
+  get statusLabel(): string {
+    if (this.isVendido) {
       return 'Vendido';
     }
+    const s = this.vehicle?.status?.toUpperCase() || '';
     if (s === 'RESERVADO') {
       return 'Reservado';
     }
-    return s;
+    return 'Em Estoque';
   }
 
   get statusClass(): string {
-    const s = this.vehicle?.status?.toUpperCase() || '';
-    if (!s || s.includes('DISPONIVEL') || s.includes('DISPONÍVEL')) {
-      return 'chip-disponivel';
-    }
-    if (s === 'VENDIDO') {
+    if (this.isVendido) {
       return 'chip-vendido';
     }
+    const s = this.vehicle?.status?.toUpperCase() || '';
     if (s === 'RESERVADO') {
       return 'chip-reservado';
     }
-    return '';
-  }
-
-  get isVendido(): boolean {
-    return this.vehicle?.status?.toUpperCase() === 'VENDIDO';
+    return 'chip-disponivel';
   }
 
   onEdit() {
@@ -441,9 +455,54 @@ export class VehicleInfoComponent implements OnChanges {
     }
   }
 
+  get compraAtiva(): any {
+    return this.vehicle?.purchaseHistory?.[0];
+  }
+
+  get vendaAtiva(): any {
+    return this.vehicle?.salesHistory?.[0];
+  }
+
   navigateToPerson(personId?: string) {
     if (!personId) return;
     this.router.navigate(['/person'], { queryParams: { editId: personId } });
+  }
+
+  navigateToNfe(nfeId?: string) {
+    if (!nfeId) return;
+    this.router.navigate(['/nfe'], { queryParams: { nfeId } });
+  }
+
+  navigateToCompra(compraId?: string) {
+    if (this.vehicle?.plate) {
+      this.router.navigate(['/compras'], { queryParams: { search: this.vehicle.plate } });
+    } else {
+      this.router.navigate(['/compras']);
+    }
+  }
+
+  navigateToVenda(vendaId?: string) {
+    if (this.vehicle?.plate) {
+      this.router.navigate(['/vendas'], { queryParams: { search: this.vehicle.plate } });
+    } else {
+      this.router.navigate(['/vendas']);
+    }
+  }
+
+  registrarCompra() {
+    if (this.vehicle?.vehicleId) {
+      this.router.navigate(['/compras/nova'], { queryParams: { vehicleId: this.vehicle.vehicleId } });
+    } else {
+      this.router.navigate(['/compras/nova']);
+    }
+  }
+
+  registrarVenda() {
+    if (this.vehicle?.vehicleId) {
+      this.router.navigate(['/vendas/nova'], { queryParams: { vehicleId: this.vehicle.vehicleId } });
+    } else {
+      this.router.navigate(['/vendas/nova']);
+    }
   }
 
   get nfeEntrada(): NfeSummary | undefined {

@@ -401,6 +401,26 @@
         .history-desc {
           flex: 1;
           color: #202124;
+
+          .history-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+
+            .btn-transacao-link {
+              font-size: 11px;
+              height: 24px;
+              line-height: 24px;
+              padding: 0 8px;
+              min-width: unset;
+              border-radius: 4px;
+              display: inline-flex;
+              align-items: center;
+              font-weight: 600;
+            }
+          }
         }
 
         .history-value {
@@ -559,6 +579,19 @@
           font-size: 16px;
           font-weight: 600;
           color: #202124;
+
+          &.clickable-nfe-title {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            color: #1967d2;
+            transition: all 0.2s ease;
+
+            &:hover {
+              text-decoration: underline;
+              opacity: 0.8;
+            }
+          }
         }
       }
 
