@@ -109,11 +109,11 @@
           </div>
         </section>
 
-        <!-- Card Informações Fiscais (NFe de Saída) -->
+        <!-- Card Informações Fiscais -->
         <section class="info-card fiscal-card">
           <div class="card-header">
-            <mat-icon>output</mat-icon>
-            <h2>Informações Fiscais (NFe de Saída)</h2>
+            <mat-icon>receipt_long</mat-icon>
+            <h2>Documento Fiscal (NF-e)</h2>
           </div>
           <div class="card-body">
             @if (nfe) {
@@ -126,15 +126,13 @@
                 </div>
               </div>
 
-              @if (nfe.nfeNumero) {
-                <div class="data-item">
-                  <span class="label">Número / Série</span>
-                  <span class="value clickable-link" (click)="navigateToNfe(nfe.nfeId)" matTooltip="Clique para ver a NF-e">
-                    Nº {{ nfe.nfeNumero }} - Série {{ nfe.nfeSerie || '1' }}
-                    <mat-icon>open_in_new</mat-icon>
-                  </span>
-                </div>
-              }
+              <div class="data-item">
+                <span class="label">Documento Fiscal</span>
+                <span class="value clickable-link" (click)="navigateToNfe(nfe.nfeId)" matTooltip="Clique para abrir a NF-e">
+                  {{ nfe.nfeNumero ? ('Nº ' + nfe.nfeNumero + ' - Série ' + (nfe.nfeSerie || '1')) : 'Rascunho da NF-e' }}
+                  <mat-icon>open_in_new</mat-icon>
+                </span>
+              </div>
 
               @if (nfe.nfeChave) {
                 <div class="data-item">
@@ -168,15 +166,19 @@
                     {{ isDownloadingXml ? 'Baixando...' : 'Baixar XML' }}
                   </button>
                 </div>
-              }
-
-              @if (nfe.nfeStatus === 'erro_autorizacao') {
+              } @else if (nfe.nfeStatus === 'erro_autorizacao') {
                 <div class="nfe-error">
                   <mat-icon>error_outline</mat-icon>
                   <span>
                     Erro ao emitir:
                     {{ nfe.nfeMensagemErro || 'Verifique os logs.' }}
                   </span>
+                </div>
+                <div class="nfe-actions" style="margin-top: 10px;">
+                  <button mat-stroked-button color="warn" type="button" (click)="navigateToNfe(nfe.nfeId)">
+                    <mat-icon>edit</mat-icon>
+                    Corrigir NF-e
+                  </button>
                 </div>
               }
             } @else {
