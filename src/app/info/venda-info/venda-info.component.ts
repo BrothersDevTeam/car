@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, inject, Output, EventEmitter } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
@@ -42,6 +43,7 @@ export class VendaInfoComponent implements OnInit {
   private datePipe = inject(DatePipe);
   private currencyPipe = inject(CurrencyPipe);
   private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
 
   venda: VendaResponseDto | null = null;
   nfe: Nfe | null = null;
@@ -217,6 +219,16 @@ export class VendaInfoComponent implements OnInit {
 
   onClose(): void {
     this.close.emit();
+  }
+
+  navigateToPerson(personId?: string): void {
+    if (!personId) return;
+    this.router.navigate(['/person'], { queryParams: { editId: personId } });
+  }
+
+  navigateToVehicle(vehicleId?: string): void {
+    if (!vehicleId) return;
+    this.router.navigate(['/vehicle'], { queryParams: { editId: vehicleId } });
   }
 
   getPagamentoStatus(pag: PagamentoResponse): string {

@@ -54,7 +54,14 @@
             <div class="card-body">
               <div class="data-item">
                 <span class="label">Nome</span>
-                <span class="value bold">{{ compra.supplierName || '—' }}</span>
+                @if (compra.supplierId) {
+                  <span class="value bold clickable-link" (click)="navigateToPerson(compra.supplierId)">
+                    {{ compra.supplierName || '—' }}
+                    <mat-icon>open_in_new</mat-icon>
+                  </span>
+                } @else {
+                  <span class="value bold">{{ compra.supplierName || '—' }}</span>
+                }
               </div>
               @if (compra.observacao) {
                 <div class="data-item">
@@ -62,6 +69,35 @@
                   <span class="value italic">"{{ compra.observacao }}"</span>
                 </div>
               }
+            </div>
+          </section>
+
+          <!-- Card Proprietário (Titular/Antigo Dono) -->
+          <section class="info-card">
+            <div class="card-header">
+              <mat-icon>person_pin</mat-icon>
+              <h2>Proprietário do Veículo</h2>
+            </div>
+            <div class="card-body">
+              <div class="data-item">
+                <span class="label">Nome</span>
+                @if (compra.ownerId) {
+                  <span class="value bold clickable-link" (click)="navigateToPerson(compra.ownerId)">
+                    {{ compra.ownerName || '—' }}
+                    <mat-icon>open_in_new</mat-icon>
+                  </span>
+                } @else if (compra.ownerName) {
+                  <span class="value bold">{{ compra.ownerName }}</span>
+                } @else {
+                  <span class="value italic" style="color: #d93025">
+                    Nenhum proprietário vinculado ao veículo.
+                    <span class="clickable-link" (click)="navigateToVehicle(compra.vehicleId)">
+                      Vincular no Veículo
+                      <mat-icon>open_in_new</mat-icon>
+                    </span>
+                  </span>
+                }
+              </div>
             </div>
           </section>
 
@@ -75,14 +111,18 @@
               @if (compra.vehiclePlate) {
                 <div class="data-item">
                   <span class="label">Placa / Veículo</span>
-                  <span class="value bold">
+                  <span class="value bold clickable-link" (click)="navigateToVehicle(compra.vehicleId)">
                     {{ compra.vehiclePlate }} - {{ compra.vehicleBrand }} {{ compra.vehicleModel }}
+                    <mat-icon>open_in_new</mat-icon>
                   </span>
                 </div>
               }
               <div class="data-item">
                 <span class="label">ID do Veículo</span>
-                <span class="value code">{{ compra.vehicleId }}</span>
+                <span class="value code clickable-link" (click)="navigateToVehicle(compra.vehicleId)">
+                  {{ compra.vehicleId }}
+                  <mat-icon>open_in_new</mat-icon>
+                </span>
               </div>
             </div>
           </section>

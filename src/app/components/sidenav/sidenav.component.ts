@@ -242,8 +242,12 @@ export class SideNavComponent implements OnInit, OnDestroy {
       this.toggleSidebar.emit();
     }
 
-    // Emitimos o clique com a rota alvo
-    this.actionsService.emitSidebarClick(route);
+    // Emitimos o clique com a rota alvo de forma segura
+    try {
+      this.actionsService.emitSidebarClick(route);
+    } catch (err) {
+      console.warn('Erro ao notificar componentes do clique na sidebar:', err);
+    }
 
     if (route) {
       this.router.navigate([route]);

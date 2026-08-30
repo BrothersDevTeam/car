@@ -15,6 +15,8 @@ export interface Compra {
   vehicleModel?: string;
   supplierId: string;
   supplierName?: string;
+  ownerId?: string;
+  ownerName?: string;
   dataCompra: string | Date;
   valorCompra: number;
   observacao?: string;

@@ -282,6 +282,9 @@ export class PersonComponent implements OnInit, OnDestroy, CanComponentDeactivat
 
   // Implementação CanComponentDeactivate
   hasUnsavedChanges(): boolean {
+    if (!this.openForm()) {
+      return false;
+    }
     return this.actionsService.hasFormChanges();
   }
 

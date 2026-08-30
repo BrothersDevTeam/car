@@ -57,13 +57,13 @@ export const unsavedChangesGuard: CanDeactivateFn<CanComponentDeactivate> = (
   // Injeta o serviço de diálogo usando a função inject() moderna
   const dialog = inject(MatDialog);
 
-  // Se não há mudanças não salvas, permite a navegação imediatamente
-  if (!component.hasUnsavedChanges()) {
+  // Se não há componente ou não há mudanças não salvas, permite a navegação imediatamente
+  if (!component || typeof component.hasUnsavedChanges !== 'function' || !component.hasUnsavedChanges()) {
     return true;
   }
 
   // Verifica se o formulário pode ser salvo completamente
-  const canSave = component.canSaveForm();
+  const canSave = typeof component.canSaveForm === 'function' ? component.canSaveForm() : false;
 
   // Abre o diálogo de confirmação com as opções apropriadas
   const dialogRef = dialog.open(UnsavedChangesDialogComponent, {

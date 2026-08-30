@@ -263,8 +263,14 @@ export class NfeComponent {
 
   ngOnInit() {
     this.subscription.add(
-      this.actionsService.sidebarClick$.subscribe(() => {
-        this.handleConfirmationCloseDrawer();
+      this.actionsService.sidebarClick$.subscribe((targetRoute: string | undefined) => {
+        if (this.openForm() || this.openInfo()) {
+          const currentRoute = '/nfe';
+          if (targetRoute && targetRoute !== currentRoute) {
+            return;
+          }
+          this.handleConfirmationCloseDrawer();
+        }
       }),
     );
 
@@ -318,11 +324,7 @@ export class NfeComponent {
   }
 
   handleConfirmationCloseDrawer() {
-    if (this.actionsService.hasFormChanges()) {
-      this.openDialog();
-    } else {
-      this.handleCloseDrawer();
-    }
+    this.handleCloseDrawer();
   }
 
   handleCloseDrawer() {
