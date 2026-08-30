@@ -171,6 +171,20 @@ export class NfeComponent {
           hidden: (row: Nfe) => row.nfeStatus !== 'rascunho',
         },
         {
+          label: 'Baixar DANFE (PDF)',
+          icon: 'picture_as_pdf',
+          color: 'primary',
+          action: (row: Nfe) => this.handleDownloadDanfe(row),
+          hidden: (row: Nfe) => row.nfeStatus !== 'autorizado',
+        },
+        {
+          label: 'Baixar XML',
+          icon: 'code',
+          color: 'primary',
+          action: (row: Nfe) => this.handleDownloadXml(row),
+          hidden: (row: Nfe) => row.nfeStatus !== 'autorizado',
+        },
+        {
           label: 'Cancelar NFe',
           icon: 'cancel',
           color: 'warn',
@@ -190,6 +204,8 @@ export class NfeComponent {
 
   nfeListLoading = signal(false);
   nfeListError = signal(false);
+  isDownloadingDanfe = signal(false);
+  isDownloadingXml = signal(false);
   openForm = signal(false);
   openInfo = signal(false);
   selectedTabIndex = signal(0); // 0 = Entrada, 1 = Saída
@@ -407,6 +423,46 @@ export class NfeComponent {
         this.toastr.error('Erro ao carregar detalhes da NFe.');
         console.error(err);
         this.nfeListLoading.set(false);
+      },
+    });
+  }
+
+  handleDownloadDanfe(nfe: Nfe) {
+    if (!nfe || !nfe.nfeId) return;
+    this.isDownloadingDanfe.set(true);
+    const filename = `${nfe.nfeChave || nfe.nfeNumero || nfe.nfeId}-danfe.pdf`;
+    this.nfeService.downloadDanfe(nfe.nfeId).subscribe({
+      next: (blob) => {
+        this.nfeService.downloadFileFromBlob(blob, filename);
+        this.toastr.success('Download do DANFE (PDF) iniciado.', 'Sucesso');
+        this.isDownloadingDanfe.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao baixar DANFE:', err);
+        if (nfe.nfeDanfeUrl) {
+          window.open(nfe.nfeDanfeUrl, '_blank');
+        } else {
+          this.toastr.error('Não foi possível realizar o download do DANFE (PDF).', 'Erro');
+        }
+        this.isDownloadingDanfe.set(false);
+      },
+    });
+  }
+
+  handleDownloadXml(nfe: Nfe) {
+    if (!nfe || !nfe.nfeId) return;
+    this.isDownloadingXml.set(true);
+    const filename = `${nfe.nfeChave || nfe.nfeNumero || nfe.nfeId}-nfe.xml`;
+    this.nfeService.downloadXml(nfe.nfeId).subscribe({
+      next: (blob) => {
+        this.nfeService.downloadFileFromBlob(blob, filename);
+        this.toastr.success('Download do XML iniciado.', 'Sucesso');
+        this.isDownloadingXml.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao baixar XML:', err);
+        this.toastr.error('Não foi possível realizar o download do XML.', 'Erro');
+        this.isDownloadingXml.set(false);
       },
     });
   }

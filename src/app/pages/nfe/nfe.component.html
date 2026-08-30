@@ -120,7 +120,7 @@
   @if (openInfo()) {
     <app-drawer class="nfe-info-drawer" (closeDrawer)="handleCloseDrawer()">
       @if (selectedNfe) {
-        <!-- Cabeçalho do Drawer: título + botão editar -->
+        <!-- Cabeçalho do Drawer: título + botão editar / download -->
         <div class="nfe-drawer-header">
           <div class="nfe-drawer-title">
             <span class="nfe-numero">
@@ -131,12 +131,36 @@
               {{ selectedNfe.nfeStatus === 'rascunho' ? 'Em digitação' : selectedNfe.nfeStatus }}
             </span>
           </div>
-          @if (selectedNfe.nfeStatus === 'rascunho') {
-            <button mat-raised-button color="primary" class="btn-editar-nfe" (click)="handleEdit(selectedNfe)">
-              <mat-icon>edit</mat-icon>
-              Editar NFe
-            </button>
-          }
+          <div class="nfe-drawer-actions">
+            @if (selectedNfe.nfeStatus === 'rascunho') {
+              <button mat-raised-button color="primary" class="btn-editar-nfe" (click)="handleEdit(selectedNfe)">
+                <mat-icon>edit</mat-icon>
+                Editar NFe
+              </button>
+            }
+            @if (selectedNfe.nfeStatus === 'autorizado') {
+              <button
+                mat-stroked-button
+                class="btn-download-danfe"
+                (click)="handleDownloadDanfe(selectedNfe)"
+                [disabled]="isDownloadingDanfe()"
+                matTooltip="Baixar DANFE em formato PDF"
+              >
+                <mat-icon>picture_as_pdf</mat-icon>
+                {{ isDownloadingDanfe() ? 'Baixando...' : 'Baixar DANFE' }}
+              </button>
+              <button
+                mat-stroked-button
+                class="btn-download-xml"
+                (click)="handleDownloadXml(selectedNfe)"
+                [disabled]="isDownloadingXml()"
+                matTooltip="Baixar XML da NF-e autorizada"
+              >
+                <mat-icon>code</mat-icon>
+                {{ isDownloadingXml() ? 'Baixando...' : 'Baixar XML' }}
+              </button>
+            }
+          </div>
         </div>
 
         <!-- ======= SEÇÃO 1: DADOS GERAIS ======= -->

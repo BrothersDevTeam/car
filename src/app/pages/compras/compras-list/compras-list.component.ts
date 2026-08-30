@@ -306,42 +306,25 @@ export class ComprasListComponent implements OnInit, OnDestroy {
     const status = (compra.nfeStatus || '').toLowerCase();
     switch (status) {
       case 'autorizado':
-        return 'NFe Autorizada - Clique para visualizar';
+        return 'NFe de Entrada (Autorizada) - Clique para visualizar';
       case 'processando':
-        return 'NFe em Processamento na SEFAZ - Clique para visualizar';
+        return 'NFe de Entrada (Em Processamento) - Clique para visualizar';
       case 'rascunho':
-        return 'NFe em Digitação (Rascunho) - Clique para visualizar';
+        return 'NFe de Entrada (Em Digitação) - Clique para visualizar';
       case 'cancelado':
-        return 'NFe Cancelada - Clique para visualizar';
+        return 'NFe de Entrada (Cancelada) - Clique para visualizar';
       case 'erro':
       case 'erro_autorizacao':
-        return 'Erro na Autorização da NFe - Clique para visualizar';
+        return 'NFe de Entrada (Erro na Autorização) - Clique para visualizar';
       case 'denegado':
-        return 'NFe Denegada - Clique para visualizar';
+        return 'NFe de Entrada (Denegada) - Clique para visualizar';
       default:
-        return compra.nfeStatus ? `NFe (${compra.nfeStatus}) - Clique para visualizar` : 'Ver Detalhes da NFe';
+        return compra.nfeStatus ? `NFe de Entrada (${compra.nfeStatus}) - Clique para visualizar` : 'Ver Detalhes da NFe';
     }
   }
 
   getNfeIcon(compra: Compra): string {
-    const status = (compra.nfeStatus || '').toLowerCase();
-    switch (status) {
-      case 'autorizado':
-        return 'check_circle';
-      case 'processando':
-        return 'sync';
-      case 'rascunho':
-        return 'edit_note';
-      case 'cancelado':
-        return 'cancel';
-      case 'erro':
-      case 'erro_autorizacao':
-        return 'error';
-      case 'denegado':
-        return 'gavel';
-      default:
-        return 'description';
-    }
+    return 'input';
   }
 
   getNfeButtonClass(compra: Compra): string {

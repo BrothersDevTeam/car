@@ -401,42 +401,25 @@ export class VendasListComponent implements OnInit, OnDestroy {
     const status = (venda.nfeStatus || '').toLowerCase();
     switch (status) {
       case 'autorizado':
-        return 'NFe Autorizada - Clique para visualizar';
+        return 'NFe de Saída (Autorizada) - Clique para visualizar';
       case 'processando':
-        return 'NFe em Processamento na SEFAZ - Clique para visualizar';
+        return 'NFe de Saída (Em Processamento) - Clique para visualizar';
       case 'rascunho':
-        return 'NFe em Digitação (Rascunho) - Clique para visualizar';
+        return 'NFe de Saída (Em Digitação) - Clique para visualizar';
       case 'cancelado':
-        return 'NFe Cancelada - Clique para visualizar';
+        return 'NFe de Saída (Cancelada) - Clique para visualizar';
       case 'erro':
       case 'erro_autorizacao':
-        return 'Erro na Autorização da NFe - Clique para visualizar';
+        return 'NFe de Saída (Erro na Autorização) - Clique para visualizar';
       case 'denegado':
-        return 'NFe Denegada - Clique para visualizar';
+        return 'NFe de Saída (Denegada) - Clique para visualizar';
       default:
-        return venda.nfeStatus ? `NFe (${venda.nfeStatus}) - Clique para visualizar` : 'Ver Detalhes da NFe';
+        return venda.nfeStatus ? `NFe de Saída (${venda.nfeStatus}) - Clique para visualizar` : 'Ver Detalhes da NFe';
     }
   }
 
   getNfeIcon(venda: VendaResponseDto): string {
-    const status = (venda.nfeStatus || '').toLowerCase();
-    switch (status) {
-      case 'autorizado':
-        return 'check_circle';
-      case 'processando':
-        return 'sync';
-      case 'rascunho':
-        return 'edit_note';
-      case 'cancelado':
-        return 'cancel';
-      case 'erro':
-      case 'erro_autorizacao':
-        return 'error';
-      case 'denegado':
-        return 'gavel';
-      default:
-        return 'description';
-    }
+    return 'output';
   }
 
   getNfeButtonClass(venda: VendaResponseDto): string {

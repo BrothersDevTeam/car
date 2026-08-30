@@ -133,18 +133,18 @@ export class VehicleComponent implements CanComponentDeactivate {
       header: 'NFes',
       actions: [
         {
-          label: 'NFe de Entrada',
+          label: (row: VehicleList) => this.getNfeTooltip(row, '0'),
           icon: 'input',
-          color: 'primary',
-          action: (row) => this.viewNfe(row, '0'),
-          hidden: (row) => !row.hasInputNfe,
+          cssClass: (row: VehicleList) => this.getNfeButtonClass(row, '0'),
+          action: (row: VehicleList) => this.viewNfe(row, '0'),
+          hidden: (row: VehicleList) => !row.hasInputNfe,
         },
         {
-          label: 'NFe de Saída',
+          label: (row: VehicleList) => this.getNfeTooltip(row, '1'),
           icon: 'output',
-          color: 'accent',
-          action: (row) => this.viewNfe(row, '1'),
-          hidden: (row) => !row.hasOutputNfe,
+          cssClass: (row: VehicleList) => this.getNfeButtonClass(row, '1'),
+          action: (row: VehicleList) => this.viewNfe(row, '1'),
+          hidden: (row: VehicleList) => !row.hasOutputNfe,
         },
       ],
     },
@@ -593,55 +593,70 @@ export class VehicleComponent implements CanComponentDeactivate {
   }
 
   /**
-   * Realiza o download do DANFE (PDF) da NFe ou redireciona caso ainda em rascunho.
+   * Retorna o tooltip informativo baseado no tipo e status da NFe.
+   */
+  getNfeTooltip(row: any, tipo: string): string {
+    const nfe = row.nfeHistory?.find((n: any) => n.nfeTipoDocumento === tipo);
+    const tipoLabel = tipo === '0' ? 'NFe de Entrada' : 'NFe de Saída';
+    if (!nfe) return tipoLabel;
+
+    const status = (nfe.nfeStatus || '').toLowerCase();
+    const numero = nfe.nfeNumero ? `#${nfe.nfeNumero}` : '';
+
+    if (status === 'autorizado') {
+      return `${tipoLabel} (Autorizada ${numero}) - Clique para visualizar`;
+    }
+    if (status === 'processando') {
+      return `${tipoLabel} (Processando ${numero}) - Clique para visualizar`;
+    }
+    if (status === 'rascunho') {
+      return `${tipoLabel} (Em digitação) - Clique para visualizar`;
+    }
+    if (status === 'cancelado') {
+      return `${tipoLabel} (Cancelada ${numero}) - Clique para visualizar`;
+    }
+    if (status === 'erro_autorizacao' || status === 'erro') {
+      return `${tipoLabel} (Erro na autorização) - Clique para visualizar`;
+    }
+    return nfe.nfeStatus ? `${tipoLabel} (${nfe.nfeStatus}) - Clique para visualizar` : tipoLabel;
+  }
+
+  /**
+   * Retorna a classe de estilo para o botão da NFe com base em seu status.
+   */
+  getNfeButtonClass(row: any, tipo: string): string {
+    const nfe = row.nfeHistory?.find((n: any) => n.nfeTipoDocumento === tipo);
+    if (!nfe) return 'nfe-status-btn';
+
+    const status = (nfe.nfeStatus || '').toLowerCase();
+    let statusClass = 'nfe-btn-rascunho';
+
+    if (status === 'autorizado') {
+      statusClass = 'nfe-btn-autorizado';
+    } else if (status === 'processando') {
+      statusClass = 'nfe-btn-processando';
+    } else if (status === 'rascunho') {
+      statusClass = 'nfe-btn-rascunho';
+    } else if (status === 'cancelado') {
+      statusClass = 'nfe-btn-cancelado';
+    } else if (status.includes('erro')) {
+      statusClass = 'nfe-btn-erro';
+    }
+
+    return `nfe-status-btn ${statusClass}`;
+  }
+
+  /**
+   * Navega para a NF-e correspondente (Entrada ou Saída) abrindo sua gaveta de detalhes.
    */
   viewNfe(row: any, tipo: string) {
     const nfe = row.nfeHistory?.find((n: any) => n.nfeTipoDocumento === tipo);
-    if (nfe && nfe.nfeStatus?.toLowerCase() === 'autorizado' && nfe.nfeId) {
-      const filename = `${nfe.nfeChave || nfe.nfeId}-danfe.pdf`;
-      this.nfeService.downloadDanfe(nfe.nfeId).subscribe({
-        next: (blob) => {
-          this.nfeService.downloadFileFromBlob(blob, filename);
-          this.toastr.success('Download do DANFE (PDF) iniciado.', 'Sucesso');
-        },
-        error: (err) => {
-          console.error('Erro ao baixar DANFE:', err);
-          if (nfe.nfeDanfeUrl) {
-            window.open(nfe.nfeDanfeUrl, '_blank');
-          } else {
-            this.toastr.error('Não foi possível realizar o download do DANFE (PDF).', 'Erro');
-          }
-        },
+    if (nfe && nfe.nfeId) {
+      this.router.navigate(['/nfe'], {
+        queryParams: { nfeId: nfe.nfeId },
       });
-    } else if (nfe) {
-      this.toastr.info(
-        'DANFE não disponível. A NFe está em rascunho ou processamento. Redirecionando para a lista de NFes...',
-        'Info',
-      );
+    } else {
       this.router.navigate(['/nfe']);
-    } else {
-      this.toastr.warning('NFe não encontrada.');
-    }
-  }
-
-  downloadNfeXml(row: any, tipo: string) {
-    const nfe = row.nfeHistory?.find((n: any) => n.nfeTipoDocumento === tipo);
-    if (nfe && nfe.nfeStatus?.toLowerCase() === 'autorizado' && nfe.nfeId) {
-      const filename = `${nfe.nfeChave || nfe.nfeId}-nfe.xml`;
-      this.nfeService.downloadXml(nfe.nfeId).subscribe({
-        next: (blob) => {
-          this.nfeService.downloadFileFromBlob(blob, filename);
-          this.toastr.success('Download do XML iniciado.', 'Sucesso');
-        },
-        error: (err) => {
-          console.error('Erro ao baixar XML:', err);
-          this.toastr.error('Não foi possível realizar o download do XML.', 'Erro');
-        },
-      });
-    } else if (nfe) {
-      this.toastr.info('O XML só está disponível para notas fiscais autorizadas.', 'Info');
-    } else {
-      this.toastr.warning('NFe não encontrada.');
     }
   }
 

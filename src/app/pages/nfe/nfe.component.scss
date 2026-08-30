@@ -236,25 +236,96 @@
     }
   }
 
-  .btn-editar-nfe {
-    border-radius: 12px;
-    padding: 0 24px;
-    height: 46px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    box-shadow: 0 4px 14px rgba(59, 122, 184, 0.25);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  .nfe-drawer-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(59, 122, 184, 0.35);
+    .btn-editar-nfe {
+      border-radius: 12px;
+      padding: 0 24px;
+      height: 46px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 14px rgba(59, 122, 184, 0.25);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 122, 184, 0.35);
+      }
+
+      mat-icon {
+        margin-right: 8px;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
     }
 
-    mat-icon {
-      margin-right: 8px;
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+    .btn-download-danfe {
+      border-radius: 10px;
+      padding: 0 16px;
+      height: 42px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      border-color: #ef4444 !important;
+      color: #dc2626 !important;
+      background-color: #fef2f2;
+      transition: all 0.2s ease-in-out;
+
+      mat-icon {
+        color: #dc2626;
+        margin-right: 6px;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: #fee2e2;
+        border-color: #dc2626 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+
+    .btn-download-xml {
+      border-radius: 10px;
+      padding: 0 16px;
+      height: 42px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      border-color: #3b82f6 !important;
+      color: #2563eb !important;
+      background-color: #eff6ff;
+      transition: all 0.2s ease-in-out;
+
+      mat-icon {
+        color: #2563eb;
+        margin-right: 6px;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: #dbeafe;
+        border-color: #2563eb !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
     }
   }
 }
