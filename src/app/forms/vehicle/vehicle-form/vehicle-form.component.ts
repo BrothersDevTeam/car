@@ -624,15 +624,51 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       } as any;
     }
 
+    this.isFillingForm = true;
+
+    if (draft.data) {
+      this.form.patchValue(draft.data);
+
+      const brandId = draft.data.brand?.id;
+      const modelId = draft.data.model?.id;
+      const fipeType = this.getFipeVehicleType();
+
+      if (brandId) {
+        this.loadingModels.set(true);
+        this.fipeService.getModelos(fipeType, brandId).subscribe({
+          next: (response) => {
+            this.models = response.modelos.map((m) => ({
+              id: m.codigo.toString(),
+              name: m.nome,
+            }));
+            this.selectModelDisabled.set(false);
+            this.loadingModels.set(false);
+
+            if (modelId) {
+              this.loadingYears.set(true);
+              this.fipeService.getAnos(fipeType, brandId, modelId).subscribe({
+                next: (yearsRes) => {
+                  this.years = yearsRes.map((ano) => ({
+                    id: ano.codigo,
+                    name: ano.nome.replace('32000', 'Zero KM'),
+                  }));
+                  this.selectYearDisabled.set(false);
+                  this.loadingYears.set(false);
+                },
+                error: () => {
+                  this.loadingYears.set(false);
+                },
+              });
+            }
+          },
+          error: () => {
+            this.loadingModels.set(false);
+          },
+        });
+      }
+    }
+
     this.isFillingForm = false;
-
-    if (draft.data?.brand?.id) {
-      this.loadModels();
-    }
-    if (draft.data?.model?.id) {
-      this.loadYears();
-    }
-
     this.initialFormValue = JSON.stringify(this.form.value);
     this.lastSavedDraftValue = this.form.getRawValue();
     this.toastrService.success('Rascunho carregado com sucesso');
