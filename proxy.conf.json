@@ -4,6 +4,8 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
+    "cookieDomainRewrite": "",
+    "cookiePathRewrite": "/",
     "pathRewrite": {
       "^/api": "/api/v1/car"
     }
