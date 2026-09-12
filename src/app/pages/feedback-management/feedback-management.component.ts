@@ -14,6 +14,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToastrService } from 'ngx-toastr';
 
+import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { FeedbackService } from '@services/feedback.service';
 import { StoreService } from '@services/store.service';
 import { Feedback, FeedbackStatus, FeedbackType } from '@interfaces/feedback';
@@ -37,6 +38,7 @@ import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confi
     MatPaginatorModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    DragDropModule,
   ],
   templateUrl: './feedback-management.component.html',
   styleUrl: './feedback-management.component.scss',
@@ -49,6 +51,16 @@ export class FeedbackManagementComponent implements OnInit {
 
   feedbacks = signal<Feedback[]>([]);
   loading = signal<boolean>(false);
+
+  // Modo de visualização: Tabela ou Kanban
+  viewMode = signal<'TABLE' | 'KANBAN'>('TABLE');
+
+  // Colunas do Kanban
+  kanbanNew = signal<Feedback[]>([]);
+  kanbanReview = signal<Feedback[]>([]);
+  kanbanProgress = signal<Feedback[]>([]);
+  kanbanResolved = signal<Feedback[]>([]);
+  kanbanDiscarded = signal<Feedback[]>([]);
 
   // Pagination & Filters
   totalElements = signal<number>(0);
@@ -72,7 +84,18 @@ export class FeedbackManagementComponent implements OnInit {
   ngOnInit(): void {
     this.loadStores();
     this.loadFeedbacks();
+    this.loadKanbanFeedbacks();
     this.loadStats();
+    this.markFeedbacksAsReadByAdmin();
+  }
+
+  private markFeedbacksAsReadByAdmin(): void {
+    this.feedbackService.markAdminRead().subscribe({
+      next: () => {
+        this.feedbackService.notifyFeedbackUpdated();
+      },
+      error: (err) => console.error('Erro ao marcar feedbacks como lidos pelo admin:', err),
+    });
   }
 
   loadStores(): void {
@@ -80,6 +103,98 @@ export class FeedbackManagementComponent implements OnInit {
       next: (res) => this.stores.set(res.content || []),
       error: () => this.stores.set([]),
     });
+  }
+
+  setViewMode(mode: 'TABLE' | 'KANBAN'): void {
+    this.viewMode.set(mode);
+    if (mode === 'KANBAN') {
+      this.loadKanbanFeedbacks();
+    } else {
+      this.loadFeedbacks();
+    }
+  }
+
+  loadKanbanFeedbacks(): void {
+    const filters = {
+      type: this.selectedType === 'ALL' ? undefined : (this.selectedType as FeedbackType),
+      storeId: this.selectedStoreId === 'ALL' ? undefined : this.selectedStoreId,
+      size: 300,
+    };
+
+    this.feedbackService.getAllFeedbacks(filters).subscribe({
+      next: (res) => {
+        const items = res.content || [];
+        this.kanbanNew.set(items.filter((i) => i.status === 'NEW'));
+        this.kanbanReview.set(items.filter((i) => i.status === 'UNDER_REVIEW'));
+        this.kanbanProgress.set(items.filter((i) => i.status === 'IN_PROGRESS'));
+        this.kanbanResolved.set(items.filter((i) => i.status === 'RESOLVED'));
+        this.kanbanDiscarded.set(items.filter((i) => i.status === 'DISCARDED'));
+      },
+      error: (err) => console.error('Erro ao carregar dados do Kanban:', err),
+    });
+  }
+
+  onCardDrop(event: CdkDragDrop<Feedback[]>, targetStatus: FeedbackStatus): void {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      return;
+    }
+
+    const item = event.previousContainer.data[event.previousIndex];
+    if (!item) return;
+
+    // Regra de fluxo: Não é permitido retornar a um passo anterior ou mover itens finalizados
+    if (!this.isValidKanbanTransition(item.status, targetStatus)) {
+      this.toastr.warning('Não é permitido retroceder para uma etapa anterior no fluxo.');
+      return;
+    }
+
+    if (targetStatus === 'DISCARDED') {
+      // Abre o modal de detalhes para exigir justificativa
+      this.openDetailDialog(item);
+      return;
+    }
+
+    // Move visualmente imediatamente
+    transferArrayItem(
+      event.previousContainer.data,
+      event.container.data,
+      event.previousIndex,
+      event.currentIndex
+    );
+
+    const oldStatus = item.status;
+    item.status = targetStatus;
+
+    this.feedbackService.updateStatus(item.id, { status: targetStatus }).subscribe({
+      next: () => {
+        this.toastr.success(`Feedback movido para "${this.getStatusLabel(targetStatus)}"`);
+        this.feedbackService.notifyFeedbackUpdated();
+        this.loadStats();
+        this.loadFeedbacks();
+      },
+      error: (err) => {
+        console.error('Erro ao atualizar status via Kanban:', err);
+        this.toastr.error('Erro ao atualizar status.');
+        item.status = oldStatus;
+        this.loadKanbanFeedbacks();
+      },
+    });
+  }
+
+  isValidKanbanTransition(current: FeedbackStatus, target: FeedbackStatus): boolean {
+    if (current === target) return true;
+    if (current === 'RESOLVED' || current === 'DISCARDED') return false;
+    if (current === 'NEW') {
+      return target === 'UNDER_REVIEW';
+    }
+    if (current === 'UNDER_REVIEW') {
+      return target === 'IN_PROGRESS' || target === 'DISCARDED';
+    }
+    if (current === 'IN_PROGRESS') {
+      return target === 'RESOLVED';
+    }
+    return false;
   }
 
   loadFeedbacks(): void {
@@ -124,6 +239,7 @@ export class FeedbackManagementComponent implements OnInit {
   onFilterChange(): void {
     this.pageIndex = 0;
     this.loadFeedbacks();
+    this.loadKanbanFeedbacks();
   }
 
   onPageChange(event: PageEvent): void {
@@ -143,6 +259,7 @@ export class FeedbackManagementComponent implements OnInit {
     dialogRef.afterClosed().subscribe((updated) => {
       if (updated) {
         this.loadFeedbacks();
+        this.loadKanbanFeedbacks();
         this.loadStats();
         this.feedbackService.notifyFeedbackUpdated();
       }
@@ -223,6 +340,21 @@ export class FeedbackManagementComponent implements OnInit {
         return 'Crítica';
       default:
         return type;
+    }
+  }
+
+  getTypeIcon(type: FeedbackType): string {
+    switch (type) {
+      case 'BUG':
+        return 'bug_report';
+      case 'SUGGESTION':
+        return 'lightbulb';
+      case 'IMPROVEMENT':
+        return 'auto_awesome';
+      case 'CRITICISM':
+        return 'feedback';
+      default:
+        return 'chat';
     }
   }
 }

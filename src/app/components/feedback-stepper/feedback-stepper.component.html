@@ -1,0 +1,48 @@
+@if (status === 'DISCARDED') {
+  <div class="discarded-banner" [class.compact]="compact">
+    <div class="discarded-header">
+      <mat-icon class="discarded-icon">cancel</mat-icon>
+      <div class="discarded-text">
+        <span class="discarded-title">Feedback Descartado / Encerrado</span>
+        <span class="discarded-subtitle">Este item foi avaliado e marcado como não aplicável ou fora do escopo.</span>
+      </div>
+    </div>
+    @if (!compact && adminNotes) {
+      <div class="discarded-notes">
+        <strong>Motivo informado:</strong> {{ adminNotes }}
+      </div>
+    }
+  </div>
+} @else {
+  <div class="stepper-container" [class.compact]="compact">
+    @for (step of steps; track step.id; let idx = $index; let isLast = $last) {
+      <div
+        class="step-item"
+        [class.completed]="isStepCompleted(idx)"
+        [class.active]="isStepActive(idx)"
+        [class.pending]="!isStepCompleted(idx) && !isStepActive(idx)"
+      >
+        <div class="step-icon-wrapper" [matTooltip]="compact ? step.label : ''">
+          @if (isStepCompleted(idx)) {
+            <mat-icon class="step-icon done">check</mat-icon>
+          } @else {
+            <mat-icon class="step-icon">{{ step.icon }}</mat-icon>
+          }
+        </div>
+
+        @if (!compact) {
+          <div class="step-content">
+            <span class="step-label">{{ step.label }}</span>
+            <span class="step-desc">{{ step.description }}</span>
+          </div>
+        } @else {
+          <span class="step-label-compact">{{ step.label }}</span>
+        }
+      </div>
+
+      @if (!isLast) {
+        <div class="step-connector" [class.filled]="isStepCompleted(idx)"></div>
+      }
+    }
+  </div>
+}

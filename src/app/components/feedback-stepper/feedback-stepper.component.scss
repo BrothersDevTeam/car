@@ -1,0 +1,213 @@
+.stepper-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-sizing: border-box;
+
+  &.compact {
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-color: #edf2f7;
+  }
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+
+  .step-icon-wrapper {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    color: #64748b;
+    transition: all 0.25s ease;
+
+    .step-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .step-content {
+    display: flex;
+    flex-direction: column;
+
+    .step-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      line-height: 1.2;
+    }
+
+    .step-desc {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+  }
+
+  /* Estado Concluído */
+  &.completed {
+    .step-icon-wrapper {
+      background: #10b981;
+      border-color: #10b981;
+      color: #ffffff;
+
+      .done {
+        font-weight: bold;
+      }
+    }
+
+    .step-content .step-label {
+      color: #0f172a;
+    }
+  }
+
+  /* Estado Ativo (Momento Atual) */
+  &.active {
+    .step-icon-wrapper {
+      background: #3b82f6;
+      border-color: #3b82f6;
+      color: #ffffff;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+      transform: scale(1.05);
+    }
+
+    .step-content {
+      .step-label {
+        color: #1d4ed8;
+        font-weight: 700;
+      }
+
+      .step-desc {
+        color: #3b82f6;
+      }
+    }
+  }
+
+  /* Estado Pendente */
+  &.pending {
+    opacity: 0.6;
+  }
+
+  /* Versão Compacta */
+  .stepper-container.compact & {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+
+    .step-icon-wrapper {
+      width: 26px;
+      height: 26px;
+
+      .step-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+      }
+    }
+
+    .step-label-compact {
+      font-size: 10px;
+      font-weight: 600;
+      color: #64748b;
+      white-space: nowrap;
+    }
+
+    &.active .step-label-compact {
+      color: #2563eb;
+      font-weight: 700;
+    }
+
+    &.completed .step-label-compact {
+      color: #0f172a;
+    }
+  }
+}
+
+.step-connector {
+  flex: 1;
+  height: 3px;
+  background: #e2e8f0;
+  margin: 0 10px;
+  border-radius: 2px;
+  transition: background 0.3s ease;
+
+  &.filled {
+    background: #10b981;
+  }
+
+  .stepper-container.compact & {
+    height: 2px;
+    margin: 0 4px;
+    margin-bottom: 14px;
+  }
+}
+
+/* Banner de Descarte */
+.discarded-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 18px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 10px;
+
+  &.compact {
+    padding: 8px 12px;
+  }
+
+  .discarded-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .discarded-icon {
+      color: #e11d48;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    .discarded-text {
+      display: flex;
+      flex-direction: column;
+
+      .discarded-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #9f1239;
+      }
+
+      .discarded-subtitle {
+        font-size: 11px;
+        color: #be123c;
+      }
+    }
+  }
+
+  .discarded-notes {
+    font-size: 12px;
+    color: #475569;
+    background: #ffffff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ffe4e6;
+  }
+}

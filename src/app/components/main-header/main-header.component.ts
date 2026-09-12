@@ -114,6 +114,13 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.loadInactiveStores();
       }
     });
+
+    // Escuta atualizações de feedback para sincronizar o sininho em tempo real
+    this.feedbackService.feedbackUpdated$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (this.isCarAdmin) {
+        this.loadUnreadFeedbacksCount();
+      }
+    });
   }
 
   ngOnDestroy(): void {

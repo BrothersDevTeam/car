@@ -11,6 +11,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToastrService } from 'ngx-toastr';
 
+import { MatMenuModule } from '@angular/material/menu';
+import { FeedbackStepperComponent } from '@components/feedback-stepper/feedback-stepper.component';
 import { FeedbackService } from '@services/feedback.service';
 import { Feedback, FeedbackStatus, FeedbackType } from '@interfaces/feedback';
 
@@ -30,8 +32,10 @@ export interface FeedbackDetailDialogData {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    MatMenuModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    FeedbackStepperComponent,
   ],
   templateUrl: './feedback-detail-dialog.component.html',
   styleUrl: './feedback-detail-dialog.component.scss',
@@ -45,15 +49,8 @@ export class FeedbackDetailDialogComponent implements OnInit {
   selectedStatus: FeedbackStatus;
   adminNotes: string;
   saving = signal<boolean>(false);
+  transitioningTo = signal<FeedbackStatus | null>(null);
   isZoomedImage = signal<boolean>(false);
-
-  statusOptions: { label: string; value: FeedbackStatus; color: string }[] = [
-    { label: 'Novo', value: 'NEW', color: '#8b5cf6' },
-    { label: 'Em Análise', value: 'UNDER_REVIEW', color: '#3b82f6' },
-    { label: 'Em Andamento', value: 'IN_PROGRESS', color: '#f59e0b' },
-    { label: 'Resolvido', value: 'RESOLVED', color: '#22c55e' },
-    { label: 'Descartado', value: 'DISCARDED', color: '#64748b' },
-  ];
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: FeedbackDetailDialogData) {
     this.feedback = data.feedback;
@@ -67,7 +64,68 @@ export class FeedbackDetailDialogComponent implements OnInit {
     this.isZoomedImage.set(!this.isZoomedImage());
   }
 
+  applyTransition(newStatus: FeedbackStatus): void {
+    // Prevenção contra duplo clique
+    if (this.saving()) {
+      return;
+    }
+
+    // Regra estrita: não é permitido retroceder ou reabrir
+    if (this.selectedStatus === 'RESOLVED' || this.selectedStatus === 'DISCARDED') {
+      this.toastr.info('Este feedback já foi finalizado e não pode ter seu status alterado.');
+      return;
+    }
+
+    if (newStatus === 'DISCARDED') {
+      if (!this.adminNotes?.trim()) {
+        this.toastr.warning(
+          'Por favor, informe a justificativa do descarte no campo de resposta antes de salvar.',
+          'Justificativa Obrigatória'
+        );
+        return;
+      }
+    }
+
+    // NÃO atualiza selectedStatus antes do backend responder, apenas sinaliza a transição ativa
+    this.transitioningTo.set(newStatus);
+    this.saving.set(true);
+
+    const payload = {
+      status: newStatus,
+      adminNotes: this.adminNotes,
+    };
+
+    this.feedbackService.updateStatus(this.feedback.id, payload).subscribe({
+      next: (updated) => {
+        this.selectedStatus = newStatus;
+        this.saving.set(false);
+        this.transitioningTo.set(null);
+        this.toastr.success('Status do feedback e resposta salvos com sucesso!');
+        this.feedbackService.notifyFeedbackUpdated();
+        this.dialogRef.close(updated);
+      },
+      error: (err) => {
+        console.error('Erro ao atualizar status:', err);
+        this.toastr.error('Erro ao atualizar o feedback.');
+        this.saving.set(false);
+        this.transitioningTo.set(null);
+      },
+    });
+  }
+
   onSave(): void {
+    if (this.saving()) {
+      return;
+    }
+
+    if (this.selectedStatus === 'DISCARDED' && !this.adminNotes?.trim()) {
+      this.toastr.warning(
+        'Por favor, informe a justificativa do descarte no campo de resposta antes de salvar.',
+        'Justificativa Obrigatória'
+      );
+      return;
+    }
+
     this.saving.set(true);
 
     const payload = {

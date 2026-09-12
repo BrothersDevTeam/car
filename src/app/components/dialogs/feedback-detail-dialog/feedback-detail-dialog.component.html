@@ -11,6 +11,11 @@
   </div>
 
   <div class="dialog-content">
+    <!-- Linha do Tempo / Stepper do Ciclo de Vida -->
+    <div class="stepper-section">
+      <app-feedback-stepper [status]="selectedStatus" [adminNotes]="adminNotes"></app-feedback-stepper>
+    </div>
+
     <!-- Grid de Informações de Contexto -->
     <div class="metadata-grid">
       <div class="meta-item">
@@ -77,32 +82,113 @@
 
     <!-- Seção de Ação do Admin / Desenvolvedor -->
     <div class="admin-action-box">
-      <h3 class="section-title">
-        <mat-icon>admin_panel_settings</mat-icon>
-        Gerenciamento e Resposta do Administrador
-      </h3>
+      <div class="admin-box-header">
+        <h3 class="section-title">
+          <mat-icon>admin_panel_settings</mat-icon>
+          Gerenciamento e Fluxo de Atendimento
+        </h3>
+      </div>
+
+      <!-- Barra de Ações Rápidas Contextuais (Workflow Unidirecional) -->
+      <div class="workflow-actions-panel">
+        <span class="workflow-label">Ações para esta etapa:</span>
+        <div class="workflow-buttons">
+          @if (selectedStatus === 'NEW') {
+            <button
+              mat-flat-button
+              class="action-btn btn-review"
+              (click)="applyTransition('UNDER_REVIEW')"
+              [disabled]="saving()"
+            >
+              @if (transitioningTo() === 'UNDER_REVIEW') {
+                <mat-spinner diameter="18"></mat-spinner>
+                <span>Iniciando Análise...</span>
+              } @else {
+                <mat-icon>troubleshoot</mat-icon>
+                <span>Iniciar Análise Técnica</span>
+              }
+            </button>
+          }
+
+          @if (selectedStatus === 'UNDER_REVIEW') {
+            <button
+              mat-flat-button
+              class="action-btn btn-progress"
+              (click)="applyTransition('IN_PROGRESS')"
+              [disabled]="saving()"
+            >
+              @if (transitioningTo() === 'IN_PROGRESS') {
+                <mat-spinner diameter="18"></mat-spinner>
+                <span>Aprovando para Fila...</span>
+              } @else {
+                <mat-icon>engineering</mat-icon>
+                <span>Aprovar para Fila / Desenvolvimento</span>
+              }
+            </button>
+
+            <button
+              mat-stroked-button
+              class="action-btn btn-discard"
+              (click)="applyTransition('DISCARDED')"
+              [disabled]="saving()"
+            >
+              @if (transitioningTo() === 'DISCARDED') {
+                <mat-spinner diameter="18"></mat-spinner>
+                <span>Descartando...</span>
+              } @else {
+                <mat-icon>cancel</mat-icon>
+                <span>Descartar / Não Aplicável</span>
+              }
+            </button>
+          }
+
+          @if (selectedStatus === 'IN_PROGRESS') {
+            <button
+              mat-flat-button
+              class="action-btn btn-resolve"
+              (click)="applyTransition('RESOLVED')"
+              [disabled]="saving()"
+            >
+              @if (transitioningTo() === 'RESOLVED') {
+                <mat-spinner diameter="18"></mat-spinner>
+                <span>Concluindo e Notificando...</span>
+              } @else {
+                <mat-icon>task_alt</mat-icon>
+                <span>Concluir e Notificar Usuário</span>
+              }
+            </button>
+          }
+
+          @if (selectedStatus === 'RESOLVED') {
+            <div class="status-notice notice-success">
+              <mat-icon>verified</mat-icon>
+              <span>Este feedback foi concluído e resolvido.</span>
+            </div>
+          }
+
+          @if (selectedStatus === 'DISCARDED') {
+            <div class="status-notice notice-discard">
+              <mat-icon>block</mat-icon>
+              <span>Este feedback foi encerrado como descartado.</span>
+            </div>
+          }
+        </div>
+      </div>
 
       <div class="admin-fields">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Status do Feedback</mat-label>
-          <mat-select [(ngModel)]="selectedStatus">
-            @for (opt of statusOptions; track opt.value) {
-              <mat-option [value]="opt.value">
-                <span class="status-option-dot" [style.background-color]="opt.color"></span>
-                {{ opt.label }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Resposta ao Usuário / Notas Internas</mat-label>
+        <mat-form-field appearance="outline" class="full-width" [class.field-warning]="selectedStatus === 'DISCARDED'">
+          <mat-label>
+            {{ selectedStatus === 'DISCARDED' ? 'Justificativa do Descarte (Obrigatório)' : 'Resposta ao Usuário / Notas Internas' }}
+          </mat-label>
           <textarea
             matInput
             [(ngModel)]="adminNotes"
             rows="3"
-            placeholder="Digite a resposta ou ações tomadas (Esta mensagem será enviada ao e-mail do usuário)..."
+            [placeholder]="selectedStatus === 'DISCARDED' ? 'Explique ao usuário por que esta sugestão/relato não será implementado...' : 'Digite a resposta ou ações tomadas (Esta mensagem será exibida na tela do usuário)...'"
           ></textarea>
+          @if (selectedStatus === 'DISCARDED' && !adminNotes?.trim()) {
+            <mat-hint class="required-hint">Obrigatório informar o motivo para descarte.</mat-hint>
+          }
         </mat-form-field>
       </div>
     </div>
