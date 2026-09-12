@@ -18,6 +18,7 @@ import { Feedback, FeedbackStatus, FeedbackType } from '@interfaces/feedback';
 
 export interface FeedbackDetailDialogData {
   feedback: Feedback;
+  targetStatus?: FeedbackStatus;
 }
 
 @Component({
@@ -48,14 +49,45 @@ export class FeedbackDetailDialogComponent implements OnInit {
   feedback: Feedback;
   selectedStatus: FeedbackStatus;
   adminNotes: string;
+  isKanbanTransition = false;
+  targetStatus?: FeedbackStatus;
   saving = signal<boolean>(false);
   transitioningTo = signal<FeedbackStatus | null>(null);
   isZoomedImage = signal<boolean>(false);
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: FeedbackDetailDialogData) {
     this.feedback = data.feedback;
-    this.selectedStatus = data.feedback.status;
-    this.adminNotes = data.feedback.adminNotes || '';
+    this.targetStatus = data.targetStatus;
+    this.isKanbanTransition = !!data.targetStatus && data.targetStatus !== data.feedback.status;
+    this.selectedStatus = data.targetStatus || data.feedback.status;
+    if (this.isKanbanTransition && this.targetStatus) {
+      this.adminNotes = this.getDefaultNoteSuggestion(this.targetStatus);
+    } else {
+      this.adminNotes = data.feedback.adminNotes || '';
+    }
+  }
+
+  getDefaultNoteSuggestion(status: FeedbackStatus): string {
+    switch (status) {
+      case 'UNDER_REVIEW':
+        return 'Olá! Recebemos sua solicitação e nossa equipe técnica já iniciou a análise.';
+      case 'IN_PROGRESS':
+        return 'Sua solicitação foi analisada e aprovada! Já iniciamos o desenvolvimento desta melhoria.';
+      case 'RESOLVED':
+        return 'Esta solicitação foi concluída e implementada com sucesso! Agradecemos pela sua colaboração.';
+      case 'DISCARDED':
+        return 'Agradecemos pela colaboração, porém no momento esta solicitação não será implementada pelos seguintes motivos: ';
+      default:
+        return '';
+    }
+  }
+
+  applySuggestion(): void {
+    this.adminNotes = this.getDefaultNoteSuggestion(this.selectedStatus);
+  }
+
+  clearNotes(): void {
+    this.adminNotes = '';
   }
 
   ngOnInit(): void {}
@@ -166,6 +198,23 @@ export class FeedbackDetailDialogComponent implements OnInit {
         return 'badge-discarded';
       default:
         return 'badge-default';
+    }
+  }
+
+  getStatusLabel(status: FeedbackStatus): string {
+    switch (status) {
+      case 'NEW':
+        return 'Novo';
+      case 'UNDER_REVIEW':
+        return 'Em Análise';
+      case 'IN_PROGRESS':
+        return 'Em Andamento';
+      case 'RESOLVED':
+        return 'Resolvido';
+      case 'DISCARDED':
+        return 'Descartado';
+      default:
+        return status;
     }
   }
 

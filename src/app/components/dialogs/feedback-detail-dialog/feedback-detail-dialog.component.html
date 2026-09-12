@@ -91,102 +91,155 @@
 
       <!-- Barra de Ações Rápidas Contextuais (Workflow Unidirecional) -->
       <div class="workflow-actions-panel">
-        <span class="workflow-label">Ações para esta etapa:</span>
-        <div class="workflow-buttons">
-          @if (selectedStatus === 'NEW') {
-            <button
-              mat-flat-button
-              class="action-btn btn-review"
-              (click)="applyTransition('UNDER_REVIEW')"
-              [disabled]="saving()"
-            >
-              @if (transitioningTo() === 'UNDER_REVIEW') {
-                <mat-spinner diameter="18"></mat-spinner>
-                <span>Iniciando Análise...</span>
-              } @else {
-                <mat-icon>troubleshoot</mat-icon>
-                <span>Iniciar Análise Técnica</span>
-              }
-            </button>
-          }
-
-          @if (selectedStatus === 'UNDER_REVIEW') {
-            <button
-              mat-flat-button
-              class="action-btn btn-progress"
-              (click)="applyTransition('IN_PROGRESS')"
-              [disabled]="saving()"
-            >
-              @if (transitioningTo() === 'IN_PROGRESS') {
-                <mat-spinner diameter="18"></mat-spinner>
-                <span>Aprovando para Fila...</span>
-              } @else {
-                <mat-icon>engineering</mat-icon>
-                <span>Aprovar para Fila / Desenvolvimento</span>
-              }
-            </button>
-
-            <button
-              mat-stroked-button
-              class="action-btn btn-discard"
-              (click)="applyTransition('DISCARDED')"
-              [disabled]="saving()"
-            >
-              @if (transitioningTo() === 'DISCARDED') {
-                <mat-spinner diameter="18"></mat-spinner>
-                <span>Descartando...</span>
-              } @else {
-                <mat-icon>cancel</mat-icon>
-                <span>Descartar / Não Aplicável</span>
-              }
-            </button>
-          }
-
-          @if (selectedStatus === 'IN_PROGRESS') {
-            <button
-              mat-flat-button
-              class="action-btn btn-resolve"
-              (click)="applyTransition('RESOLVED')"
-              [disabled]="saving()"
-            >
-              @if (transitioningTo() === 'RESOLVED') {
-                <mat-spinner diameter="18"></mat-spinner>
-                <span>Concluindo e Notificando...</span>
-              } @else {
-                <mat-icon>task_alt</mat-icon>
-                <span>Concluir e Notificar Usuário</span>
-              }
-            </button>
-          }
-
-          @if (selectedStatus === 'RESOLVED') {
-            <div class="status-notice notice-success">
-              <mat-icon>verified</mat-icon>
-              <span>Este feedback foi concluído e resolvido.</span>
+        @if (isKanbanTransition) {
+          <!-- Modo Confirmação de Movimentação do Kanban: não exibe botões da próxima etapa antes de salvar -->
+          <div class="kanban-transition-notice">
+            <mat-icon class="transition-icon">arrow_forward</mat-icon>
+            <div class="transition-info">
+              <span class="transition-title">
+                Confirmando movimentação: <strong>{{ getStatusLabel(feedback.status) }}</strong> ➔ <strong>{{ getStatusLabel(selectedStatus) }}</strong>
+              </span>
+              <span class="transition-desc">
+                Escreva a resposta ou notas internas abaixo e clique em <strong>"Salvar e Mover"</strong> no rodapé para efetivar esta etapa. Se cancelar, o feedback permanecerá em <strong>{{ getStatusLabel(feedback.status) }}</strong>.
+              </span>
             </div>
-          }
+          </div>
+        } @else {
+          <!-- Modo Normal (Visualização e Ações da Etapa Atual) -->
+          <span class="workflow-label">Ações para esta etapa:</span>
+          <div class="workflow-buttons">
+            @if (selectedStatus === 'NEW') {
+              <button
+                mat-flat-button
+                class="action-btn btn-review"
+                (click)="applyTransition('UNDER_REVIEW')"
+                [disabled]="saving()"
+              >
+                @if (transitioningTo() === 'UNDER_REVIEW') {
+                  <mat-spinner diameter="18"></mat-spinner>
+                  <span>Iniciando Análise...</span>
+                } @else {
+                  <ng-container>
+                    <mat-icon>troubleshoot</mat-icon>
+                    <span>Iniciar Análise Técnica</span>
+                  </ng-container>
+                }
+              </button>
+            }
 
-          @if (selectedStatus === 'DISCARDED') {
-            <div class="status-notice notice-discard">
-              <mat-icon>block</mat-icon>
-              <span>Este feedback foi encerrado como descartado.</span>
-            </div>
-          }
-        </div>
+            @if (selectedStatus === 'UNDER_REVIEW') {
+              <button
+                mat-flat-button
+                class="action-btn btn-progress"
+                (click)="applyTransition('IN_PROGRESS')"
+                [disabled]="saving()"
+              >
+                @if (transitioningTo() === 'IN_PROGRESS') {
+                  <mat-spinner diameter="18"></mat-spinner>
+                  <span>Aprovando para Fila...</span>
+                } @else {
+                  <ng-container>
+                    <mat-icon>engineering</mat-icon>
+                    <span>Aprovar para Fila / Desenvolvimento</span>
+                  </ng-container>
+                }
+              </button>
+
+              <button
+                mat-stroked-button
+                class="action-btn btn-discard"
+                (click)="applyTransition('DISCARDED')"
+                [disabled]="saving()"
+              >
+                @if (transitioningTo() === 'DISCARDED') {
+                  <mat-spinner diameter="18"></mat-spinner>
+                  <span>Descartando...</span>
+                } @else {
+                  <ng-container>
+                    <mat-icon>cancel</mat-icon>
+                    <span>Descartar / Não Aplicável</span>
+                  </ng-container>
+                }
+              </button>
+            }
+
+            @if (selectedStatus === 'IN_PROGRESS') {
+              <button
+                mat-flat-button
+                class="action-btn btn-resolve"
+                (click)="applyTransition('RESOLVED')"
+                [disabled]="saving()"
+              >
+                @if (transitioningTo() === 'RESOLVED') {
+                  <mat-spinner diameter="18"></mat-spinner>
+                  <span>Concluindo e Notificando...</span>
+                } @else {
+                  <ng-container>
+                    <mat-icon>task_alt</mat-icon>
+                    <span>Concluir e Notificar Usuário</span>
+                  </ng-container>
+                }
+              </button>
+            }
+
+            @if (selectedStatus === 'RESOLVED') {
+              <div class="status-notice notice-success">
+                <mat-icon>verified</mat-icon>
+                <span>Este feedback foi concluído e resolvido.</span>
+              </div>
+            }
+
+            @if (selectedStatus === 'DISCARDED') {
+              <div class="status-notice notice-discard">
+                <mat-icon>block</mat-icon>
+                <span>Este feedback foi encerrado como descartado.</span>
+              </div>
+            }
+          </div>
+        }
       </div>
 
       <div class="admin-fields">
-        <mat-form-field appearance="outline" class="full-width" [class.field-warning]="selectedStatus === 'DISCARDED'">
-          <mat-label>
+        <div class="notes-toolbar">
+          <span class="notes-toolbar-label">
             {{ selectedStatus === 'DISCARDED' ? 'Justificativa do Descarte (Obrigatório)' : 'Resposta ao Usuário / Notas Internas' }}
-          </mat-label>
+          </span>
+          <div class="notes-toolbar-actions">
+            @if (getDefaultNoteSuggestion(selectedStatus)) {
+              <button
+                type="button"
+                mat-button
+                class="btn-note-action"
+                (click)="applySuggestion()"
+                matTooltip="Inserir texto sugerido para esta etapa"
+              >
+                <mat-icon>auto_fix_high</mat-icon>
+                <span>Usar Sugestão</span>
+              </button>
+            }
+            @if (adminNotes) {
+              <button
+                type="button"
+                mat-button
+                class="btn-note-action btn-clear"
+                (click)="clearNotes()"
+                matTooltip="Limpar caixa de resposta"
+              >
+                <mat-icon>backspace</mat-icon>
+                <span>Limpar</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width" [class.field-warning]="selectedStatus === 'DISCARDED'">
           <textarea
             matInput
             [(ngModel)]="adminNotes"
             rows="3"
             [placeholder]="selectedStatus === 'DISCARDED' ? 'Explique ao usuário por que esta sugestão/relato não será implementado...' : 'Digite a resposta ou ações tomadas (Esta mensagem será exibida na tela do usuário)...'"
           ></textarea>
-          @if (selectedStatus === 'DISCARDED' && !adminNotes?.trim()) {
+          @if (selectedStatus === 'DISCARDED' && !adminNotes.trim()) {
             <mat-hint class="required-hint">Obrigatório informar o motivo para descarte.</mat-hint>
           }
         </mat-form-field>
@@ -200,12 +253,12 @@
       @if (saving()) {
         <ng-container>
           <mat-spinner diameter="18"></mat-spinner>
-          <span>Salvando...</span>
+          <span>{{ isKanbanTransition ? 'Salvando e Movendo...' : 'Salvando...' }}</span>
         </ng-container>
       } @else {
         <ng-container>
-          <mat-icon class="btn-icon">save</mat-icon>
-          <span>Salvar Alterações</span>
+          <mat-icon class="btn-icon">{{ isKanbanTransition ? 'drive_file_move' : 'save' }}</mat-icon>
+          <span>{{ isKanbanTransition ? ('Salvar e Mover para ' + getStatusLabel(selectedStatus)) : 'Salvar Alterações' }}</span>
         </ng-container>
       }
     </button>

@@ -149,13 +149,7 @@ export class FeedbackManagementComponent implements OnInit {
       return;
     }
 
-    if (targetStatus === 'DISCARDED') {
-      // Abre o modal de detalhes para exigir justificativa
-      this.openDetailDialog(item);
-      return;
-    }
-
-    // Move visualmente imediatamente
+    // Move temporariamente para a coluna de destino para o efeito visual de arraste
     transferArrayItem(
       event.previousContainer.data,
       event.container.data,
@@ -163,22 +157,25 @@ export class FeedbackManagementComponent implements OnInit {
       event.currentIndex
     );
 
-    const oldStatus = item.status;
-    item.status = targetStatus;
+    // Abre imediatamente a tela para escrever a resposta e salvar
+    const dialogRef = this.dialog.open(FeedbackDetailDialogComponent, {
+      width: '840px',
+      maxHeight: '92vh',
+      panelClass: 'feedback-detail-dialog-panel',
+      data: { feedback: item, targetStatus },
+    });
 
-    this.feedbackService.updateStatus(item.id, { status: targetStatus }).subscribe({
-      next: () => {
-        this.toastr.success(`Feedback movido para "${this.getStatusLabel(targetStatus)}"`);
-        this.feedbackService.notifyFeedbackUpdated();
-        this.loadStats();
+    dialogRef.afterClosed().subscribe((updated) => {
+      if (updated) {
+        // Confirmado e salvo no backend com sucesso
         this.loadFeedbacks();
-      },
-      error: (err) => {
-        console.error('Erro ao atualizar status via Kanban:', err);
-        this.toastr.error('Erro ao atualizar status.');
-        item.status = oldStatus;
         this.loadKanbanFeedbacks();
-      },
+        this.loadStats();
+        this.feedbackService.notifyFeedbackUpdated();
+      } else {
+        // Cancelou: a task retorna para a coluna onde estava antes de ser arrastada
+        this.loadKanbanFeedbacks();
+      }
     });
   }
 
@@ -248,12 +245,12 @@ export class FeedbackManagementComponent implements OnInit {
     this.loadFeedbacks();
   }
 
-  openDetailDialog(feedback: Feedback): void {
+  openDetailDialog(feedback: Feedback, targetStatus?: FeedbackStatus): void {
     const dialogRef = this.dialog.open(FeedbackDetailDialogComponent, {
       width: '840px',
       maxHeight: '92vh',
       panelClass: 'feedback-detail-dialog-panel',
-      data: { feedback },
+      data: { feedback, targetStatus },
     });
 
     dialogRef.afterClosed().subscribe((updated) => {
@@ -262,6 +259,9 @@ export class FeedbackManagementComponent implements OnInit {
         this.loadKanbanFeedbacks();
         this.loadStats();
         this.feedbackService.notifyFeedbackUpdated();
+      } else if (targetStatus) {
+        // Se abriu com targetStatus e cancelou, recarrega o kanban para restaurar a posição original
+        this.loadKanbanFeedbacks();
       }
     });
   }
