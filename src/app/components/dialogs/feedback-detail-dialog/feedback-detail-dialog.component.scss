@@ -327,6 +327,15 @@
             background: #059669;
           }
         }
+
+        &.btn-resolve-direct {
+          border-color: #10b981;
+          color: #059669;
+
+          &:hover {
+            background: #ecfdf5;
+          }
+        }
       }
 
       .status-notice {
@@ -405,6 +414,62 @@
 
           &:hover {
             background: #dbeafe;
+          }
+
+          &.btn-praise {
+            color: #db2777;
+            background: #fdf2f8;
+            border: 1px solid #fbcfe8;
+
+            mat-icon {
+              color: #ec4899;
+            }
+
+            &:hover {
+              background: #fce7f3;
+            }
+          }
+
+          &.btn-sugg {
+            color: #d97706;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+
+            mat-icon {
+              color: #f59e0b;
+            }
+
+            &:hover {
+              background: #fef3c7;
+            }
+          }
+
+          &.btn-quest {
+            color: #2563eb;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+
+            mat-icon {
+              color: #3b82f6;
+            }
+
+            &:hover {
+              background: #dbeafe;
+            }
+          }
+
+          &.btn-impl {
+            color: #16a34a;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+
+            mat-icon {
+              color: #22c55e;
+            }
+
+            &:hover {
+              background: #dcfce7;
+            }
           }
 
           &.btn-clear {

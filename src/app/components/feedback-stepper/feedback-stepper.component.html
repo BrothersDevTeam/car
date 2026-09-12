@@ -1,17 +1,12 @@
 @if (status === 'DISCARDED') {
-  <div class="discarded-banner" [class.compact]="compact">
-    <div class="discarded-header">
-      <mat-icon class="discarded-icon">cancel</mat-icon>
-      <div class="discarded-text">
-        <span class="discarded-title">Feedback Descartado / Encerrado</span>
-        <span class="discarded-subtitle">Este item foi avaliado e marcado como não aplicável ou fora do escopo.</span>
+  <div class="answered-banner" [class.compact]="compact">
+    <div class="answered-header">
+      <mat-icon class="answered-icon">mark_chat_read</mat-icon>
+      <div class="answered-text">
+        <span class="answered-title">Atendimento Concluído</span>
+        <span class="answered-subtitle">Agradecemos pela sua colaboração! Sua mensagem foi respondida pela nossa equipe.</span>
       </div>
     </div>
-    @if (!compact && adminNotes) {
-      <div class="discarded-notes">
-        <strong>Motivo informado:</strong> {{ adminNotes }}
-      </div>
-    }
   </div>
 } @else {
   <div class="stepper-container" [class.compact]="compact">

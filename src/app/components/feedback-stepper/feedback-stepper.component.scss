@@ -159,55 +159,55 @@
   }
 }
 
-/* Banner de Descarte */
-.discarded-banner {
+/* Banner de Atendimento Concluído / Respondido */
+.answered-banner {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 14px 18px;
-  background: #fff1f2;
-  border: 1px solid #fecdd3;
+  padding: 12px 18px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
   border-radius: 10px;
 
   &.compact {
     padding: 8px 12px;
   }
 
-  .discarded-header {
+  .answered-header {
     display: flex;
     align-items: center;
     gap: 12px;
 
-    .discarded-icon {
-      color: #e11d48;
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
+    .answered-icon {
+      color: #16a34a;
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
     }
 
-    .discarded-text {
+    .answered-text {
       display: flex;
       flex-direction: column;
 
-      .discarded-title {
+      .answered-title {
         font-size: 13px;
         font-weight: 700;
-        color: #9f1239;
+        color: #166534;
       }
 
-      .discarded-subtitle {
+      .answered-subtitle {
         font-size: 11px;
-        color: #be123c;
+        color: #15803d;
       }
     }
   }
 
-  .discarded-notes {
+  .answered-notes {
     font-size: 12px;
-    color: #475569;
+    color: #334155;
     background: #ffffff;
     padding: 8px 12px;
     border-radius: 6px;
-    border: 1px solid #ffe4e6;
+    border: 1px solid #dcfce7;
   }
 }

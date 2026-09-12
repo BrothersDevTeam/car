@@ -1101,9 +1101,8 @@ export class FeedbackDialogComponent implements OnInit {
       case 'IN_PROGRESS':
         return 'badge-progress';
       case 'RESOLVED':
-        return 'badge-resolved';
       case 'DISCARDED':
-        return 'badge-discarded';
+        return 'badge-resolved';
       default:
         return 'badge-default';
     }
@@ -1118,9 +1117,9 @@ export class FeedbackDialogComponent implements OnInit {
       case 'IN_PROGRESS':
         return 'Em Andamento';
       case 'RESOLVED':
-        return 'Resolvido';
+        return 'Concluído';
       case 'DISCARDED':
-        return 'Descartado';
+        return 'Respondido';
       default:
         return status;
     }

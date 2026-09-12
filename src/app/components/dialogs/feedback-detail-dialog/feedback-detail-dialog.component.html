@@ -125,6 +125,23 @@
                   </ng-container>
                 }
               </button>
+
+              <button
+                mat-stroked-button
+                class="action-btn btn-resolve-direct"
+                (click)="applyTransition('RESOLVED')"
+                [disabled]="saving()"
+              >
+                @if (transitioningTo() === 'RESOLVED') {
+                  <mat-spinner diameter="18"></mat-spinner>
+                  <span>Concluindo...</span>
+                } @else {
+                  <ng-container>
+                    <mat-icon style="color: #10b981">reply</mat-icon>
+                    <span>Responder e Concluir</span>
+                  </ng-container>
+                }
+              </button>
             }
 
             @if (selectedStatus === 'UNDER_REVIEW') {
@@ -147,17 +164,17 @@
 
               <button
                 mat-stroked-button
-                class="action-btn btn-discard"
-                (click)="applyTransition('DISCARDED')"
+                class="action-btn btn-resolve-direct"
+                (click)="applyTransition('RESOLVED')"
                 [disabled]="saving()"
               >
-                @if (transitioningTo() === 'DISCARDED') {
+                @if (transitioningTo() === 'RESOLVED') {
                   <mat-spinner diameter="18"></mat-spinner>
-                  <span>Descartando...</span>
+                  <span>Concluindo...</span>
                 } @else {
                   <ng-container>
-                    <mat-icon>cancel</mat-icon>
-                    <span>Descartar / Não Aplicável</span>
+                    <mat-icon style="color: #10b981">reply</mat-icon>
+                    <span>Responder e Concluir</span>
                   </ng-container>
                 }
               </button>
@@ -182,17 +199,10 @@
               </button>
             }
 
-            @if (selectedStatus === 'RESOLVED') {
+            @if (selectedStatus === 'RESOLVED' || selectedStatus === 'DISCARDED') {
               <div class="status-notice notice-success">
                 <mat-icon>verified</mat-icon>
-                <span>Este feedback foi concluído e resolvido.</span>
-              </div>
-            }
-
-            @if (selectedStatus === 'DISCARDED') {
-              <div class="status-notice notice-discard">
-                <mat-icon>block</mat-icon>
-                <span>Este feedback foi encerrado como descartado.</span>
+                <span>Este feedback foi respondido e o atendimento concluído com sucesso.</span>
               </div>
             }
           </div>
@@ -202,21 +212,54 @@
       <div class="admin-fields">
         <div class="notes-toolbar">
           <span class="notes-toolbar-label">
-            {{ selectedStatus === 'DISCARDED' ? 'Justificativa do Descarte (Obrigatório)' : 'Resposta ao Usuário / Notas Internas' }}
+            Resposta ao Usuário / Notas de Atendimento:
           </span>
           <div class="notes-toolbar-actions">
-            @if (getDefaultNoteSuggestion(selectedStatus)) {
-              <button
-                type="button"
-                mat-button
-                class="btn-note-action"
-                (click)="applySuggestion()"
-                matTooltip="Inserir texto sugerido para esta etapa"
-              >
-                <mat-icon>auto_fix_high</mat-icon>
-                <span>Usar Sugestão</span>
-              </button>
-            }
+            <!-- Templates Rápidos de Resposta -->
+            <button
+              type="button"
+              mat-button
+              class="btn-note-action btn-praise"
+              (click)="applyTemplate('PRAISE')"
+              matTooltip="Inserir modelo caloroso para Elogio"
+            >
+              <mat-icon>favorite</mat-icon>
+              <span>Elogio</span>
+            </button>
+
+            <button
+              type="button"
+              mat-button
+              class="btn-note-action btn-sugg"
+              (click)="applyTemplate('SUGGESTION')"
+              matTooltip="Inserir modelo agradecendo a sugestão"
+            >
+              <mat-icon>lightbulb</mat-icon>
+              <span>Sugestão</span>
+            </button>
+
+            <button
+              type="button"
+              mat-button
+              class="btn-note-action btn-quest"
+              (click)="applyTemplate('QUESTION')"
+              matTooltip="Inserir modelo para esclarecimento ou dúvida"
+            >
+              <mat-icon>help_outline</mat-icon>
+              <span>Dúvida</span>
+            </button>
+
+            <button
+              type="button"
+              mat-button
+              class="btn-note-action btn-impl"
+              (click)="applyTemplate('RESOLVED')"
+              matTooltip="Inserir modelo informando que foi implementado"
+            >
+              <mat-icon>task_alt</mat-icon>
+              <span>Concluído</span>
+            </button>
+
             @if (adminNotes) {
               <button
                 type="button"
@@ -232,12 +275,12 @@
           </div>
         </div>
 
-        <mat-form-field appearance="outline" class="full-width" [class.field-warning]="selectedStatus === 'DISCARDED'">
+        <mat-form-field appearance="outline" class="full-width">
           <textarea
             matInput
             [(ngModel)]="adminNotes"
             rows="3"
-            [placeholder]="selectedStatus === 'DISCARDED' ? 'Explique ao usuário por que esta sugestão/relato não será implementado...' : 'Digite a resposta ou ações tomadas (Esta mensagem será exibida na tela do usuário)...'"
+            placeholder="Digite a resposta ou ações tomadas (Esta mensagem será exibida na tela do usuário)..."
           ></textarea>
           @if (selectedStatus === 'DISCARDED' && !adminNotes.trim()) {
             <mat-hint class="required-hint">Obrigatório informar o motivo para descarte.</mat-hint>
@@ -249,7 +292,7 @@
 
   <div class="dialog-actions">
     <button mat-button (click)="onClose()">Cancelar</button>
-    <button mat-flat-button color="primary" class="btn-submit" (click)="onSave()" [disabled]="saving()">
+    <button mat-flat-button color="primary" class="btn-submit" (click)="onSave()" [disabled]="saving() || (selectedStatus === 'DISCARDED' && !adminNotes.trim())">
       @if (saving()) {
         <ng-container>
           <mat-spinner diameter="18"></mat-spinner>

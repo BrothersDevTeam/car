@@ -70,15 +70,35 @@ export class FeedbackDetailDialogComponent implements OnInit {
   getDefaultNoteSuggestion(status: FeedbackStatus): string {
     switch (status) {
       case 'UNDER_REVIEW':
-        return 'Olá! Recebemos sua solicitação e nossa equipe técnica já iniciou a análise.';
+        return 'Olá! Recebemos sua mensagem e nossa equipe técnica já iniciou a análise.';
       case 'IN_PROGRESS':
-        return 'Sua solicitação foi analisada e aprovada! Já iniciamos o desenvolvimento desta melhoria.';
+        return 'Sua solicitação foi aprovada pela equipe e entrou na nossa fila de desenvolvimento!';
       case 'RESOLVED':
-        return 'Esta solicitação foi concluída e implementada com sucesso! Agradecemos pela sua colaboração.';
+        return 'Agradecemos muito pela sua colaboração! Sua mensagem foi respondida e o atendimento foi concluído com sucesso.';
       case 'DISCARDED':
-        return 'Agradecemos pela colaboração, porém no momento esta solicitação não será implementada pelos seguintes motivos: ';
+        return 'Muito obrigado por compartilhar sua ideia conosco! Registramos suas observações para futuras melhorias do sistema.';
       default:
         return '';
+    }
+  }
+
+  applyTemplate(templateType: 'PRAISE' | 'SUGGESTION' | 'QUESTION' | 'RESOLVED'): void {
+    switch (templateType) {
+      case 'PRAISE':
+        this.adminNotes =
+          'Muito obrigado pelo seu carinho e feedback positivo! Ficamos muito felizes em saber que você está tendo uma boa experiência com o sistema CAR.';
+        break;
+      case 'SUGGESTION':
+        this.adminNotes =
+          'Muito obrigado por compartilhar sua ideia conosco! Registramos sua sugestão em nosso banco de melhorias para futuras avaliações da equipe.';
+        break;
+      case 'QUESTION':
+        this.adminNotes = 'Olá! Agradecemos pelo contato. Segue o esclarecimento referente à sua solicitação: ';
+        break;
+      case 'RESOLVED':
+        this.adminNotes =
+          'Esta solicitação foi implementada e já está disponível para uso no sistema! Agradecemos pela sua colaboração.';
+        break;
     }
   }
 
@@ -193,9 +213,8 @@ export class FeedbackDetailDialogComponent implements OnInit {
       case 'IN_PROGRESS':
         return 'badge-progress';
       case 'RESOLVED':
-        return 'badge-resolved';
       case 'DISCARDED':
-        return 'badge-discarded';
+        return 'badge-resolved';
       default:
         return 'badge-default';
     }
@@ -210,9 +229,9 @@ export class FeedbackDetailDialogComponent implements OnInit {
       case 'IN_PROGRESS':
         return 'Em Andamento';
       case 'RESOLVED':
-        return 'Resolvido';
+        return 'Concluído';
       case 'DISCARDED':
-        return 'Descartado';
+        return 'Respondido';
       default:
         return status;
     }

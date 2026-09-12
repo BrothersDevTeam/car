@@ -19,6 +19,8 @@ import { FeedbackService } from '@services/feedback.service';
 import { StoreService } from '@services/store.service';
 import { Feedback, FeedbackStatus, FeedbackType } from '@interfaces/feedback';
 import { Store } from '@interfaces/store';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
 import { FeedbackDetailDialogComponent } from '@components/dialogs/feedback-detail-dialog/feedback-detail-dialog.component';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 
@@ -38,6 +40,8 @@ import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confi
     MatPaginatorModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatMenuModule,
+    MatDividerModule,
     DragDropModule,
   ],
   templateUrl: './feedback-management.component.html',
@@ -182,14 +186,18 @@ export class FeedbackManagementComponent implements OnInit {
   isValidKanbanTransition(current: FeedbackStatus, target: FeedbackStatus): boolean {
     if (current === target) return true;
     if (current === 'RESOLVED' || current === 'DISCARDED') return false;
+
+    // Novo pode ir para Análise ou ser Respondido/Concluído diretamente (ex: elogio, dúvida, agradecimento)
     if (current === 'NEW') {
-      return target === 'UNDER_REVIEW';
+      return target === 'UNDER_REVIEW' || target === 'RESOLVED' || target === 'DISCARDED';
     }
+    // Em Análise pode avançar para Desenvolvimento ou ser Respondido/Concluído diretamente
     if (current === 'UNDER_REVIEW') {
-      return target === 'IN_PROGRESS' || target === 'DISCARDED';
+      return target === 'IN_PROGRESS' || target === 'RESOLVED' || target === 'DISCARDED';
     }
+    // Em Andamento vai para Concluído/Resolvido
     if (current === 'IN_PROGRESS') {
-      return target === 'RESOLVED';
+      return target === 'RESOLVED' || target === 'DISCARDED';
     }
     return false;
   }
@@ -266,14 +274,23 @@ export class FeedbackManagementComponent implements OnInit {
     });
   }
 
-  onDelete(feedback: Feedback, event: MouseEvent): void {
-    event.stopPropagation();
+  onDelete(feedback: Feedback, event?: MouseEvent): void {
+    event?.stopPropagation();
+
+    // Regra de Integridade: feedbacks ativos não podem ser excluídos sem justificativa e retorno ao usuário
+    if (feedback.status !== 'RESOLVED' && feedback.status !== 'DISCARDED') {
+      this.toastr.warning(
+        'Feedbacks ativos não podem ser excluídos sem resposta. Utilize a opção "Descartar com Justificativa" para notificar o usuário antes de encerrar.',
+        'Retorno Obrigatório'
+      );
+      return;
+    }
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: 'Excluir Feedback',
-        message: `Tem certeza de que deseja excluir o feedback "${feedback.title}"?`,
-        confirmText: 'Excluir',
+        title: 'Excluir Histórico de Feedback',
+        message: `Este feedback já foi finalizado. Tem certeza de que deseja remover definitivamente o registro "${feedback.title}" do sistema?`,
+        confirmText: 'Excluir Definitivamente',
         cancelText: 'Cancelar',
         type: 'danger',
       },
