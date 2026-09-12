@@ -47,8 +47,9 @@ export class FeedbackWidgetComponent implements OnInit, OnDestroy {
 
   openFeedbackDialog(): void {
     const dialogRef = this.dialog.open(FeedbackDialogComponent, {
-      width: '740px',
-      maxHeight: '92vh',
+      width: '940px',
+      maxWidth: '96vw',
+      maxHeight: '94vh',
       panelClass: 'feedback-dialog-panel',
     });
 

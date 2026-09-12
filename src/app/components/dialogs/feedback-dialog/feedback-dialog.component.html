@@ -5,10 +5,10 @@
       <mat-icon class="header-icon">rate_review</mat-icon>
       <div>
         <h2>Central de Feedback</h2>
-        <p class="subtitle">Envie sugestões ou acompanhe as suas solicitações</p>
+        <p class="subtitle">Envie sugestões, aponte problemas ou acompanhe suas solicitações</p>
       </div>
     </div>
-    <button mat-icon-button class="close-btn" (click)="onClose()" type="button">
+    <button mat-icon-button class="close-btn" (click)="onClose()" type="button" matTooltip="Fechar">
       <mat-icon>close</mat-icon>
     </button>
   </div>
@@ -46,7 +46,7 @@
           <div class="form-fields">
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Título resumido</mat-label>
-              <input matInput formControlName="title" placeholder="Ex: Adicionar filtro por placa na tela de veículos" />
+              <input matInput formControlName="title" placeholder="Ex: Ajustar filtro na listagem de veículos" />
               @if (feedbackForm.get('title')?.hasError('required') && feedbackForm.get('title')?.touched) {
                 <mat-error>O título é obrigatório</mat-error>
               }
@@ -73,50 +73,151 @@
                 <mat-icon>photo_camera</mat-icon>
                 <span>Captura de Tela da Sua Visualização (Opcional)</span>
               </div>
-              <div class="screenshot-tools">
-                @if (screenshotDataUrl()) {
+
+              @if (screenshotDataUrl()) {
+                <div class="screenshot-tools">
+                  <!-- Ferramenta: Retângulo -->
                   <button
                     type="button"
                     mat-stroked-button
-                    [color]="isDrawingMode() ? 'warn' : 'primary'"
-                    (click)="toggleDrawingMode()"
+                    [class.tool-active]="activeTool() === 'rectangle'"
+                    (click)="setActiveTool('rectangle')"
                     class="tool-btn"
+                    matTooltip="Desenhar caixa / retângulo de destaque"
                   >
-                    <mat-icon>{{ isDrawingMode() ? 'check' : 'gesture' }}</mat-icon>
-                    {{ isDrawingMode() ? 'Concluir Destaque' : 'Desenhar Destaque' }}
+                    <mat-icon>crop_square</mat-icon>
+                    <span>Retângulo</span>
                   </button>
 
-                  <button type="button" mat-icon-button (click)="clearAnnotations()" matTooltip="Limpar marcações">
+                  <!-- Ferramenta: Caneta Livre -->
+                  <button
+                    type="button"
+                    mat-stroked-button
+                    [class.tool-active]="activeTool() === 'freehand'"
+                    (click)="setActiveTool('freehand')"
+                    class="tool-btn"
+                    matTooltip="Desenho livre com caneta"
+                  >
+                    <mat-icon>draw</mat-icon>
+                    <span>Caneta</span>
+                  </button>
+
+                  <!-- Ferramenta: Texto -->
+                  <button
+                    type="button"
+                    mat-stroked-button
+                    [class.tool-active]="activeTool() === 'text'"
+                    (click)="setActiveTool('text')"
+                    class="tool-btn"
+                    matTooltip="Inserir texto anotativo sobre a imagem"
+                  >
+                    <mat-icon>title</mat-icon>
+                    <span>Texto</span>
+                  </button>
+
+                  <span class="tool-divider"></span>
+
+                  <!-- Desfazer (Undo) -->
+                  <button
+                    type="button"
+                    mat-icon-button
+                    (click)="undoLastAction()"
+                    [disabled]="annotations().length === 0"
+                    matTooltip="Desfazer última alteração"
+                  >
+                    <mat-icon>undo</mat-icon>
+                  </button>
+
+                  <!-- Excluir item selecionado -->
+                  @if (selectedAnnotationId()) {
+                    <button
+                      type="button"
+                      mat-icon-button
+                      color="warn"
+                      (click)="deleteSelectedAnnotation()"
+                      matTooltip="Excluir elemento selecionado"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  }
+
+                  <!-- Limpar Marcações -->
+                  <button type="button" mat-icon-button (click)="clearAnnotations()" matTooltip="Limpar anotações">
                     <mat-icon>cleaning_services</mat-icon>
                   </button>
 
-                  <button type="button" mat-icon-button (click)="captureCurrentScreen()" matTooltip="Recapturar Tela">
-                    <mat-icon>refresh</mat-icon>
+                  <!-- Recortar Nova Área -->
+                  <button
+                    type="button"
+                    mat-icon-button
+                    (click)="startAreaSelectionCapture()"
+                    matTooltip="Recortar nova área da tela"
+                  >
+                    <mat-icon>crop</mat-icon>
                   </button>
 
-                  <button type="button" mat-icon-button color="warn" (click)="removeScreenshot()" matTooltip="Remover Print">
+                  <!-- Remover Print -->
+                  <button type="button" mat-icon-button color="warn" (click)="removeScreenshot()" matTooltip="Remover print">
                     <mat-icon>delete_outline</mat-icon>
                   </button>
-                }
-              </div>
+                </div>
+              }
             </div>
 
+            <!-- Loading de Captura -->
             @if (capturingScreenshot()) {
               <div class="screenshot-loading">
-                <mat-spinner diameter="32"></mat-spinner>
-                <span>Gerando captura da tela atual...</span>
+                <mat-spinner diameter="34"></mat-spinner>
+                <span>Preparando captura da tela...</span>
               </div>
             } @else if (screenshotDataUrl()) {
-              <div class="canvas-wrapper" [class.drawing-active]="isDrawingMode()">
-                @if (isDrawingMode()) {
-                  <div class="drawing-banner">
-                    ✏️ Clique e arraste com o mouse sobre a imagem para destacar uma área
+              <!-- Canvas com Imagem Carregada -->
+              <div class="canvas-wrapper">
+                <!-- Banner de instrução da ferramenta ativa -->
+                <div class="drawing-banner">
+                  @if (selectedAnnotationId()) {
+                    <span>↔️ Elemento selecionado: arraste para mover de posição</span>
+                  } @else if (activeTool() === 'rectangle') {
+                    <span>🔲 Clique e arraste para criar um retângulo (clique nele depois para reposicionar)</span>
+                  } @else if (activeTool() === 'freehand') {
+                    <span>✏️ Clique e arraste para desenhar livremente com a caneta</span>
+                  } @else if (activeTool() === 'text') {
+                    <span>💬 Clique em qualquer ponto da imagem para inserir um texto (arrastável)</span>
+                  }
+                </div>
+
+                <!-- Input Flutuante de Texto sobre a Imagem -->
+                @if (textAnnotation().visible) {
+                  <div
+                    class="floating-text-editor"
+                    [style.left.px]="textAnnotation().screenX"
+                    [style.top.px]="textAnnotation().screenY"
+                  >
+                    <input
+                      #floatingTextInput
+                      type="text"
+                      [value]="textAnnotation().text"
+                      (input)="updateAnnotationText($any($event.target).value)"
+                      (keydown.enter)="applyTextAnnotation()"
+                      (keydown.escape)="closeTextAnnotation()"
+                      placeholder="Digite a observação..."
+                    />
+                    <div class="editor-actions">
+                      <button type="button" class="btn-apply" (click)="applyTextAnnotation()" matTooltip="Confirmar (Enter)">
+                        <mat-icon>check</mat-icon>
+                      </button>
+                      <button type="button" class="btn-cancel" (click)="closeTextAnnotation()" matTooltip="Cancelar (Esc)">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
                   </div>
                 }
+
                 <canvas
                   #drawingCanvas
+                  [style.cursor]="canvasCursor()"
                   (mousedown)="startDrawing($event)"
-                  (mousemove)="draw($event)"
+                  (mousemove)="onCanvasMouseMove($event)"
                   (mouseup)="stopDrawing()"
                   (mouseleave)="stopDrawing()"
                   (touchstart)="startDrawing($event)"
@@ -125,22 +226,67 @@
                 ></canvas>
               </div>
             } @else {
-              <div class="screenshot-empty-box">
-                <button type="button" mat-stroked-button color="primary" (click)="captureCurrentScreen()" class="trigger-capture-btn">
-                  <mat-icon>add_a_photo</mat-icon>
-                  Capturar Imagem da Tela Atual
-                </button>
-                <span class="empty-hint">Gere um print automático da tela para desenhar destaques ou apontar um problema.</span>
+              <!-- Dropzone Vazia com Múltiplas Opções de Entrada -->
+              <div
+                class="screenshot-dropzone"
+                [class.drag-over]="isDraggingOver()"
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onDrop($event)"
+              >
+                <!-- Input de arquivo invisível -->
+                <input
+                  #fileInput
+                  type="file"
+                  accept="image/*"
+                  (change)="onFileInputChange($event)"
+                  style="display: none;"
+                />
+
+                <div class="dropzone-buttons">
+                  <!-- Capturar Área Selecionada (Destaque Principal) -->
+                  <button
+                    type="button"
+                    mat-flat-button
+                    color="primary"
+                    (click)="startAreaSelectionCapture()"
+                    class="action-btn highlight-btn"
+                  >
+                    <mat-icon>crop</mat-icon>
+                    <span>Capturar Área da Tela</span>
+                  </button>
+
+                  <!-- Capturar Tela Inteira -->
+                  <button
+                    type="button"
+                    mat-stroked-button
+                    color="primary"
+                    (click)="captureCurrentScreen()"
+                    class="action-btn"
+                  >
+                    <mat-icon>fullscreen</mat-icon>
+                    <span>Tela Inteira</span>
+                  </button>
+
+                  <!-- Colar da Memória (Clipboard / Ctrl + V) -->
+                  <button
+                    type="button"
+                    mat-stroked-button
+                    (click)="pasteFromClipboard()"
+                    class="action-btn clipboard-btn"
+                    matTooltip="Pressione Ctrl + V em qualquer momento para colar o print do Windows"
+                  >
+                    <mat-icon>content_paste</mat-icon>
+                    <span>Colar Print (Ctrl + V)</span>
+                  </button>
+                </div>
+
+                <div class="dropzone-hint" (click)="triggerFileInput()">
+                  <mat-icon class="upload-icon">cloud_upload</mat-icon>
+                  <span>ou arraste um arquivo de imagem aqui / <strong>clique para selecionar</strong></span>
+                </div>
               </div>
             }
-          </div>
-
-          <!-- Metadados da Rota -->
-          <div class="metadata-footer">
-            <label class="metadata-checkbox">
-              <input type="checkbox" formControlName="includeMetadata" />
-              <span>Incluir rota atual (<code>{{ currentRoute }}</code>) e resolução (<code>{{ screenResolution }}</code>)</span>
-            </label>
           </div>
 
           <!-- Botões de Ação -->
@@ -197,6 +343,11 @@
                 <span class="status-badge" [ngClass]="getStatusBadgeClass(item.status)">
                   {{ getStatusLabel(item.status) }}
                 </span>
+              </div>
+
+              <!-- Linha do Tempo Compacta do Feedback -->
+              <div class="card-stepper-wrapper">
+                <app-feedback-stepper [status]="item.status" [compact]="true" [adminNotes]="item.adminNotes"></app-feedback-stepper>
               </div>
 
               <p class="card-description">{{ item.description }}</p>
