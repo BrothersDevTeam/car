@@ -212,6 +212,92 @@
         }
       }
 
+      .color-palette-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+
+        .color-swatch-btn {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          border: 2px solid #ffffff;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
+          outline: none;
+
+          &:hover {
+            transform: scale(1.2);
+          }
+
+          &.active {
+            box-shadow: 0 0 0 2px #3b82f6;
+            transform: scale(1.15);
+          }
+
+          .check-icon {
+            font-size: 13px;
+            width: 13px;
+            height: 13px;
+            line-height: 13px;
+            font-weight: 900;
+          }
+        }
+      }
+
+      .line-width-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+
+        .line-width-btn {
+          width: 26px;
+          height: 24px;
+          border-radius: 4px;
+          border: 1px solid transparent;
+          background: transparent;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0 3px;
+          transition: all 0.15s ease;
+
+          .line-preview {
+            display: block;
+            width: 100%;
+            background: #475569;
+            border-radius: 2px;
+          }
+
+          &:hover {
+            background: #e2e8f0;
+          }
+
+          &.active {
+            background: #e0f2fe;
+            border-color: #38bdf8;
+
+            .line-preview {
+              background: #0284c7;
+            }
+          }
+        }
+      }
+
       .tool-divider {
         display: inline-block;
         width: 1px;

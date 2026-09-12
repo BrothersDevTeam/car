@@ -89,6 +89,19 @@
                     <span>Retângulo</span>
                   </button>
 
+                  <!-- Ferramenta: Seta -->
+                  <button
+                    type="button"
+                    mat-stroked-button
+                    [class.tool-active]="activeTool() === 'arrow'"
+                    (click)="setActiveTool('arrow')"
+                    class="tool-btn"
+                    matTooltip="Desenhar seta indicativa"
+                  >
+                    <mat-icon>north_east</mat-icon>
+                    <span>Seta</span>
+                  </button>
+
                   <!-- Ferramenta: Caneta Livre -->
                   <button
                     type="button"
@@ -117,6 +130,43 @@
 
                   <span class="tool-divider"></span>
 
+                  <!-- Paleta de Cores -->
+                  <div class="color-palette-group" matTooltip="Cor do traço/texto">
+                    @for (color of colorPalette; track color) {
+                      <button
+                        type="button"
+                        class="color-swatch-btn"
+                        [class.active]="selectedColor() === color"
+                        [style.backgroundColor]="color"
+                        (click)="setColor(color)"
+                        [attr.aria-label]="'Cor ' + color"
+                      >
+                        @if (selectedColor() === color) {
+                          <mat-icon class="check-icon" [style.color]="color === '#ffffff' ? '#0f172a' : '#ffffff'">check</mat-icon>
+                        }
+                      </button>
+                    }
+                  </div>
+
+                  <span class="tool-divider"></span>
+
+                  <!-- Seletor de Espessura de Linha -->
+                  <div class="line-width-group" matTooltip="Espessura da linha">
+                    @for (weight of lineWeights; track weight.width) {
+                      <button
+                        type="button"
+                        class="line-width-btn"
+                        [class.active]="selectedLineWidth() === weight.width"
+                        (click)="setLineWidth(weight.width)"
+                        [matTooltip]="weight.label"
+                      >
+                        <span class="line-preview" [style.height.px]="weight.width"></span>
+                      </button>
+                    }
+                  </div>
+
+                  <span class="tool-divider"></span>
+
                   <!-- Desfazer (Undo) -->
                   <button
                     type="button"
@@ -135,7 +185,7 @@
                       mat-icon-button
                       color="warn"
                       (click)="deleteSelectedAnnotation()"
-                      matTooltip="Excluir elemento selecionado"
+                      matTooltip="Excluir elemento selecionado (Del)"
                     >
                       <mat-icon>delete</mat-icon>
                     </button>
@@ -176,11 +226,13 @@
                 <!-- Banner de instrução da ferramenta ativa -->
                 <div class="drawing-banner">
                   @if (selectedAnnotationId()) {
-                    <span>↔️ Elemento selecionado: arraste para mover de posição</span>
+                    <span>↔️ Elemento selecionado: arraste para mover, altere cor/espessura ou pressione Delete para excluir</span>
                   } @else if (activeTool() === 'rectangle') {
                     <span>🔲 Clique e arraste para criar um retângulo (clique nele depois para reposicionar)</span>
+                  } @else if (activeTool() === 'arrow') {
+                    <span>↗️ Clique e arraste para desenhar uma seta (o término do clique define a ponta)</span>
                   } @else if (activeTool() === 'freehand') {
-                    <span>✏️ Clique e arraste para desenhar livremente com a caneta</span>
+                    <span>✏️ Desenho livre com a caneta (clique sobre o traço para selecioná-lo e reposicioná-lo)</span>
                   } @else if (activeTool() === 'text') {
                     <span>💬 Clique em qualquer ponto da imagem para inserir um texto (arrastável)</span>
                   }

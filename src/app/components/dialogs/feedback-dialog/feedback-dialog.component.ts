@@ -19,11 +19,11 @@ import { FeedbackService } from '@services/feedback.service';
 import { Feedback, FeedbackType, FeedbackStatus } from '@interfaces/feedback';
 import { FeedbackStepperComponent } from '@components/feedback-stepper/feedback-stepper.component';
 
-export type AnnotationTool = 'rectangle' | 'freehand' | 'text';
+export type AnnotationTool = 'rectangle' | 'arrow' | 'freehand' | 'text';
 
 export interface AnnotationItem {
   id: string;
-  type: 'rectangle' | 'freehand' | 'text';
+  type: 'rectangle' | 'arrow' | 'freehand' | 'text';
   x: number;
   y: number;
   width: number;
@@ -32,6 +32,8 @@ export interface AnnotationItem {
   lineWidth: number;
   text?: string;
   points?: { x: number; y: number }[];
+  endX?: number;
+  endY?: number;
 }
 
 @Component({
@@ -66,6 +68,7 @@ export class FeedbackDialogComponent implements OnInit {
   private toastr = inject(ToastrService);
   private router = inject(Router);
   public dialogRef = inject(MatDialogRef<FeedbackDialogComponent>);
+  private elementRef = inject(ElementRef);
 
   feedbackForm!: FormGroup;
   selectedTabIndex = 0;
@@ -121,8 +124,66 @@ export class FeedbackDialogComponent implements OnInit {
 
   // Canvas context
   private ctx: CanvasRenderingContext2D | null = null;
-  drawColor = '#ef4444'; // Vermelho vivo
+  drawColor = '#ef4444';
   lineWidth = 4;
+
+  selectedColor = signal<string>('#ef4444');
+  selectedLineWidth = signal<number>(4);
+
+  readonly colorPalette: string[] = [
+    '#ef4444',
+    '#f97316',
+    '#f59e0b',
+    '#10b981',
+    '#3b82f6',
+    '#8b5cf6',
+    '#0f172a',
+    '#ffffff',
+  ];
+
+  readonly lineWeights: { label: string; width: number }[] = [
+    { label: 'Fina', width: 2 },
+    { label: 'Média', width: 4 },
+    { label: 'Grossa', width: 6 },
+    { label: 'Extra', width: 8 },
+  ];
+
+  setColor(color: string): void {
+    this.selectedColor.set(color);
+    this.drawColor = color;
+    const selectedId = this.selectedAnnotationId();
+    if (selectedId) {
+      this.annotations.update((items) =>
+        items.map((item) => (item.id === selectedId ? { ...item, color } : item))
+      );
+      this.renderCanvas();
+    }
+  }
+
+  setLineWidth(width: number): void {
+    this.selectedLineWidth.set(width);
+    this.lineWidth = width;
+    const selectedId = this.selectedAnnotationId();
+    if (selectedId) {
+      this.annotations.update((items) =>
+        items.map((item) => (item.id === selectedId ? { ...item, lineWidth: width } : item))
+      );
+      this.renderCanvas();
+    }
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    const target = event.target as HTMLElement;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+      return;
+    }
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      if (this.selectedAnnotationId()) {
+        this.deleteSelectedAnnotation();
+      }
+    }
+  }
 
   feedbackTypes: { label: string; value: FeedbackType; icon: string; color: string }[] = [
     { label: 'Erro / Bug', value: 'BUG', icon: 'bug_report', color: '#ef4444' },
@@ -681,6 +742,8 @@ export class FeedbackDialogComponent implements OnInit {
           this.ctx.strokeRect(item.x - 3, item.y - 3, item.width + 6, item.height + 6);
         }
         this.ctx.restore();
+      } else if (item.type === 'arrow') {
+        this.drawArrow(this.ctx, item, isSelected);
       } else if (item.type === 'freehand') {
         if (item.points && item.points.length > 0) {
           this.ctx.save();
@@ -697,6 +760,16 @@ export class FeedbackDialogComponent implements OnInit {
             }
           });
           this.ctx.stroke();
+
+          // Borda de seleção para caneta livre
+          if (isSelected) {
+            const bounds = this.getFreehandBounds(item.points);
+            this.ctx.strokeStyle = '#38bdf8';
+            this.ctx.lineWidth = 2;
+            this.ctx.setLineDash([5, 5]);
+            this.ctx.strokeRect(bounds.minX - 6, bounds.minY - 6, bounds.width + 12, bounds.height + 12);
+          }
+
           this.ctx.restore();
         }
       } else if (item.type === 'text') {
@@ -705,54 +778,194 @@ export class FeedbackDialogComponent implements OnInit {
     }
   }
 
+  private drawArrow(
+    ctx: CanvasRenderingContext2D,
+    item: AnnotationItem,
+    isSelected: boolean
+  ): void {
+    const startX = item.x;
+    const startY = item.y;
+    const endX = item.endX ?? item.x;
+    const endY = item.endY ?? item.y;
+
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const angle = Math.atan2(dy, dx);
+    const length = Math.hypot(dx, dy);
+
+    ctx.save();
+    ctx.strokeStyle = item.color;
+    ctx.fillStyle = item.color;
+    ctx.lineWidth = item.lineWidth;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    const headLength = Math.max(14, item.lineWidth * 3.5);
+    const headAngle = Math.PI / 6;
+
+    // Haste da seta
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+
+    // Cabeça da seta
+    if (length > 6) {
+      ctx.beginPath();
+      ctx.moveTo(endX, endY);
+      ctx.lineTo(
+        endX - headLength * Math.cos(angle - headAngle),
+        endY - headLength * Math.sin(angle - headAngle)
+      );
+      ctx.lineTo(
+        endX - headLength * 0.7 * Math.cos(angle),
+        endY - headLength * 0.7 * Math.sin(angle)
+      );
+      ctx.lineTo(
+        endX - headLength * Math.cos(angle + headAngle),
+        endY - headLength * Math.sin(angle + headAngle)
+      );
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    if (isSelected) {
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      const minX = Math.min(startX, endX) - 8;
+      const maxX = Math.max(startX, endX) + 8;
+      const minY = Math.min(startY, endY) - 8;
+      const maxY = Math.max(startY, endY) + 8;
+      ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
+    }
+
+    ctx.restore();
+  }
+
   private drawTextBadge(
     ctx: CanvasRenderingContext2D,
     item: AnnotationItem,
     isSelected: boolean,
-    canvasWidth: number
+    canvasWidth?: number
   ): void {
-    const scale = Math.max(1, canvasWidth / 900);
-    const fontSize = Math.round(16 * scale);
+    if (!item.text) return;
+
     ctx.save();
-    ctx.font = `bold ${fontSize}px Inter, sans-serif, system-ui`;
+    const fontSize = 14;
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.textBaseline = 'top';
 
-    const text = item.text || '';
-    const textMetrics = ctx.measureText(text);
-    const paddingX = Math.round(10 * scale);
-    const paddingY = Math.round(6 * scale);
-    const boxWidth = textMetrics.width + paddingX * 2;
-    const boxHeight = fontSize + paddingY * 2;
+    const paddingX = 8;
+    const paddingY = 6;
+    const textMetrics = ctx.measureText(item.text);
+    const textWidth = textMetrics.width;
+    const textHeight = fontSize + 4;
 
-    // Atualiza dimensões reais no item para detecção de clique
-    item.width = boxWidth;
-    item.height = boxHeight;
+    const badgeWidth = textWidth + paddingX * 2;
+    const badgeHeight = textHeight + paddingY * 2;
 
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-    ctx.shadowBlur = 6 * scale;
-    ctx.shadowOffsetY = 2 * scale;
+    // Atualiza dimensões no item para o cálculo do hit-test
+    item.width = badgeWidth;
+    item.height = badgeHeight;
 
-    ctx.fillStyle = item.color || '#ef4444';
-    if (typeof (ctx as any).roundRect === 'function') {
-      ctx.beginPath();
-      (ctx as any).roundRect(item.x, item.y - boxHeight, boxWidth, boxHeight, 6 * scale);
-      ctx.fill();
+    const x = item.x;
+    const y = item.y;
+
+    // Fundo do badge com cantos arredondados
+    const radius = 4;
+    ctx.fillStyle = item.color;
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(x, y - badgeHeight, badgeWidth, badgeHeight, radius);
     } else {
-      ctx.fillRect(item.x, item.y - boxHeight, boxWidth, boxHeight);
+      ctx.rect(x, y - badgeHeight, badgeWidth, badgeHeight);
     }
+    ctx.fill();
 
-    ctx.shadowColor = 'transparent';
-    ctx.fillStyle = '#ffffff';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, item.x + paddingX, item.y - boxHeight / 2);
+    // Texto com contraste automático
+    ctx.fillStyle = item.color === '#ffffff' ? '#0f172a' : '#ffffff';
+    ctx.fillText(item.text, x + paddingX, y - badgeHeight + paddingY);
 
+    // Moldura pontilhada quando o texto estiver selecionado
     if (isSelected) {
       ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 2 * scale;
-      ctx.setLineDash([4 * scale, 4 * scale]);
-      ctx.strokeRect(item.x - 3, item.y - boxHeight - 3, boxWidth + 6, boxHeight + 6);
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(x - 3, y - badgeHeight - 3, badgeWidth + 6, badgeHeight + 6);
     }
 
     ctx.restore();
+  }
+
+  private distanceToSegment(
+    px: number,
+    py: number,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ): number {
+    const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+    if (l2 === 0) return Math.hypot(px - x1, py - y1);
+    let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+  }
+
+  private getFreehandBounds(points: { x: number; y: number }[]): {
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+    width: number;
+    height: number;
+  } {
+    if (!points || points.length === 0) {
+      return { minX: 0, maxX: 0, minY: 0, maxY: 0, width: 0, height: 0 };
+    }
+    let minX = points[0].x;
+    let maxX = points[0].x;
+    let minY = points[0].y;
+    let maxY = points[0].y;
+    for (const pt of points) {
+      if (pt.x < minX) minX = pt.x;
+      if (pt.x > maxX) maxX = pt.x;
+      if (pt.y < minY) minY = pt.y;
+      if (pt.y > maxY) maxY = pt.y;
+    }
+    return {
+      minX,
+      maxX,
+      minY,
+      maxY,
+      width: Math.max(1, maxX - minX),
+      height: Math.max(1, maxY - minY),
+    };
+  }
+
+  private isPointNearFreehand(
+    pos: { x: number; y: number },
+    points: { x: number; y: number }[],
+    tolerance: number
+  ): boolean {
+    if (!points || points.length === 0) return false;
+    for (let i = 0; i < points.length - 1; i++) {
+      if (
+        this.distanceToSegment(
+          pos.x,
+          pos.y,
+          points[i].x,
+          points[i].y,
+          points[i + 1].x,
+          points[i + 1].y
+        ) <= tolerance
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -784,6 +997,31 @@ export class FeedbackDialogComponent implements OnInit {
           pos.y <= maxY + tolerance
         ) {
           return item;
+        }
+      } else if (item.type === 'arrow') {
+        const dist = this.distanceToSegment(
+          pos.x,
+          pos.y,
+          item.x,
+          item.y,
+          item.endX ?? item.x,
+          item.endY ?? item.y
+        );
+        if (dist <= Math.max(12, item.lineWidth * 2)) {
+          return item;
+        }
+      } else if (item.type === 'freehand' && item.points && item.points.length > 0) {
+        const bounds = this.getFreehandBounds(item.points);
+        const tolerance = Math.max(12, item.lineWidth * 2);
+        if (
+          pos.x >= bounds.minX - tolerance &&
+          pos.x <= bounds.maxX + tolerance &&
+          pos.y >= bounds.minY - tolerance &&
+          pos.y <= bounds.maxY + tolerance
+        ) {
+          if (this.isPointNearFreehand(pos, item.points, tolerance)) {
+            return item;
+          }
         }
       }
     }
@@ -847,7 +1085,18 @@ export class FeedbackDialogComponent implements OnInit {
       this.selectedAnnotationId.set(hitItem.id);
       this.isMovingAnnotation = true;
       this.movingAnnotationItem = hitItem;
-      this.moveOffset = { x: pos.x - hitItem.x, y: pos.y - hitItem.y };
+      this.moveOffset = { x: pos.x, y: pos.y };
+
+      // Sincronizar cor e espessura do elemento selecionado na barra de ferramentas
+      if (hitItem.color) {
+        this.selectedColor.set(hitItem.color);
+        this.drawColor = hitItem.color;
+      }
+      if (hitItem.lineWidth) {
+        this.selectedLineWidth.set(hitItem.lineWidth);
+        this.lineWidth = hitItem.lineWidth;
+      }
+
       this.renderCanvas();
       return;
     }
@@ -875,7 +1124,7 @@ export class FeedbackDialogComponent implements OnInit {
       return;
     }
 
-    // 4. Criar nova anotação de Retângulo ou Caneta Livre
+    // 4. Criar nova anotação de Retângulo, Seta ou Caneta Livre
     this.isDrawing = true;
     this.startPos = pos;
 
@@ -887,12 +1136,28 @@ export class FeedbackDialogComponent implements OnInit {
         y: pos.y,
         width: 0,
         height: 0,
-        color: this.drawColor,
-        lineWidth: this.lineWidth,
+        color: this.selectedColor(),
+        lineWidth: this.selectedLineWidth(),
       };
       this.currentDrawingItem = newRect;
       this.annotations.update((items) => [...items, newRect]);
       this.selectedAnnotationId.set(newRect.id);
+    } else if (this.activeTool() === 'arrow') {
+      const newArrow: AnnotationItem = {
+        id: 'arrow_' + Date.now(),
+        type: 'arrow',
+        x: pos.x,
+        y: pos.y,
+        endX: pos.x,
+        endY: pos.y,
+        width: 0,
+        height: 0,
+        color: this.selectedColor(),
+        lineWidth: this.selectedLineWidth(),
+      };
+      this.currentDrawingItem = newArrow;
+      this.annotations.update((items) => [...items, newArrow]);
+      this.selectedAnnotationId.set(newArrow.id);
     } else if (this.activeTool() === 'freehand') {
       const newPath: AnnotationItem = {
         id: 'free_' + Date.now(),
@@ -901,22 +1166,39 @@ export class FeedbackDialogComponent implements OnInit {
         y: pos.y,
         width: 0,
         height: 0,
-        color: this.drawColor,
-        lineWidth: this.lineWidth,
+        color: this.selectedColor(),
+        lineWidth: this.selectedLineWidth(),
         points: [{ x: pos.x, y: pos.y }],
       };
       this.currentDrawingItem = newPath;
       this.annotations.update((items) => [...items, newPath]);
+      this.selectedAnnotationId.set(newPath.id);
     }
   }
 
   draw(event: MouseEvent | TouchEvent): void {
     const pos = this.getCanvasPosition(event);
 
-    // Arrastar/reposicionar anotação existente
+    // Arrastar/reposicionar anotação existente (delta incremental)
     if (this.isMovingAnnotation && this.movingAnnotationItem) {
-      this.movingAnnotationItem.x = pos.x - this.moveOffset.x;
-      this.movingAnnotationItem.y = pos.y - this.moveOffset.y;
+      const dx = pos.x - this.moveOffset.x;
+      const dy = pos.y - this.moveOffset.y;
+      this.moveOffset = { x: pos.x, y: pos.y };
+
+      const item = this.movingAnnotationItem;
+      item.x += dx;
+      item.y += dy;
+
+      if (item.type === 'arrow') {
+        if (item.endX !== undefined) item.endX += dx;
+        if (item.endY !== undefined) item.endY += dy;
+      } else if (item.type === 'freehand' && item.points) {
+        for (const pt of item.points) {
+          pt.x += dx;
+          pt.y += dy;
+        }
+      }
+
       this.renderCanvas();
       return;
     }
@@ -928,6 +1210,10 @@ export class FeedbackDialogComponent implements OnInit {
       this.currentDrawingItem.width = pos.x - this.startPos.x;
       this.currentDrawingItem.height = pos.y - this.startPos.y;
       this.renderCanvas();
+    } else if (this.currentDrawingItem.type === 'arrow') {
+      this.currentDrawingItem.endX = pos.x;
+      this.currentDrawingItem.endY = pos.y;
+      this.renderCanvas();
     } else if (this.currentDrawingItem.type === 'freehand') {
       this.currentDrawingItem.points?.push({ x: pos.x, y: pos.y });
       this.renderCanvas();
@@ -935,23 +1221,48 @@ export class FeedbackDialogComponent implements OnInit {
   }
 
   stopDrawing(): void {
-    if (this.currentDrawingItem && this.currentDrawingItem.type === 'rectangle') {
-      // Normalizar retângulo com largura/altura negativas
-      if (this.currentDrawingItem.width < 0) {
-        this.currentDrawingItem.x += this.currentDrawingItem.width;
-        this.currentDrawingItem.width = Math.abs(this.currentDrawingItem.width);
-      }
-      if (this.currentDrawingItem.height < 0) {
-        this.currentDrawingItem.y += this.currentDrawingItem.height;
-        this.currentDrawingItem.height = Math.abs(this.currentDrawingItem.height);
-      }
+    if (this.currentDrawingItem) {
+      if (this.currentDrawingItem.type === 'rectangle') {
+        // Normalizar retângulo com largura/altura negativas
+        if (this.currentDrawingItem.width < 0) {
+          this.currentDrawingItem.x += this.currentDrawingItem.width;
+          this.currentDrawingItem.width = Math.abs(this.currentDrawingItem.width);
+        }
+        if (this.currentDrawingItem.height < 0) {
+          this.currentDrawingItem.y += this.currentDrawingItem.height;
+          this.currentDrawingItem.height = Math.abs(this.currentDrawingItem.height);
+        }
 
-      // Descartar cliques muito curtos sem arraste
-      if (this.currentDrawingItem.width < 8 && this.currentDrawingItem.height < 8) {
-        this.annotations.update((items) =>
-          items.filter((i) => i.id !== this.currentDrawingItem!.id)
-        );
-        this.selectedAnnotationId.set(null);
+        // Descartar cliques muito curtos sem arraste
+        if (this.currentDrawingItem.width < 8 && this.currentDrawingItem.height < 8) {
+          this.annotations.update((items) =>
+            items.filter((i) => i.id !== this.currentDrawingItem!.id)
+          );
+          this.selectedAnnotationId.set(null);
+        }
+      } else if (this.currentDrawingItem.type === 'arrow') {
+        const dx = (this.currentDrawingItem.endX ?? this.currentDrawingItem.x) - this.currentDrawingItem.x;
+        const dy = (this.currentDrawingItem.endY ?? this.currentDrawingItem.y) - this.currentDrawingItem.y;
+        const length = Math.hypot(dx, dy);
+        if (length < 8) {
+          this.annotations.update((items) =>
+            items.filter((i) => i.id !== this.currentDrawingItem!.id)
+          );
+          this.selectedAnnotationId.set(null);
+        }
+      } else if (this.currentDrawingItem.type === 'freehand') {
+        if (!this.currentDrawingItem.points || this.currentDrawingItem.points.length < 2) {
+          this.annotations.update((items) =>
+            items.filter((i) => i.id !== this.currentDrawingItem!.id)
+          );
+          this.selectedAnnotationId.set(null);
+        } else {
+          const bounds = this.getFreehandBounds(this.currentDrawingItem.points);
+          this.currentDrawingItem.x = bounds.minX;
+          this.currentDrawingItem.y = bounds.minY;
+          this.currentDrawingItem.width = bounds.maxX - bounds.minX;
+          this.currentDrawingItem.height = bounds.maxY - bounds.minY;
+        }
       }
     }
 
@@ -977,8 +1288,8 @@ export class FeedbackDialogComponent implements OnInit {
       y: current.canvasY,
       width: 0,
       height: 0,
-      color: '#ef4444',
-      lineWidth: 2,
+      color: this.selectedColor(),
+      lineWidth: this.selectedLineWidth(),
       text: text,
     };
 
@@ -1036,6 +1347,8 @@ export class FeedbackDialogComponent implements OnInit {
   onSubmit(): void {
     if (this.feedbackForm.invalid) {
       this.feedbackForm.markAllAsTouched();
+      this.focusFirstInvalidField();
+      this.toastr.warning('Por favor, preencha os campos obrigatórios em destaque.');
       return;
     }
 
@@ -1076,6 +1389,37 @@ export class FeedbackDialogComponent implements OnInit {
         this.submitting.set(false);
       },
     });
+  }
+
+  private focusFirstInvalidField(): void {
+    const controls = ['title', 'description'];
+    for (const name of controls) {
+      const control = this.feedbackForm.get(name);
+      if (control && control.invalid) {
+        const inputElement = this.elementRef.nativeElement.querySelector(
+          `[formControlName="${name}"]`
+        ) as HTMLElement | null;
+
+        if (inputElement) {
+          inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => {
+            inputElement.focus();
+          }, 100);
+          return;
+        }
+      }
+    }
+
+    const firstInvalid = this.elementRef.nativeElement.querySelector(
+      '.ng-invalid[formControlName], mat-form-field.ng-invalid input, mat-form-field.ng-invalid textarea'
+    ) as HTMLElement | null;
+
+    if (firstInvalid) {
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        firstInvalid.focus();
+      }, 100);
+    }
   }
 
   loadMyFeedbacks(): void {
