@@ -247,6 +247,8 @@ export class FeedbackDetailDialogComponent implements OnInit {
         return 'Melhoria de UI';
       case 'CRITICISM':
         return 'Crítica';
+      case 'PRAISE':
+        return 'Elogios';
       default:
         return type;
     }

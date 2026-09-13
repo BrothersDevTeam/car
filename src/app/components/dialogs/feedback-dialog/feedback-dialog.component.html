@@ -1,4 +1,4 @@
-<div class="feedback-dialog-container">
+<div class="feedback-dialog-container" [class.has-screenshot]="!!screenshotDataUrl()">
   <!-- Header -->
   <div class="dialog-header">
     <div class="header-title">
@@ -22,228 +22,607 @@
         Novo Feedback
       </ng-template>
 
-      <div class="tab-body">
-        <form [formGroup]="feedbackForm" (ngSubmit)="onSubmit()">
-          <!-- Seletor de Tipo -->
-          <div class="type-selector-section">
-            <label class="section-label">O que você gostaria de enviar?</label>
-            <div class="type-chips">
-              @for (item of feedbackTypes; track item.value) {
-                <button
-                  type="button"
-                  class="type-chip"
-                  [class.active]="feedbackForm.get('type')?.value === item.value"
-                  (click)="feedbackForm.get('type')?.setValue(item.value)"
-                >
-                  <mat-icon [style.color]="item.color">{{ item.icon }}</mat-icon>
-                  <span>{{ item.label }}</span>
-                </button>
-              }
-            </div>
-          </div>
-
-          <!-- Campos de Texto -->
-          <div class="form-fields">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Título resumido</mat-label>
-              <input matInput formControlName="title" placeholder="Ex: Ajustar filtro na listagem de veículos" />
-              @if (feedbackForm.get('title')?.hasError('required') && feedbackForm.get('title')?.touched) {
-                <mat-error>O título é obrigatório</mat-error>
-              }
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Detalhamento da sugestão ou problema</mat-label>
-              <textarea
-                matInput
-                formControlName="description"
-                rows="3"
-                placeholder="Descreva com detalhes o que aconteceu ou a sua sugestão..."
-              ></textarea>
-              @if (feedbackForm.get('description')?.hasError('required') && feedbackForm.get('description')?.touched) {
-                <mat-error>A descrição é obrigatória</mat-error>
-              }
-            </mat-form-field>
-          </div>
-
-          <!-- Seção de Captura de Tela -->
-          <div class="screenshot-section">
-            <div class="screenshot-header">
-              <div class="screenshot-title">
-                <mat-icon>photo_camera</mat-icon>
-                <span>Captura de Tela da Sua Visualização (Opcional)</span>
-              </div>
-
-              @if (screenshotDataUrl()) {
-                <div class="screenshot-tools">
-                  <!-- Ferramenta: Retângulo -->
+      <div class="tab-body split-mode-tab-body">
+        <form [formGroup]="feedbackForm" (ngSubmit)="onSubmit()" class="feedback-split-layout">
+          <!-- COLUNA ESQUERDA: Formulário e Ferramentas -->
+          <div class="split-sidebar">
+            <div class="sidebar-scrollable-content">
+              <!-- 1. Seletor de Tipo / Tag (Compacto quando selecionado) -->
+              @if (feedbackForm.get('type')?.value) {
+                <div class="selected-tag-bar">
+                  <span class="tag-bar-label">Categoria:</span>
                   <button
                     type="button"
-                    mat-stroked-button
-                    [class.tool-active]="activeTool() === 'rectangle'"
-                    (click)="setActiveTool('rectangle')"
-                    class="tool-btn"
-                    matTooltip="Desenhar caixa / retângulo de destaque"
+                    class="selected-tag-pill"
+                    [matMenuTriggerFor]="tagChangeMenu"
+                    matTooltip="Clique para trocar a categoria"
                   >
-                    <mat-icon>crop_square</mat-icon>
-                    <span>Retângulo</span>
+                    <mat-icon class="pill-icon" [style.color]="selectedTypeObj?.color">{{ selectedTypeObj?.icon }}</mat-icon>
+                    <span class="tag-name">{{ selectedTypeObj?.label }}</span>
+                    <span class="tag-change-badge">
+                      <mat-icon>swap_vert</mat-icon>
+                      Trocar
+                    </span>
                   </button>
-
-                  <!-- Ferramenta: Seta -->
-                  <button
-                    type="button"
-                    mat-stroked-button
-                    [class.tool-active]="activeTool() === 'arrow'"
-                    (click)="setActiveTool('arrow')"
-                    class="tool-btn"
-                    matTooltip="Desenhar seta indicativa"
-                  >
-                    <mat-icon>north_east</mat-icon>
-                    <span>Seta</span>
-                  </button>
-
-                  <!-- Ferramenta: Caneta Livre -->
-                  <button
-                    type="button"
-                    mat-stroked-button
-                    [class.tool-active]="activeTool() === 'freehand'"
-                    (click)="setActiveTool('freehand')"
-                    class="tool-btn"
-                    matTooltip="Desenho livre com caneta"
-                  >
-                    <mat-icon>draw</mat-icon>
-                    <span>Caneta</span>
-                  </button>
-
-                  <!-- Ferramenta: Texto -->
-                  <button
-                    type="button"
-                    mat-stroked-button
-                    [class.tool-active]="activeTool() === 'text'"
-                    (click)="setActiveTool('text')"
-                    class="tool-btn"
-                    matTooltip="Inserir texto anotativo sobre a imagem"
-                  >
-                    <mat-icon>title</mat-icon>
-                    <span>Texto</span>
-                  </button>
-
-                  <span class="tool-divider"></span>
-
-                  <!-- Paleta de Cores -->
-                  <div class="color-palette-group" matTooltip="Cor do traço/texto">
-                    @for (color of colorPalette; track color) {
+                  <mat-menu #tagChangeMenu="matMenu" class="feedback-types-menu">
+                    @for (item of feedbackTypes; track item.value) {
+                      <button mat-menu-item (click)="onSelectType(item.value)">
+                        <mat-icon [style.color]="item.color">{{ item.icon }}</mat-icon>
+                        <span>{{ item.label }}</span>
+                      </button>
+                    }
+                  </mat-menu>
+                </div>
+              } @else {
+                <div class="type-selector-section initial-selection">
+                  <div class="type-selector-header">
+                    <mat-icon class="selector-prompt-icon">category</mat-icon>
+                    <div>
+                      <label class="section-label">O que você gostaria de enviar?</label>
+                      <p class="section-hint">Escolha uma tag para iniciar:</p>
+                    </div>
+                  </div>
+                  <div class="type-chips">
+                    @for (item of feedbackTypes; track item.value) {
                       <button
                         type="button"
-                        class="color-swatch-btn"
-                        [class.active]="selectedColor() === color"
-                        [style.backgroundColor]="color"
-                        (click)="setColor(color)"
-                        [attr.aria-label]="'Cor ' + color"
+                        class="type-chip"
+                        [class.active]="feedbackForm.get('type')?.value === item.value"
+                        (click)="onSelectType(item.value)"
                       >
-                        @if (selectedColor() === color) {
-                          <mat-icon class="check-icon" [style.color]="color === '#ffffff' ? '#0f172a' : '#ffffff'">check</mat-icon>
-                        }
+                        <mat-icon [style.color]="item.color">{{ item.icon }}</mat-icon>
+                        <span>{{ item.label }}</span>
                       </button>
                     }
                   </div>
-
-                  <span class="tool-divider"></span>
-
-                  <!-- Seletor de Espessura de Linha -->
-                  <div class="line-width-group" matTooltip="Espessura da linha">
-                    @for (weight of lineWeights; track weight.width) {
-                      <button
-                        type="button"
-                        class="line-width-btn"
-                        [class.active]="selectedLineWidth() === weight.width"
-                        (click)="setLineWidth(weight.width)"
-                        [matTooltip]="weight.label"
-                      >
-                        <span class="line-preview" [style.height.px]="weight.width"></span>
-                      </button>
-                    }
-                  </div>
-
-                  <span class="tool-divider"></span>
-
-                  <!-- Desfazer (Undo) -->
-                  <button
-                    type="button"
-                    mat-icon-button
-                    (click)="undoLastAction()"
-                    [disabled]="annotations().length === 0"
-                    matTooltip="Desfazer última alteração"
-                  >
-                    <mat-icon>undo</mat-icon>
-                  </button>
-
-                  <!-- Excluir item selecionado -->
-                  @if (selectedAnnotationId()) {
-                    <button
-                      type="button"
-                      mat-icon-button
-                      color="warn"
-                      (click)="deleteSelectedAnnotation()"
-                      matTooltip="Excluir elemento selecionado (Del)"
-                    >
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  }
-
-                  <!-- Limpar Marcações -->
-                  <button type="button" mat-icon-button (click)="clearAnnotations()" matTooltip="Limpar anotações">
-                    <mat-icon>cleaning_services</mat-icon>
-                  </button>
-
-                  <!-- Recortar Nova Área -->
-                  <button
-                    type="button"
-                    mat-icon-button
-                    (click)="startAreaSelectionCapture()"
-                    matTooltip="Recortar nova área da tela"
-                  >
-                    <mat-icon>crop</mat-icon>
-                  </button>
-
-                  <!-- Remover Print -->
-                  <button type="button" mat-icon-button color="warn" (click)="removeScreenshot()" matTooltip="Remover print">
-                    <mat-icon>delete_outline</mat-icon>
-                  </button>
                 </div>
               }
+
+              @if (!feedbackForm.get('type')?.value) {
+                <!-- Prompt Inicial: Escolha de Tag -->
+                <div class="select-tag-prompt-card">
+                  <div class="prompt-icon-bubble">
+                    <mat-icon>touch_app</mat-icon>
+                  </div>
+                  <h3>Escolha uma tag acima para começar</h3>
+                  <p>Selecione se seu feedback é um <strong>Erro / Bug</strong>, <strong>Sugestão</strong>, <strong>Elogios</strong> ou outra opção.</p>
+                </div>
+              } @else {
+                <!-- 2. Inputs de Texto -->
+                <div class="form-inputs-group">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Título resumido</mat-label>
+                    <input
+                      #titleInput
+                      matInput
+                      formControlName="title"
+                      placeholder="Ex: Ajustar filtro na listagem de veículos"
+                    />
+                    @if (feedbackForm.get('title')?.hasError('required') && feedbackForm.get('title')?.touched) {
+                      <mat-error>O título é obrigatório</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Detalhamento da sugestão ou problema</mat-label>
+                    <textarea
+                      matInput
+                      formControlName="description"
+                      rows="2"
+                      placeholder="Descreva com detalhes o que aconteceu ou a sua mensagem..."
+                    ></textarea>
+                    @if (feedbackForm.get('description')?.hasError('required') && feedbackForm.get('description')?.touched) {
+                      <mat-error>A descrição é obrigatória</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+
+                <!-- 3. Painel de Ferramentas de Desenho (visível quando houver screenshot) -->
+                @if (screenshotDataUrl()) {
+                  <div class="sidebar-annotation-panel">
+                    <div class="panel-section-title">
+                      <mat-icon>draw</mat-icon>
+                      <span>Ferramentas de Anotação</span>
+                    </div>
+
+                    <!-- Botões de Formas -->
+                    <div class="tools-grid-shapes">
+                      <button
+                        type="button"
+                        mat-stroked-button
+                        class="shape-btn"
+                        [class.active]="activeTool() === 'rectangle'"
+                        (click)="setActiveTool('rectangle')"
+                        matTooltip="Retângulo de destaque"
+                      >
+                        <mat-icon>crop_square</mat-icon>
+                        <span>Retângulo</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        mat-stroked-button
+                        class="shape-btn"
+                        [class.active]="activeTool() === 'arrow'"
+                        (click)="setActiveTool('arrow')"
+                        matTooltip="Seta indicativa"
+                      >
+                        <mat-icon>north_east</mat-icon>
+                        <span>Seta</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        mat-stroked-button
+                        class="shape-btn"
+                        [class.active]="activeTool() === 'freehand'"
+                        (click)="setActiveTool('freehand')"
+                        matTooltip="Caneta livre"
+                      >
+                        <mat-icon>draw</mat-icon>
+                        <span>Caneta</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        mat-stroked-button
+                        class="shape-btn"
+                        [class.active]="activeTool() === 'text'"
+                        (click)="setActiveTool('text')"
+                        matTooltip="Texto anotativo"
+                      >
+                        <mat-icon>title</mat-icon>
+                        <span>Texto</span>
+                      </button>
+                    </div>
+
+                    <!-- Controles Específicos para Texto (Tamanho e Cor da Letra) -->
+                    @if (isTextSelectedOrActive) {
+                      <div class="tool-subgroup">
+                        <span class="subgroup-label">Tamanho do texto:</span>
+                        <div class="font-stepper-control">
+                          <button
+                            type="button"
+                            class="stepper-btn"
+                            (click)="adjustFontSize(-2)"
+                            [disabled]="selectedFontSize() <= 10"
+                            matTooltip="Diminuir texto (-2px)"
+                          >
+                            <mat-icon>remove</mat-icon>
+                          </button>
+                          <div class="stepper-input-wrapper">
+                            <input
+                              type="number"
+                              class="stepper-input"
+                              [value]="selectedFontSize()"
+                              (input)="onFontSizeInputChange($any($event.target).value)"
+                              min="10"
+                              max="72"
+                            />
+                            <span class="stepper-unit">px</span>
+                          </div>
+                          <button
+                            type="button"
+                            class="stepper-btn"
+                            (click)="adjustFontSize(2)"
+                            [disabled]="selectedFontSize() >= 72"
+                            matTooltip="Aumentar texto (+2px)"
+                          >
+                            <mat-icon>add</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="tool-subgroup">
+                        <span class="subgroup-label">Cor da letra:</span>
+                        <div class="color-palette-row">
+                          @for (color of textColorsPalette; track color) {
+                            <button
+                              type="button"
+                              class="color-swatch-btn"
+                              [class.active]="selectedTextColor() === color"
+                              [style.backgroundColor]="color"
+                              (click)="setTextColor(color)"
+                              [attr.aria-label]="'Cor da letra ' + color"
+                              matTooltip="Mudar cor da letra"
+                            >
+                              @if (selectedTextColor() === color) {
+                                <mat-icon class="check-icon" [style.color]="isLightColor(color) ? '#0f172a' : '#ffffff'">check</mat-icon>
+                              }
+                            </button>
+                          }
+                          <!-- Roda de Cores RGB para Texto -->
+                          <button
+                            type="button"
+                            class="color-wheel-btn"
+                            (click)="openColorPicker('text')"
+                            matTooltip="Roda de cores RGB (Letra)"
+                          >
+                            <mat-icon>palette</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                    }
+
+                    <!-- Controles Específicos para Retângulo (Cantos Arredondados e Cor de Fundo) -->
+                    @if (isRectangleSelectedOrActive) {
+                      <div class="tool-subgroup">
+                        <span class="subgroup-label">Cantos arredondados:</span>
+                        <div class="font-stepper-control">
+                          <button
+                            type="button"
+                            class="stepper-btn"
+                            (click)="adjustBorderRadius(-4)"
+                            [disabled]="selectedBorderRadius() <= 0"
+                            matTooltip="Menos arredondado (-4px)"
+                          >
+                            <mat-icon>remove</mat-icon>
+                          </button>
+                          <div class="stepper-input-wrapper">
+                            <input
+                              type="number"
+                              class="stepper-input"
+                              [value]="selectedBorderRadius()"
+                              (input)="setBorderRadius($any($event.target).value)"
+                              min="0"
+                              max="60"
+                            />
+                            <span class="stepper-unit">px</span>
+                          </div>
+                          <button
+                            type="button"
+                            class="stepper-btn"
+                            (click)="adjustBorderRadius(4)"
+                            [disabled]="selectedBorderRadius() >= 60"
+                            matTooltip="Mais arredondado (+4px)"
+                          >
+                            <mat-icon>add</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="tool-subgroup">
+                        <span class="subgroup-label">Cor de fundo:</span>
+                        <div class="color-palette-row">
+                          <!-- Opção Transparente / Sem Preenchimento -->
+                          <button
+                            type="button"
+                            class="color-swatch-btn btn-transparent-swatch"
+                            [class.active]="selectedRectBgColor() === 'transparent'"
+                            (click)="setRectBgColor('transparent')"
+                            matTooltip="Sem fundo (Transparente)"
+                          >
+                            <mat-icon class="no-fill-icon">block</mat-icon>
+                          </button>
+                          @for (color of rectBgColorsPalette.slice(1); track color) {
+                            <button
+                              type="button"
+                              class="color-swatch-btn"
+                              [class.active]="selectedRectBgColor() === color"
+                              [style.backgroundColor]="color"
+                              (click)="setRectBgColor(color)"
+                              matTooltip="Mudar cor de fundo"
+                            >
+                              @if (selectedRectBgColor() === color) {
+                                <mat-icon class="check-icon" [style.color]="isLightColor(color) ? '#0f172a' : '#ffffff'">check</mat-icon>
+                              }
+                            </button>
+                          }
+                          <!-- Roda de Cores RGB para Fundo -->
+                          <button
+                            type="button"
+                            class="color-wheel-btn"
+                            (click)="openColorPicker('rectBg')"
+                            matTooltip="Roda de cores RGB (Fundo)"
+                          >
+                            <mat-icon>palette</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Opacidade do Fundo do Retângulo (Permite retirar a transparência e deixar 100% sólido) -->
+                      @if (selectedRectBgColor() !== 'transparent') {
+                        <div class="tool-subgroup">
+                          <span class="subgroup-label">Opacidade do fundo:</span>
+                          <div class="opacity-controls-row">
+                            <button
+                              type="button"
+                              class="opacity-preset-btn"
+                              [class.active]="selectedBgOpacity() === 100"
+                              (click)="setRectBgOpacity(100)"
+                              matTooltip="Fundo 100% sólido (sem transparência)"
+                            >
+                              Sólido
+                            </button>
+                            <button
+                              type="button"
+                              class="opacity-preset-btn"
+                              [class.active]="selectedBgOpacity() === 35"
+                              (click)="setRectBgOpacity(35)"
+                              matTooltip="Fundo translúcido (marca-texto)"
+                            >
+                              Translúcido
+                            </button>
+                            <div class="font-stepper-control opacity-stepper">
+                              <button
+                                type="button"
+                                class="stepper-btn"
+                                (click)="adjustBgOpacity(-10)"
+                                [disabled]="selectedBgOpacity() <= 10"
+                                matTooltip="Diminuir opacidade (-10%)"
+                              >
+                                <mat-icon>remove</mat-icon>
+                              </button>
+                              <div class="stepper-input-wrapper">
+                                <input
+                                  type="number"
+                                  class="stepper-input"
+                                  [value]="selectedBgOpacity()"
+                                  (input)="setRectBgOpacity($any($event.target).value)"
+                                  min="10"
+                                  max="100"
+                                  step="5"
+                                />
+                                <span class="stepper-unit">%</span>
+                              </div>
+                              <button
+                                type="button"
+                                class="stepper-btn"
+                                (click)="adjustBgOpacity(10)"
+                                [disabled]="selectedBgOpacity() >= 100"
+                                matTooltip="Aumentar opacidade (+10%)"
+                              >
+                                <mat-icon>add</mat-icon>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    }
+
+                    <!-- Seletor de Cores (Fundo do Texto ou Cor do Traço / Borda) -->
+                    <div class="tool-subgroup">
+                      <span class="subgroup-label">{{ isTextSelectedOrActive ? 'Cor de fundo do texto:' : (isRectangleSelectedOrActive ? 'Cor da borda:' : 'Cor do traço:') }}</span>
+                      <div class="color-palette-row">
+                        @for (color of colorPalette; track color) {
+                          <button
+                            type="button"
+                            class="color-swatch-btn"
+                            [class.active]="selectedColor() === color"
+                            [style.backgroundColor]="color"
+                            (click)="setColor(color)"
+                            [attr.aria-label]="'Cor ' + color"
+                            matTooltip="Mudar cor"
+                          >
+                            @if (selectedColor() === color) {
+                              <mat-icon class="check-icon" [style.color]="isLightColor(color) ? '#0f172a' : '#ffffff'">check</mat-icon>
+                            }
+                          </button>
+                        }
+                        <!-- Roda de Cores RGB para Traço/Borda -->
+                        <button
+                          type="button"
+                          class="color-wheel-btn"
+                          (click)="openColorPicker('stroke')"
+                          matTooltip="Roda de cores RGB (Traço/Borda)"
+                        >
+                          <mat-icon>palette</mat-icon>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Espessura da Linha (apenas para formas de traço) -->
+                    @if (!isTextSelectedOrActive) {
+                      <div class="tool-subgroup">
+                        <span class="subgroup-label">Espessura do traço:</span>
+                        <div class="line-weights-row">
+                          @for (weight of lineWeights; track weight.width) {
+                            <button
+                              type="button"
+                              class="weight-btn"
+                              [class.active]="selectedLineWidth() === weight.width"
+                              (click)="setLineWidth(weight.width)"
+                              [matTooltip]="weight.label"
+                            >
+                              <span class="weight-line" [style.height.px]="weight.width"></span>
+                              <span class="weight-label">{{ weight.label }}</span>
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+
+                    <!-- Controle de Rotação Universal (para qualquer componente selecionado) -->
+                    @if (selectedAnnotationId()) {
+                      <div class="tool-subgroup">
+                        <span class="subgroup-label">Rotação do elemento:</span>
+                        <div class="rotation-controls-row">
+                          <button
+                            type="button"
+                            class="stepper-btn"
+                            (click)="rotateSelectedBy(-15)"
+                            matTooltip="Girar -15°"
+                          >
+                            <mat-icon>rotate_left</mat-icon>
+                          </button>
+                          <div class="stepper-input-wrapper">
+                            <input
+                              type="number"
+                              class="stepper-input"
+                              [value]="selectedRotation()"
+                              (input)="setSelectedRotation($any($event.target).value)"
+                              min="0"
+                              max="360"
+                            />
+                            <span class="stepper-unit">°</span>
+                          </div>
+                          <button
+                            type="button"
+                            class="stepper-btn"
+                            (click)="rotateSelectedBy(15)"
+                            matTooltip="Girar +15°"
+                          >
+                            <mat-icon>rotate_right</mat-icon>
+                          </button>
+                          <button
+                            type="button"
+                            class="rotation-quick-btn"
+                            (click)="rotateSelectedBy(90)"
+                            matTooltip="Girar +90° no sentido horário"
+                          >
+                            +90°
+                          </button>
+                          <button
+                            type="button"
+                            class="rotation-quick-btn"
+                            (click)="setSelectedRotation(0)"
+                            matTooltip="Redefinir rotação (0°)"
+                          >
+                            <mat-icon>restart_alt</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                    }
+
+                    <!-- Ações da Anotação e Imagem -->
+                    <div class="annotation-actions-row">
+                      <button
+                        type="button"
+                        mat-stroked-button
+                        (click)="undoLastAction()"
+                        [disabled]="annotations().length === 0"
+                        matTooltip="Desfazer última alteração"
+                        class="action-tiny-btn"
+                      >
+                        <mat-icon>undo</mat-icon>
+                        <span>Desfazer</span>
+                      </button>
+
+                      @if (selectedAnnotationId()) {
+                        <button
+                          type="button"
+                          mat-stroked-button
+                          color="warn"
+                          (click)="deleteSelectedAnnotation()"
+                          matTooltip="Excluir selecionado (Del)"
+                          class="action-tiny-btn btn-danger"
+                        >
+                          <mat-icon>delete</mat-icon>
+                          <span>Excluir</span>
+                        </button>
+                      }
+
+                      <button
+                        type="button"
+                        mat-stroked-button
+                        (click)="clearAnnotations()"
+                        matTooltip="Limpar todas as marcações"
+                        class="action-tiny-btn"
+                      >
+                        <mat-icon>cleaning_services</mat-icon>
+                        <span>Limpar</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        mat-stroked-button
+                        (click)="startAreaSelectionCapture()"
+                        matTooltip="Recortar nova área"
+                        class="action-tiny-btn"
+                      >
+                        <mat-icon>crop</mat-icon>
+                        <span>Recortar</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        mat-stroked-button
+                        color="warn"
+                        (click)="removeScreenshot()"
+                        matTooltip="Remover print anexado"
+                        class="action-tiny-btn btn-danger"
+                      >
+                        <mat-icon>delete_outline</mat-icon>
+                        <span>Remover Print</span>
+                      </button>
+                    </div>
+                  </div>
+                }
+              }
             </div>
 
-            <!-- Loading de Captura -->
+            <!-- Rodapé Fixo da Coluna Esquerda -->
+            <div class="sidebar-footer-actions">
+              <button mat-stroked-button type="button" (click)="onClose()" class="btn-cancel">
+                Cancelar
+              </button>
+              <button
+                mat-flat-button
+                color="primary"
+                type="submit"
+                class="btn-submit"
+                [disabled]="submitting() || !feedbackForm.get('type')?.value || feedbackForm.invalid"
+              >
+                @if (submitting()) {
+                  <mat-spinner diameter="18"></mat-spinner>
+                  <span>Enviando...</span>
+                }
+                @if (!submitting()) {
+                  <mat-icon class="btn-icon">send</mat-icon>
+                }
+                @if (!submitting()) {
+                  <span>Enviar Feedback</span>
+                }
+              </button>
+            </div>
+          </div>
+
+          <!-- COLUNA DIREITA: Área de Imagem e Desenho -->
+          <div class="split-viewport" [class.maximized-mode]="isCanvasMaximized()">
+            @if (screenshotDataUrl()) {
+              <!-- Botão de Expandir Tela Cheia no topo direito da viewport -->
+              <button
+                type="button"
+                mat-icon-button
+                class="viewport-expand-btn"
+                [class.active]="isCanvasMaximized()"
+                (click)="toggleMaximizeCanvas()"
+                [matTooltip]="isCanvasMaximized() ? 'Restaurar layout dividido' : 'Expandir imagem em tela cheia'"
+              >
+                <mat-icon>{{ isCanvasMaximized() ? 'close_fullscreen' : 'open_in_full' }}</mat-icon>
+              </button>
+            }
+
             @if (capturingScreenshot()) {
-              <div class="screenshot-loading">
-                <mat-spinner diameter="34"></mat-spinner>
+              <div class="viewport-loading">
+                <mat-spinner diameter="44"></mat-spinner>
                 <span>Preparando captura da tela...</span>
               </div>
             } @else if (screenshotDataUrl()) {
-              <!-- Canvas com Imagem Carregada -->
+              <!-- Canvas Gigante Ocupando Todo o Espaço Direito -->
               <div class="canvas-wrapper">
-                <!-- Banner de instrução da ferramenta ativa -->
+                <!-- Banner de Dica -->
                 <div class="drawing-banner">
                   @if (selectedAnnotationId()) {
-                    <span>↔️ Elemento selecionado: arraste para mover, altere cor/espessura ou pressione Delete para excluir</span>
+                    <span>↔️ Elemento selecionado: arraste para mover, altere cor ou pressione Del para excluir</span>
                   } @else if (activeTool() === 'rectangle') {
-                    <span>🔲 Clique e arraste para criar um retângulo (clique nele depois para reposicionar)</span>
+                    <span>🔲 Clique e arraste para desenhar um retângulo</span>
                   } @else if (activeTool() === 'arrow') {
-                    <span>↗️ Clique e arraste para desenhar uma seta (o término do clique define a ponta)</span>
+                    <span>↗️ Clique e arraste para desenhar uma seta</span>
                   } @else if (activeTool() === 'freehand') {
-                    <span>✏️ Desenho livre com a caneta (clique sobre o traço para selecioná-lo e reposicioná-lo)</span>
+                    <span>✏️ Desenho livre com a caneta</span>
                   } @else if (activeTool() === 'text') {
-                    <span>💬 Clique em qualquer ponto da imagem para inserir um texto (arrastável)</span>
+                    <span>💬 Clique em qualquer ponto da imagem para inserir um texto</span>
                   }
                 </div>
 
-                <!-- Input Flutuante de Texto sobre a Imagem -->
+                <!-- Input Flutuante de Texto -->
                 @if (textAnnotation().visible) {
                   <div
                     class="floating-text-editor"
                     [style.left.px]="textAnnotation().screenX"
                     [style.top.px]="textAnnotation().screenY"
+                    [style.backgroundColor]="selectedColor()"
                   >
                     <input
                       #floatingTextInput
@@ -252,7 +631,9 @@
                       (input)="updateAnnotationText($any($event.target).value)"
                       (keydown.enter)="applyTextAnnotation()"
                       (keydown.escape)="closeTextAnnotation()"
-                      placeholder="Digite a observação..."
+                      [style.color]="selectedTextColor()"
+                      [style.fontSize.px]="selectedFontSize()"
+                      placeholder="Digite o texto..."
                     />
                     <div class="editor-actions">
                       <button type="button" class="btn-apply" (click)="applyTextAnnotation()" matTooltip="Confirmar (Enter)">
@@ -278,15 +659,14 @@
                 ></canvas>
               </div>
             } @else {
-              <!-- Dropzone Vazia com Múltiplas Opções de Entrada -->
+              <!-- Dropzone Convidativa quando não há screenshot -->
               <div
-                class="screenshot-dropzone"
+                class="viewport-dropzone"
                 [class.drag-over]="isDraggingOver()"
                 (dragover)="onDragOver($event)"
                 (dragleave)="onDragLeave($event)"
                 (drop)="onDrop($event)"
               >
-                <!-- Input de arquivo invisível -->
                 <input
                   #fileInput
                   type="file"
@@ -295,68 +675,54 @@
                   style="display: none;"
                 />
 
-                <div class="dropzone-buttons">
-                  <!-- Capturar Área Selecionada (Destaque Principal) -->
-                  <button
-                    type="button"
-                    mat-flat-button
-                    color="primary"
-                    (click)="startAreaSelectionCapture()"
-                    class="action-btn highlight-btn"
-                  >
-                    <mat-icon>crop</mat-icon>
-                    <span>Capturar Área da Tela</span>
-                  </button>
+                <div class="dropzone-center-card">
+                  <div class="dropzone-icon-circle">
+                    <mat-icon>add_photo_alternate</mat-icon>
+                  </div>
+                  <h3>Anexe uma Imagem ou Capture a Tela (Opcional)</h3>
+                  <p>Destaque o problema ou sugestão desenhando diretamente sobre o print do sistema.</p>
 
-                  <!-- Capturar Tela Inteira -->
-                  <button
-                    type="button"
-                    mat-stroked-button
-                    color="primary"
-                    (click)="captureCurrentScreen()"
-                    class="action-btn"
-                  >
-                    <mat-icon>fullscreen</mat-icon>
-                    <span>Tela Inteira</span>
-                  </button>
+                  <div class="dropzone-actions-list">
+                    <button
+                      type="button"
+                      mat-flat-button
+                      color="primary"
+                      (click)="startAreaSelectionCapture()"
+                      class="main-capture-btn"
+                    >
+                      <mat-icon>crop</mat-icon>
+                      <span>Capturar Área da Tela</span>
+                    </button>
 
-                  <!-- Colar da Memória (Clipboard / Ctrl + V) -->
-                  <button
-                    type="button"
-                    mat-stroked-button
-                    (click)="pasteFromClipboard()"
-                    class="action-btn clipboard-btn"
-                    matTooltip="Pressione Ctrl + V em qualquer momento para colar o print do Windows"
-                  >
-                    <mat-icon>content_paste</mat-icon>
-                    <span>Colar Print (Ctrl + V)</span>
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      mat-stroked-button
+                      (click)="captureCurrentScreen()"
+                      class="sub-capture-btn"
+                    >
+                      <mat-icon>fullscreen</mat-icon>
+                      <span>Tela Inteira</span>
+                    </button>
 
-                <div class="dropzone-hint" (click)="triggerFileInput()">
-                  <mat-icon class="upload-icon">cloud_upload</mat-icon>
-                  <span>ou arraste um arquivo de imagem aqui / <strong>clique para selecionar</strong></span>
+                    <button
+                      type="button"
+                      mat-stroked-button
+                      (click)="pasteFromClipboard()"
+                      class="sub-capture-btn"
+                      matTooltip="Ou use Ctrl + V para colar uma imagem da área de transferência"
+                    >
+                      <mat-icon>content_paste</mat-icon>
+                      <span>Colar Print (Ctrl + V)</span>
+                    </button>
+                  </div>
+
+                  <div class="dropzone-upload-link" (click)="triggerFileInput()">
+                    <mat-icon>cloud_upload</mat-icon>
+                    <span>Arraste uma imagem aqui ou <strong>clique para escolher arquivo</strong></span>
+                  </div>
                 </div>
               </div>
             }
-          </div>
-
-          <!-- Botões de Ação -->
-          <div class="dialog-actions">
-            <button mat-button type="button" (click)="onClose()">Cancelar</button>
-            <button mat-flat-button color="primary" type="submit" class="btn-submit" [disabled]="submitting()">
-              @if (submitting()) {
-                <ng-container>
-                  <mat-spinner diameter="18"></mat-spinner>
-                  <span>Enviando...</span>
-                </ng-container>
-              } @else {
-                <ng-container>
-                  <mat-icon class="btn-icon">send</mat-icon>
-                  <span>Enviar Feedback</span>
-                </ng-container>
-              }
-            </button>
           </div>
         </form>
       </div>
@@ -419,4 +785,12 @@
       </div>
     </mat-tab>
   </mat-tab-group>
+
+  <!-- Seletor de cores nativo (Roda de cores RGB) -->
+  <input
+    #customColorPicker
+    type="color"
+    (input)="onCustomColorPicked($event)"
+    style="display: none;"
+  />
 </div>

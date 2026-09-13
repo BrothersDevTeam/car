@@ -1,13 +1,14 @@
 import { Component, ElementRef, HostListener, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -31,6 +32,11 @@ export interface AnnotationItem {
   color: string;
   lineWidth: number;
   text?: string;
+  fontSize?: number;
+  textColor?: string;
+  backgroundColor?: string;
+  borderRadius?: number;
+  rotation?: number;
   points?: { x: number; y: number }[];
   endX?: number;
   endY?: number;
@@ -50,6 +56,7 @@ export interface AnnotationItem {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    MatMenuModule,
     MatProgressSpinnerModule,
     MatChipsModule,
     MatTooltipModule,
@@ -62,12 +69,18 @@ export class FeedbackDialogComponent implements OnInit {
   @ViewChild('drawingCanvas') drawingCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('floatingTextInput') floatingTextInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('titleInput') titleInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('customColorPicker') customColorPicker?: ElementRef<HTMLInputElement>;
 
   private fb = inject(FormBuilder);
   private feedbackService = inject(FeedbackService);
   private toastr = inject(ToastrService);
   private router = inject(Router);
   public dialogRef = inject(MatDialogRef<FeedbackDialogComponent>);
+  public dialogData = inject<{ initialType?: FeedbackType; openMyFeedbacks?: boolean } | null>(
+    MAT_DIALOG_DATA,
+    { optional: true }
+  );
   private elementRef = inject(ElementRef);
 
   feedbackForm!: FormGroup;
@@ -77,6 +90,7 @@ export class FeedbackDialogComponent implements OnInit {
   capturingScreenshot = signal<boolean>(false);
   screenshotDataUrl = signal<string | null>(null);
   isDrawingMode = signal<boolean>(false);
+  isCanvasMaximized = signal<boolean>(false);
   submitting = signal<boolean>(false);
   loadingMyFeedbacks = signal<boolean>(false);
 
@@ -94,6 +108,15 @@ export class FeedbackDialogComponent implements OnInit {
   private isMovingAnnotation = false;
   private movingAnnotationItem: AnnotationItem | null = null;
   private moveOffset = { x: 0, y: 0 };
+  private isResizingAnnotation = false;
+  private activeResizeHandle: 'nw' | 'ne' | 'se' | 'sw' | null = null;
+  private resizingItem: AnnotationItem | null = null;
+  private initialDistanceToCenter = 0;
+  private initialFontSize = 18;
+
+  // Redimensionamento de Raio de Retângulo (Alça de cantos arredondados)
+  private isResizingRadius = false;
+  private resizingRadiusItem: AnnotationItem | null = null;
   private currentDrawingItem: AnnotationItem | null = null;
   private startPos: { x: number; y: number } = { x: 0, y: 0 };
 
@@ -129,8 +152,43 @@ export class FeedbackDialogComponent implements OnInit {
 
   selectedColor = signal<string>('#ef4444');
   selectedLineWidth = signal<number>(4);
+  selectedFontSize = signal<number>(18);
+  selectedTextColor = signal<string>('#ffffff');
+  selectedRectBgColor = signal<string>('transparent');
+  selectedRectBaseColor = signal<string>('transparent');
+  selectedBgOpacity = signal<number>(100);
+  selectedBorderRadius = signal<number>(0);
+  selectedRotation = signal<number>(0);
+  customColorTarget: 'stroke' | 'rectBg' | 'text' = 'stroke';
+
+  // Rotação de Anotações (Universal para todos os componentes)
+  private isRotatingAnnotation = false;
+  private rotatingItem: AnnotationItem | null = null;
 
   readonly colorPalette: string[] = [
+    '#ef4444',
+    '#f97316',
+    '#f59e0b',
+    '#10b981',
+    '#3b82f6',
+    '#8b5cf6',
+    '#0f172a',
+    '#ffffff',
+  ];
+
+  readonly textColorsPalette: string[] = [
+    '#ef4444',
+    '#f97316',
+    '#f59e0b',
+    '#10b981',
+    '#3b82f6',
+    '#8b5cf6',
+    '#0f172a',
+    '#ffffff',
+  ];
+
+  readonly rectBgColorsPalette: string[] = [
+    'transparent',
     '#ef4444',
     '#f97316',
     '#f59e0b',
@@ -148,15 +206,101 @@ export class FeedbackDialogComponent implements OnInit {
     { label: 'Extra', width: 8 },
   ];
 
+  get selectedTypeObj() {
+    const currentVal = this.feedbackForm?.get('type')?.value;
+    return this.feedbackTypes.find((t) => t.value === currentVal) || null;
+  }
+
+  get isTextSelectedOrActive(): boolean {
+    if (this.activeTool() === 'text') return true;
+    const selId = this.selectedAnnotationId();
+    if (selId) {
+      const item = this.annotations().find((a) => a.id === selId);
+      return item?.type === 'text';
+    }
+    return false;
+  }
+
+  get isRectangleSelectedOrActive(): boolean {
+    if (this.activeTool() === 'rectangle') return true;
+    const selId = this.selectedAnnotationId();
+    if (selId) {
+      const item = this.annotations().find((a) => a.id === selId);
+      return item?.type === 'rectangle';
+    }
+    return false;
+  }
+
+  isLightColor(hexColor: string): boolean {
+    if (!hexColor || hexColor === '#ffffff') return true;
+    const hex = hexColor.replace('#', '');
+    if (hex.length === 6) {
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+      return yiq >= 180;
+    }
+    return false;
+  }
+
   setColor(color: string): void {
     this.selectedColor.set(color);
     this.drawColor = color;
     const selectedId = this.selectedAnnotationId();
     if (selectedId) {
       this.annotations.update((items) =>
-        items.map((item) => (item.id === selectedId ? { ...item, color } : item))
+        items.map((item) => {
+          if (item.id === selectedId) {
+            const isText = item.type === 'text';
+            return {
+              ...item,
+              color,
+              textColor: isText ? (this.isLightColor(color) ? '#0f172a' : '#ffffff') : item.textColor,
+            };
+          }
+          return item;
+        })
       );
       this.renderCanvas();
+    }
+  }
+
+  setTextColor(color: string): void {
+    this.selectedTextColor.set(color);
+    const selectedId = this.selectedAnnotationId();
+    if (selectedId) {
+      this.annotations.update((items) =>
+        items.map((item) =>
+          item.id === selectedId && item.type === 'text' ? { ...item, textColor: color } : item
+        )
+      );
+      this.renderCanvas();
+    }
+  }
+
+  setFontSize(size: number): void {
+    const clamped = Math.min(72, Math.max(10, size));
+    this.selectedFontSize.set(clamped);
+    const selectedId = this.selectedAnnotationId();
+    if (selectedId) {
+      this.annotations.update((items) =>
+        items.map((item) => (item.id === selectedId && item.type === 'text' ? { ...item, fontSize: clamped } : item))
+      );
+      this.renderCanvas();
+    }
+  }
+
+  adjustFontSize(delta: number): void {
+    const current = this.selectedFontSize();
+    const next = Math.min(72, Math.max(10, current + delta));
+    this.setFontSize(next);
+  }
+
+  onFontSizeInputChange(val: string | number): void {
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    if (!isNaN(num)) {
+      this.setFontSize(num);
     }
   }
 
@@ -169,6 +313,157 @@ export class FeedbackDialogComponent implements OnInit {
         items.map((item) => (item.id === selectedId ? { ...item, lineWidth: width } : item))
       );
       this.renderCanvas();
+    }
+  }
+
+  hexToRgba(hex: string, opacityPercent: number): string {
+    if (!hex || hex === 'transparent') return 'transparent';
+    const clamped = Math.max(0, Math.min(100, opacityPercent));
+    if (clamped >= 100) {
+      return hex.startsWith('#') && hex.length >= 7 ? hex.substring(0, 7) : hex;
+    }
+    let cleanHex = hex.replace('#', '');
+    if (cleanHex.length === 8) cleanHex = cleanHex.substring(0, 6);
+    if (cleanHex.length === 3) cleanHex = cleanHex.split('').map((c) => c + c).join('');
+    if (cleanHex.length === 6) {
+      const alphaHex = Math.round((clamped / 100) * 255)
+        .toString(16)
+        .padStart(2, '0');
+      return `#${cleanHex}${alphaHex}`;
+    }
+    return hex;
+  }
+
+  parseHexColorAndOpacity(color: string): { baseColor: string; opacity: number } {
+    if (!color || color === 'transparent') {
+      return { baseColor: 'transparent', opacity: 100 };
+    }
+    const cleanHex = color.replace('#', '');
+    if (cleanHex.length === 8) {
+      const base = '#' + cleanHex.substring(0, 6);
+      const alphaVal = parseInt(cleanHex.substring(6, 8), 16);
+      const opacity = Math.round((alphaVal / 255) * 100);
+      return { baseColor: base, opacity };
+    }
+    return { baseColor: color, opacity: 100 };
+  }
+
+  setRectBgColor(color: string): void {
+    this.selectedRectBaseColor.set(color);
+    let finalColor = 'transparent';
+    if (color !== 'transparent') {
+      finalColor = this.hexToRgba(color, this.selectedBgOpacity());
+    }
+    this.selectedRectBgColor.set(finalColor);
+
+    const selectedId = this.selectedAnnotationId();
+    if (selectedId) {
+      this.annotations.update((items) =>
+        items.map((item) =>
+          item.id === selectedId && item.type === 'rectangle'
+            ? { ...item, backgroundColor: finalColor }
+            : item
+        )
+      );
+      this.renderCanvas();
+    }
+  }
+
+  setRectBgOpacity(opacity: number | string): void {
+    const num = typeof opacity === 'string' ? parseInt(opacity, 10) : opacity;
+    if (isNaN(num)) return;
+    const clamped = Math.max(5, Math.min(100, Math.round(num)));
+    this.selectedBgOpacity.set(clamped);
+
+    const baseColor = this.selectedRectBaseColor();
+    if (baseColor && baseColor !== 'transparent') {
+      const finalColor = this.hexToRgba(baseColor, clamped);
+      this.selectedRectBgColor.set(finalColor);
+
+      const selectedId = this.selectedAnnotationId();
+      if (selectedId) {
+        this.annotations.update((items) =>
+          items.map((item) =>
+            item.id === selectedId && item.type === 'rectangle'
+              ? { ...item, backgroundColor: finalColor }
+              : item
+          )
+        );
+        this.renderCanvas();
+      }
+    }
+  }
+
+  adjustBgOpacity(delta: number): void {
+    this.setRectBgOpacity(this.selectedBgOpacity() + delta);
+  }
+
+  setSelectedRotation(degrees: number | string): void {
+    const num = typeof degrees === 'string' ? parseInt(degrees, 10) : degrees;
+    if (isNaN(num)) return;
+    const normalized = (Math.round(num) % 360 + 360) % 360;
+    this.selectedRotation.set(normalized);
+
+    const selectedId = this.selectedAnnotationId();
+    if (selectedId) {
+      this.annotations.update((items) =>
+        items.map((item) =>
+          item.id === selectedId ? { ...item, rotation: normalized } : item
+        )
+      );
+      this.renderCanvas();
+    }
+  }
+
+  rotateSelectedBy(deltaDegrees: number): void {
+    const current = this.selectedRotation();
+    this.setSelectedRotation(current + deltaDegrees);
+  }
+
+  setBorderRadius(radius: number): void {
+    const clamped = Math.max(0, Math.min(100, Math.round(radius)));
+    this.selectedBorderRadius.set(clamped);
+    const selectedId = this.selectedAnnotationId();
+    if (selectedId) {
+      this.annotations.update((items) =>
+        items.map((item) =>
+          item.id === selectedId && item.type === 'rectangle' ? { ...item, borderRadius: clamped } : item
+        )
+      );
+      this.renderCanvas();
+    }
+  }
+
+  adjustBorderRadius(delta: number): void {
+    this.setBorderRadius(this.selectedBorderRadius() + delta);
+  }
+
+  openColorPicker(target: 'stroke' | 'rectBg' | 'text'): void {
+    this.customColorTarget = target;
+    if (this.customColorPicker) {
+      let currentColor = '#ef4444';
+      if (target === 'stroke') currentColor = this.selectedColor();
+      else if (target === 'text') currentColor = this.selectedTextColor();
+      else if (target === 'rectBg') {
+        const base = this.selectedRectBaseColor();
+        currentColor = base && base !== 'transparent' ? (base.length > 7 ? base.substring(0, 7) : base) : '#ffffff';
+      }
+      this.customColorPicker.nativeElement.value = currentColor.startsWith('#') && currentColor.length === 7 ? currentColor : '#ef4444';
+      this.customColorPicker.nativeElement.click();
+    }
+  }
+
+  onCustomColorPicked(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const color = input.value;
+    if (!color) return;
+
+    if (this.customColorTarget === 'stroke') {
+      this.setColor(color);
+    } else if (this.customColorTarget === 'text') {
+      this.setTextColor(color);
+    } else if (this.customColorTarget === 'rectBg') {
+      this.setRectBgColor(color);
     }
   }
 
@@ -188,6 +483,7 @@ export class FeedbackDialogComponent implements OnInit {
   feedbackTypes: { label: string; value: FeedbackType; icon: string; color: string }[] = [
     { label: 'Erro / Bug', value: 'BUG', icon: 'bug_report', color: '#ef4444' },
     { label: 'Sugestão', value: 'SUGGESTION', icon: 'lightbulb', color: '#3b82f6' },
+    { label: 'Elogios', value: 'PRAISE', icon: 'sentiment_very_satisfied', color: '#10b981' },
     { label: 'Melhoria de UI', value: 'IMPROVEMENT', icon: 'auto_awesome', color: '#8b5cf6' },
     { label: 'Crítica', value: 'CRITICISM', icon: 'feedback', color: '#f59e0b' },
     { label: 'Outro', value: 'OTHER', icon: 'more_horiz', color: '#6b7280' },
@@ -197,14 +493,29 @@ export class FeedbackDialogComponent implements OnInit {
     this.initForm();
     this.collectMetadata();
     this.loadMyFeedbacks();
+
+    if (this.dialogData?.openMyFeedbacks) {
+      this.selectedTabIndex = 1;
+    } else if (this.dialogData?.initialType) {
+      this.onSelectType(this.dialogData.initialType);
+    }
   }
 
   private initForm(): void {
     this.feedbackForm = this.fb.group({
-      type: ['SUGGESTION' as FeedbackType, [Validators.required]],
+      type: [null as FeedbackType | null, [Validators.required]],
       title: ['', [Validators.required, Validators.maxLength(255)]],
       description: ['', [Validators.required]],
     });
+  }
+
+  onSelectType(type: FeedbackType): void {
+    this.feedbackForm.get('type')?.setValue(type);
+    setTimeout(() => {
+      if (this.titleInput?.nativeElement) {
+        this.titleInput.nativeElement.focus();
+      }
+    }, 50);
   }
 
   private collectMetadata(): void {
@@ -636,9 +947,21 @@ export class FeedbackDialogComponent implements OnInit {
       isSelecting = false;
       isResizing = false;
       isMoving = false;
-      activeHandle = null;
-
       if (hadAction && currentRect.width >= 15 && currentRect.height >= 15) {
+        // Posicionamento inteligente para a barra NUNCA ficar cortada ou fora da tela
+        if (currentRect.height >= 75) {
+          actionToolbar.style.bottom = '12px';
+          actionToolbar.style.top = 'auto';
+          actionToolbar.style.right = '12px';
+        } else if (currentRect.y > 60) {
+          actionToolbar.style.top = '-48px';
+          actionToolbar.style.bottom = 'auto';
+          actionToolbar.style.right = '0px';
+        } else {
+          actionToolbar.style.top = '6px';
+          actionToolbar.style.bottom = 'auto';
+          actionToolbar.style.right = '10px';
+        }
         actionToolbar.style.display = 'flex';
       }
     });
@@ -690,8 +1013,16 @@ export class FeedbackDialogComponent implements OnInit {
     this.isDrawingMode.set(false);
     this.annotations.set([]);
     this.selectedAnnotationId.set(null);
+    this.isCanvasMaximized.set(false);
     this.baseImage = null;
     this.closeTextAnnotation();
+  }
+
+  toggleMaximizeCanvas(): void {
+    this.isCanvasMaximized.set(!this.isCanvasMaximized());
+    setTimeout(() => {
+      this.renderCanvas();
+    }, 60);
   }
 
   // =========================================================================
@@ -713,6 +1044,120 @@ export class FeedbackDialogComponent implements OnInit {
     this.baseImage.src = dataUrl;
   }
 
+  rotatePoint(
+    point: { x: number; y: number },
+    center: { x: number; y: number },
+    angleDegrees: number
+  ): { x: number; y: number } {
+    if (!angleDegrees) return { ...point };
+    const rad = (angleDegrees * Math.PI) / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+    const dx = point.x - center.x;
+    const dy = point.y - center.y;
+    return {
+      x: center.x + dx * cos - dy * sin,
+      y: center.y + dx * sin + dy * cos,
+    };
+  }
+
+  getItemCenter(item: AnnotationItem): { x: number; y: number } {
+    if (item.type === 'text') {
+      return { x: item.x, y: item.y };
+    } else if (item.type === 'arrow') {
+      const endX = item.endX ?? item.x;
+      const endY = item.endY ?? item.y;
+      return { x: (item.x + endX) / 2, y: (item.y + endY) / 2 };
+    } else if (item.type === 'freehand' && item.points && item.points.length > 0) {
+      const bounds = this.getFreehandBounds(item.points);
+      return { x: bounds.minX + bounds.width / 2, y: bounds.minY + bounds.height / 2 };
+    } else {
+      return { x: item.x + item.width / 2, y: item.y + item.height / 2 };
+    }
+  }
+
+  getItemBoundingBox(item: AnnotationItem): {
+    minX: number;
+    minY: number;
+    width: number;
+    height: number;
+  } {
+    if (item.type === 'text') {
+      const w = item.width || 60;
+      const h = item.height || 30;
+      return { minX: item.x - w / 2, minY: item.y - h / 2, width: w, height: h };
+    } else if (item.type === 'arrow') {
+      const startX = item.x;
+      const startY = item.y;
+      const endX = item.endX ?? item.x;
+      const endY = item.endY ?? item.y;
+      const minX = Math.min(startX, endX);
+      const minY = Math.min(startY, endY);
+      const width = Math.max(24, Math.abs(endX - startX));
+      const height = Math.max(24, Math.abs(endY - startY));
+      return { minX, minY, width, height };
+    } else if (item.type === 'freehand' && item.points && item.points.length > 0) {
+      return this.getFreehandBounds(item.points);
+    } else {
+      const minX = Math.min(item.x, item.x + item.width);
+      const minY = Math.min(item.y, item.y + item.height);
+      const width = Math.abs(item.width);
+      const height = Math.abs(item.height);
+      return { minX, minY, width, height };
+    }
+  }
+
+  getRotationHandlePosition(item: AnnotationItem): { x: number; y: number } {
+    const center = this.getItemCenter(item);
+    const box = this.getItemBoundingBox(item);
+    const localHandle = { x: center.x, y: box.minY - 26 };
+    return this.rotatePoint(localHandle, center, item.rotation || 0);
+  }
+
+  isPointNearRotationHandle(pos: { x: number; y: number }): AnnotationItem | null {
+    const selId = this.selectedAnnotationId();
+    if (!selId) return null;
+    const item = this.annotations().find((a) => a.id === selId);
+    if (!item) return null;
+    const handlePos = this.getRotationHandlePosition(item);
+    return Math.hypot(pos.x - handlePos.x, pos.y - handlePos.y) <= 15 ? item : null;
+  }
+
+  private drawRotationHandle(ctx: CanvasRenderingContext2D, item: AnnotationItem): void {
+    const center = this.getItemCenter(item);
+    const box = this.getItemBoundingBox(item);
+    const handleX = center.x;
+    const handleY = box.minY - 26;
+
+    ctx.save();
+    ctx.setLineDash([]);
+
+    // Linha haste conectando topo da caixa à alça
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(handleX, box.minY - 4);
+    ctx.lineTo(handleX, handleY);
+    ctx.stroke();
+
+    // Círculo externo da alça de rotação
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#0284c7';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(handleX, handleY, 6.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Ponto central
+    ctx.fillStyle = '#0284c7';
+    ctx.beginPath();
+    ctx.arc(handleX, handleY, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
   /**
    * Renderiza a imagem base e todas as camadas de anotações
    */
@@ -726,22 +1171,18 @@ export class FeedbackDialogComponent implements OnInit {
     const items = this.annotations();
     for (const item of items) {
       const isSelected = drawSelectionBorder && item.id === this.selectedAnnotationId();
+      const center = this.getItemCenter(item);
+      const rotation = item.rotation || 0;
+
+      this.ctx.save();
+      if (rotation !== 0) {
+        this.ctx.translate(center.x, center.y);
+        this.ctx.rotate((rotation * Math.PI) / 180);
+        this.ctx.translate(-center.x, -center.y);
+      }
 
       if (item.type === 'rectangle') {
-        this.ctx.save();
-        this.ctx.strokeStyle = item.color;
-        this.ctx.lineWidth = item.lineWidth;
-        this.ctx.lineJoin = 'miter';
-        this.ctx.strokeRect(item.x, item.y, item.width, item.height);
-
-        // Borda de seleção quando selecionado
-        if (isSelected) {
-          this.ctx.strokeStyle = '#38bdf8';
-          this.ctx.lineWidth = 2;
-          this.ctx.setLineDash([6, 6]);
-          this.ctx.strokeRect(item.x - 3, item.y - 3, item.width + 6, item.height + 6);
-        }
-        this.ctx.restore();
+        this.drawRectangle(this.ctx, item, isSelected);
       } else if (item.type === 'arrow') {
         this.drawArrow(this.ctx, item, isSelected);
       } else if (item.type === 'freehand') {
@@ -765,7 +1206,7 @@ export class FeedbackDialogComponent implements OnInit {
           if (isSelected) {
             const bounds = this.getFreehandBounds(item.points);
             this.ctx.strokeStyle = '#38bdf8';
-            this.ctx.lineWidth = 2;
+            this.ctx.lineWidth = 1.5;
             this.ctx.setLineDash([5, 5]);
             this.ctx.strokeRect(bounds.minX - 6, bounds.minY - 6, bounds.width + 12, bounds.height + 12);
           }
@@ -775,7 +1216,120 @@ export class FeedbackDialogComponent implements OnInit {
       } else if (item.type === 'text') {
         this.drawTextBadge(this.ctx, item, isSelected, canvas.width);
       }
+
+      // Alça de rotação universal no topo do elemento selecionado
+      if (isSelected) {
+        this.drawRotationHandle(this.ctx, item);
+      }
+
+      this.ctx.restore();
     }
+  }
+
+  private drawRectangle(
+    ctx: CanvasRenderingContext2D,
+    item: AnnotationItem,
+    isSelected: boolean
+  ): void {
+    ctx.save();
+
+    const minX = Math.min(item.x, item.x + item.width);
+    const minY = Math.min(item.y, item.y + item.height);
+    const w = Math.abs(item.width);
+    const h = Math.abs(item.height);
+    const maxRadius = Math.round(Math.min(w, h) / 2);
+    const radius = Math.min(maxRadius, Math.max(0, item.borderRadius ?? 0));
+
+    // Caminho do retângulo com ou sem cantos arredondados
+    ctx.beginPath();
+    if (radius > 0) {
+      if (ctx.roundRect) {
+        ctx.roundRect(minX, minY, w, h, radius);
+      } else {
+        ctx.moveTo(minX + radius, minY);
+        ctx.arcTo(minX + w, minY, minX + w, minY + h, radius);
+        ctx.arcTo(minX + w, minY + h, minX, minY + h, radius);
+        ctx.arcTo(minX, minY + h, minX, minY, radius);
+        ctx.arcTo(minX, minY, minX + w, minY, radius);
+        ctx.closePath();
+      }
+    } else {
+      ctx.rect(minX, minY, w, h);
+    }
+
+    // Preenchimento com cor de fundo (se definida e diferente de transparente)
+    if (item.backgroundColor && item.backgroundColor !== 'transparent') {
+      ctx.fillStyle = item.backgroundColor;
+      ctx.fill();
+    }
+
+    // Borda do retângulo
+    ctx.strokeStyle = item.color;
+    ctx.lineWidth = item.lineWidth;
+    ctx.stroke();
+
+    // Borda de seleção e alça interativa de raio
+    if (isSelected) {
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 5]);
+      ctx.strokeRect(minX - 4, minY - 4, w + 8, h + 8);
+
+      // Alça de arredondamento de cantos (estilo Figma/Illustrator)
+      if (w >= 24 && h >= 24) {
+        ctx.setLineDash([]);
+        const handlePos = this.getRectRadiusHandle(item);
+
+        // Linha guia sutil até o ponto de controle
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.7)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(minX, minY);
+        ctx.lineTo(handlePos.x, handlePos.y);
+        ctx.stroke();
+
+        // Círculo externo da alça
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#0284c7';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(handlePos.x, handlePos.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Ponto central da alça
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath();
+        ctx.arc(handlePos.x, handlePos.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    ctx.restore();
+  }
+
+  private getRectRadiusHandle(item: AnnotationItem): { x: number; y: number } {
+    const minX = Math.min(item.x, item.x + item.width);
+    const minY = Math.min(item.y, item.y + item.height);
+    const w = Math.abs(item.width);
+    const h = Math.abs(item.height);
+    const maxR = Math.round(Math.min(w, h) / 2);
+    const r = Math.min(maxR, Math.max(0, item.borderRadius ?? 0));
+    const offset = Math.min(maxR - 5, Math.max(12, r + 8));
+    return { x: minX + offset, y: minY + offset };
+  }
+
+  private isPointNearRadiusHandle(pos: { x: number; y: number }): AnnotationItem | null {
+    const selId = this.selectedAnnotationId();
+    if (!selId) return null;
+    const item = this.annotations().find((a) => a.id === selId && a.type === 'rectangle');
+    if (!item) return null;
+
+    const center = this.getItemCenter(item);
+    const localPos = this.rotatePoint(pos, center, -(item.rotation || 0));
+
+    const handlePos = this.getRectRadiusHandle(item);
+    return Math.hypot(localPos.x - handlePos.x, localPos.y - handlePos.y) <= 14 ? item : null;
   }
 
   private drawArrow(
@@ -853,50 +1407,112 @@ export class FeedbackDialogComponent implements OnInit {
     if (!item.text) return;
 
     ctx.save();
-    const fontSize = 14;
+    const fontSize = item.fontSize || 18;
     ctx.font = `bold ${fontSize}px sans-serif`;
-    ctx.textBaseline = 'top';
 
-    const paddingX = 8;
-    const paddingY = 6;
+    const paddingX = Math.round(fontSize * 0.7);
+    const paddingY = Math.round(fontSize * 0.45);
     const textMetrics = ctx.measureText(item.text);
     const textWidth = textMetrics.width;
-    const textHeight = fontSize + 4;
+    const textHeight = fontSize;
 
-    const badgeWidth = textWidth + paddingX * 2;
-    const badgeHeight = textHeight + paddingY * 2;
+    const badgeWidth = Math.round(textWidth + paddingX * 2);
+    const badgeHeight = Math.round(textHeight + paddingY * 2);
 
     // Atualiza dimensões no item para o cálculo do hit-test
     item.width = badgeWidth;
     item.height = badgeHeight;
 
-    const x = item.x;
-    const y = item.y;
+    // x e y representam o CENTRO da anotação
+    const badgeLeft = item.x - badgeWidth / 2;
+    const badgeTop = item.y - badgeHeight / 2;
+
+    // Sombra suave na caixinha para destacar sobre qualquer fundo
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 2;
 
     // Fundo do badge com cantos arredondados
-    const radius = 4;
-    ctx.fillStyle = item.color;
+    const radius = Math.min(8, Math.round(fontSize * 0.35));
+    ctx.fillStyle = item.color || '#ef4444';
     ctx.beginPath();
     if (ctx.roundRect) {
-      ctx.roundRect(x, y - badgeHeight, badgeWidth, badgeHeight, radius);
+      ctx.roundRect(badgeLeft, badgeTop, badgeWidth, badgeHeight, radius);
     } else {
-      ctx.rect(x, y - badgeHeight, badgeWidth, badgeHeight);
+      ctx.rect(badgeLeft, badgeTop, badgeWidth, badgeHeight);
     }
     ctx.fill();
 
-    // Texto com contraste automático
-    ctx.fillStyle = item.color === '#ffffff' ? '#0f172a' : '#ffffff';
-    ctx.fillText(item.text, x + paddingX, y - badgeHeight + paddingY);
+    // Resetar sombras para que o texto não sofra deslocamento visual
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
 
-    // Moldura pontilhada quando o texto estiver selecionado
+    // Texto perfeitamente centralizado
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = item.textColor || (this.isLightColor(item.color) ? '#0f172a' : '#ffffff');
+    ctx.fillText(item.text, item.x, item.y);
+
+    // Moldura pontilhada e alças interativas quando o texto estiver selecionado
     if (isSelected) {
       ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1.5;
       ctx.setLineDash([4, 4]);
-      ctx.strokeRect(x - 3, y - badgeHeight - 3, badgeWidth + 6, badgeHeight + 6);
+      ctx.strokeRect(badgeLeft - 3, badgeTop - 3, badgeWidth + 6, badgeHeight + 6);
+
+      // Alças circulares de redimensionamento nos 4 cantos
+      ctx.setLineDash([]);
+      const handleRadius = 4.5;
+      const corners = [
+        { x: badgeLeft - 3, y: badgeTop - 3 },
+        { x: badgeLeft + badgeWidth + 3, y: badgeTop - 3 },
+        { x: badgeLeft + badgeWidth + 3, y: badgeTop + badgeHeight + 3 },
+        { x: badgeLeft - 3, y: badgeTop + badgeHeight + 3 },
+      ];
+
+      for (const corner of corners) {
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#0284c7';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(corner.x, corner.y, handleRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
     }
 
     ctx.restore();
+  }
+
+  private getTextResizeHandle(pos: { x: number; y: number }): { handle: 'nw' | 'ne' | 'se' | 'sw'; item: AnnotationItem } | null {
+    const selId = this.selectedAnnotationId();
+    if (!selId) return null;
+    const item = this.annotations().find((a) => a.id === selId && a.type === 'text');
+    if (!item || !item.width || !item.height) return null;
+
+    const center = this.getItemCenter(item);
+    const localPos = this.rotatePoint(pos, center, -(item.rotation || 0));
+
+    const badgeLeft = Math.round(item.x - item.width / 2);
+    const badgeTop = Math.round(item.y - item.height / 2);
+    const handleHitRadius = 14;
+
+    const corners: { handle: 'nw' | 'ne' | 'se' | 'sw'; x: number; y: number }[] = [
+      { handle: 'nw', x: badgeLeft - 3, y: badgeTop - 3 },
+      { handle: 'ne', x: badgeLeft + item.width + 3, y: badgeTop - 3 },
+      { handle: 'se', x: badgeLeft + item.width + 3, y: badgeTop + item.height + 3 },
+      { handle: 'sw', x: badgeLeft - 3, y: badgeTop + item.height + 3 },
+    ];
+
+    for (const c of corners) {
+      if (Math.hypot(localPos.x - c.x, localPos.y - c.y) <= handleHitRadius) {
+        return { handle: c.handle, item };
+      }
+    }
+    return null;
   }
 
   private distanceToSegment(
@@ -975,12 +1591,17 @@ export class FeedbackDialogComponent implements OnInit {
     const list = this.annotations();
     for (let i = list.length - 1; i >= 0; i--) {
       const item = list[i];
+      const center = this.getItemCenter(item);
+      const localPos = this.rotatePoint(pos, center, -(item.rotation || 0));
+
       if (item.type === 'text') {
+        const halfW = (item.width || 60) / 2;
+        const halfH = (item.height || 30) / 2;
         if (
-          pos.x >= item.x &&
-          pos.x <= item.x + item.width &&
-          pos.y >= item.y - item.height &&
-          pos.y <= item.y
+          localPos.x >= item.x - halfW &&
+          localPos.x <= item.x + halfW &&
+          localPos.y >= item.y - halfH &&
+          localPos.y <= item.y + halfH
         ) {
           return item;
         }
@@ -991,35 +1612,35 @@ export class FeedbackDialogComponent implements OnInit {
         const maxY = Math.max(item.y, item.y + item.height);
         const tolerance = 10;
         if (
-          pos.x >= minX - tolerance &&
-          pos.x <= maxX + tolerance &&
-          pos.y >= minY - tolerance &&
-          pos.y <= maxY + tolerance
+          localPos.x >= minX - tolerance &&
+          localPos.x <= maxX + tolerance &&
+          localPos.y >= minY - tolerance &&
+          localPos.y <= maxY + tolerance
         ) {
           return item;
         }
       } else if (item.type === 'arrow') {
         const dist = this.distanceToSegment(
-          pos.x,
-          pos.y,
+          localPos.x,
+          localPos.y,
           item.x,
           item.y,
           item.endX ?? item.x,
           item.endY ?? item.y
         );
-        if (dist <= Math.max(12, item.lineWidth * 2)) {
+        if (dist <= Math.max(14, item.lineWidth * 2.5)) {
           return item;
         }
       } else if (item.type === 'freehand' && item.points && item.points.length > 0) {
         const bounds = this.getFreehandBounds(item.points);
-        const tolerance = Math.max(12, item.lineWidth * 2);
+        const tolerance = Math.max(14, item.lineWidth * 2.5);
         if (
-          pos.x >= bounds.minX - tolerance &&
-          pos.x <= bounds.maxX + tolerance &&
-          pos.y >= bounds.minY - tolerance &&
-          pos.y <= bounds.maxY + tolerance
+          localPos.x >= bounds.minX - tolerance &&
+          localPos.x <= bounds.maxX + tolerance &&
+          localPos.y >= bounds.minY - tolerance &&
+          localPos.y <= bounds.maxY + tolerance
         ) {
-          if (this.isPointNearFreehand(pos, item.points, tolerance)) {
+          if (this.isPointNearFreehand(localPos, item.points, tolerance)) {
             return item;
           }
         }
@@ -1061,11 +1682,35 @@ export class FeedbackDialogComponent implements OnInit {
   }
 
   onCanvasMouseMove(event: MouseEvent): void {
-    if (this.isDrawing || this.isMovingAnnotation) {
+    if (this.isDrawing || this.isMovingAnnotation || this.isResizingAnnotation || this.isResizingRadius || this.isRotatingAnnotation) {
       this.draw(event);
       return;
     }
     const pos = this.getCanvasPosition(event);
+
+    // 1. Verificar se está sobre a alça de rotação de qualquer elemento selecionado
+    const rotItem = this.isPointNearRotationHandle(pos);
+    if (rotItem) {
+      this.canvasCursor.set('grab');
+      return;
+    }
+
+    // 2. Verificar se está sobre a alça de redimensionamento de texto selecionado
+    const handleInfo = this.getTextResizeHandle(pos);
+    if (handleInfo) {
+      this.canvasCursor.set(
+        handleInfo.handle === 'nw' || handleInfo.handle === 'se' ? 'nwse-resize' : 'nesw-resize'
+      );
+      return;
+    }
+
+    // 3. Verificar se está sobre a alça de raio de um retângulo selecionado
+    const radiusItem = this.isPointNearRadiusHandle(pos);
+    if (radiusItem) {
+      this.canvasCursor.set('nwse-resize');
+      return;
+    }
+
     const hit = this.findHitAnnotation(pos);
     if (hit) {
       this.canvasCursor.set('move');
@@ -1079,6 +1724,34 @@ export class FeedbackDialogComponent implements OnInit {
 
     const pos = this.getCanvasPosition(event);
 
+    // 0.0 Verificar se clicou na alça de rotação de um elemento selecionado
+    const rotHit = this.isPointNearRotationHandle(pos);
+    if (rotHit) {
+      this.isRotatingAnnotation = true;
+      this.rotatingItem = rotHit;
+      this.canvasCursor.set('grabbing');
+      return;
+    }
+
+    // 0.1 Verificar se clicou em uma alça de redimensionamento de texto selecionado
+    const handleHit = this.getTextResizeHandle(pos);
+    if (handleHit) {
+      this.isResizingAnnotation = true;
+      this.activeResizeHandle = handleHit.handle;
+      this.resizingItem = handleHit.item;
+      this.initialDistanceToCenter = Math.hypot(pos.x - handleHit.item.x, pos.y - handleHit.item.y);
+      this.initialFontSize = handleHit.item.fontSize || 18;
+      return;
+    }
+
+    // 0.2 Verificar se clicou na alça de raio de um retângulo selecionado
+    const radiusItem = this.isPointNearRadiusHandle(pos);
+    if (radiusItem) {
+      this.isResizingRadius = true;
+      this.resizingRadiusItem = radiusItem;
+      return;
+    }
+
     // 1. Verificar se clicou em uma anotação existente para selecioná-la e arrastar
     const hitItem = this.findHitAnnotation(pos);
     if (hitItem) {
@@ -1087,7 +1760,7 @@ export class FeedbackDialogComponent implements OnInit {
       this.movingAnnotationItem = hitItem;
       this.moveOffset = { x: pos.x, y: pos.y };
 
-      // Sincronizar cor e espessura do elemento selecionado na barra de ferramentas
+      // Sincronizar cor, tamanho e espessura do elemento selecionado na barra de ferramentas
       if (hitItem.color) {
         this.selectedColor.set(hitItem.color);
         this.drawColor = hitItem.color;
@@ -1096,6 +1769,32 @@ export class FeedbackDialogComponent implements OnInit {
         this.selectedLineWidth.set(hitItem.lineWidth);
         this.lineWidth = hitItem.lineWidth;
       }
+      if (hitItem.fontSize) {
+        this.selectedFontSize.set(hitItem.fontSize);
+      }
+      if (hitItem.textColor) {
+        this.selectedTextColor.set(hitItem.textColor);
+      }
+      if (hitItem.rotation !== undefined) {
+        this.selectedRotation.set(hitItem.rotation);
+      } else {
+        this.selectedRotation.set(0);
+      }
+      if (hitItem.type === 'rectangle') {
+        if (hitItem.backgroundColor !== undefined) {
+          this.selectedRectBgColor.set(hitItem.backgroundColor);
+          if (hitItem.backgroundColor === 'transparent') {
+            this.selectedRectBaseColor.set('transparent');
+          } else {
+            const parsed = this.parseHexColorAndOpacity(hitItem.backgroundColor);
+            this.selectedRectBaseColor.set(parsed.baseColor);
+            this.selectedBgOpacity.set(parsed.opacity);
+          }
+        }
+        if (hitItem.borderRadius !== undefined) {
+          this.selectedBorderRadius.set(hitItem.borderRadius);
+        }
+      }
 
       this.renderCanvas();
       return;
@@ -1103,6 +1802,7 @@ export class FeedbackDialogComponent implements OnInit {
 
     // 2. Se clicou fora de qualquer anotação, desmarcar a seleção atual
     this.selectedAnnotationId.set(null);
+    this.selectedRotation.set(0);
 
     // 3. Se ferramenta for Texto, abrir o editor flutuante
     if (this.activeTool() === 'text') {
@@ -1138,6 +1838,9 @@ export class FeedbackDialogComponent implements OnInit {
         height: 0,
         color: this.selectedColor(),
         lineWidth: this.selectedLineWidth(),
+        backgroundColor: this.selectedRectBgColor(),
+        borderRadius: this.selectedBorderRadius(),
+        rotation: 0,
       };
       this.currentDrawingItem = newRect;
       this.annotations.update((items) => [...items, newRect]);
@@ -1154,6 +1857,7 @@ export class FeedbackDialogComponent implements OnInit {
         height: 0,
         color: this.selectedColor(),
         lineWidth: this.selectedLineWidth(),
+        rotation: 0,
       };
       this.currentDrawingItem = newArrow;
       this.annotations.update((items) => [...items, newArrow]);
@@ -1169,6 +1873,7 @@ export class FeedbackDialogComponent implements OnInit {
         color: this.selectedColor(),
         lineWidth: this.selectedLineWidth(),
         points: [{ x: pos.x, y: pos.y }],
+        rotation: 0,
       };
       this.currentDrawingItem = newPath;
       this.annotations.update((items) => [...items, newPath]);
@@ -1178,6 +1883,54 @@ export class FeedbackDialogComponent implements OnInit {
 
   draw(event: MouseEvent | TouchEvent): void {
     const pos = this.getCanvasPosition(event);
+
+    // Rotacionar anotação via alça interativa
+    if (this.isRotatingAnnotation && this.rotatingItem) {
+      const center = this.getItemCenter(this.rotatingItem);
+      const angleRad = Math.atan2(pos.y - center.y, pos.x - center.x);
+      let deg = Math.round((angleRad * 180) / Math.PI) + 90;
+      deg = (deg % 360 + 360) % 360;
+
+      // Snap suave de 4° próximo aos ângulos cardeais e semi-cardeais
+      for (const snap of [0, 45, 90, 135, 180, 225, 270, 315]) {
+        if (Math.abs(deg - snap) <= 4) {
+          deg = snap;
+          break;
+        }
+      }
+
+      this.rotatingItem.rotation = deg;
+      this.selectedRotation.set(deg);
+      this.renderCanvas();
+      return;
+    }
+
+    // Redimensionar raio do retângulo via alça interativa
+    if (this.isResizingRadius && this.resizingRadiusItem) {
+      const minX = Math.min(this.resizingRadiusItem.x, this.resizingRadiusItem.x + this.resizingRadiusItem.width);
+      const minY = Math.min(this.resizingRadiusItem.y, this.resizingRadiusItem.y + this.resizingRadiusItem.height);
+      const w = Math.abs(this.resizingRadiusItem.width);
+      const h = Math.abs(this.resizingRadiusItem.height);
+      const maxRadius = Math.round(Math.min(w, h) / 2);
+
+      const currentDist = Math.hypot(pos.x - minX, pos.y - minY);
+      const newRadius = Math.min(maxRadius, Math.max(0, Math.round(currentDist - 8)));
+      this.resizingRadiusItem.borderRadius = newRadius;
+      this.selectedBorderRadius.set(newRadius);
+      this.renderCanvas();
+      return;
+    }
+
+    // Redimensionar anotação de texto via alças interativas
+    if (this.isResizingAnnotation && this.resizingItem) {
+      const currentDist = Math.hypot(pos.x - this.resizingItem.x, pos.y - this.resizingItem.y);
+      const scale = currentDist / (this.initialDistanceToCenter || 1);
+      const newFontSize = Math.min(72, Math.max(10, Math.round(this.initialFontSize * scale)));
+      this.resizingItem.fontSize = newFontSize;
+      this.selectedFontSize.set(newFontSize);
+      this.renderCanvas();
+      return;
+    }
 
     // Arrastar/reposicionar anotação existente (delta incremental)
     if (this.isMovingAnnotation && this.movingAnnotationItem) {
@@ -1209,19 +1962,44 @@ export class FeedbackDialogComponent implements OnInit {
     if (this.currentDrawingItem.type === 'rectangle') {
       this.currentDrawingItem.width = pos.x - this.startPos.x;
       this.currentDrawingItem.height = pos.y - this.startPos.y;
-      this.renderCanvas();
     } else if (this.currentDrawingItem.type === 'arrow') {
       this.currentDrawingItem.endX = pos.x;
       this.currentDrawingItem.endY = pos.y;
-      this.renderCanvas();
     } else if (this.currentDrawingItem.type === 'freehand') {
-      this.currentDrawingItem.points?.push({ x: pos.x, y: pos.y });
-      this.renderCanvas();
+      if (!this.currentDrawingItem.points) {
+        this.currentDrawingItem.points = [];
+      }
+      this.currentDrawingItem.points.push({ x: pos.x, y: pos.y });
     }
+
+    this.renderCanvas();
   }
 
   stopDrawing(): void {
-    if (this.currentDrawingItem) {
+    if (this.isRotatingAnnotation) {
+      this.isRotatingAnnotation = false;
+      this.rotatingItem = null;
+      this.canvasCursor.set('grab');
+      this.renderCanvas();
+      return;
+    }
+
+    if (this.isResizingRadius) {
+      this.isResizingRadius = false;
+      this.resizingRadiusItem = null;
+      this.renderCanvas();
+      return;
+    }
+
+    if (this.isResizingAnnotation) {
+      this.isResizingAnnotation = false;
+      this.activeResizeHandle = null;
+      this.resizingItem = null;
+      this.renderCanvas();
+      return;
+    }
+
+    if (this.isDrawing && this.currentDrawingItem) {
       if (this.currentDrawingItem.type === 'rectangle') {
         // Normalizar retângulo com largura/altura negativas
         if (this.currentDrawingItem.width < 0) {
@@ -1281,6 +2059,9 @@ export class FeedbackDialogComponent implements OnInit {
       return;
     }
 
+    const color = this.selectedColor();
+    const fontSize = this.selectedFontSize();
+    const textColor = this.selectedTextColor() || (this.isLightColor(color) ? '#0f172a' : '#ffffff');
     const newTextItem: AnnotationItem = {
       id: 'text_' + Date.now(),
       type: 'text',
@@ -1288,9 +2069,12 @@ export class FeedbackDialogComponent implements OnInit {
       y: current.canvasY,
       width: 0,
       height: 0,
-      color: this.selectedColor(),
+      color: color,
+      textColor: textColor,
+      fontSize: fontSize,
       lineWidth: this.selectedLineWidth(),
       text: text,
+      rotation: 0,
     };
 
     this.annotations.update((items) => [...items, newTextItem]);

@@ -1,4 +1,4 @@
-export type FeedbackType = 'BUG' | 'SUGGESTION' | 'IMPROVEMENT' | 'CRITICISM' | 'OTHER';
+export type FeedbackType = 'BUG' | 'SUGGESTION' | 'IMPROVEMENT' | 'CRITICISM' | 'PRAISE' | 'OTHER';
 
 export type FeedbackStatus = 'NEW' | 'UNDER_REVIEW' | 'IN_PROGRESS' | 'RESOLVED' | 'DISCARDED';
 

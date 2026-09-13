@@ -1,9 +1,10 @@
 <div class="feedback-widget-container">
+  <!-- Botão Gatilho com Menu de Tags -->
   <button
     type="button"
     class="feedback-trigger-btn"
-    (click)="openFeedbackDialog()"
-    matTooltip="Enviar sugestão ou relatar problema"
+    [matMenuTriggerFor]="feedbackChoiceMenu"
+    matTooltip="Enviar sugestão, elogio ou relatar problema"
     matTooltipPosition="left"
   >
     <div class="btn-content">
@@ -18,4 +19,55 @@
       <span class="btn-text">Feedback</span>
     </div>
   </button>
+
+  <!-- Menu de Escolha de Tag Suspenso -->
+  <mat-menu
+    #feedbackChoiceMenu="matMenu"
+    class="feedback-choice-menu-panel"
+    xPosition="before"
+    yPosition="above"
+  >
+    <div class="feedback-menu-header" (click)="$event.stopPropagation()">
+      <mat-icon class="menu-header-icon">category</mat-icon>
+      <div class="menu-header-text">
+        <span class="menu-header-title">O que você gostaria de enviar?</span>
+        <span class="menu-header-sub">Escolha uma tag para começar:</span>
+      </div>
+    </div>
+
+    <div class="feedback-menu-list">
+      @for (item of feedbackTypes; track item.value) {
+        <button
+          mat-menu-item
+          class="feedback-tag-menu-item"
+          (click)="selectTagAndOpen(item.value)"
+        >
+          <div class="item-icon-badge" [style.color]="item.color" [style.background-color]="item.color + '18'">
+            <mat-icon>{{ item.icon }}</mat-icon>
+          </div>
+          <div class="item-info">
+            <span class="item-title">{{ item.label }}</span>
+            <span class="item-subtitle">{{ item.description }}</span>
+          </div>
+        </button>
+      }
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <button mat-menu-item class="feedback-history-menu-item" (click)="openMyFeedbacks()">
+      <mat-icon
+        [matBadge]="unreadResponsesCount()"
+        [matBadgeHidden]="unreadResponsesCount() === 0"
+        matBadgeColor="warn"
+        class="history-icon"
+      >
+        history
+      </mat-icon>
+      <div class="history-info">
+        <span class="history-title">Meus Feedbacks</span>
+        <span class="history-subtitle">Acompanhe respostas e histórico</span>
+      </div>
+    </button>
+  </mat-menu>
 </div>

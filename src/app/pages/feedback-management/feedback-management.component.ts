@@ -355,6 +355,8 @@ export class FeedbackManagementComponent implements OnInit {
         return 'Melhoria';
       case 'CRITICISM':
         return 'Crítica';
+      case 'PRAISE':
+        return 'Elogios';
       default:
         return type;
     }
@@ -370,6 +372,8 @@ export class FeedbackManagementComponent implements OnInit {
         return 'auto_awesome';
       case 'CRITICISM':
         return 'feedback';
+      case 'PRAISE':
+        return 'sentiment_very_satisfied';
       default:
         return 'chat';
     }
