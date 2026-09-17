@@ -186,7 +186,7 @@ export class VehicleInfoComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['vehicle'] && this.vehicle) {
       const ownerId = this.vehicle.ownerId || (this.vehicle as any).owner;
-      const supplierId = this.vehicle.supplierId || this.vehicle.purchaseHistory?.[0]?.supplierId;
+      const supplierId = this.vehicle.purchaseHistory?.[0]?.supplierId;
       const buyerId = this.vehicle.salesHistory?.[0]?.buyerId;
 
       this.loadFinancialTransactions();
@@ -311,9 +311,6 @@ export class VehicleInfoComponent implements OnChanges {
   }
 
   get valorCompraEfetivo(): number {
-    if (this.vehicle?.valorCompra && parseFloat(this.vehicle.valorCompra) > 0) {
-      return parseFloat(this.vehicle.valorCompra);
-    }
     return this.vehicle?.purchaseHistory?.[0]?.valorCompra || 0;
   }
 
@@ -322,7 +319,7 @@ export class VehicleInfoComponent implements OnChanges {
     if (this.vehicle?.status === 'VENDIDO' && this.vehicle?.salesHistory?.[0]?.valorFinal) {
       return this.vehicle.salesHistory[0].valorFinal;
     }
-    return this.vehicle?.valorVenda ? parseFloat(this.vehicle.valorVenda) : 0;
+    return this.vehicle?.valorVendaSugerido ? parseFloat(this.vehicle.valorVendaSugerido) : 0;
   }
 
   get hasValorCompra(): boolean {
@@ -342,10 +339,7 @@ export class VehicleInfoComponent implements OnChanges {
   }
 
   get isCompraEfetiva(): boolean {
-    return (
-      !!this.vehicle?.purchaseHistory?.[0]?.valorCompra &&
-      (!this.vehicle?.valorCompra || parseFloat(this.vehicle.valorCompra) === 0)
-    );
+    return !!this.vehicle?.purchaseHistory?.[0]?.valorCompra;
   }
 
   get historyTimeline(): any[] {
@@ -355,13 +349,13 @@ export class VehicleInfoComponent implements OnChanges {
     if (this.vehicle.purchaseHistory) {
       this.vehicle.purchaseHistory.forEach((compra) => {
         timeline.push({
-          date: compra.dataCompra || this.vehicle.dataCompra,
+          date: compra.dataCompra,
           title: 'Entrada no Estoque (Compra)',
-          description: `Veículo adquirido de ${compra.supplierName || this.vehicle.supplierName || 'Fornecedor'}`,
-          value: compra.valorCompra || this.vehicle.valorCompra,
+          description: `Veículo adquirido de ${compra.supplierName || 'Fornecedor'}`,
+          value: compra.valorCompra,
           type: 'COMPRA',
           icon: 'input',
-          personId: compra.supplierId || this.vehicle.supplierId,
+          personId: compra.supplierId,
           compraId: compra.compraId,
         });
       });

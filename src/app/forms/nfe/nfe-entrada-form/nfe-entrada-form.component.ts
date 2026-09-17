@@ -508,9 +508,6 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
             valorCompra = parse(firstPurchase.valorCompra);
           }
         }
-        if (!valorCompra && vehicle.valorCompra) {
-          valorCompra = parse(vehicle.valorCompra);
-        }
 
         itemGroup.patchValue({
           vehicle: {

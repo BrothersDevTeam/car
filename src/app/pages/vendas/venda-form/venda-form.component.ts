@@ -302,7 +302,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
             name: `${v.brand} ${v.model} (${v.plate})`,
           });
 
-          const valorVenda = v.valorVenda ? parseFloat(v.valorVenda.toString().replace(',', '.')) : 0;
+          const valorVenda = v.valorVendaSugerido ? parseFloat(v.valorVendaSugerido.toString().replace(',', '.')) : 0;
           this.vendaForm.patchValue({
             valor: valorVenda,
             valorFinal: valorVenda,
@@ -339,7 +339,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
 
   onVehicleSelected(option: { id: string; name: string }) {
     this.vehicleService.getById(option.id).subscribe((vehicle) => {
-      const valorVenda = vehicle.valorVenda ? parseFloat(vehicle.valorVenda.toString().replace(',', '.')) : 0;
+      const valorVenda = vehicle.valorVendaSugerido ? parseFloat(vehicle.valorVendaSugerido.toString().replace(',', '.')) : 0;
 
       this.vendaForm.patchValue({
         valor: valorVenda,
@@ -945,8 +945,9 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
 
     this.vehicleService.getById(option.id).subscribe({
       next: (vehicle) => {
-        // Mapeia o valorCompra vindo do backend
-        const valorCompra = vehicle.valorCompra ? parseFloat(vehicle.valorCompra.toString().replace(',', '.')) : 0;
+        // Mapeia o valorCompra vindo do histórico de compra do veículo
+        const compra = vehicle.purchaseHistory?.[0];
+        const valorCompra = compra?.valorCompra != null ? Number(compra.valorCompra) : 0;
 
         const paymentsArray = this.pagamentos;
         const paymentGroup = paymentsArray.at(index) as FormGroup;

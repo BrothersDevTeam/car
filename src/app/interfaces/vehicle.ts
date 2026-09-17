@@ -87,11 +87,7 @@ export interface Vehicle {
   features?: string;
   fuelType?: FuelType | string;
   origin?: string;
-  valorCompra?: string;
-  supplierId?: string;
-  supplierName?: string;
-  dataCompra?: string;
-  valorVenda?: string;
+  valorVendaSugerido?: string;
   fipeValue?: string;
   observation?: string;
   entryDate?: string;
@@ -122,7 +118,7 @@ export interface VehicleList {
   modelYear?: string;
   color: string;
   status: string;
-  valorVenda?: string;
+  valorVendaSugerido?: string;
   entryDate?: string;
   hasInputNfe?: boolean;
   hasOutputNfe?: boolean;

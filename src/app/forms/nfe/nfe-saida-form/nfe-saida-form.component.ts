@@ -445,8 +445,8 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
         return parseFloat(s) || 0;
       };
 
-      const vCompra = parse(vehicle.valorCompra);
-      const vVenda = parse(vehicle.valorVenda);
+      const vCompra = Number(vehicle.purchaseHistory?.[0]?.valorCompra) || 0;
+      const vVenda = parse(vehicle.valorVendaSugerido);
 
       // Fallback: Se não houver valor de venda, sugere o de compra
       const valor = vVenda || vCompra;

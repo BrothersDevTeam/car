@@ -310,9 +310,9 @@
                   <label class="modern-label">Valor de Venda Sugerido</label>
                   <span class="helper-text">Valor base para anúncios e vitrine</span>
                   <app-currency-input
-                    formControlName="valorVenda"
+                    formControlName="valorVendaSugerido"
                     label="Valor de Venda Sugerido"
-                    [error]="!!(form.get('valorVenda')?.invalid && (form.get('valorVenda')?.touched || submitted))"
+                    [error]="!!(form.get('valorVendaSugerido')?.invalid && (form.get('valorVendaSugerido')?.touched || submitted))"
                     errorMessage="Valor inválido"
                   ></app-currency-input>
                 </div>
