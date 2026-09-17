@@ -44,10 +44,11 @@ import {
   SaveDraftDialogResult,
 } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 
+import { DatePipe } from '@angular/common';
 import { NaturezaOperacao } from '@interfaces/nfe';
 import type { Nfe } from '@interfaces/nfe';
 import type { Person } from '@interfaces/person';
-import { Vehicle } from '@interfaces/vehicle';
+import { Vehicle, NfeSummary } from '@interfaces/vehicle';
 
 import { NfeService } from '@services/nfe.service';
 import { PersonService } from '@services/person.service';
@@ -60,6 +61,7 @@ import { FormDraftService, FormDraft } from '@services/form-draft.service';
 @Component({
   selector: 'app-nfe-entrada-form',
   imports: [
+    DatePipe,
     PrimarySelectComponent,
     PrimaryInputComponent,
     ReactiveFormsModule,
@@ -176,10 +178,13 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('submitButton', { static: false, read: ElementRef })
   submitButton!: ElementRef<HTMLButtonElement>;
 
+  conflictingNfe = signal<NfeSummary | null>(null);
+
   @Input() dataForm: Nfe | null = null;
   @Input() draft: FormDraft | null | undefined = null;
   @Output() formSubmitted = new EventEmitter<void>();
   @Output() formChanged = new EventEmitter<boolean>();
+  @Output() openExistingNfe = new EventEmitter<string>();
 
   private nfeService = inject(NfeService);
   private personService = inject(PersonService);
@@ -416,6 +421,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     if (!option || !option.id) {
       this.selectedVehicle = null;
       this.selectedVehicleHasNoOwner = false;
+      this.conflictingNfe.set(null);
       this.form.get('headerVehicle')?.patchValue({ id: '', name: '' });
       this.form.get('person')?.patchValue({ id: '', name: '' });
       this.form.get('ownerDisplayName')?.setValue('');
@@ -434,6 +440,28 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       next: (vehicle) => {
         this.selectedVehicle = vehicle;
         const vehicleDisplay = this.getVehicleDisplay(vehicle);
+
+        // Verifica se o veículo já possui NFe de entrada ativa vinculada
+        const activeNfe = (vehicle.nfeHistory || []).find((nfe) => {
+          const isSameTipo = nfe.nfeTipoDocumento === '0';
+          const isNotCurrent = !this.dataForm?.nfeId || nfe.nfeId !== this.dataForm.nfeId;
+          const status = (nfe.nfeStatus || '').toLowerCase();
+          const isActive = !['cancelado', 'denegado', 'inutilizada'].includes(status);
+          return isSameTipo && isNotCurrent && isActive;
+        });
+
+        if (activeNfe) {
+          this.conflictingNfe.set(activeNfe);
+          const statusLabel = this.getStatusDisplayLabel(activeNfe.nfeStatus);
+          const numeroStr = activeNfe.nfeNumero ? ` (Nº ${activeNfe.nfeNumero})` : '';
+          this.toastrService.warning(
+            `Este veículo já possui uma NFe de Entrada vinculada com status "${statusLabel}"${numeroStr}. Não é permitido criar outra NFe de Entrada.`,
+            'NFe Já Vinculada',
+            { timeOut: 8000 }
+          );
+        } else {
+          this.conflictingNfe.set(null);
+        }
 
         this.form.get('headerVehicle')?.patchValue({
           id: vehicle.vehicleId,
@@ -472,9 +500,17 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
           return parseFloat(s) || 0;
         };
 
-        const vCompra = parse(vehicle.valorCompra);
-        const vVenda = parse(vehicle.valorVenda);
-        const valor = vCompra || vVenda;
+        // Na NFe de Entrada, busca o valor de compra caso exista uma compra atrelada ao veículo
+        let valorCompra = 0;
+        if (vehicle.purchaseHistory && vehicle.purchaseHistory.length > 0) {
+          const firstPurchase = vehicle.purchaseHistory[0];
+          if (firstPurchase.valorCompra) {
+            valorCompra = parse(firstPurchase.valorCompra);
+          }
+        }
+        if (!valorCompra && vehicle.valorCompra) {
+          valorCompra = parse(vehicle.valorCompra);
+        }
 
         itemGroup.patchValue({
           vehicle: {
@@ -482,8 +518,8 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
             name: vehicleDisplay,
           },
           itemDescricao: vehicleDisplay,
-          itemValorUnitarioComercial: valor ? valor.toFixed(2) : '',
-          itemValorBruto: valor ? valor.toFixed(2) : '',
+          itemValorUnitarioComercial: valorCompra > 0 ? valorCompra.toFixed(2) : '',
+          itemValorBruto: valorCompra > 0 ? valorCompra.toFixed(2) : '',
         });
       },
       error: () => {
@@ -539,14 +575,18 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['dataForm'] && this.dataForm) {
-      this.isInitializing = true;
-      this.tryPatchForm();
-      this.showFormFields = true;
-      setTimeout(() => {
-        this.captureInitialFormValue();
-        this.isInitializing = false;
-      }, 500);
+    if (changes['dataForm']) {
+      if (this.dataForm) {
+        this.isInitializing = true;
+        this.tryPatchForm();
+        this.showFormFields = true;
+        setTimeout(() => {
+          this.captureInitialFormValue();
+          this.isInitializing = false;
+        }, 500);
+      } else {
+        this.conflictingNfe.set(null);
+      }
     }
     if (changes['draft'] && this.draft) {
       this.loadDraftData(this.draft);
@@ -557,6 +597,8 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.dataForm || this.vehicles.length === 0 || this.persons.length === 0) {
       return;
     }
+
+    this.conflictingNfe.set(null);
 
     const itemTipo = this.dataForm.vehicleId ? 'veiculo' : 'produto';
     this.form.get('itemTipo')?.setValue(itemTipo, { emitEvent: false });
@@ -570,12 +612,15 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
         const vehicleId = item.vehicleId || this.dataForm?.vehicleId;
         const vehicleName = item.itemDescricao || this.dataForm?.productIdentifier || '';
+        const itemValor = item.itemValorUnitarioComercial || item.itemValorBruto || this.dataForm?.nfeValorTotal || '';
 
         this.itens.push(
           this.createItem({
             ...item,
             vehicleId: vehicleId,
             vehicleName: vehicleName,
+            itemValorUnitarioComercial: itemValor,
+            itemValorBruto: itemValor,
             icmsOrigem: icms.icmsOrigem,
             icmsSituacaoTributaria: icms.icmsSituacaoTributaria,
             icmsValorBaseCalculo: icms.icmsValorBaseCalculo,
@@ -594,6 +639,12 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       });
     } else {
       this.addItem();
+      if (this.itens.length > 0 && this.dataForm?.nfeValorTotal) {
+        this.itens.at(0).patchValue({
+          itemValorUnitarioComercial: this.dataForm.nfeValorTotal,
+          itemValorBruto: this.dataForm.nfeValorTotal,
+        });
+      }
     }
 
     const personName = this.persons.find((p) => p.id === this.dataForm!.personId)?.name || '';
@@ -626,7 +677,19 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       this.vehicleService.getById(vId).subscribe((vehicle) => {
         this.selectedVehicle = vehicle;
         this.selectedVehicleHasNoOwner = !vehicle.ownerId;
+
+        // Verifica se há OUTRA NFe ativa vinculada a este veículo além da que está sendo editada
+        const otherActiveNfe = (vehicle.nfeHistory || []).find((nfe) => {
+          const isSameTipo = nfe.nfeTipoDocumento === '0';
+          const isNotCurrent = nfe.nfeId !== this.dataForm?.nfeId;
+          const status = (nfe.nfeStatus || '').toLowerCase();
+          const isActive = !['cancelado', 'denegado', 'inutilizada'].includes(status);
+          return isSameTipo && isNotCurrent && isActive;
+        });
+        this.conflictingNfe.set(otherActiveNfe || null);
       });
+    } else {
+      this.conflictingNfe.set(null);
     }
   }
 
@@ -646,6 +709,10 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   onSubmit() {
     this.submitted = true;
+    if (this.conflictingNfe()) {
+      this.toastrService.error('Não é possível gerar a NFe: o veículo selecionado já possui uma NFe de Entrada vinculada.');
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -791,6 +858,9 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get isSaveButtonDisabled(): boolean {
+    if (this.conflictingNfe()) {
+      return true;
+    }
     if (this.isSaving || this.isInitializing) {
       return true;
     }
@@ -815,7 +885,39 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get canShowDraftButton(): boolean {
+    if (this.conflictingNfe()) {
+      return false;
+    }
     return !this.isSaving && !this.isInitializing && this.form.dirty && this.hasChangesComparedToDraft();
+  }
+
+  getStatusDisplayLabel(status?: string): string {
+    if (!status) return 'Em digitação';
+    switch (status.toLowerCase()) {
+      case 'rascunho':
+        return 'Em digitação';
+      case 'processando':
+        return 'Processando';
+      case 'autorizado':
+        return 'Autorizada';
+      case 'cancelado':
+        return 'Cancelada';
+      case 'erro':
+        return 'Erro';
+      case 'denegado':
+        return 'Denegada';
+      case 'inutilizada':
+        return 'Inutilizada';
+      default:
+        return status;
+    }
+  }
+
+  navigateToExistingNfe(): void {
+    const nfeId = this.conflictingNfe()?.nfeId;
+    if (nfeId) {
+      this.openExistingNfe.emit(nfeId);
+    }
   }
 
   get currentDraftName(): string | undefined {
@@ -1063,6 +1165,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     this.selectedVehicle = null;
     this.selectedVehicleToEdit = null;
     this.selectedVehicleHasNoOwner = false;
+    this.conflictingNfe.set(null);
     this.itens.clear();
     this.addItem();
     this.submitted = false;

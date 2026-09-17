@@ -533,6 +533,27 @@ export class NfeComponent {
     });
   }
 
+  onOpenExistingNfe(nfeId: string) {
+    if (!nfeId) return;
+
+    this.nfeService.getById(nfeId).subscribe({
+      next: (fullNfe) => {
+        this.selectedNfe = fullNfe;
+
+        // Fecha o formulário de criação e abre o drawer de informação/detalhes da NFe existente
+        this.openForm.set(false);
+        this.openInfo.set(true);
+
+        const numInfo = fullNfe.nfeNumero ? ` #${fullNfe.nfeNumero}` : ' (Em digitação)';
+        this.toastr.info(`Detalhes da NFe${numInfo} abertos para visualização.`, 'NFe Existente');
+      },
+      error: (err) => {
+        this.toastr.error('Erro ao carregar detalhes da NFe vinculada.');
+        console.error(err);
+      },
+    });
+  }
+
   handleSelectionChange(selectedRows: Nfe[]) {
     this.selectedRows = selectedRows;
   }

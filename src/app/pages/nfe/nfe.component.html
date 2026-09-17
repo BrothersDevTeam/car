@@ -698,6 +698,7 @@
               [dataForm]="selectedNfe"
               (formSubmitted)="onFormSubmitted()"
               (formChanged)="handleFormChanged($event)"
+              (openExistingNfe)="onOpenExistingNfe($event)"
             />
           </ng-template>
         </mat-tab>
@@ -707,6 +708,7 @@
               [dataForm]="selectedNfe"
               (formSubmitted)="onFormSubmitted()"
               (formChanged)="handleFormChanged($event)"
+              (openExistingNfe)="onOpenExistingNfe($event)"
             />
           </ng-template>
         </mat-tab>

@@ -42,10 +42,11 @@ import {
   SaveDraftDialogResult,
 } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 
+import { DatePipe } from '@angular/common';
 import { NaturezaOperacao } from '@interfaces/nfe';
 import type { Nfe } from '@interfaces/nfe';
 import type { Person } from '@interfaces/person';
-import { Vehicle } from '@interfaces/vehicle';
+import { Vehicle, NfeSummary } from '@interfaces/vehicle';
 
 import { NfeService } from '@services/nfe.service';
 import { PersonService } from '@services/person.service';
@@ -58,6 +59,7 @@ import { FormDraftService, FormDraft } from '@services/form-draft.service';
 @Component({
   selector: 'app-nfe-saida-form',
   imports: [
+    DatePipe,
     PrimarySelectComponent,
     ReactiveFormsModule,
     MatButtonModule,
@@ -177,10 +179,13 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('submitButton', { static: false, read: ElementRef })
   submitButton!: ElementRef<HTMLButtonElement>;
 
+  conflictingNfe = signal<NfeSummary | null>(null);
+
   @Input() dataForm: Nfe | null = null;
   @Input() draft: FormDraft | null | undefined = null;
   @Output() formSubmitted = new EventEmitter<void>();
   @Output() formChanged = new EventEmitter<boolean>();
+  @Output() openExistingNfe = new EventEmitter<string>();
 
   private nfeService = inject(NfeService);
   private personService = inject(PersonService);
@@ -401,9 +406,34 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onVehicleSelectedForItem(option: any, index: number) {
-    if (!option || !option.id) return;
+    if (!option || !option.id) {
+      this.conflictingNfe.set(null);
+      return;
+    }
 
     this.vehicleService.getById(option.id).subscribe((vehicle) => {
+      // Verifica se o veículo já possui NFe de saída ativa vinculada
+      const activeNfe = (vehicle.nfeHistory || []).find((nfe) => {
+        const isSameTipo = nfe.nfeTipoDocumento === '1';
+        const isNotCurrent = !this.dataForm?.nfeId || nfe.nfeId !== this.dataForm.nfeId;
+        const status = (nfe.nfeStatus || '').toLowerCase();
+        const isActive = !['cancelado', 'denegado', 'inutilizada'].includes(status);
+        return isSameTipo && isNotCurrent && isActive;
+      });
+
+      if (activeNfe) {
+        this.conflictingNfe.set(activeNfe);
+        const statusLabel = this.getStatusDisplayLabel(activeNfe.nfeStatus);
+        const numeroStr = activeNfe.nfeNumero ? ` (Nº ${activeNfe.nfeNumero})` : '';
+        this.toastrService.warning(
+          `Este veículo já possui uma NFe de Saída vinculada com status "${statusLabel}"${numeroStr}. Não é permitido criar outra NFe de Saída.`,
+          'NFe Já Vinculada',
+          { timeOut: 8000 }
+        );
+      } else {
+        this.conflictingNfe.set(null);
+      }
+
       const itemGroup = this.itens.at(index) as FormGroup;
 
       // Helper para parsing robusto
@@ -438,14 +468,18 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['dataForm'] && this.dataForm) {
-      this.isInitializing = true;
-      this.tryPatchForm();
-      this.showFormFields = true;
-      setTimeout(() => {
-        this.captureInitialFormValue();
-        this.isInitializing = false;
-      }, 500);
+    if (changes['dataForm']) {
+      if (this.dataForm) {
+        this.isInitializing = true;
+        this.tryPatchForm();
+        this.showFormFields = true;
+        setTimeout(() => {
+          this.captureInitialFormValue();
+          this.isInitializing = false;
+        }, 500);
+      } else {
+        this.conflictingNfe.set(null);
+      }
     }
     if (changes['draft'] && this.draft) {
       this.loadDraftData(this.draft);
@@ -456,6 +490,8 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.dataForm || this.vehicles.length === 0 || this.persons.length === 0) {
       return;
     }
+
+    this.conflictingNfe.set(null);
 
     const itemTipo = this.dataForm.vehicleId ? 'veiculo' : 'produto';
     this.form.get('itemTipo')?.setValue(itemTipo, { emitEvent: false });
@@ -469,12 +505,15 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
 
         const vehicleId = item.vehicleId || this.dataForm?.vehicleId;
         const vehicleName = item.itemDescricao || this.dataForm?.productIdentifier || '';
+        const itemValor = item.itemValorUnitarioComercial || item.itemValorBruto || this.dataForm?.nfeValorTotal || '';
 
         this.itens.push(
           this.createItem({
             ...item,
             vehicleId: vehicleId,
             vehicleName: vehicleName,
+            itemValorUnitarioComercial: itemValor,
+            itemValorBruto: itemValor,
             icmsOrigem: icms.icmsOrigem,
             icmsSituacaoTributaria: icms.icmsSituacaoTributaria,
             icmsValorBaseCalculo: icms.icmsValorBaseCalculo,
@@ -493,6 +532,12 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
       });
     } else {
       this.addItem();
+      if (this.itens.length > 0 && this.dataForm?.nfeValorTotal) {
+        this.itens.at(0).patchValue({
+          itemValorUnitarioComercial: this.dataForm.nfeValorTotal,
+          itemValorBruto: this.dataForm.nfeValorTotal,
+        });
+      }
     }
 
     this.form.patchValue({
@@ -511,6 +556,23 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
         this.dataForm.nfeInformacoesAdicionaisFisco ||
         'BASE DE CALCULO DO ICMS REDUZIDA 72.22% DE ACORDO COM O ITEM 11 DO ANEXO IV DO RICMS-MG. DECRETO 48.055/2020, OBSERVANDO O DISPOSTO NO SUBITEM 11.7. OS TRIBUTOS FEDERAIS INCIDENTES SOBRE ESTA OPERAÇÃO SERÃO RECOLHIDOS CONFORME ART.5 LEI Nº 9.716/98. PERCENTUAL DE IMPOSTOS CONFORME LEI 12.741 / 8,65%.\nNF DE ENTRADA N.: SERIE: DATA: ',
     });
+
+    const firstVehicleId = this.dataForm.nfeItens?.find((it) => it.vehicleId)?.vehicleId || this.dataForm.vehicleId;
+    if (firstVehicleId) {
+      this.vehicleService.getById(firstVehicleId).subscribe((vehicle) => {
+        // Verifica se há OUTRA NFe ativa vinculada a este veículo além da que está sendo editada
+        const otherActiveNfe = (vehicle.nfeHistory || []).find((nfe) => {
+          const isSameTipo = nfe.nfeTipoDocumento === '1';
+          const isNotCurrent = nfe.nfeId !== this.dataForm?.nfeId;
+          const status = (nfe.nfeStatus || '').toLowerCase();
+          const isActive = !['cancelado', 'denegado', 'inutilizada'].includes(status);
+          return isSameTipo && isNotCurrent && isActive;
+        });
+        this.conflictingNfe.set(otherActiveNfe || null);
+      });
+    } else {
+      this.conflictingNfe.set(null);
+    }
   }
 
   onEnter(event: Event): void {
@@ -529,6 +591,10 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   onSubmit() {
     this.submitted = true;
+    if (this.conflictingNfe()) {
+      this.toastrService.error('Não é possível gerar a NFe: o veículo selecionado já possui uma NFe de Saída vinculada.');
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -674,6 +740,9 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get isSaveButtonDisabled(): boolean {
+    if (this.conflictingNfe()) {
+      return true;
+    }
     if (this.isSaving || this.isInitializing) {
       return true;
     }
@@ -698,7 +767,39 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get canShowDraftButton(): boolean {
+    if (this.conflictingNfe()) {
+      return false;
+    }
     return !this.isSaving && !this.isInitializing && this.form.dirty && this.hasChangesComparedToDraft();
+  }
+
+  getStatusDisplayLabel(status?: string): string {
+    if (!status) return 'Em digitação';
+    switch (status.toLowerCase()) {
+      case 'rascunho':
+        return 'Em digitação';
+      case 'processando':
+        return 'Processando';
+      case 'autorizado':
+        return 'Autorizada';
+      case 'cancelado':
+        return 'Cancelada';
+      case 'erro':
+        return 'Erro';
+      case 'denegado':
+        return 'Denegada';
+      case 'inutilizada':
+        return 'Inutilizada';
+      default:
+        return status;
+    }
+  }
+
+  navigateToExistingNfe(): void {
+    const nfeId = this.conflictingNfe()?.nfeId;
+    if (nfeId) {
+      this.openExistingNfe.emit(nfeId);
+    }
   }
 
   get currentDraftName(): string | undefined {
@@ -925,6 +1026,7 @@ export class NfeSaidaFormComponent implements OnInit, OnChanges, OnDestroy {
     this.itens.clear();
     this.addItem();
     this.submitted = false;
+    this.conflictingNfe.set(null);
     this.selectedDraftId = null;
     this.lastSavedDraftValue = this.form.getRawValue();
     this.form.markAsPristine();

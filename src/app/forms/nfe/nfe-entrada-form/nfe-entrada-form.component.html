@@ -1,8 +1,15 @@
 <form [formGroup]="form" (keydown.enter)="onEnter($event)">
   <div class="title-trash">
-    <h2>NFe de Entrada</h2>
+    <div class="form-title-wrapper">
+      <h2>{{ dataForm?.nfeId ? 'Editar NFe de Entrada' : 'Nova NFe de Entrada' }}</h2>
+      @if (dataForm?.nfeId) {
+        <span class="badge-status-editing">
+          {{ dataForm?.nfeStatus === 'rascunho' ? 'Em digitação' : (dataForm?.nfeStatus || 'Em edição') }}
+        </span>
+      }
+    </div>
     @if (dataForm?.nfeId) {
-      <button mat-icon-button color="warn" (click)="onDelete()" type="button" matTooltip="Cancelar NFe">
+      <button mat-icon-button color="warn" (click)="onDelete()" type="button" matTooltip="Excluir NFe em digitação">
         <mat-icon>delete</mat-icon>
       </button>
     }
@@ -83,6 +90,38 @@
           [disabled]="true"
         ></app-primary-input>
       </div>
+
+      <!-- Alerta quando veículo já possui NFe de Entrada ativa -->
+      @if (conflictingNfe(); as conflict) {
+        <div class="nfe-conflict-alert">
+          <div class="alert-content">
+            <mat-icon class="alert-icon">warning_amber</mat-icon>
+            <div class="alert-text">
+              <strong>Veículo já possui NFe de Entrada vinculada</strong>
+              <span>
+                Este veículo já possui uma NFe de Entrada com status
+                <strong>"{{ getStatusDisplayLabel(conflict.nfeStatus) }}"</strong>
+                @if (conflict.nfeNumero) {
+                  (Nº {{ conflict.nfeNumero }})
+                }
+                @if (conflict.nfeDataEmissao) {
+                  emitida em {{ conflict.nfeDataEmissao | date: 'dd/MM/yyyy HH:mm' }}
+                }.
+                Não é permitido criar outra NFe de Entrada para este veículo.
+              </span>
+            </div>
+          </div>
+          <button
+            mat-flat-button
+            type="button"
+            class="open-nfe-btn"
+            (click)="navigateToExistingNfe()"
+          >
+            <mat-icon>open_in_new</mat-icon>
+            <span>Acessar NFe Existente</span>
+          </button>
+        </div>
+      }
 
       <!-- Alerta quando veículo não tem proprietário -->
       @if (selectedVehicleHasNoOwner) {
