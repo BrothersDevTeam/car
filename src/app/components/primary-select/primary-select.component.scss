@@ -15,6 +15,16 @@
  * - Scroll interno para listas longas
  */
 
+:host {
+  display: block;
+  width: 100%;
+  position: relative;
+
+  &.dropdown-open {
+    z-index: 1050;
+  }
+}
+
 .input-wrapper {
   color: var(--text-color);
   font-size: 16px;
@@ -109,10 +119,10 @@
         right: 0;
         background-color: var(--gray-secondary-bg);
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 1000;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+        z-index: 1050;
         margin-top: 4px;
-        border: 1px solid rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.15);
         overflow: hidden;
         scroll-margin-bottom: 48px; // Respiro de espaçamento na parte inferior ao rolar a tela do navegador automaticamente
 
@@ -214,6 +224,7 @@
           max-height: 400px;
           overflow-y: auto;
           scroll-margin-bottom: 48px;
+          background-color: var(--gray-secondary-bg);
 
           &::-webkit-scrollbar {
             width: 8px;
@@ -306,6 +317,7 @@
           transition: all 0.2s ease;
           position: relative;
           min-height: 44px; // Altura mínima para boa área de toque (mobile)
+          background-color: var(--gray-secondary-bg);
 
           /**
            * Estado de hover (mouse)

@@ -1,6 +1,7 @@
 import {
   Component,
   HostListener,
+  HostBinding,
   Input,
   Output,
   EventEmitter,
@@ -64,6 +65,12 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
 
   selectedOption: CustomSelectOption | null = null;
   isOpen: boolean = false;
+
+  @HostBinding('class.dropdown-open')
+  get isDropdownOpen(): boolean {
+    return this.isOpen;
+  }
+
   searchTerm: string = '';
   filteredOptions: CustomSelectOption[] = [];
   isLoading: boolean = false;

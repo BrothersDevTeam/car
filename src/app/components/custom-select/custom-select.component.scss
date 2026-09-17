@@ -1,6 +1,16 @@
 @use 'abstracts/variables' as *;
 @use 'abstracts/functions' as *;
 
+:host {
+  display: block;
+  width: 100%;
+  position: relative;
+
+  &.dropdown-open {
+    z-index: 1050;
+  }
+}
+
 .disabled {
   pointer-events: none;
   opacity: 0.5;

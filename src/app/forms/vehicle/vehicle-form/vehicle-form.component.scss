@@ -57,6 +57,9 @@
 
 // Tabs
 .modern-tab-group {
+  position: relative;
+  z-index: 10;
+
   ::ng-deep {
     .mat-mdc-tab-body-wrapper {
       padding: 1.5rem 0;
@@ -356,6 +359,8 @@
   justify-content: flex-end;
   padding: 1.5rem 0;
   border-top: 1px solid #f1f5f9;
+  position: relative;
+  z-index: 1;
 }
 
 .submit-btn {
@@ -363,6 +368,8 @@
   color: white !important;
   height: 48px !important;
   font-size: 1rem !important;
+  position: relative;
+  z-index: 1 !important;
 
   &:disabled {
     background-color: rgba(0, 0, 0, 0.12) !important;
@@ -575,6 +582,8 @@
 
 .optionals-section {
   gap: 0.75rem !important;
+  position: relative;
+  z-index: 20;
 
   .form-grid {
     padding-bottom: 0 !important;

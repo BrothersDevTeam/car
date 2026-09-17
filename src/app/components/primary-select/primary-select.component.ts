@@ -9,6 +9,7 @@ import {
   OnChanges,
   SimpleChanges,
   ElementRef,
+  HostBinding,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -165,6 +166,11 @@ export class PrimarySelectComponent implements ControlValueAccessor, OnInit, OnC
    * Controla se o dropdown está aberto
    */
   isOpen: boolean = false;
+
+  @HostBinding('class.dropdown-open')
+  get isDropdownOpen(): boolean {
+    return this.isOpen;
+  }
 
   /**
    * Índice da opção atualmente focada pela navegação por teclado
