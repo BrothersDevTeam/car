@@ -64,24 +64,79 @@
 
   @if (showFormFields) {
     <div class="section-title">Informações Gerais</div>
-    <div class="tax-row">
-      <app-custom-select
-        listType="person"
-        [label]="'Remetente*'"
-        [options]="persons"
-        [control]="$any(form.get('person'))"
-        placeholder="Selecione o Fornecedor/Cliente"
-        (onCreateNew)="onCreateNewPerson()"
-        (onEdit)="onEditPerson($event)"
-      ></app-custom-select>
 
-      <app-primary-select
-        [label]="'Natureza da Operação*'"
-        [options]="tiposNfeEntrada"
-        formControlName="nfeNaturezaOperacao"
-        placeholder="Selecione a Natureza"
-      ></app-primary-select>
-    </div>
+    @if (form.get('itemTipo')?.value === 'veiculo') {
+      <div class="tax-row">
+        <app-custom-select
+          listType="vehicle"
+          [label]="'Veículo*'"
+          [options]="vehicles"
+          [control]="$any(form.get('headerVehicle'))"
+          placeholder="Selecione o Veículo"
+          (optionSelected)="onHeaderVehicleSelected($event)"
+        ></app-custom-select>
+
+        <app-primary-input
+          [label]="'Proprietário do Veículo*'"
+          formControlName="ownerDisplayName"
+          placeholder="Selecione o veículo para carregar o proprietário"
+          [disabled]="true"
+        ></app-primary-input>
+      </div>
+
+      <!-- Alerta quando veículo não tem proprietário -->
+      @if (selectedVehicleHasNoOwner) {
+        <div class="vehicle-no-owner-alert">
+          <div class="alert-content">
+            <mat-icon class="alert-icon">warning_amber</mat-icon>
+            <div class="alert-text">
+              <strong>Veículo sem proprietário cadastrado</strong>
+              <span>
+                Para emitir a NFe de Entrada, é obrigatório vincular o proprietário (antigo dono) no cadastro do veículo.
+              </span>
+            </div>
+          </div>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="edit-vehicle-btn"
+            (click)="openEditVehicleDrawer()"
+          >
+            <mat-icon>edit</mat-icon>
+            Editar Veículo e Vincular Proprietário
+          </button>
+        </div>
+      }
+
+      <div class="tax-row">
+        <app-primary-select
+          [label]="'Natureza da Operação*'"
+          [options]="tiposNfeEntrada"
+          formControlName="nfeNaturezaOperacao"
+          placeholder="Selecione a Natureza"
+        ></app-primary-select>
+      </div>
+    } @else {
+      <div class="tax-row">
+        <app-custom-select
+          listType="person"
+          [label]="'Fornecedor*'"
+          [options]="persons"
+          [control]="$any(form.get('person'))"
+          placeholder="Selecione o Fornecedor"
+          (onCreateNew)="onCreateNewPerson()"
+          (onEdit)="onEditPerson($event)"
+        ></app-custom-select>
+
+        <app-primary-select
+          [label]="'Natureza da Operação*'"
+          [options]="tiposNfeEntrada"
+          formControlName="nfeNaturezaOperacao"
+          placeholder="Selecione a Natureza"
+        ></app-primary-select>
+      </div>
+    }
 
     <div class="section-title">Parâmetros de Emissão</div>
     <div class="tax-row three-cols">
@@ -157,14 +212,14 @@
           </div>
 
           @if (form.get('itemTipo')?.value === 'veiculo') {
-            <app-custom-select
-              listType="vehicle"
-              [label]="'Veículo*'"
-              [options]="vehicles"
-              [control]="$any(itemGroup.get('vehicle'))"
-              placeholder="Selecione o Veículo"
-              (optionSelected)="onVehicleSelectedForItem($event, $index)"
-            ></app-custom-select>
+            <div class="vehicle-item-summary">
+              <div class="vehicle-summary-info">
+                <mat-icon>directions_car</mat-icon>
+                <span>
+                  {{ form.get('headerVehicle.name')?.value || 'Nenhum veículo selecionado no topo' }}
+                </span>
+              </div>
+            </div>
 
             <div class="tax-row">
               <app-currency-input
@@ -432,5 +487,15 @@
         </ng-template>
       </mat-tab>
     </mat-tab-group>
+  </app-drawer>
+}
+
+<!-- Drawer para criar/editar veículo -->
+@if (openVehicleForm()) {
+  <app-drawer (closeDrawer)="handleCloseVehicleDrawer()">
+    <app-vehicle-form
+      [dataForm]="selectedVehicleToEdit"
+      (formSubmitted)="onVehicleFormSubmitted()"
+    />
   </app-drawer>
 }

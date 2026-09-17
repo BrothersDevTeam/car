@@ -33,10 +33,12 @@ import { CurrencyInputComponent } from '@components/currency-input/currency-inpu
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
+import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
+import { VehicleFormComponent } from '@forms/vehicle/vehicle-form/vehicle-form.component';
 import {
   SaveDraftDialogComponent,
   SaveDraftDialogResult,
@@ -59,6 +61,7 @@ import { FormDraftService, FormDraft } from '@services/form-draft.service';
   selector: 'app-nfe-entrada-form',
   imports: [
     PrimarySelectComponent,
+    PrimaryInputComponent,
     ReactiveFormsModule,
     MatButtonModule,
     CurrencyInputComponent,
@@ -76,6 +79,7 @@ import { FormDraftService, FormDraft } from '@services/form-draft.service';
     DrawerComponent,
     NaturalPersonFormComponent,
     LegalEntityFormComponent,
+    VehicleFormComponent,
   ],
   templateUrl: './nfe-entrada-form.component.html',
   styleUrl: './nfe-entrada-form.component.scss',
@@ -103,6 +107,9 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   openPersonForm = signal(false);
   selectedPersonToEdit = signal<Person | null>(null);
   openVehicleForm = signal(false);
+  selectedVehicle: Vehicle | null = null;
+  selectedVehicleToEdit: Vehicle | null = null;
+  selectedVehicleHasNoOwner = false;
   tiposNfeEntrada: { value: NaturezaOperacao; label: string }[] = [
     {
       value: NaturezaOperacao.ENTRADA_VEICULO_USADO,
@@ -190,10 +197,15 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
   protected form: FormGroup = this.formBuilderService.group({
     storeId: [''],
+    headerVehicle: this.formBuilderService.group({
+      id: [''],
+      name: [''],
+    }),
     person: this.formBuilderService.group({
       id: ['', Validators.required],
       name: [''],
     }),
+    ownerDisplayName: [{ value: '', disabled: true }],
     nfeNaturezaOperacao: ['', Validators.required],
     nfePreenchimentoManualImpostos: [false],
     itemTipo: ['veiculo'], // 'veiculo' ou 'produto'
@@ -236,9 +248,15 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     );
 
     this.subscriptions.add(
-      this.form.get('itemTipo')?.valueChanges.subscribe(() => {
+      this.form.get('itemTipo')?.valueChanges.subscribe((tipo) => {
         this.itens.clear();
         this.addItem();
+        this.selectedVehicleHasNoOwner = false;
+        if (tipo === 'produto') {
+          this.form.get('headerVehicle')?.patchValue({ id: '', name: '' });
+          this.form.get('ownerDisplayName')?.setValue('');
+          this.form.get('person')?.patchValue({ id: '', name: '' });
+        }
       }),
     );
 
@@ -389,37 +407,131 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  onVehicleSelectedForItem(option: any, index: number) {
-    if (!option || !option.id) return;
+  /**
+   * Callback acionado ao selecionar um veículo no cabeçalho do formulário.
+   * Carrega os dados completos do veículo, preenche o proprietário (Remetente da NFe de entrada),
+   * valida se o veículo tem proprietário associado e sincroniza o item 1 de nfeItens.
+   */
+  onHeaderVehicleSelected(option: any) {
+    if (!option || !option.id) {
+      this.selectedVehicle = null;
+      this.selectedVehicleHasNoOwner = false;
+      this.form.get('headerVehicle')?.patchValue({ id: '', name: '' });
+      this.form.get('person')?.patchValue({ id: '', name: '' });
+      this.form.get('ownerDisplayName')?.setValue('');
+      if (this.itens.length > 0) {
+        this.itens.at(0).patchValue({
+          vehicle: { id: '', name: '' },
+          itemDescricao: '',
+          itemValorUnitarioComercial: '',
+          itemValorBruto: '',
+        });
+      }
+      return;
+    }
 
-    this.vehicleService.getById(option.id).subscribe((vehicle) => {
-      const itemGroup = this.itens.at(index) as FormGroup;
+    this.vehicleService.getById(option.id).subscribe({
+      next: (vehicle) => {
+        this.selectedVehicle = vehicle;
+        const vehicleDisplay = this.getVehicleDisplay(vehicle);
 
-      // Helper para parsing robusto
-      const parse = (v: any) => {
-        if (!v) return 0;
-        let s = v.toString();
-        if (s.includes(',') && s.includes('.')) s = s.replace(/\./g, '').replace(',', '.');
-        else if (s.includes(',')) s = s.replace(',', '.');
-        return parseFloat(s) || 0;
-      };
-
-      const vCompra = parse(vehicle.valorCompra);
-      const vVenda = parse(vehicle.valorVenda);
-
-      // Fallback: Se não houver valor de compra, sugere o de venda
-      const valor = vCompra || vVenda;
-
-      itemGroup.patchValue({
-        vehicle: {
+        this.form.get('headerVehicle')?.patchValue({
           id: vehicle.vehicleId,
-          name: this.getVehicleDisplay(vehicle),
-        },
-        itemDescricao: this.getVehicleDisplay(vehicle),
-        itemValorUnitarioComercial: valor,
-        itemValorBruto: valor.toFixed(2),
-      });
+          name: vehicleDisplay,
+        });
+
+        if (vehicle.ownerId) {
+          this.selectedVehicleHasNoOwner = false;
+          this.form.get('person')?.patchValue({
+            id: vehicle.ownerId,
+            name: vehicle.ownerName || '',
+          });
+          this.form.get('ownerDisplayName')?.setValue(vehicle.ownerName || '');
+        } else {
+          this.selectedVehicleHasNoOwner = true;
+          this.form.get('person')?.patchValue({ id: '', name: '' });
+          this.form.get('ownerDisplayName')?.setValue('Nenhum proprietário vinculado');
+          this.toastrService.warning(
+            'O veículo selecionado não possui proprietário cadastrado. É necessário vincular o proprietário para emitir a NFe.',
+            'Proprietário Ausente',
+            { timeOut: 7000 }
+          );
+        }
+
+        // Sincroniza o item 1 de nfeItens
+        if (this.itens.length === 0) {
+          this.addItem();
+        }
+        const itemGroup = this.itens.at(0) as FormGroup;
+
+        const parse = (v: any) => {
+          if (!v) return 0;
+          let s = v.toString();
+          if (s.includes(',') && s.includes('.')) s = s.replace(/\./g, '').replace(',', '.');
+          else if (s.includes(',')) s = s.replace(',', '.');
+          return parseFloat(s) || 0;
+        };
+
+        const vCompra = parse(vehicle.valorCompra);
+        const vVenda = parse(vehicle.valorVenda);
+        const valor = vCompra || vVenda;
+
+        itemGroup.patchValue({
+          vehicle: {
+            id: vehicle.vehicleId,
+            name: vehicleDisplay,
+          },
+          itemDescricao: vehicleDisplay,
+          itemValorUnitarioComercial: valor ? valor.toFixed(2) : '',
+          itemValorBruto: valor ? valor.toFixed(2) : '',
+        });
+      },
+      error: () => {
+        this.toastrService.error('Erro ao buscar dados do veículo selecionado');
+      },
     });
+  }
+
+  // Métodos para o Drawer de Veículo
+  openEditVehicleDrawer() {
+    if (this.selectedVehicle) {
+      this.selectedVehicleToEdit = this.selectedVehicle;
+      this.openVehicleForm.set(true);
+    } else {
+      const vId = this.form.get('headerVehicle.id')?.value;
+      if (vId) {
+        this.vehicleService.getById(vId).subscribe((v) => {
+          this.selectedVehicleToEdit = v;
+          this.openVehicleForm.set(true);
+        });
+      }
+    }
+  }
+
+  handleCloseVehicleDrawer() {
+    this.openVehicleForm.set(false);
+    this.selectedVehicleToEdit = null;
+  }
+
+  onVehicleFormSubmitted() {
+    this.handleCloseVehicleDrawer();
+    this.toastrService.success('Veículo atualizado com sucesso');
+    const storeId = this.storeContextService.currentStoreId;
+    if (storeId) {
+      // Recarrega a lista de veículos
+      this.vehicleService.getPaginatedData(0, 1000, { storeId }).subscribe((response) => {
+        this.vehicles = (response.content || []).map((v) => ({
+          id: v.vehicleId,
+          name: this.getVehicleDisplay(v as Vehicle),
+        }));
+
+        // Recarrega o veículo atualmente selecionado para atualizar o proprietário
+        const currentVehicleId = this.form.get('headerVehicle.id')?.value;
+        if (currentVehicleId) {
+          this.onHeaderVehicleSelected({ id: currentVehicleId });
+        }
+      });
+    }
   }
 
   ngOnDestroy() {
@@ -484,11 +596,20 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       this.addItem();
     }
 
+    const personName = this.persons.find((p) => p.id === this.dataForm!.personId)?.name || '';
+    const vId = this.dataForm.vehicleId || this.dataForm.nfeItens?.[0]?.vehicleId;
+    const vName = this.vehicles.find((v) => v.id === vId)?.name || '';
+
     this.form.patchValue({
+      headerVehicle: {
+        id: vId || '',
+        name: vName,
+      },
       person: {
         id: this.dataForm.personId || '',
-        name: this.persons.find((p) => p.id === this.dataForm!.personId)?.name || '',
+        name: personName,
       },
+      ownerDisplayName: personName,
       nfeNaturezaOperacao: this.dataForm.nfeNaturezaOperacao || '',
       nfePreenchimentoManualImpostos: this.dataForm.nfeCalcularImpostosAutomaticamente === false,
       nfeFinalidadeEmissao: this.dataForm.nfeFinalidadeEmissao || '1',
@@ -500,6 +621,13 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
         this.dataForm.nfeInformacoesAdicionaisFisco ||
         'EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.',
     });
+
+    if (vId) {
+      this.vehicleService.getById(vId).subscribe((vehicle) => {
+        this.selectedVehicle = vehicle;
+        this.selectedVehicleHasNoOwner = !vehicle.ownerId;
+      });
+    }
   }
 
   onEnter(event: Event): void {
@@ -769,6 +897,25 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
     this.form.patchValue(draftData);
 
+    const draftVehicleId = draftData.headerVehicle?.id || draftData.nfeItens?.[0]?.vehicle?.id || draftData.nfeItens?.[0]?.vehicleId;
+    if (draftVehicleId && (draftData.itemTipo === 'veiculo' || !draftData.itemTipo)) {
+      const vObj = this.vehicles.find((v) => v.id === draftVehicleId);
+      this.form.get('headerVehicle')?.patchValue({
+        id: draftVehicleId,
+        name: draftData.headerVehicle?.name || vObj?.name || '',
+      });
+      const pName = draftData.ownerDisplayName || draftData.person?.name || '';
+      this.form.get('ownerDisplayName')?.setValue(pName);
+
+      this.vehicleService.getById(draftVehicleId).subscribe((vehicle) => {
+        this.selectedVehicle = vehicle;
+        this.selectedVehicleHasNoOwner = !vehicle.ownerId;
+        if (vehicle.ownerName) {
+          this.form.get('ownerDisplayName')?.setValue(vehicle.ownerName);
+        }
+      });
+    }
+
     this.toastrService.success(`Rascunho "${draft.draftName || 'sem nome'}" carregado`);
     this.lastSavedDraftValue = this.form.getRawValue();
 
@@ -899,7 +1046,9 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   resetForm() {
     this.form.reset({
       storeId: this.storeContextService.currentStoreId || '',
+      headerVehicle: { id: '', name: '' },
       person: { id: '', name: '' },
+      ownerDisplayName: '',
       nfeNaturezaOperacao: '',
       nfePreenchimentoManualImpostos: false,
       itemTipo: 'veiculo',
@@ -911,6 +1060,9 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       nfeInformacoesAdicionaisFisco:
         'EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.',
     });
+    this.selectedVehicle = null;
+    this.selectedVehicleToEdit = null;
+    this.selectedVehicleHasNoOwner = false;
     this.itens.clear();
     this.addItem();
     this.submitted = false;

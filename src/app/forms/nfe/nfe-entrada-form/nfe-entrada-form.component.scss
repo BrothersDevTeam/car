@@ -231,6 +231,106 @@ form {
     }
   }
 
+  .vehicle-no-owner-alert {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background-color: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+    margin-top: -0.25rem;
+    margin-bottom: 0.5rem;
+    animation: fadeIn 0.3s ease-out;
+
+    .alert-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .alert-icon {
+        color: #d97706;
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
+      }
+
+      .alert-text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        strong {
+          color: #92400e;
+          font-size: 0.95rem;
+        }
+
+        span {
+          color: #b45309;
+          font-size: 0.85rem;
+          line-height: 1.3;
+        }
+      }
+    }
+
+    .edit-vehicle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+      height: 40px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      white-space: nowrap;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+
+      .edit-vehicle-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+
+  .vehicle-item-summary {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+
+    .vehicle-summary-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #1e293b;
+      font-weight: 600;
+      font-size: 0.95rem;
+
+      mat-icon {
+        color: var(--primary-color);
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+      }
+    }
+  }
+
   .m-b-16 {
     margin-bottom: 1rem;
   }
