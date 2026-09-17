@@ -37,23 +37,31 @@
               <div class="value-card buy">
                 <span class="card-label">
                   Valor de Compra
-                  @if (isCompraEfetiva) {
+                  @if (hasValorCompra && isCompraEfetiva) {
                     <small style="font-size: 10px; opacity: 0.7">(Efetivo)</small>
                   }
                 </span>
                 <span class="card-value">
-                  {{ valorCompraEfetivo | currency: 'BRL' }}
+                  @if (hasValorCompra) {
+                    {{ valorCompraEfetivo | currency: 'BRL' }}
+                  } @else {
+                    Não informado
+                  }
                 </span>
               </div>
               <div class="value-card sell">
                 <span class="card-label">
-                  Valor de Venda
-                  @if (isVendaEfetiva) {
+                  {{ isVendido ? 'Valor de Venda' : 'Valor de Venda Sugerido' }}
+                  @if (isVendido && isVendaEfetiva) {
                     <small style="font-size: 10px; opacity: 0.7">(Real)</small>
                   }
                 </span>
                 <span class="card-value">
-                  {{ valorVendaEfetivo | currency: 'BRL' }}
+                  @if (hasValorVenda) {
+                    {{ valorVendaEfetivo | currency: 'BRL' }}
+                  } @else {
+                    Não informado
+                  }
                 </span>
               </div>
               <div class="value-card fipe">

@@ -311,32 +311,40 @@ export class VehicleInfoComponent implements OnChanges {
   }
 
   get valorCompraEfetivo(): number {
-    if (this.vehicle.valorCompra && parseFloat(this.vehicle.valorCompra) > 0) {
+    if (this.vehicle?.valorCompra && parseFloat(this.vehicle.valorCompra) > 0) {
       return parseFloat(this.vehicle.valorCompra);
     }
-    return this.vehicle.purchaseHistory?.[0]?.valorCompra || 0;
+    return this.vehicle?.purchaseHistory?.[0]?.valorCompra || 0;
   }
 
   get valorVendaEfetivo(): number {
     // Se está vendido, prioriza o valor da venda finalizada
-    if (this.vehicle.status === 'VENDIDO' && this.vehicle.salesHistory?.[0]?.valorFinal) {
+    if (this.vehicle?.status === 'VENDIDO' && this.vehicle?.salesHistory?.[0]?.valorFinal) {
       return this.vehicle.salesHistory[0].valorFinal;
     }
-    return this.vehicle.valorVenda ? parseFloat(this.vehicle.valorVenda) : 0;
+    return this.vehicle?.valorVenda ? parseFloat(this.vehicle.valorVenda) : 0;
+  }
+
+  get hasValorCompra(): boolean {
+    return this.valorCompraEfetivo > 0;
+  }
+
+  get hasValorVenda(): boolean {
+    return this.valorVendaEfetivo > 0;
   }
 
   get dataEntradaEfetiva(): string | undefined {
-    return this.vehicle.entryDate || this.vehicle.purchaseHistory?.[0]?.dataCompra;
+    return this.vehicle?.entryDate || this.vehicle?.purchaseHistory?.[0]?.dataCompra;
   }
 
   get isVendaEfetiva(): boolean {
-    return this.vehicle.status === 'VENDIDO' && !!this.vehicle.salesHistory?.[0]?.valorFinal;
+    return this.vehicle?.status === 'VENDIDO' && !!this.vehicle?.salesHistory?.[0]?.valorFinal;
   }
 
   get isCompraEfetiva(): boolean {
     return (
-      !!this.vehicle.purchaseHistory?.[0]?.valorCompra &&
-      (!this.vehicle.valorCompra || parseFloat(this.vehicle.valorCompra) === 0)
+      !!this.vehicle?.purchaseHistory?.[0]?.valorCompra &&
+      (!this.vehicle?.valorCompra || parseFloat(this.vehicle.valorCompra) === 0)
     );
   }
 

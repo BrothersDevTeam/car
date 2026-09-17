@@ -302,16 +302,16 @@
             <section class="form-section">
               <div class="section-title">
                 <mat-icon>attach_money</mat-icon>
-                <h3>Preço de Venda e Tabela FIPE</h3>
+                <h3>Valor de Venda e Tabela FIPE</h3>
               </div>
 
               <div class="form-grid">
                 <div class="field-container">
-                  <label class="modern-label">Preço de Venda Sugerido</label>
+                  <label class="modern-label">Valor de Venda Sugerido</label>
                   <span class="helper-text">Valor base para anúncios e vitrine</span>
                   <app-currency-input
                     formControlName="valorVenda"
-                    label="Preço de Venda"
+                    label="Valor de Venda Sugerido"
                     [error]="!!(form.get('valorVenda')?.invalid && (form.get('valorVenda')?.touched || submitted))"
                     errorMessage="Valor inválido"
                   ></app-currency-input>
