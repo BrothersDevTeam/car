@@ -302,7 +302,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
             name: `${v.brand} ${v.model} (${v.plate})`,
           });
 
-          const valorVenda = v.valorVendaSugerido ? parseFloat(v.valorVendaSugerido.toString().replace(',', '.')) : 0;
+          const valorVenda = v.suggestedSalePrice ? parseFloat(v.suggestedSalePrice.toString().replace(',', '.')) : 0;
           this.vendaForm.patchValue({
             valor: valorVenda,
             valorFinal: valorVenda,
@@ -339,7 +339,7 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
 
   onVehicleSelected(option: { id: string; name: string }) {
     this.vehicleService.getById(option.id).subscribe((vehicle) => {
-      const valorVenda = vehicle.valorVendaSugerido ? parseFloat(vehicle.valorVendaSugerido.toString().replace(',', '.')) : 0;
+      const valorVenda = vehicle.suggestedSalePrice ? parseFloat(vehicle.suggestedSalePrice.toString().replace(',', '.')) : 0;
 
       this.vendaForm.patchValue({
         valor: valorVenda,

@@ -221,7 +221,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     fuelType: [''], // Tipo de Combustível (String)
     optionalIds: [[]], // Array de Opcionais (UUIDs)
     origin: ['NACIONAL'],
-    valorVendaSugerido: [''],
+    suggestedSalePrice: [''],
     fipeValue: [''],
     observation: [''],
     entryDate: [''],
@@ -505,7 +505,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
           origin: formValues.origin || 'NACIONAL',
           fuelType: this.mapFuelTypeToBackend(formValues.fuelType),
           optionalIds: formValues.optionalIds || [],
-          valorVendaSugerido: formValues.valorVendaSugerido?.toString() || '',
+          suggestedSalePrice: formValues.suggestedSalePrice?.toString() || '',
           fipeValue: formValues.fipeValue || '',
           observation: formValues.observation || '',
           entryDate: formValues.entryDate || '',
@@ -1408,7 +1408,7 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       fuelType: this.dataForm!.fuelType || '', // Tipo de combustível
       optionalIds: this.dataForm!.optionals ? this.dataForm!.optionals.map((opt) => opt.optionalId) : [], // Opcionais do veículo
       origin: this.dataForm!.origin || 'NACIONAL',
-      valorVendaSugerido: this.dataForm!.valorVendaSugerido || '',
+      suggestedSalePrice: this.dataForm!.suggestedSalePrice || '',
       fipeValue: this.dataForm!.fipeValue || '',
       observation: this.dataForm!.observation || '',
       entryDate: this.dataForm!.entryDate ? this.dataForm!.entryDate.toString().substring(0, 16) : '',

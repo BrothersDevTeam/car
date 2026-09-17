@@ -319,7 +319,7 @@ export class VehicleInfoComponent implements OnChanges {
     if (this.vehicle?.status === 'VENDIDO' && this.vehicle?.salesHistory?.[0]?.valorFinal) {
       return this.vehicle.salesHistory[0].valorFinal;
     }
-    return this.vehicle?.valorVendaSugerido ? parseFloat(this.vehicle.valorVendaSugerido) : 0;
+    return this.vehicle?.suggestedSalePrice ? parseFloat(this.vehicle.suggestedSalePrice) : 0;
   }
 
   get hasValorCompra(): boolean {
