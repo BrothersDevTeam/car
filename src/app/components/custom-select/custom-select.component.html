@@ -1,4 +1,4 @@
-<div class="custom-dropdown" [class.disabled]="disabled" [class.error]="error">
+<div class="custom-dropdown" [class.disabled]="disabled" [class.error]="error" [class.no-add-button]="!showAddButton">
   <span class="label">
     {{ label }}
   </span>
@@ -7,7 +7,9 @@
     <button type="button" class="dropdown-button" (click)="toggleDropdown()">
       {{ selectedOption?.name || placeholder }}
       <span class="dropdown-arrow"></span>
-      <span class="vertical-bar"></span>
+      @if (showAddButton) {
+        <span class="vertical-bar"></span>
+      }
     </button>
 
     <!-- Dropdown Menu com busca -->
@@ -47,9 +49,19 @@
               <span class="option-content">
                 <mat-icon class="option-chevron">chevron_right</mat-icon>
                 <span class="option-text">{{ option.name }}</span>
+                @if (option.isCustom) {
+                  <span class="badge-custom">Loja</span>
+                }
               </span>
               <div class="select_list_buttons">
-                <button type="button" class="edit-button" (click)="editItem(option, $event)">✏️</button>
+                @if (option.isCustom || listType === 'color' || listType === 'person') {
+                  <button type="button" class="edit-button" (click)="editItem(option, $event)" title="Editar">✏️</button>
+                  @if (option.isCustom) {
+                    <button type="button" class="delete-button" (click)="deleteItem(option, $event)" title="Excluir">
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  }
+                }
               </div>
             </li>
           }
@@ -69,7 +81,9 @@
       }
     </div>
 
-    <mat-icon [matTooltip]="matTooltip" (click)="createNewItem()">add_box</mat-icon>
+    @if (showAddButton) {
+      <mat-icon [matTooltip]="matTooltip" (click)="createNewItem()">add_box</mat-icon>
+    }
   </div>
   @if (error) {
     <span class="error-message">Campo obrigatório</span>

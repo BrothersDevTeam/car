@@ -18,7 +18,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
 import { BrandFormDialogComponent } from '@components/dialogs/brand-form-dialog/brand-form-dialog.component';
 import { ModelFormDialogComponent } from '@components/dialogs/model-form-dialog/model-form-dialog.component';
@@ -32,6 +32,13 @@ import { PersonService } from '@services/person.service';
 import { VehicleService } from '@services/vehicle.service';
 import { FinancialCategoryService } from '@services/financial-category.service';
 
+export interface CustomSelectOption {
+  id: string;
+  name: string;
+  isCustom?: boolean;
+  raw?: any;
+}
+
 @Component({
   selector: 'app-custom-select',
   imports: [ReactiveFormsModule, FormsModule, MatIcon, MatTooltipModule],
@@ -40,23 +47,25 @@ import { FinancialCategoryService } from '@services/financial-category.service';
 })
 export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
   @Input() label: string = 'Selecione uma opção';
-  @Input() options: { id: string; name: string }[] = [];
+  @Input() options: CustomSelectOption[] = [];
   @Input() control!: FormControl | FormGroup;
   @Input() listType!: 'brand' | 'model' | 'color' | 'person' | 'vehicle' | 'financial_category';
   @Input() selectedBrand: { id: string; name: string } = { id: '', name: '' };
   @Input() matTooltip: string = '';
   @Input() placeholder: string = '';
   @Input() disabled: boolean = false;
+  @Input() showAddButton: boolean = true;
   @Output() onCreateNew = new EventEmitter<void>();
   @Output() onEdit = new EventEmitter<string>(); // Emite o ID da pessoa a editar
+  @Output() onDelete = new EventEmitter<string>(); // Emite o ID do item excluído
   @Output() itemChanged = new EventEmitter<void>(); // Notifica que um item foi criado/editado/deletado
   @Output() optionSelected = new EventEmitter<any>();
   @Input() error: boolean = false;
 
-  selectedOption: { id: string; name: string } | null = null;
+  selectedOption: CustomSelectOption | null = null;
   isOpen: boolean = false;
   searchTerm: string = '';
-  filteredOptions: { id: string; name: string }[] = [];
+  filteredOptions: CustomSelectOption[] = [];
   isLoading: boolean = false;
 
   @ViewChild('searchInput') searchInput!: ElementRef;
@@ -114,35 +123,50 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
       }
     }
 
-    if (this.options.length > 0) {
-      this.filteredOptions = [...this.options];
-      this.setSelectedOption();
-      this.cdr.detectChanges();
-    } else {
-      // Tenta setar a opção mesmo sem lista (usando o fallback do control)
-      this.setSelectedOption();
-      this.cdr.detectChanges();
-    }
+    this.filteredOptions = [...this.options];
+    this.setSelectedOption();
+    this.cdr.detectChanges();
   }
 
   private setSelectedOption() {
-    if (this.control instanceof FormControl && this.control.value) {
-      this.selectedOption = this.options.find((option) => option.id === this.control.value.id) || null;
-    } else if (this.control instanceof FormGroup) {
-      const value = this.control.value;
+    if (!this.control) {
+      this.selectedOption = null;
+      return;
+    }
 
-      // Se o valor está vazio (id e name vazios), não faz nada
-      if ((!value.id && !value.name) || (value.id === '' && value.name === '')) {
+    if (this.control instanceof FormControl) {
+      if (!this.control.value) {
+        this.selectedOption = null;
+      } else {
+        const val = this.control.value;
+        const targetId = typeof val === 'object' ? val.id : val;
+        this.selectedOption = this.options.find((option) => option.id === targetId) || null;
+      }
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (this.control instanceof FormGroup) {
+      const value = this.control.value;
+      const hasId = value?.id !== null && value?.id !== undefined && value?.id !== '';
+      const hasName = value?.name !== null && value?.name !== undefined && value?.name !== '';
+
+      // Se o valor está vazio (id e name vazios ou nulos), limpa a seleção
+      if (!value || (!hasId && !hasName)) {
+        this.selectedOption = null;
+        this.cdr.detectChanges();
         return;
       }
 
-      if (value && value.id) {
+      if (hasId) {
         const found = this.options.find((option) => option.id === value.id);
-        this.selectedOption = found || (value.name ? { id: value.id, name: value.name } : null);
-      } else if (value && value.name && !value.id) {
-        // Se só tem name, busca pela name
+        this.selectedOption = found || (hasName ? { id: value.id, name: value.name } : null);
+      } else if (hasName) {
+        // Se só tem name, busca pelo name
         const found = this.options.find((option) => option.name === value.name);
         this.selectedOption = found || { id: '', name: value.name };
+      } else {
+        this.selectedOption = null;
       }
 
       this.cdr.detectChanges();
@@ -179,7 +203,7 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  selectOption(option: { id: string; name: string }) {
+  selectOption(option: CustomSelectOption) {
     this.selectedOption = option;
 
     this.control.setValue({
@@ -308,8 +332,13 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Edita um item existente
    */
-  editItem(option: { id: string; name: string }, event: Event) {
+  editItem(option: CustomSelectOption, event: Event) {
     event.stopPropagation();
+
+    // Apenas itens customizados da loja (ou color/person) podem ser editados
+    if ((this.listType === 'brand' || this.listType === 'model') && !option.isCustom) {
+      return;
+    }
 
     const service = this.serviceMap[this.listType];
 
@@ -339,9 +368,58 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
         this.openColorDialog('edit', fullColor);
       });
     } else {
-      // Para FuelType, usar dialog simples
       this.openSimpleDialog('edit', service, option);
     }
+  }
+
+  /**
+   * Exclui um item existente (apenas itens personalizados da loja)
+   */
+  deleteItem(option: CustomSelectOption, event: Event) {
+    event.stopPropagation();
+
+    const service = this.serviceMap[this.listType];
+    if (!service) {
+      console.error(`Serviço não encontrado para o tipo: ${this.listType}`);
+      return;
+    }
+
+    const itemLabel = this.listType === 'brand' ? 'a marca' : this.listType === 'model' ? 'o modelo' : 'este item';
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Confirmar Exclusão',
+        message: `Tem certeza que deseja excluir ${itemLabel} <strong>${option.name}</strong>?`,
+        confirmText: 'Sim, Excluir',
+        cancelText: 'Cancelar',
+        icon: 'delete_forever',
+        type: 'danger',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        service.delete(option.id).subscribe({
+          next: () => {
+            this.toastrService.success(`${option.name} excluído com sucesso!`);
+            if (this.selectedOption?.id === option.id) {
+              this.selectedOption = null;
+              if (this.control instanceof FormControl) {
+                this.control.reset();
+              } else if (this.control instanceof FormGroup) {
+                this.control.reset({ id: '', name: '' });
+              }
+            }
+            this.onDelete.emit(option.id);
+            this.itemChanged.emit();
+          },
+          error: (error: any) => {
+            console.error(`Erro ao excluir ${this.listType}:`, error);
+            this.toastrService.error(`Erro ao excluir ${option.name}. Pode estar vinculado a outros registros.`);
+          },
+        });
+      }
+    });
   }
 
   /**
@@ -363,8 +441,17 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
         if (mode === 'create') {
           this.brandService.create(payload).subscribe({
             next: (response: any) => {
-              this.reloadBrands();
               this.toastrService.success(this.typeListTexts.brand.successCreateMessage);
+              const newOption: CustomSelectOption = {
+                id: response.brandId || response.id,
+                name: response.name,
+                isCustom: true,
+                raw: response,
+              };
+              this.options.push(newOption);
+              this.filteredOptions = [...this.options];
+              this.selectOption(newOption);
+              this.itemChanged.emit();
             },
             error: (error: any) => {
               console.error('Erro ao criar marca:', error);
@@ -374,8 +461,8 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
         } else {
           this.brandService.update(payload).subscribe({
             next: (response: any) => {
-              this.reloadBrands();
               this.toastrService.success(this.typeListTexts.brand.successUpdateMessage);
+              this.itemChanged.emit();
             },
             error: (error: any) => {
               console.error('Erro ao editar marca:', error);
@@ -388,12 +475,58 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /**
+   * Garante que uma marca exista no banco de dados local da loja para obter um UUID válido
+   */
+  private async ensureBrandInDatabase(brandName: string): Promise<string> {
+    const response = await firstValueFrom(this.brandService.getBrands());
+    const existing = response?.content?.find(
+      (b) => b.name?.trim().toUpperCase() === brandName?.trim().toUpperCase(),
+    );
+    if (existing) {
+      return existing.brandId;
+    }
+
+    const created = await firstValueFrom(
+      this.brandService.create({
+        name: brandName.trim().toUpperCase(),
+        isGlobal: false,
+        storeId: null,
+      }),
+    );
+    return created.brandId;
+  }
+
+  /**
    * Abre o dialog específico para Model
    */
-  private openModelDialog(mode: 'create' | 'edit', option?: any) {
-    if (mode === 'create' && !this.selectedBrand) {
+  private async openModelDialog(mode: 'create' | 'edit', option?: any) {
+    if (mode === 'create' && !this.selectedBrand?.id && !this.selectedBrand?.name) {
       this.toastrService.warning('Selecione uma marca primeiro!');
       return;
+    }
+
+    const brandName = this.selectedBrand?.name || this.options.find((o) => o.id === this.selectedBrand?.id)?.name || '';
+
+    let effectiveBrandId = this.selectedBrand?.id;
+
+    if (mode === 'create') {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(effectiveBrandId || '');
+      if (!isUuid) {
+        if (!brandName) {
+          this.toastrService.warning('Selecione uma marca primeiro!');
+          return;
+        }
+        try {
+          this.isLoading = true;
+          effectiveBrandId = await this.ensureBrandInDatabase(brandName);
+        } catch (error) {
+          console.error('Erro ao sincronizar marca localmente:', error);
+          this.toastrService.error('Erro ao vincular marca no sistema. Tente novamente.');
+          return;
+        } finally {
+          this.isLoading = false;
+        }
+      }
     }
 
     const dialogRef = this.dialog.open(ModelFormDialogComponent, {
@@ -403,8 +536,8 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
           mode === 'create' ? this.typeListTexts.model.create : `${this.typeListTexts.model.update}: ${option?.name}`,
         mode: mode,
         model: mode === 'edit' ? option : undefined,
-        brandId: this.selectedBrand.id,
-        brandName: this.options.find((o) => o.id === this.selectedBrand.id)?.name,
+        brandId: effectiveBrandId,
+        brandName: brandName,
       },
     });
 
@@ -414,10 +547,14 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
         if (mode === 'create') {
           this.modelService.create(payload).subscribe({
             next: (response: any) => {
-              console.log('CustomSelect - Modelo criado, recarregando...', response);
-              this.reloadModels();
               this.toastrService.success(this.typeListTexts.model.successCreateMessage);
-              console.log('CustomSelect - Emitting itemChanged');
+              const newOption: CustomSelectOption = {
+                id: response.modelId || response.id,
+                name: response.name,
+                isCustom: true,
+                raw: response,
+              };
+              this.selectOption(newOption);
               this.itemChanged.emit();
             },
             error: (error: any) => {
@@ -428,8 +565,8 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
         } else {
           this.modelService.update(payload.modelId, payload).subscribe({
             next: (response: any) => {
-              this.reloadModels();
               this.toastrService.success(this.typeListTexts.model.successUpdateMessage);
+              this.itemChanged.emit();
             },
             error: (error: any) => {
               console.error('Erro ao editar modelo:', error);
@@ -612,6 +749,10 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
    * Carrega dados completos de uma marca
    */
   private loadFullBrandData(brandId: string): Promise<any> {
+    const foundOpt = this.options.find((o) => o.id === brandId);
+    if (foundOpt?.raw) {
+      return Promise.resolve(foundOpt.raw);
+    }
     return new Promise((resolve, reject) => {
       this.brandService.getBrands().subscribe({
         next: (response) => {
@@ -619,12 +760,12 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
           if (fullBrand) {
             resolve(fullBrand);
           } else {
-            reject('Marca não encontrada');
+            resolve({ brandId, name: foundOpt?.name || '' });
           }
         },
         error: (error) => {
           console.error('Erro ao carregar dados da marca:', error);
-          reject(error);
+          resolve({ brandId, name: foundOpt?.name || '' });
         },
       });
     });
@@ -634,6 +775,10 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
    * Carrega dados completos de um modelo
    */
   private loadFullModelData(modelId: string): Promise<any> {
+    const foundOpt = this.options.find((o) => o.id === modelId);
+    if (foundOpt?.raw) {
+      return Promise.resolve(foundOpt.raw);
+    }
     return new Promise((resolve, reject) => {
       if (this.selectedBrand?.id) {
         this.modelService.getModelsByBrand(this.selectedBrand.id).subscribe({
@@ -642,16 +787,16 @@ export class CustomSelectComponent implements OnInit, OnChanges, OnDestroy {
             if (fullModel) {
               resolve(fullModel);
             } else {
-              reject('Modelo não encontrado');
+              resolve({ modelId, name: foundOpt?.name || '', brandId: this.selectedBrand.id });
             }
           },
           error: (error) => {
             console.error('Erro ao carregar dados do modelo:', error);
-            reject(error);
+            resolve({ modelId, name: foundOpt?.name || '', brandId: this.selectedBrand.id });
           },
         });
       } else {
-        reject('Nenhuma marca selecionada');
+        resolve({ modelId, name: foundOpt?.name || '' });
       }
     });
   }

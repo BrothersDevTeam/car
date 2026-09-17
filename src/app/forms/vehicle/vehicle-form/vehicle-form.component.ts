@@ -45,10 +45,10 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 
 import { ToastrService } from 'ngx-toastr';
-import { distinctUntilChanged, Subscription, of, Observable } from 'rxjs';
+import { distinctUntilChanged, Subscription, of, Observable, forkJoin, catchError } from 'rxjs';
 
 import { ConfirmDialogComponent } from '@components/dialogs/confirm-dialog/confirm-dialog.component';
-import { CustomSelectComponent } from '@components/custom-select/custom-select.component';
+import { CustomSelectComponent, CustomSelectOption } from '@components/custom-select/custom-select.component';
 import { PrimaryInputComponent } from '@components/primary-input/primary-input.component';
 import { PrimarySelectComponent } from '@components/primary-select/primary-select.component';
 
@@ -57,6 +57,8 @@ import { extractErrorMessage } from '@utils/error-utils';
 import { FuelType, FuelTypeLabels } from '../../../enums/fuelType';
 
 import { VehicleService } from '@services/vehicle.service';
+import { BrandService } from '@services/brand.service';
+import { ModelService } from '@services/model.service';
 import { ColorService } from '@services/color.service';
 import { OptionalService } from '@services/optional.service';
 import { CurrencyInputComponent } from '@components/currency-input/currency-input.component';
@@ -121,11 +123,11 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   private actionsService = inject(ActionsService);
   private router = inject(Router);
 
-  brands: { id: string; name: string }[] = [];
-  models: { id: string; name: string }[] = [];
-  years: { id: string; name: string }[] = []; // FIPE Years
-  colors: { id: string; name: string }[] = [];
-  persons: { id: string; name: string }[] = [];
+  brands: CustomSelectOption[] = [];
+  models: CustomSelectOption[] = [];
+  years: CustomSelectOption[] = []; // FIPE Years
+  colors: CustomSelectOption[] = [];
+  persons: CustomSelectOption[] = [];
   selectedTabIndex = signal(0);
 
   // Flags para controlar o drawer de person
@@ -242,6 +244,8 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
   constructor(
     private vehicleService: VehicleService,
     private fipeService: FipeService, // Injected FipeService
+    private brandService: BrandService,
+    private modelService: ModelService,
     private colorService: ColorService,
     private personService: PersonService,
     private toastrService: ToastrService,
@@ -725,143 +729,420 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  // Validador de formato UUID (marcas e modelos do banco da loja sempre usam UUID)
+  private isUuid(id: string | null | undefined): boolean {
+    if (!id) return false;
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  }
+
+  // Métodos auxiliares para identificação de Marca/Modelo selecionados
+  getSelectedBrand(): CustomSelectOption | undefined {
+    const val = this.brandControl.value;
+    if (!val) return undefined;
+    const found =
+      this.brands.find((b) => b.id === val.id) ||
+      this.brands.find((b) => b.name?.trim().toLowerCase() === val.name?.trim().toLowerCase());
+
+    if (!found && this.isUuid(val.id)) {
+      return {
+        id: val.id,
+        name: val.name,
+        isCustom: true,
+      };
+    }
+    return found;
+  }
+
+  getSelectedModel(): CustomSelectOption | undefined {
+    const val = this.modelControl.value;
+    if (!val) return undefined;
+    const found =
+      this.models.find((m) => m.id === val.id) ||
+      this.models.find((m) => m.name?.trim().toLowerCase() === val.name?.trim().toLowerCase());
+
+    if (!found && this.isUuid(val.id)) {
+      return {
+        id: val.id,
+        name: val.name,
+        isCustom: true,
+      };
+    }
+    return found;
+  }
+
+  get isCustomVehicle(): boolean {
+    const brand = this.getSelectedBrand();
+    const model = this.getSelectedModel();
+    const brandId = this.brandControl.value?.id;
+    const modelId = this.modelControl.value?.id;
+    return !!(brand?.isCustom || model?.isCustom || this.isUuid(brandId) || this.isUuid(modelId));
+  }
+
+  get isFipeValueReadOnly(): boolean {
+    if (this.isCustomVehicle) {
+      return false;
+    }
+    const yearId = this.fipeYearControl.value?.id;
+    if (!yearId || yearId === 'MANUAL') {
+      return false;
+    }
+    return !!this.form.get('fipeValue')?.value;
+  }
+
+  getYearPlaceholder(): string {
+    if (this.isCustomVehicle) {
+      return 'Não se aplica a veículo personalizado';
+    }
+    if (this.loadingYears()) {
+      return 'Carregando anos...';
+    }
+    if (this.selectYearDisabled()) {
+      return 'Selecione um modelo primeiro';
+    }
+    return 'Selecione o ano/versão';
+  }
+
+  getModelPlaceholder(): string {
+    if (this.loadingModels()) {
+      return 'Carregando modelos...';
+    }
+    if (this.selectModelDisabled()) {
+      return 'Selecione uma marca primeiro';
+    }
+    if (this.models.length === 0) {
+      return 'Nenhum modelo cadastrado (clique em + para adicionar)';
+    }
+    return 'Selecione um modelo';
+  }
+
   // Métodos de carregamento para serem chamados quando houver alteração
   loadBrands() {
     const fipeType = this.getFipeVehicleType();
 
-    this.fipeService.getMarcas(fipeType).subscribe({
-      next: (response) => {
-        this.brands = response.map((brand) => ({
+    forkJoin({
+      fipe: this.fipeService.getMarcas(fipeType).pipe(
+        catchError((error) => {
+          console.warn('FIPE getMarcas falhou ou está offline:', error);
+          return of([]);
+        }),
+      ),
+      store: this.brandService.getBrands().pipe(
+        catchError((error) => {
+          console.warn('Erro ao carregar marcas da loja:', error);
+          return of({ content: [] } as any);
+        }),
+      ),
+    }).subscribe({
+      next: ({ fipe, store }) => {
+        const fipeBrands: CustomSelectOption[] = (fipe || []).map((brand: any) => ({
           id: brand.codigo,
           name: brand.nome,
+          isCustom: false,
         }));
+
+        const storeBrands: CustomSelectOption[] = (store?.content || []).map((brand: any) => ({
+          id: brand.brandId,
+          name: brand.name,
+          isCustom: true,
+          raw: brand,
+        }));
+
+        this.brands = [...fipeBrands, ...storeBrands].sort((a, b) => a.name.localeCompare(b.name));
         this.brandsLoaded = true;
         this.tryFillFormOnEdit();
       },
       error: (error) => {
-        console.error('Erro ao carregar marcas FIPE:', error);
-        this.toastrService.error('Erro ao carregar marcas (FIPE)');
+        console.error('Erro ao consolidar marcas:', error);
         this.brandsLoaded = true;
       },
     });
   }
 
   loadModels() {
-    const brandControlValue = this.brandControl.value;
-    const brandId = brandControlValue?.id;
+    const brandValue = this.brandControl.value;
+    const selectedBrand = this.getSelectedBrand();
+    const brandId = brandValue?.id || selectedBrand?.id;
+    const brandName = brandValue?.name || selectedBrand?.name;
     const fipeType = this.getFipeVehicleType();
 
-    if (brandId) {
-      this.loadingModels.set(true);
-      this.fipeService.getModelos(fipeType, brandId).subscribe({
-        next: (response) => {
-          this.models = response.modelos.map((model) => ({
-            id: model.codigo.toString(),
-            name: model.nome,
-          }));
-          this.selectModelDisabled.set(false);
-          this.loadingModels.set(false);
+    if (!brandId && !brandName) {
+      this.models = [];
+      this.selectModelDisabled.set(true);
+      return;
+    }
 
-          // Se estamos editando, tenta selecionar o modelo correto
-          if (this.dataForm?.model) {
-            const selectedModel = this.models.find((m) => m.name === this.dataForm!.model);
-            if (selectedModel && !this.modelControl.value?.id) {
-              this.modelControl.patchValue({
-                id: selectedModel.id,
-                name: selectedModel.name,
-              });
-            }
-          }
-        },
-        error: (error) => {
-          console.error('Erro ao carregar modelos FIPE:', error);
-          this.toastrService.error('Erro ao carregar modelos');
-          this.models = [];
-          this.selectModelDisabled.set(true);
-          this.loadingModels.set(false);
+    this.loadingModels.set(true);
+    this.models = [];
+
+    const isStoreBrand = selectedBrand?.isCustom || this.isUuid(brandId);
+
+    // Se a marca for exclusiva da loja (isCustom: true ou UUID), busca EXCLUSIVAMENTE na API do CAR
+    if (isStoreBrand && brandId) {
+      this.modelService
+        .getModelsByBrand(brandId)
+        .pipe(
+          catchError((error) => {
+            console.warn('Erro ao carregar modelos da loja para marca customizada:', error);
+            return of({ content: [] } as any);
+          }),
+        )
+        .subscribe({
+          next: (response) => {
+            this.models = (response?.content || [])
+              .map((m: any) => ({
+                id: m.modelId,
+                name: m.name,
+                isCustom: true,
+                raw: m,
+              }))
+              .sort((a: any, b: any) => a.name.localeCompare(b.name));
+
+            this.selectModelDisabled.set(false);
+            this.loadingModels.set(false);
+            this.handleSelectedModelOnEdit();
+          },
+          error: () => {
+            this.models = [];
+            this.selectModelDisabled.set(false);
+            this.loadingModels.set(false);
+          },
+        });
+      return;
+    }
+
+    // Se a marca for da FIPE (código numérico, ex: "21"):
+    this.brandService
+      .getBrands()
+      .pipe(
+        catchError(() => of({ content: [] } as any)),
+      )
+      .subscribe({
+        next: (brandsRes) => {
+          const matchingStoreBrand = brandsRes?.content?.find(
+            (b: any) => b.name?.trim().toUpperCase() === brandName?.trim().toUpperCase(),
+          );
+
+          const storeModels$ = matchingStoreBrand
+            ? this.modelService.getModelsByBrand(matchingStoreBrand.brandId).pipe(
+                catchError((error) => {
+                  console.warn('Erro ao carregar modelos locais da marca:', error);
+                  return of({ content: [] } as any);
+                }),
+              )
+            : of({ content: [] } as any);
+
+          // NUNCA envia UUID para a API externa da FIPE
+          const fipeModels$ = brandId && !this.isUuid(brandId)
+            ? this.fipeService.getModelos(fipeType, brandId).pipe(
+                catchError((error) => {
+                  console.warn('FIPE getModelos falhou ou está offline:', error);
+                  return of({ modelos: [], anos: [] });
+                }),
+              )
+            : of({ modelos: [], anos: [] });
+
+          forkJoin({
+            fipe: fipeModels$,
+            store: storeModels$,
+          }).subscribe({
+            next: ({ fipe, store }) => {
+              const fipeModels: CustomSelectOption[] = (fipe?.modelos || []).map((model: any) => ({
+                id: model.codigo.toString(),
+                name: model.nome,
+                isCustom: false,
+              }));
+
+              const storeModels: CustomSelectOption[] = (store?.content || []).map((m: any) => ({
+                id: m.modelId,
+                name: m.name,
+                isCustom: true,
+                raw: m,
+              }));
+
+              this.models = [...fipeModels, ...storeModels].sort((a, b) => a.name.localeCompare(b.name));
+              this.selectModelDisabled.set(false);
+              this.loadingModels.set(false);
+              this.handleSelectedModelOnEdit();
+            },
+            error: (error) => {
+              console.error('Erro ao consolidar modelos:', error);
+              this.models = [];
+              this.selectModelDisabled.set(false);
+              this.loadingModels.set(false);
+            },
+          });
         },
       });
+  }
+
+  private handleSelectedModelOnEdit() {
+    if (this.dataForm?.model) {
+      const selectedModel = this.models.find(
+        (m) => m.name.trim().toLowerCase() === this.dataForm!.model.trim().toLowerCase(),
+      );
+      if (selectedModel) {
+        this.modelControl.patchValue({
+          id: selectedModel.id,
+          name: selectedModel.name,
+        });
+        if (!this.isCustomVehicle) {
+          this.loadYears();
+        }
+      }
     }
+    this.isInitializing = false;
+    this.lastSavedDraftValue = this.form.getRawValue();
   }
 
   loadYears() {
-    const brandId = this.brandControl.value?.id;
-    const modelId = this.modelControl.value?.id;
+    const selectedBrand = this.getSelectedBrand();
+    const selectedModel = this.getSelectedModel();
+    const brandId = this.brandControl.value?.id || selectedBrand?.id;
+    const modelId = this.modelControl.value?.id || selectedModel?.id;
     const fipeType = this.getFipeVehicleType();
 
-    if (brandId && modelId) {
-      this.loadingYears.set(true);
-      this.fipeService.getAnos(fipeType, brandId, modelId).subscribe({
+    // Se marca ou modelo for personalizado da loja, não carrega anos FIPE
+    if (selectedBrand?.isCustom || selectedModel?.isCustom) {
+      this.years = [];
+      this.fipeYearControl.reset();
+      this.selectYearDisabled.set(true);
+      return;
+    }
+
+    if (!brandId || !modelId) {
+      this.years = [];
+      this.fipeYearControl.reset();
+      this.selectYearDisabled.set(true);
+      return;
+    }
+
+    this.loadingYears.set(true);
+    this.fipeService
+      .getAnos(fipeType, brandId, modelId)
+      .pipe(
+        catchError((error) => {
+          console.warn('FIPE getAnos falhou ou está offline:', error);
+          return of([]);
+        }),
+      )
+      .subscribe({
         next: (response) => {
-          this.years = response.map((ano) => ({
+          const manualOption: CustomSelectOption = {
+            id: 'MANUAL',
+            name: '⚙️ Não encontrei meu ano/versão (Preencher manualmente, Ano de fabricação e Ano do Modelo)',
+            isCustom: false,
+          };
+
+          const fipeYears: CustomSelectOption[] = (response || []).map((ano: any) => ({
             id: ano.codigo,
             name: ano.nome.replace('32000', 'Zero KM'),
+            isCustom: false,
           }));
+
+          this.years = [manualOption, ...fipeYears];
           this.selectYearDisabled.set(false);
           this.loadingYears.set(false);
+
+          // Se estamos em edição, busca e pré-seleciona a opção FIPE correspondente ao ano
+          const targetYear = (this.dataForm?.modelYear || this.dataForm?.vehicleYear || '').toString();
+          if (targetYear) {
+            const selectedYear = this.years.find(
+              (y) => y.id.startsWith(targetYear) || y.name.includes(targetYear),
+            );
+            if (selectedYear) {
+              this.fipeYearControl.patchValue(
+                { id: selectedYear.id, name: selectedYear.name },
+                { emitEvent: false },
+              );
+            }
+          }
+          this.isInitializing = false;
+          this.lastSavedDraftValue = this.form.getRawValue();
         },
         error: (error) => {
           console.error('Erro ao carregar anos FIPE:', error);
-          this.toastrService.error('Erro ao carregar versões/anos');
-          this.years = [];
-          this.selectYearDisabled.set(true);
+          this.years = [
+            {
+              id: 'MANUAL',
+              name: '⚙️ Não encontrei meu ano/versão (Preencher manualmente, Ano de fabricação e Ano do Modelo)',
+              isCustom: false,
+            },
+          ];
+          this.selectYearDisabled.set(false);
           this.loadingYears.set(false);
+          this.isInitializing = false;
+          this.lastSavedDraftValue = this.form.getRawValue();
         },
       });
-    }
   }
 
   loadVehicleDetails(showToast = true) {
-    const brandId = this.brandControl.value?.id;
-    const modelId = this.modelControl.value?.id;
+    const selectedBrand = this.getSelectedBrand();
+    const selectedModel = this.getSelectedModel();
+    const brandId = this.brandControl.value?.id || selectedBrand?.id;
+    const modelId = this.modelControl.value?.id || selectedModel?.id;
     const yearId = this.fipeYearControl.value?.id;
     const fipeType = this.getFipeVehicleType();
 
+    if (this.isCustomVehicle || yearId === 'MANUAL') {
+      return;
+    }
+
     if (brandId && modelId && yearId) {
       this.loadingDetails.set(true);
-      this.fipeService.getVehicleDetails(fipeType, brandId, modelId, yearId).subscribe({
-        next: (details) => {
-          this.loadingDetails.set(false);
+      this.fipeService
+        .getVehicleDetails(fipeType, brandId, modelId, yearId)
+        .pipe(
+          catchError((error) => {
+            console.warn('Erro ao carregar detalhes FIPE:', error);
+            return of(null);
+          }),
+        )
+        .subscribe({
+          next: (details) => {
+            this.loadingDetails.set(false);
+            if (!details) {
+              return;
+            }
 
-          // Preenche automaticamente os campos com dados da FIPE
-          // Se o ano for 32000, considera como Zero KM (usa o ano atual)
-          const fipeYear = details.AnoModelo === 32000 ? new Date().getFullYear() : details.AnoModelo;
+            const fipeYear = details.AnoModelo === 32000 ? new Date().getFullYear() : details.AnoModelo;
+            const engineDisplacementMatch = details.Modelo.match(/(\d+\.\d+)/);
+            const extractedDisplacement = engineDisplacementMatch ? engineDisplacementMatch[0] : '';
 
-          // Extração de cilindrada do modelo (ex: "GOL 1.0" -> "1.0" ou "2.0")
-          // Procura por padrão número.número (ex: 1.0, 2.0, 1.6)
-          const engineDisplacementMatch = details.Modelo.match(/(\d+\.\d+)/);
-          const extractedDisplacement = engineDisplacementMatch ? engineDisplacementMatch[0] : '';
+            this.form.patchValue({
+              vehicleYear: fipeYear,
+              modelYear: fipeYear,
+              engineDisplacement: extractedDisplacement,
+              fuelType: this.mapFuelTypeToBackend(details.Combustivel),
+              fipeValue: details.Valor,
+            });
 
-          this.form.patchValue({
-            vehicleYear: fipeYear,
-            modelYear: fipeYear, // FIPE geralmente retorna apenas AnoModelo
-            engineDisplacement: extractedDisplacement,
-            fuelType: this.mapFuelTypeToBackend(details.Combustivel),
-            fipeValue: details.Valor,
-          });
-
-          console.log('Detalhes FIPE:', details);
-          if (showToast) {
-            this.toastrService.info(`Valor tabela FIPE: ${details.Valor}`, 'Dados FIPE carregados');
-          }
-        },
-        error: (error) => {
-          console.error('Erro ao carregar detalhes FIPE:', error);
-          this.loadingDetails.set(false);
-          this.toastrService.error('Erro ao consultar Tabela FIPE', 'Erro');
-        },
-      });
+            console.log('Detalhes FIPE:', details);
+            if (showToast) {
+              this.toastrService.info(`Valor tabela FIPE: ${details.Valor}`, 'Dados FIPE carregados');
+            }
+          },
+          error: (error) => {
+            console.error('Erro ao carregar detalhes FIPE:', error);
+            this.loadingDetails.set(false);
+          },
+        });
     }
   }
 
   refreshFipeValue() {
+    if (this.isCustomVehicle) {
+      this.toastrService.info('Veículo com marca ou modelo personalizado não possui consulta FIPE.');
+      return;
+    }
+
     const brandId = this.brandControl.value?.id;
     const modelId = this.modelControl.value?.id;
     const yearId = this.fipeYearControl.value?.id;
 
-    if (!brandId || !modelId || !yearId) {
+    if (!brandId || !modelId || !yearId || yearId === 'MANUAL') {
       this.toastrService.warning(
-        'Selecione a marca, modelo e versão/ano na aba Veículo para consultar a Tabela FIPE.',
+        'Selecione a marca, modelo e versão/ano da FIPE na aba Veículo para consultar a Tabela FIPE.',
         'Tabela FIPE',
       );
       return;
@@ -969,7 +1250,11 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       this.form.get('vehicleType')?.valueChanges.subscribe(() => {
         if (this.isFillingForm) return;
         // Limpa seleções dependentes
-        this.brandControl.reset();
+        this.brandControl.reset({ id: '', name: '' });
+        this.modelControl.reset({ id: '', name: '' });
+        this.fipeYearControl.reset({ id: '', name: '' });
+        this.models = [];
+        this.years = [];
 
         // Recarrega marcas com o novo tipo
         this.loadBrands();
@@ -979,20 +1264,21 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Cascata: Marca -> Modelo
     this.subscriptions.add(
       this.brandControl.valueChanges
-        .pipe(distinctUntilChanged((prev, curr) => prev?.id === curr?.id))
+        .pipe(distinctUntilChanged((prev, curr) => prev?.id === curr?.id && prev?.name === curr?.name))
         .subscribe((brand) => {
           if (this.isFillingForm) return;
-          if (brand && brand.id) {
-            this.modelControl.reset();
-            this.fipeYearControl.reset();
+          if (brand && (brand.id || brand.name)) {
+            this.models = [];
+            this.modelControl.reset({ id: '', name: '' });
+            this.fipeYearControl.reset({ id: '', name: '' });
             this.years = [];
             this.selectYearDisabled.set(true);
             this.loadModels();
           } else {
             this.models = [];
             this.years = [];
-            this.modelControl.reset();
-            this.fipeYearControl.reset(); // Reset ano também
+            this.modelControl.reset({ id: '', name: '' });
+            this.fipeYearControl.reset({ id: '', name: '' });
             this.selectModelDisabled.set(true);
             this.selectYearDisabled.set(true);
           }
@@ -1002,15 +1288,15 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Cascata: Modelo -> Ano
     this.subscriptions.add(
       this.modelControl.valueChanges
-        .pipe(distinctUntilChanged((prev, curr) => prev?.id === curr?.id))
+        .pipe(distinctUntilChanged((prev, curr) => prev?.id === curr?.id && prev?.name === curr?.name))
         .subscribe((model) => {
           if (this.isFillingForm) return;
-          if (model && model.id) {
-            this.fipeYearControl.reset();
+          if (model && (model.id || model.name)) {
+            this.fipeYearControl.reset({ id: '', name: '' });
             this.loadYears();
           } else {
             this.years = [];
-            this.fipeYearControl.reset();
+            this.fipeYearControl.reset({ id: '', name: '' });
             this.selectYearDisabled.set(true);
           }
         }),
@@ -1021,8 +1307,10 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
       this.fipeYearControl.valueChanges
         .pipe(distinctUntilChanged((prev, curr) => prev?.id === curr?.id))
         .subscribe((year) => {
-          if (year && year.id) {
+          if (year && year.id && year.id !== 'MANUAL') {
             this.loadVehicleDetails();
+          } else if (year?.id === 'MANUAL') {
+            this.toastrService.info('Preencha os dados do veículo manualmente nas abas correspondentes.');
           }
         }),
     );
@@ -1132,82 +1420,9 @@ export class VehicleFormComponent implements OnInit, OnChanges, OnDestroy {
     // Marca que o formulário foi preenchido
     this.formFilled = true;
 
-    // Se houver uma marca selecionada (com ID), carrega os modelos
-    if (selectedBrand && selectedBrand.id) {
-      const fipeType = this.getFipeVehicleType();
-      this.loadingModels.set(true);
-      this.fipeService.getModelos(fipeType, selectedBrand.id).subscribe({
-        next: (response) => {
-          this.models = response.modelos.map((model) => ({
-            id: model.codigo.toString(),
-            name: model.nome,
-          }));
-          this.selectModelDisabled.set(false);
-          this.loadingModels.set(false);
-
-          // Após carregar os modelos, busca o modelo selecionado
-          const selectedModel = this.models.find(
-            (m) => m.name.toLowerCase() === (this.dataForm?.model || '').toLowerCase(),
-          );
-
-          if (selectedModel) {
-            this.modelControl.patchValue({
-              id: selectedModel.id,
-              name: selectedModel.name,
-            });
-
-            // Carrega os anos/versões FIPE para o modelo selecionado
-            this.loadingYears.set(true);
-            this.fipeService.getAnos(fipeType, selectedBrand.id, selectedModel.id).subscribe({
-              next: (yearsResponse) => {
-                this.years = yearsResponse.map((ano) => ({
-                  id: ano.codigo,
-                  name: ano.nome.replace('32000', 'Zero KM'),
-                }));
-                this.selectYearDisabled.set(false);
-                this.loadingYears.set(false);
-
-                // Busca e pré-seleciona a opção FIPE correspondente ao ano do modelo/veículo
-                const targetYear = (this.dataForm?.modelYear || this.dataForm?.vehicleYear || '').toString();
-                if (targetYear) {
-                  const selectedYear = this.years.find(
-                    (y) => y.id.startsWith(targetYear) || y.name.includes(targetYear),
-                  );
-
-                  if (selectedYear) {
-                    this.fipeYearControl.patchValue(
-                      {
-                        id: selectedYear.id,
-                        name: selectedYear.name,
-                      },
-                      { emitEvent: false },
-                    );
-                  }
-                }
-                this.isInitializing = false;
-                this.lastSavedDraftValue = this.form.getRawValue();
-              },
-              error: (err) => {
-                console.error('Erro ao carregar anos FIPE na edição:', err);
-                this.selectYearDisabled.set(true);
-                this.loadingYears.set(false);
-                this.isInitializing = false;
-                this.lastSavedDraftValue = this.form.getRawValue();
-              },
-            });
-          } else {
-            this.isInitializing = false;
-            this.lastSavedDraftValue = this.form.getRawValue();
-          }
-        },
-        error: (error) => {
-          console.error('Erro ao carregar modelos:', error);
-          this.selectModelDisabled.set(true);
-          this.loadingModels.set(false);
-          this.isInitializing = false;
-          this.lastSavedDraftValue = this.form.getRawValue();
-        },
-      });
+    // Se houver uma marca selecionada, carrega os modelos (híbrido loja + FIPE)
+    if (selectedBrand && (selectedBrand.id || selectedBrand.name)) {
+      this.loadModels();
     } else {
       this.isInitializing = false;
       this.lastSavedDraftValue = this.form.getRawValue();

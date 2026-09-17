@@ -145,7 +145,8 @@
 
 .grid-2-cols {
   grid-template-columns: 1fr 1fr !important;
-  gap: 2rem;
+  gap: 1.5rem;
+  align-items: flex-end;
 }
 
 .vertical-form-stack {
