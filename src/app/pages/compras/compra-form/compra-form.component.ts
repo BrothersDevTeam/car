@@ -38,6 +38,7 @@ import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-
 import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
 import { DrawerComponent } from '@components/drawer/drawer.component';
 import { VehicleFormComponent } from '@forms/vehicle/vehicle-form/vehicle-form.component';
+import { NgxMaskDirective } from 'ngx-mask';
 
 @Component({
   selector: 'app-compra-form',
@@ -46,6 +47,7 @@ import { VehicleFormComponent } from '@forms/vehicle/vehicle-form/vehicle-form.c
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    NgxMaskDirective,
     ContentHeaderComponent,
     MatButtonModule,
     MatIconModule,
@@ -92,17 +94,44 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
 
   // Lista de Formas de Pagamento
   readonly formasPagamentoList = [
-    { value: 'DINHEIRO', label: 'DINHEIRO' },
-    { value: 'PIX', label: 'PIX' },
-    { value: 'CARTAO', label: 'CARTÃO' },
-    { value: 'TED', label: 'TED' },
+    { value: 'DINHEIRO', label: 'Dinheiro' },
+    { value: 'CHEQUE', label: 'Cheque' },
+    { value: 'CARTAO_CREDITO', label: 'Cartão de Crédito' },
+    { value: 'CARTAO_DEBITO', label: 'Cartão de Débito' },
+    { value: 'CREDITO_LOJA', label: 'Crédito Loja' },
+    { value: 'VALE_ALIMENTACAO', label: 'Vale Alimentação' },
+    { value: 'VALE_REFEICAO', label: 'Vale Refeição' },
+    { value: 'VALE_PRESENTE', label: 'Vale Presente' },
+    { value: 'VALE_COMBUSTIVEL', label: 'Vale Combustível' },
+    { value: 'DUPLICATA_MERCANTIL', label: 'Duplicata Mercantil' },
+    { value: 'BOLETO', label: 'Boleto Bancário' },
+    { value: 'PIX', label: 'Pagamento Instantâneo (PIX)' },
+    { value: 'TED', label: 'Transferência Bancária / TED' },
     { value: 'DOC', label: 'DOC' },
-    { value: 'BOLETO', label: 'BOLETO' },
-    { value: 'CHEQUE', label: 'CHEQUE' },
-    { value: 'PROMISSORIA', label: 'PROMISSÓRIA' },
-    { value: 'FINANCIAMENTO', label: 'FINANCIAMENTO' },
-    { value: 'OUTROS', label: 'OUTROS' },
+    { value: 'FINANCIAMENTO', label: 'Financiamento' },
+    { value: 'PROMISSORIA', label: 'Nota Promissória' },
+    { value: 'TROCA', label: 'Troca' },
+    { value: 'SEM_PAGAMENTO', label: 'Sem Pagamento' },
+    { value: 'OUTROS', label: 'Outros' },
   ];
+
+  readonly bandeirasCartao = [
+    { value: '', label: 'Selecione a Bandeira' },
+    { value: '01', label: 'Visa' },
+    { value: '02', label: 'Mastercard' },
+    { value: '03', label: 'American Express' },
+    { value: '04', label: 'Sorocred' },
+    { value: '05', label: 'Diners Club' },
+    { value: '06', label: 'Elo' },
+    { value: '07', label: 'Hipercard' },
+    { value: '08', label: 'Aura' },
+    { value: '09', label: 'Cabal' },
+    { value: '99', label: 'Outros' },
+  ];
+
+  isCartaoForma(forma?: string): boolean {
+    return forma === 'CARTAO_CREDITO' || forma === 'CARTAO_DEBITO';
+  }
 
   // Flags para controle do drawer de fornecedor (person)
   openPersonForm = signal(false);
@@ -326,6 +355,10 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
                   vencimento: pag.vencimento ? new Date(pag.vencimento) : new Date(),
                   tipo: pag.tipo || 'D',
                   origem: isPrazo ? 'PRAZO' : 'VISTA',
+                  cartaoTipoIntegracao: pag.cartaoTipoIntegracao || '2',
+                  cartaoBandeira: pag.cartaoBandeira || '',
+                  cartaoCnpj: pag.cartaoCnpj || '',
+                  cartaoAutorizacao: pag.cartaoAutorizacao || '',
                 }),
               );
             });
@@ -359,6 +392,10 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
       vencimento: [data?.vencimento ? new Date(data.vencimento) : new Date(), Validators.required],
       tipo: [data?.tipo || 'D'],
       origem: [data?.origem || 'VISTA'],
+      cartaoTipoIntegracao: [data?.cartaoTipoIntegracao || '2'],
+      cartaoBandeira: [data?.cartaoBandeira || ''],
+      cartaoCnpj: [data?.cartaoCnpj || ''],
+      cartaoAutorizacao: [data?.cartaoAutorizacao || ''],
     });
   }
 
@@ -526,6 +563,10 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
               valor: p.valor,
               vencimento: p.vencimento,
               tipo: p.tipo,
+              cartaoTipoIntegracao: p.cartaoTipoIntegracao || null,
+              cartaoBandeira: p.cartaoBandeira || null,
+              cartaoCnpj: p.cartaoCnpj ? p.cartaoCnpj.replace(/\D/g, '') : null,
+              cartaoAutorizacao: p.cartaoAutorizacao || null,
             }))
           : [],
     };

@@ -259,10 +259,52 @@
             Valores
           </h3>
           <div class="info-grid">
-            <div class="info-item">
-              <label>Valor Total</label>
-              <span class="valor-destaque">R$ {{ nfeValorTotalCalculado }}</span>
-            </div>
+            <!-- Formas de Pagamento -->
+            @if (nfePagamentos.length > 0) {
+              <div class="pagamentos-header-row">
+                <span class="pagamentos-title">
+                  <mat-icon>payments</mat-icon>
+                  Formas de Pagamento
+                </span>
+              </div>
+
+              @for (pag of nfePagamentos; track $index) {
+                <div class="info-item pagamento-row">
+                  <div class="pagamento-details">
+                    <div class="pagamento-primary">
+                      <span class="pagamento-forma">{{ getFormaPagamentoLabel(pag.detalhesPagamentoFormaPagamento) }}</span>
+                      @if (pag.detalhesPagamentoDescricao) {
+                        <span class="pagamento-desc">({{ pag.detalhesPagamentoDescricao }})</span>
+                      }
+                    </div>
+                    @if (pag.detalhesPagamentoCartao?.cartaoBandeira || pag.detalhesPagamentoCartao?.cartaoAutorizacao) {
+                      <div class="pagamento-sub">
+                        @if (pag.detalhesPagamentoCartao?.cartaoBandeira) {
+                          <span class="cartao-tag">{{ getBandeiraCartaoLabel(pag.detalhesPagamentoCartao?.cartaoBandeira) }}</span>
+                        }
+                        @if (pag.detalhesPagamentoCartao?.cartaoTipoIntegracao) {
+                          <span class="cartao-tag">{{ pag.detalhesPagamentoCartao?.cartaoTipoIntegracao === '1' ? 'TEF Integrado' : 'POS' }}</span>
+                        }
+                        @if (pag.detalhesPagamentoCartao?.cartaoAutorizacao) {
+                          <span class="cartao-tag">Aut: {{ pag.detalhesPagamentoCartao?.cartaoAutorizacao }}</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <span class="pagamento-valor">R$ {{ formatarValorMoeda(pag.detalhesPagamentoValor) }}</span>
+                </div>
+              }
+
+              @if (nfeTroco) {
+                <div class="info-item troco-row">
+                  <label>Troco</label>
+                  <span>R$ {{ formatarValorMoeda(nfeTroco) }}</span>
+                </div>
+              }
+
+              <div class="pagamentos-divider"></div>
+            }
+
             @if (selectedNfe.nfeIcmsBaseCalculo) {
               <div class="info-item">
                 <label>Base Calc. ICMS</label>
@@ -305,6 +347,12 @@
                 <span>R$ {{ selectedNfe.nfeValorCofins }}</span>
               </div>
             }
+
+            <!-- Valor Total (Abaixo das formas de pagamento) -->
+            <div class="info-item total-final-item">
+              <label>Valor Total</label>
+              <span class="valor-destaque">R$ {{ nfeValorTotalCalculado }}</span>
+            </div>
           </div>
         </div>
 

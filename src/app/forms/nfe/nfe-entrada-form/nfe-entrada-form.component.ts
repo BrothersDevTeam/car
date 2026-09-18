@@ -44,7 +44,7 @@ import {
   SaveDraftDialogResult,
 } from '@components/dialogs/save-draft-dialog/save-draft-dialog.component';
 
-import { DatePipe } from '@angular/common';
+import { DatePipe, CurrencyPipe } from '@angular/common';
 import { NaturezaOperacao } from '@interfaces/nfe';
 import type { Nfe } from '@interfaces/nfe';
 import type { Person } from '@interfaces/person';
@@ -65,6 +65,7 @@ import { FormDraftService, FormDraft } from '@services/form-draft.service';
   selector: 'app-nfe-entrada-form',
   imports: [
     DatePipe,
+    CurrencyPipe,
     PrimarySelectComponent,
     PrimaryInputComponent,
     ReactiveFormsModule,
@@ -138,11 +139,22 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     },
   ];
 
+  formasEmissao = [
+    { value: '1', label: '1 - Normal' },
+    { value: '2', label: '2 - Contingência FS-IA' },
+    { value: '3', label: '3 - Contingência SCAN' },
+    { value: '4', label: '4 - Contingência DPEC' },
+    { value: '5', label: '5 - Contingência FS-DA' },
+    { value: '6', label: '6 - Contingência SVC-AN' },
+    { value: '7', label: '7 - Contingência SVC-RS' },
+    { value: '9', label: '9 - Contingência off-line da NFC-e' },
+  ];
+
   finalidadesEmissao = [
     { value: '1', label: '1 - Normal' },
     { value: '2', label: '2 - Complementar' },
-    { value: '3', label: '3 - Devolução de Mercadoria' },
-    { value: '4', label: '4 - Ajuste' },
+    { value: '3', label: '3 - Ajuste' },
+    { value: '4', label: '4 - Devolução de Mercadoria' },
   ];
 
   consumidoresFinais = [
@@ -166,12 +178,42 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   ];
 
   modalidadesFrete = [
-    { value: '0', label: '0 - Contratação por conta do Remetente (CIF)' },
-    { value: '1', label: '1 - Contratação por conta do Destinatário (FOB)' },
-    { value: '2', label: '2 - Contratação por conta de Terceiros' },
-    { value: '3', label: '3 - Transporte Próprio por conta do Remetente' },
-    { value: '4', label: '4 - Transporte Próprio por conta do Destinatário' },
-    { value: '9', label: '9 - Sem Ocorrência de Transporte' },
+    { value: '0', label: '00 - Por conta do emitente' },
+    { value: '1', label: '01 - Por conta do destinatário/remetente' },
+    { value: '2', label: '02 - Por conta de terceiros' },
+    { value: '9', label: '09 - Sem frete (v2.0)' },
+  ];
+
+  formasPagamentoNfe = [
+    { value: '01', label: '01 - Dinheiro' },
+    { value: '02', label: '02 - Cheque' },
+    { value: '03', label: '03 - Cartão de Crédito' },
+    { value: '04', label: '04 - Cartão de Débito' },
+    { value: '05', label: '05 - Crédito Loja' },
+    { value: '10', label: '10 - Vale Alimentação' },
+    { value: '11', label: '11 - Vale Refeição' },
+    { value: '12', label: '12 - Vale Presente' },
+    { value: '13', label: '13 - Vale Combustível' },
+    { value: '14', label: '14 - Duplicata Mercantil' },
+    { value: '15', label: '15 - Boleto Bancário' },
+    { value: '17', label: '17 - Pagamento Instantâneo (PIX)' },
+    { value: '18', label: '18 - Transferência Bancária' },
+    { value: '90', label: '90 - Sem Pagamento' },
+    { value: '99', label: '99 - Outros' },
+  ];
+
+  bandeirasCartao = [
+    { value: '', label: 'Selecione a Bandeira' },
+    { value: '01', label: 'Visa' },
+    { value: '02', label: 'Mastercard' },
+    { value: '03', label: 'American Express' },
+    { value: '04', label: 'Sorocred' },
+    { value: '05', label: 'Diners Club' },
+    { value: '06', label: 'Elo' },
+    { value: '07', label: 'Hipercard' },
+    { value: '08', label: 'Aura' },
+    { value: '09', label: 'Cabal' },
+    { value: '99', label: 'Outros' },
   ];
 
   readonly dialog = inject(MatDialog);
@@ -226,11 +268,14 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     nfePreenchimentoManualImpostos: [false],
     itemTipo: ['veiculo'], // 'veiculo' ou 'produto'
     nfeItens: this.formBuilderService.array([]),
+    nfeFormaEmissao: ['1', Validators.required],
     nfeFinalidadeEmissao: ['1', Validators.required],
     nfeConsumidorFinal: ['0', Validators.required],
     nfePresencaComprador: ['1', Validators.required],
     nfeIndicadorIntermediario: ['0', Validators.required],
     modalidadeFrete: ['9', Validators.required],
+    pagamentos: this.formBuilderService.array([]),
+    pagamentoValorTroco: ['0.00'],
     nfeInformacoesAdicionaisFisco: [
       'EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.',
     ],
@@ -245,6 +290,9 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
     if (!this.dataForm && !this.draft) {
       this.addItem();
+      if (this.pagamentos.length === 0) {
+        this.addPagamento();
+      }
     }
 
     this.subscriptions.add(
@@ -365,6 +413,80 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     if (this.itens.length > 1) {
       this.itens.removeAt(index);
     }
+  }
+
+  get pagamentos(): FormArray {
+    return this.form.get('pagamentos') as FormArray;
+  }
+
+  createPagamentoItem(data: any = {}): FormGroup {
+    return this.formBuilderService.group({
+      detalhesPagamentoFormaPagamento: [data.detalhesPagamentoFormaPagamento || '01', Validators.required],
+      detalhesPagamentoDescricao: [data.detalhesPagamentoDescricao || ''],
+      detalhesPagamentoValor: [data.detalhesPagamentoValor || '', Validators.required],
+      cartaoBandeira: [data.cartaoBandeira || ''],
+      cartaoTipoIntegracao: [data.cartaoTipoIntegracao || '2'], // 1=Integrado, 2=Não Integrado
+      cartaoCnpj: [data.cartaoCnpj || ''],
+      cartaoAutorizacao: [data.cartaoAutorizacao || ''],
+    });
+  }
+
+  addPagamento(data?: any): void {
+    this.pagamentos.push(this.createPagamentoItem(data));
+  }
+
+  removePagamento(index: number): void {
+    this.pagamentos.removeAt(index);
+  }
+
+  isCartaoForma(forma?: string): boolean {
+    return forma === '03' || forma === '04';
+  }
+
+  mapFormaPagamentoToSefazCode(forma: string): string {
+    if (!forma) return '01';
+    const map: Record<string, string> = {
+      DINHEIRO: '01',
+      CHEQUE: '02',
+      CARTAO_CREDITO: '03',
+      CARTAO_DEBITO: '04',
+      CREDITO_LOJA: '05',
+      VALE_ALIMENTACAO: '10',
+      VALE_REFEICAO: '11',
+      VALE_PRESENTE: '12',
+      VALE_COMBUSTIVEL: '13',
+      DUPLICATA_MERCANTIL: '14',
+      BOLETO: '15',
+      PIX: '17',
+      TED: '18',
+      DOC: '18',
+      SEM_PAGAMENTO: '90',
+      OUTROS: '99',
+    };
+    return map[forma.toUpperCase()] || (forma.length === 2 ? forma : '99');
+  }
+
+  calcularTotalItens(): number {
+    if (!this.itens || this.itens.length === 0) return 0;
+    return this.itens.controls.reduce((acc, ctrl) => {
+      const qtd = Number(ctrl.get('itemQuantidadeComercial')?.value || 0);
+      const unit = Number(ctrl.get('itemValorUnitarioComercial')?.value || 0);
+      return acc + qtd * unit;
+    }, 0);
+  }
+
+  calcularTotalPagamentos(): number {
+    if (!this.pagamentos || this.pagamentos.length === 0) return 0;
+    return this.pagamentos.controls.reduce((acc, ctrl) => {
+      const val = parseFloat(ctrl.get('detalhesPagamentoValor')?.value) || 0;
+      return acc + val;
+    }, 0);
+  }
+
+  calcularTroco(): number {
+    const totalItens = this.calcularTotalItens();
+    const totalPagamentos = this.calcularTotalPagamentos();
+    return totalPagamentos > totalItens ? totalPagamentos - totalItens : 0;
   }
 
   /**
@@ -562,6 +684,33 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
           itemValorUnitarioComercial: valorCompra > 0 ? valorCompra.toFixed(2) : '',
           itemValorBruto: valorCompra > 0 ? valorCompra.toFixed(2) : '',
         });
+
+        // Sincroniza pagamentos da compra na NFe de Entrada
+        if (vehicle.purchaseHistory && vehicle.purchaseHistory.length > 0) {
+          const firstPurchase = vehicle.purchaseHistory[0];
+          if (firstPurchase.pagamentos && firstPurchase.pagamentos.length > 0) {
+            if (this.pagamentos.length === 0 || (this.pagamentos.length === 1 && !this.pagamentos.at(0).get('detalhesPagamentoValor')?.value)) {
+              this.pagamentos.clear();
+              firstPurchase.pagamentos.forEach((p: any) => {
+                this.addPagamento({
+                  detalhesPagamentoFormaPagamento: this.mapFormaPagamentoToSefazCode(p.formaPagamento),
+                  detalhesPagamentoDescricao: p.descricao || '',
+                  detalhesPagamentoValor: p.valor ? parse(p.valor).toFixed(2) : '0.00',
+                  cartaoBandeira: p.cartaoBandeira || '',
+                  cartaoTipoIntegracao: p.cartaoTipoIntegracao || '2',
+                  cartaoCnpj: p.cartaoCnpj || '',
+                  cartaoAutorizacao: p.cartaoAutorizacao || '',
+                });
+              });
+            }
+          } else if (valorCompra > 0 && (this.pagamentos.length === 0 || (this.pagamentos.length === 1 && !this.pagamentos.at(0).get('detalhesPagamentoValor')?.value))) {
+            this.pagamentos.clear();
+            this.addPagamento({
+              detalhesPagamentoFormaPagamento: '01',
+              detalhesPagamentoValor: valorCompra.toFixed(2),
+            });
+          }
+        }
       },
       error: () => {
         this.toastrService.error('Erro ao buscar dados do veículo selecionado');
@@ -823,15 +972,37 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       ownerDisplayName: personName,
       nfeNaturezaOperacao: this.dataForm.nfeNaturezaOperacao || '',
       nfePreenchimentoManualImpostos: this.dataForm.nfeCalcularImpostosAutomaticamente === false,
+      nfeFormaEmissao: this.dataForm.nfeFormaEmissao || '1',
       nfeFinalidadeEmissao: this.dataForm.nfeFinalidadeEmissao || '1',
       nfeConsumidorFinal: this.dataForm.nfeConsumidorFinal || '0',
       nfePresencaComprador: this.dataForm.nfePresencaComprador || '1',
       nfeIndicadorIntermediario: this.dataForm.nfeIndicadorIntermediario || '0',
       modalidadeFrete: this.dataForm.nfeTransporte?.modalidadeFrete || '9',
+      pagamentoValorTroco: this.dataForm.nfePagamento?.pagamentoValorTroco || '0.00',
       nfeInformacoesAdicionaisFisco:
         this.dataForm.nfeInformacoesAdicionaisFisco ||
         'EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.',
     });
+
+    this.pagamentos.clear();
+    if (this.dataForm.nfePagamento?.pagamentoDetalhamentos && this.dataForm.nfePagamento.pagamentoDetalhamentos.length > 0) {
+      this.dataForm.nfePagamento.pagamentoDetalhamentos.forEach((d) => {
+        this.addPagamento({
+          detalhesPagamentoFormaPagamento: d.detalhesPagamentoFormaPagamento,
+          detalhesPagamentoDescricao: d.detalhesPagamentoDescricao,
+          detalhesPagamentoValor: d.detalhesPagamentoValor,
+          cartaoBandeira: d.detalhesPagamentoCartao?.cartaoBandeira,
+          cartaoTipoIntegracao: d.detalhesPagamentoCartao?.cartaoTipoIntegracao || '2',
+          cartaoCnpj: d.detalhesPagamentoCartao?.cartaoCnpj,
+          cartaoAutorizacao: d.detalhesPagamentoCartao?.cartaoAutorizacao,
+        });
+      });
+    } else if (this.dataForm.nfeValorTotal) {
+      this.addPagamento({
+        detalhesPagamentoFormaPagamento: '01',
+        detalhesPagamentoValor: this.dataForm.nfeValorTotal,
+      });
+    }
 
     if (vId) {
       this.loadVehicleOwnersForNfe(vId, this.dataForm.personId || undefined);
@@ -916,6 +1087,24 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       } as any;
     });
 
+    // Montagem dos pagamentos da NFe
+    const detalhamentos = this.pagamentos.getRawValue().map((pag: any) => {
+      const isCartao = this.isCartaoForma(pag.detalhesPagamentoFormaPagamento);
+      return {
+        detalhesPagamentoFormaPagamento: pag.detalhesPagamentoFormaPagamento,
+        detalhesPagamentoDescricao: pag.detalhesPagamentoDescricao || undefined,
+        detalhesPagamentoValor: String(pag.detalhesPagamentoValor || '0'),
+        detalhesPagamentoCartao: isCartao
+          ? {
+              cartaoTipoIntegracao: pag.cartaoTipoIntegracao || '2',
+              cartaoBandeira: pag.cartaoBandeira || undefined,
+              cartaoCnpj: pag.cartaoCnpj || undefined,
+              cartaoAutorizacao: pag.cartaoAutorizacao || undefined,
+            }
+          : undefined,
+      };
+    });
+
     const formValues: Nfe = {
       nfeId: this.dataForm?.nfeId,
       storeId: this.storeContextService.currentStoreId!,
@@ -924,6 +1113,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       nfeTipoDocumento: '0', // Entrada
       nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
       nfeCalcularImpostosAutomaticamente: !this.form.value.nfePreenchimentoManualImpostos,
+      nfeFormaEmissao: this.form.value.nfeFormaEmissao || '1',
       nfeFinalidadeEmissao: this.form.value.nfeFinalidadeEmissao,
       nfeConsumidorFinal: this.form.value.nfeConsumidorFinal,
       nfePresencaComprador: this.form.value.nfePresencaComprador,
@@ -931,6 +1121,13 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       nfeTransporte: {
         modalidadeFrete: this.form.value.modalidadeFrete,
       },
+      nfePagamento:
+        detalhamentos.length > 0
+          ? {
+              pagamentoValorTroco: this.calcularTroco().toFixed(2),
+              pagamentoDetalhamentos: detalhamentos,
+            }
+          : undefined,
       nfeInformacoesAdicionaisFisco: this.form.value.nfeInformacoesAdicionaisFisco,
     };
 
@@ -1159,6 +1356,15 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       this.addItem();
     }
 
+    this.pagamentos.clear();
+    if (draftData.pagamentos && draftData.pagamentos.length > 0) {
+      draftData.pagamentos.forEach((pag: any) => {
+        this.addPagamento(pag);
+      });
+    } else {
+      this.addPagamento();
+    }
+
     this.form.patchValue(draftData);
 
     const draftVehicleId = draftData.headerVehicle?.id || draftData.nfeItens?.[0]?.vehicle?.id || draftData.nfeItens?.[0]?.vehicleId;
@@ -1314,11 +1520,13 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       nfeNaturezaOperacao: '',
       nfePreenchimentoManualImpostos: false,
       itemTipo: 'veiculo',
+      nfeFormaEmissao: '1',
       nfeFinalidadeEmissao: '1',
       nfeConsumidorFinal: '0',
       nfePresencaComprador: '1',
       nfeIndicadorIntermediario: '0',
       modalidadeFrete: '9',
+      pagamentoValorTroco: '0.00',
       nfeInformacoesAdicionaisFisco:
         'EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.',
     });
@@ -1331,6 +1539,8 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     this.conflictingNfe.set(null);
     this.itens.clear();
     this.addItem();
+    this.pagamentos.clear();
+    this.addPagamento();
     this.submitted = false;
     this.selectedDraftId = null;
     this.lastSavedDraftValue = this.form.getRawValue();

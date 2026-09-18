@@ -70,6 +70,17 @@
   }
 
   @if (showFormFields) {
+    <!-- Opções de Configuração Inicial da NFe -->
+    <div class="nfe-top-options-container">
+      <mat-checkbox formControlName="nfeSincronizarRenave" color="primary">
+        Sincronizar compra ao RENAVE automaticamente
+      </mat-checkbox>
+
+      <mat-checkbox formControlName="nfePreenchimentoManualImpostos" color="primary">
+        Preenchimento manual de Impostos
+      </mat-checkbox>
+    </div>
+
     <div class="section-title">Informações Gerais</div>
 
     @if (form.get('itemTipo')?.value === 'veiculo') {
@@ -202,20 +213,20 @@
       </div>
     }
 
-    <div class="section-title">Parâmetros de Emissão</div>
+    <div class="section-title">Detalhes da Nota Fiscal</div>
     <div class="tax-row three-cols">
+      <app-primary-select
+        [label]="'Forma de Emissão*'"
+        [options]="formasEmissao"
+        formControlName="nfeFormaEmissao"
+        placeholder="Selecione a Forma de Emissão"
+      ></app-primary-select>
+
       <app-primary-select
         [label]="'Finalidade da Emissão*'"
         [options]="finalidadesEmissao"
         formControlName="nfeFinalidadeEmissao"
         placeholder="Selecione a Finalidade"
-      ></app-primary-select>
-
-      <app-primary-select
-        [label]="'Consumidor Final*'"
-        [options]="consumidoresFinais"
-        formControlName="nfeConsumidorFinal"
-        placeholder="Selecione a Opção"
       ></app-primary-select>
 
       <app-primary-select
@@ -226,7 +237,14 @@
       ></app-primary-select>
     </div>
 
-    <div class="tax-row">
+    <div class="tax-row three-cols">
+      <app-primary-select
+        [label]="'Consumidor Final*'"
+        [options]="consumidoresFinais"
+        formControlName="nfeConsumidorFinal"
+        placeholder="Selecione a Opção"
+      ></app-primary-select>
+
       <app-primary-select
         [label]="'Presença do Comprador*'"
         [options]="presencasComprador"
@@ -240,12 +258,6 @@
         formControlName="nfeIndicadorIntermediario"
         placeholder="Selecione o Intermediário"
       ></app-primary-select>
-    </div>
-
-    <div class="renave-sync-toggle-container m-b-16" style="margin-top: 16px; margin-bottom: 16px">
-      <mat-checkbox formControlName="nfeSincronizarRenave" color="primary">
-        Sincronizar compra ao RENAVE automaticamente
-      </mat-checkbox>
     </div>
 
     <div class="section-title">Itens da NFe</div>
@@ -482,10 +494,116 @@
       </button>
     }
 
-    <div class="tributacao-manual-container">
-      <mat-checkbox formControlName="nfePreenchimentoManualImpostos" color="primary">
-        Preenchimento manual de Impostos
-      </mat-checkbox>
+    <div class="section-title">Pagamentos da Nota Fiscal</div>
+    <div class="payments-container" formArrayName="pagamentos">
+      @for (pagGroup of pagamentos.controls; track $index; let i = $index) {
+        <div class="payment-card" [formGroupName]="i">
+          <div class="payment-header">
+            <div class="payment-index">
+              <mat-icon>payment</mat-icon>
+              <span>Pagamento #{{ i + 1 }}</span>
+            </div>
+            @if (pagamentos.length > 1) {
+              <button
+                mat-icon-button
+                color="warn"
+                type="button"
+                (click)="removePagamento(i)"
+                matTooltip="Remover este pagamento"
+              >
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            }
+          </div>
+
+          <div class="payment-grid">
+            <div class="field-forma">
+              <app-primary-select
+                [label]="'Forma de Pagamento*'"
+                [options]="formasPagamentoNfe"
+                formControlName="detalhesPagamentoFormaPagamento"
+                placeholder="Selecione a Forma"
+              ></app-primary-select>
+            </div>
+
+            <div class="field-desc">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Descrição (Opcional)</mat-label>
+                <input matInput formControlName="detalhesPagamentoDescricao" placeholder="Ex: Entrada em dinheiro, PIX..." />
+              </mat-form-field>
+            </div>
+
+            <div class="field-valor">
+              <app-currency-input
+                label="Valor (R$)*"
+                formControlName="detalhesPagamentoValor"
+                [error]="!!(pagGroup.get('detalhesPagamentoValor')?.invalid && (pagGroup.get('detalhesPagamentoValor')?.touched || submitted))"
+                errorMessage="Valor obrigatório"
+              ></app-currency-input>
+            </div>
+          </div>
+
+          <!-- Campos complementares se for Cartão -->
+          @if (isCartaoForma(pagGroup.get('detalhesPagamentoFormaPagamento')?.value)) {
+            <div class="card-details-box">
+              <div class="card-details-title">
+                <mat-icon>credit_card</mat-icon>
+                <span>Dados do Cartão</span>
+              </div>
+              <div class="card-details-grid">
+                <app-primary-select
+                  [label]="'Bandeira'"
+                  [options]="bandeirasCartao"
+                  formControlName="cartaoBandeira"
+                  placeholder="Selecione a Bandeira"
+                ></app-primary-select>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Tipo Integração</mat-label>
+                  <mat-select formControlName="cartaoTipoIntegracao">
+                    <mat-option value="1">1 - Pagamento Integrado (TEF)</mat-option>
+                    <mat-option value="2">2 - Não Integrado (POS)</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>CNPJ Credenciadora</mat-label>
+                  <input matInput formControlName="cartaoCnpj" placeholder="CNPJ da Operadora" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Cód. Autorização</mat-label>
+                  <input matInput formControlName="cartaoAutorizacao" placeholder="Autorização da Transação" />
+                </mat-form-field>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="payment-actions-bar">
+        <button mat-stroked-button color="primary" type="button" (click)="addPagamento()" class="add-payment-btn">
+          <mat-icon>add</mat-icon>
+          Adicionar Pagamento
+        </button>
+
+        <div class="payment-totals-summary">
+          <div class="total-badge">
+            <span class="label">Total da Nota:</span>
+            <span class="value">{{ calcularTotalItens() | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
+          </div>
+          <div class="total-badge" [class.badge-success]="calcularTotalPagamentos() >= calcularTotalItens()">
+            <span class="label">Total Informado:</span>
+            <span class="value">{{ calcularTotalPagamentos() | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
+          </div>
+          @if (calcularTroco() > 0) {
+            <div class="total-badge badge-troco">
+              <span class="label">Troco:</span>
+              <span class="value">{{ calcularTroco() | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
+            </div>
+          }
+        </div>
+      </div>
     </div>
 
     <div class="section-title">Informações de Interesse do Fisco</div>

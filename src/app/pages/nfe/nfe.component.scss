@@ -535,11 +535,110 @@
   .info-grid {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
     background: #f8fafc;
     padding: 22px;
     border-radius: 14px;
     border: 1px solid #e2e8f0;
+
+    .pagamentos-header-row {
+      display: flex;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1.5px solid #e2e8f0;
+
+      .pagamentos-title {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          color: #3b7ab8;
+        }
+      }
+    }
+
+    .pagamento-row {
+      .pagamento-details {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+
+        .pagamento-primary {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-wrap: wrap;
+
+          .pagamento-forma {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #1e293b;
+          }
+
+          .pagamento-desc {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 400;
+          }
+        }
+
+        .pagamento-sub {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-wrap: wrap;
+
+          .cartao-tag {
+            font-size: 0.72rem;
+            background: #e2e8f0;
+            color: #475569;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+          }
+        }
+      }
+
+      .pagamento-valor {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1e293b;
+      }
+    }
+
+    .troco-row {
+      background: #f1f5f9;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border-bottom: none;
+
+      label {
+        font-size: 0.8rem;
+        color: #64748b;
+        font-weight: 600;
+      }
+
+      span {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+    }
+
+    .pagamentos-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 4px 0;
+    }
 
     .info-item {
       display: flex;
@@ -569,11 +668,13 @@
         color: #192231;
       }
 
-      // Estilo especial para o Valor Total (primeiro elemento)
-      &:first-child {
-        border-bottom: 2px solid #cbd5e1;
-        padding-bottom: 14px;
-        margin-bottom: 6px;
+      // Estilo especial para o Valor Total (mostrado abaixo das formas de pagamento)
+      &.total-final-item {
+        border-top: 2px solid #cbd5e1;
+        border-bottom: none;
+        padding-top: 14px;
+        padding-bottom: 0;
+        margin-top: 4px;
 
         label {
           font-size: 0.85rem;

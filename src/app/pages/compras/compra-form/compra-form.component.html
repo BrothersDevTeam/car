@@ -120,45 +120,82 @@
           <!-- MODO 1: À VISTA -->
           @if (condicaoPagamento() === 'A_VISTA') {
             <div formArrayName="pagamentos" class="pagamentos-list">
-              <div *ngFor="let item of pagamentos.controls; let i = index" [formGroupName]="i" class="pagamento-item">
-                <div class="field-forma">
-                  <mat-form-field appearance="outline">
-                    <mat-label>Forma</mat-label>
-                    <mat-select formControlName="formaPagamento">
-                      <mat-option *ngFor="let f of formasPagamentoList" [value]="f.value">{{ f.label }}</mat-option>
-                    </mat-select>
-                  </mat-form-field>
+              <div *ngFor="let item of pagamentos.controls; let i = index" [formGroupName]="i" class="pagamento-item-wrapper">
+                <div class="pagamento-item">
+                  <div class="field-forma">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Forma</mat-label>
+                      <mat-select formControlName="formaPagamento">
+                        <mat-option *ngFor="let f of formasPagamentoList" [value]="f.value">{{ f.label }}</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="field-valor">
+                    <app-currency-input formControlName="valor" label="Valor" [required]="true"></app-currency-input>
+                  </div>
+
+                  <div class="field-vencimento">
+                    <app-date-input
+                      formControlName="vencimento"
+                      label="Data do Pagamento"
+                      [required]="true"
+                    ></app-date-input>
+                  </div>
+
+                  <div class="field-desc">
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-label>Descrição / Doc</mat-label>
+                      <input matInput formControlName="descricao" placeholder="Ex: Chave Pix, Banco, Nº do Cheque..." />
+                    </mat-form-field>
+                  </div>
+
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    type="button"
+                    (click)="removePagamento(i)"
+                    style="margin-top: 4px"
+                    title="Remover forma"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
                 </div>
 
-                <div class="field-valor">
-                  <app-currency-input formControlName="valor" label="Valor" [required]="true"></app-currency-input>
-                </div>
+                @if (isCartaoForma(item.get('formaPagamento')?.value)) {
+                  <div class="card-details-box">
+                    <div class="card-details-title">
+                      <mat-icon>credit_card</mat-icon>
+                      <span>Dados do Cartão</span>
+                    </div>
+                    <div class="card-details-grid">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Bandeira</mat-label>
+                        <mat-select formControlName="cartaoBandeira">
+                          <mat-option *ngFor="let b of bandeirasCartao" [value]="b.value">{{ b.label }}</mat-option>
+                        </mat-select>
+                      </mat-form-field>
 
-                <div class="field-vencimento">
-                  <app-date-input
-                    formControlName="vencimento"
-                    label="Data do Pagamento"
-                    [required]="true"
-                  ></app-date-input>
-                </div>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Tipo Integração</mat-label>
+                        <mat-select formControlName="cartaoTipoIntegracao">
+                          <mat-option value="1">1 - Pagamento Integrado (TEF)</mat-option>
+                          <mat-option value="2">2 - Não Integrado (POS)</mat-option>
+                        </mat-select>
+                      </mat-form-field>
 
-                <div class="field-desc">
-                  <mat-form-field appearance="outline" class="w-100">
-                    <mat-label>Descrição / Doc</mat-label>
-                    <input matInput formControlName="descricao" placeholder="Ex: Chave Pix, Banco, Nº do Cheque..." />
-                  </mat-form-field>
-                </div>
+                      <mat-form-field appearance="outline">
+                        <mat-label>CNPJ Credenciadora</mat-label>
+                        <input matInput formControlName="cartaoCnpj" placeholder="CNPJ da Operadora" mask="00.000.000/0000-00" />
+                      </mat-form-field>
 
-                <button
-                  mat-icon-button
-                  color="warn"
-                  type="button"
-                  (click)="removePagamento(i)"
-                  style="margin-top: 4px"
-                  title="Remover forma"
-                >
-                  <mat-icon>delete</mat-icon>
-                </button>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Cód. Autorização</mat-label>
+                        <input matInput formControlName="cartaoAutorizacao" placeholder="Autorização da Transação" />
+                      </mat-form-field>
+                    </div>
+                  </div>
+                }
               </div>
             </div>
 
@@ -224,41 +261,78 @@
 
             <!-- Listagem de Parcelas -->
             <div formArrayName="pagamentos" class="pagamentos-list">
-              <div *ngFor="let item of pagamentos.controls; let i = index" [formGroupName]="i" class="pagamento-item">
-                <div class="field-forma">
-                  <mat-form-field appearance="outline">
-                    <mat-label>Forma</mat-label>
-                    <mat-select formControlName="formaPagamento">
-                      <mat-option *ngFor="let f of formasPagamentoList" [value]="f.value">{{ f.label }}</mat-option>
-                    </mat-select>
-                  </mat-form-field>
+              <div *ngFor="let item of pagamentos.controls; let i = index" [formGroupName]="i" class="pagamento-item-wrapper">
+                <div class="pagamento-item">
+                  <div class="field-forma">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Forma</mat-label>
+                      <mat-select formControlName="formaPagamento">
+                        <mat-option *ngFor="let f of formasPagamentoList" [value]="f.value">{{ f.label }}</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="field-valor">
+                    <app-currency-input formControlName="valor" label="Valor" [required]="true"></app-currency-input>
+                  </div>
+
+                  <div class="field-vencimento">
+                    <app-date-input formControlName="vencimento" label="Vencimento" [required]="true"></app-date-input>
+                  </div>
+
+                  <div class="field-desc">
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-label>Descrição / Doc</mat-label>
+                      <input matInput formControlName="descricao" placeholder="Ex: Parcela 1/3..." />
+                    </mat-form-field>
+                  </div>
+
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    type="button"
+                    (click)="removePagamento(i)"
+                    style="margin-top: 4px"
+                    title="Remover parcela"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
                 </div>
 
-                <div class="field-valor">
-                  <app-currency-input formControlName="valor" label="Valor" [required]="true"></app-currency-input>
-                </div>
+                @if (isCartaoForma(item.get('formaPagamento')?.value)) {
+                  <div class="card-details-box">
+                    <div class="card-details-title">
+                      <mat-icon>credit_card</mat-icon>
+                      <span>Dados do Cartão</span>
+                    </div>
+                    <div class="card-details-grid">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Bandeira</mat-label>
+                        <mat-select formControlName="cartaoBandeira">
+                          <mat-option *ngFor="let b of bandeirasCartao" [value]="b.value">{{ b.label }}</mat-option>
+                        </mat-select>
+                      </mat-form-field>
 
-                <div class="field-vencimento">
-                  <app-date-input formControlName="vencimento" label="Vencimento" [required]="true"></app-date-input>
-                </div>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Tipo Integração</mat-label>
+                        <mat-select formControlName="cartaoTipoIntegracao">
+                          <mat-option value="1">1 - Pagamento Integrado (TEF)</mat-option>
+                          <mat-option value="2">2 - Não Integrado (POS)</mat-option>
+                        </mat-select>
+                      </mat-form-field>
 
-                <div class="field-desc">
-                  <mat-form-field appearance="outline" class="w-100">
-                    <mat-label>Descrição / Doc</mat-label>
-                    <input matInput formControlName="descricao" placeholder="Ex: Parcela 1/3..." />
-                  </mat-form-field>
-                </div>
+                      <mat-form-field appearance="outline">
+                        <mat-label>CNPJ Credenciadora</mat-label>
+                        <input matInput formControlName="cartaoCnpj" placeholder="CNPJ da Operadora" mask="00.000.000/0000-00" />
+                      </mat-form-field>
 
-                <button
-                  mat-icon-button
-                  color="warn"
-                  type="button"
-                  (click)="removePagamento(i)"
-                  style="margin-top: 4px"
-                  title="Remover parcela"
-                >
-                  <mat-icon>delete</mat-icon>
-                </button>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Cód. Autorização</mat-label>
+                        <input matInput formControlName="cartaoAutorizacao" placeholder="Autorização da Transação" />
+                      </mat-form-field>
+                    </div>
+                  </div>
+                }
               </div>
             </div>
 
@@ -281,45 +355,82 @@
 
               <div formArrayName="pagamentos" class="pagamentos-list">
                 <ng-container *ngFor="let i of pagamentosVistaIndices">
-                  <div [formGroupName]="i" class="pagamento-item">
-                    <div class="field-forma">
-                      <mat-form-field appearance="outline">
-                        <mat-label>Forma</mat-label>
-                        <mat-select formControlName="formaPagamento">
-                          <mat-option *ngFor="let f of formasPagamentoList" [value]="f.value">{{ f.label }}</mat-option>
-                        </mat-select>
-                      </mat-form-field>
+                  <div [formGroupName]="i" class="pagamento-item-wrapper">
+                    <div class="pagamento-item">
+                      <div class="field-forma">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Forma</mat-label>
+                          <mat-select formControlName="formaPagamento">
+                            <mat-option *ngFor="let f of formasPagamentoList" [value]="f.value">{{ f.label }}</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="field-valor">
+                        <app-currency-input formControlName="valor" label="Valor" [required]="true"></app-currency-input>
+                      </div>
+
+                      <div class="field-vencimento">
+                        <app-date-input
+                          formControlName="vencimento"
+                          label="Data do Pagamento"
+                          [required]="true"
+                        ></app-date-input>
+                      </div>
+
+                      <div class="field-desc">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Descrição / Doc</mat-label>
+                          <input matInput formControlName="descricao" placeholder="Ex: Entrada PIX..." />
+                        </mat-form-field>
+                      </div>
+
+                      <button
+                        mat-icon-button
+                        color="warn"
+                        type="button"
+                        (click)="removePagamento(i)"
+                        style="margin-top: 4px"
+                        title="Remover forma"
+                      >
+                        <mat-icon>delete</mat-icon>
+                      </button>
                     </div>
 
-                    <div class="field-valor">
-                      <app-currency-input formControlName="valor" label="Valor" [required]="true"></app-currency-input>
-                    </div>
+                    @if (isCartaoForma(pagamentos.at(i).get('formaPagamento')?.value)) {
+                      <div class="card-details-box">
+                        <div class="card-details-title">
+                          <mat-icon>credit_card</mat-icon>
+                          <span>Dados do Cartão</span>
+                        </div>
+                        <div class="card-details-grid">
+                          <mat-form-field appearance="outline">
+                            <mat-label>Bandeira</mat-label>
+                            <mat-select formControlName="cartaoBandeira">
+                              <mat-option *ngFor="let b of bandeirasCartao" [value]="b.value">{{ b.label }}</mat-option>
+                            </mat-select>
+                          </mat-form-field>
 
-                    <div class="field-vencimento">
-                      <app-date-input
-                        formControlName="vencimento"
-                        label="Data do Pagamento"
-                        [required]="true"
-                      ></app-date-input>
-                    </div>
+                          <mat-form-field appearance="outline">
+                            <mat-label>Tipo Integração</mat-label>
+                            <mat-select formControlName="cartaoTipoIntegracao">
+                              <mat-option value="1">1 - Pagamento Integrado (TEF)</mat-option>
+                              <mat-option value="2">2 - Não Integrado (POS)</mat-option>
+                            </mat-select>
+                          </mat-form-field>
 
-                    <div class="field-desc">
-                      <mat-form-field appearance="outline" class="w-100">
-                        <mat-label>Descrição / Doc</mat-label>
-                        <input matInput formControlName="descricao" placeholder="Ex: Entrada PIX..." />
-                      </mat-form-field>
-                    </div>
+                          <mat-form-field appearance="outline">
+                            <mat-label>CNPJ Credenciadora</mat-label>
+                            <input matInput formControlName="cartaoCnpj" placeholder="CNPJ da Operadora" mask="00.000.000/0000-00" />
+                          </mat-form-field>
 
-                    <button
-                      mat-icon-button
-                      color="warn"
-                      type="button"
-                      (click)="removePagamento(i)"
-                      style="margin-top: 4px"
-                      title="Remover forma"
-                    >
-                      <mat-icon>delete</mat-icon>
-                    </button>
+                          <mat-form-field appearance="outline">
+                            <mat-label>Cód. Autorização</mat-label>
+                            <input matInput formControlName="cartaoAutorizacao" placeholder="Autorização da Transação" />
+                          </mat-form-field>
+                        </div>
+                      </div>
+                    }
                   </div>
                 </ng-container>
               </div>
@@ -392,45 +503,82 @@
               <!-- Listagem de Parcelas do Modo Misto -->
               <div formArrayName="pagamentos" class="pagamentos-list" *ngIf="pagamentosPrazoIndices.length > 0">
                 <ng-container *ngFor="let i of pagamentosPrazoIndices">
-                  <div [formGroupName]="i" class="pagamento-item">
-                    <div class="field-forma">
-                      <mat-form-field appearance="outline">
-                        <mat-label>Forma</mat-label>
-                        <mat-select formControlName="formaPagamento">
-                          <mat-option *ngFor="let f of formasPagamentoList" [value]="f.value">{{ f.label }}</mat-option>
-                        </mat-select>
-                      </mat-form-field>
+                  <div [formGroupName]="i" class="pagamento-item-wrapper">
+                    <div class="pagamento-item">
+                      <div class="field-forma">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Forma</mat-label>
+                          <mat-select formControlName="formaPagamento">
+                            <mat-option *ngFor="let f of formasPagamentoList" [value]="f.value">{{ f.label }}</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="field-valor">
+                        <app-currency-input formControlName="valor" label="Valor" [required]="true"></app-currency-input>
+                      </div>
+
+                      <div class="field-vencimento">
+                        <app-date-input
+                          formControlName="vencimento"
+                          label="Vencimento"
+                          [required]="true"
+                        ></app-date-input>
+                      </div>
+
+                      <div class="field-desc">
+                        <mat-form-field appearance="outline" class="w-100">
+                          <mat-label>Descrição / Doc</mat-label>
+                          <input matInput formControlName="descricao" placeholder="Ex: Parcela 1/3..." />
+                        </mat-form-field>
+                      </div>
+
+                      <button
+                        mat-icon-button
+                        color="warn"
+                        type="button"
+                        (click)="removePagamento(i)"
+                        style="margin-top: 4px"
+                        title="Remover parcela"
+                      >
+                        <mat-icon>delete</mat-icon>
+                      </button>
                     </div>
 
-                    <div class="field-valor">
-                      <app-currency-input formControlName="valor" label="Valor" [required]="true"></app-currency-input>
-                    </div>
+                    @if (isCartaoForma(pagamentos.at(i).get('formaPagamento')?.value)) {
+                      <div class="card-details-box">
+                        <div class="card-details-title">
+                          <mat-icon>credit_card</mat-icon>
+                          <span>Dados do Cartão</span>
+                        </div>
+                        <div class="card-details-grid">
+                          <mat-form-field appearance="outline">
+                            <mat-label>Bandeira</mat-label>
+                            <mat-select formControlName="cartaoBandeira">
+                              <mat-option *ngFor="let b of bandeirasCartao" [value]="b.value">{{ b.label }}</mat-option>
+                            </mat-select>
+                          </mat-form-field>
 
-                    <div class="field-vencimento">
-                      <app-date-input
-                        formControlName="vencimento"
-                        label="Vencimento"
-                        [required]="true"
-                      ></app-date-input>
-                    </div>
+                          <mat-form-field appearance="outline">
+                            <mat-label>Tipo Integração</mat-label>
+                            <mat-select formControlName="cartaoTipoIntegracao">
+                              <mat-option value="1">1 - Pagamento Integrado (TEF)</mat-option>
+                              <mat-option value="2">2 - Não Integrado (POS)</mat-option>
+                            </mat-select>
+                          </mat-form-field>
 
-                    <div class="field-desc">
-                      <mat-form-field appearance="outline" class="w-100">
-                        <mat-label>Descrição / Doc</mat-label>
-                        <input matInput formControlName="descricao" placeholder="Ex: Parcela 1/3..." />
-                      </mat-form-field>
-                    </div>
+                          <mat-form-field appearance="outline">
+                            <mat-label>CNPJ Credenciadora</mat-label>
+                            <input matInput formControlName="cartaoCnpj" placeholder="CNPJ da Operadora" mask="00.000.000/0000-00" />
+                          </mat-form-field>
 
-                    <button
-                      mat-icon-button
-                      color="warn"
-                      type="button"
-                      (click)="removePagamento(i)"
-                      style="margin-top: 4px"
-                      title="Remover parcela"
-                    >
-                      <mat-icon>delete</mat-icon>
-                    </button>
+                          <mat-form-field appearance="outline">
+                            <mat-label>Cód. Autorização</mat-label>
+                            <input matInput formControlName="cartaoAutorizacao" placeholder="Autorização da Transação" />
+                          </mat-form-field>
+                        </div>
+                      </div>
+                    }
                   </div>
                 </ng-container>
               </div>

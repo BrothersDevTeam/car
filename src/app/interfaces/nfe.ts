@@ -89,12 +89,33 @@ export interface Nfe {
   nfeValorTotalTributos?: string;
 
   // === Campos de Envio FocusNFe (Novos) ===
+  nfeFormaEmissao?: string;
   nfeFinalidadeEmissao?: string;
   nfeConsumidorFinal?: string;
   nfePresencaComprador?: string;
   nfeIndicadorIntermediario?: string;
   nfeTransporte?: any;
+  nfePagamento?: NfePagamento;
   nfeInformacoesAdicionaisFisco?: string;
+}
+
+export interface DetalhesPagamentoCartao {
+  cartaoTipoIntegracao?: string;
+  cartaoCnpj?: string;
+  cartaoBandeira?: string;
+  cartaoAutorizacao?: string;
+}
+
+export interface DetalhamentoPagamento {
+  detalhesPagamentoFormaPagamento: string;
+  detalhesPagamentoDescricao?: string;
+  detalhesPagamentoValor: string;
+  detalhesPagamentoCartao?: DetalhesPagamentoCartao;
+}
+
+export interface NfePagamento {
+  pagamentoValorTroco?: string;
+  pagamentoDetalhamentos: DetalhamentoPagamento[];
 }
 
 export enum NaturezaOperacao {

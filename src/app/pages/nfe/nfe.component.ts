@@ -26,7 +26,7 @@ import { InutilizarNumeracaoDialog } from '@components/dialogs/inutilizar-numera
 import { NfeSaidaFormComponent } from '../../forms/nfe/nfe-saida-form/nfe-saida-form.component';
 import { NfeEntradaFormComponent } from '../../forms/nfe/nfe-entrada-form/nfe-entrada-form.component';
 
-import type { Nfe } from '@interfaces/nfe';
+import type { Nfe, DetalhamentoPagamento } from '@interfaces/nfe';
 import type { ColumnConfig } from '@interfaces/genericTable';
 import type { PaginationResponse } from '@interfaces/pagination';
 
@@ -876,5 +876,84 @@ export class NfeComponent {
       '9': '9 - Sem Ocorrência de Transporte',
     };
     return value ? modalidades[value] || value : '—';
+  }
+
+  getFormaPagamentoLabel(code?: string): string {
+    if (!code) return '—';
+    const map: Record<string, string> = {
+      '01': 'Dinheiro',
+      '02': 'Cheque',
+      '03': 'Cartão de Crédito',
+      '04': 'Cartão de Débito',
+      '05': 'Crédito Loja',
+      '10': 'Vale Alimentação',
+      '11': 'Vale Refeição',
+      '12': 'Vale Presente',
+      '13': 'Vale Combustível',
+      '14': 'Duplicata Mercantil',
+      '15': 'Boleto Bancário',
+      '17': 'Pagamento Instantâneo (PIX)',
+      '18': 'Transferência Bancária / TED',
+      '90': 'Sem Pagamento',
+      '99': 'Outros',
+      DINHEIRO: 'Dinheiro',
+      CHEQUE: 'Cheque',
+      CARTAO_CREDITO: 'Cartão de Crédito',
+      CARTAO_DEBITO: 'Cartão de Débito',
+      CREDITO_LOJA: 'Crédito Loja',
+      VALE_ALIMENTACAO: 'Vale Alimentação',
+      VALE_REFEICAO: 'Vale Refeição',
+      VALE_PRESENTE: 'Vale Presente',
+      VALE_COMBUSTIVEL: 'Vale Combustível',
+      DUPLICATA_MERCANTIL: 'Duplicata Mercantil',
+      BOLETO: 'Boleto Bancário',
+      PIX: 'Pagamento Instantâneo (PIX)',
+      TED: 'Transferência Bancária / TED',
+      DOC: 'DOC',
+      TROCA: 'Troca',
+      FINANCIAMENTO: 'Financiamento',
+      PROMISSORIA: 'Nota Promissória',
+      SEM_PAGAMENTO: 'Sem Pagamento',
+      OUTROS: 'Outros',
+    };
+    return map[code] || map[code.toUpperCase()] || code;
+  }
+
+  getBandeiraCartaoLabel(code?: string): string {
+    if (!code) return '';
+    const map: Record<string, string> = {
+      '01': 'Visa',
+      '02': 'Mastercard',
+      '03': 'American Express',
+      '04': 'Sorocred',
+      '05': 'Diners Club',
+      '06': 'Elo',
+      '07': 'Hipercard',
+      '08': 'Aura',
+      '09': 'Cabal',
+      '99': 'Outros',
+    };
+    return map[code] || code;
+  }
+
+  parseValor(valor: any): number {
+    if (!valor) return 0;
+    if (typeof valor === 'number') return valor;
+    const str = valor.toString().replace(/\./g, '').replace(',', '.');
+    const n = parseFloat(str);
+    return isNaN(n) ? 0 : n;
+  }
+
+  formatarValorMoeda(valor: any): string {
+    return this.formatCurrency(valor);
+  }
+
+  get nfePagamentos(): DetalhamentoPagamento[] {
+    return this.selectedNfe?.nfePagamento?.pagamentoDetalhamentos || [];
+  }
+
+  get nfeTroco(): string | null {
+    const troco = this.selectedNfe?.nfePagamento?.pagamentoValorTroco;
+    return troco && this.parseValor(troco) > 0 ? troco : null;
   }
 }

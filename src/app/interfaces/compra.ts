@@ -4,6 +4,10 @@ export interface CompraPagamento {
   valor: number;
   vencimento: string | Date;
   tipo?: string;
+  cartaoTipoIntegracao?: string;
+  cartaoBandeira?: string;
+  cartaoCnpj?: string;
+  cartaoAutorizacao?: string;
 }
 
 export interface Compra {
