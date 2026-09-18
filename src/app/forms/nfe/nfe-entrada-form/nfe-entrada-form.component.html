@@ -4,7 +4,7 @@
       <h2>{{ dataForm?.nfeId ? 'Editar NFe de Entrada' : 'Nova NFe de Entrada' }}</h2>
       @if (dataForm?.nfeId) {
         <span class="badge-status-editing">
-          {{ dataForm?.nfeStatus === 'rascunho' ? 'Em digitação' : (dataForm?.nfeStatus || 'Em edição') }}
+          {{ dataForm?.nfeStatus === 'rascunho' ? 'Em digitação' : dataForm?.nfeStatus || 'Em edição' }}
         </span>
       }
     </div>
@@ -83,12 +83,35 @@
           (optionSelected)="onHeaderVehicleSelected($event)"
         ></app-custom-select>
 
-        <app-primary-input
-          [label]="'Proprietário do Veículo*'"
-          formControlName="ownerDisplayName"
-          placeholder="Selecione o veículo para carregar o proprietário"
-          [disabled]="true"
-        ></app-primary-input>
+        <div class="owner-field-wrapper">
+          @if (selectedVehicle && vehicleOwnerOptions.length > 0) {
+            <app-primary-select
+              [label]="'Proprietário no Documento (DUT/ATPV-e)*'"
+              [options]="vehicleOwnerOptions"
+              formControlName="selectedOwnerId"
+              placeholder="Selecione o proprietário do documento"
+              (optionSelected)="onOwnerSelected($event)"
+            ></app-primary-select>
+          } @else {
+            <app-primary-input
+              [label]="'Proprietário do Veículo*'"
+              formControlName="ownerDisplayName"
+              placeholder="Selecione o veículo para carregar o proprietário"
+              [disabled]="true"
+            ></app-primary-input>
+          }
+          @if (selectedVehicle) {
+            <button
+              mat-icon-button
+              type="button"
+              class="add-owner-inline-btn"
+              matTooltip="Vincular novo proprietário a este veículo"
+              (click)="openAddOwnerFromNfeDialog()"
+            >
+              <mat-icon>person_add</mat-icon>
+            </button>
+          }
+        </div>
       </div>
 
       <!-- Alerta quando veículo já possui NFe de Entrada ativa -->
@@ -106,17 +129,12 @@
                 }
                 @if (conflict.nfeDataEmissao) {
                   emitida em {{ conflict.nfeDataEmissao | date: 'dd/MM/yyyy HH:mm' }}
-                }.
-                Não é permitido criar outra NFe de Entrada para este veículo.
+                }
+                . Não é permitido criar outra NFe de Entrada para este veículo.
               </span>
             </div>
           </div>
-          <button
-            mat-flat-button
-            type="button"
-            class="open-nfe-btn"
-            (click)="navigateToExistingNfe()"
-          >
+          <button mat-flat-button type="button" class="open-nfe-btn" (click)="navigateToExistingNfe()">
             <mat-icon>open_in_new</mat-icon>
             <span>Acessar NFe Existente</span>
           </button>
@@ -131,20 +149,27 @@
             <div class="alert-text">
               <strong>Veículo sem proprietário cadastrado</strong>
               <span>
-                Para emitir a NFe de Entrada, é obrigatório vincular o proprietário (antigo dono) no cadastro do veículo.
+                Para emitir a NFe de Entrada, é obrigatório vincular o proprietário (antigo dono) no cadastro do
+                veículo.
               </span>
             </div>
           </div>
-          <button
-            mat-flat-button
-            color="primary"
-            type="button"
-            class="edit-vehicle-btn"
-            (click)="openEditVehicleDrawer()"
-          >
-            <mat-icon>edit</mat-icon>
-            Editar Veículo e Vincular Proprietário
-          </button>
+          <div class="alert-actions">
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              class="add-owner-btn"
+              (click)="openAddOwnerFromNfeDialog()"
+            >
+              <mat-icon>person_add</mat-icon>
+              Vincular Proprietário Agora
+            </button>
+            <button mat-stroked-button type="button" class="edit-vehicle-btn" (click)="openEditVehicleDrawer()">
+              <mat-icon>edit</mat-icon>
+              Editar Veículo Completo
+            </button>
+          </div>
         </div>
       }
 
@@ -513,7 +538,7 @@
         <ng-template matTabContent>
           <app-natural-person-form
             [dataForm]="!selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null"
-            (formSubmitted)="onPersonFormSubmitted()"
+            (formSubmitted)="onPersonFormSubmitted($event)"
           />
         </ng-template>
       </mat-tab>
@@ -521,7 +546,7 @@
         <ng-template matTabContent>
           <app-legal-entity-form
             [dataForm]="selectedPersonToEdit()?.legalEntity ? selectedPersonToEdit() : null"
-            (formSubmitted)="onPersonFormSubmitted()"
+            (formSubmitted)="onPersonFormSubmitted($event)"
           />
         </ng-template>
       </mat-tab>
@@ -532,9 +557,6 @@
 <!-- Drawer para criar/editar veículo -->
 @if (openVehicleForm()) {
   <app-drawer (closeDrawer)="handleCloseVehicleDrawer()">
-    <app-vehicle-form
-      [dataForm]="selectedVehicleToEdit"
-      (formSubmitted)="onVehicleFormSubmitted()"
-    />
+    <app-vehicle-form [dataForm]="selectedVehicleToEdit" (formSubmitted)="onVehicleFormSubmitted()" />
   </app-drawer>
 }

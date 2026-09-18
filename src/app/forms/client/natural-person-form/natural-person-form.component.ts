@@ -102,7 +102,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
 
   @Input() dataForm: Person | null = null;
   @Input() draft: FormDraft | null | undefined = null; // Added to receive draft from parent
-  @Output() formSubmitted = new EventEmitter<void>();
+  @Output() formSubmitted = new EventEmitter<Person | void>();
   @Output() formChanged = new EventEmitter<boolean>();
 
   /**
@@ -1168,7 +1168,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
       const draftIdToDelete = this.selectedDraftId || this.draft?.id;
 
       this.personService.create(clean).subscribe({
-        next: () => {
+        next: (createdPerson: Person) => {
           this.toastrService.success('Cadastro realizado com sucesso');
 
           // Remove o rascunho específico se houver
@@ -1178,7 +1178,7 @@ export class NaturalPersonFormComponent implements OnInit, OnChanges, CanCompone
             this.formDraftService.removeDraft(this.FORM_TYPE);
           }
 
-          this.formSubmitted.emit();
+          this.formSubmitted.emit(createdPerson);
           this.resetForm();
           this.isSaving = false;
         },

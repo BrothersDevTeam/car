@@ -116,7 +116,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
 
   @Input() dataForm: Person | null = null;
   @Input() draft: FormDraft | null | undefined = null;
-  @Output() formSubmitted = new EventEmitter<void>();
+  @Output() formSubmitted = new EventEmitter<Person | void>();
   @Output() formChanged = new EventEmitter<boolean>();
 
   /**
@@ -995,7 +995,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
       const draftIdToDelete = this.selectedDraftId || this.draft?.id;
 
       this.personService.create(formCleaned).subscribe({
-        next: () => {
+        next: (createdPerson: Person) => {
           this.toastrService.success('Cadastro realizado com sucesso');
 
           // Remove o rascunho se houver
@@ -1005,7 +1005,7 @@ export class LegalEntityFormComponent implements OnInit, OnChanges, OnDestroy, C
             this.formDraftService.removeDraft(this.FORM_TYPE);
           }
 
-          this.formSubmitted.emit();
+          this.formSubmitted.emit(createdPerson);
           this.resetForm();
         },
         error: (error) => {

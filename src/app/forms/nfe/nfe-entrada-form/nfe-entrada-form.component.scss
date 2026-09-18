@@ -177,6 +177,41 @@ form {
     }
   }
 
+  .owner-field-wrapper {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    width: 100%;
+
+    app-primary-select,
+    app-primary-input {
+      flex: 1;
+      width: 100%;
+    }
+
+    .add-owner-inline-btn {
+      height: 44px;
+      width: 44px;
+      margin-bottom: 2px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface-secondary, #f1f5f9);
+      border: 1px solid var(--border-color, #cbd5e1);
+      color: var(--primary-color, #0284c7);
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+
+      &:hover {
+        background: var(--primary-color, #0284c7);
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+
   .tributacao-manual-container {
     margin: 1rem 0;
     padding: 1rem;
@@ -295,21 +330,44 @@ form {
       }
     }
 
-    .edit-vehicle-btn {
-      display: inline-flex;
+    .alert-actions {
+      display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
       flex-shrink: 0;
-      height: 40px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      border-radius: 6px;
-      white-space: nowrap;
 
-      mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
+      .add-owner-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        height: 40px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border-radius: 6px;
+        white-space: nowrap;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+
+      .edit-vehicle-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        height: 40px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border-radius: 6px;
+        white-space: nowrap;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
       }
     }
 
@@ -317,9 +375,15 @@ form {
       flex-direction: column;
       align-items: flex-start;
 
-      .edit-vehicle-btn {
+      .alert-actions {
         width: 100%;
-        justify-content: center;
+        flex-direction: column;
+
+        .add-owner-btn,
+        .edit-vehicle-btn {
+          width: 100%;
+          justify-content: center;
+        }
       }
     }
   }

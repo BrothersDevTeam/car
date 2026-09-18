@@ -49,10 +49,13 @@ import { NaturezaOperacao } from '@interfaces/nfe';
 import type { Nfe } from '@interfaces/nfe';
 import type { Person } from '@interfaces/person';
 import { Vehicle, NfeSummary } from '@interfaces/vehicle';
+import { VehicleOwner } from '@interfaces/vehicle-owner';
 
 import { NfeService } from '@services/nfe.service';
 import { PersonService } from '@services/person.service';
 import { VehicleService } from '@services/vehicle.service';
+import { VehicleOwnerService } from '@services/vehicle-owner.service';
+import { VehicleOwnerDialogComponent } from '@components/dialogs/vehicle-owner-dialog/vehicle-owner-dialog.component';
 import { extractErrorMessage } from '@utils/error-utils';
 import { StoreContextService } from '@services/store-context.service';
 import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fiscal.service';
@@ -189,9 +192,16 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   private nfeService = inject(NfeService);
   private personService = inject(PersonService);
   private vehicleService = inject(VehicleService);
+  private vehicleOwnerService = inject(VehicleOwnerService);
   private toastrService = inject(ToastrService);
   private parametroFiscalService = inject(ParametroFiscalService);
   private formDraftService = inject(FormDraftService);
+
+  vehicleOwners: VehicleOwner[] = [];
+  vehicleOwnerOptions: { value: string; label: string; owner: VehicleOwner }[] = [];
+  selectedOwnerId: string = '';
+  pendingOwnerLink?: { vehicleId: string; isCurrentOwner: boolean; observation?: string };
+  lastCreatedPersonId?: string;
 
   parametroFiscal: ParametroFiscal | null = null;
   loadingParametros = false;
@@ -210,6 +220,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       id: ['', Validators.required],
       name: [''],
     }),
+    selectedOwnerId: [''],
     ownerDisplayName: [{ value: '', disabled: true }],
     nfeNaturezaOperacao: ['', Validators.required],
     nfePreenchimentoManualImpostos: [false],
@@ -253,14 +264,26 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     );
 
     this.subscriptions.add(
+      this.personService.personCreated$.subscribe((person) => {
+        if (person?.personId) {
+          this.lastCreatedPersonId = person.personId;
+        }
+      }),
+    );
+
+    this.subscriptions.add(
       this.form.get('itemTipo')?.valueChanges.subscribe((tipo) => {
         this.itens.clear();
         this.addItem();
         this.selectedVehicleHasNoOwner = false;
         if (tipo === 'produto') {
           this.form.get('headerVehicle')?.patchValue({ id: '', name: '' });
+          this.form.get('selectedOwnerId')?.setValue('');
           this.form.get('ownerDisplayName')?.setValue('');
           this.form.get('person')?.patchValue({ id: '', name: '' });
+          this.vehicleOwners = [];
+          this.vehicleOwnerOptions = [];
+          this.selectedOwnerId = '';
         }
       }),
     );
@@ -405,10 +428,42 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     this.selectedPersonToEdit.set(null);
   }
 
-  onPersonFormSubmitted() {
+  onPersonFormSubmitted(createdPerson?: any) {
     this.handleClosePersonDrawer();
-    if (this.storeContextService.currentStoreId) {
-      this.loadInitialData(this.storeContextService.currentStoreId);
+    const storeId = this.storeContextService.currentStoreId;
+    if (storeId) {
+      this.loadInitialData(storeId);
+    }
+
+    if (this.pendingOwnerLink) {
+      const link = this.pendingOwnerLink;
+      this.pendingOwnerLink = undefined;
+
+      const personIdToLink = createdPerson?.personId || this.lastCreatedPersonId;
+      this.lastCreatedPersonId = undefined;
+
+      if (personIdToLink) {
+        this.vehicleOwnerService
+          .addOwner(link.vehicleId, {
+            personId: personIdToLink,
+            isCurrentOwner: link.isCurrentOwner,
+            observation: link.observation,
+          })
+          .subscribe({
+            next: () => {
+              this.toastrService.success('Pessoa cadastrada e vinculada como proprietária com sucesso!');
+              this.loadVehicleOwnersForNfe(link.vehicleId, personIdToLink);
+            },
+            error: (err) => {
+              console.error('Erro ao vincular proprietário recém-criado:', err);
+              const msg = err.error?.message || 'Erro ao vincular proprietário ao veículo.';
+              this.toastrService.error(msg, 'Erro');
+              this.loadVehicleOwnersForNfe(link.vehicleId);
+            },
+          });
+      } else {
+        this.loadVehicleOwnersForNfe(link.vehicleId);
+      }
     }
   }
 
@@ -422,7 +477,11 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       this.selectedVehicle = null;
       this.selectedVehicleHasNoOwner = false;
       this.conflictingNfe.set(null);
+      this.vehicleOwners = [];
+      this.vehicleOwnerOptions = [];
+      this.selectedOwnerId = '';
       this.form.get('headerVehicle')?.patchValue({ id: '', name: '' });
+      this.form.get('selectedOwnerId')?.setValue('');
       this.form.get('person')?.patchValue({ id: '', name: '' });
       this.form.get('ownerDisplayName')?.setValue('');
       if (this.itens.length > 0) {
@@ -468,23 +527,8 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
           name: vehicleDisplay,
         });
 
-        if (vehicle.ownerId) {
-          this.selectedVehicleHasNoOwner = false;
-          this.form.get('person')?.patchValue({
-            id: vehicle.ownerId,
-            name: vehicle.ownerName || '',
-          });
-          this.form.get('ownerDisplayName')?.setValue(vehicle.ownerName || '');
-        } else {
-          this.selectedVehicleHasNoOwner = true;
-          this.form.get('person')?.patchValue({ id: '', name: '' });
-          this.form.get('ownerDisplayName')?.setValue('Nenhum proprietário vinculado');
-          this.toastrService.warning(
-            'O veículo selecionado não possui proprietário cadastrado. É necessário vincular o proprietário para emitir a NFe.',
-            'Proprietário Ausente',
-            { timeOut: 7000 }
-          );
-        }
+        // Carrega proprietários vinculados do veículo para seleção flexível
+        this.loadVehicleOwnersForNfe(vehicle.vehicleId, this.dataForm?.personId || vehicle.ownerId);
 
         // Sincroniza o item 1 de nfeItens
         if (this.itens.length === 0) {
@@ -522,6 +566,125 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       error: () => {
         this.toastrService.error('Erro ao buscar dados do veículo selecionado');
       },
+    });
+  }
+
+  /**
+   * Carrega a lista de proprietários do veículo para seleção no formulário de NFe.
+   */
+  loadVehicleOwnersForNfe(vehicleId?: string, preSelectPersonId?: string): void {
+    if (!vehicleId) {
+      this.vehicleOwners = [];
+      this.vehicleOwnerOptions = [];
+      this.selectedOwnerId = '';
+      this.selectedVehicleHasNoOwner = false;
+      this.form.get('selectedOwnerId')?.setValue('');
+      return;
+    }
+
+    this.vehicleOwnerService.getOwners(vehicleId).subscribe({
+      next: (owners) => {
+        this.vehicleOwners = owners || [];
+
+        if (this.vehicleOwners.length === 0) {
+          this.selectedVehicleHasNoOwner = true;
+          this.vehicleOwnerOptions = [];
+          this.selectedOwnerId = '';
+          this.form.get('selectedOwnerId')?.setValue('');
+          this.form.get('person')?.patchValue({ id: '', name: '' });
+          this.form.get('ownerDisplayName')?.setValue('');
+          this.toastrService.warning(
+            'O veículo selecionado não possui proprietários vinculados. Vincule o proprietário do documento para emitir a NFe.',
+            'Proprietário Ausente',
+            { timeOut: 7000 }
+          );
+          return;
+        }
+
+        this.selectedVehicleHasNoOwner = false;
+        this.vehicleOwnerOptions = this.vehicleOwners.map((o) => ({
+          value: o.personId,
+          label: `${o.personName || 'Sem Nome'}${o.personCpfCnpj ? ' (' + o.personCpfCnpj + ')' : ''}${o.isCurrentOwner ? ' ★ Atual no DUT' : ''}`,
+          owner: o,
+        }));
+
+        // Prioridade de seleção: preSelectPersonId -> isCurrentOwner -> primeiro da lista
+        let targetOwner = this.vehicleOwners.find((o) => o.personId === preSelectPersonId);
+        if (!targetOwner) {
+          targetOwner = this.vehicleOwners.find((o) => o.isCurrentOwner);
+        }
+        if (!targetOwner && this.vehicleOwners.length > 0) {
+          targetOwner = this.vehicleOwners[0];
+        }
+
+        if (targetOwner) {
+          this.selectedOwnerId = targetOwner.personId;
+          this.form.get('selectedOwnerId')?.setValue(targetOwner.personId);
+          this.form.get('person')?.patchValue({
+            id: targetOwner.personId,
+            name: targetOwner.personName || '',
+          });
+          this.form.get('ownerDisplayName')?.setValue(targetOwner.personName || '');
+        }
+      },
+      error: () => {
+        this.toastrService.error('Erro ao carregar proprietários do veículo');
+      },
+    });
+  }
+
+  /**
+   * Evento disparado quando o usuário seleciona um proprietário diferente no dropdown da NFe.
+   */
+  onOwnerSelected(value: any): void {
+    const personId = typeof value === 'object' ? value?.value || value?.personId : value;
+    const selected = this.vehicleOwners.find((o) => o.personId === personId);
+    if (selected) {
+      this.selectedOwnerId = selected.personId;
+      this.form.get('selectedOwnerId')?.setValue(selected.personId);
+      this.form.get('person')?.patchValue({
+        id: selected.personId,
+        name: selected.personName || '',
+      });
+      this.form.get('ownerDisplayName')?.setValue(selected.personName || '');
+    }
+  }
+
+  /**
+   * Abre modal para adicionar/vincular um novo proprietário diretamente da tela da NFe.
+   */
+  openAddOwnerFromNfeDialog(): void {
+    const vId = this.form.get('headerVehicle.id')?.value || this.selectedVehicle?.vehicleId;
+    if (!vId) {
+      this.toastrService.warning('Selecione um veículo primeiro.', 'Veículo não selecionado');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(VehicleOwnerDialogComponent, {
+      width: '560px',
+      data: {
+        vehicleId: vId,
+        isFirstOwner: this.vehicleOwners.length === 0,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result) return;
+
+      if (result.createNewPerson) {
+        // Usuário clicou em '+' para criar nova pessoa: abre o Drawer padrão de pessoa
+        this.pendingOwnerLink = {
+          vehicleId: vId,
+          isCurrentOwner: result.isCurrentOwner,
+          observation: result.observation,
+        };
+        this.selectedPersonToEdit.set(null);
+        this.openPersonForm.set(true);
+        return;
+      }
+
+      this.toastrService.success('Proprietário vinculado com sucesso!');
+      this.loadVehicleOwnersForNfe(vId, result.personId);
     });
   }
 
@@ -671,6 +834,8 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     if (vId) {
+      this.loadVehicleOwnersForNfe(vId, this.dataForm.personId || undefined);
+
       this.vehicleService.getById(vId).subscribe((vehicle) => {
         this.selectedVehicle = vehicle;
         this.selectedVehicleHasNoOwner = !vehicle.ownerId;
@@ -1006,12 +1171,10 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       const pName = draftData.ownerDisplayName || draftData.person?.name || '';
       this.form.get('ownerDisplayName')?.setValue(pName);
 
+      this.loadVehicleOwnersForNfe(draftVehicleId, draftData.person?.id || draftData.selectedOwnerId);
+
       this.vehicleService.getById(draftVehicleId).subscribe((vehicle) => {
         this.selectedVehicle = vehicle;
-        this.selectedVehicleHasNoOwner = !vehicle.ownerId;
-        if (vehicle.ownerName) {
-          this.form.get('ownerDisplayName')?.setValue(vehicle.ownerName);
-        }
       });
     }
 
@@ -1162,6 +1325,9 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     this.selectedVehicle = null;
     this.selectedVehicleToEdit = null;
     this.selectedVehicleHasNoOwner = false;
+    this.vehicleOwners = [];
+    this.vehicleOwnerOptions = [];
+    this.selectedOwnerId = '';
     this.conflictingNfe.set(null);
     this.itens.clear();
     this.addItem();

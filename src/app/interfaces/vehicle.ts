@@ -4,6 +4,7 @@ import { VehicleSpecies } from '../enums/vehicleSpeciesTypes';
 import { VehicleType } from '../enums/vehicleType';
 import { Person } from './person';
 import { Optional } from './optional';
+import { VehicleOwner } from './vehicle-owner';
 
 /**
  * Interfaces de Resumo para otimização de payload (T-8)
@@ -68,6 +69,7 @@ export interface Vehicle {
   vehicleId?: string;
   ownerId?: string;
   ownerName?: string;
+  owners?: VehicleOwner[];
   plate: string;
   brand: string;
   model: string;

@@ -1,0 +1,51 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="title-with-icon">
+      <mat-icon color="primary">person_add</mat-icon>
+      <h2>Vincular Proprietário</h2>
+    </div>
+    <button mat-icon-button (click)="onCancel()" type="button" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="dialog-content">
+    <div class="form-group">
+      <app-custom-select
+        listType="person"
+        label="Pessoa (Proprietário)*"
+        [options]="persons"
+        [control]="personControl"
+        placeholder="Selecione ou busque a pessoa"
+        (onCreateNew)="handleCreateNewPerson()"
+      ></app-custom-select>
+    </div>
+
+    <div class="form-group checkbox-group">
+      <mat-checkbox formControlName="isCurrentOwner" color="primary">
+        Definir como Proprietário Atual no Documento (DUT / ATPV-e)
+      </mat-checkbox>
+      <small class="helper-text">
+        Se marcado, este proprietário será considerado o titular atual do veículo e os demais serão desmarcados.
+      </small>
+    </div>
+
+    <div class="form-group">
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Observações</mat-label>
+        <textarea matInput formControlName="observation" rows="3" placeholder="Ex: Proprietário registrado no ATPV-e nº ..."></textarea>
+      </mat-form-field>
+    </div>
+
+    <div class="dialog-actions">
+      <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="submitting">
+        Cancelar
+      </button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="submitting || !personControl.get('id')?.value">
+        <mat-icon *ngIf="!submitting">check</mat-icon>
+        <span>{{ submitting ? 'Salvando...' : 'Vincular Proprietário' }}</span>
+      </button>
+    </div>
+  </form>
+</div>
+

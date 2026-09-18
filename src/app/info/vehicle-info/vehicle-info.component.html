@@ -153,53 +153,98 @@
             </div>
           </div>
 
-          <!-- Seção Proprietário (Antigo Dono / Registro de Origem) -->
+          <!-- Seção Proprietários (Registro no Documento / Histórico) -->
           <div class="info-section">
-            <h2 class="section-title">
-              <mat-icon>person</mat-icon>
-              Proprietário (Antigo Dono)
-            </h2>
-            @if (proprietario) {
-              <div class="owner-card">
+            <div class="section-header-actions">
+              <h2 class="section-title">
+                <mat-icon>people</mat-icon>
+                Proprietários do Veículo
+              </h2>
+              <button mat-stroked-button color="primary" type="button" class="btn-sm" (click)="openAddOwnerDialog()">
+                <mat-icon>person_add</mat-icon>
+                <span>Adicionar Proprietário</span>
+              </button>
+            </div>
+
+            @if (currentVehicleOwner || proprietario) {
+              <div class="owner-card current-owner-card">
+                <div class="owner-badge-container">
+                  <span class="owner-status-badge">
+                    <mat-icon>verified</mat-icon>
+                    Atual no Documento (DUT / ATPV-e)
+                  </span>
+                </div>
                 <div class="owner-header">
                   <div class="owner-avatar">
                     <mat-icon>
-                      {{ proprietario.legalEntity ? 'business' : 'person' }}
+                      {{ (currentVehicleOwner?.personCpfCnpj?.length ?? 0) > 14 || proprietario?.legalEntity ? 'business' : 'person' }}
                     </mat-icon>
                   </div>
                   <div class="owner-name-info">
-                    <h3 class="clickable-link" (click)="navigateToPerson(proprietario.personId)">
-                      {{ proprietario.name }}
+                    <h3 class="clickable-link" (click)="navigateToPerson(currentVehicleOwner?.personId || proprietario?.personId)">
+                      {{ currentVehicleOwner?.personName || proprietario?.name }}
                       <mat-icon>open_in_new</mat-icon>
                     </h3>
-                    <p>{{ proprietario.email || 'Sem e-mail cadastrado' }}</p>
+                    <p>{{ currentVehicleOwner?.personEmail || proprietario?.email || 'Sem e-mail cadastrado' }}</p>
                   </div>
                 </div>
                 <mat-divider></mat-divider>
                 <div class="owner-details">
                   <div class="info-item">
-                    <label>{{ proprietario.legalEntity ? 'CNPJ' : 'CPF' }}</label>
-                    <span>{{ proprietario.cnpj || proprietario.cpf || '-' }}</span>
+                    <label>Documento</label>
+                    <span>{{ currentVehicleOwner?.personCpfCnpj || proprietario?.cnpj || proprietario?.cpf || '-' }}</span>
                   </div>
                   <div class="info-item">
                     <label>Telefone</label>
-                    <span>{{ proprietario.phone || '-' }}</span>
+                    <span>{{ currentVehicleOwner?.personPhone || proprietario?.phone || '-' }}</span>
                   </div>
-                  <div class="info-item">
-                    <label>Vínculo</label>
-                    <span>
-                      <mat-chip class="chip-small">
-                        {{ proprietario.relationship?.name || proprietario.relationship || 'PROPRIETÁRIO' }}
-                      </mat-chip>
-                    </span>
-                  </div>
+                  @if (currentVehicleOwner?.observation) {
+                    <div class="info-item full-width-item">
+                      <label>Observação</label>
+                      <span>{{ currentVehicleOwner?.observation }}</span>
+                    </div>
+                  }
                 </div>
               </div>
-            } @else {
+            }
+
+            @if (otherVehicleOwners && otherVehicleOwners.length > 0) {
+              <div class="other-owners-container">
+                <h4 class="other-owners-heading">Outros Proprietários Vinculados ({{ otherVehicleOwners.length }})</h4>
+                <div class="other-owners-list">
+                  @for (owner of otherVehicleOwners; track owner.vehicleOwnerId) {
+                    <div class="other-owner-card">
+                      <div class="other-owner-main">
+                        <div class="other-owner-name">
+                          <strong class="clickable-link" (click)="navigateToPerson(owner.personId)">
+                            {{ owner.personName }}
+                          </strong>
+                          <span class="doc-pill">{{ owner.personCpfCnpj || '-' }}</span>
+                        </div>
+                        @if (owner.observation) {
+                          <span class="other-owner-obs">{{ owner.observation }}</span>
+                        }
+                      </div>
+                      <div class="other-owner-actions">
+                        <button mat-stroked-button color="primary" type="button" class="btn-sm" (click)="setCurrentOwner(owner)">
+                          <mat-icon>check_circle</mat-icon>
+                          <span>Definir como Atual</span>
+                        </button>
+                        <button mat-icon-button color="warn" type="button" (click)="removeOwner(owner)" title="Remover Vínculo">
+                          <mat-icon>delete_outline</mat-icon>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (!currentVehicleOwner && !proprietario && (!otherVehicleOwners || otherVehicleOwners.length === 0)) {
               <div class="empty-state-owner">
                 <mat-icon>person_off</mat-icon>
                 <p>Nenhum proprietário vinculado a este veículo.</p>
-                <button mat-stroked-button color="primary" (click)="onEdit()">Vincular Agora</button>
+                <button mat-stroked-button color="primary" (click)="openAddOwnerDialog()">Vincular Agora</button>
               </div>
             }
           </div>
@@ -916,3 +961,28 @@
     </button>
   </footer>
 </div>
+
+<!-- Drawer para cadastrar nova pessoa quando solicitado pelo diálogo de proprietário -->
+@if (openPersonForm()) {
+  <app-drawer (closeDrawer)="handleClosePersonDrawer()">
+    <mat-tab-group [selectedIndex]="0">
+      <mat-tab label="Pessoa Física">
+        <ng-template matTabContent>
+          <app-natural-person-form
+            [dataForm]="null"
+            (formSubmitted)="onPersonFormSubmitted($event)"
+          />
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="Pessoa Jurídica">
+        <ng-template matTabContent>
+          <app-legal-entity-form
+            [dataForm]="null"
+            (formSubmitted)="onPersonFormSubmitted($event)"
+          />
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+  </app-drawer>
+}
+

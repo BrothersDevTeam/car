@@ -1,0 +1,136 @@
+.dialog-container {
+  padding: 24px;
+  min-width: 420px;
+  max-width: 520px;
+  background-color: var(--card-bg, #ffffff);
+  border-radius: 12px;
+
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .title-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      mat-icon {
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary, #1e293b);
+      }
+    }
+
+    .close-btn {
+      color: var(--text-secondary, #64748b);
+    }
+  }
+
+  .dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+
+      &.checkbox-group {
+        background-color: var(--bg-surface-secondary, #f8fafc);
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color, #e2e8f0);
+
+        .helper-text {
+          color: var(--text-secondary, #64748b);
+          font-size: 0.8rem;
+          margin-top: 4px;
+          margin-left: 32px;
+        }
+      }
+
+      .w-100 {
+        width: 100%;
+      }
+    }
+  }
+
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color, #e2e8f0);
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 20px;
+      height: 40px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+  }
+}
+
+.person-modal-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 85vh;
+  background-color: var(--card-bg, #ffffff);
+
+  .person-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+
+    .title-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      mat-icon {
+        font-size: 26px;
+        width: 26px;
+        height: 26px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary, #1e293b);
+      }
+    }
+
+    .close-btn {
+      color: var(--text-secondary, #64748b);
+    }
+  }
+
+  .person-modal-body {
+    padding: 16px 24px;
+    overflow-y: auto;
+    flex: 1;
+
+    .tab-padding {
+      padding-top: 16px;
+    }
+  }
+}

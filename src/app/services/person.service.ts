@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, first, Observable, of, tap, forkJoin } from 'rxjs';
+import { BehaviorSubject, Subject, first, Observable, of, tap, forkJoin } from 'rxjs';
 
 import { CreateLegalEntity, CreateNaturalPerson, Person } from '@interfaces/person';
 import { PaginationResponse } from '@interfaces/pagination';
@@ -11,6 +11,9 @@ import { AuthService } from './auth/auth.service';
 })
 export class PersonService {
   private cache: PaginationResponse<Person> | null = null;
+
+  // Subject para notificar criação de nova pessoa no sistema
+  public readonly personCreated$ = new Subject<Person>();
 
   // Subject para notificar mudanças no cache
   private cacheUpdated$ = new BehaviorSubject<PaginationResponse<Person> | null>(null);
@@ -152,10 +155,13 @@ export class PersonService {
     );
   }
 
-  create(data: Partial<Person>) {
-    return this.http.post<string>(`${this.apiUrl}`, data).pipe(
-      tap((response: string) => {
+  create(data: Partial<Person>): Observable<Person> {
+    return this.http.post<Person>(`${this.apiUrl}`, data).pipe(
+      tap((response: Person) => {
         this.clearCache();
+        if (response && response.personId) {
+          this.personCreated$.next(response);
+        }
       }),
     );
   }

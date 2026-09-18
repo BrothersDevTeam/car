@@ -23,6 +23,12 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FipeService } from '@services/fipe.service';
 import { FuelType, FuelTypeLabels } from '../../enums/fuelType';
+import { VehicleOwner } from '@interfaces/vehicle-owner';
+import { VehicleOwnerService } from '@services/vehicle-owner.service';
+import { VehicleOwnerDialogComponent } from '@components/dialogs/vehicle-owner-dialog/vehicle-owner-dialog.component';
+import { DrawerComponent } from '@components/drawer/drawer.component';
+import { NaturalPersonFormComponent } from '@forms/client/natural-person-form/natural-person-form.component';
+import { LegalEntityFormComponent } from '@forms/client/legal-entity-form/legal-entity-form.component';
 
 @Component({
   selector: 'app-vehicle-info',
@@ -37,6 +43,9 @@ import { FuelType, FuelTypeLabels } from '../../enums/fuelType';
     MatTabsModule,
     MatDialogModule,
     MatTooltipModule,
+    DrawerComponent,
+    NaturalPersonFormComponent,
+    LegalEntityFormComponent,
   ],
   templateUrl: './vehicle-info.component.html',
   styleUrl: './vehicle-info.component.scss',
@@ -49,17 +58,32 @@ export class VehicleInfoComponent implements OnChanges {
   private financialService = inject(FinancialService);
   private nfeService = inject(NfeService);
   private fipeService = inject(FipeService);
+  private vehicleOwnerService = inject(VehicleOwnerService);
   private router = inject(Router);
 
   isRefreshingFipe = signal(false);
   isDownloadingDanfe = signal<string | null>(null);
   isDownloadingXml = signal<string | null>(null);
+  openPersonForm = signal(false);
+  pendingOwnerLink?: { vehicleId: string; isCurrentOwner: boolean; observation?: string };
+  lastCreatedPersonId?: string;
+
+  constructor() {
+    this.personService.personCreated$.subscribe((person) => {
+      if (person?.personId) {
+        this.lastCreatedPersonId = person.personId;
+      }
+    });
+  }
 
   @Input() vehicle!: VehicleForm;
   proprietario: Person | null = null;
   fornecedor: Person | null = null;
   comprador: Person | null = null;
   financialTransactions: FinancialTransaction[] = [];
+  vehicleOwners: VehicleOwner[] = [];
+  currentVehicleOwner: VehicleOwner | null = null;
+  otherVehicleOwners: VehicleOwner[] = [];
 
   @Output() editEvent = new EventEmitter<VehicleForm>();
   @Output() formSubmitted = new EventEmitter<void>();
@@ -189,6 +213,10 @@ export class VehicleInfoComponent implements OnChanges {
       const supplierId = this.vehicle.purchaseHistory?.[0]?.supplierId;
       const buyerId = this.vehicle.salesHistory?.[0]?.buyerId;
 
+      if (this.vehicle.vehicleId) {
+        this.loadVehicleOwners(this.vehicle.vehicleId);
+      }
+
       this.loadFinancialTransactions();
 
       // Carrega Comprador
@@ -244,6 +272,140 @@ export class VehicleInfoComponent implements OnChanges {
         }
       }
     }
+  }
+
+  loadVehicleOwners(vehicleId: string): void {
+    this.vehicleOwnerService.getOwners(vehicleId).subscribe({
+      next: (owners) => {
+        this.vehicleOwners = owners || [];
+        this.currentVehicleOwner = this.vehicleOwners.find((o) => o.isCurrentOwner) || null;
+        this.otherVehicleOwners = this.vehicleOwners.filter((o) => !o.isCurrentOwner);
+        if (this.currentVehicleOwner) {
+          this.personService.getById(this.currentVehicleOwner.personId).subscribe({
+            next: (p) => (this.proprietario = p),
+            error: () => (this.proprietario = null),
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Erro ao carregar proprietários do veículo:', err);
+      },
+    });
+  }
+
+  openAddOwnerDialog(): void {
+    if (!this.vehicle?.vehicleId) return;
+
+    const vId = this.vehicle.vehicleId;
+    const dialogRef = this.dialog.open(VehicleOwnerDialogComponent, {
+      width: '480px',
+      data: {
+        vehicleId: vId,
+        isFirstOwner: this.vehicleOwners.length === 0,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result) return;
+
+      if (result.createNewPerson) {
+        this.pendingOwnerLink = {
+          vehicleId: vId,
+          isCurrentOwner: result.isCurrentOwner,
+          observation: result.observation,
+        };
+        this.openPersonForm.set(true);
+        return;
+      }
+
+      this.loadVehicleOwners(vId);
+      this.formSubmitted.emit();
+    });
+  }
+
+  handleClosePersonDrawer(): void {
+    this.openPersonForm.set(false);
+  }
+
+  onPersonFormSubmitted(createdPerson?: any): void {
+    this.handleClosePersonDrawer();
+
+    if (this.pendingOwnerLink && this.vehicle?.vehicleId) {
+      const link = this.pendingOwnerLink;
+      this.pendingOwnerLink = undefined;
+
+      const personIdToLink = createdPerson?.personId || this.lastCreatedPersonId;
+      this.lastCreatedPersonId = undefined;
+
+      if (personIdToLink) {
+        this.vehicleOwnerService
+          .addOwner(link.vehicleId, {
+            personId: personIdToLink,
+            isCurrentOwner: link.isCurrentOwner,
+            observation: link.observation,
+          })
+          .subscribe({
+            next: () => {
+              this.toastrService.success('Pessoa cadastrada e vinculada como proprietária com sucesso!');
+              this.loadVehicleOwners(link.vehicleId);
+              this.formSubmitted.emit();
+            },
+            error: (err) => {
+              console.error('Erro ao vincular proprietário recém-criado:', err);
+              const msg = err.error?.message || 'Erro ao vincular proprietário ao veículo.';
+              this.toastrService.error(msg, 'Erro');
+              this.loadVehicleOwners(link.vehicleId);
+            },
+          });
+      } else {
+        this.loadVehicleOwners(link.vehicleId);
+      }
+    }
+  }
+
+  setCurrentOwner(owner: VehicleOwner): void {
+    if (!this.vehicle?.vehicleId) return;
+
+    this.vehicleOwnerService.setCurrentOwner(this.vehicle.vehicleId, owner.vehicleOwnerId).subscribe({
+      next: () => {
+        this.toastrService.success(`${owner.personName || 'Proprietário'} definido como atual do documento!`, 'Sucesso');
+        this.loadVehicleOwners(this.vehicle.vehicleId!);
+        this.formSubmitted.emit();
+      },
+      error: (err) => {
+        const msg = err.error?.message || 'Erro ao definir proprietário atual.';
+        this.toastrService.error(msg, 'Erro');
+      },
+    });
+  }
+
+  removeOwner(owner: VehicleOwner): void {
+    if (!this.vehicle?.vehicleId) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Remover Vínculo de Proprietário',
+        message: `Deseja realmente remover o vínculo de ${owner.personName || 'este proprietário'} com este veículo?`,
+        confirmText: 'Remover',
+        cancelText: 'Cancelar',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed && this.vehicle.vehicleId) {
+        this.vehicleOwnerService.removeOwner(this.vehicle.vehicleId, owner.vehicleOwnerId).subscribe({
+          next: () => {
+            this.toastrService.success('Vínculo de proprietário removido com sucesso!', 'Sucesso');
+            this.loadVehicleOwners(this.vehicle.vehicleId!);
+            this.formSubmitted.emit();
+          },
+          error: (err) => {
+            const msg = err.error?.message || 'Erro ao remover vínculo de proprietário.';
+            this.toastrService.error(msg, 'Erro');
+          },
+        });
+      }
+    });
   }
 
   loadFinancialTransactions(): void {
