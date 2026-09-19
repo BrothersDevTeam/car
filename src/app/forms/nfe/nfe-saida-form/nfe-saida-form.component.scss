@@ -62,20 +62,27 @@ form {
   }
 
   .section-title {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-    margin-top: 1.5rem;
+    color: var(--text-primary, #0f172a);
+    margin-bottom: 1.25rem;
+    margin-top: 2rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.65rem;
+
+    .section-title-icon {
+      color: var(--primary-color, #0284c7);
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
 
     &::after {
       content: '';
       flex: 1;
       height: 1px;
-      background: linear-gradient(to right, var(--border-color), transparent);
+      background: linear-gradient(to right, var(--border-color, #e2e8f0), transparent);
       margin-left: 1rem;
     }
 
@@ -188,6 +195,10 @@ form {
 
     &.three-cols {
       grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    &.single-col {
+      grid-template-columns: 1fr;
     }
 
     mat-form-field {

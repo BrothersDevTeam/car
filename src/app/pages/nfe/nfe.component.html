@@ -739,21 +739,21 @@
   <!-- === ANTIGRAVITY END ==== -->
   @if (openForm()) {
     <app-drawer class="nfe-form-drawer" (closeDrawer)="handleConfirmationCloseDrawer()">
-      <mat-tab-group [selectedIndex]="selectedTabIndex()">
-        <mat-tab label="NFe Entrada">
+      <mat-tab-group [selectedIndex]="selectedTabIndex()" (selectedIndexChange)="selectedTabIndex.set($event)">
+        <mat-tab label="NFe Entrada" [disabled]="!!(selectedNfe && selectedNfe.nfeTipoDocumento === '1')">
           <ng-template matTabContent>
             <app-nfe-entrada-form
-              [dataForm]="selectedNfe"
+              [dataForm]="selectedNfe?.nfeTipoDocumento === '0' ? selectedNfe : null"
               (formSubmitted)="onFormSubmitted()"
               (formChanged)="handleFormChanged($event)"
               (openExistingNfe)="onOpenExistingNfe($event)"
             />
           </ng-template>
         </mat-tab>
-        <mat-tab label="NFe Saída">
+        <mat-tab label="NFe Saída" [disabled]="!!(selectedNfe && selectedNfe.nfeTipoDocumento === '0')">
           <ng-template matTabContent>
             <app-nfe-saida-form
-              [dataForm]="selectedNfe"
+              [dataForm]="selectedNfe?.nfeTipoDocumento === '1' ? selectedNfe : null"
               (formSubmitted)="onFormSubmitted()"
               (formChanged)="handleFormChanged($event)"
               (openExistingNfe)="onOpenExistingNfe($event)"

@@ -184,7 +184,7 @@
         </div>
       }
 
-      <div class="tax-row">
+      <div class="tax-row single-col">
         <app-primary-select
           [label]="'Natureza da Operação*'"
           [options]="tiposNfeEntrada"
@@ -494,19 +494,22 @@
       </button>
     }
 
-    <div class="section-title">Pagamentos da Nota Fiscal</div>
+    <div class="section-title">
+      <mat-icon class="section-title-icon">payments</mat-icon>
+      <span>Pagamentos da Nota Fiscal</span>
+    </div>
     <div class="payments-container" formArrayName="pagamentos">
       @for (pagGroup of pagamentos.controls; track $index; let i = $index) {
         <div class="payment-card" [formGroupName]="i">
           <div class="payment-header">
-            <div class="payment-index">
-              <mat-icon>payment</mat-icon>
+            <div class="payment-badge">
+              <mat-icon>receipt_long</mat-icon>
               <span>Pagamento #{{ i + 1 }}</span>
             </div>
             @if (pagamentos.length > 1) {
               <button
                 mat-icon-button
-                color="warn"
+                class="remove-payment-btn"
                 type="button"
                 (click)="removePagamento(i)"
                 matTooltip="Remover este pagamento"
@@ -518,12 +521,17 @@
 
           <div class="payment-grid">
             <div class="field-forma">
-              <app-primary-select
-                [label]="'Forma de Pagamento*'"
-                [options]="formasPagamentoNfe"
-                formControlName="detalhesPagamentoFormaPagamento"
-                placeholder="Selecione a Forma"
-              ></app-primary-select>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Forma de Pagamento*</mat-label>
+                <mat-select formControlName="detalhesPagamentoFormaPagamento">
+                  @for (fp of formasPagamentoNfe; track fp.value) {
+                    <mat-option [value]="fp.value">{{ fp.label }}</mat-option>
+                  }
+                </mat-select>
+                @if (pagGroup.get('detalhesPagamentoFormaPagamento')?.invalid && (pagGroup.get('detalhesPagamentoFormaPagamento')?.touched || submitted)) {
+                  <mat-error>Forma obrigatória</mat-error>
+                }
+              </mat-form-field>
             </div>
 
             <div class="field-desc">
@@ -551,29 +559,31 @@
                 <span>Dados do Cartão</span>
               </div>
               <div class="card-details-grid">
-                <app-primary-select
-                  [label]="'Bandeira'"
-                  [options]="bandeirasCartao"
-                  formControlName="cartaoBandeira"
-                  placeholder="Selecione a Bandeira"
-                ></app-primary-select>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Bandeira do Cartão</mat-label>
+                  <mat-select formControlName="cartaoBandeira">
+                    @for (b of bandeirasCartao; track b.value) {
+                      <mat-option [value]="b.value">{{ b.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
 
-                <mat-form-field appearance="outline">
+                <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Tipo Integração</mat-label>
                   <mat-select formControlName="cartaoTipoIntegracao">
-                    <mat-option value="1">1 - Pagamento Integrado (TEF)</mat-option>
+                    <mat-option value="1">1 - Integrado (TEF)</mat-option>
                     <mat-option value="2">2 - Não Integrado (POS)</mat-option>
                   </mat-select>
                 </mat-form-field>
 
-                <mat-form-field appearance="outline">
+                <mat-form-field appearance="outline" class="full-width">
                   <mat-label>CNPJ Credenciadora</mat-label>
-                  <input matInput formControlName="cartaoCnpj" placeholder="CNPJ da Operadora" />
+                  <input matInput formControlName="cartaoCnpj" placeholder="00.000.000/0000-00" />
                 </mat-form-field>
 
-                <mat-form-field appearance="outline">
+                <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Cód. Autorização</mat-label>
-                  <input matInput formControlName="cartaoAutorizacao" placeholder="Autorização da Transação" />
+                  <input matInput formControlName="cartaoAutorizacao" placeholder="Autorização" />
                 </mat-form-field>
               </div>
             </div>
@@ -582,23 +592,29 @@
       }
 
       <div class="payment-actions-bar">
-        <button mat-stroked-button color="primary" type="button" (click)="addPagamento()" class="add-payment-btn">
-          <mat-icon>add</mat-icon>
+        <button mat-flat-button color="primary" type="button" (click)="addPagamento()" class="add-payment-btn">
+          <mat-icon>add_circle_outline</mat-icon>
           Adicionar Pagamento
         </button>
 
         <div class="payment-totals-summary">
-          <div class="total-badge">
-            <span class="label">Total da Nota:</span>
+          <div class="total-card total-nota">
+            <span class="label">Total da Nota</span>
             <span class="value">{{ calcularTotalItens() | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
           </div>
-          <div class="total-badge" [class.badge-success]="calcularTotalPagamentos() >= calcularTotalItens()">
-            <span class="label">Total Informado:</span>
+          <div class="total-card total-informado" [class.badge-success]="calcularTotalPagamentos() >= calcularTotalItens() && calcularTotalItens() > 0">
+            <span class="label">Total Informado</span>
             <span class="value">{{ calcularTotalPagamentos() | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
           </div>
+          @if (calcularTotalItens() > calcularTotalPagamentos() && calcularTotalItens() > 0) {
+            <div class="total-card total-pendente">
+              <span class="label">Falta Informar</span>
+              <span class="value">{{ (calcularTotalItens() - calcularTotalPagamentos()) | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
+            </div>
+          }
           @if (calcularTroco() > 0) {
-            <div class="total-badge badge-troco">
-              <span class="label">Troco:</span>
+            <div class="total-card total-troco">
+              <span class="label">Troco</span>
               <span class="value">{{ calcularTroco() | currency: 'BRL' : 'symbol' : '1.2-2' }}</span>
             </div>
           }
