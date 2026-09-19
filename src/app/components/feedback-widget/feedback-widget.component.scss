@@ -1,82 +1,126 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+}
+
 .feedback-widget-container {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 999;
+  display: inline-flex;
+  align-items: center;
 
   .feedback-trigger-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 50px;
-    width: 50px;
+    height: 40px;
+    width: 40px;
     padding: 0;
-    border-radius: 25px;
-    border: none;
+    border-radius: 9999px;
+    border: 1px solid rgba(59, 130, 246, 0.25);
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     color: #ffffff;
     cursor: pointer;
-    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.45), 0 8px 10px -6px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.28);
     transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    user-select: none;
     overflow: hidden;
 
     .btn-content {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
 
       .widget-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         flex-shrink: 0;
-        transition: transform 0.3s ease;
+        transition: transform 0.25s ease;
       }
 
       .btn-text {
         max-width: 0;
         opacity: 0;
         margin-left: 0;
-        font-size: 0.94rem;
+        font-family: 'Inter', Roboto, sans-serif;
+        font-size: 0.85rem;
         font-weight: 600;
         letter-spacing: 0.01em;
         white-space: nowrap;
         overflow: hidden;
         transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
                     opacity 0.25s ease,
-                    margin 0.3s ease;
+                    margin-left 0.3s ease;
       }
     }
 
     &:hover,
     &[aria-expanded="true"] {
       width: auto;
-      min-width: 140px;
-      padding: 0 20px;
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 15px 32px -5px rgba(37, 99, 235, 0.55), 0 10px 14px -5px rgba(37, 99, 235, 0.35);
-      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      min-width: 118px;
+      padding: 0 16px 0 12px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+      transform: translateY(-1px);
 
       .btn-content {
         .widget-icon {
-          transform: scale(1.05);
+          transform: scale(1.06);
         }
 
         .btn-text {
-          max-width: 120px;
+          max-width: 90px;
           opacity: 1;
-          margin-left: 10px;
+          margin-left: 8px;
         }
       }
     }
 
     &:active {
-      transform: translateY(-1px) scale(0.98);
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
     }
   }
 }
 
-/* Painel de Menu de Escolha de Tags */
+// ===== RESPONSIVIDADE NO MOBILE (CELULAR) =====
+@media (max-width: 768px) {
+  .feedback-widget-container {
+    .feedback-trigger-btn {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      padding: 0;
+      border-radius: 50%;
+
+      &:hover,
+      &[aria-expanded="true"] {
+        width: 36px;
+        min-width: 36px;
+        padding: 0;
+      }
+
+      .btn-content {
+        gap: 0;
+
+        .btn-text {
+          display: none !important; // Esconde o texto "Feedback" no mobile para não espremer o header
+        }
+
+        .widget-icon {
+          font-size: 19px;
+          width: 19px;
+          height: 19px;
+        }
+      }
+    }
+  }
+}
+
+/* Painel de Menu de Escolha de Tags (Abre para baixo) */
 ::ng-deep .feedback-choice-menu-panel {
   &.mat-mdc-menu-panel {
     min-width: 320px;
@@ -85,7 +129,7 @@
     padding: 0 !important;
     overflow: hidden !important;
     background: var(--bg-surface, #ffffff) !important;
-    box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.3), 0 0 0 1px rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(226, 232, 240, 0.85) !important;
   }
 
   .feedback-menu-header {
@@ -125,6 +169,8 @@
 
   .feedback-menu-list {
     padding: 6px;
+    max-height: 55vh;
+    overflow-y: auto;
   }
 
   .feedback-tag-menu-item {
@@ -219,6 +265,16 @@
         font-size: 0.74rem;
         color: #94a3b8;
       }
+    }
+  }
+}
+
+// Responsividade para o overlay suspenso do menu em telas móveis
+@media (max-width: 768px) {
+  ::ng-deep .feedback-choice-menu-panel {
+    &.mat-mdc-menu-panel {
+      min-width: 280px !important;
+      max-width: calc(100vw - 20px) !important;
     }
   }
 }

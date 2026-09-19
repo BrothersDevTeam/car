@@ -5,7 +5,7 @@
     class="feedback-trigger-btn"
     [matMenuTriggerFor]="feedbackChoiceMenu"
     matTooltip="Enviar sugestão, elogio ou relatar problema"
-    matTooltipPosition="left"
+    matTooltipPosition="below"
   >
     <div class="btn-content">
       <mat-icon
@@ -20,12 +20,12 @@
     </div>
   </button>
 
-  <!-- Menu de Escolha de Tag Suspenso -->
+  <!-- Menu de Escolha de Tag Suspenso (Abre para baixo) -->
   <mat-menu
     #feedbackChoiceMenu="matMenu"
     class="feedback-choice-menu-panel"
     xPosition="before"
-    yPosition="above"
+    yPosition="below"
   >
     <div class="feedback-menu-header" (click)="$event.stopPropagation()">
       <mat-icon class="menu-header-icon">category</mat-icon>

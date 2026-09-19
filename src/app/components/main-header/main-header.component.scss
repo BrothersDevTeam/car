@@ -13,6 +13,12 @@ mat-toolbar {
     margin-right: 10px;
   }
 
+  .header-feedback-widget {
+    margin-right: 14px;
+    display: inline-flex;
+    align-items: center;
+  }
+
   .header-store-select {
     min-width: 280px;
     max-width: 380px;
@@ -181,6 +187,10 @@ mat-toolbar {
 // ========== RESPONSIVIDADE DO CABEÇALHO PARA MOBILE ==========
 @media (max-width: 768px) {
   mat-toolbar {
+    .header-feedback-widget {
+      margin-right: 8px;
+    }
+
     .header-store-select {
       min-width: auto;
       max-width: 220px;

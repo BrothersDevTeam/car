@@ -18,6 +18,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, distinctUntilChanged } from 'rxjs';
 
 import { FeedbackService } from '@services/feedback.service';
+import { FeedbackWidgetComponent } from '../feedback-widget/feedback-widget.component';
 
 @Component({
   selector: 'app-main-header',
@@ -31,6 +32,7 @@ import { FeedbackService } from '@services/feedback.service';
     MatDividerModule,
     MatTooltipModule,
     FormsModule,
+    FeedbackWidgetComponent,
   ],
   templateUrl: './main-header.component.html',
   styleUrl: './main-header.component.scss',
