@@ -25,7 +25,7 @@
         [(ngModel)]="value"
         [attr.maxlength]="maxlength"
         [attr.required]="required ? '' : null"
-        [readonly]="readonly"
+        [readonly]="readonly || isReadOnly"
         [disabled]="disabled"
         (ngModelChange)="onModelChange($event)"
         (blur)="onBlur($event)"

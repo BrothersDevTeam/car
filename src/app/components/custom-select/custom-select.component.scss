@@ -21,17 +21,24 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-top: 12px;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 500;
 
   .label {
+    display: block;
     margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 500;
     color: var(--text-color);
+    line-height: normal;
   }
 
   .dropdown-container {
     display: flex;
     align-items: center;
     gap: 8px;
+    position: relative;
 
     mat-icon {
       position: absolute;
@@ -49,11 +56,17 @@
 
   .dropdown-button {
     width: 100%;
-    padding: 12px 12px;
+    padding: 8px 12px;
+    min-height: 40px;
+    height: 40px;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: normal;
     background-color: var(--gray-secondary-bg);
     border: none;
-    border-radius: 8px;
-    color: var(--text-color-light);
+    border-radius: 6px;
+    color: var(--text-color);
     text-align: left;
     cursor: pointer;
     display: flex;

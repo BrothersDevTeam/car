@@ -115,52 +115,56 @@
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.75rem;
 
   .section-title {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    color: #64748b;
+    gap: 0.6rem;
+    color: var(--text-color, #1e293b);
     border-bottom: 1px solid #e2e8f0;
     padding-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 
     mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+      color: var(--primary-color, #3b82f6);
     }
 
     h3 {
       margin: 0;
-      font-size: 0.9rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-color, #1e293b);
+      text-transform: none;
+      letter-spacing: normal;
     }
   }
 }
 
 .grid-3-cols {
   grid-template-columns: repeat(3, 1fr) !important;
-  align-items: flex-end;
+  align-items: flex-start;
+  gap: 1rem;
 }
 
 .grid-2-cols {
-  grid-template-columns: 1fr 1fr !important;
-  gap: 1.5rem;
-  align-items: flex-end;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 1rem;
+  align-items: flex-start;
 }
 
 .vertical-form-stack {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
   width: 100%;
 }
 
 .date-row {
-  max-width: 400px; // Limita a largura da data para não ficar gigante
+  max-width: 400px;
 }
 
 .financial-card-stack {
@@ -190,20 +194,32 @@
 .field-container {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  margin-top: 10px;
+  width: 100%;
+
+  .field-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 4px;
+    display: block;
+    line-height: normal;
+  }
 }
 
 .modern-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #94a3b8;
-  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 4px;
+  display: block;
+  text-transform: none;
 }
 
 .helper-text {
   font-size: 0.75rem;
   color: #64748b;
-  margin-top: -0.4rem;
+  margin-top: -0.2rem;
   margin-bottom: 0.4rem;
   font-style: italic;
   display: block;
@@ -211,31 +227,58 @@
 
 .premium-toggle-group {
   border: none !important;
-  background: #f1f5f9;
-  border-radius: 12px !important;
-  padding: 4px;
+  background: var(--gray-secondary-bg, #f1f5f9);
+  border-radius: 6px !important;
+  padding: 3px;
   width: 100%;
+  height: 40px;
+  min-height: 40px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
 
   .mat-button-toggle {
     flex: 1;
+    height: 34px;
     border: none !important;
-    border-radius: 8px !important;
+    border-radius: 4px !important;
     background: transparent;
-    color: #64748b;
-    font-weight: 600;
-    transition: all 0.3s ease;
+    color: var(--text-color-light, #64748b);
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    ::ng-deep .mat-button-toggle-button {
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    ::ng-deep .mat-button-toggle-label-content {
+      line-height: normal;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 8px;
+    }
 
     mat-icon {
-      margin-right: 4px;
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
+      margin-right: 0;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
     }
 
     &.mat-button-toggle-checked {
       background: white !important;
-      color: #3b82f6 !important;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      color: var(--primary-color, #3b82f6) !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      font-weight: 600;
     }
   }
 }
@@ -243,21 +286,13 @@
 // Grid System
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  padding: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  padding: 0;
+  align-items: flex-start;
 
   &.grid-3 {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  }
-}
-
-// Custom Select Alignment
-::ng-deep app-custom-select {
-  .select-container {
-    background: #f8fafc !important;
-    border-radius: 12px !important;
-    border: 1px solid #e2e8f0 !important;
   }
 }
 
@@ -590,64 +625,37 @@
   }
 }
 
-.fipe-field-container {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
+.fipe-mat-field {
   width: 100%;
 
-  .fipe-input {
-    flex: 1;
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      background-color: transparent !important;
+      transition: all 0.2s ease;
+    }
 
-    ::ng-deep {
-      .input-wrapper {
-        margin-top: 0 !important;
-      }
+    .mdc-notched-outline {
+      border-width: 1px;
+    }
 
-      .input-container {
-        margin-top: 0 !important;
-      }
-
-      .input-content input {
-        height: 56px !important;
-        padding: 0 16px !important;
-        box-sizing: border-box !important;
-        font-size: 1.05rem !important;
-        font-weight: 600 !important;
-        background-color: var(--gray-secondary-bg, #f1f5f9) !important;
-        border: 1px solid var(--border-color, #cbd5e1) !important;
-        border-radius: 8px !important;
-      }
+    input.mat-mdc-input-element {
+      font-weight: 500;
+      color: var(--mat-sys-on-surface);
     }
   }
 
-  .refresh-fipe-btn {
-    height: 56px !important;
-    width: 56px !important;
-    min-width: 56px !important;
-    border-radius: 8px !important;
-    background-color: rgba(59, 130, 246, 0.08);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.2s ease;
+  .refresh-fipe-icon-btn {
+    color: var(--primary-color, #3b82f6);
+    transition: transform 0.2s ease;
 
     &:hover:not([disabled]) {
-      background-color: rgba(59, 130, 246, 0.18);
-      border-color: rgba(59, 130, 246, 0.4);
-      transform: scale(1.02);
-    }
-
-    &:disabled {
-      opacity: 0.5;
+      transform: scale(1.1);
     }
 
     mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
 
       &.spin {
         animation: spin 1s linear infinite;

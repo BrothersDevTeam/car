@@ -27,20 +27,30 @@
 
 .input-wrapper {
   color: var(--text-color);
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 500;
   width: 100%;
-  margin-top: 12px;
+  margin-top: 10px;
   position: relative;
+
+  label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+    line-height: normal;
+  }
 
   .input-container {
     display: flex;
     flex-direction: column;
-    margin-top: 4px;
+    margin-top: 0;
 
     .input-content {
       display: flex;
       flex-direction: column;
-      border-radius: 8px;
+      border-radius: 6px;
       align-items: stretch;
       position: relative;
 
@@ -53,7 +63,7 @@
         align-items: center;
         position: relative;
         cursor: pointer;
-        border-radius: 8px;
+        border-radius: 6px;
         transition: box-shadow 0.2s ease;
 
         /**
@@ -67,13 +77,17 @@
 
         .select-input {
           border: none;
-          border-radius: 8px;
-          padding: 12px;
+          border-radius: 6px;
+          padding: 8px 12px;
+          min-height: 40px;
+          height: 40px;
+          box-sizing: border-box;
+          font-family: inherit;
           width: 100%;
           background-color: var(--gray-secondary-bg);
           cursor: pointer;
           padding-right: 40px; // Espaço para a seta
-          font-size: 16px;
+          font-size: 14px;
           color: var(--text-color);
 
           /**
@@ -258,6 +272,7 @@
             @media (min-width: 768px) {
               grid-template-columns: repeat(2, 1fr); // 2 colunas
             }
+
             @media (min-width: 1200px) {
               grid-template-columns: repeat(3, 1fr); // 3 colunas em telas bem grandes
             }
@@ -451,10 +466,12 @@
     opacity: 1;
     transform: translateX(0);
   }
+
   50% {
     opacity: 0.6;
     transform: translateX(-3px);
   }
+
   100% {
     opacity: 1;
     transform: translateX(0);

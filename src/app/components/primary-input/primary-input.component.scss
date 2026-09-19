@@ -1,29 +1,41 @@
 .input-wrapper {
   color: var(--text-color);
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 500;
   width: 100%;
-  margin-top: 12px;
+  margin-top: 10px;
+
+  label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+    line-height: normal;
+  }
 
   .input-container {
     display: flex;
     flex-direction: column;
-    margin-top: 4px;
+    margin-top: 0;
 
     .input-content {
       display: flex;
       align-items: center;
-      border-radius: 8px;
+      border-radius: 6px;
       position: relative;
 
       input {
         border: none;
-        border-radius: 8px;
-        padding: 12px;
+        border-radius: 6px;
+        padding: 8px 12px;
+        min-height: 40px;
+        height: 40px;
         width: 100%;
         background-color: var(--gray-secondary-bg);
         color: var(--text-color);
         font-family: inherit;
-        font-size: 1rem;
+        font-size: 14px;
         box-sizing: border-box;
 
         // deixa espaço à direita para o ícone

@@ -89,7 +89,7 @@
                 <h3>Identificação Básica</h3>
               </div>
 
-              <div class="form-grid grid-3-cols align-items-end">
+              <div class="form-grid grid-3-cols">
                 <app-custom-select
                   listType="person"
                   label="Proprietário"
@@ -116,7 +116,7 @@
                 ></app-primary-select>
 
                 <div class="field-container">
-                  <label class="modern-label">Origem do Veículo</label>
+                  <label class="field-label">Origem do Veículo</label>
                   <mat-button-toggle-group
                     formControlName="origin"
                     aria-label="Origem do Veículo"
@@ -179,7 +179,7 @@
                 ></app-custom-select>
               </div>
 
-              <div class="form-grid grid-3-cols align-items-end">
+              <div class="form-grid grid-3-cols">
                 <app-custom-select
                   listType="model"
                   label="Ano/Versão (FIPE)"
@@ -209,7 +209,7 @@
                 <h3>Especificações Técnicas e Motor</h3>
               </div>
 
-              <div class="form-grid grid-3-cols align-items-end">
+              <div class="form-grid grid-3-cols">
                 <app-custom-select
                   listType="color"
                   label="Cor"
@@ -281,7 +281,7 @@
                 <h3>Documentação e Registro</h3>
               </div>
 
-              <div class="form-grid grid-3-cols align-items-end">
+              <div class="form-grid grid-3-cols">
                 <app-primary-input formControlName="chassis" label="Chassi" mask="AAAAAAAAAAAAAAAAA" />
                 <app-primary-input formControlName="renavam" label="Renavam" />
                 <app-primary-input formControlName="engineNumber" label="Nº do Motor" />
@@ -305,41 +305,35 @@
                 <h3>Valor de Venda e Tabela FIPE</h3>
               </div>
 
-              <div class="form-grid">
-                <div class="field-container">
-                  <label class="modern-label">Valor de Venda Sugerido</label>
-                  <span class="helper-text">Valor base para anúncios e vitrine</span>
-                  <app-currency-input
-                    formControlName="suggestedSalePrice"
-                    label="Valor de Venda Sugerido"
-                    [error]="!!(form.get('suggestedSalePrice')?.invalid && (form.get('suggestedSalePrice')?.touched || submitted))"
-                    errorMessage="Valor inválido"
-                  ></app-currency-input>
-                </div>
+              <div class="form-grid grid-2-cols">
+                <app-currency-input
+                  formControlName="suggestedSalePrice"
+                  label="Valor de Venda Sugerido"
+                  [error]="!!(form.get('suggestedSalePrice')?.invalid && (form.get('suggestedSalePrice')?.touched || submitted))"
+                  errorMessage="Valor inválido"
+                ></app-currency-input>
 
-                <div class="field-container">
-                  <label class="modern-label">Valor Tabela FIPE</label>
-                  <span class="helper-text">Valor de referência retornado da Tabela FIPE</span>
-                  <div class="fipe-field-container">
-                    <app-primary-input
-                      formControlName="fipeValue"
-                      placeholder="R$ 0,00"
-                      [readonly]="isFipeValueReadOnly"
-                      class="fipe-input"
-                    ></app-primary-input>
-                    <button
-                      type="button"
-                      mat-icon-button
-                      color="primary"
-                      (click)="refreshFipeValue()"
-                      [disabled]="loadingDetails() || isCustomVehicle"
-                      matTooltip="Atualizar valor da Tabela FIPE"
-                      class="refresh-fipe-btn"
-                    >
-                      <mat-icon [class.spin]="loadingDetails()">refresh</mat-icon>
-                    </button>
-                  </div>
-                </div>
+                <mat-form-field appearance="outline" class="w-100 fipe-mat-field">
+                  <mat-label>Valor Tabela FIPE</mat-label>
+                  <input
+                    matInput
+                    formControlName="fipeValue"
+                    placeholder="R$ 0,00"
+                    [readonly]="isFipeValueReadOnly"
+                  />
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matSuffix
+                    color="primary"
+                    (click)="refreshFipeValue()"
+                    [disabled]="loadingDetails() || isCustomVehicle"
+                    matTooltip="Atualizar valor da Tabela FIPE"
+                    class="refresh-fipe-icon-btn"
+                  >
+                    <mat-icon [class.spin]="loadingDetails()">refresh</mat-icon>
+                  </button>
+                </mat-form-field>
               </div>
             </section>
 
@@ -348,7 +342,7 @@
                 <mat-icon>event</mat-icon>
                 <h3>Logística</h3>
               </div>
-              <div class="form-grid">
+              <div class="form-grid grid-2-cols">
                 <app-date-input formControlName="entryDate" label="Data de Entrada"></app-date-input>
                 <app-date-input formControlName="exitDate" label="Data de Saída"></app-date-input>
               </div>
