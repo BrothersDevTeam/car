@@ -82,7 +82,7 @@
     </div>
 
     <div class="section-title">Informações Gerais</div>
-    <div class="tax-row">
+    <div class="tax-row single-col">
       <app-custom-select
         listType="person"
         [label]="'Destinatário*'"
@@ -92,13 +92,45 @@
         (onCreateNew)="onCreateNewPerson()"
         (onEdit)="onEditPerson($event)"
       ></app-custom-select>
+    </div>
 
+    <div class="tax-row">
       <app-primary-select
         [label]="'Natureza da Operação*'"
         [options]="tiposNfeSaida"
         formControlName="nfeNaturezaOperacao"
         placeholder="Selecione a Natureza"
       ></app-primary-select>
+
+      <div class="cfop-field-container">
+        <label class="cfop-label">CFOP*</label>
+        <div class="cfop-control-wrapper">
+          <div class="cfop-input-group">
+            <input
+              type="text"
+              class="cfop-input"
+              formControlName="cfop"
+              placeholder="5.102"
+              maxlength="5"
+              (input)="onCfopInput($event)"
+              (blur)="onCfopBlur()"
+            />
+            <button
+              type="button"
+              class="cfop-search-btn"
+              (click)="openCfopSearchDialog()"
+              matTooltip="Pesquisar CFOP na tabela oficial"
+            >
+              <mat-icon>search</mat-icon>
+            </button>
+          </div>
+          <div class="cfop-desc-wrapper" [class.empty]="!cfopDescricao()">
+            <span class="cfop-desc-text" [matTooltip]="cfopDescricao()">
+              {{ cfopDescricao() || 'Selecione a natureza ou pesquise o CFOP' }}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="section-title">Parâmetros de Emissão</div>

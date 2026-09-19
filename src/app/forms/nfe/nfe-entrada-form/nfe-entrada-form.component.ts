@@ -60,6 +60,10 @@ import { extractErrorMessage } from '@utils/error-utils';
 import { StoreContextService } from '@services/store-context.service';
 import { ParametroFiscalService, ParametroFiscal } from '@services/parametro-fiscal.service';
 import { FormDraftService, FormDraft } from '@services/form-draft.service';
+import { CfopService } from '@services/cfop.service';
+import { AddressService } from '@services/address.service';
+import { CfopSearchDialog } from '@components/dialogs/cfop-search-dialog/cfop-search-dialog';
+import type { Cfop } from '@interfaces/cfop';
 
 @Component({
   selector: 'app-nfe-entrada-form',
@@ -118,16 +122,16 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   selectedVehicleHasNoOwner = false;
   tiposNfeEntrada: { value: NaturezaOperacao; label: string }[] = [
     {
-      value: NaturezaOperacao.ENTRADA_VEICULO_USADO,
-      label: 'Entrada de Veículo Usado',
+      value: NaturezaOperacao.COMPRA_VEICULO_PARA_ESTOQUE,
+      label: 'Compra de Veículo Usado',
     },
     {
       value: NaturezaOperacao.ENTRADA_CONSIGNACAO,
       label: 'Entrada em Consignação',
     },
     {
-      value: NaturezaOperacao.COMPRA_VEICULO_PARA_ESTOQUE,
-      label: 'Compra de Veículo para Estoque',
+      value: NaturezaOperacao.COMPRA_DEFINITIVA_CONSIGNACAO,
+      label: 'Compra Definitiva (Veículo em Consignação)',
     },
     {
       value: NaturezaOperacao.DEVOLUCAO_VENDA,
@@ -238,6 +242,12 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
   private toastrService = inject(ToastrService);
   private parametroFiscalService = inject(ParametroFiscalService);
   private formDraftService = inject(FormDraftService);
+  private cfopService = inject(CfopService);
+  private addressService = inject(AddressService);
+
+  cfopDescricao = signal<string>('');
+  storeUf = signal<string>('');
+  personUf = signal<string>('');
 
   vehicleOwners: VehicleOwner[] = [];
   vehicleOwnerOptions: { value: string; label: string; owner: VehicleOwner }[] = [];
@@ -265,6 +275,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     selectedOwnerId: [''],
     ownerDisplayName: [{ value: '', disabled: true }],
     nfeNaturezaOperacao: ['', Validators.required],
+    cfop: ['', Validators.required],
     nfePreenchimentoManualImpostos: [false],
     itemTipo: ['veiculo'], // 'veiculo' ou 'produto'
     nfeItens: this.formBuilderService.array([]),
@@ -307,7 +318,14 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
         if (storeId) {
           this.loadInitialData(storeId);
           this.loadParametrosFiscais(storeId);
+          this.loadStoreAddressUf(storeId);
         }
+      }),
+    );
+
+    this.subscriptions.add(
+      this.form.get('nfeNaturezaOperacao')?.valueChanges.subscribe((natureza) => {
+        this.onNaturezaOperacaoChange(natureza);
       }),
     );
 
@@ -315,6 +333,14 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       this.personService.personCreated$.subscribe((person) => {
         if (person?.personId) {
           this.lastCreatedPersonId = person.personId;
+        }
+      }),
+    );
+
+    this.subscriptions.add(
+      this.form.get('person.id')?.valueChanges.subscribe((personId) => {
+        if (personId) {
+          this.loadPersonAddressUf(personId);
         }
       }),
     );
@@ -372,7 +398,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
       // Campos fiscais
       itemCodigoNcm: [data.itemCodigoNcm || ''],
-      itemCfop: [data.itemCfop || ''],
+      itemCfop: [data.itemCfop || this.cfopService.cleanCfop(this.form?.get('cfop')?.value) || ''],
       icmsOrigem: [data.icmsOrigem || '0'],
       icmsSituacaoTributaria: [data.icmsSituacaoTributaria || ''],
       icmsValorBaseCalculo: [data.icmsValorBaseCalculo || ''],
@@ -971,6 +997,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       },
       ownerDisplayName: personName,
       nfeNaturezaOperacao: this.dataForm.nfeNaturezaOperacao || '',
+      cfop: this.cfopService.formatCfop(this.dataForm.cfop || this.dataForm.nfeItens?.[0]?.itemCfop || ''),
       nfePreenchimentoManualImpostos: this.dataForm.nfeCalcularImpostosAutomaticamente === false,
       nfeFormaEmissao: this.dataForm.nfeFormaEmissao || '1',
       nfeFinalidadeEmissao: this.dataForm.nfeFinalidadeEmissao || '1',
@@ -983,6 +1010,17 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
         this.dataForm.nfeInformacoesAdicionaisFisco ||
         'EMITIDA NOS TERMOS DO ANEXO V, ARTIGO 20, INCISO I DO RICMS-MG/2002. ICMS: NÃO INCIDÊNCIAS POR ESTAR INCURSO NO ARTIGO 55, PARÁGRAFO 1º E 2º DO RICMS-MG/2002.',
     });
+
+    const rawCfop = this.dataForm.cfop || this.dataForm.nfeItens?.[0]?.itemCfop || '';
+    if (rawCfop) {
+      this.resolveCfopDescription(rawCfop);
+    }
+    if (this.dataForm.nfeEmitente?.emitenteUf) {
+      this.storeUf.set(this.dataForm.nfeEmitente.emitenteUf.toUpperCase());
+    }
+    if (this.dataForm.nfeDestinatario?.destinatarioUf) {
+      this.personUf.set(this.dataForm.nfeDestinatario.destinatarioUf.toUpperCase());
+    }
 
     this.pagamentos.clear();
     if (this.dataForm.nfePagamento?.pagamentoDetalhamentos && this.dataForm.nfePagamento.pagamentoDetalhamentos.length > 0) {
@@ -1063,7 +1101,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
         itemValorBruto: String(item.itemValorBruto || '0'),
         itemCodigoProduto: !isVeiculo ? item.itemCodigoProduto : undefined,
         itemCodigoNcm: item.itemCodigoNcm || undefined,
-        itemCfop: item.itemCfop || undefined,
+        itemCfop: item.itemCfop || this.cfopService.cleanCfop(this.form.value.cfop) || undefined,
         itemIcms: {
           icmsOrigem: item.icmsOrigem,
           icmsSituacaoTributaria: item.icmsSituacaoTributaria,
@@ -1112,6 +1150,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       personId: this.form.value.person?.id,
       nfeTipoDocumento: '0', // Entrada
       nfeNaturezaOperacao: this.form.value.nfeNaturezaOperacao,
+      cfop: this.cfopService.cleanCfop(this.form.value.cfop),
       nfeCalcularImpostosAutomaticamente: !this.form.value.nfePreenchimentoManualImpostos,
       nfeFormaEmissao: this.form.value.nfeFormaEmissao || '1',
       nfeFinalidadeEmissao: this.form.value.nfeFinalidadeEmissao,
@@ -1367,6 +1406,10 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
 
     this.form.patchValue(draftData);
 
+    if (draftData.cfop) {
+      this.resolveCfopDescription(draftData.cfop);
+    }
+
     const draftVehicleId = draftData.headerVehicle?.id || draftData.nfeItens?.[0]?.vehicle?.id || draftData.nfeItens?.[0]?.vehicleId;
     if (draftVehicleId && (draftData.itemTipo === 'veiculo' || !draftData.itemTipo)) {
       const vObj = this.vehicles.find((v) => v.id === draftVehicleId);
@@ -1518,6 +1561,7 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
       person: { id: '', name: '' },
       ownerDisplayName: '',
       nfeNaturezaOperacao: '',
+      cfop: '',
       nfePreenchimentoManualImpostos: false,
       itemTipo: 'veiculo',
       nfeFormaEmissao: '1',
@@ -1544,7 +1588,129 @@ export class NfeEntradaFormComponent implements OnInit, OnChanges, OnDestroy {
     this.submitted = false;
     this.selectedDraftId = null;
     this.lastSavedDraftValue = this.form.getRawValue();
+    this.cfopDescricao.set('');
     this.form.markAsPristine();
     this.formChanged.emit(false);
+  }
+
+  loadStoreAddressUf(storeId: string): void {
+    if (!storeId) return;
+    this.addressService.getByStoreId(storeId).subscribe({
+      next: (addresses) => {
+        const main = addresses.find((a) => a.mainAddress) || addresses[0];
+        if (main?.state) {
+          this.storeUf.set(main.state.trim().toUpperCase());
+          this.applySuggestedCfopIfNaturezaSelected();
+        }
+      },
+      error: () => {},
+    });
+  }
+
+  loadPersonAddressUf(personId: string): void {
+    if (!personId) return;
+    this.addressService.getByPersonId(personId).subscribe({
+      next: (addresses) => {
+        const main = addresses.find((a) => a.mainAddress) || addresses[0];
+        if (main?.state) {
+          this.personUf.set(main.state.trim().toUpperCase());
+          this.applySuggestedCfopIfNaturezaSelected();
+        }
+      },
+      error: () => {},
+    });
+  }
+
+  applySuggestedCfopIfNaturezaSelected(): void {
+    const natureza = this.form.get('nfeNaturezaOperacao')?.value;
+    if (!natureza) return;
+
+    const isInterestadual = !!(
+      this.storeUf() &&
+      this.personUf() &&
+      this.storeUf().toUpperCase() !== this.personUf().toUpperCase()
+    );
+
+    const suggested = this.cfopService.getSuggestedCfop(natureza, isInterestadual, 'E');
+    this.form.get('cfop')?.setValue(this.cfopService.formatCfop(suggested));
+    this.resolveCfopDescription(suggested);
+    this.propagateCfopToItems(suggested);
+  }
+
+  onNaturezaOperacaoChange(natureza: any): void {
+    if (!natureza) {
+      this.form.get('cfop')?.setValue('');
+      this.cfopDescricao.set('');
+      return;
+    }
+    this.applySuggestedCfopIfNaturezaSelected();
+  }
+
+  resolveCfopDescription(codigo: string | null | undefined): void {
+    if (!codigo) {
+      this.cfopDescricao.set('');
+      return;
+    }
+    const clean = this.cfopService.cleanCfop(codigo);
+    this.cfopService.getByCodigo(clean).subscribe({
+      next: (cfop) => {
+        this.cfopDescricao.set(cfop?.cfopDescricao || '');
+      },
+      error: () => {
+        this.cfopDescricao.set('');
+      },
+    });
+  }
+
+  propagateCfopToItems(codigo: string): void {
+    const clean = this.cfopService.cleanCfop(codigo);
+    if (!clean) return;
+    this.itens.controls.forEach((itemCtrl) => {
+      itemCtrl.get('itemCfop')?.setValue(clean);
+    });
+  }
+
+  openCfopSearchDialog(): void {
+    const currentCode = this.form.get('cfop')?.value;
+    const dialogRef = this.dialog.open(CfopSearchDialog, {
+      width: '900px',
+      maxWidth: '92vw',
+      panelClass: 'cfop-dialog-panel',
+      data: {
+        tipoOperacao: 'E',
+        selectedCodigo: currentCode,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((selected: Cfop | null | undefined) => {
+      if (selected) {
+        this.form.get('cfop')?.setValue(this.cfopService.formatCfop(selected.cfopCodigo));
+        this.cfopDescricao.set(selected.cfopDescricao);
+        this.propagateCfopToItems(selected.cfopCodigo);
+      }
+    });
+  }
+
+  onCfopInput(event: any): void {
+    const val = event.target.value;
+    const clean = this.cfopService.cleanCfop(val);
+    if (clean.length === 4) {
+      const formatted = this.cfopService.formatCfop(clean);
+      this.form.get('cfop')?.setValue(formatted, { emitEvent: false });
+      this.resolveCfopDescription(clean);
+      this.propagateCfopToItems(clean);
+    }
+  }
+
+  onCfopBlur(): void {
+    const val = this.form.get('cfop')?.value;
+    const clean = this.cfopService.cleanCfop(val);
+    if (clean.length === 4) {
+      this.form.get('cfop')?.setValue(this.cfopService.formatCfop(clean), { emitEvent: false });
+      this.resolveCfopDescription(clean);
+      this.propagateCfopToItems(clean);
+    } else if (clean.length === 0) {
+      this.cfopDescricao.set('');
+    }
   }
 }

@@ -1,0 +1,113 @@
+<div class="cfop-dialog-container">
+  <div class="dialog-header">
+    <div class="header-info">
+      <div class="header-icon-circle">
+        <mat-icon class="header-icon">search</mat-icon>
+      </div>
+      <div class="header-text">
+        <h2 mat-dialog-title>Pesquisar CFOP</h2>
+        <p class="instruction">Informe o código ou a descrição para localizar na tabela oficial.</p>
+      </div>
+    </div>
+    <button mat-icon-button mat-dialog-close class="close-btn" matTooltip="Fechar janela">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="form" (ngSubmit)="search()" class="filter-bar">
+      <div class="filter-row">
+        <mat-form-field appearance="outline" class="field-pesquisa">
+          <mat-label>Pesquisar CFOP</mat-label>
+          <input
+            matInput
+            formControlName="termo"
+            placeholder="Digite o código (ex: 1.102) ou a descrição..."
+            (input)="applyFilter()"
+            (keydown.enter)="applyFilter()"
+          />
+          @if (form.get('termo')?.value) {
+            <button matSuffix mat-icon-button type="button" (click)="form.get('termo')?.setValue(''); applyFilter()" matTooltip="Limpar busca">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" type="submit" class="btn-search" [disabled]="loading()">
+          <mat-icon>search</mat-icon>
+          <span>Pesquisar</span>
+        </button>
+      </div>
+    </form>
+
+    <div class="table-wrapper">
+      @if (loading()) {
+        <div class="loading-state">
+          <mat-spinner diameter="36"></mat-spinner>
+          <span>Carregando CFOPs...</span>
+        </div>
+      } @else if (cfops().length === 0) {
+        <div class="empty-state">
+          <mat-icon>search_off</mat-icon>
+          <p class="empty-title">Nenhum CFOP encontrado</p>
+          <span class="empty-subtitle">Verifique os filtros ou termo digitado para visualizar os CFOPs disponíveis.</span>
+        </div>
+      } @else {
+        <div class="table-scroll">
+          <table mat-table [dataSource]="cfops()" class="cfop-table">
+            <!-- Coluna Código -->
+            <ng-container matColumnDef="codigo">
+              <th mat-header-cell *matHeaderCellDef class="col-code">#Código</th>
+              <td mat-cell *matCellDef="let row" class="col-code">
+                <span class="code-badge">{{ formatCode(row.cfopCodigo) }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Coluna Descrição -->
+            <ng-container matColumnDef="descricao">
+              <th mat-header-cell *matHeaderCellDef class="col-desc">CFOP (Descrição)</th>
+              <td mat-cell *matCellDef="let row" class="col-desc">
+                {{ row.cfopDescricao }}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: displayedColumns"
+              class="cfop-row"
+              [class.selected-row]="selectedCfop()?.cfopCodigo === row.cfopCodigo"
+              (click)="selectRow(row)"
+              (dblclick)="confirmSelection(row)"
+            ></tr>
+          </table>
+        </div>
+      }
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <div class="actions-hint">
+      @if (selectedCfop(); as sel) {
+        <span class="selected-summary">
+          Selecionado: <strong>{{ formatCode(sel.cfopCodigo) }}</strong> - {{ sel.cfopDescricao }}
+        </span>
+      } @else {
+        <span class="tip-text">Dê um duplo-clique na linha para selecionar rapidamente</span>
+      }
+    </div>
+    <div class="action-buttons">
+      <button mat-stroked-button mat-dialog-close type="button" class="cancel-btn">Cancelar</button>
+      <button
+        mat-flat-button
+        type="button"
+        class="confirm-btn"
+        [disabled]="!selectedCfop()"
+        (click)="confirmSelection()"
+      >
+        <mat-icon>check</mat-icon>
+        <span>Selecionar</span>
+      </button>
+    </div>
+  </mat-dialog-actions>
+</div>
