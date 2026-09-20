@@ -107,6 +107,10 @@ export class NfeComponent {
       header: '',
       alertConfig: {
         getMessage: (row: Nfe) => row.nfeMensagemErro || null,
+        title: (row: Nfe) =>
+          row.nfeStatus?.toLowerCase() === 'rascunho' || !row.nfeStatus
+            ? 'Pendências para Autorização SEFAZ'
+            : 'Erros / Rejeição SEFAZ',
         icon: 'warning_amber',
       },
     },
@@ -575,6 +579,16 @@ export class NfeComponent {
     // Impedir envio de NFes que não sejam rascunho
     if (nfe.nfeStatus !== 'rascunho') {
       this.toastr.info('Apenas NFes Em Digitação podem ser enviadas para a SEFAZ.');
+      return;
+    }
+
+    // Bloquear envio se a NFe possuir pendências de validação
+    if (nfe.nfeMensagemErro && nfe.nfeMensagemErro.trim().length > 0) {
+      this.toastr.error(
+        'Corrija as pendências indicadas antes de enviar para a SEFAZ.',
+        'NFe com Pendências',
+        { timeOut: 6000, progressBar: true },
+      );
       return;
     }
 

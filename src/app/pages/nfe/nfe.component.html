@@ -163,6 +163,81 @@
           </div>
         </div>
 
+        <!-- ======= CARD DE PENDÊNCIAS SEFAZ (RASCUNHO / EM DIGITAÇÃO) ======= -->
+        @if ((selectedNfe.nfeStatus?.toLowerCase() === 'rascunho' || !selectedNfe.nfeStatus) && selectedNfe.nfeMensagemErro) {
+          <div class="nfe-pending-card warning">
+            <div class="pending-card-header">
+              <div class="pending-card-title-group">
+                <div class="pending-card-icon-wrapper">
+                  <mat-icon>warning</mat-icon>
+                </div>
+                <div class="pending-card-text">
+                  <div class="title-with-badge">
+                    <h4>Pendências para Autorização na SEFAZ</h4>
+                    <span class="pending-badge">
+                      {{ selectedNfe.nfeMensagemErro.split(';').length }} pendência(s)
+                    </span>
+                  </div>
+                  <p>Preencha os campos listados abaixo para que a NFe possa ser transmitida e autorizada com sucesso.</p>
+                </div>
+              </div>
+              <button mat-flat-button class="btn-corrigir-nfe" (click)="handleEdit(selectedNfe)">
+                <mat-icon>edit</mat-icon>
+                Corrigir Pendências
+              </button>
+            </div>
+            <div class="pending-card-body">
+              <div class="pending-grid">
+                @for (error of selectedNfe.nfeMensagemErro.split(';'); track error) {
+                  @if (error.trim()) {
+                    <div class="pending-item">
+                      <mat-icon>arrow_right</mat-icon>
+                      <span>{{ error.trim() }}</span>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ======= CARD DE REJEIÇÃO / ERRO SEFAZ (STATUS ERRO / DENEGADO) ======= -->
+        @if (selectedNfe.nfeStatus !== 'rascunho' && selectedNfe.nfeMensagemErro) {
+          <div class="nfe-pending-card danger">
+            <div class="pending-card-header">
+              <div class="pending-card-title-group">
+                <div class="pending-card-icon-wrapper">
+                  <mat-icon>error</mat-icon>
+                </div>
+                <div class="pending-card-text">
+                  <div class="title-with-badge">
+                    <h4>Rejeição / Erro de Transmissão SEFAZ</h4>
+                  </div>
+                  <p>A SEFAZ retornou as seguintes inconsistências durante o processamento da nota:</p>
+                </div>
+              </div>
+              @if (selectedNfe.nfeStatus === 'erro') {
+                <button mat-flat-button class="btn-corrigir-nfe danger" (click)="handleEdit(selectedNfe)">
+                  <mat-icon>edit</mat-icon>
+                  Editar e Reenviar
+                </button>
+              }
+            </div>
+            <div class="pending-card-body">
+              <div class="pending-grid">
+                @for (error of selectedNfe.nfeMensagemErro.split(';'); track error) {
+                  @if (error.trim()) {
+                    <div class="pending-item">
+                      <mat-icon>close</mat-icon>
+                      <span>{{ error.trim() }}</span>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+        }
+
         <!-- ======= SEÇÃO 1: DADOS GERAIS ======= -->
         <div class="nfe-section section-dados-gerais">
           <h3 class="section-title">
@@ -232,21 +307,6 @@
               <div class="info-item full-width">
                 <label>Informações de Interesse do Fisco</label>
                 <span>{{ selectedNfe.nfeInformacoesAdicionaisFisco }}</span>
-              </div>
-            }
-            @if (selectedNfe.nfeMensagemErro) {
-              <div class="info-item full-width error-item">
-                <label>Erros Identificados</label>
-                <div class="error-list">
-                  @for (error of selectedNfe.nfeMensagemErro.split(';'); track error) {
-                    @if (error.trim()) {
-                      <div class="error-line">
-                        <mat-icon>chevron_right</mat-icon>
-                        <span>{{ error.trim() }}</span>
-                      </div>
-                    }
-                  }
-                </div>
               </div>
             }
           </div>

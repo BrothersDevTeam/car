@@ -51,17 +51,30 @@
                     </mat-icon>
                     <div class="alert-tooltip">
                       <div class="alert-tooltip-header">
-                        <mat-icon>error_outline</mat-icon>
-                        <span>Pendências para NFe de Entrada</span>
+                        <div class="header-title-group">
+                          <mat-icon class="header-icon">warning_amber</mat-icon>
+                          <span>{{ getAlertTitle(column, element) }}</span>
+                        </div>
+                        <span class="count-badge">{{ getTotalErrors(alertMsg) }}</span>
                       </div>
                       <div class="alert-tooltip-body">
-                        @for (err of alertMsg.split(';'); track err) {
-                          @if (err.trim()) {
-                            <div class="alert-tooltip-line">
-                              <mat-icon>chevron_right</mat-icon>
-                              <span>{{ err.trim() }}</span>
+                        @for (group of parseErrorGroups(alertMsg); track group.category) {
+                          <div class="alert-group">
+                            @if (group.category) {
+                              <div class="alert-group-header">
+                                <mat-icon class="group-icon">{{ getCategoryIcon(group.category) }}</mat-icon>
+                                <span class="group-title">{{ group.category }}</span>
+                              </div>
+                            }
+                            <div class="alert-group-items">
+                              @for (item of group.items; track item) {
+                                <div class="alert-tooltip-line">
+                                  <span class="bullet-dot"></span>
+                                  <span class="error-text">{{ item }}</span>
+                                </div>
+                              }
                             </div>
-                          }
+                          </div>
                         }
                       </div>
                     </div>

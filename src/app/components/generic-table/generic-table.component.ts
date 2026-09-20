@@ -160,6 +160,15 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
     return column.alertConfig?.getMessage(row) ?? null;
   }
 
+  getAlertTitle(column: ColumnConfig<T>, row: T): string {
+    if (!column.alertConfig?.title) {
+      return 'Pendências para Autorização SEFAZ';
+    }
+    return typeof column.alertConfig.title === 'function'
+      ? column.alertConfig.title(row)
+      : column.alertConfig.title;
+  }
+
   getActionLabel(action: any, row: T): string {
     if (!action) return '';
     return typeof action.label === 'function' ? action.label(row) : action.label || '';
@@ -195,5 +204,55 @@ export class GenericTableComponent<T> implements OnInit, OnChanges {
     const windowHeight = window.innerHeight;
     // Se estiver abaixo de 60% da tela, abre para cima
     this.tooltipDirection.set(y > windowHeight * 0.6 ? 'up' : 'down');
+  }
+
+  parseErrorGroups(rawMessage: string | null | undefined): { category: string; items: string[] }[] {
+    if (!rawMessage) return [];
+    const parts = rawMessage
+      .split(';')
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+
+    const groupMap = new Map<string, string[]>();
+
+    for (const part of parts) {
+      const colonIndex = part.indexOf(':');
+      let category = '';
+      let item = part;
+
+      if (colonIndex > 0) {
+        category = part.substring(0, colonIndex).trim();
+        item = part.substring(colonIndex + 1).trim();
+      }
+
+      if (!groupMap.has(category)) {
+        groupMap.set(category, []);
+      }
+      groupMap.get(category)!.push(item);
+    }
+
+    return Array.from(groupMap.entries()).map(([category, items]) => ({
+      category,
+      items,
+    }));
+  }
+
+  getTotalErrors(rawMessage: string | null | undefined): number {
+    if (!rawMessage) return 0;
+    return rawMessage
+      .split(';')
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0).length;
+  }
+
+  getCategoryIcon(category: string): string {
+    const cat = category.toLowerCase();
+    if (cat.includes('veículo') || cat.includes('veiculo')) return 'directions_car';
+    if (cat.includes('emitente') || cat.includes('loja')) return 'storefront';
+    if (cat.includes('destinatário') || cat.includes('destinatario') || cat.includes('cliente')) return 'person';
+    if (cat.includes('item') || cat.includes('produto')) return 'inventory_2';
+    if (cat.includes('pagamento')) return 'payments';
+    if (cat.includes('transporte') || cat.includes('frete')) return 'local_shipping';
+    return 'label';
   }
 }

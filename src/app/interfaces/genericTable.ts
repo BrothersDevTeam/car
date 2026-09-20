@@ -8,6 +8,8 @@ export interface BadgeConfig {
 export interface AlertConfig<T> {
   // Função que retorna a mensagem de alerta se houver erro (null/undefined se não houver)
   getMessage: (row: T) => string | null | undefined;
+  // Título opcional do alerta no cabeçalho do tooltip (string ou função que recebe a linha)
+  title?: string | ((row: T) => string);
   // Ícone opcional (default: warning_amber)
   icon?: string;
 }
