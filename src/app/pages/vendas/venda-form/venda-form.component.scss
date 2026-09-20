@@ -196,6 +196,98 @@ mat-form-field {
   width: 100%;
 }
 
+.venda-valores-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.venda-valores-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  width: 100%;
+
+  .col-4 {
+    flex: 0 0 calc(33.33% - 16px);
+
+    app-currency-input,
+    app-date-input {
+      width: 100%;
+      display: block;
+      margin-bottom: 0;
+
+      ::ng-deep {
+        .mat-mdc-form-field-subscript-wrapper {
+          display: none;
+        }
+
+        .mat-mdc-text-field-wrapper {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}
+
+.observacao-row {
+  width: 100%;
+  margin-top: 4px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.retorno-financiamento-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  width: 100%;
+
+  .col-4,
+  .col-3,
+  .col-2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .field-banco {
+    app-custom-select {
+      width: 100%;
+      display: block;
+
+      ::ng-deep .custom-dropdown {
+        margin-top: 0;
+      }
+    }
+  }
+
+  .field-numero,
+  .field-valor,
+  .field-previsao {
+    mat-form-field,
+    app-currency-input {
+      width: 100%;
+      margin-bottom: 0;
+      display: block;
+
+      ::ng-deep {
+        .mat-mdc-form-field-subscript-wrapper {
+          display: none;
+        }
+
+        .mat-mdc-text-field-wrapper {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}
+
 .pagamentos-list {
   display: flex;
   flex-direction: column;

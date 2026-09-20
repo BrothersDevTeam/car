@@ -76,7 +76,7 @@
             <mat-card-title>Veículo e Cliente</mat-card-title>
           </mat-card-header>
           <mat-card-content class="grid-row">
-            <div class="col-6">
+            <div class="col-4">
               <app-custom-select
                 listType="vehicle"
                 label="Veículo em estoque*"
@@ -87,7 +87,7 @@
               ></app-custom-select>
             </div>
 
-            <div class="col-6">
+            <div class="col-4">
               <app-custom-select
                 listType="person"
                 label="Comprador*"
@@ -99,7 +99,7 @@
               ></app-custom-select>
             </div>
 
-            <div class="col-6">
+            <div class="col-4">
               <app-custom-select
                 listType="person"
                 label="Vendedor"
@@ -110,13 +110,6 @@
                 (onEdit)="onEditPerson($event)"
               ></app-custom-select>
             </div>
-
-            <app-date-input
-              class="col-6"
-              label="Data da Venda"
-              formControlName="dataVenda"
-              [required]="true"
-            ></app-date-input>
           </mat-card-content>
         </mat-card>
 
@@ -125,34 +118,48 @@
           <mat-card-header>
             <mat-card-title>Valores e Detalhes</mat-card-title>
           </mat-card-header>
-          <mat-card-content class="grid-row">
-            <app-currency-input
-              class="col-4"
-              label="Valor Tabela/Venda"
-              formControlName="valor"
-              [required]="true"
-              [error]="!!(vendaForm.get('valor')?.touched && vendaForm.get('valor')?.invalid)"
-              errorMessage="O valor deve ser maior que zero"
-            ></app-currency-input>
+          <mat-card-content class="venda-valores-card-content">
+            <div class="venda-valores-row">
+              <div class="col-4">
+                <app-currency-input
+                  label="Valor Tabela/Venda"
+                  formControlName="valor"
+                  [required]="true"
+                  [error]="!!(vendaForm.get('valor')?.touched && vendaForm.get('valor')?.invalid)"
+                  errorMessage="O valor deve ser maior que zero"
+                ></app-currency-input>
+              </div>
 
-            <app-currency-input
-              class="col-4"
-              label="Valor Final (Fechamento)"
-              formControlName="valorFinal"
-              [required]="true"
-              [error]="!!(vendaForm.get('valorFinal')?.touched && vendaForm.get('valorFinal')?.invalid)"
-              errorMessage="O valor final deve ser maior que zero"
-            ></app-currency-input>
+              <div class="col-4">
+                <app-currency-input
+                  label="Valor Final (Fechamento)"
+                  formControlName="valorFinal"
+                  [required]="true"
+                  [error]="!!(vendaForm.get('valorFinal')?.touched && vendaForm.get('valorFinal')?.invalid)"
+                  errorMessage="O valor final deve ser maior que zero"
+                ></app-currency-input>
+              </div>
 
-            <mat-form-field appearance="outline" class="col-12">
-              <mat-label>Observações</mat-label>
-              <textarea
-                matInput
-                rows="3"
-                formControlName="observacao"
-                placeholder="Ex: Detalhes da garantia, troca, etc..."
-              ></textarea>
-            </mat-form-field>
+              <div class="col-4">
+                <app-date-input
+                  label="Data da Venda"
+                  formControlName="dataVenda"
+                  [required]="true"
+                ></app-date-input>
+              </div>
+            </div>
+
+            <div class="observacao-row">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Observações</mat-label>
+                <textarea
+                  matInput
+                  rows="3"
+                  formControlName="observacao"
+                  placeholder="Ex: Detalhes da garantia, troca, etc..."
+                ></textarea>
+              </mat-form-field>
+            </div>
           </mat-card-content>
         </mat-card>
 
@@ -460,8 +467,8 @@
           </mat-card-header>
 
           <mat-card-content>
-            <div class="grid-row">
-              <div class="col-4">
+            <div class="retorno-financiamento-row">
+              <div class="col-4 field-banco">
                 <app-custom-select
                   listType="person"
                   label="Banco do Financiamento"
@@ -470,14 +477,14 @@
                 ></app-custom-select>
               </div>
 
-              <div class="col-2">
+              <div class="col-2 field-numero">
                 <mat-form-field appearance="outline">
                   <mat-label>Nº Retorno</mat-label>
                   <input matInput type="number" formControlName="retornoNumero" />
                 </mat-form-field>
               </div>
 
-              <div class="col-3">
+              <div class="col-3 field-valor">
                 <app-currency-input
                   formControlName="retornoValor"
                   label="Valor a Receber"
@@ -485,7 +492,7 @@
                 ></app-currency-input>
               </div>
 
-              <div class="col-3">
+              <div class="col-3 field-previsao">
                 <mat-form-field appearance="outline">
                   <mat-label>Previsão de Crédito</mat-label>
                   <input matInput [matDatepicker]="credPicker" formControlName="retornoCreditarDia" />

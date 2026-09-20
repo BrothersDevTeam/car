@@ -13,70 +13,64 @@
     </div>
   } @else {
     <form [formGroup]="compraForm" (ngSubmit)="onSubmit()" class="compra-form">
-      <!-- SEÇÃO 1: VEÍCULO E FORNECEDOR -->
-      <mat-card class="form-section">
-        <mat-card-header>
-          <mat-card-title>Veículo e Fornecedor</mat-card-title>
-        </mat-card-header>
-        <mat-card-content class="grid-row">
-          <div class="col-6">
-            <app-custom-select
-              listType="vehicle"
-              label="Veículo*"
-              [options]="vehicles"
-              [control]="$any(compraForm.get('vehicle'))"
-              placeholder="Selecione o veículo"
-              (onCreateNew)="onCreateNewVehicle()"
-              (onEdit)="onEditVehicle($event)"
-            ></app-custom-select>
-          </div>
-
-          <div class="col-6">
-            <app-custom-select
-              listType="person"
-              label="Fornecedor*"
-              [options]="suppliers"
-              [control]="$any(compraForm.get('supplier'))"
-              placeholder="Selecione o fornecedor"
-              (onCreateNew)="onCreateNewSupplier()"
-              (onEdit)="onEditSupplier($event)"
-            ></app-custom-select>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- SEÇÃO 2: DADOS DA TRANSAÇÃO -->
+      <!-- SEÇÃO 1: DADOS DA COMPRA -->
       <mat-card class="form-section">
         <mat-card-header>
           <mat-card-title>Dados da Compra</mat-card-title>
         </mat-card-header>
-        <mat-card-content class="grid-row">
-          <div class="col-4">
-            <app-currency-input
-              formControlName="valorCompra"
-              label="Valor de Compra*"
-              [required]="true"
-            ></app-currency-input>
+        <mat-card-content class="compra-main-card-content">
+          <div class="compra-main-row">
+            <div class="field-vehicle">
+              <app-custom-select
+                listType="vehicle"
+                label="Veículo*"
+                [options]="vehicles"
+                [control]="$any(compraForm.get('vehicle'))"
+                placeholder="Selecione o veículo"
+                (onCreateNew)="onCreateNewVehicle()"
+                (onEdit)="onEditVehicle($event)"
+              ></app-custom-select>
+            </div>
+
+            <div class="field-supplier">
+              <app-custom-select
+                listType="person"
+                label="Fornecedor*"
+                [options]="suppliers"
+                [control]="$any(compraForm.get('supplier'))"
+                placeholder="Selecione o fornecedor"
+                (onCreateNew)="onCreateNewSupplier()"
+                (onEdit)="onEditSupplier($event)"
+              ></app-custom-select>
+            </div>
+
+            <div class="field-valor">
+              <app-currency-input
+                formControlName="valorCompra"
+                label="Valor de Compra*"
+                [required]="true"
+              ></app-currency-input>
+            </div>
+
+            <div class="field-data">
+              <app-date-input formControlName="dataCompra" label="Data da Compra*" [required]="true"></app-date-input>
+            </div>
+
+            <div class="field-tipo">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Tipo de Entrada</mat-label>
+                <mat-select formControlName="tipoEntrada">
+                  <mat-option value="COMPRA">Compra</mat-option>
+                  <mat-option value="CONSIGNACAO">Consignação</mat-option>
+                  <mat-option value="COMISSAO">Comissão</mat-option>
+                  <mat-option value="DEVOLUCAO">Devolução</mat-option>
+                  <mat-option value="TRANSFERENCIA">Transferência</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
           </div>
 
-          <div class="col-4">
-            <app-date-input formControlName="dataCompra" label="Data da Compra*" [required]="true"></app-date-input>
-          </div>
-
-          <div class="col-4">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Tipo de Entrada</mat-label>
-              <mat-select formControlName="tipoEntrada">
-                <mat-option value="COMPRA">Compra</mat-option>
-                <mat-option value="CONSIGNACAO">Consignação</mat-option>
-                <mat-option value="COMISSAO">Comissão</mat-option>
-                <mat-option value="DEVOLUCAO">Devolução</mat-option>
-                <mat-option value="TRANSFERENCIA">Transferência</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <div class="col-12" style="margin-top: 16px">
+          <div class="observacao-row">
             <mat-form-field appearance="outline" class="w-100">
               <mat-label>Observação</mat-label>
               <textarea
