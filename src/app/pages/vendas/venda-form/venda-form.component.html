@@ -168,10 +168,12 @@
         <mat-card class="form-section">
           <mat-card-header class="header-with-action">
             <mat-card-title>Acréscimos / Receitas (Entradas)</mat-card-title>
-            <button type="button" mat-flat-button color="primary" (click)="addReceita()">
-              <mat-icon>add</mat-icon>
-              Adicionar Recebimento
-            </button>
+            <div class="header-actions">
+              <button type="button" mat-flat-button color="primary" (click)="addReceita()">
+                <mat-icon>add</mat-icon>
+                <span>Adicionar Recebimento</span>
+              </button>
+            </div>
           </mat-card-header>
 
           <mat-card-content>
@@ -351,10 +353,12 @@
         <mat-card class="form-section" style="margin-top: 24px">
           <mat-card-header class="header-with-action">
             <mat-card-title>Deduções / Base de Troca (Débitos)</mat-card-title>
-            <button type="button" mat-flat-button color="accent" (click)="addDebito()">
-              <mat-icon>add</mat-icon>
-              Adicionar Troca
-            </button>
+            <div class="header-actions">
+              <button type="button" mat-flat-button color="accent" (click)="addDebito()">
+                <mat-icon>add</mat-icon>
+                <span>Adicionar Troca</span>
+              </button>
+            </div>
           </mat-card-header>
 
           <mat-card-content>
@@ -508,14 +512,14 @@
         <mat-card class="form-section" style="margin-top: 24px; margin-bottom: 24px">
           <mat-card-header class="header-with-action">
             <mat-card-title>Despesas e Serviços (Transferência, Despachante, IPVA)</mat-card-title>
-            <div style="display: flex; gap: 8px">
+            <div class="header-actions">
               <button type="button" mat-flat-button color="primary" (click)="addDespesa('LOJA')">
                 <mat-icon>add</mat-icon>
-                Despesa Loja
+                <span>Despesa Loja</span>
               </button>
               <button type="button" mat-flat-button color="accent" (click)="addDespesa('RECEBIDA')">
                 <mat-icon>add</mat-icon>
-                Despesa Recebida (Cobrada)
+                <span>Despesa Recebida (Cobrada)</span>
               </button>
             </div>
           </mat-card-header>
@@ -524,31 +528,13 @@
             <div
               formArrayName="despesas"
               class="despesas-list"
-              style="display: flex; flex-direction: column; gap: 16px"
             >
               @for (desp of despesas.controls; track desp) {
                 <div
                   [formGroupName]="$index"
                   class="despesa-item grid-row"
-                  style="
-                    border: 1px solid rgba(0, 0, 0, 0.1);
-                    padding: 16px;
-                    border-radius: 8px;
-                    background: rgba(0, 0, 0, 0.01);
-                    width: 100%;
-                  "
                 >
-                  <div
-                    class="col-12"
-                    style="
-                      display: flex;
-                      justify-content: space-between;
-                      align-items: center;
-                      margin-bottom: 12px;
-                      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-                      padding-bottom: 8px;
-                    "
-                  >
+                  <div class="col-12 despesa-item-header">
                     <strong [style.color]="desp.get('tipo')?.value === 'RECEBIDA' ? '#2e7d32' : '#c62828'">
                       {{
                         desp.get('tipo')?.value === 'RECEBIDA'
@@ -613,11 +599,13 @@
                       ></app-currency-input>
                     </div>
 
-                    <div class="col-4" style="display: flex; align-items: center; padding-left: 16px">
-                      <span style="font-weight: 500">Lucro Esperado:</span>
-                      <strong style="color: #2e7d32; margin-left: 8px; font-size: 1.1rem">
-                        {{ calcularLucroDespesa(desp) | currency: 'BRL' }}
-                      </strong>
+                    <div class="col-4">
+                      <div class="despesa-lucro-box">
+                        <span class="lucro-label">Lucro Esperado:</span>
+                        <strong class="lucro-valor">
+                          {{ calcularLucroDespesa(desp) | currency: 'BRL' }}
+                        </strong>
+                      </div>
                     </div>
                   }
                 </div>
@@ -668,41 +656,44 @@
         </mat-card>
 
         <!-- AÇÕES FINAIS -->
-        <div class="form-actions" style="display: flex; gap: 16px; align-items: center">
-          <button type="button" mat-button (click)="goBack()" [disabled]="isSubmitting()">Cancelar</button>
+        <footer class="form-actions">
+          <button
+            type="button"
+            mat-stroked-button
+            class="cancel-btn"
+            (click)="goBack()"
+            [disabled]="isSubmitting()"
+          >
+            Cancelar
+          </button>
+
+          <!-- Salvar Rascunho -->
+          @if (canShowDraftButton) {
+            <button
+              mat-stroked-button
+              type="button"
+              color="primary"
+              class="draft-btn"
+              (click)="openSaveDraftDialog()"
+              [disabled]="isSaving"
+              matTooltip="Salvar Rascunho"
+            >
+              <mat-icon>save_as</mat-icon>
+              <span>Salvar Rascunho</span>
+            </button>
+          }
 
           <button
-            mat-raised-button
+            mat-flat-button
             color="primary"
             type="submit"
             class="submit-btn"
             [disabled]="isSaveButtonDisabled"
-            style="flex: 1"
           >
             <mat-icon>{{ isEdit ? 'save' : 'check' }}</mat-icon>
-            {{ isEdit ? 'Salvar Alterações' : 'Concluir Registro de Venda' }}
+            <span>{{ isEdit ? 'Salvar Alterações' : 'Concluir Registro de Venda' }}</span>
           </button>
-
-          <!-- Salvar Rascunho (Ícone discreto) -->
-          @if (canShowDraftButton) {
-            <button
-              mat-icon-button
-              type="button"
-              color="primary"
-              (click)="openSaveDraftDialog()"
-              [disabled]="isSaving"
-              matTooltip="Salvar Rascunho"
-              style="
-                flex: 0 0 auto !important;
-                width: 48px !important;
-                height: 48px !important;
-                min-width: 48px !important;
-              "
-            >
-              <mat-icon style="margin: 0 !important">save_as</mat-icon>
-            </button>
-          }
-        </div>
+        </footer>
       </form>
     }
   }
