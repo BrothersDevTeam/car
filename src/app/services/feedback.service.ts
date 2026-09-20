@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import {
   Feedback,
+  FeedbackClientReviewPayload,
   FeedbackCreatePayload,
   FeedbackStatus,
   FeedbackStatusUpdatePayload,
@@ -70,6 +71,10 @@ export class FeedbackService {
 
   updateStatus(id: string, payload: FeedbackStatusUpdatePayload): Observable<Feedback> {
     return this.http.post<Feedback>(`${this.apiUrl}/${id}/status`, payload);
+  }
+
+  reviewFeedback(id: string, payload: FeedbackClientReviewPayload): Observable<Feedback> {
+    return this.http.post<Feedback>(`${this.apiUrl}/${id}/client-review`, payload);
   }
 
   deleteFeedback(id: string): Observable<void> {

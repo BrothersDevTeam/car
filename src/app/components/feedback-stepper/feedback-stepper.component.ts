@@ -28,6 +28,7 @@ export class FeedbackStepperComponent {
     { id: 'UNDER_REVIEW', label: 'Em Análise', description: 'Triagem e viabilidade técnica', icon: 'troubleshoot' },
     { id: 'IN_PROGRESS', label: 'Em Andamento', description: 'Em desenvolvimento / fila', icon: 'engineering' },
     { id: 'RESOLVED', label: 'Resolvido', description: 'Implementado ou respondido', icon: 'task_alt' },
+    { id: 'COMPLETED', label: 'Concluído', description: 'Homologado pelo cliente', icon: 'verified' },
   ];
 
   getStepIndex(status: FeedbackStatus): number {
@@ -40,6 +41,8 @@ export class FeedbackStepperComponent {
         return 2;
       case 'RESOLVED':
         return 3;
+      case 'COMPLETED':
+        return 4;
       case 'DISCARDED':
         return -1;
       default:

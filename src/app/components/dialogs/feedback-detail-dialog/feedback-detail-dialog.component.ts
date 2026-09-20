@@ -74,7 +74,9 @@ export class FeedbackDetailDialogComponent implements OnInit {
       case 'IN_PROGRESS':
         return 'Sua solicitação foi aprovada pela equipe e entrou na nossa fila de desenvolvimento!';
       case 'RESOLVED':
-        return 'Agradecemos muito pela sua colaboração! Sua mensagem foi respondida e o atendimento foi concluído com sucesso.';
+        return 'Esta melhoria/correção foi implementada e está disponível no sistema! Por favor, valide se atendeu ao seu pedido.';
+      case 'COMPLETED':
+        return 'Atendimento concluído e homologado com sucesso.';
       case 'DISCARDED':
         return 'Muito obrigado por compartilhar sua ideia conosco! Registramos suas observações para futuras melhorias do sistema.';
       default:
@@ -122,8 +124,8 @@ export class FeedbackDetailDialogComponent implements OnInit {
       return;
     }
 
-    // Regra estrita: não é permitido retroceder ou reabrir
-    if (this.selectedStatus === 'RESOLVED' || this.selectedStatus === 'DISCARDED') {
+    // Regra estrita: não é permitido alterar feedbacks finalizados em COMPLETED ou DISCARDED
+    if (this.selectedStatus === 'COMPLETED' || this.selectedStatus === 'DISCARDED') {
       this.toastr.info('Este feedback já foi finalizado e não pode ter seu status alterado.');
       return;
     }
@@ -213,8 +215,11 @@ export class FeedbackDetailDialogComponent implements OnInit {
       case 'IN_PROGRESS':
         return 'badge-progress';
       case 'RESOLVED':
-      case 'DISCARDED':
         return 'badge-resolved';
+      case 'COMPLETED':
+        return 'badge-completed';
+      case 'DISCARDED':
+        return 'badge-discarded';
       default:
         return 'badge-default';
     }
@@ -229,9 +234,11 @@ export class FeedbackDetailDialogComponent implements OnInit {
       case 'IN_PROGRESS':
         return 'Em Andamento';
       case 'RESOLVED':
+        return 'Resolvido';
+      case 'COMPLETED':
         return 'Concluído';
       case 'DISCARDED':
-        return 'Respondido';
+        return 'Descartado';
       default:
         return status;
     }

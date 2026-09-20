@@ -770,7 +770,44 @@
 
               <p class="card-description">{{ item.description }}</p>
 
-              @if (item.adminNotes) {
+              <!-- Captura de Tela Anexada pelo Usuário -->
+              @if (item.screenshotUrl) {
+                <div class="card-screenshot-section">
+                  <span class="section-micro-label">
+                    <mat-icon>image</mat-icon>
+                    Captura de tela anexada:
+                  </span>
+                  <div class="thumbnail-preview" (click)="openImagePreview(item.screenshotUrl)" matTooltip="Clique para visualizar em tela cheia">
+                    <img [src]="item.screenshotUrl" alt="Print anexado" />
+                    <div class="zoom-overlay">
+                      <mat-icon>zoom_in</mat-icon>
+                      <span>Visualizar imagem ampliada</span>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Histórico de Interações / Conversa -->
+              @if (item.interactions && item.interactions.length > 0) {
+                <div class="interactions-thread">
+                  <span class="thread-title">
+                    <mat-icon>forum</mat-icon>
+                    Histórico do Atendimento ({{ item.interactions.length }} {{ item.interactions.length === 1 ? 'registro' : 'registros' }}):
+                  </span>
+                  @for (inter of item.interactions; track inter.id) {
+                    <div class="thread-item" [class.is-user]="inter.authorType === 'USER'" [class.is-admin]="inter.authorType === 'ADMIN'">
+                      <div class="thread-meta">
+                        <span class="thread-author">
+                          <mat-icon>{{ inter.authorType === 'USER' ? 'person' : 'support_agent' }}</mat-icon>
+                          {{ inter.authorType === 'USER' ? (inter.userName || 'Você') : 'Equipe de Desenvolvimento' }}
+                        </span>
+                        <span class="thread-time">{{ inter.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+                      </div>
+                      <p class="thread-message">{{ inter.message }}</p>
+                    </div>
+                  }
+                </div>
+              } @else if (item.adminNotes) {
                 <div class="dev-response-box">
                   <div class="response-header">
                     <mat-icon>forum</mat-icon>
@@ -779,12 +816,89 @@
                   <p class="response-text">{{ item.adminNotes }}</p>
                 </div>
               }
+
+              <!-- Painel de Homologação / Devolutiva do Cliente (Quando o status for RESOLVED) -->
+              @if (item.status === 'RESOLVED') {
+                <div class="review-action-banner">
+                  <div class="review-banner-header">
+                    <mat-icon class="review-icon">task_alt</mat-icon>
+                    <div class="review-text">
+                      <h4 class="review-title">Sua solicitação foi marcada como Resolvida!</h4>
+                      <p class="review-desc">Por favor, verifique se a solução atendeu ao que você precisava para podermos concluir:</p>
+                    </div>
+                  </div>
+
+                  <div class="review-buttons">
+                    <button
+                      type="button"
+                      mat-flat-button
+                      class="btn-approve"
+                      (click)="approveFeedback(item)"
+                      [disabled]="submittingReview()"
+                    >
+                      <mat-icon>check_circle</mat-icon>
+                      <span>Está de acordo (Concluir)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      mat-stroked-button
+                      class="btn-reopen"
+                      (click)="toggleReopenBox(item.id)"
+                      [disabled]="submittingReview()"
+                    >
+                      <mat-icon>refresh</mat-icon>
+                      <span>{{ showReopenBoxId() === item.id ? 'Fechar Formulário de Ajuste' : 'Precisa de Ajuste (Reabrir)' }}</span>
+                    </button>
+                  </div>
+
+                  @if (showReopenBoxId() === item.id) {
+                    <div class="reopen-form-box">
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>O que ainda precisa ser ajustado?</mat-label>
+                        <textarea
+                          matInput
+                          rows="3"
+                          [ngModel]="reopenReason()"
+                          (ngModelChange)="reopenReason.set($event)"
+                          placeholder="Descreva o que faltou ou o que não funcionou como esperado para nossa equipe analisar..."
+                        ></textarea>
+                      </mat-form-field>
+                      <div class="reopen-form-actions">
+                        <button type="button" mat-button (click)="toggleReopenBox(item.id)">Cancelar</button>
+                        <button
+                          type="button"
+                          mat-flat-button
+                          color="warn"
+                          (click)="submitReopenFeedback(item)"
+                          [disabled]="submittingReview() || !reopenReason().trim()"
+                        >
+                          <mat-icon>send</mat-icon>
+                          <span>Enviar e Reabrir</span>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
             </div>
           }
         }
       </div>
     </mat-tab>
   </mat-tab-group>
+
+  <!-- Modal Lightbox de Visualização em Alta Resolução -->
+  @if (selectedImagePreview()) {
+    <div class="image-lightbox-backdrop" (click)="closeImagePreview()">
+      <div class="image-lightbox-content" (click)="$event.stopPropagation()">
+        <button type="button" class="lightbox-close-btn" (click)="closeImagePreview()" matTooltip="Fechar visualização">
+          <mat-icon>close</mat-icon>
+        </button>
+        <img [src]="selectedImagePreview()" alt="Visualização em alta resolução" class="lightbox-img" />
+      </div>
+    </div>
+  }
 
   <!-- Seletor de cores nativo (Roda de cores RGB) -->
   <input

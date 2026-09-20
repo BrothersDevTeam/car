@@ -60,7 +60,7 @@
       <p class="description-text">{{ feedback.description }}</p>
     </div>
 
-    <!-- Print Anetado / Captura de Tela -->
+    <!-- Print Anexado / Captura de Tela -->
     @if (feedback.screenshotUrl) {
       <div class="section-box">
         <div class="section-title-between">
@@ -76,6 +76,30 @@
 
         <div class="image-wrapper" [class.zoomed]="isZoomedImage()" (click)="toggleImageZoom()">
           <img [src]="feedback.screenshotUrl" alt="Print de feedback" class="screenshot-img" />
+        </div>
+      </div>
+    }
+
+    <!-- Histórico de Interações / Devolutivas com o Cliente -->
+    @if (feedback.interactions && feedback.interactions.length > 0) {
+      <div class="section-box interactions-section">
+        <h3 class="section-title">
+          <mat-icon>forum</mat-icon>
+          Histórico de Atendimento e Devolutivas ({{ feedback.interactions.length }})
+        </h3>
+        <div class="interactions-thread">
+          @for (inter of feedback.interactions; track inter.id) {
+            <div class="thread-item" [class.is-user]="inter.authorType === 'USER'" [class.is-admin]="inter.authorType === 'ADMIN'">
+              <div class="thread-meta">
+                <span class="thread-author">
+                  <mat-icon>{{ inter.authorType === 'USER' ? 'person' : 'support_agent' }}</mat-icon>
+                  {{ inter.authorType === 'USER' ? (inter.userName || 'Cliente') : 'Equipe / Admin' }}
+                </span>
+                <span class="thread-time">{{ inter.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <p class="thread-message">{{ inter.message }}</p>
+            </div>
+          }
         </div>
       </div>
     }
@@ -134,11 +158,11 @@
               >
                 @if (transitioningTo() === 'RESOLVED') {
                   <mat-spinner diameter="18"></mat-spinner>
-                  <span>Concluindo...</span>
+                  <span>Resolvendo...</span>
                 } @else {
                   <ng-container>
                     <mat-icon style="color: #10b981">reply</mat-icon>
-                    <span>Responder e Concluir</span>
+                    <span>Responder e Marcar Resolvido</span>
                   </ng-container>
                 }
               </button>
@@ -170,11 +194,11 @@
               >
                 @if (transitioningTo() === 'RESOLVED') {
                   <mat-spinner diameter="18"></mat-spinner>
-                  <span>Concluindo...</span>
+                  <span>Resolvendo...</span>
                 } @else {
                   <ng-container>
                     <mat-icon style="color: #10b981">reply</mat-icon>
-                    <span>Responder e Concluir</span>
+                    <span>Responder e Marcar Resolvido</span>
                   </ng-container>
                 }
               </button>
@@ -189,20 +213,51 @@
               >
                 @if (transitioningTo() === 'RESOLVED') {
                   <mat-spinner diameter="18"></mat-spinner>
-                  <span>Concluindo e Notificando...</span>
+                  <span>Marcando como Resolvido...</span>
                 } @else {
                   <ng-container>
                     <mat-icon>task_alt</mat-icon>
-                    <span>Concluir e Notificar Usuário</span>
+                    <span>Marcar como Resolvido (Aguardar Homologação)</span>
                   </ng-container>
                 }
               </button>
             }
 
-            @if (selectedStatus === 'RESOLVED' || selectedStatus === 'DISCARDED') {
+            @if (selectedStatus === 'RESOLVED') {
+              <div class="status-notice notice-waiting-review">
+                <mat-icon>hourglass_top</mat-icon>
+                <span>Aguardando homologação pelo cliente. Caso necessário, você pode concluir diretamente:</span>
+              </div>
+
+              <button
+                mat-flat-button
+                class="action-btn btn-resolve"
+                (click)="applyTransition('COMPLETED')"
+                [disabled]="saving()"
+              >
+                @if (transitioningTo() === 'COMPLETED') {
+                  <mat-spinner diameter="18"></mat-spinner>
+                  <span>Concluindo Atendimento...</span>
+                } @else {
+                  <ng-container>
+                    <mat-icon>verified</mat-icon>
+                    <span>Concluir Atendimento</span>
+                  </ng-container>
+                }
+              </button>
+            }
+
+            @if (selectedStatus === 'COMPLETED') {
               <div class="status-notice notice-success">
                 <mat-icon>verified</mat-icon>
-                <span>Este feedback foi respondido e o atendimento concluído com sucesso.</span>
+                <span>Este feedback foi homologado e o atendimento concluído com sucesso.</span>
+              </div>
+            }
+
+            @if (selectedStatus === 'DISCARDED') {
+              <div class="status-notice notice-discard">
+                <mat-icon>cancel</mat-icon>
+                <span>Este feedback foi descartado.</span>
               </div>
             }
           </div>

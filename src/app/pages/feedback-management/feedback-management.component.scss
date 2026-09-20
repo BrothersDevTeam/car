@@ -88,6 +88,11 @@
         background: rgba(34, 197, 94, 0.1);
         color: #16a34a;
       }
+
+      &.completed {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+      }
     }
 
     .stat-info {
@@ -323,6 +328,11 @@
   }
 
   &.badge-resolved {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  &.badge-completed {
     background: #dcfce7;
     color: #15803d;
   }
@@ -377,7 +387,7 @@
    ========================================================================== */
 .kanban-container {
   display: grid;
-  grid-template-columns: repeat(5, minmax(260px, 1fr));
+  grid-template-columns: repeat(6, minmax(260px, 1fr));
   gap: 16px;
   overflow-x: auto;
   padding-bottom: 24px;
@@ -453,6 +463,10 @@
   }
 
   &.col-resolved .column-indicator {
+    background: #3b82f6;
+  }
+
+  &.col-completed .column-indicator {
     background: #10b981;
   }
 

@@ -2220,6 +2220,73 @@ export class FeedbackDialogComponent implements OnInit {
     });
   }
 
+  // Visualização de Imagem / Print Anexado
+  selectedImagePreview = signal<string | null>(null);
+
+  // Homologação pelo Cliente
+  showReopenBoxId = signal<string | null>(null);
+  reopenReason = signal<string>('');
+  submittingReview = signal<boolean>(false);
+
+  openImagePreview(url: string): void {
+    this.selectedImagePreview.set(url);
+  }
+
+  closeImagePreview(): void {
+    this.selectedImagePreview.set(null);
+  }
+
+  toggleReopenBox(id: string): void {
+    if (this.showReopenBoxId() === id) {
+      this.showReopenBoxId.set(null);
+      this.reopenReason.set('');
+    } else {
+      this.showReopenBoxId.set(id);
+      this.reopenReason.set('');
+    }
+  }
+
+  approveFeedback(item: Feedback): void {
+    this.submittingReview.set(true);
+    this.feedbackService.reviewFeedback(item.id, { approved: true }).subscribe({
+      next: () => {
+        this.toastr.success('Obrigado! Feedback homologado e concluído com sucesso.');
+        this.submittingReview.set(false);
+        this.loadMyFeedbacks();
+        this.feedbackService.notifyFeedbackUpdated();
+      },
+      error: (err) => {
+        console.error('Erro ao aprovar feedback:', err);
+        this.toastr.error('Erro ao aprovar feedback. Tente novamente.');
+        this.submittingReview.set(false);
+      },
+    });
+  }
+
+  submitReopenFeedback(item: Feedback): void {
+    if (!this.reopenReason().trim()) {
+      this.toastr.warning('Por favor, descreva o que ainda precisa ser ajustado.');
+      return;
+    }
+
+    this.submittingReview.set(true);
+    this.feedbackService.reviewFeedback(item.id, { approved: false, comment: this.reopenReason().trim() }).subscribe({
+      next: () => {
+        this.toastr.info('Solicitação de ajuste enviada para análise da equipe.');
+        this.submittingReview.set(false);
+        this.showReopenBoxId.set(null);
+        this.reopenReason.set('');
+        this.loadMyFeedbacks();
+        this.feedbackService.notifyFeedbackUpdated();
+      },
+      error: (err) => {
+        console.error('Erro ao solicitar ajuste:', err);
+        this.toastr.error('Erro ao solicitar ajuste. Tente novamente.');
+        this.submittingReview.set(false);
+      },
+    });
+  }
+
   getStatusBadgeClass(status: FeedbackStatus): string {
     switch (status) {
       case 'NEW':
@@ -2229,8 +2296,11 @@ export class FeedbackDialogComponent implements OnInit {
       case 'IN_PROGRESS':
         return 'badge-progress';
       case 'RESOLVED':
-      case 'DISCARDED':
         return 'badge-resolved';
+      case 'COMPLETED':
+        return 'badge-completed';
+      case 'DISCARDED':
+        return 'badge-discarded';
       default:
         return 'badge-default';
     }
@@ -2239,15 +2309,17 @@ export class FeedbackDialogComponent implements OnInit {
   getStatusLabel(status: FeedbackStatus): string {
     switch (status) {
       case 'NEW':
-        return 'Novo';
+        return 'Recebido';
       case 'UNDER_REVIEW':
         return 'Em Análise';
       case 'IN_PROGRESS':
         return 'Em Andamento';
       case 'RESOLVED':
+        return 'Resolvido';
+      case 'COMPLETED':
         return 'Concluído';
       case 'DISCARDED':
-        return 'Respondido';
+        return 'Descartado';
       default:
         return status;
     }

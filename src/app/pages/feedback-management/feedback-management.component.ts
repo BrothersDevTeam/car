@@ -64,6 +64,7 @@ export class FeedbackManagementComponent implements OnInit {
   kanbanReview = signal<Feedback[]>([]);
   kanbanProgress = signal<Feedback[]>([]);
   kanbanResolved = signal<Feedback[]>([]);
+  kanbanCompleted = signal<Feedback[]>([]);
   kanbanDiscarded = signal<Feedback[]>([]);
 
   // Pagination & Filters
@@ -82,6 +83,7 @@ export class FeedbackManagementComponent implements OnInit {
   newCount = signal<number>(0);
   inProgressCount = signal<number>(0);
   resolvedCount = signal<number>(0);
+  completedCount = signal<number>(0);
 
   displayedColumns: string[] = ['createdAt', 'type', 'userName', 'currentRoute', 'title', 'status', 'actions'];
 
@@ -132,6 +134,7 @@ export class FeedbackManagementComponent implements OnInit {
         this.kanbanReview.set(items.filter((i) => i.status === 'UNDER_REVIEW'));
         this.kanbanProgress.set(items.filter((i) => i.status === 'IN_PROGRESS'));
         this.kanbanResolved.set(items.filter((i) => i.status === 'RESOLVED'));
+        this.kanbanCompleted.set(items.filter((i) => i.status === 'COMPLETED'));
         this.kanbanDiscarded.set(items.filter((i) => i.status === 'DISCARDED'));
       },
       error: (err) => console.error('Erro ao carregar dados do Kanban:', err),
@@ -185,19 +188,23 @@ export class FeedbackManagementComponent implements OnInit {
 
   isValidKanbanTransition(current: FeedbackStatus, target: FeedbackStatus): boolean {
     if (current === target) return true;
-    if (current === 'RESOLVED' || current === 'DISCARDED') return false;
+    if (current === 'COMPLETED' || current === 'DISCARDED') return false;
 
-    // Novo pode ir para Análise ou ser Respondido/Concluído diretamente (ex: elogio, dúvida, agradecimento)
+    // Novo pode ir para Análise, Resolvido ou Descartado diretamente
     if (current === 'NEW') {
-      return target === 'UNDER_REVIEW' || target === 'RESOLVED' || target === 'DISCARDED';
+      return target === 'UNDER_REVIEW' || target === 'RESOLVED' || target === 'COMPLETED' || target === 'DISCARDED';
     }
-    // Em Análise pode avançar para Desenvolvimento ou ser Respondido/Concluído diretamente
+    // Em Análise pode avançar para Desenvolvimento ou ser Resolvido diretamente
     if (current === 'UNDER_REVIEW') {
-      return target === 'IN_PROGRESS' || target === 'RESOLVED' || target === 'DISCARDED';
+      return target === 'IN_PROGRESS' || target === 'RESOLVED' || target === 'COMPLETED' || target === 'DISCARDED';
     }
-    // Em Andamento vai para Concluído/Resolvido
+    // Em Andamento vai para Resolvido, Concluído ou Descartado
     if (current === 'IN_PROGRESS') {
-      return target === 'RESOLVED' || target === 'DISCARDED';
+      return target === 'RESOLVED' || target === 'COMPLETED' || target === 'DISCARDED';
+    }
+    // Resolvido aguarda homologação do cliente, mas pode ser Concluído pelo admin, ou voltar para Análise se precisar de ajuste
+    if (current === 'RESOLVED') {
+      return target === 'COMPLETED' || target === 'UNDER_REVIEW' || target === 'DISCARDED';
     }
     return false;
   }
@@ -237,6 +244,7 @@ export class FeedbackManagementComponent implements OnInit {
         this.newCount.set(items.filter((i) => i.status === 'NEW').length);
         this.inProgressCount.set(items.filter((i) => i.status === 'UNDER_REVIEW' || i.status === 'IN_PROGRESS').length);
         this.resolvedCount.set(items.filter((i) => i.status === 'RESOLVED').length);
+        this.completedCount.set(items.filter((i) => i.status === 'COMPLETED').length);
       },
     });
   }
@@ -278,7 +286,7 @@ export class FeedbackManagementComponent implements OnInit {
     event?.stopPropagation();
 
     // Regra de Integridade: feedbacks ativos não podem ser excluídos sem justificativa e retorno ao usuário
-    if (feedback.status !== 'RESOLVED' && feedback.status !== 'DISCARDED') {
+    if (feedback.status !== 'RESOLVED' && feedback.status !== 'COMPLETED' && feedback.status !== 'DISCARDED') {
       this.toastr.warning(
         'Feedbacks ativos não podem ser excluídos sem resposta. Utilize a opção "Descartar com Justificativa" para notificar o usuário antes de encerrar.',
         'Retorno Obrigatório'
@@ -321,6 +329,8 @@ export class FeedbackManagementComponent implements OnInit {
         return 'badge-progress';
       case 'RESOLVED':
         return 'badge-resolved';
+      case 'COMPLETED':
+        return 'badge-completed';
       case 'DISCARDED':
         return 'badge-discarded';
       default:
@@ -338,6 +348,8 @@ export class FeedbackManagementComponent implements OnInit {
         return 'Em Andamento';
       case 'RESOLVED':
         return 'Resolvido';
+      case 'COMPLETED':
+        return 'Concluído';
       case 'DISCARDED':
         return 'Descartado';
       default:

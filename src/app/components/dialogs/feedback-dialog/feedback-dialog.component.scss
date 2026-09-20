@@ -1415,13 +1415,330 @@
   }
 
   &.badge-resolved {
+    background: #e0f2fe;
+    color: #0284c7;
+    border: 1px solid #bae6fd;
+  }
+
+  &.badge-completed {
     background: #dcfce7;
     color: #15803d;
+    border: 1px solid #bbf7d0;
   }
 
   &.badge-discarded {
     background: #f1f5f9;
     color: #64748b;
+  }
+}
+
+// Miniatura e Visualização da Imagem Anexada
+.card-screenshot-section {
+  margin: 12px 0;
+
+  .section-micro-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary, #64748b);
+    margin-bottom: 6px;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .thumbnail-preview {
+    position: relative;
+    width: 220px;
+    height: 130px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    background: #f8fafc;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .zoom-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      font-size: 0.78rem;
+      font-weight: 500;
+
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+      .zoom-overlay {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+// Histórico de Mensagens / Interações
+.interactions-thread {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+
+  .thread-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 10px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #3b82f6;
+    }
+  }
+
+  .thread-item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &.is-admin {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+
+      .thread-author {
+        color: #1d4ed8;
+      }
+    }
+
+    &.is-user {
+      background: #f1f5f9;
+      border-color: #e2e8f0;
+
+      .thread-author {
+        color: #0f172a;
+      }
+    }
+
+    .thread-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+
+      .thread-author {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+
+      .thread-time {
+        font-size: 0.72rem;
+        color: #64748b;
+      }
+    }
+
+    .thread-message {
+      font-size: 0.86rem;
+      color: #1e293b;
+      margin: 0;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+  }
+}
+
+// Painel de Homologação / Devolutiva do Cliente
+.review-action-banner {
+  margin-top: 14px;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1px solid #86efac;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.12);
+
+  .review-banner-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    .review-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: #15803d;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .review-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #14532d;
+      margin: 0 0 2px 0;
+    }
+
+    .review-desc {
+      font-size: 0.84rem;
+      color: #166534;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+
+  .review-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    .btn-approve {
+      background: #16a34a !important;
+      color: #ffffff !important;
+      font-weight: 600;
+      height: 38px;
+      border-radius: 8px;
+
+      mat-icon {
+        margin-right: 4px;
+      }
+
+      &:hover {
+        background: #15803d !important;
+      }
+    }
+
+    .btn-reopen {
+      color: #b45309 !important;
+      border-color: #fcd34d !important;
+      background: #fffbeb !important;
+      font-weight: 500;
+      height: 38px;
+      border-radius: 8px;
+
+      mat-icon {
+        margin-right: 4px;
+      }
+
+      &:hover {
+        background: #fef3c7 !important;
+      }
+    }
+  }
+
+  .reopen-form-box {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #bbf7d0;
+
+    .full-width {
+      width: 100%;
+    }
+
+    .reopen-form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 4px;
+    }
+  }
+}
+
+// Modal Lightbox da Imagem
+.image-lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+
+  .image-lightbox-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000000;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+
+    .lightbox-close-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0, 0, 0, 0.6);
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+      z-index: 10;
+
+      &:hover {
+        background: rgba(239, 68, 68, 0.9);
+      }
+    }
+
+    .lightbox-img {
+      max-width: 100%;
+      max-height: 85vh;
+      display: block;
+      object-fit: contain;
+    }
   }
 }
 

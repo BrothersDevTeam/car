@@ -51,6 +51,16 @@
         <span class="stat-label">Resolvidos</span>
       </div>
     </div>
+
+    <div class="stat-card">
+      <div class="stat-icon completed">
+        <mat-icon>verified</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ completedCount() }}</span>
+        <span class="stat-label">Concluídos</span>
+      </div>
+    </div>
   </div>
 
   <!-- Barra de Filtros -->
@@ -64,6 +74,7 @@
           <mat-option value="UNDER_REVIEW">Em Análise</mat-option>
           <mat-option value="IN_PROGRESS">Em Andamento</mat-option>
           <mat-option value="RESOLVED">Resolvidos</mat-option>
+          <mat-option value="COMPLETED">Concluídos</mat-option>
           <mat-option value="DISCARDED">Descartados</mat-option>
         </mat-select>
       </mat-form-field>
@@ -254,19 +265,30 @@
               </button>
               <button mat-menu-item (click)="openDetailDialog(feedback, 'RESOLVED')">
                 <mat-icon style="color: #10b981">reply</mat-icon>
-                <span>Responder e Concluir</span>
+                <span>Responder e Marcar Resolvido</span>
               </button>
             }
 
             @if (feedback.status === 'IN_PROGRESS') {
               <button mat-menu-item (click)="openDetailDialog(feedback, 'RESOLVED')">
                 <mat-icon style="color: #10b981">task_alt</mat-icon>
-                <span>Concluir e Notificar Usuário</span>
+                <span>Marcar Resolvido (Aguardar Homologação)</span>
+              </button>
+            }
+
+            @if (feedback.status === 'RESOLVED') {
+              <button mat-menu-item (click)="openDetailDialog(feedback, 'COMPLETED')">
+                <mat-icon style="color: #059669">verified</mat-icon>
+                <span>Concluir Atendimento</span>
+              </button>
+              <button mat-menu-item (click)="openDetailDialog(feedback, 'UNDER_REVIEW')">
+                <mat-icon style="color: #3b82f6">replay</mat-icon>
+                <span>Retornar para Em Análise</span>
               </button>
             }
 
             <!-- Exclusão definitiva permitida apenas após conclusão/descarte com retorno dado -->
-            @if (feedback.status === 'RESOLVED' || feedback.status === 'DISCARDED') {
+            @if (feedback.status === 'RESOLVED' || feedback.status === 'COMPLETED' || feedback.status === 'DISCARDED') {
               <mat-divider></mat-divider>
               <button mat-menu-item (click)="onDelete(feedback, $event)">
                 <mat-icon color="warn">delete_outline</mat-icon>
@@ -444,6 +466,46 @@
             </div>
           } @empty {
             <div class="column-empty">Nenhum feedback resolvido</div>
+          }
+        </div>
+      </div>
+
+      <!-- Coluna: Concluídos -->
+      <div class="kanban-column col-completed">
+        <div class="column-header">
+          <div class="header-info">
+            <span class="column-indicator"></span>
+            <span class="column-title">Concluídos</span>
+          </div>
+          <span class="column-count">{{ kanbanCompleted().length }}</span>
+        </div>
+
+        <div
+          cdkDropList
+          [cdkDropListData]="kanbanCompleted()"
+          (cdkDropListDropped)="onCardDrop($event, 'COMPLETED')"
+          class="kanban-drop-list"
+        >
+          @for (item of kanbanCompleted(); track item.id) {
+            <div cdkDrag class="kanban-card" (click)="openDetailDialog(item)">
+              <div class="card-meta">
+                <span class="type-pill" [class]="item.type.toLowerCase()">
+                  <mat-icon class="card-type-icon">{{ getTypeIcon(item.type) }}</mat-icon>
+                  {{ getTypeLabel(item.type) }}
+                </span>
+                @if (item.screenshotUrl) {
+                  <mat-icon class="has-image-icon" matTooltip="Possui captura de tela">image</mat-icon>
+                }
+              </div>
+              <h4 class="card-title">{{ item.title }}</h4>
+              <p class="card-desc">{{ item.description }}</p>
+              <div class="card-footer">
+                <span class="card-author">{{ item.userName || 'Anônimo' }}</span>
+                <span class="card-date">{{ item.createdAt | date: 'dd/MM' }}</span>
+              </div>
+            </div>
+          } @empty {
+            <div class="column-empty">Nenhum feedback concluído</div>
           }
         </div>
       </div>
