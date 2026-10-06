@@ -1,19 +1,71 @@
-.dialog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-right: 8px;
+:host {
+  display: block;
+  position: relative;
+}
 
+.dialog-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 8px;
+  margin: 0;
+
+  h2[mat-dialog-title],
   h2 {
     margin: 0;
+    padding: 0 44px 0 0 !important;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary, #1e293b);
+    line-height: 1.4;
   }
 
   .close-btn {
-    margin-top: -10px;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none;
+    border-radius: 50%;
+    color: var(--text-secondary, #64748b);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    padding: 0;
+
+    mat-icon {
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+      line-height: 22px;
+      color: #64748b;
+      transition: color 0.2s ease-in-out;
+    }
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.06) !important;
+      color: #0f172a;
+
+      mat-icon {
+        color: #0f172a;
+      }
+    }
+
+    &:focus,
+    &:focus-visible {
+      outline: none;
+      background-color: transparent !important;
+    }
   }
 }
 
 mat-dialog-content {
-  padding-top: 10px;
+  padding: 8px 20px 20px;
   min-height: 400px;
 }
