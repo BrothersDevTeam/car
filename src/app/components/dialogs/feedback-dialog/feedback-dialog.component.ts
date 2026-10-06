@@ -705,17 +705,36 @@ export class FeedbackDialogComponent implements OnInit {
   }
 
   /**
+   * Obtém os elementos que pertencem exclusivamente ao diálogo de feedback para ocultar temporariamente
+   * durante a captura de tela, garantindo que modais abertos no fundo (ex: cadastro de endereços) NÃO sumam do print.
+   */
+  private getFeedbackElementsToHide(): HTMLElement[] {
+    const elements: HTMLElement[] = [];
+    const feedbackPanes = document.querySelectorAll(
+      '.cdk-overlay-pane.feedback-dialog-panel, .feedback-dialog-panel'
+    );
+    feedbackPanes.forEach((el) => elements.push(el as HTMLElement));
+
+    const backdrops = document.querySelectorAll('.cdk-overlay-backdrop');
+    if (backdrops.length > 0) {
+      // Oculta apenas o último backdrop (que pertence ao diálogo de feedback)
+      elements.push(backdrops[backdrops.length - 1] as HTMLElement);
+    }
+    return elements;
+  }
+
+  /**
    * Captura área selecionada com overlay interativo instantâneo em tela cheia
    */
   async startAreaSelectionCapture(): Promise<void> {
-    const overlays = document.querySelectorAll('.cdk-overlay-container');
-    overlays.forEach((el) => ((el as HTMLElement).style.display = 'none'));
+    const elementsToHide = this.getFeedbackElementsToHide();
+    elementsToHide.forEach((el) => (el.style.display = 'none'));
 
     try {
       const sourceCanvas = await this.captureScreenNative();
-      this.launchSnippingOverlay(sourceCanvas, overlays);
+      this.launchSnippingOverlay(sourceCanvas, elementsToHide);
     } catch (err: any) {
-      overlays.forEach((el) => ((el as HTMLElement).style.display = 'block'));
+      elementsToHide.forEach((el) => (el.style.display = ''));
       if (err.name !== 'NotAllowedError') {
         console.error('Erro na captura nativa:', err);
         this.toastr.warning('Dica: você também pode usar Win + Shift + S no Windows e colar diretamente com Ctrl + V.');
@@ -726,7 +745,7 @@ export class FeedbackDialogComponent implements OnInit {
   /**
    * Lança o overlay interativo de seleção em tela cheia com alças de redimensionamento e arraste
    */
-  private launchSnippingOverlay(sourceCanvas: HTMLCanvasElement, overlays: NodeListOf<Element>): void {
+  private launchSnippingOverlay(sourceCanvas: HTMLCanvasElement, overlays: HTMLElement[]): void {
     const overlay = document.createElement('div');
     overlay.id = 'snipping-tool-overlay';
     overlay.className = 'snipping-tool-overlay';
@@ -983,12 +1002,12 @@ export class FeedbackDialogComponent implements OnInit {
   async captureCurrentScreen(): Promise<void> {
     this.capturingScreenshot.set(true);
 
-    const elementsToHide = document.querySelectorAll('.cdk-overlay-container');
-    elementsToHide.forEach((el) => ((el as HTMLElement).style.display = 'none'));
+    const elementsToHide = this.getFeedbackElementsToHide();
+    elementsToHide.forEach((el) => (el.style.display = 'none'));
 
     try {
       const canvas = await this.captureScreenNative();
-      elementsToHide.forEach((el) => ((el as HTMLElement).style.display = 'block'));
+      elementsToHide.forEach((el) => (el.style.display = ''));
       const dataUrl = canvas.toDataURL('image/png');
       this.screenshotDataUrl.set(dataUrl);
       this.capturingScreenshot.set(false);
@@ -999,7 +1018,7 @@ export class FeedbackDialogComponent implements OnInit {
       setTimeout(() => this.initDrawingCanvas(dataUrl), 60);
       this.toastr.success('Tela inteira capturada com sucesso!');
     } catch (err: any) {
-      elementsToHide.forEach((el) => ((el as HTMLElement).style.display = 'block'));
+      elementsToHide.forEach((el) => (el.style.display = ''));
       this.capturingScreenshot.set(false);
       if (err.name !== 'NotAllowedError') {
         console.error('Erro ao capturar tela:', err);

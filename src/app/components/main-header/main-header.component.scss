@@ -17,6 +17,8 @@ mat-toolbar {
     margin-right: 14px;
     display: inline-flex;
     align-items: center;
+    position: relative;
+    pointer-events: auto !important;
   }
 
   .header-store-select {

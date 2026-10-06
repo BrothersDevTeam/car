@@ -320,3 +320,30 @@
   }
 }
 
+// =========================================================================
+// CAMADAS E ACESSO AO WIDGET DE FEEDBACK COM MODAIS ABERTOS
+// =========================================================================
+
+// Quando houver um modal (backdrop CDK) aberto, eleva a barra do header para z-index 1005
+// bloqueando cliques nos itens comuns (pointer-events: none) mas mantendo o botão de feedback
+// 100% visível e clicável (pointer-events: auto).
+body:has(.cdk-overlay-backdrop-showing),
+html:has(.cdk-overlay-backdrop-showing) {
+  app-main-header mat-toolbar {
+    z-index: 1005 !important;
+    pointer-events: none !important;
+
+    .header-feedback-widget {
+      pointer-events: auto !important;
+      cursor: pointer !important;
+    }
+  }
+}
+
+// O menu de tags de feedback e o modal de feedback têm prioridade máxima (z-index 2000),
+// garantindo que abram acima da barra do header e de qualquer modal anterior.
+.cdk-overlay-container:has(.feedback-choice-menu-panel),
+.cdk-overlay-container:has(.feedback-dialog-panel) {
+  z-index: 2000 !important;
+}
+
