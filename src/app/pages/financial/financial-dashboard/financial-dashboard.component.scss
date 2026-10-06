@@ -4,6 +4,147 @@ main {
   gap: 1.5rem;
 }
 
+// Header e Ações do Topo
+:host ::ng-deep app-content-header {
+  .header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .primary-action-btn {
+    height: 48px !important;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 102, 204, 0.2);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+
+    ::ng-deep .mdc-button__label {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      height: 100% !important;
+      gap: 8px !important;
+    }
+
+    .icon-wrapper {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      mat-icon:not(.add-badge) {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 20px !important;
+        width: 20px !important;
+        height: 20px !important;
+        margin: 0 !important;
+      }
+    }
+
+    span[matListItemTitle] {
+      display: inline-flex !important;
+      align-items: center !important;
+      line-height: 1 !important;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+    }
+  }
+}
+
+.financial-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.financial-header-btn {
+  height: 48px !important;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0 1rem;
+  background-color: var(--mat-sys-surface, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: var(--mat-sys-on-surface, #374151);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--primary-color, #1e40af);
+  }
+
+  &:hover:not([disabled]) {
+    background-color: var(--mat-sys-surface-container-low, #f8fafc);
+    border-color: var(--primary-color, #1e40af);
+    color: var(--primary-color, #1e40af);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+
+  &[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background-color: rgba(0, 0, 0, 0.04);
+    box-shadow: none;
+
+    mat-icon {
+      color: inherit;
+    }
+  }
+}
+
+@media (max-width: 992px) {
+  :host ::ng-deep app-content-header {
+    .header-actions {
+      justify-content: flex-start;
+      gap: 0.75rem;
+    }
+
+    .primary-action-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .financial-actions-group {
+    width: 100%;
+
+    .financial-header-btn {
+      flex: 1 1 calc(50% - 0.75rem);
+      justify-content: center;
+      min-width: 140px;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .financial-actions-group .financial-header-btn {
+    flex: 1 1 100%;
+  }
+}
+
 .loader-container {
   display: flex;
   justify-content: center;
