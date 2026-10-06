@@ -71,14 +71,27 @@
 
   <!-- Botões de Mapa -->
   <div class="map-actions">
-    <button mat-stroked-button color="primary" (click)="toggleMap()" class="btn-map">
-      <mat-icon>{{ showMap ? 'visibility_off' : 'map' }}</mat-icon>
-      {{ showMap ? 'Ocultar Mapa' : 'Ver Mapa' }}
+    <button
+      type="button"
+      mat-button
+      (click)="toggleMap()"
+      class="btn-map"
+      [class.active]="showMap"
+      [matTooltip]="showMap ? 'Recolher mapa embutido' : 'Visualizar mapa interativo aqui no card'"
+    >
+      <mat-icon class="btn-icon">{{ showMap ? 'visibility_off' : 'map' }}</mat-icon>
+      <span class="btn-label">{{ showMap ? 'Ocultar Mapa' : 'Ver Mapa' }}</span>
     </button>
 
-    <button mat-stroked-button (click)="openInGoogleMaps()" class="btn-map-external">
-      <mat-icon>open_in_new</mat-icon>
-      Abrir no Maps
+    <button
+      type="button"
+      mat-button
+      (click)="openInGoogleMaps()"
+      class="btn-map-external"
+      matTooltip="Abrir endereço no Google Maps em nova aba"
+    >
+      <mat-icon class="btn-icon">open_in_new</mat-icon>
+      <span class="btn-label">Google Maps</span>
     </button>
   </div>
 
