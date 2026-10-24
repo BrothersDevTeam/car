@@ -241,7 +241,8 @@ export class VendaFormComponent implements OnInit, OnDestroy, CanComponentDeacti
     this.personService.getPaginatedData(0, 1000, { storeId }).subscribe((response) => {
       const mapped = (response.content || []).map((p) => ({
         id: p.personId,
-        name: p.cpf ? `${p.name} - CPF: ${p.cpf}` : `${p.name} - CNPJ: ${p.cnpj}`,
+        // name: p.cpf ? `${p.name} - CPF: ${p.cpf}` : `${p.name} - CNPJ: ${p.cnpj}`,
+        name: `${p.name}`,
       }));
       this.buyers = [...mapped];
       this.sellers = [...mapped];

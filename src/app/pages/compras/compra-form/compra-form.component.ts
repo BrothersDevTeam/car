@@ -276,7 +276,9 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
       next: (response) => {
         this.suppliers = (response.content || []).map((p) => ({
           id: p.personId,
-          name: p.cpf ? `${p.name} - CPF: ${p.cpf}` : `${p.name} - CNPJ: ${p.cnpj}`,
+          //TODO: desativar cpf e cnpj
+          // name: p.cpf ? `${p.name} - CPF: ${p.cpf}` : `${p.name} - CNPJ: ${p.cnpj}`,
+          name: `${p.name}`,
         }));
       },
       error: (error) => {
@@ -558,16 +560,16 @@ export class CompraFormComponent implements OnInit, OnDestroy, CanComponentDeact
       pagamentos:
         formValues.tipoEntrada === 'COMPRA'
           ? formValues.pagamentos.map((p: any) => ({
-              formaPagamento: p.formaPagamento,
-              descricao: p.descricao,
-              valor: p.valor,
-              vencimento: p.vencimento,
-              tipo: p.tipo,
-              cartaoTipoIntegracao: p.cartaoTipoIntegracao || null,
-              cartaoBandeira: p.cartaoBandeira || null,
-              cartaoCnpj: p.cartaoCnpj ? p.cartaoCnpj.replace(/\D/g, '') : null,
-              cartaoAutorizacao: p.cartaoAutorizacao || null,
-            }))
+            formaPagamento: p.formaPagamento,
+            descricao: p.descricao,
+            valor: p.valor,
+            vencimento: p.vencimento,
+            tipo: p.tipo,
+            cartaoTipoIntegracao: p.cartaoTipoIntegracao || null,
+            cartaoBandeira: p.cartaoBandeira || null,
+            cartaoCnpj: p.cartaoCnpj ? p.cartaoCnpj.replace(/\D/g, '') : null,
+            cartaoAutorizacao: p.cartaoAutorizacao || null,
+          }))
           : [],
     };
 
