@@ -203,7 +203,8 @@ export class StoreOwnerDialogComponent implements OnInit {
         },
         error: (err) => {
           console.error('Erro ao adicionar proprietário:', err);
-          this.toastr.error(err.error || 'Erro ao adicionar proprietário');
+          const msg = err.error?.errorMessage || err.error?.message || (typeof err.error === 'string' ? err.error : null) || 'Erro ao adicionar proprietário';
+          this.toastr.error(msg, 'Erro');
           this.submitting = false;
         },
       });
@@ -234,7 +235,8 @@ export class StoreOwnerDialogComponent implements OnInit {
           },
           error: (err) => {
             console.error('Erro ao remover proprietário:', err);
-            this.toastr.error(err.error || 'Erro ao remover proprietário');
+            const msg = err.error?.errorMessage || err.error?.message || (typeof err.error === 'string' ? err.error : null) || 'Erro ao remover proprietário';
+            this.toastr.error(msg, 'Erro');
             this.submitting = false;
           },
         });

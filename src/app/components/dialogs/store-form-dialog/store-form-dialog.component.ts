@@ -101,6 +101,7 @@ export class StoreFormDialogComponent implements OnInit {
   submitError: string | null = null;
   createdStoreInstance: Store | null = null;
   createdAddressInstance: any = null;
+  createdPersonInstance: any = null;
   loadingCep = false;
 
   constructor(
@@ -793,7 +794,7 @@ export class StoreFormDialogComponent implements OnInit {
    * Cancela o cadastro e fecha o dialog
    */
   onCancel(): void {
-    this.dialogRef.close(null);
+    this.dialogRef.close(this.createdStoreInstance || null);
   }
 
   /**
@@ -912,14 +913,17 @@ export class StoreFormDialogComponent implements OnInit {
             );
           }
 
-          // Fluxo de criação de Novo Proprietário
-          const personPayload = this.preparePersonPayload(createdStore.storeId);
-          console.log('📝 Criando novo proprietário:', personPayload);
+          // Fluxo de criação de Novo Proprietário (com Idempotência)
+          const createPersonObservable = this.createdPersonInstance
+            ? of(this.createdPersonInstance)
+            : this.personService.createPerson(this.preparePersonPayload(createdStore.storeId)).pipe(
+                tap((createdPerson: any) => {
+                  this.createdPersonInstance = createdPerson;
+                  console.log('✅ Novo proprietário criado e salvo no estado:', createdPerson);
+                }),
+              );
 
-          return this.personService.createPerson(personPayload).pipe(
-            tap((createdPerson: any) => {
-              console.log('✅ Novo proprietário criado:', createdPerson);
-            }),
+          return createPersonObservable.pipe(
             switchMap((createdPerson: any) => {
               if (!createdPerson.personId) {
                 throw new Error('Person criada sem personId');
@@ -964,6 +968,8 @@ export class StoreFormDialogComponent implements OnInit {
           // Mensagem de erro amigável baseada no tipo de erro
           if (extractedErrorMessage) {
             this.submitError = extractedErrorMessage;
+          } else if (error.error?.errorMessage) {
+            this.submitError = error.error.errorMessage;
           } else if (error.error?.message) {
             this.submitError = error.error.message;
           } else if (error.status === 400) {
@@ -988,10 +994,17 @@ export class StoreFormDialogComponent implements OnInit {
             this.submitError = 'Erro ao cadastrar loja. Tente novamente.';
           }
 
+          // Se a loja já foi gravada no banco com sucesso mas falhou nas etapas posteriores
+          if (this.createdStoreInstance) {
+            const storeName = this.createdStoreInstance.name || 'Loja';
+            const errorDetail = this.submitError || 'Falha na comunicação com o servidor';
+            this.submitError = `A loja "${storeName}" foi cadastrada com sucesso! Porém, ocorreu uma falha ao vincular o proprietário (${errorDetail}). Você pode clicar em "Tentar Vincular Proprietário" para concluir ou fechar esta janela para vincular depois na tela da loja.`;
+          }
+
           if (this.submitError) {
             const cleanMessage = this.submitError.replace(/^[❌\s]+/, '');
-            this.toastrService.error(cleanMessage, 'Erro no Cadastro', {
-              timeOut: 5000,
+            this.toastrService.error(cleanMessage, 'Atenção no Cadastro', {
+              timeOut: 8000,
               progressBar: true,
               closeButton: true,
             });

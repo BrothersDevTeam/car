@@ -697,12 +697,12 @@
       @if (isSubmitting) {
         <span class="button-content">
           <mat-spinner diameter="20"></mat-spinner>
-          <span>Cadastrando...</span>
+          <span>{{ createdStoreInstance ? 'Vinculando...' : 'Cadastrando...' }}</span>
         </span>
       } @else {
         <span class="button-content">
-          <mat-icon>save</mat-icon>
-          <span>Cadastrar {{ data.isCarAdmin ? 'Matriz' : 'Filial' }}</span>
+          <mat-icon>{{ createdStoreInstance ? 'link' : 'save' }}</mat-icon>
+          <span>{{ createdStoreInstance ? 'Tentar Vincular Proprietário' : ('Cadastrar ' + (data.isCarAdmin ? 'Matriz' : 'Filial')) }}</span>
         </span>
       }
     </button>
