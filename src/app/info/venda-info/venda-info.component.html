@@ -166,6 +166,13 @@
                     {{ isDownloadingXml ? 'Baixando...' : 'Baixar XML' }}
                   </button>
                 </div>
+              } @else if (nfe.nfeStatus?.toLowerCase() === 'rascunho') {
+                <div class="nfe-actions" style="margin-top: 12px;">
+                  <button mat-flat-button color="primary" type="button" (click)="navigateToNfe(nfe.nfeId)">
+                    <mat-icon>rate_review</mat-icon>
+                    Conferir e Emitir NF-e
+                  </button>
+                </div>
               } @else if (nfe.nfeStatus === 'erro_autorizacao') {
                 <div class="nfe-error">
                   <mat-icon>error_outline</mat-icon>
@@ -193,8 +200,8 @@
                   [disabled]="generatingNfe || venda.vendaStatus === 'CANCELADA'"
                   class="btn-emitir-nfe"
                 >
-                  <mat-icon>{{ generatingNfe ? 'hourglass_empty' : 'add_circle_outline' }}</mat-icon>
-                  {{ generatingNfe ? 'Gerando NF-e...' : 'Gerar NF-e de Venda' }}
+                  <mat-icon>{{ generatingNfe ? 'hourglass_empty' : 'post_add' }}</mat-icon>
+                  {{ generatingNfe ? 'Gerando Rascunho...' : 'Gerar Rascunho da NF-e' }}
                 </button>
               </div>
             }

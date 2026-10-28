@@ -196,11 +196,11 @@ export class VendaInfoComponent implements OnInit {
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: 'Gerar NFe de Venda',
-        message: `Deseja gerar a <strong style="color: var(--primary-color)">NFe de Venda (Saída)</strong> para a venda <strong>#${this.venda.numero || ''}</strong>? <br><br> <small style="color: var(--text-secondary)">Os dados do comprador e do veículo serão importados automaticamente.</small>`,
-        confirmText: 'Sim, Gerar',
-        cancelText: 'Não',
-        icon: 'output',
+        title: 'Gerar Rascunho da NF-e',
+        message: `Deseja gerar o rascunho da <strong style="color: var(--primary-color)">NF-e de Venda (Saída)</strong> para a venda <strong>#${this.venda.numero || ''}</strong>? <br><br> <small style="color: var(--text-secondary)">Os dados do comprador, do veículo e as condições comerciais serão importados para você conferir e validar os impostos antes do envio final.</small>`,
+        confirmText: 'Sim, Gerar e Revisar',
+        cancelText: 'Cancelar',
+        icon: 'rate_review',
         type: 'primary',
       },
     });
@@ -209,15 +209,19 @@ export class VendaInfoComponent implements OnInit {
       if (result) {
         this.generatingNfe = true;
         this.vendaService.gerarNfe(this.venda!.vendaId, this.venda!.storeId).subscribe({
-          next: () => {
-            this.toastrService.success('Rascunho da NFe de Saída gerado com sucesso! A emissão foi disparada.');
+          next: (updatedVenda) => {
             this.generatingNfe = false;
+            this.toastrService.success('Rascunho da NF-e gerado com sucesso! Redirecionando para conferência fiscal...');
             this.loadVendaDetails();
             this.nfeGenerated.emit();
+            const targetNfeId = updatedVenda?.nfeId || this.nfe?.nfeId;
+            if (targetNfeId) {
+              this.navigateToNfe(targetNfeId);
+            }
           },
           error: (err) => {
             this.generatingNfe = false;
-            const errorMessage = extractErrorMessage(err, 'Erro ao gerar NFe de Venda');
+            const errorMessage = extractErrorMessage(err, 'Erro ao gerar NF-e de Venda');
             this.toastrService.error(errorMessage);
           },
         });
